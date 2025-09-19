@@ -1,8 +1,20 @@
 import { QueryTranslator } from "@js-soft/docdb-querytranslator";
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController, LocalAttribute, LocalAttributeDeletionInfoJSON, LocalAttributeShareInfoJSON } from "@nmshd/consumption";
+import {
+    AbstractAttributeDeletionInfoJSON,
+    AttributesController,
+    ForwardedSharingDetailsJSON,
+    LocalAttribute,
+    OwnIdentityAttribute,
+    OwnRelationshipAttribute,
+    PeerIdentityAttribute,
+    PeerRelationshipAttribute,
+    PeerSharingDetailsJSON,
+    ThirdPartyRelationshipAttribute,
+    ThirdPartyRelationshipAttributeSharingDetailsJSON
+} from "@nmshd/consumption";
 import { AbstractAttributeJSON, IdentityAttribute, IdentityAttributeJSON, RelationshipAttributeJSON } from "@nmshd/content";
-import { LocalAttributeDTO } from "@nmshd/runtime-types";
+import { ForwardedSharingDetailsDTO, LocalAttributeDeletionInfoDTO, LocalAttributeDTO, PeerSharingDetailsDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
 import { nameof } from "ts-simple-nameof";
 import { UseCase } from "../../common";
@@ -15,6 +27,7 @@ export interface GetAttributesRequest {
 }
 
 export interface GetAttributesRequestQuery {
+    "@type"?: string | string[];
     createdAt?: string;
     succeeds?: string | string[];
     succeededBy?: string | string[];
@@ -27,20 +40,29 @@ export interface GetAttributesRequestQuery {
     "content.isTechnical"?: string;
     "content.confidentiality"?: string | string[];
     "content.value.@type"?: string | string[];
-    shareInfo?: string | string[];
-    "shareInfo.requestReference"?: string | string[];
-    "shareInfo.notificationReference"?: string | string[];
-    "shareInfo.peer"?: string | string[];
-    "shareInfo.sourceAttribute"?: string | string[];
-    "shareInfo.thirdPartyAddress"?: string | string[];
-    deletionInfo?: string | string[];
-    "deletionInfo.deletionStatus"?: string | string[];
-    "deletionInfo.deletionDate"?: string | string[];
+    peerSharingDetails?: string | string[];
+    "peerSharingDetails.peer"?: string | string[];
+    "peerSharingDetails.sourceReference"?: string | string[];
+    "peerSharingDetails.initialAttributePeer"?: string | string[];
+    "peerSharingDetails.deletionInfo"?: string | string[];
+    "peerSharingDetails.deletionInfo.deletionStatus"?: string | string[];
+    "peerSharingDetails.deletionInfo.deletionDate"?: string | string[];
+    forwardedSharingDetails?: string | string[];
+    "forwardedSharingDetails.peer"?: string | string[];
+    "forwardedSharingDetails.sourceReference"?: string | string[];
+    "forwardedSharingDetails.sharedAt"?: string | string[];
+    "forwardedSharingDetails.deletionInfo"?: string | string[];
+    "forwardedSharingDetails.deletionInfo.deletionStatus"?: string | string[];
+    "forwardedSharingDetails.deletionInfo.deletionDate"?: string | string[];
 }
+
+type AttributeWithPeerSharingDetails = PeerIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute | ThirdPartyRelationshipAttribute;
+type ForwardableAttribute = OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute;
 
 export class GetAttributesUseCase extends UseCase<GetAttributesRequest, LocalAttributeDTO[]> {
     public static readonly queryTranslator = new QueryTranslator({
         whitelist: {
+            ["@type"]: true,
             [nameof<LocalAttributeDTO>((x) => x.createdAt)]: true,
             [nameof<LocalAttributeDTO>((x) => x.succeeds)]: true,
             [nameof<LocalAttributeDTO>((x) => x.succeededBy)]: true,
@@ -60,24 +82,30 @@ export class GetAttributesUseCase extends UseCase<GetAttributesRequest, LocalAtt
             [`${nameof<LocalAttributeDTO>((x) => x.content)}.${nameof<RelationshipAttributeJSON>((x) => x.isTechnical)}`]: true,
             [`${nameof<LocalAttributeDTO>((x) => x.content)}.${nameof<RelationshipAttributeJSON>((x) => x.confidentiality)}`]: true,
 
-            // shareInfo
-            [`${nameof<LocalAttributeDTO>((x) => x.shareInfo)}`]: true,
-            [`${nameof<LocalAttributeDTO>((x) => x.shareInfo)}.${nameof<LocalAttributeShareInfoJSON>((x) => x.peer)}`]: true,
-            [`${nameof<LocalAttributeDTO>((x) => x.shareInfo)}.${nameof<LocalAttributeShareInfoJSON>((x) => x.requestReference)}`]: true,
-            [`${nameof<LocalAttributeDTO>((x) => x.shareInfo)}.${nameof<LocalAttributeShareInfoJSON>((x) => x.notificationReference)}`]: true,
-            [`${nameof<LocalAttributeDTO>((x) => x.shareInfo)}.${nameof<LocalAttributeShareInfoJSON>((x) => x.sourceAttribute)}`]: true,
+            // peerSharingDetails
+            [`${nameof<LocalAttributeDTO>((x) => x.peerSharingDetails)}`]: true,
+            [`${nameof<LocalAttributeDTO>((x) => x.peerSharingDetails)}.${nameof<PeerSharingDetailsDTO>((x) => x.peer)}`]: true,
+            [`${nameof<LocalAttributeDTO>((x) => x.peerSharingDetails)}.${nameof<PeerSharingDetailsDTO>((x) => x.sourceReference)}`]: true,
+            [`${nameof<LocalAttributeDTO>((x) => x.peerSharingDetails)}.${nameof<PeerSharingDetailsDTO>((x) => x.initialAttributePeer)}`]: true,
+            [`${nameof<LocalAttributeDTO>((x) => x.peerSharingDetails)}.${nameof<PeerSharingDetailsDTO>((x) => x.deletionInfo)}`]: true,
+            [`${nameof<LocalAttributeDTO>((x) => x.peerSharingDetails)}.${nameof<PeerSharingDetailsDTO>((x) => x.deletionInfo)}.${nameof<LocalAttributeDeletionInfoDTO>((x) => x.deletionStatus)}`]: true,
+            [`${nameof<LocalAttributeDTO>((x) => x.peerSharingDetails)}.${nameof<PeerSharingDetailsDTO>((x) => x.deletionInfo)}.${nameof<LocalAttributeDeletionInfoDTO>((x) => x.deletionDate)}`]: true,
 
-            // deletionInfo
-            [`${nameof<LocalAttributeDTO>((x) => x.deletionInfo)}`]: true,
-            [`${nameof<LocalAttributeDTO>((x) => x.deletionInfo)}.${nameof<LocalAttributeDeletionInfoJSON>((x) => x.deletionStatus)}`]: true,
-            [`${nameof<LocalAttributeDTO>((x) => x.deletionInfo)}.${nameof<LocalAttributeDeletionInfoJSON>((x) => x.deletionDate)}`]: true
+            // forwardedSharingDetails
+            [`${nameof<LocalAttributeDTO>((x) => x.forwardedSharingDetails)}`]: true,
+            [`${nameof<LocalAttributeDTO>((x) => x.forwardedSharingDetails)}.${nameof<ForwardedSharingDetailsDTO>((x) => x.peer)}`]: true,
+            [`${nameof<LocalAttributeDTO>((x) => x.forwardedSharingDetails)}.${nameof<ForwardedSharingDetailsDTO>((x) => x.sourceReference)}`]: true,
+            [`${nameof<LocalAttributeDTO>((x) => x.forwardedSharingDetails)}.${nameof<ForwardedSharingDetailsDTO>((x) => x.sharedAt)}`]: true,
+            [`${nameof<LocalAttributeDTO>((x) => x.forwardedSharingDetails)}.${nameof<ForwardedSharingDetailsDTO>((x) => x.deletionInfo)}`]: true,
+            [`${nameof<LocalAttributeDTO>((x) => x.forwardedSharingDetails)}.${nameof<ForwardedSharingDetailsDTO>((x) => x.deletionInfo)}.${nameof<LocalAttributeDeletionInfoDTO>((x) => x.deletionStatus)}`]: true,
+            [`${nameof<LocalAttributeDTO>((x) => x.forwardedSharingDetails)}.${nameof<ForwardedSharingDetailsDTO>((x) => x.deletionInfo)}.${nameof<LocalAttributeDeletionInfoDTO>((x) => x.deletionDate)}`]: true
         },
         alias: {
             [nameof<LocalAttributeDTO>((x) => x.createdAt)]: nameof<LocalAttribute>((x) => x.createdAt),
             [nameof<LocalAttributeDTO>((x) => x.succeeds)]: nameof<LocalAttribute>((x) => x.succeeds),
             [nameof<LocalAttributeDTO>((x) => x.succeededBy)]: nameof<LocalAttribute>((x) => x.succeededBy),
             [nameof<LocalAttributeDTO>((x) => x.wasViewedAt)]: nameof<LocalAttribute>((x) => x.wasViewedAt),
-            [nameof<LocalAttributeDTO>((x) => x.isDefault)]: nameof<LocalAttribute>((x) => x.isDefault),
+            [nameof<LocalAttributeDTO>((x) => x.isDefault)]: nameof<OwnIdentityAttribute>((x) => x.isDefault),
 
             // content.abstractAttribute
             [`${nameof<LocalAttributeDTO>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.owner)}`]: `${nameof<LocalAttribute>((x) => x.content)}.${nameof<AbstractAttributeJSON>((x) => x.owner)}`,
@@ -92,17 +120,23 @@ export class GetAttributesUseCase extends UseCase<GetAttributesRequest, LocalAtt
             [`${nameof<LocalAttributeDTO>((x) => x.content)}.${nameof<RelationshipAttributeJSON>((x) => x.isTechnical)}`]: `${nameof<LocalAttribute>((x) => x.content)}.${nameof<RelationshipAttributeJSON>((x) => x.isTechnical)}`,
             [`${nameof<LocalAttributeDTO>((x) => x.content)}.${nameof<RelationshipAttributeJSON>((x) => x.confidentiality)}`]: `${nameof<LocalAttribute>((x) => x.content)}.${nameof<RelationshipAttributeJSON>((x) => x.confidentiality)}`,
 
-            // shareInfo
-            [`${nameof<LocalAttributeDTO>((x) => x.shareInfo)}`]: `${nameof<LocalAttribute>((x) => x.shareInfo)}`,
-            [`${nameof<LocalAttributeDTO>((x) => x.shareInfo)}.${nameof<LocalAttributeShareInfoJSON>((x) => x.peer)}`]: `${nameof<LocalAttribute>((x) => x.shareInfo)}.${nameof<LocalAttributeShareInfoJSON>((x) => x.peer)}`,
-            [`${nameof<LocalAttributeDTO>((x) => x.shareInfo)}.${nameof<LocalAttributeShareInfoJSON>((x) => x.requestReference)}`]: `${nameof<LocalAttribute>((x) => x.shareInfo)}.${nameof<LocalAttributeShareInfoJSON>((x) => x.requestReference)}`,
-            [`${nameof<LocalAttributeDTO>((x) => x.shareInfo)}.${nameof<LocalAttributeShareInfoJSON>((x) => x.notificationReference)}`]: `${nameof<LocalAttribute>((x) => x.shareInfo)}.${nameof<LocalAttributeShareInfoJSON>((x) => x.notificationReference)}`,
-            [`${nameof<LocalAttributeDTO>((x) => x.shareInfo)}.${nameof<LocalAttributeShareInfoJSON>((x) => x.sourceAttribute)}`]: `${nameof<LocalAttribute>((x) => x.shareInfo)}.${nameof<LocalAttributeShareInfoJSON>((x) => x.sourceAttribute)}`,
+            // peerSharingDetails
+            [`${nameof<LocalAttributeDTO>((x) => x.peerSharingDetails)}`]: `${nameof<AttributeWithPeerSharingDetails>((x) => x.peerSharingDetails)}`,
+            [`${nameof<LocalAttributeDTO>((x) => x.peerSharingDetails)}.${nameof<PeerSharingDetailsDTO>((x) => x.peer)}`]: `${nameof<AttributeWithPeerSharingDetails>((x) => x.peerSharingDetails)}.${nameof<PeerSharingDetailsJSON>((x) => x.peer)}`,
+            [`${nameof<LocalAttributeDTO>((x) => x.peerSharingDetails)}.${nameof<PeerSharingDetailsDTO>((x) => x.sourceReference)}`]: `${nameof<AttributeWithPeerSharingDetails>((x) => x.peerSharingDetails)}.${nameof<PeerSharingDetailsJSON>((x) => x.sourceReference)}`,
+            [`${nameof<LocalAttributeDTO>((x) => x.peerSharingDetails)}.${nameof<PeerSharingDetailsDTO>((x) => x.initialAttributePeer)}`]: `${nameof<ThirdPartyRelationshipAttribute>((x) => x.peerSharingDetails)}.${nameof<ThirdPartyRelationshipAttributeSharingDetailsJSON>((x) => x.initialAttributePeer)}`,
+            [`${nameof<LocalAttributeDTO>((x) => x.peerSharingDetails)}.${nameof<PeerSharingDetailsDTO>((x) => x.deletionInfo)}`]: `${nameof<AttributeWithPeerSharingDetails>((x) => x.peerSharingDetails)}.${nameof<PeerSharingDetailsJSON>((x) => x.deletionInfo)}`,
+            [`${nameof<LocalAttributeDTO>((x) => x.peerSharingDetails)}.${nameof<PeerSharingDetailsDTO>((x) => x.deletionInfo)}.${nameof<LocalAttributeDeletionInfoDTO>((x) => x.deletionStatus)}`]: `${nameof<AttributeWithPeerSharingDetails>((x) => x.peerSharingDetails)}.${nameof<PeerSharingDetailsJSON>((x) => x.deletionInfo)}.${nameof<AbstractAttributeDeletionInfoJSON>((x) => x.deletionStatus)}`,
+            [`${nameof<LocalAttributeDTO>((x) => x.peerSharingDetails)}.${nameof<PeerSharingDetailsDTO>((x) => x.deletionInfo)}.${nameof<LocalAttributeDeletionInfoDTO>((x) => x.deletionDate)}`]: `${nameof<AttributeWithPeerSharingDetails>((x) => x.peerSharingDetails)}.${nameof<PeerSharingDetailsJSON>((x) => x.deletionInfo)}.${nameof<AbstractAttributeDeletionInfoJSON>((x) => x.deletionDate)}`,
 
-            // deletionInfo
-            [`${nameof<LocalAttributeDTO>((x) => x.deletionInfo)}`]: `${nameof<LocalAttribute>((x) => x.deletionInfo)}`,
-            [`${nameof<LocalAttributeDTO>((x) => x.deletionInfo)}.${nameof<LocalAttributeDeletionInfoJSON>((x) => x.deletionStatus)}`]: `${nameof<LocalAttribute>((x) => x.deletionInfo)}.${nameof<LocalAttributeDeletionInfoJSON>((x) => x.deletionStatus)}`,
-            [`${nameof<LocalAttributeDTO>((x) => x.deletionInfo)}.${nameof<LocalAttributeDeletionInfoJSON>((x) => x.deletionDate)}`]: `${nameof<LocalAttribute>((x) => x.deletionInfo)}.${nameof<LocalAttributeDeletionInfoJSON>((x) => x.deletionDate)}`
+            // forwardedSharingDetails
+            [`${nameof<LocalAttributeDTO>((x) => x.forwardedSharingDetails)}`]: `${nameof<ForwardableAttribute>((x) => x.forwardedSharingDetails)}`,
+            [`${nameof<LocalAttributeDTO>((x) => x.forwardedSharingDetails)}.${nameof<ForwardedSharingDetailsDTO>((x) => x.peer)}`]: `${nameof<ForwardableAttribute>((x) => x.forwardedSharingDetails)}.${nameof<ForwardedSharingDetailsJSON>((x) => x.peer)}`,
+            [`${nameof<LocalAttributeDTO>((x) => x.forwardedSharingDetails)}.${nameof<ForwardedSharingDetailsDTO>((x) => x.sourceReference)}`]: `${nameof<ForwardableAttribute>((x) => x.forwardedSharingDetails)}.${nameof<ForwardedSharingDetailsJSON>((x) => x.sourceReference)}`,
+            [`${nameof<LocalAttributeDTO>((x) => x.forwardedSharingDetails)}.${nameof<ForwardedSharingDetailsDTO>((x) => x.sharedAt)}`]: `${nameof<ForwardableAttribute>((x) => x.forwardedSharingDetails)}.${nameof<ForwardedSharingDetailsJSON>((x) => x.sharedAt)}`,
+            [`${nameof<LocalAttributeDTO>((x) => x.forwardedSharingDetails)}.${nameof<ForwardedSharingDetailsDTO>((x) => x.deletionInfo)}`]: `${nameof<ForwardableAttribute>((x) => x.forwardedSharingDetails)}.${nameof<ForwardedSharingDetailsJSON>((x) => x.deletionInfo)}`,
+            [`${nameof<LocalAttributeDTO>((x) => x.forwardedSharingDetails)}.${nameof<ForwardedSharingDetailsDTO>((x) => x.deletionInfo)}.${nameof<LocalAttributeDeletionInfoDTO>((x) => x.deletionStatus)}`]: `${nameof<ForwardableAttribute>((x) => x.forwardedSharingDetails)}.${nameof<ForwardedSharingDetailsJSON>((x) => x.deletionInfo)}.${nameof<AbstractAttributeDeletionInfoJSON>((x) => x.deletionStatus)}`,
+            [`${nameof<LocalAttributeDTO>((x) => x.forwardedSharingDetails)}.${nameof<ForwardedSharingDetailsDTO>((x) => x.deletionInfo)}.${nameof<LocalAttributeDeletionInfoDTO>((x) => x.deletionDate)}`]: `${nameof<ForwardableAttribute>((x) => x.forwardedSharingDetails)}.${nameof<ForwardedSharingDetailsJSON>((x) => x.deletionInfo)}.${nameof<AbstractAttributeDeletionInfoJSON>((x) => x.deletionDate)}`
         },
         custom: {
             // content.tags

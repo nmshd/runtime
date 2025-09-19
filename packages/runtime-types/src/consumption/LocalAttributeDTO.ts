@@ -1,23 +1,30 @@
 import { IdentityAttributeJSON, RelationshipAttributeJSON } from "@nmshd/content";
 
 export interface LocalAttributeDTO {
+    "@type": "OwnIdentityAttribute" | "PeerIdentityAttribute" | "OwnRelationshipAttribute" | "PeerRelationshipAttribute" | "ThirdPartyRelationshipAttribute";
     id: string;
     createdAt: string;
     content: IdentityAttributeJSON | RelationshipAttributeJSON;
     succeeds?: string;
     succeededBy?: string;
-    shareInfo?: LocalAttributeShareInfoDTO;
-    deletionInfo?: LocalAttributeDeletionInfoDTO;
-    isDefault?: true;
     wasViewedAt?: string;
+    isDefault?: true;
+    peerSharingDetails?: PeerSharingDetailsDTO;
+    forwardedSharingDetails?: ForwardedSharingDetailsDTO[];
 }
 
-export interface LocalAttributeShareInfoDTO {
-    requestReference?: string;
-    notificationReference?: string;
+export interface PeerSharingDetailsDTO {
     peer: string;
-    sourceAttribute?: string;
-    thirdPartyAddress?: string;
+    sourceReference: string;
+    deletionInfo?: LocalAttributeDeletionInfoDTO;
+    initialAttributePeer?: string;
+}
+
+export interface ForwardedSharingDetailsDTO {
+    peer: string;
+    sourceReference: string;
+    sharedAt: string;
+    deletionInfo?: LocalAttributeDeletionInfoDTO;
 }
 
 export interface LocalAttributeDeletionInfoDTO {
@@ -25,11 +32,4 @@ export interface LocalAttributeDeletionInfoDTO {
     deletionDate: string;
 }
 
-export enum LocalAttributeDeletionStatus {
-    DeletionRequestSent = "DeletionRequestSent",
-    DeletionRequestRejected = "DeletionRequestRejected",
-    ToBeDeleted = "ToBeDeleted",
-    ToBeDeletedByPeer = "ToBeDeletedByPeer",
-    DeletedByPeer = "DeletedByPeer",
-    DeletedByOwner = "DeletedByOwner"
-}
+export type LocalAttributeDeletionStatus = "DeletionRequestSent" | "DeletionRequestRejected" | "ToBeDeleted" | "ToBeDeletedByPeer" | "DeletedByPeer" | "DeletedByOwner";

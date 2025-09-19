@@ -8,14 +8,12 @@ import {
     GetMessagesQuery,
     IdentityDeletionProcessStatus,
     IncomingRequestReceivedEvent,
-    LocalAttributeDeletionStatus,
     LocalRequestDTO,
     LocalRequestStatus,
     MessageReceivedEvent,
     MessageSentEvent,
     MessageWasReadAtChangedEvent,
     OutgoingRequestStatusChangedEvent,
-    OwnSharedAttributeSucceededEvent,
     PeerDeletionCancelledEvent,
     PeerToBeDeletedEvent,
     RelationshipStatus
@@ -28,7 +26,7 @@ import {
     exchangeMessage,
     exchangeMessageWithAttachment,
     exchangeTemplate,
-    executeFullCreateAndShareRepositoryAttributeFlow,
+    executeFullCreateAndShareOwnIdentityAttributeFlow,
     QueryParamConditions,
     reactivateTerminatedRelationship,
     RuntimeServiceProvider,
@@ -654,7 +652,7 @@ describe("Postponed Notifications via Messages", () => {
         });
 
         test("should be able to receive Notifications sent on a terminated Relationship in the right order after the Relationship was reactivated", async () => {
-            const ownSharedIdentityAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(client1, client5, {
+            const ownIdentityAttribute = await executeFullCreateAndShareOwnIdentityAttributeFlow(client1, client5, {
                 content: {
                     value: {
                         "@type": "GivenName",
@@ -667,9 +665,9 @@ describe("Postponed Notifications via Messages", () => {
             const terminatedRelationship = (await syncUntilHasRelationships(client5.transport))[0];
             expect(terminatedRelationship.status).toBe(RelationshipStatus.Terminated);
 
-            const { successor: successorOfRepositoryAttribute } = (
-                await client1.consumption.attributes.succeedRepositoryAttribute({
-                    predecessorId: (await client1.consumption.attributes.getRepositoryAttributes({})).value[0].id,
+            const { successor: successorOfOwnIdentityAttribute } = (
+                await client1.consumption.attributes.succeedOwnIdentityAttribute({
+                    predecessorId: (await client1.consumption.attributes.getOwnIdentityAttributes({})).value[0].id,
                     successorContent: {
                         value: {
                             "@type": "GivenName",
@@ -680,17 +678,16 @@ describe("Postponed Notifications via Messages", () => {
             ).value;
 
             const notifyAboutSuccessionResult = (
-                await client1.consumption.attributes.notifyPeerAboutRepositoryAttributeSuccession({ attributeId: successorOfRepositoryAttribute.id, peer: client5.address })
+                await client1.consumption.attributes.notifyPeerAboutOwnIdentityAttributeSuccession({ attributeId: successorOfOwnIdentityAttribute.id, peer: client5.address })
             ).value;
-            await client1.eventBus.waitForEvent(OwnSharedAttributeSucceededEvent);
             await client5.transport.account.syncEverything();
             const successionNotificationNotYetReceived = await client5.consumption.notifications.getNotification({ id: notifyAboutSuccessionResult.notificationId });
             expect(successionNotificationNotYetReceived).toBeAnError(/.*/, "error.transport.recordNotFound");
 
-            const notifyAboutDeletionResult = (await client1.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: ownSharedIdentityAttribute.id })).value;
+            const notifyAboutDeletionResult = (await client1.consumption.attributes.deleteAttributeAndNotify({ attributeId: ownIdentityAttribute.id })).value;
             await client1.eventBus.waitForEvent(AttributeDeletedEvent);
             await client5.transport.account.syncEverything();
-            const deletionNotificationNotYetReceived = await client5.consumption.notifications.getNotification({ id: notifyAboutDeletionResult.notificationId! });
+            const deletionNotificationNotYetReceived = await client5.consumption.notifications.getNotification({ id: notifyAboutDeletionResult.notificationIds[0] });
             expect(deletionNotificationNotYetReceived).toBeAnError(/.*/, "error.transport.recordNotFound");
 
             await client1.transport.relationships.requestRelationshipReactivation({ relationshipId: relationshipId });
@@ -712,13 +709,13 @@ describe("Postponed Notifications via Messages", () => {
             const processedDeletionNotificationResult = await client5.consumption.notifications.processNotificationById({ notificationId: postponedDeletionNotification.id });
             expect(processedDeletionNotificationResult).toBeSuccessful();
 
-            const peerSharedIdentityAttribute = (await client5.consumption.attributes.getAttribute({ id: ownSharedIdentityAttribute.id })).value;
-            assert(peerSharedIdentityAttribute.succeededBy);
-            assert(peerSharedIdentityAttribute.deletionInfo?.deletionDate);
-            assert(peerSharedIdentityAttribute.deletionInfo.deletionStatus, LocalAttributeDeletionStatus.DeletedByOwner);
+            const peerIdentityAttribute = (await client5.consumption.attributes.getAttribute({ id: ownIdentityAttribute.id })).value;
+            assert(peerIdentityAttribute.succeededBy);
+            assert(peerIdentityAttribute.peerSharingDetails!.deletionInfo?.deletionDate);
+            assert(peerIdentityAttribute.peerSharingDetails!.deletionInfo.deletionStatus, "DeletedByOwner");
 
-            const timeOfSuccession = (await client5.consumption.attributes.getAttribute({ id: peerSharedIdentityAttribute.succeededBy })).value.createdAt;
-            const timeOfDeletionByOwner = peerSharedIdentityAttribute.deletionInfo.deletionDate;
+            const timeOfSuccession = (await client5.consumption.attributes.getAttribute({ id: peerIdentityAttribute.succeededBy })).value.createdAt;
+            const timeOfDeletionByOwner = peerIdentityAttribute.peerSharingDetails!.deletionInfo.deletionDate;
             expect(CoreDate.from(timeOfAcceptanceOfReactivation).isBefore(CoreDate.from(timeOfSuccession))).toBe(true);
             expect(CoreDate.from(timeOfSuccession).isBefore(CoreDate.from(timeOfDeletionByOwner))).toBe(true);
         });

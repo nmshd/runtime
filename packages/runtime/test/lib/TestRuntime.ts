@@ -130,7 +130,7 @@ export class TestRuntime extends Runtime {
 
 export class NoLoginTestRuntime extends TestRuntime {
     public constructor(runtimeConfig: RuntimeConfig) {
-        super(runtimeConfig, { setDefaultRepositoryAttributes: false });
+        super(runtimeConfig, { setDefaultOwnIdentityAttributes: false });
     }
 
     protected override async initAccount(): Promise<void> {

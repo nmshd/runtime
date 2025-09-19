@@ -15,7 +15,7 @@ import {
     ThirdPartyRelationshipAttributeQuery,
     ThirdPartyRelationshipAttributeQueryOwner
 } from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId, ICoreDate, ICoreId, LanguageISO639 } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId, LanguageISO639 } from "@nmshd/core-types";
 import * as iql from "@nmshd/iql";
 import { Relationship, RelationshipStatus, SynchronizedCollection, TagClient, TransportCoreErrors } from "@nmshd/transport";
 import _ from "lodash";
@@ -27,24 +27,47 @@ import { ConsumptionCoreErrors } from "../../consumption/ConsumptionCoreErrors";
 import { ConsumptionError } from "../../consumption/ConsumptionError";
 import { ConsumptionIds } from "../../consumption/ConsumptionIds";
 import { flattenObject, ValidationResult } from "../common";
-import {
-    AttributeCreatedEvent,
-    AttributeDeletedEvent,
-    AttributeWasViewedAtChangedEvent,
-    OwnSharedAttributeSucceededEvent,
-    RepositoryAttributeSucceededEvent,
-    SharedAttributeCopyCreatedEvent,
-    ThirdPartyRelationshipAttributeSucceededEvent
-} from "./events";
-import { AttributeSuccessorParams, AttributeSuccessorParamsJSON, IAttributeSuccessorParams } from "./local/AttributeSuccessorParams";
+import { AttributeCreatedEvent, AttributeDeletedEvent, AttributeForwardedSharingDetailsChangedEvent, AttributeSucceededEvent, AttributeWasViewedAtChangedEvent } from "./events";
 import { AttributeTagCollection, IAttributeTag } from "./local/AttributeTagCollection";
-import { CreateRepositoryAttributeParams, ICreateRepositoryAttributeParams } from "./local/CreateRepositoryAttributeParams";
-import { CreateSharedLocalAttributeCopyParams, ICreateSharedLocalAttributeCopyParams } from "./local/CreateSharedLocalAttributeCopyParams";
-import { CreateSharedLocalAttributeParams, ICreateSharedLocalAttributeParams } from "./local/CreateSharedLocalAttributeParams";
-import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./local/LocalAttribute";
-import { LocalAttributeDeletionInfo, LocalAttributeDeletionStatus } from "./local/LocalAttributeDeletionInfo";
-import { LocalAttributeShareInfo } from "./local/LocalAttributeShareInfo";
+import { LocalAttribute, LocalAttributeJSON } from "./local/attributeTypes/LocalAttribute";
+import { OwnIdentityAttribute } from "./local/attributeTypes/OwnIdentityAttribute";
+import { OwnRelationshipAttribute } from "./local/attributeTypes/OwnRelationshipAttribute";
+import { PeerIdentityAttribute } from "./local/attributeTypes/PeerIdentityAttribute";
+import { PeerRelationshipAttribute } from "./local/attributeTypes/PeerRelationshipAttribute";
+import { ThirdPartyRelationshipAttribute } from "./local/attributeTypes/ThirdPartyRelationshipAttribute";
 import { IdentityAttributeQueryTranslator, RelationshipAttributeQueryTranslator, ThirdPartyRelationshipAttributeQueryTranslator } from "./local/QueryTranslator";
+import {
+    EmittedAttributeDeletionInfo,
+    EmittedAttributeDeletionStatus,
+    ForwardedSharingDetails,
+    OwnRelationshipAttributeSharingDetails,
+    PeerIdentityAttributeSharingDetails,
+    PeerRelationshipAttributeSharingDetails,
+    ReceivedAttributeDeletionInfo,
+    ReceivedAttributeDeletionStatus,
+    ThirdPartyRelationshipAttributeDeletionInfo,
+    ThirdPartyRelationshipAttributeDeletionStatus,
+    ThirdPartyRelationshipAttributeSharingDetails
+} from "./local/sharingDetails";
+import {
+    IOwnIdentityAttributeSuccessorParams,
+    IOwnRelationshipAttributeSuccessorParams,
+    IPeerIdentityAttributeSuccessorParams,
+    IThirdPartyRelationshipAttributeSuccessorParams,
+    OwnIdentityAttributeSuccessorParams,
+    OwnIdentityAttributeSuccessorParamsJSON,
+    OwnRelationshipAttributeSuccessorParams,
+    OwnRelationshipAttributeSuccessorParamsJSON,
+    PeerIdentityAttributeSuccessorParams,
+    PeerIdentityAttributeSuccessorParamsJSON,
+    ThirdPartyRelationshipAttributeSuccessorParams,
+    ThirdPartyRelationshipAttributeSuccessorParamsJSON
+} from "./local/successorParams";
+import {
+    IPeerRelationshipAttributeSuccessorParams,
+    PeerRelationshipAttributeSuccessorParams,
+    PeerRelationshipAttributeSuccessorParamsJSON
+} from "./local/successorParams/PeerRelationshipAttributeSuccessorParams";
 
 export class AttributesController extends ConsumptionBaseController {
     private attributes: SynchronizedCollection;
@@ -60,7 +83,7 @@ export class AttributesController extends ConsumptionBaseController {
         parent: ConsumptionController,
         private readonly eventBus: EventBus,
         private readonly identity: { address: CoreAddress },
-        private readonly setDefaultRepositoryAttributes: boolean
+        private readonly setDefaultOwnIdentityAttributes: boolean
     ) {
         super(ConsumptionControllerName.AttributesController, parent);
     }
@@ -135,12 +158,7 @@ export class AttributesController extends ConsumptionBaseController {
     public async executeIQLQuery(query: IIQLQuery): Promise<LocalAttribute[]> {
         /* Fetch subset of attributes relevant for IQL queries. We filter for
          * identity attributes which are not shared. */
-        const envelopedAttributes: any[] = await this.attributes.find({
-            "content.@type": "IdentityAttribute",
-            shareInfo: {
-                $exists: false
-            }
-        });
+        const envelopedAttributes: any[] = await this.attributes.find({ "@type": "OwnIdentityAttribute" });
 
         /* Remove envelope from attributes and execute query. IQL makes no use
          * of the envelope data. */
@@ -208,56 +226,36 @@ export class AttributesController extends ConsumptionBaseController {
         const parsedQuery = IdentityAttributeQuery.from(query);
         const dbQuery = IdentityAttributeQueryTranslator.translate(parsedQuery);
         dbQuery["content.owner"] = this.identity.address.toString();
-        dbQuery["shareInfo"] = { $exists: false };
 
         const attributes = await this.attributes.find(dbQuery);
 
         return this.parseArray(attributes, LocalAttribute);
     }
 
-    public async createRepositoryAttribute(params: ICreateRepositoryAttributeParams): Promise<LocalAttribute> {
-        if (params.content.owner.toString() !== this.identity.address.toString()) {
-            throw ConsumptionCoreErrors.attributes.wrongOwnerOfRepositoryAttribute();
+    public async createOwnIdentityAttribute(params: { content: IdentityAttribute }): Promise<OwnIdentityAttribute> {
+        const attribute = this.trimAttribute(params.content);
+
+        if (!attribute.owner.equals(this.identity.address)) {
+            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute("When creating an OwnIdentityAttribute, the owner must match the own address.");
         }
 
-        const parsedParams = CreateRepositoryAttributeParams.from(params);
+        await this.validateAttributeCreation(attribute);
 
-        const tagValidationResult = await this.validateTagsOfAttribute(parsedParams.content);
-        if (tagValidationResult.isError()) throw tagValidationResult.error;
-
-        const trimmedAttribute = {
-            ...parsedParams.content.toJSON(),
-            value: this.trimAttributeValue(parsedParams.content.value.toJSON() as AttributeValues.Identity.Json)
-        };
-        parsedParams.content = IdentityAttribute.from(trimmedAttribute);
-
-        if (!this.validateAttributeCharacters(parsedParams.content)) {
-            throw ConsumptionCoreErrors.attributes.forbiddenCharactersInAttribute("The Attribute contains forbidden characters.");
-        }
-
-        let localAttribute = LocalAttribute.from({
-            id: parsedParams.id ?? (await ConsumptionIds.attribute.generate()),
+        let ownIdentityAttribute = OwnIdentityAttribute.from({
+            id: await ConsumptionIds.attribute.generate(),
             createdAt: CoreDate.utc(),
-            content: parsedParams.content
+            content: attribute
         });
+        await this.attributes.create(ownIdentityAttribute);
 
-        await this.attributes.create(localAttribute);
+        if (this.setDefaultOwnIdentityAttributes) ownIdentityAttribute = await this.setAsDefaultOwnIdentityAttribute(ownIdentityAttribute, true);
 
-        if (this.setDefaultRepositoryAttributes) {
-            localAttribute = await this.setAsDefaultRepositoryAttribute(localAttribute, true);
-        }
-
-        this.eventBus.publish(new AttributeCreatedEvent(this.identity.address.toString(), localAttribute));
-
-        return localAttribute;
+        this.eventBus.publish(new AttributeCreatedEvent(this.identity.address.toString(), ownIdentityAttribute));
+        return ownIdentityAttribute;
     }
 
-    public async setAsDefaultRepositoryAttribute(newDefaultAttribute: LocalAttribute, skipOverwrite?: boolean): Promise<LocalAttribute> {
-        if (!this.setDefaultRepositoryAttributes) throw ConsumptionCoreErrors.attributes.setDefaultRepositoryAttributesIsDisabled();
-
-        if (!newDefaultAttribute.isRepositoryAttribute(this.identity.address)) {
-            throw ConsumptionCoreErrors.attributes.isNotRepositoryAttribute(newDefaultAttribute.id);
-        }
+    public async setAsDefaultOwnIdentityAttribute(newDefaultAttribute: OwnIdentityAttribute, skipOverwrite?: boolean): Promise<OwnIdentityAttribute> {
+        if (!this.setDefaultOwnIdentityAttributes) throw ConsumptionCoreErrors.attributes.setDefaultOwnIdentityAttributesIsDisabled();
 
         if (newDefaultAttribute.isDefault) return newDefaultAttribute;
 
@@ -265,15 +263,15 @@ export class AttributesController extends ConsumptionBaseController {
         const query = {
             $and: [
                 {
-                    [`${nameof<LocalAttribute>((c) => c.content)}.value.@type`]: valueType
+                    [`${nameof<OwnIdentityAttribute>((c) => c.content)}.value.@type`]: valueType
                 },
                 {
-                    [nameof<LocalAttribute>((c) => c.isDefault)]: true
+                    [nameof<OwnIdentityAttribute>((c) => c.isDefault)]: true
                 }
             ]
         };
 
-        const currentDefaultAttributeResult = await this.getLocalAttributes(query);
+        const currentDefaultAttributeResult = (await this.getLocalAttributes(query)) as OwnIdentityAttribute[];
 
         if (currentDefaultAttributeResult.length > 1) {
             throw new ConsumptionError(`There are multiple default Attributes for type ${valueType.toString()}, even though only one is expected.`);
@@ -293,260 +291,224 @@ export class AttributesController extends ConsumptionBaseController {
         return newDefaultAttribute;
     }
 
-    public async updateAttributeUnsafe(attributeParams: ILocalAttribute): Promise<LocalAttribute> {
-        const doc = await this.attributes.findOne({
-            [nameof<LocalAttribute>((c) => c.id)]: attributeParams.id.toString()
-        });
-        if (!doc) {
-            throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attributeParams.id.toString());
-        }
+    public async updateAttributeUnsafe(attribute: LocalAttribute): Promise<LocalAttribute> {
+        const doc = await this.attributes.findOne({ [nameof<LocalAttribute>((c) => c.id)]: attribute.id.toString() });
+        if (!doc) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
 
-        const params: ILocalAttribute = {
-            id: attributeParams.id,
-            content: attributeParams.content,
-            createdAt: attributeParams.createdAt,
-            shareInfo: attributeParams.shareInfo,
-            succeededBy: attributeParams.succeededBy,
-            succeeds: attributeParams.succeeds,
-            deletionInfo: attributeParams.deletionInfo,
-            isDefault: attributeParams.isDefault
-        };
-        const newAttribute = LocalAttribute.from(params);
-        await this.attributes.update(doc, newAttribute);
-        return newAttribute;
+        await this.attributes.update(doc, attribute);
+        return attribute;
     }
 
-    public async createSharedLocalAttributeCopy(params: ICreateSharedLocalAttributeCopyParams): Promise<LocalAttribute> {
-        const parsedParams = CreateSharedLocalAttributeCopyParams.from(params);
-        const sourceAttribute = await this.getLocalAttribute(parsedParams.sourceAttributeId);
-        if (!sourceAttribute) {
-            throw TransportCoreErrors.general.recordNotFound(LocalAttribute, parsedParams.sourceAttributeId.toString());
+    public async createPeerIdentityAttribute(params: { content: IdentityAttribute; peer: CoreAddress; sourceReference: CoreId; id: CoreId }): Promise<PeerIdentityAttribute> {
+        const attribute = this.trimAttribute(params.content);
+
+        if (attribute.owner.equals(this.identity.address)) {
+            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute("When creating a PeerIdentityAttribute, the owner must not match the own address.");
         }
 
-        const shareInfo = LocalAttributeShareInfo.from({
-            peer: parsedParams.peer,
-            requestReference: parsedParams.requestReference,
-            sourceAttribute: parsedParams.sourceAttributeId,
-            thirdPartyAddress: sourceAttribute.shareInfo?.peer
-        });
+        if (!attribute.owner.equals(params.peer)) {
+            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute("When creating a PeerIdentityAttribute, the owner must match the address of the peer.");
+        }
 
-        const sharedLocalAttributeCopy = await LocalAttribute.fromAttribute(sourceAttribute.content, undefined, shareInfo, parsedParams.attributeId);
-        await this.attributes.create(sharedLocalAttributeCopy);
+        await this.validateAttributeCreation(attribute);
 
-        this.eventBus.publish(new SharedAttributeCopyCreatedEvent(this.identity.address.toString(), sharedLocalAttributeCopy));
-        return sharedLocalAttributeCopy;
-    }
-
-    public async createSharedLocalAttribute(params: ICreateSharedLocalAttributeParams): Promise<LocalAttribute> {
-        const parsedParams = CreateSharedLocalAttributeParams.from(params);
-        const tagValidationResult = await this.validateTagsOfAttribute(parsedParams.content);
-        if (tagValidationResult.isError()) throw tagValidationResult.error;
-
-        const shareInfo = LocalAttributeShareInfo.from({
+        const peerSharingDetails = PeerIdentityAttributeSharingDetails.from({
             peer: params.peer,
-            requestReference: params.requestReference,
-            thirdPartyAddress: params.thirdPartyAddress
+            sourceReference: params.sourceReference
         });
-        const peerLocalAttribute = LocalAttribute.from({
-            id: params.id ?? (await ConsumptionIds.attribute.generate()),
-            content: params.content,
-            shareInfo: shareInfo,
+        const peerIdentityAttribute = PeerIdentityAttribute.from({
+            id: params.id,
+            content: attribute,
+            peerSharingDetails,
             createdAt: CoreDate.utc()
         });
-        await this.attributes.create(peerLocalAttribute);
-        this.eventBus.publish(new AttributeCreatedEvent(this.identity.address.toString(), peerLocalAttribute));
-        return peerLocalAttribute;
+        await this.attributes.create(peerIdentityAttribute);
+
+        this.eventBus.publish(new AttributeCreatedEvent(this.identity.address.toString(), peerIdentityAttribute));
+        return peerIdentityAttribute;
     }
 
-    public async succeedRepositoryAttribute(
-        predecessorId: CoreId,
-        successorParams: IAttributeSuccessorParams | AttributeSuccessorParamsJSON,
+    public async createOwnRelationshipAttribute(params: {
+        content: RelationshipAttribute;
+        peer: CoreAddress;
+        sourceReference: CoreId;
+        id?: CoreId;
+    }): Promise<OwnRelationshipAttribute> {
+        const attribute = params.content;
+
+        if (!attribute.owner.equals(this.identity.address)) {
+            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute("When creating an OwnRelationshipAttribute, the owner must match the own address.");
+        }
+
+        if (params.peer.equals(this.identity.address)) {
+            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute("When creating an OwnRelationshipAttribute, the peer must not match the own address.");
+        }
+
+        await this.validateAttributeCreation(attribute);
+
+        const peerSharingDetails = OwnRelationshipAttributeSharingDetails.from({
+            peer: params.peer,
+            sourceReference: params.sourceReference
+        });
+        const ownRelationshipAttribute = OwnRelationshipAttribute.from({
+            id: params.id ?? (await ConsumptionIds.attribute.generate()),
+            content: attribute,
+            peerSharingDetails,
+            createdAt: CoreDate.utc()
+        });
+        await this.attributes.create(ownRelationshipAttribute);
+
+        this.eventBus.publish(new AttributeCreatedEvent(this.identity.address.toString(), ownRelationshipAttribute));
+        return ownRelationshipAttribute;
+    }
+
+    public async createPeerRelationshipAttribute(params: {
+        content: RelationshipAttribute;
+        peer: CoreAddress;
+        sourceReference: CoreId;
+        id?: CoreId;
+    }): Promise<PeerRelationshipAttribute> {
+        const attribute = params.content;
+
+        if (attribute.owner.equals(this.identity.address)) {
+            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute("When creating a PeerRelationshipAttribute, the owner must not match the own address.");
+        }
+
+        if (!attribute.owner.equals(params.peer)) {
+            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute("When creating a PeerRelationshipAttribute, the owner must match the address of the peer.");
+        }
+
+        await this.validateAttributeCreation(attribute);
+
+        const peerSharingDetails = PeerRelationshipAttributeSharingDetails.from({
+            peer: params.peer,
+            sourceReference: params.sourceReference
+        });
+        const peerRelationshipAttribute = PeerRelationshipAttribute.from({
+            id: params.id ?? (await ConsumptionIds.attribute.generate()),
+            content: attribute,
+            peerSharingDetails,
+            createdAt: CoreDate.utc()
+        });
+        await this.attributes.create(peerRelationshipAttribute);
+
+        this.eventBus.publish(new AttributeCreatedEvent(this.identity.address.toString(), peerRelationshipAttribute));
+        return peerRelationshipAttribute;
+    }
+
+    public async createThirdPartyRelationshipAttribute(params: {
+        content: RelationshipAttribute;
+        peer: CoreAddress;
+        sourceReference: CoreId;
+        initialAttributePeer: CoreAddress;
+        id: CoreId;
+    }): Promise<ThirdPartyRelationshipAttribute> {
+        const attribute = params.content;
+
+        if (attribute.owner.equals(this.identity.address)) {
+            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute("When creating a ThirdPartyRelationshipAttribute, the owner must not match the own address.");
+        }
+
+        if (!(attribute.owner.equals(params.peer) || attribute.owner.equals(params.initialAttributePeer))) {
+            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute(
+                "When creating a ThirdPartyRelationshipAttribute, the owner must match the address of the peer or initial Attribute peer."
+            );
+        }
+
+        if (params.peer.equals(params.initialAttributePeer)) {
+            throw ConsumptionCoreErrors.attributes.wrongOwnerOfAttribute("When creating a ThirdPartyRelationshipAttribute, the peer must not match the initialAttributePeer.");
+        }
+
+        await this.validateAttributeCreation(attribute);
+
+        const peerSharingDetails = ThirdPartyRelationshipAttributeSharingDetails.from({
+            peer: params.peer,
+            sourceReference: params.sourceReference,
+            initialAttributePeer: params.initialAttributePeer
+        });
+        const thirdPartyRelationshipAttribute = ThirdPartyRelationshipAttribute.from({
+            id: params.id,
+            content: attribute,
+            peerSharingDetails,
+            createdAt: CoreDate.utc()
+        });
+        await this.attributes.create(thirdPartyRelationshipAttribute);
+
+        this.eventBus.publish(new AttributeCreatedEvent(this.identity.address.toString(), thirdPartyRelationshipAttribute));
+        return thirdPartyRelationshipAttribute;
+    }
+
+    private async validateAttributeCreation(attribute: IdentityAttribute | RelationshipAttribute): Promise<void> {
+        if (!this.validateAttributeCharacters(attribute)) throw ConsumptionCoreErrors.attributes.forbiddenCharactersInAttribute("The Attribute contains forbidden characters.");
+
+        if (attribute instanceof RelationshipAttribute) return;
+
+        const tagValidationResult = await this.validateTagsOfAttribute(attribute);
+        if (tagValidationResult.isError()) throw tagValidationResult.error;
+    }
+
+    public async addForwardedSharingDetailsToAttribute<T extends OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute>(
+        attribute: T,
+        peer: CoreAddress,
+        sourceReference: CoreId
+    ): Promise<T> {
+        const localAttribute = await this.getLocalAttribute(attribute.id);
+        if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
+        if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+
+        if (attribute.isForwardedTo(peer, true)) throw ConsumptionCoreErrors.attributes.alreadyForwarded(attribute.id, peer);
+
+        const sharingDetails = attribute.hasDeletionStatusUnequalDeletedByPeer(peer)
+            ? (() => {
+                  const sharingDetailsForPeer = attribute.getForwardedSharingDetailsNotDeletedByPeer(peer)!;
+                  sharingDetailsForPeer.deletionInfo = undefined;
+                  return sharingDetailsForPeer;
+              })()
+            : ForwardedSharingDetails.from({ peer, sourceReference, sharedAt: CoreDate.utc() });
+
+        attribute.upsertForwardedSharingDetailsForPeer(peer, sharingDetails);
+        await this.updateAttributeUnsafe(attribute);
+
+        this.eventBus.publish(new AttributeForwardedSharingDetailsChangedEvent(this.identity.address.toString(), attribute));
+        return attribute;
+    }
+
+    public async succeedOwnIdentityAttribute(
+        predecessor: OwnIdentityAttribute,
+        successorParams: IOwnIdentityAttributeSuccessorParams | OwnIdentityAttributeSuccessorParamsJSON,
         validate = true
-    ): Promise<{ predecessor: LocalAttribute; successor: LocalAttribute }> {
-        const parsedSuccessorParams = AttributeSuccessorParams.from(successorParams);
-        const trimmedAttribute = {
-            ...parsedSuccessorParams.content.toJSON(),
-            value: this.trimAttributeValue(parsedSuccessorParams.content.value.toJSON() as AttributeValues.Identity.Json)
-        };
-        parsedSuccessorParams.content = IdentityAttribute.from(trimmedAttribute);
+    ): Promise<{ predecessor: OwnIdentityAttribute; successor: OwnIdentityAttribute }> {
+        const parsedSuccessorParams = OwnIdentityAttributeSuccessorParams.from(successorParams);
+        const attribute = this.trimAttribute(parsedSuccessorParams.content);
 
         if (validate) {
-            const validationResult = await this.validateRepositoryAttributeSuccession(predecessorId, parsedSuccessorParams);
+            const validationResult = await this.validateOwnIdentityAttributeSuccession(predecessor, parsedSuccessorParams);
             if (validationResult.isError()) throw validationResult.error;
         }
 
-        const { predecessor, successor } = await this._succeedAttributeUnsafe(predecessorId, {
-            id: parsedSuccessorParams.id,
-            content: parsedSuccessorParams.content,
-            succeeds: predecessorId,
-            shareInfo: parsedSuccessorParams.shareInfo,
-            createdAt: parsedSuccessorParams.createdAt,
-            succeededBy: parsedSuccessorParams.succeededBy
-        });
-
-        this.eventBus.publish(new RepositoryAttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
-
-        return { predecessor, successor };
-    }
-
-    public async succeedOwnSharedIdentityAttribute(
-        predecessorId: CoreId,
-        successorParams: IAttributeSuccessorParams | AttributeSuccessorParamsJSON,
-        validate = true
-    ): Promise<{ predecessor: LocalAttribute; successor: LocalAttribute }> {
-        const parsedSuccessorParams = AttributeSuccessorParams.from(successorParams);
-
-        if (validate) {
-            const validationResult = await this.validateOwnSharedIdentityAttributeSuccession(predecessorId, parsedSuccessorParams);
-            if (validationResult.isError()) throw validationResult.error;
-        }
-
-        const { predecessor, successor } = await this._succeedAttributeUnsafe(predecessorId, {
-            id: parsedSuccessorParams.id,
-            content: parsedSuccessorParams.content,
-            succeeds: predecessorId,
-            shareInfo: parsedSuccessorParams.shareInfo,
-            createdAt: parsedSuccessorParams.createdAt,
-            succeededBy: parsedSuccessorParams.succeededBy
-        });
-
-        this.eventBus.publish(new OwnSharedAttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
-
-        return { predecessor, successor };
-    }
-
-    public async succeedOwnSharedRelationshipAttribute(
-        predecessorId: CoreId,
-        successorParams: IAttributeSuccessorParams | AttributeSuccessorParamsJSON,
-        validate = true
-    ): Promise<{ predecessor: LocalAttribute; successor: LocalAttribute }> {
-        const parsedSuccessorParams = AttributeSuccessorParams.from(successorParams);
-
-        if (validate) {
-            const validationResult = await this.validateOwnSharedRelationshipAttributeSuccession(predecessorId, parsedSuccessorParams);
-            if (validationResult.isError()) throw validationResult.error;
-        }
-
-        const { predecessor, successor } = await this._succeedAttributeUnsafe(predecessorId, {
-            id: parsedSuccessorParams.id,
-            content: parsedSuccessorParams.content,
-            succeeds: predecessorId,
-            shareInfo: parsedSuccessorParams.shareInfo,
-            createdAt: parsedSuccessorParams.createdAt,
-            succeededBy: parsedSuccessorParams.succeededBy
-        });
-
-        this.eventBus.publish(new OwnSharedAttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
-
-        return { predecessor, successor };
-    }
-
-    public async succeedPeerSharedIdentityAttribute(
-        predecessorId: CoreId,
-        successorParams: IAttributeSuccessorParams | AttributeSuccessorParamsJSON,
-        validate = true
-    ): Promise<{ predecessor: LocalAttribute; successor: LocalAttribute }> {
-        const parsedSuccessorParams = AttributeSuccessorParams.from(successorParams);
-
-        if (validate) {
-            const validationResult = await this.validatePeerSharedIdentityAttributeSuccession(predecessorId, parsedSuccessorParams);
-            if (validationResult.isError()) throw validationResult.error;
-        }
-
-        const { predecessor, successor } = await this._succeedAttributeUnsafe(predecessorId, {
-            id: parsedSuccessorParams.id,
-            content: parsedSuccessorParams.content,
-            succeeds: predecessorId,
-            shareInfo: parsedSuccessorParams.shareInfo,
-            createdAt: parsedSuccessorParams.createdAt,
-            succeededBy: parsedSuccessorParams.succeededBy
-        });
-
-        /* No succeeded attribute event fired here. This is done by the notification system. */
-
-        return { predecessor, successor };
-    }
-
-    public async succeedPeerSharedRelationshipAttribute(
-        predecessorId: CoreId,
-        successorParams: IAttributeSuccessorParams | AttributeSuccessorParamsJSON,
-        validate = true
-    ): Promise<{ predecessor: LocalAttribute; successor: LocalAttribute }> {
-        const parsedSuccessorParams = AttributeSuccessorParams.from(successorParams);
-
-        if (validate) {
-            const validationResult = await this.validatePeerSharedRelationshipAttributeSuccession(predecessorId, parsedSuccessorParams);
-            if (validationResult.isError()) throw validationResult.error;
-        }
-
-        const { predecessor, successor } = await this._succeedAttributeUnsafe(predecessorId, {
-            id: parsedSuccessorParams.id,
-            content: parsedSuccessorParams.content,
-            succeeds: predecessorId,
-            shareInfo: parsedSuccessorParams.shareInfo,
-            createdAt: parsedSuccessorParams.createdAt,
-            succeededBy: parsedSuccessorParams.succeededBy
-        });
-
-        /* No succeeded attribute event fired here. This is done by the notification system. */
-
-        return { predecessor, successor };
-    }
-
-    public async succeedThirdPartyRelationshipAttribute(
-        predecessorId: CoreId,
-        successorParams: IAttributeSuccessorParams | AttributeSuccessorParamsJSON,
-        validate = true
-    ): Promise<{ predecessor: LocalAttribute; successor: LocalAttribute }> {
-        const parsedSuccessorParams = AttributeSuccessorParams.from(successorParams);
-
-        if (validate) {
-            const validationResult = await this.validateThirdPartyRelationshipAttributeSuccession(predecessorId, parsedSuccessorParams);
-            if (validationResult.isError()) {
-                throw validationResult.error;
-            }
-        }
-
-        const { predecessor, successor } = await this._succeedAttributeUnsafe(predecessorId, {
-            id: parsedSuccessorParams.id,
-            content: parsedSuccessorParams.content,
-            succeeds: predecessorId,
-            shareInfo: parsedSuccessorParams.shareInfo,
-            createdAt: parsedSuccessorParams.createdAt,
-            succeededBy: parsedSuccessorParams.succeededBy
-        });
-
-        this.eventBus.publish(new ThirdPartyRelationshipAttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
-
-        return { predecessor, successor };
-    }
-
-    private async _succeedAttributeUnsafe(
-        predecessorId: CoreId,
-        successorParams: Parameters<typeof this.createAttributeUnsafe>[0]
-    ): Promise<{ predecessor: LocalAttribute; successor: LocalAttribute }> {
-        const predecessor = await this.getLocalAttribute(predecessorId);
-        if (!predecessor) throw ConsumptionCoreErrors.attributes.predecessorDoesNotExist();
-
-        const successor = await this.createAttributeUnsafe({
-            id: successorParams.id,
-            content: successorParams.content,
-            succeeds: predecessorId,
-            shareInfo: successorParams.shareInfo,
-            createdAt: successorParams.createdAt,
-            succeededBy: successorParams.succeededBy,
+        const successor = OwnIdentityAttribute.from({
+            id: await ConsumptionIds.attribute.generate(),
+            content: attribute,
+            createdAt: CoreDate.utc(),
+            succeeds: predecessor.id,
             isDefault: predecessor.isDefault
         });
+        await this.succeedAttributeUnsafe(predecessor, successor);
 
         await this.removeDefault(predecessor);
 
-        predecessor.succeededBy = successor.id;
-        await this.updateAttributeUnsafe(predecessor);
-
+        this.eventBus.publish(new AttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
         return { predecessor, successor };
     }
 
-    private async removeDefault(attribute: LocalAttribute): Promise<LocalAttribute> {
+    private async succeedAttributeUnsafe(predecessor: LocalAttribute, successor: LocalAttribute): Promise<void> {
+        await this.attributes.create(successor);
+
+        predecessor.succeededBy = successor.id;
+        await this.updateAttributeUnsafe(predecessor);
+    }
+
+    private async removeDefault(attribute: OwnIdentityAttribute): Promise<OwnIdentityAttribute> {
         if (!attribute.isDefault) return attribute;
 
         attribute.isDefault = undefined;
@@ -554,290 +516,133 @@ export class AttributesController extends ConsumptionBaseController {
         return attribute;
     }
 
-    public async validateRepositoryAttributeSuccession(
-        predecessorId: CoreId,
-        successorParams: IAttributeSuccessorParams | AttributeSuccessorParamsJSON
+    public async succeedPeerIdentityAttribute(
+        predecessor: PeerIdentityAttribute,
+        successorParams: IPeerIdentityAttributeSuccessorParams | PeerIdentityAttributeSuccessorParamsJSON,
+        validate = true
+    ): Promise<{ predecessor: PeerIdentityAttribute; successor: PeerIdentityAttribute }> {
+        const parsedSuccessorParams = PeerIdentityAttributeSuccessorParams.from(successorParams);
+        const attribute = this.trimAttribute(parsedSuccessorParams.content);
+
+        if (validate) {
+            const validationResult = await this.validatePeerIdentityAttributeSuccession(predecessor, parsedSuccessorParams);
+            if (validationResult.isError()) throw validationResult.error;
+        }
+
+        const peerSharingDetails = PeerIdentityAttributeSharingDetails.from({
+            peer: predecessor.peerSharingDetails.peer,
+            sourceReference: parsedSuccessorParams.sourceReference
+        });
+
+        const successor = PeerIdentityAttribute.from({
+            id: parsedSuccessorParams.id,
+            content: attribute,
+            createdAt: CoreDate.utc(),
+            succeeds: predecessor.id,
+            peerSharingDetails
+        });
+        await this.succeedAttributeUnsafe(predecessor, successor);
+
+        return { predecessor, successor };
+    }
+
+    public async succeedOwnRelationshipAttribute(
+        predecessor: OwnRelationshipAttribute,
+        successorParams: IOwnRelationshipAttributeSuccessorParams | OwnRelationshipAttributeSuccessorParamsJSON,
+        validate = true
+    ): Promise<{ predecessor: OwnRelationshipAttribute; successor: OwnRelationshipAttribute }> {
+        const parsedSuccessorParams = OwnRelationshipAttributeSuccessorParams.from(successorParams);
+
+        if (validate) {
+            const validationResult = await this.validateOwnRelationshipAttributeSuccession(predecessor, parsedSuccessorParams);
+            if (validationResult.isError()) throw validationResult.error;
+        }
+
+        const peerSharingDetails = OwnRelationshipAttributeSharingDetails.from({
+            peer: predecessor.peerSharingDetails.peer,
+            sourceReference: parsedSuccessorParams.sourceReference
+        });
+
+        const successor = OwnRelationshipAttribute.from({
+            id: await ConsumptionIds.attribute.generate(),
+            content: parsedSuccessorParams.content,
+            createdAt: CoreDate.utc(),
+            succeeds: predecessor.id,
+            peerSharingDetails
+        });
+        await this.succeedAttributeUnsafe(predecessor, successor);
+
+        this.eventBus.publish(new AttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
+        return { predecessor, successor };
+    }
+
+    public async succeedPeerRelationshipAttribute(
+        predecessor: PeerRelationshipAttribute,
+        successorParams: IPeerRelationshipAttributeSuccessorParams | PeerRelationshipAttributeSuccessorParamsJSON,
+        validate = true
+    ): Promise<{ predecessor: PeerRelationshipAttribute; successor: PeerRelationshipAttribute }> {
+        const parsedSuccessorParams = PeerRelationshipAttributeSuccessorParams.from(successorParams);
+
+        if (validate) {
+            const validationResult = await this.validatePeerRelationshipAttributeSuccession(predecessor, parsedSuccessorParams);
+            if (validationResult.isError()) throw validationResult.error;
+        }
+
+        const peerSharingDetails = PeerRelationshipAttributeSharingDetails.from({
+            peer: predecessor.peerSharingDetails.peer,
+            sourceReference: parsedSuccessorParams.sourceReference
+        });
+
+        const successor = PeerRelationshipAttribute.from({
+            id: parsedSuccessorParams.id,
+            content: parsedSuccessorParams.content,
+            createdAt: CoreDate.utc(),
+            succeeds: predecessor.id,
+            peerSharingDetails
+        });
+        await this.succeedAttributeUnsafe(predecessor, successor);
+
+        return { predecessor, successor };
+    }
+
+    public async succeedThirdPartyRelationshipAttribute(
+        predecessor: ThirdPartyRelationshipAttribute,
+        successorParams: IThirdPartyRelationshipAttributeSuccessorParams | ThirdPartyRelationshipAttributeSuccessorParamsJSON,
+        validate = true
+    ): Promise<{ predecessor: ThirdPartyRelationshipAttribute; successor: ThirdPartyRelationshipAttribute }> {
+        const parsedSuccessorParams = ThirdPartyRelationshipAttributeSuccessorParams.from(successorParams);
+
+        if (validate) {
+            const validationResult = await this.validateThirdPartyRelationshipAttributeSuccession(predecessor, parsedSuccessorParams);
+            if (validationResult.isError()) throw validationResult.error;
+        }
+
+        const peerSharingDetails = ThirdPartyRelationshipAttributeSharingDetails.from({
+            peer: predecessor.peerSharingDetails.peer,
+            sourceReference: parsedSuccessorParams.sourceReference,
+            initialAttributePeer: predecessor.peerSharingDetails.initialAttributePeer
+        });
+
+        const successor = ThirdPartyRelationshipAttribute.from({
+            id: parsedSuccessorParams.id,
+            content: parsedSuccessorParams.content,
+            createdAt: CoreDate.utc(),
+            succeeds: predecessor.id,
+            peerSharingDetails
+        });
+        await this.succeedAttributeUnsafe(predecessor, successor);
+
+        this.eventBus.publish(new AttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
+        return { predecessor, successor };
+    }
+
+    public async validateOwnIdentityAttributeSuccession(
+        predecessor: OwnIdentityAttribute,
+        successorParams: OwnIdentityAttributeSuccessorParams | OwnIdentityAttributeSuccessorParamsJSON
     ): Promise<ValidationResult> {
         let parsedSuccessorParams;
         try {
-            parsedSuccessorParams = AttributeSuccessorParams.from(successorParams);
-        } catch (e: unknown) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotAValidAttribute(e));
-        }
-
-        const commonValidation = await this.validateAttributeSuccessionCommon(predecessorId, parsedSuccessorParams);
-        if (commonValidation.isError()) return commonValidation;
-
-        const predecessor = (await this.getLocalAttribute(predecessorId))!;
-
-        const successor = LocalAttribute.from({
-            id: CoreId.from(parsedSuccessorParams.id ?? "dummy"),
-            content: parsedSuccessorParams.content,
-            createdAt: parsedSuccessorParams.createdAt ?? CoreDate.utc(),
-            succeeds: parsedSuccessorParams.succeeds,
-            succeededBy: parsedSuccessorParams.succeededBy,
-            shareInfo: parsedSuccessorParams.shareInfo
-        });
-
-        if (!predecessor.isRepositoryAttribute(this.identity.address)) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorIsNotRepositoryAttribute());
-        }
-
-        if (!successor.isRepositoryAttribute(this.identity.address)) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotRepositoryAttribute());
-        }
-
-        return ValidationResult.success();
-    }
-
-    public async validateOwnSharedIdentityAttributeSuccession(
-        predecessorId: CoreId,
-        successorParams: IAttributeSuccessorParams | AttributeSuccessorParamsJSON
-    ): Promise<ValidationResult> {
-        let parsedSuccessorParams;
-        try {
-            parsedSuccessorParams = AttributeSuccessorParams.from(successorParams);
-        } catch (e: unknown) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotAValidAttribute(e));
-        }
-
-        const commonValidation = await this.validateAttributeSuccessionCommon(predecessorId, parsedSuccessorParams);
-        if (commonValidation.isError()) return commonValidation;
-
-        const predecessor = (await this.getLocalAttribute(predecessorId))!;
-        const successor = LocalAttribute.from({
-            id: CoreId.from(parsedSuccessorParams.id ?? "dummy"),
-            content: parsedSuccessorParams.content,
-            createdAt: parsedSuccessorParams.createdAt ?? CoreDate.utc(),
-            succeeds: parsedSuccessorParams.succeeds,
-            succeededBy: parsedSuccessorParams.succeededBy,
-            shareInfo: parsedSuccessorParams.shareInfo
-        });
-
-        if (!predecessor.isOwnSharedIdentityAttribute(this.identity.address)) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorIsNotOwnSharedIdentityAttribute());
-        }
-
-        if (!successor.isOwnSharedIdentityAttribute(this.identity.address)) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotOwnSharedIdentityAttribute());
-        }
-
-        if (!predecessor.shareInfo.peer.equals(successor.shareInfo.peer)) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangePeer());
-        }
-
-        if (!successor.shareInfo.sourceAttribute) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.successorSourceAttributeIsNotSpecified());
-        }
-
-        const successorSource = await this.getLocalAttribute(successor.shareInfo.sourceAttribute);
-        if (!successorSource) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.successorSourceAttributeDoesNotExist());
-        }
-
-        if (!successorSource.isRepositoryAttribute(this.identity.address)) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.successorSourceAttributeIsNotRepositoryAttribute());
-        }
-
-        if (!_.isEqual(successorSource.content.toJSON(), successor.content.toJSON())) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.successorSourceContentIsNotEqualToCopyContent());
-        }
-
-        const predecessorSource = predecessor.shareInfo.sourceAttribute ? await this.getLocalAttribute(predecessor.shareInfo.sourceAttribute) : undefined;
-        if (predecessorSource) {
-            if (!predecessorSource.isRepositoryAttribute(this.identity.address)) {
-                return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorSourceAttributeIsNotRepositoryAttribute());
-            }
-
-            const successorSourceVersionIds = (await this.getVersionsOfAttribute(successorSource.id)).map((x) => x.id.toString());
-            if (!predecessorSource.succeededBy || !successorSourceVersionIds.some((id) => id === predecessorSource.succeededBy?.toString())) {
-                return ValidationResult.error(ConsumptionCoreErrors.attributes.successorSourceDoesNotSucceedPredecessorSource());
-            }
-
-            if (!_.isEqual(predecessorSource.content.toJSON(), predecessor.content.toJSON())) {
-                return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorSourceContentIsNotEqualToCopyContent());
-            }
-        }
-
-        return ValidationResult.success();
-    }
-
-    public async validateOwnSharedRelationshipAttributeSuccession(
-        predecessorId: CoreId,
-        successorParams: IAttributeSuccessorParams | AttributeSuccessorParamsJSON
-    ): Promise<ValidationResult> {
-        let parsedSuccessorParams;
-        try {
-            parsedSuccessorParams = AttributeSuccessorParams.from(successorParams);
-        } catch (e: unknown) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotAValidAttribute(e));
-        }
-
-        const commonValidation = await this.validateAttributeSuccessionCommon(predecessorId, parsedSuccessorParams);
-        if (commonValidation.isError()) return commonValidation;
-
-        const predecessor = (await this.getLocalAttribute(predecessorId))!;
-        const successor = LocalAttribute.from({
-            id: CoreId.from(parsedSuccessorParams.id ?? "dummy"),
-            content: parsedSuccessorParams.content,
-            createdAt: parsedSuccessorParams.createdAt ?? CoreDate.utc(),
-            succeeds: parsedSuccessorParams.succeeds,
-            succeededBy: parsedSuccessorParams.succeededBy,
-            shareInfo: parsedSuccessorParams.shareInfo
-        });
-
-        if (!predecessor.isOwnSharedRelationshipAttribute(this.identity.address)) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorIsNotOwnSharedRelationshipAttribute());
-        }
-
-        if (!successor.isOwnSharedRelationshipAttribute(this.identity.address)) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotOwnSharedRelationshipAttribute());
-        }
-
-        if (successor.content.key !== predecessor.content.key) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangeKey());
-        }
-
-        if (!predecessor.shareInfo.peer.equals(successor.shareInfo.peer)) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangePeer());
-        }
-
-        return ValidationResult.success();
-    }
-
-    public async validatePeerSharedIdentityAttributeSuccession(
-        predecessorId: CoreId,
-        successorParams: IAttributeSuccessorParams | AttributeSuccessorParamsJSON
-    ): Promise<ValidationResult> {
-        let parsedSuccessorParams;
-        try {
-            parsedSuccessorParams = AttributeSuccessorParams.from(successorParams);
-        } catch (e: unknown) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotAValidAttribute(e));
-        }
-
-        const commonValidation = await this.validateAttributeSuccessionCommon(predecessorId, parsedSuccessorParams);
-        if (commonValidation.isError()) return commonValidation;
-
-        const predecessor = (await this.getLocalAttribute(predecessorId))!;
-        const successor = LocalAttribute.from({
-            id: CoreId.from(parsedSuccessorParams.id ?? "dummy"),
-            content: parsedSuccessorParams.content,
-            createdAt: parsedSuccessorParams.createdAt ?? CoreDate.utc(),
-            succeeds: parsedSuccessorParams.succeeds,
-            succeededBy: parsedSuccessorParams.succeededBy,
-            shareInfo: parsedSuccessorParams.shareInfo
-        });
-
-        if (!predecessor.isPeerSharedIdentityAttribute()) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorIsNotPeerSharedIdentityAttribute());
-        }
-
-        if (!successor.isPeerSharedIdentityAttribute()) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotPeerSharedIdentityAttribute());
-        }
-
-        if (!predecessor.shareInfo.peer.equals(successor.shareInfo.peer)) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangePeer());
-        }
-
-        return ValidationResult.success();
-    }
-
-    public async validatePeerSharedRelationshipAttributeSuccession(
-        predecessorId: CoreId,
-        successorParams: IAttributeSuccessorParams | AttributeSuccessorParamsJSON
-    ): Promise<ValidationResult> {
-        let parsedSuccessorParams;
-        try {
-            parsedSuccessorParams = AttributeSuccessorParams.from(successorParams);
-        } catch (e: unknown) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotAValidAttribute(e));
-        }
-
-        const commonValidation = await this.validateAttributeSuccessionCommon(predecessorId, parsedSuccessorParams);
-        if (commonValidation.isError()) return commonValidation;
-
-        const predecessor = (await this.getLocalAttribute(predecessorId))!;
-        const successor = LocalAttribute.from({
-            id: CoreId.from(parsedSuccessorParams.id ?? "dummy"),
-            content: parsedSuccessorParams.content,
-            createdAt: parsedSuccessorParams.createdAt ?? CoreDate.utc(),
-            succeeds: parsedSuccessorParams.succeeds,
-            succeededBy: parsedSuccessorParams.succeededBy,
-            shareInfo: parsedSuccessorParams.shareInfo
-        });
-
-        if (!predecessor.isPeerSharedRelationshipAttribute()) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorIsNotPeerSharedRelationshipAttribute());
-        }
-
-        if (!successor.isPeerSharedRelationshipAttribute()) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotPeerSharedRelationshipAttribute());
-        }
-
-        if (successor.content.key !== predecessor.content.key) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangeKey());
-        }
-
-        if (!predecessor.shareInfo.peer.equals(successor.shareInfo.peer)) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangePeer());
-        }
-
-        return ValidationResult.success();
-    }
-
-    public async validateThirdPartyRelationshipAttributeSuccession(
-        predecessorId: CoreId,
-        successorParams: IAttributeSuccessorParams | AttributeSuccessorParamsJSON
-    ): Promise<ValidationResult> {
-        let parsedSuccessorParams;
-        try {
-            parsedSuccessorParams = AttributeSuccessorParams.from(successorParams);
-        } catch (e: unknown) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotAValidAttribute(e));
-        }
-
-        const commonValidation = await this.validateAttributeSuccessionCommon(predecessorId, parsedSuccessorParams);
-        if (commonValidation.isError()) return commonValidation;
-
-        const predecessor = (await this.getLocalAttribute(predecessorId))!;
-        const successor = LocalAttribute.from({
-            id: CoreId.from(parsedSuccessorParams.id ?? "dummy"),
-            content: parsedSuccessorParams.content,
-            createdAt: parsedSuccessorParams.createdAt ?? CoreDate.utc(),
-            succeeds: parsedSuccessorParams.succeeds,
-            succeededBy: parsedSuccessorParams.succeededBy,
-            shareInfo: parsedSuccessorParams.shareInfo
-        });
-
-        if (!predecessor.isThirdPartyRelationshipAttribute()) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorIsNotThirdPartyRelationshipAttribute());
-        }
-
-        if (!successor.isThirdPartyRelationshipAttribute()) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotThirdPartyRelationshipAttribute());
-        }
-
-        if (successor.content.key !== predecessor.content.key) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangeKey());
-        }
-
-        if (!predecessor.shareInfo.peer.equals(successor.shareInfo.peer)) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangePeer());
-        }
-
-        if (!predecessor.shareInfo.thirdPartyAddress.equals(successor.shareInfo.thirdPartyAddress)) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangeThirdParty());
-        }
-
-        return ValidationResult.success();
-    }
-
-    public async validateAttributeSuccessionCommon(predecessorId: CoreId, successorParams: IAttributeSuccessorParams | AttributeSuccessorParamsJSON): Promise<ValidationResult> {
-        let parsedSuccessorParams;
-        try {
-            parsedSuccessorParams = AttributeSuccessorParams.from(successorParams);
+            parsedSuccessorParams = OwnIdentityAttributeSuccessorParams.from(successorParams);
         } catch (e: unknown) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotAValidAttribute(e));
         }
@@ -845,41 +650,165 @@ export class AttributesController extends ConsumptionBaseController {
         const tagValidationResult = await this.validateTagsOfAttribute(parsedSuccessorParams.content);
         if (tagValidationResult.isError()) throw tagValidationResult.error;
 
-        const successor = LocalAttribute.from({
-            id: CoreId.from(parsedSuccessorParams.id ?? "dummy"),
+        const successor = OwnIdentityAttribute.from({
+            id: await ConsumptionIds.attribute.generate(),
             content: parsedSuccessorParams.content,
-            createdAt: parsedSuccessorParams.createdAt ?? CoreDate.utc(),
-            succeeds: parsedSuccessorParams.succeeds,
-            succeededBy: parsedSuccessorParams.succeededBy,
-            shareInfo: parsedSuccessorParams.shareInfo
+            createdAt: CoreDate.utc(),
+            succeeds: predecessor.id
         });
 
-        if (parsedSuccessorParams.id) {
-            const successor = await this.getLocalAttribute(CoreId.from(parsedSuccessorParams.id));
-            if (successor) return ValidationResult.error(ConsumptionCoreErrors.attributes.successorMustNotYetExist());
+        return await this.validateAttributeSuccession(predecessor, successor);
+    }
+
+    public async validatePeerIdentityAttributeSuccession(
+        predecessor: PeerIdentityAttribute,
+        successorParams: PeerIdentityAttributeSuccessorParams | PeerIdentityAttributeSuccessorParamsJSON
+    ): Promise<ValidationResult> {
+        let parsedSuccessorParams;
+        try {
+            parsedSuccessorParams = PeerIdentityAttributeSuccessorParams.from(successorParams);
+        } catch (e: unknown) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotAValidAttribute(e));
         }
 
-        if (successor.succeededBy) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.successorMustNotHaveASuccessor());
+        const peerSharingDetails = PeerIdentityAttributeSharingDetails.from({
+            peer: predecessor.peerSharingDetails.peer,
+            sourceReference: parsedSuccessorParams.sourceReference
+        });
+
+        const successor = PeerIdentityAttribute.from({
+            id: parsedSuccessorParams.id,
+            content: parsedSuccessorParams.content,
+            createdAt: CoreDate.utc(),
+            succeeds: predecessor.id,
+            peerSharingDetails
+        });
+
+        if (predecessor.peerSharingDetails.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.DeletedByOwner) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedSharedAttributesDeletedByPeer());
         }
 
-        const predecessor = await this.getLocalAttribute(predecessorId);
-        if (!predecessor) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorDoesNotExist());
+        return await this.validateAttributeSuccession(predecessor, successor);
+    }
+
+    public async validateOwnRelationshipAttributeSuccession(
+        predecessor: OwnRelationshipAttribute,
+        successorParams: OwnRelationshipAttributeSuccessorParams | OwnRelationshipAttributeSuccessorParamsJSON
+    ): Promise<ValidationResult> {
+        let parsedSuccessorParams;
+        try {
+            parsedSuccessorParams = OwnRelationshipAttributeSuccessorParams.from(successorParams);
+        } catch (e: unknown) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotAValidAttribute(e));
         }
 
-        if (predecessor.succeededBy) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedAttributesWithASuccessor(predecessor.succeededBy.toString()));
+        const peerSharingDetails = OwnRelationshipAttributeSharingDetails.from({
+            peer: predecessor.peerSharingDetails.peer,
+            sourceReference: parsedSuccessorParams.sourceReference
+        });
+
+        const successor = OwnRelationshipAttribute.from({
+            id: await ConsumptionIds.attribute.generate(),
+            content: parsedSuccessorParams.content,
+            createdAt: CoreDate.utc(),
+            succeeds: predecessor.id,
+            peerSharingDetails
+        });
+
+        if (predecessor.content.key !== successor.content.key) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangeKey());
+        }
+
+        if (predecessor.peerSharingDetails.deletionInfo?.deletionStatus === EmittedAttributeDeletionStatus.DeletedByPeer) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedSharedAttributesDeletedByPeer());
+        }
+
+        return await this.validateAttributeSuccession(predecessor, successor);
+    }
+
+    public async validatePeerRelationshipAttributeSuccession(
+        predecessor: PeerRelationshipAttribute,
+        successorParams: IPeerRelationshipAttributeSuccessorParams | PeerRelationshipAttributeSuccessorParamsJSON
+    ): Promise<ValidationResult> {
+        let parsedSuccessorParams;
+        try {
+            parsedSuccessorParams = PeerRelationshipAttributeSuccessorParams.from(successorParams);
+        } catch (e: unknown) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotAValidAttribute(e));
+        }
+
+        const peerSharingDetails = PeerRelationshipAttributeSharingDetails.from({
+            peer: predecessor.peerSharingDetails.peer,
+            sourceReference: parsedSuccessorParams.sourceReference
+        });
+
+        const successor = PeerRelationshipAttribute.from({
+            id: parsedSuccessorParams.id,
+            content: parsedSuccessorParams.content,
+            createdAt: CoreDate.utc(),
+            succeeds: predecessor.id,
+            peerSharingDetails
+        });
+
+        if (predecessor.content.key !== successor.content.key) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangeKey());
+        }
+
+        if (predecessor.peerSharingDetails.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.DeletedByOwner) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedSharedAttributesDeletedByPeer());
+        }
+
+        return await this.validateAttributeSuccession(predecessor, successor);
+    }
+
+    public async validateThirdPartyRelationshipAttributeSuccession(
+        predecessor: ThirdPartyRelationshipAttribute,
+        successorParams: ThirdPartyRelationshipAttributeSuccessorParams | ThirdPartyRelationshipAttributeSuccessorParamsJSON
+    ): Promise<ValidationResult> {
+        let parsedSuccessorParams;
+        try {
+            parsedSuccessorParams = ThirdPartyRelationshipAttributeSuccessorParams.from(successorParams);
+        } catch (e: unknown) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotAValidAttribute(e));
+        }
+
+        const peerSharingDetails = ThirdPartyRelationshipAttributeSharingDetails.from({
+            peer: predecessor.peerSharingDetails.peer,
+            sourceReference: parsedSuccessorParams.sourceReference,
+            initialAttributePeer: predecessor.peerSharingDetails.initialAttributePeer
+        });
+
+        const successor = ThirdPartyRelationshipAttribute.from({
+            id: parsedSuccessorParams.id,
+            content: parsedSuccessorParams.content,
+            createdAt: CoreDate.utc(),
+            succeeds: predecessor.id,
+            peerSharingDetails
+        });
+
+        if (predecessor.content.key !== successor.content.key) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangeKey());
         }
 
         if (
-            predecessor.hasDeletionInfo() &&
-            !(
-                predecessor.deletionInfo.deletionStatus === LocalAttributeDeletionStatus.DeletionRequestRejected ||
-                predecessor.deletionInfo.deletionStatus === LocalAttributeDeletionStatus.DeletionRequestSent
-            )
+            predecessor.peerSharingDetails.deletionInfo?.deletionStatus === ThirdPartyRelationshipAttributeDeletionStatus.DeletedByOwner ||
+            predecessor.peerSharingDetails.deletionInfo?.deletionStatus === ThirdPartyRelationshipAttributeDeletionStatus.DeletedByPeer
         ) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedAttributesWithDeletionInfo());
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedSharedAttributesDeletedByPeer());
+        }
+
+        return await this.validateAttributeSuccession(predecessor, successor);
+    }
+
+    private async validateAttributeSuccession(predecessor: LocalAttribute, successor: LocalAttribute): Promise<ValidationResult> {
+        const localAttribute = await this.getLocalAttribute(predecessor.id);
+        if (!_.isEqual(predecessor, localAttribute)) return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorDoesNotExist());
+
+        const existingAttributeWithSameId = await this.getLocalAttribute(successor.id);
+        if (existingAttributeWithSameId) return ValidationResult.error(ConsumptionCoreErrors.attributes.successorMustNotYetExist());
+
+        if (predecessor.succeededBy) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedAttributesWithASuccessor(predecessor.succeededBy.toString()));
         }
 
         if (_.isEqual(successor.content.toJSON(), predecessor.content.toJSON())) {
@@ -898,10 +827,6 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangeValueType());
         }
 
-        if (successor.succeeds && !predecessorId.equals(successor.succeeds.toString())) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.setPredecessorIdDoesNotMatchActualPredecessorId());
-        }
-
         if (!this.validateAttributeCharacters(successor.content)) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.forbiddenCharactersInAttribute("The successor contains forbidden characters."));
         }
@@ -909,36 +834,47 @@ export class AttributesController extends ConsumptionBaseController {
         return ValidationResult.success();
     }
 
-    public async createAttributeUnsafe(attributeData: Omit<ILocalAttribute, "id" | "createdAt"> & { id?: ICoreId; createdAt?: ICoreDate }): Promise<LocalAttribute> {
-        const localAttribute = LocalAttribute.from({
-            id: attributeData.id ?? (await ConsumptionIds.attribute.generate()),
-            content: attributeData.content,
-            createdAt: attributeData.createdAt ?? CoreDate.utc(),
-            shareInfo: attributeData.shareInfo,
-            succeededBy: attributeData.succeededBy,
-            succeeds: attributeData.succeeds,
-            deletionInfo: attributeData.deletionInfo,
-            isDefault: attributeData.isDefault
-        });
-        await this.attributes.create(localAttribute);
-        return localAttribute;
-    }
-
     public async deleteAttribute(attribute: LocalAttribute): Promise<void> {
+        const localAttribute = await this.getLocalAttribute(attribute.id);
+        if (localAttribute && !_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+
         await this.deleteAttributeUnsafe(attribute.id);
-
         this.eventBus.publish(new AttributeDeletedEvent(this.identity.address.toString(), attribute));
-    }
-
-    public async deleteAttributesExchangedWithPeer(peer: CoreAddress): Promise<void> {
-        const attributes = await this.getLocalAttributes({ "shareInfo.peer": peer.toString() });
-        for (const attribute of attributes) {
-            await this.deleteAttributeUnsafe(attribute.id);
-        }
     }
 
     public async deleteAttributeUnsafe(id: CoreId): Promise<void> {
         await this.attributes.delete({ id: id });
+    }
+
+    public async deleteAttributesExchangedWithPeer(peer: CoreAddress): Promise<void> {
+        const receivedAttributes = await this.getLocalAttributes({ "peerSharingDetails.peer": peer.toString() });
+        for (const attribute of receivedAttributes) {
+            await this.deleteAttributeUnsafe(attribute.id);
+        }
+
+        const forwardedAttributes = (await this.getLocalAttributes({ "forwardedSharingDetails.peer": peer.toString() })) as (
+            | OwnIdentityAttribute
+            | OwnRelationshipAttribute
+            | PeerRelationshipAttribute
+        )[];
+        for (const attribute of forwardedAttributes) {
+            await this.removeForwardedSharingDetailsFromAttribute(attribute, peer);
+        }
+    }
+
+    public async removeForwardedSharingDetailsFromAttribute<T extends OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute>(
+        attribute: T,
+        peer: CoreAddress
+    ): Promise<T> {
+        const localAttribute = await this.getLocalAttribute(attribute.id);
+        if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
+        if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+
+        attribute.forwardedSharingDetails = attribute.forwardedSharingDetails?.filter((sharingDetails) => !sharingDetails.peer.equals(peer));
+        await this.updateAttributeUnsafe(attribute);
+
+        this.eventBus.publish(new AttributeForwardedSharingDetailsChangedEvent(this.identity.address.toString(), attribute));
+        return attribute;
     }
 
     public async executeFullAttributeDeletionProcess(attribute: LocalAttribute): Promise<void> {
@@ -947,60 +883,27 @@ export class AttributesController extends ConsumptionBaseController {
 
         if (attribute.succeededBy) {
             const successor = await this.getLocalAttribute(attribute.succeededBy);
-            if (!successor) {
-                throw ConsumptionCoreErrors.attributes.successorDoesNotExist();
-            }
+            if (!successor) throw ConsumptionCoreErrors.attributes.successorDoesNotExist();
+
             await this.detachSuccessor(successor);
         }
 
-        const attributeCopies = await this.getLocalAttributes({
-            ["shareInfo.sourceAttribute"]: attribute.id.toString()
-        });
-        const predecessorCopies = await this.getSharedPredecessorsOfAttribute(attribute);
-        const attributeCopiesToDetach = [...attributeCopies, ...predecessorCopies];
-        await this.detachAttributeCopies(attributeCopiesToDetach);
+        await this.deletePredecessorsOfAttribute(attribute);
 
-        await this.deletePredecessorsOfAttribute(attribute.id);
-
-        if (this.setDefaultRepositoryAttributes) {
-            await this.transferDefault(attribute);
-        }
+        if (attribute instanceof OwnIdentityAttribute && this.setDefaultOwnIdentityAttributes) await this.transferDefault(attribute);
 
         await this.deleteAttribute(attribute);
     }
 
     public async validateFullAttributeDeletionProcess(attribute: LocalAttribute): Promise<ValidationResult> {
-        const validateSuccessorResult = await this.validateSuccessor(attribute);
-        if (validateSuccessorResult.isError()) {
-            return validateSuccessorResult;
+        const localAttribute = await this.getLocalAttribute(attribute.id);
+        if (localAttribute && !_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+
+        if (attribute.succeededBy) {
+            const successor = await this.getLocalAttribute(attribute.succeededBy);
+            if (!successor) return ValidationResult.error(ConsumptionCoreErrors.attributes.successorDoesNotExist());
         }
 
-        const attributeCopies = await this.getLocalAttributes({ ["shareInfo.sourceAttribute"]: attribute.id.toString() });
-
-        const predecessorCopies = await this.getSharedPredecessorsOfAttribute(attribute);
-
-        const attributeCopiesToDetach = [...attributeCopies, ...predecessorCopies];
-
-        const validateSharedAttributesResult = this.validateSharedAttributes(attributeCopiesToDetach);
-        return validateSharedAttributesResult;
-    }
-
-    private async validateSuccessor(predecessor: LocalAttribute): Promise<ValidationResult> {
-        if (predecessor.succeededBy) {
-            const successor = await this.getLocalAttribute(predecessor.succeededBy);
-            if (!successor) {
-                return ValidationResult.error(ConsumptionCoreErrors.attributes.successorDoesNotExist());
-            }
-        }
-        return ValidationResult.success();
-    }
-
-    private validateSharedAttributes(sharedAttributes: LocalAttribute[]): ValidationResult {
-        for (const sharedAttribute of sharedAttributes) {
-            if (!sharedAttribute.isShared()) {
-                return ValidationResult.error(ConsumptionCoreErrors.attributes.isNotSharedAttribute(sharedAttribute.id));
-            }
-        }
         return ValidationResult.success();
     }
 
@@ -1009,75 +912,56 @@ export class AttributesController extends ConsumptionBaseController {
         await this.updateAttributeUnsafe(successor);
     }
 
-    private async detachAttributeCopies(sharedAttributes: LocalAttribute[]): Promise<void> {
-        for (const sharedAttribute of sharedAttributes) {
-            if (!sharedAttribute.isShared()) {
-                throw ConsumptionCoreErrors.attributes.isNotSharedAttribute(sharedAttribute.id);
-            }
-            sharedAttribute.shareInfo.sourceAttribute = undefined;
-            await this.updateAttributeUnsafe(sharedAttribute);
-        }
-    }
-
-    private async deletePredecessorsOfAttribute(attributeId: CoreId): Promise<void> {
-        const predecessors = await this.getPredecessorsOfAttribute(attributeId);
+    private async deletePredecessorsOfAttribute(attribute: LocalAttribute): Promise<void> {
+        const predecessors = await this.getPredecessorsOfAttribute(attribute);
         for (const predecessor of predecessors) {
             await this.deleteAttribute(predecessor);
         }
     }
 
-    private async transferDefault(attribute: LocalAttribute): Promise<void> {
-        if (!this.setDefaultRepositoryAttributes) throw ConsumptionCoreErrors.attributes.setDefaultRepositoryAttributesIsDisabled();
+    private async transferDefault(attribute: OwnIdentityAttribute): Promise<void> {
+        if (!this.setDefaultOwnIdentityAttributes) throw ConsumptionCoreErrors.attributes.setDefaultOwnIdentityAttributesIsDisabled();
+
         if (!attribute.isDefault) return;
 
         const valueType = attribute.content.value.constructor.name;
         const query = {
             $and: [
-                {
-                    [`${nameof<LocalAttribute>((c) => c.content)}.value.@type`]: valueType
-                },
-                {
-                    [nameof<LocalAttribute>((c) => c.succeededBy)]: undefined
-                },
-                {
-                    [nameof<LocalAttribute>((c) => c.id)]: { $ne: attribute.id.toString() }
-                }
+                { [`@type`]: "OwnIdentityAttribute" },
+                { [`${nameof<LocalAttribute>((c) => c.content)}.value.@type`]: valueType },
+                { [nameof<LocalAttribute>((c) => c.succeededBy)]: undefined },
+                { [nameof<LocalAttribute>((c) => c.id)]: { $ne: attribute.id.toString() } }
             ]
         };
 
-        const defaultCandidates = await this.getLocalAttributes(query);
+        const defaultCandidates = (await this.getLocalAttributes(query)) as OwnIdentityAttribute[];
         if (defaultCandidates.length === 0) return;
 
         defaultCandidates[defaultCandidates.length - 1].isDefault = true;
         await this.updateAttributeUnsafe(defaultCandidates[defaultCandidates.length - 1]);
     }
 
-    public async getVersionsOfAttribute(id: CoreId): Promise<LocalAttribute[]> {
-        const attribute = await this.getLocalAttribute(id);
-        if (!attribute) {
-            throw TransportCoreErrors.general.recordNotFound(LocalAttribute, id.toString());
-        }
+    public async getVersionsOfAttribute<T extends LocalAttribute>(attribute: T): Promise<T[]> {
+        const localAttribute = await this.getLocalAttribute(attribute.id);
+        if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
+        if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
-        const predecessors = await this.getPredecessorsOfAttribute(id);
-        const successors = await this.getSuccessorsOfAttribute(id);
+        const predecessors = await this.getPredecessorsOfAttribute(attribute);
+        const successors = await this.getSuccessorsOfAttribute(attribute);
 
         const allAttributeVersions = [...successors.reverse(), attribute, ...predecessors];
-
         return allAttributeVersions;
     }
 
-    public async getPredecessorsOfAttribute(id: CoreId): Promise<LocalAttribute[]> {
-        let attribute = await this.getLocalAttribute(id);
-        if (!attribute) {
-            throw TransportCoreErrors.general.recordNotFound(LocalAttribute, id.toString());
-        }
+    public async getPredecessorsOfAttribute<T extends LocalAttribute>(attribute: T): Promise<T[]> {
+        const localAttribute = await this.getLocalAttribute(attribute.id);
+        if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
+        if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
-        const predecessors: LocalAttribute[] = [];
+        const predecessors: T[] = [];
         while (attribute.succeeds) {
-            const predecessor = await this.getLocalAttribute(attribute.succeeds);
-            if (!predecessor) {
-                throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.succeeds.toString());
-            }
+            const predecessor = (await this.getLocalAttribute(attribute.succeeds)) as T | undefined;
+            if (!predecessor) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.succeeds.toString());
 
             attribute = predecessor;
             predecessors.push(attribute);
@@ -1086,18 +970,15 @@ export class AttributesController extends ConsumptionBaseController {
         return predecessors;
     }
 
-    public async getSuccessorsOfAttribute(id: CoreId): Promise<LocalAttribute[]> {
-        let attribute = await this.getLocalAttribute(id);
-        if (!attribute) {
-            throw TransportCoreErrors.general.recordNotFound(LocalAttribute, id.toString());
-        }
+    public async getSuccessorsOfAttribute<T extends LocalAttribute>(attribute: T): Promise<T[]> {
+        const localAttribute = await this.getLocalAttribute(attribute.id);
+        if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
+        if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
-        const successors: LocalAttribute[] = [];
+        const successors: T[] = [];
         while (attribute.succeededBy) {
-            const successor = await this.getLocalAttribute(attribute.succeededBy);
-            if (!successor) {
-                throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.succeededBy.toString());
-            }
+            const successor = (await this.getLocalAttribute(attribute.succeededBy)) as T | undefined;
+            if (!successor) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.succeededBy.toString());
 
             attribute = successor;
             successors.push(successor);
@@ -1107,6 +988,14 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async isSubsequentInSuccession(predecessor: LocalAttribute, successor: LocalAttribute): Promise<boolean> {
+        const predecessorLocalAttribute = await this.getLocalAttribute(predecessor.id);
+        if (!predecessorLocalAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, predecessor.id.toString());
+        if (!_.isEqual(predecessor, predecessorLocalAttribute)) throw ConsumptionCoreErrors.attributes.predecessorDoesNotExist();
+
+        const successorlocalAttribute = await this.getLocalAttribute(successor.id);
+        if (!successorlocalAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, successor.id.toString());
+        if (!_.isEqual(successor, successorlocalAttribute)) throw ConsumptionCoreErrors.attributes.successorDoesNotExist();
+
         while (predecessor.succeededBy) {
             const directSuccessor = await this.getLocalAttribute(predecessor.succeededBy);
             if (!directSuccessor) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, predecessor.succeededBy.toString());
@@ -1118,94 +1007,131 @@ export class AttributesController extends ConsumptionBaseController {
         return false;
     }
 
-    public async getSharedVersionsOfAttribute(id: CoreId, peers?: CoreAddress[], onlyLatestVersions = true, query: any = {}): Promise<LocalAttribute[]> {
-        const sourceAttribute = await this.getLocalAttribute(id);
-        if (!sourceAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, id.toString());
+    public async getVersionsOfAttributeSharedWithPeer<T extends OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute>(
+        attribute: T,
+        peerAddress: CoreAddress,
+        onlyLatestVersion = true,
+        excludeToBeDeleted = false
+    ): Promise<T[]> {
+        const localAttribute = await this.getLocalAttribute(attribute.id);
+        if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
+        if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
-        query["shareInfo.sourceAttribute"] = sourceAttribute.id.toString();
-        if (peers) query["shareInfo.peer"] = { $in: peers.map((address) => address.toString()) };
-        if (onlyLatestVersions) query["succeededBy"] = { $exists: false };
+        const sharedAttribute = attribute.isForwardedTo(peerAddress, excludeToBeDeleted) ? [attribute] : [];
+        const sharedPredecessors = await this.getPredecessorsOfAttributeSharedWithPeer(attribute, peerAddress, excludeToBeDeleted);
+        const sharedSuccessors = await this.getSuccessorsOfAttributeSharedWithPeer(attribute, peerAddress, excludeToBeDeleted);
 
-        const ownSharedAttributes = await this.getLocalAttributes(query);
-        const ownSharedAttributePredecessors = await this.getSharedPredecessorsOfAttribute(sourceAttribute, query);
-        const ownSharedAttributeSuccessors = await this.getSharedSuccessorsOfAttribute(sourceAttribute, query);
+        const sharedAttributeVersions = [...sharedSuccessors.reverse(), ...sharedAttribute, ...sharedPredecessors];
 
-        const ownSharedAttributeVersions = [...ownSharedAttributeSuccessors.reverse(), ...ownSharedAttributes, ...ownSharedAttributePredecessors];
-        return ownSharedAttributeVersions;
+        if (onlyLatestVersion) return sharedAttributeVersions.length > 0 ? [sharedAttributeVersions[0]] : [];
+
+        return sharedAttributeVersions;
     }
 
-    public async getSharedPredecessorsOfAttribute(sourceAttribute: LocalAttribute, query: any = {}): Promise<LocalAttribute[]> {
-        const ownSharedAttributePredecessors: LocalAttribute[] = [];
-        while (sourceAttribute.succeeds) {
-            const predecessor = await this.getLocalAttribute(sourceAttribute.succeeds);
-            if (!predecessor) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, sourceAttribute.succeeds.toString());
+    public async getPredecessorsOfAttributeSharedWithPeer<T extends OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute>(
+        referenceAttribute: T,
+        peerAddress: CoreAddress,
+        excludeToBeDeleted = false
+    ): Promise<T[]> {
+        const localAttribute = await this.getLocalAttribute(referenceAttribute.id);
+        if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, referenceAttribute.id.toString());
+        if (!_.isEqual(referenceAttribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
-            sourceAttribute = predecessor;
+        const matchingPredecessors: T[] = [];
+        while (referenceAttribute.succeeds) {
+            const predecessor = (await this.getLocalAttribute(referenceAttribute.succeeds)) as T | undefined;
+            if (!predecessor) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, referenceAttribute.succeeds.toString());
 
-            query["shareInfo.sourceAttribute"] = sourceAttribute.id.toString();
-            const sharedCopies = await this.getLocalAttributes(query);
+            referenceAttribute = predecessor;
 
-            ownSharedAttributePredecessors.push(...sharedCopies);
+            if (referenceAttribute.isForwardedTo(peerAddress, excludeToBeDeleted)) matchingPredecessors.push(referenceAttribute);
         }
 
-        return ownSharedAttributePredecessors;
+        return matchingPredecessors;
     }
 
-    public async getSharedSuccessorsOfAttribute(sourceAttribute: LocalAttribute, query: any = {}): Promise<LocalAttribute[]> {
-        const ownSharedAttributeSuccessors: LocalAttribute[] = [];
-        while (sourceAttribute.succeededBy) {
-            const successor = await this.getLocalAttribute(sourceAttribute.succeededBy);
-            if (!successor) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, sourceAttribute.succeededBy.toString());
+    public async getSuccessorsOfAttributeSharedWithPeer<T extends OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute>(
+        referenceAttribute: T,
+        peerAddress: CoreAddress,
+        excludeToBeDeleted = false
+    ): Promise<T[]> {
+        const localAttribute = await this.getLocalAttribute(referenceAttribute.id);
+        if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, referenceAttribute.id.toString());
+        if (!_.isEqual(referenceAttribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
-            sourceAttribute = successor;
+        const matchingSuccessors: T[] = [];
+        while (referenceAttribute.succeededBy) {
+            const successor = (await this.getLocalAttribute(referenceAttribute.succeededBy)) as T | undefined;
+            if (!successor) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, referenceAttribute.succeededBy.toString());
 
-            query["shareInfo.sourceAttribute"] = sourceAttribute.id.toString();
-            const sharedCopies = await this.getLocalAttributes(query);
+            referenceAttribute = successor;
 
-            ownSharedAttributeSuccessors.push(...sharedCopies);
+            if (referenceAttribute.isForwardedTo(peerAddress, excludeToBeDeleted)) matchingSuccessors.push(referenceAttribute);
         }
 
-        return ownSharedAttributeSuccessors;
+        return matchingSuccessors;
     }
 
-    public async getRepositoryAttributeWithSameValue(value: AttributeValues.Identity.Json): Promise<LocalAttribute | undefined> {
+    public async getOwnIdentityAttributeWithSameValue(value: AttributeValues.Identity.Json): Promise<OwnIdentityAttribute | undefined> {
         const trimmedValue = this.trimAttributeValue(value);
-        const queryForRepositoryAttributeDuplicates = flattenObject({
+        const queryForOwnIdentityAttributeDuplicates = flattenObject({
+            "@type": "OwnIdentityAttribute",
+            content: { value: trimmedValue }
+        });
+        queryForOwnIdentityAttributeDuplicates["succeededBy"] = { $exists: false };
+
+        return (await this.getAttributeWithSameValue(trimmedValue, queryForOwnIdentityAttributeDuplicates)) as OwnIdentityAttribute | undefined;
+    }
+
+    public async getPeerIdentityAttributeWithSameValue(value: AttributeValues.Identity.Json, owner: string): Promise<PeerIdentityAttribute | undefined> {
+        const trimmedValue = this.trimAttributeValue(value);
+        const query = flattenObject({
+            "@type": "PeerIdentityAttribute",
             content: {
-                "@type": "IdentityAttribute",
-                owner: this.identity.address.toString(),
-                value: trimmedValue
+                value: trimmedValue,
+                owner: owner
             }
         });
-        queryForRepositoryAttributeDuplicates["succeededBy"] = { $exists: false };
-        queryForRepositoryAttributeDuplicates["shareInfo"] = { $exists: false };
+        query["peerSharingDetails.deletionInfo.deletionStatus"] = { $ne: ReceivedAttributeDeletionStatus.DeletedByOwner };
 
-        return await this.getAttributeWithSameValue(trimmedValue, queryForRepositoryAttributeDuplicates);
+        return (await this.getAttributeWithSameValue(trimmedValue, query)) as PeerIdentityAttribute | undefined;
     }
 
-    public async getPeerSharedIdentityAttributeWithSameValue(value: AttributeValues.Identity.Json, peer: string): Promise<LocalAttribute | undefined> {
-        const trimmedValue = this.trimAttributeValue(value);
-        const queryForPeerSharedAttributeDuplicates = flattenObject({
+    public async getThirdPartyRelationshipAttributeWithSameValue(
+        value: AttributeValues.Relationship.Json,
+        peer: string,
+        owner: string,
+        key: string
+    ): Promise<ThirdPartyRelationshipAttribute | undefined> {
+        const query = flattenObject({
+            "@type": "ThirdPartyRelationshipAttribute",
             content: {
-                "@type": "IdentityAttribute",
-                owner: peer,
-                value: trimmedValue
-            },
-            shareInfo: {
-                peer
+                value: value,
+                owner: owner,
+                key: key
             }
         });
-        queryForPeerSharedAttributeDuplicates["succeededBy"] = { $exists: false };
-        queryForPeerSharedAttributeDuplicates["shareInfo.sourceAttribute"] = { $exists: false };
+        query["peerSharingDetails.peer"] = peer;
+        query["peerSharingDetails.deletionInfo.deletionStatus"] = {
+            $nin: [ThirdPartyRelationshipAttributeDeletionStatus.DeletedByOwner, ThirdPartyRelationshipAttributeDeletionStatus.DeletedByPeer]
+        };
 
-        return await this.getAttributeWithSameValue(trimmedValue, queryForPeerSharedAttributeDuplicates);
+        return (await this.getAttributeWithSameValue(value, query)) as ThirdPartyRelationshipAttribute | undefined;
     }
 
-    private async getAttributeWithSameValue(value: AttributeValues.Identity.Json, query: any): Promise<LocalAttribute | undefined> {
+    private async getAttributeWithSameValue(value: AttributeValues.Identity.Json | AttributeValues.Relationship.Json, query: any): Promise<LocalAttribute | undefined> {
         const matchingAttributes = await this.getLocalAttributes(query);
 
         const attributeDuplicate = matchingAttributes.find((duplicate) => _.isEqual(duplicate.content.value.toJSON(), value));
         return attributeDuplicate;
+    }
+
+    private trimAttribute(attribute: IdentityAttribute): IdentityAttribute {
+        const trimmedAttribute = {
+            ...attribute.toJSON(),
+            value: this.trimAttributeValue(attribute.value.toJSON() as AttributeValues.Identity.Json)
+        };
+        return IdentityAttribute.from(trimmedAttribute);
     }
 
     private trimAttributeValue(value: AttributeValues.Identity.Json): AttributeValues.Identity.Json {
@@ -1213,23 +1139,28 @@ export class AttributesController extends ConsumptionBaseController {
         return Object.fromEntries(trimmedEntries) as AttributeValues.Identity.Json;
     }
 
-    public async getRelationshipAttributesOfValueTypeToPeerWithGivenKeyAndOwner(key: string, owner: CoreAddress, valueType: string, peer: CoreAddress): Promise<LocalAttribute[]> {
-        return await this.getLocalAttributes({
-            "content.@type": "RelationshipAttribute",
+    public async getRelationshipAttributesOfValueTypeToPeerWithGivenKeyAndOwner(
+        key: string,
+        owner: CoreAddress,
+        valueType: string,
+        peer: CoreAddress
+    ): Promise<OwnRelationshipAttribute[] | PeerRelationshipAttribute[]> {
+        const query = {
+            "@type": { $in: ["OwnRelationshipAttribute", "PeerRelationshipAttribute"] },
             "content.owner": owner.toString(),
             "content.key": key,
             "content.value.@type": valueType,
-            "shareInfo.peer": peer.toString(),
-            "shareInfo.thirdPartyAddress": { $exists: false },
-            "deletionInfo.deletionStatus": {
+            "peerSharingDetails.peer": peer.toString(),
+            "peerSharingDetails.deletionInfo.deletionStatus": {
                 $nin: [
-                    LocalAttributeDeletionStatus.ToBeDeleted,
-                    LocalAttributeDeletionStatus.ToBeDeletedByPeer,
-                    LocalAttributeDeletionStatus.DeletedByPeer,
-                    LocalAttributeDeletionStatus.DeletedByOwner
+                    EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
+                    EmittedAttributeDeletionStatus.DeletedByPeer,
+                    ReceivedAttributeDeletionStatus.ToBeDeleted,
+                    ReceivedAttributeDeletionStatus.DeletedByOwner
                 ]
             }
-        });
+        };
+        return (await this.getLocalAttributes(query)) as OwnRelationshipAttribute[] | PeerRelationshipAttribute[];
     }
 
     public async getAttributeTagCollection(): Promise<AttributeTagCollection> {
@@ -1403,44 +1334,230 @@ export class AttributesController extends ConsumptionBaseController {
 
         const deletionDate = relationship.auditLog[relationship.auditLog.length - 1].createdAt;
 
-        await this.setDeletionInfoOfOwnSharedAttributes(relationship.peer.address.toString(), deletionDate);
-        await this.setDeletionInfoOfPeerSharedAttributes(relationship.peer.address.toString(), deletionDate);
+        await this.setDeletionInfoOfAttributesSharedWithPeer(relationship.peer.address, deletionDate);
     }
 
-    private async setDeletionInfoOfOwnSharedAttributes(peer: String, deletionDate: CoreDate): Promise<void> {
-        const ownSharedAttributeDeletionInfo = LocalAttributeDeletionInfo.from({
-            deletionStatus: LocalAttributeDeletionStatus.DeletedByPeer,
+    private async setDeletionInfoOfAttributesSharedWithPeer(peer: CoreAddress, deletionDate: CoreDate): Promise<void> {
+        await this.setDeletionInfoOfOwnIdentityAttributes(peer, deletionDate);
+        await this.setDeletionInfoOfPeerIdentityAttributes(peer, deletionDate);
+        await this.setDeletionInfoOfOwnRelationshipAttributes(peer, deletionDate);
+        await this.setDeletionInfoOfPeerRelationshipAttributes(peer, deletionDate);
+        await this.setDeletionInfoOfForwardedRelationshipAttributes(peer, deletionDate);
+        await this.setDeletionInfoOfThirdPartyRelationshipAttributes(peer, deletionDate);
+    }
+
+    private async setDeletionInfoOfOwnIdentityAttributes(peer: CoreAddress, deletionDate: CoreDate): Promise<void> {
+        const deletionInfo = EmittedAttributeDeletionInfo.from({
+            deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
             deletionDate
         });
 
-        const ownSharedAttributes = await this.getLocalAttributes({
-            "shareInfo.peer": peer,
-            "content.owner": this.identity.address.toString(),
-            "deletionInfo.deletionStatus": { $ne: LocalAttributeDeletionStatus.DeletedByPeer }
-        });
+        const attributesSharedWithPeer = (await this.getLocalAttributes({
+            "@type": "OwnIdentityAttribute",
+            "forwardedSharingDetails.peer": peer.toString(),
+            "forwardedSharingDetails.deletionInfo.deletionStatus": { $ne: EmittedAttributeDeletionStatus.DeletedByPeer }
+        })) as OwnIdentityAttribute[];
 
-        await this.setDeletionInfoOfAttributes(ownSharedAttributes, ownSharedAttributeDeletionInfo);
+        for (const attribute of attributesSharedWithPeer) {
+            await this.setForwardedDeletionInfoOfAttribute(attribute, deletionInfo, peer);
+        }
     }
 
-    private async setDeletionInfoOfPeerSharedAttributes(peer: String, deletionDate: CoreDate): Promise<void> {
-        const peerSharedAttributeDeletionInfo = LocalAttributeDeletionInfo.from({
-            deletionStatus: LocalAttributeDeletionStatus.DeletedByOwner,
+    private async setDeletionInfoOfPeerIdentityAttributes(peer: CoreAddress, deletionDate: CoreDate): Promise<void> {
+        const deletionInfo = ReceivedAttributeDeletionInfo.from({
+            deletionStatus: ReceivedAttributeDeletionStatus.DeletedByOwner,
             deletionDate
         });
 
-        const peerSharedAttributes = await this.getLocalAttributes({
-            "shareInfo.peer": peer,
-            "content.owner": peer,
-            "deletionInfo.deletionStatus": { $ne: LocalAttributeDeletionStatus.DeletedByOwner }
-        });
+        const attributesSharedWithPeer = (await this.getLocalAttributes({
+            "@type": "PeerIdentityAttribute",
+            "peerSharingDetails.peer": peer.toString(),
+            "peerSharingDetails.deletionInfo.deletionStatus": { $ne: ReceivedAttributeDeletionStatus.DeletedByOwner }
+        })) as PeerIdentityAttribute[];
 
-        await this.setDeletionInfoOfAttributes(peerSharedAttributes, peerSharedAttributeDeletionInfo);
+        for (const attribute of attributesSharedWithPeer) {
+            await this.setPeerDeletionInfoOfPeerAttribute(attribute, deletionInfo);
+        }
     }
 
-    private async setDeletionInfoOfAttributes(attributes: LocalAttribute[], deletionInfo: LocalAttributeDeletionInfo): Promise<void> {
-        for (const attribute of attributes) {
-            attribute.setDeletionInfo(deletionInfo, this.identity.address);
-            await this.updateAttributeUnsafe(attribute);
+    private async setDeletionInfoOfOwnRelationshipAttributes(peer: CoreAddress, deletionDate: CoreDate): Promise<void> {
+        const deletionInfo = EmittedAttributeDeletionInfo.from({
+            deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
+            deletionDate
+        });
+
+        const attributesSharedWithPeer = (await this.getLocalAttributes({
+            "@type": "OwnRelationshipAttribute",
+            "peerSharingDetails.peer": peer.toString(),
+            "peerSharingDetails.deletionInfo.deletionStatus": { $ne: EmittedAttributeDeletionStatus.DeletedByPeer }
+        })) as OwnRelationshipAttribute[];
+
+        for (const attribute of attributesSharedWithPeer) {
+            await this.setPeerDeletionInfoOfOwnRelationshipAttribute(attribute, deletionInfo);
+        }
+    }
+
+    private async setDeletionInfoOfPeerRelationshipAttributes(peer: CoreAddress, deletionDate: CoreDate): Promise<void> {
+        const deletionInfo = ReceivedAttributeDeletionInfo.from({
+            deletionStatus: ReceivedAttributeDeletionStatus.DeletedByOwner,
+            deletionDate
+        });
+
+        const attributesSharedWithPeer = (await this.getLocalAttributes({
+            "@type": "PeerRelationshipAttribute",
+            "peerSharingDetails.peer": peer.toString(),
+            "peerSharingDetails.deletionInfo.deletionStatus": { $ne: ReceivedAttributeDeletionStatus.DeletedByOwner }
+        })) as PeerRelationshipAttribute[];
+
+        for (const attribute of attributesSharedWithPeer) {
+            await this.setPeerDeletionInfoOfPeerAttribute(attribute, deletionInfo);
+        }
+    }
+
+    private async setDeletionInfoOfForwardedRelationshipAttributes(thirdParty: CoreAddress, deletionDate: CoreDate): Promise<void> {
+        const deletionInfo = EmittedAttributeDeletionInfo.from({
+            deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
+            deletionDate
+        });
+
+        const attributesSharedWithPeer = (await this.getLocalAttributes({
+            "@type": { $in: ["OwnRelationshipAttribute", "PeerRelationshipAttribute"] },
+            "forwardedSharingDetails.peer": thirdParty.toString(),
+            "forwardedSharingDetails.deletionInfo.deletionStatus": { $ne: EmittedAttributeDeletionStatus.DeletedByPeer }
+        })) as OwnRelationshipAttribute[] | PeerRelationshipAttribute[];
+
+        for (const attribute of attributesSharedWithPeer) {
+            await this.setForwardedDeletionInfoOfAttribute(attribute, deletionInfo, thirdParty);
+        }
+    }
+
+    private async setDeletionInfoOfThirdPartyRelationshipAttributes(peer: CoreAddress, deletionDate: CoreDate): Promise<void> {
+        const deletionInfo = ThirdPartyRelationshipAttributeDeletionInfo.from({
+            // TODO: might also need to be DeletedByOwner -> refactor deletionStatus in further PR
+            deletionStatus: ThirdPartyRelationshipAttributeDeletionStatus.DeletedByPeer,
+            deletionDate
+        });
+
+        const attributesSharedWithPeer = (await this.getLocalAttributes({
+            "@type": "ThirdPartyRelationshipAttribute",
+            "peerSharingDetails.peer": peer.toString(),
+            "peerSharingDetails.deletionInfo.deletionStatus": {
+                $nin: [ThirdPartyRelationshipAttributeDeletionStatus.DeletedByPeer, ThirdPartyRelationshipAttributeDeletionStatus.DeletedByOwner]
+            }
+        })) as ThirdPartyRelationshipAttribute[];
+
+        for (const attribute of attributesSharedWithPeer) {
+            await this.setPeerDeletionInfoOfThirdPartyRelationshipAttribute(attribute, deletionInfo);
+        }
+    }
+
+    public async setForwardedDeletionInfoOfAttribute(
+        attribute: OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute,
+        deletionInfo: EmittedAttributeDeletionInfo | undefined,
+        peer: CoreAddress,
+        overrideDeletedOrToBeDeleted = false
+    ): Promise<void> {
+        const localAttribute = await this.getLocalAttribute(attribute.id);
+        if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
+        if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+
+        if (attribute.isDeletedOrToBeDeletedByForwardingPeer(peer) && !overrideDeletedOrToBeDeleted) return;
+
+        attribute.setDeletionInfoForForwardingPeer(deletionInfo, peer, overrideDeletedOrToBeDeleted);
+        await this.updateAttributeUnsafe(attribute);
+    }
+
+    public async setPeerDeletionInfoOfOwnRelationshipAttribute(
+        attribute: OwnRelationshipAttribute,
+        deletionInfo: EmittedAttributeDeletionInfo | undefined,
+        overrideDeletedOrToBeDeleted = false
+    ): Promise<void> {
+        const localAttribute = await this.getLocalAttribute(attribute.id);
+        if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
+        if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+
+        if (attribute.isDeletedOrToBeDeletedByPeer() && !overrideDeletedOrToBeDeleted) return;
+
+        attribute.setPeerDeletionInfo(deletionInfo, overrideDeletedOrToBeDeleted);
+        await this.parent.attributes.updateAttributeUnsafe(attribute);
+    }
+
+    public async setPeerDeletionInfoOfPeerAttribute(
+        attribute: PeerIdentityAttribute | PeerRelationshipAttribute,
+        deletionInfo: ReceivedAttributeDeletionInfo | undefined,
+        overrideDeletedOrToBeDeleted = false
+    ): Promise<void> {
+        const localAttribute = await this.getLocalAttribute(attribute.id);
+        if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
+        if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+
+        if (attribute.isDeletedByOwnerOrToBeDeleted() && !overrideDeletedOrToBeDeleted) return;
+
+        attribute.setPeerDeletionInfo(deletionInfo, overrideDeletedOrToBeDeleted);
+        await this.parent.attributes.updateAttributeUnsafe(attribute);
+    }
+
+    public async setPeerDeletionInfoOfThirdPartyRelationshipAttribute(
+        attribute: ThirdPartyRelationshipAttribute,
+        deletionInfo: ThirdPartyRelationshipAttributeDeletionInfo | undefined,
+        overrideDeletedOrToBeDeleted = false
+    ): Promise<void> {
+        const localAttribute = await this.getLocalAttribute(attribute.id);
+        if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
+        if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+
+        if (attribute.isDeletedByOwnerOrPeerOrToBeDeleted() && !overrideDeletedOrToBeDeleted) return;
+
+        attribute.setPeerDeletionInfo(deletionInfo, overrideDeletedOrToBeDeleted);
+        await this.parent.attributes.updateAttributeUnsafe(attribute);
+    }
+
+    public async setForwardedDeletionInfoOfAttributeAndPredecessors(
+        attribute: OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute,
+        deletionInfo: EmittedAttributeDeletionInfo | undefined,
+        peer: CoreAddress,
+        overrideDeletedOrToBeDeleted = false
+    ): Promise<void> {
+        const predecessors = await this.getPredecessorsOfAttribute(attribute);
+
+        for (const attr of [attribute, ...predecessors]) {
+            await this.setForwardedDeletionInfoOfAttribute(attr, deletionInfo, peer, overrideDeletedOrToBeDeleted);
+        }
+    }
+
+    public async setPeerDeletionInfoOfOwnRelationshipAttributeAndPredecessors(
+        attribute: OwnRelationshipAttribute,
+        deletionInfo: EmittedAttributeDeletionInfo | undefined,
+        overrideDeletedOrToBeDeleted = false
+    ): Promise<void> {
+        const predecessors = await this.getPredecessorsOfAttribute(attribute);
+
+        for (const attr of [attribute, ...predecessors]) {
+            await this.setPeerDeletionInfoOfOwnRelationshipAttribute(attr, deletionInfo, overrideDeletedOrToBeDeleted);
+        }
+    }
+
+    public async setPeerDeletionInfoOfPeerAttributeAndPredecessors(
+        attribute: PeerIdentityAttribute | PeerRelationshipAttribute,
+        deletionInfo: ReceivedAttributeDeletionInfo | undefined,
+        overrideDeletedOrToBeDeleted = false
+    ): Promise<void> {
+        const predecessors = await this.getPredecessorsOfAttribute(attribute);
+
+        for (const attr of [attribute, ...predecessors]) {
+            await this.setPeerDeletionInfoOfPeerAttribute(attr, deletionInfo, overrideDeletedOrToBeDeleted);
+        }
+    }
+
+    public async setPeerDeletionInfoOfThirdPartyRelationshipAttributeAndPredecessors(
+        attribute: ThirdPartyRelationshipAttribute,
+        deletionInfo: ThirdPartyRelationshipAttributeDeletionInfo | undefined,
+        overrideDeletedOrToBeDeleted = false
+    ): Promise<void> {
+        const predecessors = await this.getPredecessorsOfAttribute(attribute);
+
+        for (const attr of [attribute, ...predecessors]) {
+            await this.setPeerDeletionInfoOfThirdPartyRelationshipAttribute(attr, deletionInfo, overrideDeletedOrToBeDeleted);
         }
     }
 

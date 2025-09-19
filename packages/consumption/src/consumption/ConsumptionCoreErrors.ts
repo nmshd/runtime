@@ -2,6 +2,14 @@ import { ApplicationError } from "@js-soft/ts-utils";
 import { CoreAddress, CoreError, CoreId } from "@nmshd/core-types";
 
 class Attributes {
+    public attributeDoesNotExist() {
+        return new CoreError("error.consumption.attributes.attributeDoesNotExist", "The specified Attribute does not exist.");
+    }
+
+    public alreadyForwarded(attributeId: CoreId, peer: CoreAddress) {
+        return new CoreError("error.consumption.attributes.alreadyForwarded", `The Attribute '${attributeId.toString()} is already forwarded to peer '${peer.toString()}'.`);
+    }
+
     public successorIsNotAValidAttribute(error: any) {
         return new CoreError(
             "error.consumption.attributes.successorIsNotAValidAttribute",
@@ -23,100 +31,10 @@ class Attributes {
         return new CoreError("error.consumption.attributes.successionPeerIsNotOwner", "The peer of the succeeded Attribute is not its owner. This may be an attempt of spoofing.");
     }
 
-    public predecessorSourceAttributeIsNotRepositoryAttribute() {
-        return new CoreError("error.consumption.attributes.predecessorSourceAttributeIsNotRepositoryAttribute", "Predecessor sourceAttribute is not a RepositoryAttribute.");
-    }
-
-    public successorSourceAttributeIsNotRepositoryAttribute() {
-        return new CoreError("error.consumption.attributes.successorSourceAttributeIsNotRepositoryAttribute", "Successor sourceAttribute is not a RepositoryAttribute.");
-    }
-
-    public successorSourceDoesNotSucceedPredecessorSource() {
-        return new CoreError(
-            "error.consumption.attributes.successorSourceDoesNotSucceedPredecessorSource",
-            "Predecessor sourceAttribute is not succeeded by successor sourceAttribute."
-        );
-    }
-
-    public predecessorSourceContentIsNotEqualToCopyContent() {
-        return new CoreError(
-            "error.consumption.attributes.predecessorSourceContentIsNotEqualToCopyContent",
-            "Predecessor sourceAttribute content doesn't match the content of the predecessor shared Attribute copy."
-        );
-    }
-
-    public successorSourceContentIsNotEqualToCopyContent() {
-        return new CoreError(
-            "error.consumption.attributes.successorSourceContentIsNotEqualToCopyContent",
-            "Successor sourceAttribute content doesn't match the content of the successor shared Attribute copy."
-        );
-    }
-
     public successorMustNotYetExist() {
         return new CoreError(
             "error.consumption.attributes.successorMustNotYetExist",
             "The predecessor Attribute's successor must not exist. It will be created by the succession handlers and must not be created manually."
-        );
-    }
-
-    public successorMustNotHaveASuccessor(comment?: string) {
-        let errorMessage = "The successor must not have a successor itself.";
-        if (comment) errorMessage += ` ${comment}`;
-        return new CoreError("error.consumption.attributes.successorMustNotHaveASuccessor", errorMessage);
-    }
-
-    public predecessorIsNotRepositoryAttribute() {
-        return new CoreError("error.consumption.attributes.predecessorIsNotRepositoryAttribute", "Predecessor is not a RepositoryAttribute.");
-    }
-
-    public predecessorIsNotOwnSharedIdentityAttribute() {
-        return new CoreError("error.consumption.attributes.predecessorIsNotOwnSharedIdentityAttribute", "Predecessor is not an own shared IdentityAttribute.");
-    }
-
-    public predecessorIsNotPeerSharedIdentityAttribute() {
-        return new CoreError("error.consumption.attributes.predecessorIsNotPeerSharedIdentityAttribute", "Predecessor is not a peer shared IdentityAttribute.");
-    }
-
-    public predecessorIsNotOwnSharedRelationshipAttribute() {
-        return new CoreError("error.consumption.attributes.predecessorIsNotOwnSharedRelationshipAttribute", "Predecessor is not an own shared RelationshipAttribute.");
-    }
-
-    public predecessorIsNotPeerSharedRelationshipAttribute() {
-        return new CoreError("error.consumption.attributes.predecessorIsNotPeerSharedRelationshipAttribute", "Predecessor is not a peer shared RelationshipAttribute.");
-    }
-
-    public predecessorIsNotThirdPartyRelationshipAttribute() {
-        return new CoreError("error.consumption.attributes.predecessorIsNotThirdPartyRelationshipAttribute", "Predecessor is not a ThirdPartyRelationshipAttribute.");
-    }
-
-    public successorIsNotRepositoryAttribute() {
-        return new CoreError("error.consumption.attributes.successorIsNotRepositoryAttribute", "Successor is not a RepositoryAttribute.");
-    }
-
-    public successorIsNotOwnSharedIdentityAttribute() {
-        return new CoreError("error.consumption.attributes.successorIsNotOwnSharedIdentityAttribute", "Successor is not an own shared IdentityAttribute.");
-    }
-
-    public successorIsNotPeerSharedIdentityAttribute() {
-        return new CoreError("error.consumption.attributes.successorIsNotPeerSharedIdentityAttribute", "Successor is not a peer shared IdentityAttribute.");
-    }
-
-    public successorIsNotOwnSharedRelationshipAttribute() {
-        return new CoreError("error.consumption.attributes.successorIsNotOwnSharedRelationshipAttribute", "Successor is not an own shared RelationshipAttribute.");
-    }
-
-    public successorIsNotPeerSharedRelationshipAttribute() {
-        return new CoreError("error.consumption.attributes.successorIsNotPeerSharedRelationshipAttribute", "Successor is not a peer shared RelationshipAttribute.");
-    }
-
-    public successorIsNotThirdPartyRelationshipAttribute() {
-        return new CoreError("error.consumption.attributes.successorIsNotThirdPartyRelationshipAttribute", "Successor is not a ThirdPartyRelationshipAttribute.");
-    }
-
-    public setPredecessorIdDoesNotMatchActualPredecessorId() {
-        return new CoreError(
-            "error.consumption.attributes.setPredecessorIdDoesNotMatchActualPredecessorId",
-            "The predecessor's ID and the explicitly set value for the successor's succeeds field don't match."
         );
     }
 
@@ -126,14 +44,6 @@ class Attributes {
 
     public successorDoesNotExist() {
         return new CoreError("error.consumption.attributes.successorDoesNotExist", "The successor does not exist.");
-    }
-
-    public successorSourceAttributeIsNotSpecified() {
-        return new CoreError("error.consumption.attributes.successorSourceAttributeIsNotSpecified", "You must specify the sourceAttribute of the successor.");
-    }
-
-    public successorSourceAttributeDoesNotExist() {
-        return new CoreError("error.consumption.attributes.successorSourceAttributeDoesNotExist", "The successor sourceAttribute does not exist.");
     }
 
     public successionMustChangeContent() {
@@ -164,18 +74,6 @@ class Attributes {
         );
     }
 
-    public successionMustNotChangePeer(comment?: string) {
-        let errorMessage = "The peer of the shared Attribute must not change.";
-        if (comment) errorMessage += ` ${comment}`;
-        return new CoreError("error.consumption.attributes.successionMustNotChangePeer", errorMessage);
-    }
-
-    public successionMustNotChangeThirdParty(comment?: string) {
-        let errorMessage = "The thirdPartyAddress of the shared Attribute must not change.";
-        if (comment) errorMessage += ` ${comment}`;
-        return new CoreError("error.consumption.attributes.successionMustNotChangeThirdParty", errorMessage);
-    }
-
     public cannotSucceedAttributesWithASuccessor(successorId: string | CoreId) {
         return new CoreError(
             "error.consumption.attributes.cannotSucceedAttributesWithASuccessor",
@@ -183,38 +81,25 @@ class Attributes {
         );
     }
 
-    public cannotSucceedAttributesWithDeletionInfo() {
+    public cannotSucceedSharedAttributesDeletedByPeer() {
         return new CoreError(
-            "error.consumption.attributes.cannotSucceedAttributesWithDeletionInfo",
-            "You cannot succeed Attributes with a deletionInfo, since the peer may have already deleted it or marked it for deletion."
+            "error.consumption.attributes.cannotSucceedSharedAttributesDeletedByPeer",
+            "You cannot succeed shared Attributes that are already deleted by the peer."
         );
     }
 
-    public cannotSetDeletionInfoOfRepositoryAttributes() {
-        return new CoreError(
-            "error.consumption.attributes.cannotSetDeletionInfoOfRepositoryAttributes",
-            "RepositoryAttributes can not have a deletionInfo, since they are not shared with a peer and you can delete them directly."
-        );
+    public cannotSetAttributeDeletionInfo(attributeId: string | CoreId, peer?: CoreAddress | string) {
+        const errorMessageWithPeer = `You cannot set the deletionInfo of Attribute '${attributeId.toString()}' for peer '${peer?.toString()}' since it isn't shared with them or already deleted by them.`;
+        const errorMessageWithoutPeer = `You cannot set the deletionInfo of Attribute '${attributeId.toString()}' since it is already deleted by the peer.`;
+        const errorMessage = peer ? errorMessageWithPeer : errorMessageWithoutPeer;
+
+        return new CoreError("error.consumption.attributes.cannotSetAttributeDeletionInfo", errorMessage);
     }
 
-    public invalidDeletionInfoOfOwnSharedAttribute() {
+    public cannotSetForwardedSharingDetailsForPeer(attributeId: string | CoreId, peer: CoreAddress | string) {
         return new CoreError(
-            "error.consumption.attributes.invalidDeletionInfoOfOwnSharedAttribute",
-            "The only valid deletionStatuses for own shared Attributes are 'DeletionRequestSent', 'DeletionRequestRejected', 'DeletedByPeer' or 'ToBeDeletedByPeer'."
-        );
-    }
-
-    public invalidDeletionInfoOfPeerSharedAttribute() {
-        return new CoreError(
-            "error.consumption.attributes.invalidDeletionInfoOfPeerSharedAttribute",
-            "The only valid deletionStatuses for peer shared Attributes are 'DeletedByOwner' or 'ToBeDeleted'."
-        );
-    }
-
-    public invalidDeletionInfoOfThirdPartyRelationshipAttribute() {
-        return new CoreError(
-            "error.consumption.attributes.invalidDeletionInfoOfThirdPartyRelationshipAttribute",
-            "The only valid deletionStatus for ThirdPartyRelationshipAttributes is 'DeletedByPeer'."
+            "error.consumption.attributes.cannotSetForwardedSharingDetailsForPeer",
+            `You cannot set the forwardedSharingDetails of Attribute '${attributeId.toString()}' for peer '${peer.toString()}' since they are the peer of the Relationship in whose context the RelationshipAttribute exists.`
         );
     }
 
@@ -225,31 +110,12 @@ class Attributes {
         );
     }
 
-    public wrongOwnerOfRepositoryAttribute() {
-        return new CoreError(
-            "error.consumption.attributes.wrongOwnerOfRepositoryAttribute",
-            "A wrong owner was provided wanting to create a RepositoryAttribute. You can only create RepositoryAttributes for yourself."
-        );
+    public wrongOwnerOfAttribute(message: string) {
+        return new CoreError("error.consumption.attributes.wrongOwnerOfAttribute", message);
     }
 
-    public isNotRepositoryAttribute(attributeId: string | CoreId) {
-        return new CoreError("error.consumption.attributes.isNotRepositoryAttribute", `The Attribute (id: ${attributeId}) is not a RepositoryAttribute.`);
-    }
-
-    public isNotSharedAttribute(attributeId: string | CoreId) {
-        return new CoreError("error.consumption.attributes.isNotSharedAttribute", `The Attribute (id: '${attributeId}') is not a shared Attribute.`);
-    }
-
-    public isNotOwnSharedAttribute(attributeId: string | CoreId) {
-        return new CoreError("error.consumption.attributes.isNotOwnSharedAttribute", `The Attribute (id: '${attributeId}') is not an own shared Attribute.`);
-    }
-
-    public isNotPeerSharedAttribute(attributeId: string | CoreId) {
-        return new CoreError("error.consumption.attributes.isNotPeerSharedAttribute", `The Attribute (id: '${attributeId}') is not a peer shared Attribute.`);
-    }
-
-    public isNotThirdPartyRelationshipAttribute(attributeId: string | CoreId) {
-        return new CoreError("error.consumption.attributes.isNotThirdPartyRelationshipAttribute", `The Attribute (id: '${attributeId}') is not a ThirdPartyRelationshipAttribute.`);
+    public wrongTypeOfAttribute(message: string) {
+        return new CoreError("error.consumption.attributes.wrongTypeOfAttribute", message);
     }
 
     public senderIsNotPeerOfSharedAttribute(senderId: string | CoreAddress, attributeId: string | CoreId) {
@@ -259,8 +125,8 @@ class Attributes {
         );
     }
 
-    public setDefaultRepositoryAttributesIsDisabled() {
-        return new CoreError("error.consumption.attributes.setDefaultRepositoryAttributesIsDisabled", "Setting default RepositoryAttributes is disabled for this Account.");
+    public setDefaultOwnIdentityAttributesIsDisabled() {
+        return new CoreError("error.consumption.attributes.setDefaultOwnIdentityAttributesIsDisabled", "Setting default OwnIdentityAttributes is disabled for this Account.");
     }
 
     public invalidTags(tags: string[]): ApplicationError {

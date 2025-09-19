@@ -198,41 +198,33 @@ class Notifications {
 }
 
 class Attributes {
-    public isNotRepositoryAttribute(attributeId: CoreId | string): ApplicationError {
-        return new ApplicationError("error.runtime.attributes.isNotRepositoryAttribute", `Attribute '${attributeId.toString()}' is not a RepositoryAttribute.`);
+    public isNotOwnIdentityAttribute(attributeId: CoreId | string): ApplicationError {
+        return new ApplicationError("error.runtime.attributes.isNotOwnIdentityAttribute", `The Attribute '${attributeId.toString()}' is not an OwnIdentityAttribute.`);
     }
 
-    public repositoryAttributeHasAlreadyBeenSharedWithPeer(
-        repositoryAttributeId: CoreId | string,
-        peer: CoreAddress | string,
-        ownSharedIdentityAttributeId: CoreId | string
-    ): ApplicationError {
+    public ownIdentityAttributeHasAlreadyBeenSharedWithPeer(attributeId: CoreId | string, peer: CoreAddress | string): ApplicationError {
         return new ApplicationError(
-            "error.runtime.attributes.repositoryAttributeHasAlreadyBeenSharedWithPeer",
-            `RepositoryAttribute '${repositoryAttributeId.toString()}' has already been shared with peer '${peer.toString()}'. ID of own shared IdentityAttribute: '${ownSharedIdentityAttributeId.toString()}'.`
+            "error.runtime.attributes.ownIdentityAttributeHasAlreadyBeenSharedWithPeer",
+            `The OwnIdentityAttribute '${attributeId.toString()}' has already been shared with peer '${peer.toString()}'.'.`
         );
     }
 
-    public noPreviousVersionOfRepositoryAttributeHasBeenSharedWithPeerBefore(repositoryAttributeId: CoreId | string, peer: CoreAddress | string): ApplicationError {
+    public successorOfOwnIdentityAttributeHasAlreadyBeenSharedWithPeer(attributeId: CoreId | string, successorId: CoreId | string, peer: CoreAddress | string): ApplicationError {
         return new ApplicationError(
-            "error.runtime.attributes.noPreviousVersionOfRepositoryAttributeHasBeenSharedWithPeerBefore",
-            `No previous version of the RepositoryAttribute '${repositoryAttributeId.toString()}' has been shared with peer '${peer.toString()}' before. If you wish to execute an initial sharing of this Attribute, use the ShareRepositoryAttributeUseCase instead.`
+            "error.runtime.attributes.successorOfOwnIdentityAttributeHasAlreadyBeenSharedWithPeer",
+            `A successor '${successorId.toString()}' of the OwnIdentityAttribute '${attributeId.toString()}' has already been shared with peer '${peer.toString()}'.'.`
         );
     }
 
-    public isNotOwnSharedAttribute(attributeId: CoreId | string): ApplicationError {
-        return new ApplicationError("error.runtime.attributes.isNotOwnSharedAttribute", `Attribute '${attributeId.toString()}' is not an own shared Attribute.`);
-    }
-
-    public isNotPeerSharedAttribute(attributeId: CoreId | string): ApplicationError {
-        return new ApplicationError("error.runtime.attributes.isNotPeerSharedAttribute", `Attribute '${attributeId.toString()}' is not a peer shared Attribute.`);
-    }
-
-    public isNotThirdPartyRelationshipAttribute(attributeId: CoreId | string): ApplicationError {
+    public peerHasNoPreviousVersionOfAttribute(attributeId: CoreId | string, peer: CoreAddress | string): ApplicationError {
         return new ApplicationError(
-            "error.runtime.attributes.isNotThirdPartyRelationshipAttribute",
-            `Attribute '${attributeId.toString()}' is not a ThirdPartyRelationshipAttribute.`
+            "error.runtime.attributes.peerHasNoPreviousVersionOfAttribute",
+            `The peer '${peer.toString()}' doesn't have any previous version of the Attribute '${attributeId.toString()}'. Either you haven't shared it before or the peer has deleted it.`
         );
+    }
+
+    public isNotOwnRelationshipAttribute(attributeId: CoreId | string): ApplicationError {
+        return new ApplicationError("error.runtime.attributes.isNotOwnRelationshipAttribute", `The Attribute '${attributeId.toString()}' is not an OwnRelationshipAttribute.`);
     }
 
     public hasSuccessor(predecessor: LocalAttribute): ApplicationError {
@@ -242,28 +234,21 @@ class Attributes {
         );
     }
 
-    public cannotSucceedAttributesWithDeletionInfo(ownSharedIdentityAttributeIds: CoreId[] | string[]): ApplicationError {
+    public cannotCreateDuplicateOwnIdentityAttribute(attributeId: CoreId | string): ApplicationError {
         return new ApplicationError(
-            "error.runtime.attributes.cannotSucceedAttributesWithDeletionInfo",
-            `The own shared IdentityAttribute predecessor(s) ${ownSharedIdentityAttributeIds.map((ownSharedIdentityAttributeId) => `'${ownSharedIdentityAttributeId.toString()}'`).join(", ")} can't be succeeded due to set deletionInfo.`
+            "error.runtime.attributes.cannotCreateDuplicateOwnIdentityAttribute",
+            `The OwnIdentityAttribute cannot be created because it has the same content.value as the already existing OwnIdentityAttribute with id '${attributeId.toString()}'.`
         );
     }
 
-    public cannotCreateDuplicateRepositoryAttribute(attributeId: CoreId | string): ApplicationError {
-        return new ApplicationError(
-            "error.runtime.attributes.cannotCreateDuplicateRepositoryAttribute",
-            `The RepositoryAttribute cannot be created because it has the same content.value as the already existing RepositoryAttribute with id '${attributeId.toString()}'.`
-        );
-    }
-
-    public setDefaultRepositoryAttributesIsDisabled(): ApplicationError {
-        return new ApplicationError("error.runtime.attributes.setDefaultRepositoryAttributesIsDisabled", "Setting default RepositoryAttributes is disabled for this Account.");
+    public setDefaultOwnIdentityAttributesIsDisabled(): ApplicationError {
+        return new ApplicationError("error.runtime.attributes.setDefaultOwnIdentityAttributesIsDisabled", "Setting default OwnIdentityAttributes is disabled for this Account.");
     }
 
     public cannotDeleteSharedAttributeWhileRelationshipIsPending(): ApplicationError {
         return new ApplicationError(
             "error.runtime.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending",
-            "The shared Attribute cannot be deleted while the Relationship to the peer is in status 'Pending'."
+            "The shared Attribute cannot be deleted while the Relationship to the peer is in status 'Pending'. If you want to delete it now, you'll have to accept, reject or revoke the pending Relationship."
         );
     }
 }

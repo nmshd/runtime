@@ -1,3 +1,3 @@
 export interface ConsumptionConfig {
-    setDefaultRepositoryAttributes: boolean;
+    setDefaultOwnIdentityAttributes: boolean;
 }

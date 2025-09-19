@@ -35,11 +35,11 @@ export const LoadPeerTokenAnonymousRequest: any = {
     }
 }
 
-export const CanCreateRepositoryAttributeRequest: any = {
+export const CanCreateOwnIdentityAttributeRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CanCreateRepositoryAttributeRequest",
+    "$ref": "#/definitions/CanCreateOwnIdentityAttributeRequest",
     "definitions": {
-        "CanCreateRepositoryAttributeRequest": {
+        "CanCreateOwnIdentityAttributeRequest": {
             "type": "object",
             "additionalProperties": false,
             "properties": {
@@ -67,11 +67,11 @@ export const CanCreateRepositoryAttributeRequest: any = {
     }
 }
 
-export const ChangeDefaultRepositoryAttributeRequest: any = {
+export const ChangeDefaultOwnIdentityAttributeRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/ChangeDefaultRepositoryAttributeRequest",
+    "$ref": "#/definitions/ChangeDefaultOwnIdentityAttributeRequest",
     "definitions": {
-        "ChangeDefaultRepositoryAttributeRequest": {
+        "ChangeDefaultOwnIdentityAttributeRequest": {
             "type": "object",
             "properties": {
                 "attributeId": {
@@ -1916,7 +1916,7 @@ export const CanCreateOutgoingRequestRequest: any = {
                         }
                     ]
                 },
-                "sourceAttributeId": {
+                "attributeId": {
                     "type": "string"
                 },
                 "thirdPartyAddress": {
@@ -1926,8 +1926,8 @@ export const CanCreateOutgoingRequestRequest: any = {
             "required": [
                 "@type",
                 "attribute",
-                "mustBeAccepted",
-                "sourceAttributeId"
+                "attributeId",
+                "mustBeAccepted"
             ],
             "additionalProperties": false
         },
@@ -2927,9 +2927,6 @@ export const CompleteOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/CreateAttributeAcceptResponseItemJSON"
                 },
                 {
-                    "$ref": "#/definitions/ShareAttributeAcceptResponseItemJSON"
-                },
-                {
                     "$ref": "#/definitions/ProposeAttributeAcceptResponseItemJSON"
                 },
                 {
@@ -4497,34 +4494,6 @@ export const CompleteOutgoingRequestRequest: any = {
                 "@type": {
                     "type": "string",
                     "const": "CreateAttributeAcceptResponseItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "result": {
-                    "type": "string",
-                    "const": "Accepted"
-                },
-                "attributeId": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "attributeId",
-                "result"
-            ],
-            "additionalProperties": false
-        },
-        "ShareAttributeAcceptResponseItemJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ShareAttributeAcceptResponseItem"
                 },
                 "@context": {
                     "type": "string"
@@ -4924,9 +4893,6 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "$ref": "#/definitions/CreateAttributeAcceptResponseItemJSON"
                 },
                 {
-                    "$ref": "#/definitions/ShareAttributeAcceptResponseItemJSON"
-                },
-                {
                     "$ref": "#/definitions/ProposeAttributeAcceptResponseItemJSON"
                 },
                 {
@@ -6494,34 +6460,6 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                 "@type": {
                     "type": "string",
                     "const": "CreateAttributeAcceptResponseItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "result": {
-                    "type": "string",
-                    "const": "Accepted"
-                },
-                "attributeId": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "attributeId",
-                "result"
-            ],
-            "additionalProperties": false
-        },
-        "ShareAttributeAcceptResponseItemJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ShareAttributeAcceptResponseItem"
                 },
                 "@context": {
                     "type": "string"
@@ -8505,7 +8443,7 @@ export const CreateOutgoingRequestRequest: any = {
                         }
                     ]
                 },
-                "sourceAttributeId": {
+                "attributeId": {
                     "type": "string"
                 },
                 "thirdPartyAddress": {
@@ -8515,8 +8453,8 @@ export const CreateOutgoingRequestRequest: any = {
             "required": [
                 "@type",
                 "attribute",
-                "mustBeAccepted",
-                "sourceAttributeId"
+                "attributeId",
+                "mustBeAccepted"
             ],
             "additionalProperties": false
         },
@@ -11489,7 +11427,7 @@ export const ReceivedIncomingRequestRequest: any = {
                         }
                     ]
                 },
-                "sourceAttributeId": {
+                "attributeId": {
                     "type": "string"
                 },
                 "thirdPartyAddress": {
@@ -11499,8 +11437,8 @@ export const ReceivedIncomingRequestRequest: any = {
             "required": [
                 "@type",
                 "attribute",
-                "mustBeAccepted",
-                "sourceAttributeId"
+                "attributeId",
+                "mustBeAccepted"
             ],
             "additionalProperties": false
         },
@@ -12987,11 +12925,11 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
     }
 }
 
-export const CreateRepositoryAttributeRequest: any = {
+export const CreateOwnIdentityAttributeRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CreateRepositoryAttributeRequest",
+    "$ref": "#/definitions/CreateOwnIdentityAttributeRequest",
     "definitions": {
-        "CreateRepositoryAttributeRequest": {
+        "CreateOwnIdentityAttributeRequest": {
             "type": "object",
             "additionalProperties": false,
             "properties": {
@@ -13019,57 +12957,11 @@ export const CreateRepositoryAttributeRequest: any = {
     }
 }
 
-export const DeleteOwnSharedAttributeAndNotifyPeerRequest: any = {
+export const DeleteAttributeAndNotifyRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/DeleteOwnSharedAttributeAndNotifyPeerRequest",
+    "$ref": "#/definitions/DeleteAttributeAndNotifyRequest",
     "definitions": {
-        "DeleteOwnSharedAttributeAndNotifyPeerRequest": {
-            "type": "object",
-            "properties": {
-                "attributeId": {
-                    "$ref": "#/definitions/AttributeIdString"
-                }
-            },
-            "required": [
-                "attributeId"
-            ],
-            "additionalProperties": false
-        },
-        "AttributeIdString": {
-            "type": "string",
-            "pattern": "ATT[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const DeletePeerSharedAttributeAndNotifyOwnerRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/DeletePeerSharedAttributeAndNotifyOwnerRequest",
-    "definitions": {
-        "DeletePeerSharedAttributeAndNotifyOwnerRequest": {
-            "type": "object",
-            "properties": {
-                "attributeId": {
-                    "$ref": "#/definitions/AttributeIdString"
-                }
-            },
-            "required": [
-                "attributeId"
-            ],
-            "additionalProperties": false
-        },
-        "AttributeIdString": {
-            "type": "string",
-            "pattern": "ATT[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const DeleteRepositoryAttributeRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/DeleteRepositoryAttributeRequest",
-    "definitions": {
-        "DeleteRepositoryAttributeRequest": {
+        "DeleteAttributeAndNotifyRequest": {
             "type": "object",
             "properties": {
                 "attributeId": {
@@ -13107,29 +12999,6 @@ export const DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest: any 
         "RelationshipIdString": {
             "type": "string",
             "pattern": "REL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const DeleteThirdPartyRelationshipAttributeAndNotifyPeerRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/DeleteThirdPartyRelationshipAttributeAndNotifyPeerRequest",
-    "definitions": {
-        "DeleteThirdPartyRelationshipAttributeAndNotifyPeerRequest": {
-            "type": "object",
-            "properties": {
-                "attributeId": {
-                    "$ref": "#/definitions/AttributeIdString"
-                }
-            },
-            "required": [
-                "attributeId"
-            ],
-            "additionalProperties": false
-        },
-        "AttributeIdString": {
-            "type": "string",
-            "pattern": "ATT[A-Za-z0-9]{17}"
         }
     }
 }
@@ -13604,6 +13473,19 @@ export const GetAttributesRequest: any = {
         "GetAttributesRequestQuery": {
             "type": "object",
             "properties": {
+                "@type": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
                 "createdAt": {
                     "type": "string"
                 },
@@ -13730,7 +13612,7 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
-                "shareInfo": {
+                "peerSharingDetails": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -13743,7 +13625,7 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
-                "shareInfo.requestReference": {
+                "peerSharingDetails.peer": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -13756,7 +13638,7 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
-                "shareInfo.notificationReference": {
+                "peerSharingDetails.sourceReference": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -13769,7 +13651,7 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
-                "shareInfo.peer": {
+                "peerSharingDetails.initialAttributePeer": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -13782,7 +13664,7 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
-                "shareInfo.sourceAttribute": {
+                "peerSharingDetails.deletionInfo": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -13795,7 +13677,7 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
-                "shareInfo.thirdPartyAddress": {
+                "peerSharingDetails.deletionInfo.deletionStatus": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -13808,7 +13690,7 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
-                "deletionInfo": {
+                "peerSharingDetails.deletionInfo.deletionDate": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -13821,7 +13703,7 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
-                "deletionInfo.deletionStatus": {
+                "forwardedSharingDetails": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -13834,7 +13716,72 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
-                "deletionInfo.deletionDate": {
+                "forwardedSharingDetails.peer": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingDetails.sourceReference": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingDetails.sharedAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingDetails.deletionInfo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingDetails.deletionInfo.deletionStatus": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingDetails.deletionInfo.deletionDate": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -13853,18 +13800,18 @@ export const GetAttributesRequest: any = {
     }
 }
 
-export const GetOwnSharedAttributesRequest: any = {
+export const GetOwnAttributesSharedWithPeerRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetOwnSharedAttributesRequest",
+    "$ref": "#/definitions/GetOwnAttributesSharedWithPeerRequest",
     "definitions": {
-        "GetOwnSharedAttributesRequest": {
+        "GetOwnAttributesSharedWithPeerRequest": {
             "type": "object",
             "properties": {
                 "peer": {
                     "$ref": "#/definitions/AddressString"
                 },
                 "query": {
-                    "$ref": "#/definitions/GetOwnSharedAttributeRequestQuery"
+                    "$ref": "#/definitions/GetOwnAttributesSharedWithPeerRequestQuery"
                 },
                 "hideTechnical": {
                     "type": "boolean"
@@ -13883,9 +13830,22 @@ export const GetOwnSharedAttributesRequest: any = {
             "type": "string",
             "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
         },
-        "GetOwnSharedAttributeRequestQuery": {
+        "GetOwnAttributesSharedWithPeerRequestQuery": {
             "type": "object",
             "properties": {
+                "@type": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
                 "createdAt": {
                     "type": "string"
                 },
@@ -13901,6 +13861,9 @@ export const GetOwnSharedAttributesRequest: any = {
                             }
                         }
                     ]
+                },
+                "isDefault": {
+                    "type": "string"
                 },
                 "content.@type": {
                     "anyOf": [
@@ -13970,7 +13933,7 @@ export const GetOwnSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "shareInfo": {
+                "peerSharingDetails": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -13983,7 +13946,7 @@ export const GetOwnSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "shareInfo.requestReference": {
+                "peerSharingDetails.sourceReference": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -13996,7 +13959,7 @@ export const GetOwnSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "shareInfo.notificationReference": {
+                "peerSharingDetails.deletionInfo": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -14009,7 +13972,7 @@ export const GetOwnSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "shareInfo.sourceAttribute": {
+                "peerSharingDetails.deletionInfo.deletionStatus": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -14022,7 +13985,7 @@ export const GetOwnSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "shareInfo.thirdPartyAddress": {
+                "peerSharingDetails.deletionInfo.deletionDate": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -14035,7 +13998,7 @@ export const GetOwnSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "deletionInfo": {
+                "forwardedSharingDetails": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -14048,7 +14011,7 @@ export const GetOwnSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "deletionInfo.deletionStatus": {
+                "forwardedSharingDetails.sourceReference": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -14061,62 +14024,7 @@ export const GetOwnSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "deletionInfo.deletionDate": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                }
-            },
-            "additionalProperties": false
-        }
-    }
-}
-
-export const GetPeerSharedAttributesRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetPeerSharedAttributesRequest",
-    "definitions": {
-        "GetPeerSharedAttributesRequest": {
-            "type": "object",
-            "properties": {
-                "peer": {
-                    "$ref": "#/definitions/AddressString"
-                },
-                "query": {
-                    "$ref": "#/definitions/GetPeerSharedAttributesRequestQuery"
-                },
-                "hideTechnical": {
-                    "type": "boolean"
-                },
-                "onlyLatestVersions": {
-                    "type": "boolean",
-                    "description": "default: true"
-                }
-            },
-            "required": [
-                "peer"
-            ],
-            "additionalProperties": false
-        },
-        "AddressString": {
-            "type": "string",
-            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
-        },
-        "GetPeerSharedAttributesRequestQuery": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "wasViewedAt": {
+                "forwardedSharingDetails.sharedAt": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -14129,7 +14037,7 @@ export const GetPeerSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "content.@type": {
+                "forwardedSharingDetails.deletionInfo": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -14142,7 +14050,7 @@ export const GetPeerSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "content.tags": {
+                "forwardedSharingDetails.deletionInfo.deletionStatus": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -14155,127 +14063,7 @@ export const GetPeerSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "content.key": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.isTechnical": {
-                    "type": "string"
-                },
-                "content.confidentiality": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.value.@type": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "shareInfo": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "shareInfo.requestReference": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "shareInfo.notificationReference": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "shareInfo.thirdPartyAddress": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "deletionInfo": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "deletionInfo.deletionStatus": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "deletionInfo.deletionDate": {
+                "forwardedSharingDetails.deletionInfo.deletionDate": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -14294,11 +14082,11 @@ export const GetPeerSharedAttributesRequest: any = {
     }
 }
 
-export const GetRepositoryAttributesRequest: any = {
+export const GetOwnIdentityAttributesRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetRepositoryAttributesRequest",
+    "$ref": "#/definitions/GetOwnIdentityAttributesRequest",
     "definitions": {
-        "GetRepositoryAttributesRequest": {
+        "GetOwnIdentityAttributesRequest": {
             "type": "object",
             "properties": {
                 "onlyLatestVersions": {
@@ -14306,12 +14094,12 @@ export const GetRepositoryAttributesRequest: any = {
                     "description": "default: true"
                 },
                 "query": {
-                    "$ref": "#/definitions/GetRepositoryAttributesRequestQuery"
+                    "$ref": "#/definitions/GetOwnIdentityAttributesRequestQuery"
                 }
             },
             "additionalProperties": false
         },
-        "GetRepositoryAttributesRequestQuery": {
+        "GetOwnIdentityAttributesRequestQuery": {
             "type": "object",
             "properties": {
                 "createdAt": {
@@ -14358,6 +14146,97 @@ export const GetRepositoryAttributesRequest: any = {
                             }
                         }
                     ]
+                },
+                "forwardedSharingDetails": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingDetails.peer": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingDetails.sourceReference": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingDetails.sharedAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingDetails.deletionInfo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingDetails.deletionInfo.deletionStatus": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingDetails.deletionInfo.deletionDate": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
                 }
             },
             "additionalProperties": false
@@ -14365,21 +14244,21 @@ export const GetRepositoryAttributesRequest: any = {
     }
 }
 
-export const GetSharedVersionsOfAttributeRequest: any = {
+export const GetPeerAttributesRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetSharedVersionsOfAttributeRequest",
+    "$ref": "#/definitions/GetPeerAttributesRequest",
     "definitions": {
-        "GetSharedVersionsOfAttributeRequest": {
+        "GetPeerAttributesRequest": {
             "type": "object",
             "properties": {
-                "attributeId": {
-                    "$ref": "#/definitions/AttributeIdString"
+                "peer": {
+                    "$ref": "#/definitions/AddressString"
                 },
-                "peers": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/AddressString"
-                    }
+                "query": {
+                    "$ref": "#/definitions/GetPeerAttributesRequestQuery"
+                },
+                "hideTechnical": {
+                    "type": "boolean"
                 },
                 "onlyLatestVersions": {
                     "type": "boolean",
@@ -14387,17 +14266,285 @@ export const GetSharedVersionsOfAttributeRequest: any = {
                 }
             },
             "required": [
-                "attributeId"
+                "peer"
             ],
             "additionalProperties": false
-        },
-        "AttributeIdString": {
-            "type": "string",
-            "pattern": "ATT[A-Za-z0-9]{17}"
         },
         "AddressString": {
             "type": "string",
             "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
+        },
+        "GetPeerAttributesRequestQuery": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "wasViewedAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.@type": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.tags": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.key": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.isTechnical": {
+                    "type": "string"
+                },
+                "content.confidentiality": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.value.@type": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "peerSharingDetails": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "peerSharingDetails.sourceReference": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "peerSharingDetails.initialAttributePeer": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "peerSharingDetails.deletionInfo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "peerSharingDetails.deletionInfo.deletionStatus": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "peerSharingDetails.deletionInfo.deletionDate": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingDetails": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingDetails.peer": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingDetails.sourceReference": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingDetails.sharedAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingDetails.deletionInfo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingDetails.deletionInfo.deletionStatus": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forwardedSharingDetails.deletionInfo.deletionDate": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": false
         }
     }
 }
@@ -14425,6 +14572,41 @@ export const GetVersionsOfAttributeRequest: any = {
     }
 }
 
+export const GetVersionsOfAttributeSharedWithPeerRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetVersionsOfAttributeSharedWithPeerRequest",
+    "definitions": {
+        "GetVersionsOfAttributeSharedWithPeerRequest": {
+            "type": "object",
+            "properties": {
+                "attributeId": {
+                    "$ref": "#/definitions/AttributeIdString"
+                },
+                "peer": {
+                    "$ref": "#/definitions/AddressString"
+                },
+                "onlyLatestVersions": {
+                    "type": "boolean",
+                    "description": "default: true"
+                }
+            },
+            "required": [
+                "attributeId",
+                "peer"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeIdString": {
+            "type": "string",
+            "pattern": "ATT[A-Za-z0-9]{17}"
+        },
+        "AddressString": {
+            "type": "string",
+            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
+        }
+    }
+}
+
 export const MarkAttributeAsViewedRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/MarkAttributeAsViewedRequest",
@@ -14448,11 +14630,11 @@ export const MarkAttributeAsViewedRequest: any = {
     }
 }
 
-export const NotifyPeerAboutRepositoryAttributeSuccessionRequest: any = {
+export const NotifyPeerAboutOwnIdentityAttributeSuccessionRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/NotifyPeerAboutRepositoryAttributeSuccessionRequest",
+    "$ref": "#/definitions/NotifyPeerAboutOwnIdentityAttributeSuccessionRequest",
     "definitions": {
-        "NotifyPeerAboutRepositoryAttributeSuccessionRequest": {
+        "NotifyPeerAboutOwnIdentityAttributeSuccessionRequest": {
             "type": "object",
             "properties": {
                 "attributeId": {
@@ -14502,11 +14684,11 @@ export const SetAttributeDeletionInfoOfDeletionProposedRelationshipRequest: any 
     }
 }
 
-export const ShareRepositoryAttributeRequest: any = {
+export const ShareOwnIdentityAttributeRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/ShareRepositoryAttributeRequest",
+    "$ref": "#/definitions/ShareOwnIdentityAttributeRequest",
     "definitions": {
-        "ShareRepositoryAttributeRequest": {
+        "ShareOwnIdentityAttributeRequest": {
             "type": "object",
             "properties": {
                 "attributeId": {
@@ -14568,666 +14750,11 @@ export const ShareRepositoryAttributeRequest: any = {
     }
 }
 
-export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
+export const SucceedOwnIdentityAttributeRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/SucceedRelationshipAttributeAndNotifyPeerRequest",
+    "$ref": "#/definitions/SucceedOwnIdentityAttributeRequest",
     "definitions": {
-        "SucceedRelationshipAttributeAndNotifyPeerRequest": {
-            "type": "object",
-            "properties": {
-                "predecessorId": {
-                    "$ref": "#/definitions/AttributeIdString"
-                },
-                "successorContent": {
-                    "type": "object",
-                    "properties": {
-                        "value": {
-                            "$ref": "#/definitions/AttributeValues.Relationship.Json"
-                        }
-                    },
-                    "required": [
-                        "value"
-                    ],
-                    "additionalProperties": false
-                }
-            },
-            "required": [
-                "predecessorId",
-                "successorContent"
-            ],
-            "additionalProperties": false
-        },
-        "AttributeIdString": {
-            "type": "string",
-            "pattern": "ATT[A-Za-z0-9]{17}"
-        },
-        "AttributeValues.Relationship.Json": {
-            "anyOf": [
-                {
-                    "$ref": "#/definitions/ProprietaryBooleanJSON"
-                },
-                {
-                    "$ref": "#/definitions/ProprietaryCountryJSON"
-                },
-                {
-                    "$ref": "#/definitions/ProprietaryEMailAddressJSON"
-                },
-                {
-                    "$ref": "#/definitions/ProprietaryFileReferenceJSON"
-                },
-                {
-                    "$ref": "#/definitions/ProprietaryFloatJSON"
-                },
-                {
-                    "$ref": "#/definitions/ProprietaryHEXColorJSON"
-                },
-                {
-                    "$ref": "#/definitions/ProprietaryIntegerJSON"
-                },
-                {
-                    "$ref": "#/definitions/ProprietaryLanguageJSON"
-                },
-                {
-                    "$ref": "#/definitions/ProprietaryPhoneNumberJSON"
-                },
-                {
-                    "$ref": "#/definitions/ProprietaryStringJSON"
-                },
-                {
-                    "$ref": "#/definitions/ProprietaryURLJSON"
-                },
-                {
-                    "$ref": "#/definitions/ProprietaryJSONJSON"
-                },
-                {
-                    "$ref": "#/definitions/ProprietaryXMLJSON"
-                },
-                {
-                    "$ref": "#/definitions/ConsentJSON"
-                }
-            ]
-        },
-        "ProprietaryBooleanJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryBoolean"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "boolean"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
-                }
-            },
-            "required": [
-                "@type",
-                "title",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "ValueHintsOverrideJSON": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ValueHints"
-                },
-                "editHelp": {
-                    "type": "string"
-                },
-                "min": {
-                    "type": "number"
-                },
-                "max": {
-                    "type": "number"
-                },
-                "pattern": {
-                    "type": "string"
-                },
-                "values": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ValueHintsValueJSON"
-                    }
-                },
-                "defaultValue": {
-                    "type": [
-                        "string",
-                        "number",
-                        "boolean"
-                    ]
-                },
-                "propertyHints": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/ValueHintsJSON"
-                    }
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                }
-            }
-        },
-        "ValueHintsValueJSON": {
-            "type": "object",
-            "properties": {
-                "key": {
-                    "type": [
-                        "string",
-                        "number",
-                        "boolean"
-                    ]
-                },
-                "displayName": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "key",
-                "displayName"
-            ],
-            "additionalProperties": false
-        },
-        "ValueHintsJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ValueHints"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "editHelp": {
-                    "type": "string"
-                },
-                "min": {
-                    "type": "number"
-                },
-                "max": {
-                    "type": "number"
-                },
-                "pattern": {
-                    "type": "string"
-                },
-                "values": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ValueHintsValueJSON"
-                    }
-                },
-                "defaultValue": {
-                    "type": [
-                        "string",
-                        "number",
-                        "boolean"
-                    ]
-                },
-                "propertyHints": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/ValueHintsJSON"
-                    }
-                }
-            },
-            "required": [
-                "@type"
-            ],
-            "additionalProperties": false
-        },
-        "ProprietaryCountryJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryCountry"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
-                }
-            },
-            "required": [
-                "@type",
-                "title",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "ProprietaryEMailAddressJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryEMailAddress"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
-                }
-            },
-            "required": [
-                "@type",
-                "title",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "ProprietaryFileReferenceJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryFileReference"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
-                }
-            },
-            "required": [
-                "@type",
-                "title",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "ProprietaryFloatJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryFloat"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "number"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
-                }
-            },
-            "required": [
-                "@type",
-                "title",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "ProprietaryHEXColorJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryHEXColor"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
-                }
-            },
-            "required": [
-                "@type",
-                "title",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "ProprietaryIntegerJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryInteger"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "number"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
-                }
-            },
-            "required": [
-                "@type",
-                "title",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "ProprietaryLanguageJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryLanguage"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
-                }
-            },
-            "required": [
-                "@type",
-                "title",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "ProprietaryPhoneNumberJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryPhoneNumber"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
-                }
-            },
-            "required": [
-                "@type",
-                "title",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "ProprietaryStringJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryString"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
-                }
-            },
-            "required": [
-                "@type",
-                "title",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "ProprietaryURLJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryURL"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
-                }
-            },
-            "required": [
-                "@type",
-                "title",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "ProprietaryJSONJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryJSON"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "value": {}
-            },
-            "required": [
-                "@type",
-                "title",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "ProprietaryXMLJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ProprietaryXML"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "valueHintsOverride": {
-                    "$ref": "#/definitions/ValueHintsOverrideJSON"
-                },
-                "schemaURL": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "title",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "ConsentJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Consent"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "consent": {
-                    "type": "string"
-                },
-                "link": {
-                    "type": "string"
-                },
-                "linkDisplayText": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "consent"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
-export const SucceedRepositoryAttributeRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/SucceedRepositoryAttributeRequest",
-    "definitions": {
-        "SucceedRepositoryAttributeRequest": {
+        "SucceedOwnIdentityAttributeRequest": {
             "type": "object",
             "properties": {
                 "predecessorId": {
@@ -16011,6 +15538,661 @@ export const SucceedRepositoryAttributeRequest: any = {
             "required": [
                 "@type",
                 "value"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
+export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/SucceedRelationshipAttributeAndNotifyPeerRequest",
+    "definitions": {
+        "SucceedRelationshipAttributeAndNotifyPeerRequest": {
+            "type": "object",
+            "properties": {
+                "predecessorId": {
+                    "$ref": "#/definitions/AttributeIdString"
+                },
+                "successorContent": {
+                    "type": "object",
+                    "properties": {
+                        "value": {
+                            "$ref": "#/definitions/AttributeValues.Relationship.Json"
+                        }
+                    },
+                    "required": [
+                        "value"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "predecessorId",
+                "successorContent"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeIdString": {
+            "type": "string",
+            "pattern": "ATT[A-Za-z0-9]{17}"
+        },
+        "AttributeValues.Relationship.Json": {
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/ProprietaryBooleanJSON"
+                },
+                {
+                    "$ref": "#/definitions/ProprietaryCountryJSON"
+                },
+                {
+                    "$ref": "#/definitions/ProprietaryEMailAddressJSON"
+                },
+                {
+                    "$ref": "#/definitions/ProprietaryFileReferenceJSON"
+                },
+                {
+                    "$ref": "#/definitions/ProprietaryFloatJSON"
+                },
+                {
+                    "$ref": "#/definitions/ProprietaryHEXColorJSON"
+                },
+                {
+                    "$ref": "#/definitions/ProprietaryIntegerJSON"
+                },
+                {
+                    "$ref": "#/definitions/ProprietaryLanguageJSON"
+                },
+                {
+                    "$ref": "#/definitions/ProprietaryPhoneNumberJSON"
+                },
+                {
+                    "$ref": "#/definitions/ProprietaryStringJSON"
+                },
+                {
+                    "$ref": "#/definitions/ProprietaryURLJSON"
+                },
+                {
+                    "$ref": "#/definitions/ProprietaryJSONJSON"
+                },
+                {
+                    "$ref": "#/definitions/ProprietaryXMLJSON"
+                },
+                {
+                    "$ref": "#/definitions/ConsentJSON"
+                }
+            ]
+        },
+        "ProprietaryBooleanJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryBoolean"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "boolean"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                }
+            },
+            "required": [
+                "@type",
+                "title",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "ValueHintsOverrideJSON": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ValueHints"
+                },
+                "editHelp": {
+                    "type": "string"
+                },
+                "min": {
+                    "type": "number"
+                },
+                "max": {
+                    "type": "number"
+                },
+                "pattern": {
+                    "type": "string"
+                },
+                "values": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ValueHintsValueJSON"
+                    }
+                },
+                "defaultValue": {
+                    "type": [
+                        "string",
+                        "number",
+                        "boolean"
+                    ]
+                },
+                "propertyHints": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/ValueHintsJSON"
+                    }
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                }
+            }
+        },
+        "ValueHintsValueJSON": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": [
+                        "string",
+                        "number",
+                        "boolean"
+                    ]
+                },
+                "displayName": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "key",
+                "displayName"
+            ],
+            "additionalProperties": false
+        },
+        "ValueHintsJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ValueHints"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "editHelp": {
+                    "type": "string"
+                },
+                "min": {
+                    "type": "number"
+                },
+                "max": {
+                    "type": "number"
+                },
+                "pattern": {
+                    "type": "string"
+                },
+                "values": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ValueHintsValueJSON"
+                    }
+                },
+                "defaultValue": {
+                    "type": [
+                        "string",
+                        "number",
+                        "boolean"
+                    ]
+                },
+                "propertyHints": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/ValueHintsJSON"
+                    }
+                }
+            },
+            "required": [
+                "@type"
+            ],
+            "additionalProperties": false
+        },
+        "ProprietaryCountryJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryCountry"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                }
+            },
+            "required": [
+                "@type",
+                "title",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "ProprietaryEMailAddressJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryEMailAddress"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                }
+            },
+            "required": [
+                "@type",
+                "title",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "ProprietaryFileReferenceJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryFileReference"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                }
+            },
+            "required": [
+                "@type",
+                "title",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "ProprietaryFloatJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryFloat"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "number"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                }
+            },
+            "required": [
+                "@type",
+                "title",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "ProprietaryHEXColorJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryHEXColor"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                }
+            },
+            "required": [
+                "@type",
+                "title",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "ProprietaryIntegerJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryInteger"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "number"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                }
+            },
+            "required": [
+                "@type",
+                "title",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "ProprietaryLanguageJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryLanguage"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                }
+            },
+            "required": [
+                "@type",
+                "title",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "ProprietaryPhoneNumberJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryPhoneNumber"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                }
+            },
+            "required": [
+                "@type",
+                "title",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "ProprietaryStringJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryString"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                }
+            },
+            "required": [
+                "@type",
+                "title",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "ProprietaryURLJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryURL"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                }
+            },
+            "required": [
+                "@type",
+                "title",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "ProprietaryJSONJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryJSON"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "value": {}
+            },
+            "required": [
+                "@type",
+                "title",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "ProprietaryXMLJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ProprietaryXML"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "valueHintsOverride": {
+                    "$ref": "#/definitions/ValueHintsOverrideJSON"
+                },
+                "schemaURL": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "title",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "ConsentJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "Consent"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "consent": {
+                    "type": "string"
+                },
+                "link": {
+                    "type": "string"
+                },
+                "linkDisplayText": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "consent"
             ],
             "additionalProperties": false
         }
