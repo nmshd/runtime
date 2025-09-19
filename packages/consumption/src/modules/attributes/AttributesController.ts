@@ -869,7 +869,7 @@ export class AttributesController extends ConsumptionBaseController {
         const localAttribute = await this.getLocalAttribute(attribute.id);
         if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
         if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
-        
+
         attribute.forwardedSharingDetails = attribute.forwardedSharingDetails?.filter((sharingDetails) => !sharingDetails.peer.equals(peer));
         await this.updateAttributeUnsafe(attribute);
 
@@ -1036,7 +1036,7 @@ export class AttributesController extends ConsumptionBaseController {
         const localAttribute = await this.getLocalAttribute(referenceAttribute.id);
         if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, referenceAttribute.id.toString());
         if (!_.isEqual(referenceAttribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
-        
+
         const matchingPredecessors: T[] = [];
         while (referenceAttribute.succeeds) {
             const predecessor = (await this.getLocalAttribute(referenceAttribute.succeeds)) as T | undefined;
@@ -1058,7 +1058,7 @@ export class AttributesController extends ConsumptionBaseController {
         const localAttribute = await this.getLocalAttribute(referenceAttribute.id);
         if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, referenceAttribute.id.toString());
         if (!_.isEqual(referenceAttribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
-        
+
         const matchingSuccessors: T[] = [];
         while (referenceAttribute.succeededBy) {
             const successor = (await this.getLocalAttribute(referenceAttribute.succeededBy)) as T | undefined;
@@ -1460,7 +1460,7 @@ export class AttributesController extends ConsumptionBaseController {
         const localAttribute = await this.getLocalAttribute(attribute.id);
         if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
         if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
-        
+
         if (attribute.isDeletedOrToBeDeletedByForwardingPeer(peer) && !overrideDeletedOrToBeDeleted) return;
 
         attribute.setDeletionInfoForForwardingPeer(deletionInfo, peer, overrideDeletedOrToBeDeleted);
