@@ -1,11 +1,11 @@
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController, AttributeSuccessorParams, ConsumptionCoreErrors, ConsumptionIds } from "@nmshd/consumption";
-import { AttributeValues, Notification, PeerSharedAttributeSucceededNotificationItem, RelationshipAttribute, RelationshipAttributeJSON } from "@nmshd/content";
+import { AttributesController, ConsumptionCoreErrors, ConsumptionIds, OwnRelationshipAttribute, OwnRelationshipAttributeSuccessorParams } from "@nmshd/consumption";
+import { AttributeValues, Notification, PeerAttributeSucceededNotificationItem, RelationshipAttribute } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { AccountController, MessageController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { AttributeIdString, NotificationIdString, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { AttributeIdString, NotificationIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { AttributeMapper } from "./AttributeMapper";
 
 export interface SucceedRelationshipAttributeAndNotifyPeerResponse {
@@ -41,32 +41,32 @@ export class SucceedRelationshipAttributeAndNotifyPeerUseCase extends UseCase<Su
         const predecessor = await this.attributeController.getLocalAttribute(CoreId.from(request.predecessorId));
         if (!predecessor) return Result.fail(ConsumptionCoreErrors.attributes.predecessorDoesNotExist());
 
-        if (!predecessor.isOwnSharedRelationshipAttribute(this.accountController.identity.address, predecessor.shareInfo?.peer)) {
-            return Result.fail(ConsumptionCoreErrors.attributes.predecessorIsNotOwnSharedRelationshipAttribute());
-        }
+        if (!(predecessor instanceof OwnRelationshipAttribute)) return Result.fail(RuntimeErrors.attributes.isNotOwnRelationshipAttribute(predecessor.id));
 
-        const notificationId = await ConsumptionIds.notification.generate();
-        const predecessorId = CoreId.from(request.predecessorId);
-        const att: RelationshipAttributeJSON = {
+        const successorContent = RelationshipAttribute.from({
             "@type": "RelationshipAttribute",
             ...request.successorContent,
             confidentiality: predecessor.content.confidentiality,
             isTechnical: predecessor.content.isTechnical,
             key: predecessor.content.key,
             owner: predecessor.content.owner.toString()
-        };
-        const successorParams = AttributeSuccessorParams.from({
-            content: RelationshipAttribute.from(att),
-            shareInfo: { peer: predecessor.shareInfo.peer, notificationReference: notificationId }
         });
-        const validationResult = await this.attributeController.validateOwnSharedRelationshipAttributeSuccession(predecessorId, successorParams);
-        if (validationResult.isError()) {
-            return Result.fail(validationResult.error);
-        }
 
-        const { predecessor: updatedPredecessor, successor } = await this.attributeController.succeedOwnSharedRelationshipAttribute(predecessorId, successorParams, false);
+        const peer = predecessor.peerSharingDetails.peer;
 
-        const notificationItem = PeerSharedAttributeSucceededNotificationItem.from({
+        const notificationId = await ConsumptionIds.notification.generate();
+
+        const successorParams = OwnRelationshipAttributeSuccessorParams.from({
+            content: successorContent,
+            sourceReference: notificationId
+        });
+
+        const validationResult = await this.attributeController.validateOwnRelationshipAttributeSuccession(predecessor, successorParams);
+        if (validationResult.isError()) return Result.fail(validationResult.error);
+
+        const { predecessor: updatedPredecessor, successor } = await this.attributeController.succeedOwnRelationshipAttribute(predecessor, successorParams, false);
+
+        const notificationItem = PeerAttributeSucceededNotificationItem.from({
             predecessorId: predecessor.id,
             successorId: successor.id,
             successorContent: successor.content
@@ -75,8 +75,9 @@ export class SucceedRelationshipAttributeAndNotifyPeerUseCase extends UseCase<Su
             id: notificationId,
             items: [notificationItem]
         });
+
         await this.messageController.sendMessage({
-            recipients: [predecessor.shareInfo.peer],
+            recipients: [peer],
             content: notification
         });
 

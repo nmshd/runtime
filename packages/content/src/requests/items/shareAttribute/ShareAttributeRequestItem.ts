@@ -7,13 +7,13 @@ import { IRequestItem, RequestItem } from "../../RequestItem";
 export interface ShareAttributeRequestItemJSON extends RequestItemJSON {
     "@type": "ShareAttributeRequestItem";
     attribute: IdentityAttributeJSON | RelationshipAttributeJSON;
-    sourceAttributeId: string;
+    attributeId: string;
     thirdPartyAddress?: string;
 }
 
 export interface IShareAttributeRequestItem extends IRequestItem {
     attribute: IIdentityAttribute | IRelationshipAttribute;
-    sourceAttributeId: ICoreId;
+    attributeId: ICoreId;
     thirdPartyAddress?: CoreAddress;
 }
 
@@ -25,7 +25,7 @@ export class ShareAttributeRequestItem extends RequestItem implements IShareAttr
 
     @serialize()
     @validate()
-    public sourceAttributeId: CoreId;
+    public attributeId: CoreId;
 
     @serialize()
     @validate({ nullable: true })

@@ -7,7 +7,7 @@ import {
     ReadAttributeAcceptResponseItem,
     ResponseItemResult
 } from "@nmshd/content";
-import { AttributesController, LocalAttribute, LocalAttributeDeletionStatus, LocalAttributeShareInfo } from "../../../attributes";
+import { AttributesController, OwnIdentityAttribute } from "../../../attributes";
 import { LocalRequestInfo } from "../IRequestItemProcessor";
 
 export default async function createAppropriateResponseItem(
@@ -40,104 +40,83 @@ export default async function createAppropriateResponseItem(
     | AttributeAlreadySharedAcceptResponseItem
     | AttributeSuccessionAcceptResponseItem
 > {
-    const repositoryAttribute = await getSourceRepositoryAttribute(identityAttribute, attributesController);
+    const ownIdentityAttribute = await getOwnIdentityAttribute(identityAttribute, attributesController);
 
-    const query = {
-        "deletionInfo.deletionStatus": {
-            $nin: [
-                LocalAttributeDeletionStatus.DeletedByPeer,
-                LocalAttributeDeletionStatus.DeletedByOwner,
-                LocalAttributeDeletionStatus.ToBeDeletedByPeer,
-                LocalAttributeDeletionStatus.ToBeDeleted
-            ]
-        }
-    };
-    const latestSharedVersions = await attributesController.getSharedVersionsOfAttribute(repositoryAttribute.id, [requestInfo.peer], true, query);
+    const latestSharedVersions = await attributesController.getVersionsOfAttributeSharedWithPeer(ownIdentityAttribute, requestInfo.peer);
     const latestSharedVersion = latestSharedVersions.length > 0 ? latestSharedVersions[0] : undefined;
 
     if (!latestSharedVersion) {
-        const newOwnSharedIdentityAttribute = await attributesController.createSharedLocalAttributeCopy({
-            peer: requestInfo.peer,
-            requestReference: requestInfo.id,
-            sourceAttributeId: repositoryAttribute.id
-        });
+        const updatedAttribute = await attributesController.addForwardedSharingDetailsToAttribute(ownIdentityAttribute, requestInfo.peer, requestInfo.id);
 
         switch (itemType) {
             case "Create":
                 return CreateAttributeAcceptResponseItem.from({
                     result: ResponseItemResult.Accepted,
-                    attributeId: newOwnSharedIdentityAttribute.id
+                    attributeId: updatedAttribute.id
                 });
             case "Read":
                 return ReadAttributeAcceptResponseItem.from({
                     result: ResponseItemResult.Accepted,
-                    attributeId: newOwnSharedIdentityAttribute.id,
-                    attribute: newOwnSharedIdentityAttribute.content
+                    attributeId: ownIdentityAttribute.id,
+                    attribute: updatedAttribute.content
                 });
             case "Propose":
                 return ProposeAttributeAcceptResponseItem.from({
                     result: ResponseItemResult.Accepted,
-                    attributeId: newOwnSharedIdentityAttribute.id,
-                    attribute: newOwnSharedIdentityAttribute.content
+                    attributeId: ownIdentityAttribute.id,
+                    attribute: updatedAttribute.content
                 });
         }
     }
 
-    if (latestSharedVersion.shareInfo!.sourceAttribute!.equals(repositoryAttribute.id)) {
+    if (latestSharedVersion.id.equals(ownIdentityAttribute.id)) {
+        if (latestSharedVersion.hasDeletionStatusUnequalDeletedByPeer(requestInfo.peer)) {
+            await attributesController.setForwardedDeletionInfoOfAttribute(latestSharedVersion, undefined, requestInfo.peer, true);
+        }
+
         return AttributeAlreadySharedAcceptResponseItem.from({
             result: ResponseItemResult.Accepted,
             attributeId: latestSharedVersion.id
         });
     }
 
-    const ownSharedIdentityAttributeSuccessorParams = {
-        content: repositoryAttribute.content,
-        shareInfo: LocalAttributeShareInfo.from({
-            peer: requestInfo.peer,
-            requestReference: requestInfo.id,
-            sourceAttribute: repositoryAttribute.id
-        })
-    };
-    const ownSharedIdentityAttributesAfterSuccession = await attributesController.succeedOwnSharedIdentityAttribute(
-        latestSharedVersion.id,
-        ownSharedIdentityAttributeSuccessorParams
-    );
-    const succeededOwnSharedIdentityAttribute = ownSharedIdentityAttributesAfterSuccession.successor;
+    const updatedAttribute = await attributesController.addForwardedSharingDetailsToAttribute(ownIdentityAttribute, requestInfo.peer, requestInfo.id);
 
     return AttributeSuccessionAcceptResponseItem.from({
         result: ResponseItemResult.Accepted,
-        successorId: succeededOwnSharedIdentityAttribute.id,
-        successorContent: succeededOwnSharedIdentityAttribute.content,
+        successorId: updatedAttribute.id,
+        successorContent: updatedAttribute.content,
         predecessorId: latestSharedVersion.id
     });
 }
 
-async function getSourceRepositoryAttribute(attribute: IdentityAttribute, attributesController: AttributesController): Promise<LocalAttribute> {
-    const existingRepositoryAttribute = await attributesController.getRepositoryAttributeWithSameValue((attribute.value as any).toJSON());
+async function getOwnIdentityAttribute(attribute: IdentityAttribute, attributesController: AttributesController): Promise<OwnIdentityAttribute> {
+    const existingOwnIdentityAttribute = await attributesController.getOwnIdentityAttributeWithSameValue((attribute.value as any).toJSON());
 
-    if (!existingRepositoryAttribute) {
-        return await attributesController.createRepositoryAttribute({
-            content: attribute
-        });
+    if (!existingOwnIdentityAttribute) {
+        return await attributesController.createOwnIdentityAttribute({ content: attribute });
     }
 
-    const newTags = attribute.tags?.filter((tag) => !(existingRepositoryAttribute.content as IdentityAttribute).tags?.includes(tag));
-    if (!newTags || newTags.length === 0) return existingRepositoryAttribute;
+    const newTags = attribute.tags?.filter((tag) => !existingOwnIdentityAttribute.content.tags?.includes(tag));
+    if (!newTags || newTags.length === 0) return existingOwnIdentityAttribute;
 
-    const succeededRepositoryAttribute = await mergeTagsOfRepositoryAttribute(existingRepositoryAttribute, newTags, attributesController);
-    return succeededRepositoryAttribute;
+    const succeededOwnIdentityAttribute = await mergeTagsOfOwnIdentityAttribute(existingOwnIdentityAttribute, newTags, attributesController);
+    return succeededOwnIdentityAttribute;
 }
 
-async function mergeTagsOfRepositoryAttribute(existingRepositoryAttribute: LocalAttribute, newTags: string[], attributesController: AttributesController): Promise<LocalAttribute> {
-    const repositoryAttributeSuccessorParams = {
+async function mergeTagsOfOwnIdentityAttribute(
+    ownIdentityAttribute: OwnIdentityAttribute,
+    newTags: string[],
+    attributesController: AttributesController
+): Promise<OwnIdentityAttribute> {
+    const ownIdentityAttributeSuccessorParams = {
         content: {
-            ...existingRepositoryAttribute.content.toJSON(),
-            tags: [...((existingRepositoryAttribute.content as IdentityAttribute).tags ?? []), ...newTags]
+            ...ownIdentityAttribute.content.toJSON(),
+            tags: [...(ownIdentityAttribute.content.tags ?? []), ...newTags]
         },
-        succeeds: existingRepositoryAttribute.id.toString()
+        succeeds: ownIdentityAttribute.id.toString()
     };
 
-    const repositoryAttributesAfterSuccession = await attributesController.succeedRepositoryAttribute(existingRepositoryAttribute.id, repositoryAttributeSuccessorParams);
-
-    return repositoryAttributesAfterSuccession.successor;
+    const ownIdentityAttributesAfterSuccession = await attributesController.succeedOwnIdentityAttribute(ownIdentityAttribute, ownIdentityAttributeSuccessorParams);
+    return ownIdentityAttributesAfterSuccession.successor;
 }
