@@ -13,7 +13,6 @@ export class DeviceMapper {
             name: device.name,
             type: device.type.toString(),
             username: device.username,
-            certificate: device.certificate,
             description: device.description,
             lastLoginAt: device.lastLoginAt?.toString(),
             operatingSystem: device.operatingSystem,

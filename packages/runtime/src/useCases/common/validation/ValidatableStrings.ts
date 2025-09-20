@@ -59,11 +59,6 @@ export type DeviceIdString = string;
 export type FileIdString = string;
 
 /**
- * @pattern ATL[A-Za-z0-9]{17}
- */
-export type AttributeListenerIdString = string;
-
-/**
  * @pattern NOT[A-Za-z0-9]{17}
  */
 export type NotificationIdString = string;

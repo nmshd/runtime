@@ -39,7 +39,7 @@ export class NotificationsController extends ConsumptionBaseController {
 
         const content = this.extractNotificationFromMessage(message);
 
-        const recipients = message.cache!.recipients;
+        const recipients = message.recipients;
         if (recipients.length > 1) throw new Error("Message contains more than one recipient.");
 
         const notification = LocalNotification.from({
@@ -47,7 +47,7 @@ export class NotificationsController extends ConsumptionBaseController {
             content,
             status: LocalNotificationStatus.Sent,
             isOwn: true,
-            createdAt: message.cache!.createdAt,
+            createdAt: message.createdAt,
             peer: recipients[0].address,
             source: LocalNotificationSource.message(message.id)
         });
@@ -66,8 +66,8 @@ export class NotificationsController extends ConsumptionBaseController {
             content,
             status: LocalNotificationStatus.Open,
             isOwn: false,
-            createdAt: message.cache!.createdAt,
-            peer: message.cache!.createdBy,
+            createdAt: message.createdAt,
+            peer: message.createdBy,
             source: LocalNotificationSource.message(message.id),
             receivedByDevice: this.device.id
         });
@@ -78,11 +78,11 @@ export class NotificationsController extends ConsumptionBaseController {
     }
 
     private extractNotificationFromMessage(message: Message): Notification {
-        if (!(message.cache!.content instanceof Notification)) {
+        if (!(message.content instanceof Notification)) {
             throw new Error("Message does not contain a Notification.");
         }
 
-        return message.cache!.content;
+        return message.content;
     }
 
     public async processOpenNotifactionsReceivedByCurrentDevice(): Promise<void> {

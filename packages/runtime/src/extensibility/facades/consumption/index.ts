@@ -1,4 +1,3 @@
-export * from "./AttributeListenersFacade";
 export * from "./AttributesFacade";
 export * from "./DraftsFacade";
 export * from "./IdentityMetadataFacade";

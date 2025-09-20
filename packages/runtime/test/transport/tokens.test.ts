@@ -39,7 +39,7 @@ describe("Tokens", () => {
 
     test("load peer Token by truncated reference", async () => {
         const uploadedToken = await uploadOwnToken(runtimeServices1.transport);
-        const result = await runtimeServices2.transport.tokens.loadPeerToken({ reference: uploadedToken.truncatedReference, ephemeral: false });
+        const result = await runtimeServices2.transport.tokens.loadPeerToken({ reference: uploadedToken.reference.truncated, ephemeral: false });
         expect(result).toBeSuccessful();
 
         const token = result.value;
@@ -224,7 +224,7 @@ describe("Personalized tokens", () => {
         });
         expect(createResult).toBeSuccessful();
 
-        const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: createResult.value.truncatedReference, ephemeral: true });
+        const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: createResult.value.reference.truncated, ephemeral: true });
         expect(loadResult).toBeSuccessful();
         expect(loadResult.value.forIdentity).toBe(runtimeServices2.address);
     });
@@ -238,7 +238,7 @@ describe("Personalized tokens", () => {
         });
         expect(createResult).toBeSuccessful();
 
-        const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: createResult.value.truncatedReference, ephemeral: true });
+        const loadResult = await runtimeServices2.transport.tokens.loadPeerToken({ reference: createResult.value.reference.truncated, ephemeral: true });
         expect(loadResult).toBeAnError(/.*/, "error.transport.general.notIntendedForYou");
     });
 });

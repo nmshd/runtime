@@ -1,5 +1,6 @@
 import { CoreId } from "@nmshd/core-types";
-import { IdentityDeletionProcessStatus } from "@nmshd/runtime";
+import { DeviceMapper, IdentityDeletionProcessStatus } from "@nmshd/runtime";
+import { TokenContentDeviceSharedSecret } from "@nmshd/transport";
 import { AppRuntime, LocalAccountDeletionDateChangedEvent, LocalAccountDTO, LocalAccountSession } from "../../src";
 import { MockEventBus, TestUtil } from "../lib";
 
@@ -72,9 +73,10 @@ describe("IdentityDeletionProcessStatusChanged", function () {
             runtime2 = await TestUtil.createRuntime(undefined, undefined, eventBusRuntime2);
             await runtime2.start();
 
-            const createDeviceResult = await session1.transportServices.devices.createDevice({ name: "aName", isAdmin: true });
-            const onboardingInfoResult = await session1.transportServices.devices.getDeviceOnboardingInfo({ id: createDeviceResult.value.id, profileName: "aProfileName" });
-            const localAccountDevice2 = await runtime2.accountServices.onboardAccount(onboardingInfoResult.value);
+            const emptyToken = await runtime2.anonymousServices.tokens.createEmptyToken();
+            const fillResult = await session1.transportServices.devices.fillDeviceOnboardingTokenWithNewDevice({ reference: emptyToken.value.reference.truncated });
+            const deviceOnboardingDTO = DeviceMapper.toDeviceOnboardingInfoDTO(TokenContentDeviceSharedSecret.from(fillResult.value.content).sharedSecret);
+            const localAccountDevice2 = await runtime2.accountServices.onboardAccount(deviceOnboardingDTO);
             session2 = await runtime2.selectAccount(localAccountDevice2.id.toString());
 
             await session1.transportServices.account.syncDatawallet();
