@@ -2311,7 +2311,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 deletionStatus: ReceivedAttributeDeletionStatus.ToBeDeleted,
                 deletionDate: CoreDate.utc().add({ days: 1 })
             });
-            await consumptionController.attributes.setPeerDeletionInfoOfPeerAttribute(predecessorPeerIdentityAttribute, deletionInfo);
+            await consumptionController.attributes.setPeerDeletionInfoOfReceivedAttribute(predecessorPeerIdentityAttribute, deletionInfo);
 
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: true,
@@ -2373,7 +2373,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 deletionStatus: ReceivedAttributeDeletionStatus.ToBeDeleted,
                 deletionDate: CoreDate.utc().add({ days: 1 })
             });
-            await consumptionController.attributes.setPeerDeletionInfoOfPeerAttribute(existingPeerIdentityAttribute, deletionInfo);
+            await consumptionController.attributes.setPeerDeletionInfoOfReceivedAttribute(existingPeerIdentityAttribute, deletionInfo);
 
             const requestItem = ProposeAttributeRequestItem.from({
                 mustBeAccepted: true,

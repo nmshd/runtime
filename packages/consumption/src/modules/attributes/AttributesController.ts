@@ -1369,7 +1369,7 @@ export class AttributesController extends ConsumptionBaseController {
         })) as PeerIdentityAttribute[];
 
         for (const attribute of attributesSharedWithPeer) {
-            await this.setPeerDeletionInfoOfPeerAttribute(attribute, deletionInfo);
+            await this.setPeerDeletionInfoOfReceivedAttribute(attribute, deletionInfo);
         }
     }
 
@@ -1403,7 +1403,7 @@ export class AttributesController extends ConsumptionBaseController {
         })) as PeerRelationshipAttribute[];
 
         for (const attribute of attributesSharedWithPeer) {
-            await this.setPeerDeletionInfoOfPeerAttribute(attribute, deletionInfo);
+            await this.setPeerDeletionInfoOfReceivedAttribute(attribute, deletionInfo);
         }
     }
 
@@ -1437,7 +1437,7 @@ export class AttributesController extends ConsumptionBaseController {
         })) as ThirdPartyRelationshipAttribute[];
 
         for (const attribute of attributesSharedWithPeer) {
-            await this.setPeerDeletionInfoOfThirdPartyRelationshipAttribute(attribute, deletionInfo);
+            await this.setPeerDeletionInfoOfReceivedAttribute(attribute, deletionInfo);
         }
     }
 
@@ -1472,23 +1472,8 @@ export class AttributesController extends ConsumptionBaseController {
         await this.parent.attributes.updateAttributeUnsafe(attribute);
     }
 
-    public async setPeerDeletionInfoOfPeerAttribute(
-        attribute: PeerIdentityAttribute | PeerRelationshipAttribute,
-        deletionInfo: ReceivedAttributeDeletionInfo | undefined,
-        overrideDeletedOrToBeDeleted = false
-    ): Promise<void> {
-        const localAttribute = await this.getLocalAttribute(attribute.id);
-        if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
-        if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
-
-        if (attribute.isDeletedByEmitterOrToBeDeleted() && !overrideDeletedOrToBeDeleted) return;
-
-        attribute.setPeerDeletionInfo(deletionInfo, overrideDeletedOrToBeDeleted);
-        await this.parent.attributes.updateAttributeUnsafe(attribute);
-    }
-
-    public async setPeerDeletionInfoOfThirdPartyRelationshipAttribute(
-        attribute: ThirdPartyRelationshipAttribute,
+    public async setPeerDeletionInfoOfReceivedAttribute(
+        attribute: PeerIdentityAttribute | PeerRelationshipAttribute | ThirdPartyRelationshipAttribute,
         deletionInfo: ReceivedAttributeDeletionInfo | undefined,
         overrideDeletedOrToBeDeleted = false
     ): Promise<void> {
@@ -1535,7 +1520,7 @@ export class AttributesController extends ConsumptionBaseController {
         const predecessors = await this.getPredecessorsOfAttribute(attribute);
 
         for (const attr of [attribute, ...predecessors]) {
-            await this.setPeerDeletionInfoOfPeerAttribute(attr, deletionInfo, overrideDeletedOrToBeDeleted);
+            await this.setPeerDeletionInfoOfReceivedAttribute(attr, deletionInfo, overrideDeletedOrToBeDeleted);
         }
     }
 
@@ -1547,7 +1532,7 @@ export class AttributesController extends ConsumptionBaseController {
         const predecessors = await this.getPredecessorsOfAttribute(attribute);
 
         for (const attr of [attribute, ...predecessors]) {
-            await this.setPeerDeletionInfoOfThirdPartyRelationshipAttribute(attr, deletionInfo, overrideDeletedOrToBeDeleted);
+            await this.setPeerDeletionInfoOfReceivedAttribute(attr, deletionInfo, overrideDeletedOrToBeDeleted);
         }
     }
 

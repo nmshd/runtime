@@ -1417,7 +1417,7 @@ describe("AttributesController", function () {
                     sourceReference: CoreId.from("aSourceReferenceId"),
                     id: CoreId.from("aPredecessorId")
                 });
-                await consumptionController.attributes.setPeerDeletionInfoOfPeerAttribute(
+                await consumptionController.attributes.setPeerDeletionInfoOfReceivedAttribute(
                     predecessor,
                     ReceivedAttributeDeletionInfo.from({
                         deletionStatus: ReceivedAttributeDeletionStatus.DeletedByEmitter,
@@ -1456,7 +1456,7 @@ describe("AttributesController", function () {
                     sourceReference: CoreId.from("aSourceReferenceId"),
                     id: CoreId.from("aPredecessorId")
                 });
-                await consumptionController.attributes.setPeerDeletionInfoOfPeerAttribute(
+                await consumptionController.attributes.setPeerDeletionInfoOfReceivedAttribute(
                     predecessor,
                     ReceivedAttributeDeletionInfo.from({
                         deletionStatus: ReceivedAttributeDeletionStatus.ToBeDeleted,

@@ -322,7 +322,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
 
             if (attribute.peerSharingDetails.deletionInfo?.deletionStatus !== ReceivedAttributeDeletionStatus.ToBeDeleted) return;
 
-            await this.consumptionController.attributes.setPeerDeletionInfoOfPeerAttribute(attribute, undefined, true);
+            await this.consumptionController.attributes.setPeerDeletionInfoOfReceivedAttribute(attribute, undefined, true);
             return;
         }
 

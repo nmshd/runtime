@@ -926,7 +926,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 id: CoreId.from("aPeerIdentityAttributeId")
             });
 
-            await consumptionController.attributes.setPeerDeletionInfoOfPeerAttribute(
+            await consumptionController.attributes.setPeerDeletionInfoOfReceivedAttribute(
                 existingPeerIdentityAttribute,
                 ReceivedAttributeDeletionInfo.from({
                     deletionStatus: ReceivedAttributeDeletionStatus.DeletedByEmitter,
@@ -991,7 +991,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 id: CoreId.from("aPeerIdentityAttributeId")
             });
 
-            await consumptionController.attributes.setPeerDeletionInfoOfPeerAttribute(
+            await consumptionController.attributes.setPeerDeletionInfoOfReceivedAttribute(
                 existingPeerIdentityAttribute,
                 ReceivedAttributeDeletionInfo.from({
                     deletionStatus: ReceivedAttributeDeletionStatus.ToBeDeleted,
@@ -1093,7 +1093,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 id: CoreId.from("aThirdPartyRelationshipAttributeId")
             });
 
-            await consumptionController.attributes.setPeerDeletionInfoOfThirdPartyRelationshipAttribute(
+            await consumptionController.attributes.setPeerDeletionInfoOfReceivedAttribute(
                 existingThirdPartyRelationshipAttribute,
                 ReceivedAttributeDeletionInfo.from({
                     deletionStatus: ReceivedAttributeDeletionStatus.DeletedByEmitter,
@@ -1162,7 +1162,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 id: CoreId.from("aThirdPartyRelationshipAttributeId")
             });
 
-            await consumptionController.attributes.setPeerDeletionInfoOfThirdPartyRelationshipAttribute(
+            await consumptionController.attributes.setPeerDeletionInfoOfReceivedAttribute(
                 existingThirdPartyRelationshipAttribute,
                 ReceivedAttributeDeletionInfo.from({
                     deletionStatus: ReceivedAttributeDeletionStatus.ToBeDeleted,

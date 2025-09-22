@@ -173,7 +173,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
 
             if (existingThirdPartyRelationshipAttribute) {
                 if (existingThirdPartyRelationshipAttribute.peerSharingDetails.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.ToBeDeleted) {
-                    await this.consumptionController.attributes.setPeerDeletionInfoOfThirdPartyRelationshipAttribute(existingThirdPartyRelationshipAttribute, undefined, true);
+                    await this.consumptionController.attributes.setPeerDeletionInfoOfReceivedAttribute(existingThirdPartyRelationshipAttribute, undefined, true);
                 }
 
                 return AttributeAlreadySharedAcceptResponseItem.from({
@@ -200,7 +200,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
 
         if (existingPeerIdentityAttribute) {
             if (existingPeerIdentityAttribute.peerSharingDetails.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.ToBeDeleted) {
-                await this.consumptionController.attributes.setPeerDeletionInfoOfPeerAttribute(existingPeerIdentityAttribute, undefined, true);
+                await this.consumptionController.attributes.setPeerDeletionInfoOfReceivedAttribute(existingPeerIdentityAttribute, undefined, true);
             }
 
             return AttributeAlreadySharedAcceptResponseItem.from({
