@@ -35,7 +35,7 @@ afterEach(async () => {
         return;
     }
     let abortResult;
-    if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Approved) {
+    if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Active) {
         abortResult = await transportService.identityDeletionProcesses.cancelIdentityDeletionProcess();
     }
 
@@ -49,13 +49,13 @@ describe("IdentityDeletionProcess", () => {
             expect(result).toBeSuccessful();
 
             const identityDeletionProcess = result.value;
-            expect(identityDeletionProcess.status).toBe(IdentityDeletionProcessStatus.Approved);
+            expect(identityDeletionProcess.status).toBe(IdentityDeletionProcessStatus.Active);
 
             await expect(eventBus).toHavePublished(IdentityDeletionProcessStatusChangedEvent, (e) => e.data!.id === identityDeletionProcess.id);
-            await expect(eventBus).toHavePublished(IdentityDeletionProcessStatusChangedEvent, (e) => e.data!.status === IdentityDeletionProcessStatus.Approved);
+            await expect(eventBus).toHavePublished(IdentityDeletionProcessStatusChangedEvent, (e) => e.data!.status === IdentityDeletionProcessStatus.Active);
         });
 
-        test("should return an error trying to initiate an IdentityDeletionProcess if there already is one approved", async function () {
+        test("should return an error trying to initiate an IdentityDeletionProcess if there already is one active", async function () {
             await transportService.identityDeletionProcesses.initiateIdentityDeletionProcess();
             const result = await transportService.identityDeletionProcesses.initiateIdentityDeletionProcess();
             expect(result).toBeAnError(
@@ -122,7 +122,7 @@ describe("IdentityDeletionProcess", () => {
             expect(identityDeletionProcesses[0].id.toString()).toBe(cancelledIdentityDeletionProcess.id.toString());
             expect(identityDeletionProcesses[0].status).toBe(IdentityDeletionProcessStatus.Cancelled);
             expect(identityDeletionProcesses[1].id.toString()).toBe(activeIdentityDeletionProcess.id.toString());
-            expect(identityDeletionProcesses[1].status).toBe(IdentityDeletionProcessStatus.Approved);
+            expect(identityDeletionProcesses[1].status).toBe(IdentityDeletionProcessStatus.Active);
         });
 
         test("should return an empty list trying to get all IdentityDeletionProcesses if there are none", async function () {
@@ -155,7 +155,7 @@ describe("IdentityDeletionProcess", () => {
 
         test("should return an error trying to cancel an IdentityDeletionProcess if there is none active", async function () {
             const result = await transportService.identityDeletionProcesses.cancelIdentityDeletionProcess();
-            expect(result).toBeAnError("No approved IdentityDeletionProcess found.", "error.runtime.identityDeletionProcess.noApprovedIdentityDeletionProcess");
+            expect(result).toBeAnError("No active IdentityDeletionProcess found.", "error.runtime.identityDeletionProcess.noActiveIdentityDeletionProcess");
         });
     });
 });

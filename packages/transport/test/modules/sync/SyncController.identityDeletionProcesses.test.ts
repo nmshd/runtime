@@ -21,7 +21,7 @@ describe("IdentityDeletionProcessSync", function () {
         const identityDeletionProcess = await account1.identityDeletionProcess.initiateIdentityDeletionProcess();
         await account1.syncDatawallet();
         await account2.syncDatawallet();
-        const result = await account2.identityDeletionProcess.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.Approved);
+        const result = await account2.identityDeletionProcess.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.Active);
         expect(result).toBeDefined();
         expect(result).toStrictEqual(identityDeletionProcess);
     });

@@ -303,8 +303,8 @@ describe("MessageController", function () {
         let identityDeletionProcessOfRecipient: IdentityDeletionProcess;
 
         beforeEach(async function () {
-            const approvedIdentityDeletionProcess = await recipient.identityDeletionProcess.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.Approved);
-            if (!approvedIdentityDeletionProcess) {
+            const activeIdentityDeletionProcess = await recipient.identityDeletionProcess.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.Active);
+            if (!activeIdentityDeletionProcess) {
                 identityDeletionProcessOfRecipient = await recipient.identityDeletionProcess.initiateIdentityDeletionProcess();
                 await TestUtil.syncUntilHasRelationships(sender);
             }

@@ -3,6 +3,6 @@ import { RESTClientAuthenticate } from "../../../core/backbone/RESTClientAuthent
 
 export class BackboneNotificationsClient extends RESTClientAuthenticate {
     public async sendNotification(input: { recipients: string[]; code: string }): Promise<ClientResult<void>> {
-        return await this.post<void>("/api/v1/Notifications", input);
+        return await this.post<void>("/api/v2/Notifications", input);
     }
 }
