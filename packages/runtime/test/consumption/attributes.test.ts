@@ -3080,7 +3080,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 const timeAfterUpdate = CoreDate.utc();
 
                 const updatedThirdPartyRelationshipAttribute = (await services3.consumption.attributes.getAttribute({ id: forwardedPeerRelationshipAttributeVersion0.id })).value;
-                expect(updatedThirdPartyRelationshipAttribute.peerSharingDetails!.deletionInfo!.deletionStatus).toBe("DeletedByRecipient");
+                expect(updatedThirdPartyRelationshipAttribute.peerSharingDetails!.deletionInfo!.deletionStatus).toBe("DeletedByEmitter");
                 expect(
                     CoreDate.from(updatedThirdPartyRelationshipAttribute.peerSharingDetails!.deletionInfo!.deletionDate).isBetween(timeBeforeUpdate, timeAfterUpdate.add(1))
                 ).toBe(true);
@@ -3100,7 +3100,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 const updatedPredecessorThirdPartyRelationshipAttribute = (
                     await services3.consumption.attributes.getAttribute({ id: forwardedPeerRelationshipAttributeVersion0.id })
                 ).value;
-                expect(updatedPredecessorThirdPartyRelationshipAttribute.peerSharingDetails!.deletionInfo!.deletionStatus).toBe("DeletedByRecipient");
+                expect(updatedPredecessorThirdPartyRelationshipAttribute.peerSharingDetails!.deletionInfo!.deletionStatus).toBe("DeletedByEmitter");
                 expect(
                     CoreDate.from(updatedPredecessorThirdPartyRelationshipAttribute.peerSharingDetails!.deletionInfo!.deletionDate).isBetween(
                         timeBeforeUpdate,
