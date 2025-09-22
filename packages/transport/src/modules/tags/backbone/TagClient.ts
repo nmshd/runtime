@@ -10,7 +10,7 @@ export class TagClient extends RESTClientAuthenticate {
             headers["if-none-match"] = etag;
         }
 
-        const result = await this.get<BackboneGetTagCollection>("/api/v1/Tags", undefined, {
+        const result = await this.get<BackboneGetTagCollection>("/api/v2/Tags", undefined, {
             headers,
             validateStatus: (status) => status === 200 || status === 304
         });
