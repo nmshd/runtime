@@ -7,9 +7,11 @@ import {
     LocalAttribute,
     OwnIdentityAttribute,
     OwnRelationshipAttribute,
+    OwnRelationshipAttributeSharingDetailsJSON,
     PeerIdentityAttribute,
+    PeerIdentityAttributeSharingDetailsJSON,
     PeerRelationshipAttribute,
-    PeerSharingDetailsJSON,
+    PeerRelationshipAttributeSharingDetailsJSON,
     ThirdPartyRelationshipAttribute,
     ThirdPartyRelationshipAttributeSharingDetailsJSON
 } from "@nmshd/consumption";
@@ -58,6 +60,11 @@ export interface GetAttributesRequestQuery {
 
 type AttributeWithPeerSharingDetails = PeerIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute | ThirdPartyRelationshipAttribute;
 type ForwardableAttribute = OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute;
+type PeerSharingDetailsJSON =
+    | PeerIdentityAttributeSharingDetailsJSON
+    | OwnRelationshipAttributeSharingDetailsJSON
+    | PeerRelationshipAttributeSharingDetailsJSON
+    | ThirdPartyRelationshipAttributeSharingDetailsJSON;
 
 export class GetAttributesUseCase extends UseCase<GetAttributesRequest, LocalAttributeDTO[]> {
     public static readonly queryTranslator = new QueryTranslator({
