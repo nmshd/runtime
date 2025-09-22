@@ -575,7 +575,7 @@ describe("Message errors", () => {
                 return;
             }
             let abortResult;
-            if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Approved) {
+            if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Active) {
                 abortResult = await client2.transport.identityDeletionProcesses.cancelIdentityDeletionProcess();
             }
             await syncUntilHasEvent(client1, PeerDeletionCancelledEvent);
@@ -737,7 +737,7 @@ describe("Postponed Notifications via Messages", () => {
                 return;
             }
             let abortResult;
-            if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Approved) {
+            if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Active) {
                 abortResult = await client1.transport.identityDeletionProcesses.cancelIdentityDeletionProcess();
             }
             await syncUntilHasEvent(client5, PeerDeletionCancelledEvent, (e) => e.data.id === relationshipId);

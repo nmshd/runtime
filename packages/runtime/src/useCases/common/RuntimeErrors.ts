@@ -280,10 +280,6 @@ class IdentityDeletionProcess {
         return new ApplicationError("error.runtime.identityDeletionProcess.noActiveIdentityDeletionProcess", "No active IdentityDeletionProcess found.");
     }
 
-    public noApprovedIdentityDeletionProcess() {
-        return new ApplicationError("error.runtime.identityDeletionProcess.noApprovedIdentityDeletionProcess", "No approved IdentityDeletionProcess found.");
-    }
-
     public activeIdentityDeletionProcessAlreadyExists() {
         return new ApplicationError(
             "error.runtime.identityDeletionProcess.activeIdentityDeletionProcessAlreadyExists",

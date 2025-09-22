@@ -9,8 +9,6 @@ export interface IdentityDeletionProcessJSON {
     status: IdentityDeletionProcessStatus;
     createdAt?: string;
     createdByDevice?: string;
-    approvedAt?: string;
-    approvedByDevice?: string;
     gracePeriodEndsAt?: string;
     cancelledAt?: string;
     cancelledByDevice?: string;
@@ -21,8 +19,6 @@ export interface IIdentityDeletionProcess {
     status: IdentityDeletionProcessStatus;
     createdAt?: CoreDate;
     createdByDevice?: CoreId;
-    approvedAt?: CoreDate;
-    approvedByDevice?: CoreId;
     gracePeriodEndsAt?: CoreDate;
     cancelledAt?: CoreDate;
     cancelledByDevice?: CoreId;
@@ -38,8 +34,6 @@ export class IdentityDeletionProcess extends CoreSynchronizable implements IIden
     ];
 
     public override readonly contentProperties = [
-        nameof<IdentityDeletionProcess>((r) => r.approvedAt),
-        nameof<IdentityDeletionProcess>((r) => r.approvedByDevice),
         nameof<IdentityDeletionProcess>((r) => r.gracePeriodEndsAt),
         nameof<IdentityDeletionProcess>((r) => r.cancelledAt),
         nameof<IdentityDeletionProcess>((r) => r.cancelledByDevice)
@@ -56,14 +50,6 @@ export class IdentityDeletionProcess extends CoreSynchronizable implements IIden
     @validate({ nullable: true })
     @serialize()
     public createdByDevice?: CoreId;
-
-    @validate({ nullable: true })
-    @serialize()
-    public approvedAt?: CoreDate;
-
-    @validate({ nullable: true })
-    @serialize()
-    public approvedByDevice?: CoreId;
 
     @validate({ nullable: true })
     @serialize()

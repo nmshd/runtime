@@ -43,33 +43,33 @@ export class SyncClient extends RESTClientAuthenticate implements ISyncClient {
     }
 
     public async startSyncRun(request?: StartSyncRunRequest): Promise<ClientResult<StartSyncRunResponse>> {
-        return await this.post<StartSyncRunResponse>("/api/v1/SyncRuns", request);
+        return await this.post<StartSyncRunResponse>("/api/v2/SyncRuns", request);
     }
 
     public async finalizeExternalEventSync(id: string, request: FinalizeExternalEventSyncRequest): Promise<ClientResult<FinalizeExternalEventSyncResponse>> {
-        return await this.put<FinalizeExternalEventSyncResponse>(`/api/v1/SyncRuns/${id}/FinalizeExternalEventSync`, request);
+        return await this.put<FinalizeExternalEventSyncResponse>(`/api/v2/SyncRuns/${id}/FinalizeExternalEventSync`, request);
     }
 
     public async finalizeDatawalletVersionUpgrade(id: string, request: FinalizeDatawalletVersionUpgradeRequest): Promise<ClientResult<FinalizeDatawalletVersionUpgradeResponse>> {
-        return await this.put<FinalizeDatawalletVersionUpgradeResponse>(`/api/v1/SyncRuns/${id}/FinalizeDatawalletVersionUpgrade`, request);
+        return await this.put<FinalizeDatawalletVersionUpgradeResponse>(`/api/v2/SyncRuns/${id}/FinalizeDatawalletVersionUpgrade`, request);
     }
 
     public async getExternalEventsOfSyncRun(syncRunId: string, progessCallback?: PaginatorPercentageCallback): Promise<ClientResult<Paginator<BackboneExternalEvent>>> {
-        return await this.getPaged<BackboneExternalEvent>(`/api/v1/SyncRuns/${syncRunId}/ExternalEvents`, {}, undefined, progessCallback);
+        return await this.getPaged<BackboneExternalEvent>(`/api/v2/SyncRuns/${syncRunId}/ExternalEvents`, {}, undefined, progessCallback);
     }
 
     public async getDatawallet(): Promise<ClientResult<GetDatawalletResponse>> {
-        return await this.get<GetDatawalletResponse>("/api/v1/Datawallet");
+        return await this.get<GetDatawalletResponse>("/api/v2/Datawallet");
     }
 
     public async getDatawalletModifications(
         request: GetDatawalletModificationsRequest,
         progessCallback?: PaginatorPercentageCallback
     ): Promise<ClientResult<Paginator<BackboneDatawalletModification>>> {
-        return await this.getPaged<BackboneDatawalletModification>("/api/v1/Datawallet/Modifications", request, undefined, progessCallback);
+        return await this.getPaged<BackboneDatawalletModification>("/api/v2/Datawallet/Modifications", request, undefined, progessCallback);
     }
 
     public async createDatawalletModifications(request: CreateDatawalletModificationsRequest): Promise<ClientResult<CreateDatawalletModificationsResponse>> {
-        return await this.post<CreateDatawalletModificationsResponse>("/api/v1/Datawallet/Modifications", request);
+        return await this.post<CreateDatawalletModificationsResponse>("/api/v2/Datawallet/Modifications", request);
     }
 }

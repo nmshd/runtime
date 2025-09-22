@@ -4,6 +4,6 @@ import { GetBackboneVersionResponse } from "./GetBackboneVersionResponse";
 
 export class VersionClient extends RESTClient {
     public async getBackboneVersion(): Promise<ClientResult<GetBackboneVersionResponse>> {
-        return await this.get<GetBackboneVersionResponse>("/api/v1/Version");
+        return await this.get<GetBackboneVersionResponse>("/api/v2/Version");
     }
 }
