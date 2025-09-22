@@ -1,4 +1,5 @@
-import { IdentityDeletionProcessStatus, RuntimeServices } from "@nmshd/runtime";
+import { DeviceMapper, IdentityDeletionProcessStatus, RuntimeServices } from "@nmshd/runtime";
+import { TokenContentDeviceSharedSecret } from "@nmshd/transport";
 import { AppRuntime } from "../../src";
 import { TestUtil } from "../lib";
 
@@ -20,12 +21,12 @@ describe("Offboarding", function () {
         const [localAccount1] = await TestUtil.provideAccounts(runtime, 1);
         services1 = await runtime.getServices(localAccount1.id);
 
-        const createDeviceResult = await services1.transportServices.devices.createDevice({});
-        device2Id = createDeviceResult.value.id;
+        const emptyToken = await runtime.anonymousServices.tokens.createEmptyToken();
+        const fillResult = await services1.transportServices.devices.fillDeviceOnboardingTokenWithNewDevice({ reference: emptyToken.value.reference.truncated });
+        const deviceOnboardingDTO = DeviceMapper.toDeviceOnboardingInfoDTO(TokenContentDeviceSharedSecret.from(fillResult.value.content).sharedSecret);
+        device2Id = deviceOnboardingDTO.id;
 
-        const onboardingInfoResult = await services1.transportServices.devices.getDeviceOnboardingInfo({ id: createDeviceResult.value.id });
-
-        const localAccount2 = await runtime.accountServices.onboardAccount(onboardingInfoResult.value);
+        const localAccount2 = await runtime.accountServices.onboardAccount(deviceOnboardingDTO);
         localAccount2Id = localAccount2.id;
         services2 = await runtime.getServices(localAccount2.id);
 
@@ -64,7 +65,7 @@ describe("Offboarding", function () {
         await services2.transportServices.account.syncDatawallet();
 
         const identityDeletionProcessOnSecondAccount = (await services2.transportServices.identityDeletionProcesses.getActiveIdentityDeletionProcess()).value;
-        expect(identityDeletionProcessOnSecondAccount.status).toStrictEqual(IdentityDeletionProcessStatus.Approved);
+        expect(identityDeletionProcessOnSecondAccount.status).toStrictEqual(IdentityDeletionProcessStatus.Active);
 
         await runtime.accountServices.offboardAccount(localAccount2Id);
         await services1.transportServices.account.syncDatawallet();

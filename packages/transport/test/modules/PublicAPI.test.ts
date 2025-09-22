@@ -3,7 +3,6 @@ import { nameof } from "ts-simple-nameof";
 import {
     AccountController,
     AnonymousTokenController,
-    CertificateIssuer,
     ChallengeController,
     DeviceController,
     DevicesController,
@@ -69,8 +68,6 @@ publicFunctions[IdentityController.name] = [
     nameof<IdentityController>((r) => r.verify)
 ];
 
-publicFunctions[CertificateIssuer.name] = [nameof<CertificateIssuer>((r) => r.init), nameof<CertificateIssuer>((r) => r.issueCertificate)];
-
 publicFunctions[ChallengeController.name] = [
     nameof<ChallengeController>((r) => r.init),
     nameof<ChallengeController>((r) => r.validateChallenge),
@@ -87,15 +84,13 @@ publicFunctions[FileController.name] = [
     nameof<FileController>((r) => r.getOrLoadFileByReference),
     nameof<FileController>((r) => r.getOrLoadFile),
     nameof<FileController>((r) => r.sendFile),
-    nameof<FileController>((r) => r.downloadFileContent),
-    nameof<FileController>((r) => r.updateCache)
+    nameof<FileController>((r) => r.downloadFileContent)
 ];
 publicFunctions[MessageController.name] = [
     nameof<MessageController>((r) => r.init),
     nameof<MessageController>((r) => r.getMessages),
     nameof<MessageController>((r) => r.getMessage),
-    nameof<MessageController>((r) => r.sendMessage),
-    nameof<FileController>((r) => r.updateCache)
+    nameof<MessageController>((r) => r.sendMessage)
 ];
 publicFunctions[RelationshipsController.name] = [
     nameof<RelationshipsController>((r) => r.init),
@@ -110,8 +105,7 @@ publicFunctions[RelationshipsController.name] = [
     nameof<RelationshipsController>((r) => r.sendRelationship),
     nameof<RelationshipsController>((r) => r.accept),
     nameof<RelationshipsController>((r) => r.reject),
-    nameof<RelationshipsController>((r) => r.revoke),
-    nameof<FileController>((r) => r.updateCache)
+    nameof<RelationshipsController>((r) => r.revoke)
 ];
 publicFunctions[RelationshipSecretController.name] = [
     nameof<RelationshipSecretController>((r) => r.init),
@@ -135,8 +129,7 @@ publicFunctions[RelationshipTemplateController.name] = [
     nameof<RelationshipTemplateController>((r) => r.sendRelationshipTemplate),
     nameof<RelationshipTemplateController>((r) => r.deleteRelationshipTemplate),
     nameof<RelationshipTemplateController>((r) => r.getRelationshipTemplates),
-    nameof<RelationshipTemplateController>((r) => r.getRelationshipTemplate),
-    nameof<FileController>((r) => r.updateCache)
+    nameof<RelationshipTemplateController>((r) => r.getRelationshipTemplate)
 ];
 publicFunctions[SecretController.name] = [
     nameof<SecretController>((r) => r.init),
@@ -153,7 +146,6 @@ publicFunctions[TokenController.name] = [
     nameof<TokenController>((r) => r.getTokens),
     nameof<TokenController>((r) => r.sendToken),
     nameof<TokenController>((r) => r.getToken),
-    nameof<TokenController>((r) => r.updateCache),
     nameof<TokenController>((r) => r.loadPeerTokenByReference)
 ];
 
@@ -191,7 +183,6 @@ describe("PublicAPI", function () {
         controllers[DevicesController.name] = account.devices;
         controllers[DeviceSecretController.name] = account.activeDevice.secrets;
         controllers[IdentityController.name] = account.identity;
-        controllers[CertificateIssuer.name] = account.certificateIssuer;
         controllers[ChallengeController.name] = account.challenges;
         controllers[FileController.name] = account.files;
         controllers[MessageController.name] = account.messages;

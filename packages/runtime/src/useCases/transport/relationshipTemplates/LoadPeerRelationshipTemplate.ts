@@ -6,7 +6,6 @@ import {
     BackboneIds,
     RelationshipTemplateController,
     RelationshipTemplateReference,
-    Token,
     TokenContentRelationshipTemplate,
     TokenController,
     TokenReference
@@ -78,15 +77,11 @@ export class LoadPeerRelationshipTemplateUseCase extends UseCase<LoadPeerRelatio
     private async loadRelationshipTemplateFromTokenReference(reference: TokenReference, password?: string): Promise<Result<RelationshipTemplateDTO>> {
         const token = await this.tokenController.loadPeerTokenByReference(reference, true, password);
 
-        if (!token.cache) {
-            throw RuntimeErrors.general.cacheEmpty(Token, token.id.toString());
-        }
-
-        if (!(token.cache.content instanceof TokenContentRelationshipTemplate)) {
+        if (!(token.content instanceof TokenContentRelationshipTemplate)) {
             return Result.fail(RuntimeErrors.general.invalidTokenContent());
         }
 
-        const content = token.cache.content;
+        const content = token.content;
         const template = await this.templateController.loadPeerRelationshipTemplateByTokenContent(content, password);
         return Result.ok(RelationshipTemplateMapper.toRelationshipTemplateDTO(template));
     }

@@ -32,7 +32,7 @@ describe("MultiAccountController", function () {
             }
 
             let abortResult;
-            if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Approved) {
+            if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Active) {
                 abortResult = await session.transportServices.identityDeletionProcesses.cancelIdentityDeletionProcess();
             }
             if (abortResult?.isError) throw abortResult.error;

@@ -37,7 +37,6 @@ describe("FileSync", function () {
 
         fileOnDevice2 = await device2.files.getFile(fileOnDevice1.id);
         expect(fileOnDevice2).toBeDefined();
-        expect(fileOnDevice2?.cache).toBeDefined();
-        expect(fileOnDevice2!.toJSON()).toStrictEqualExcluding(fileOnDevice1.toJSON(), "cachedAt");
+        expect(fileOnDevice2!.toJSON()).toStrictEqual(fileOnDevice1.toJSON());
     });
 });

@@ -1,17 +1,11 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
-import { DeviceDTO, DeviceOnboardingInfoDTO, TokenDTO } from "@nmshd/runtime-types";
+import { DeviceDTO, TokenDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
 import {
-    CreateDeviceOnboardingTokenRequest,
-    CreateDeviceOnboardingTokenUseCase,
-    CreateDeviceRequest,
-    CreateDeviceUseCase,
     DeleteDeviceRequest,
     DeleteDeviceUseCase,
     FillDeviceOnboardingTokenWithNewDeviceRequest,
     FillDeviceOnboardingTokenWithNewDeviceUseCase,
-    GetDeviceOnboardingInfoRequest,
-    GetDeviceOnboardingInfoUseCase,
     GetDeviceRequest,
     GetDevicesUseCase,
     GetDeviceUseCase,
@@ -27,12 +21,9 @@ export class DevicesFacade {
     public constructor(
         @Inject private readonly getDeviceUseCase: GetDeviceUseCase,
         @Inject private readonly getDevicesUseCase: GetDevicesUseCase,
-        @Inject private readonly createDeviceUseCase: CreateDeviceUseCase,
         @Inject private readonly updateCurrentDeviceUseCase: UpdateCurrentDeviceUseCase,
         @Inject private readonly updateDeviceUseCase: UpdateDeviceUseCase,
         @Inject private readonly deleteDeviceUseCase: DeleteDeviceUseCase,
-        @Inject private readonly getDeviceOnboardingInfoUseCase: GetDeviceOnboardingInfoUseCase,
-        @Inject private readonly createDeviceOnboardingTokenUseCase: CreateDeviceOnboardingTokenUseCase,
         @Inject private readonly fillDeviceOnboardingTokenWithNewDeviceUseCase: FillDeviceOnboardingTokenWithNewDeviceUseCase,
         @Inject private readonly setCommunicationLanguageUseCase: SetCommunicationLanguageUseCase
     ) {}
@@ -43,27 +34,6 @@ export class DevicesFacade {
 
     public async getDevices(): Promise<Result<DeviceDTO[], ApplicationError>> {
         return await this.getDevicesUseCase.execute();
-    }
-
-    /**
-     * @deprecated use fillDeviceOnboardingToken instead
-     */
-    public async createDevice(request: CreateDeviceRequest): Promise<Result<DeviceDTO, ApplicationError>> {
-        return await this.createDeviceUseCase.execute(request);
-    }
-
-    /**
-     * @deprecated use fillDeviceOnboardingToken instead
-     */
-    public async getDeviceOnboardingInfo(request: GetDeviceOnboardingInfoRequest): Promise<Result<DeviceOnboardingInfoDTO, ApplicationError>> {
-        return await this.getDeviceOnboardingInfoUseCase.execute(request);
-    }
-
-    /**
-     * @deprecated use fillDeviceOnboardingToken instead
-     */
-    public async createDeviceOnboardingToken(request: CreateDeviceOnboardingTokenRequest): Promise<Result<TokenDTO, ApplicationError>> {
-        return await this.createDeviceOnboardingTokenUseCase.execute(request);
     }
 
     public async fillDeviceOnboardingTokenWithNewDevice(request: FillDeviceOnboardingTokenWithNewDeviceRequest): Promise<Result<TokenDTO, ApplicationError>> {

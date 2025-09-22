@@ -22,15 +22,15 @@ export class IdentityDeletionProcessStatusChangedModule extends AppRuntimeModule
             const services = await this.runtime.getServices(event.eventTargetAddress);
             const identityDeletionProcesses = await services.transportServices.identityDeletionProcesses.getIdentityDeletionProcesses();
 
-            const approvedIdentityDeletionProcess = identityDeletionProcesses.value.filter((idp) => idp.status === IdentityDeletionProcessStatus.Approved).at(0);
-            const deletionDate = approvedIdentityDeletionProcess?.gracePeriodEndsAt ? CoreDate.from(approvedIdentityDeletionProcess.gracePeriodEndsAt) : undefined;
+            const activeIdentityDeletionProcess = identityDeletionProcesses.value.filter((idp) => idp.status === IdentityDeletionProcessStatus.Active).at(0);
+            const deletionDate = activeIdentityDeletionProcess?.gracePeriodEndsAt ? CoreDate.from(activeIdentityDeletionProcess.gracePeriodEndsAt) : undefined;
 
             await this.updateLocalAccountDeletionDate(event.eventTargetAddress, deletionDate, true);
             return;
         }
 
         switch (identityDeletionProcess.status) {
-            case IdentityDeletionProcessStatus.Approved:
+            case IdentityDeletionProcessStatus.Active:
                 await this.updateLocalAccountDeletionDate(event.eventTargetAddress, CoreDate.from(identityDeletionProcess.gracePeriodEndsAt!));
                 break;
 
