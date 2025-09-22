@@ -6,22 +6,22 @@ import { BackbonePostMessagesRequest, BackbonePostMessagesResponse } from "./Bac
 
 export class MessageClient extends RESTClientAuthenticate {
     public async getMessages(request?: BackboneGetMessagesRequest): Promise<ClientResult<Paginator<BackboneGetMessagesResponse>>> {
-        return await this.getPaged<BackboneGetMessagesResponse>("/api/v1/Messages", request);
+        return await this.getPaged<BackboneGetMessagesResponse>("/api/v2/Messages", request);
     }
 
     public async createMessage(input: BackbonePostMessagesRequest): Promise<ClientResult<BackbonePostMessagesResponse>> {
-        return await this.post<BackbonePostMessagesResponse>("/api/v1/Messages", input);
+        return await this.post<BackbonePostMessagesResponse>("/api/v2/Messages", input);
     }
 
     public async getMessage(id: string): Promise<ClientResult<BackboneGetMessagesResponse>> {
-        return await this.get<BackboneGetMessagesResponse>(`/api/v1/Messages/${id}`);
+        return await this.get<BackboneGetMessagesResponse>(`/api/v2/Messages/${id}`);
     }
 
     public async deleteMessage(id: string): Promise<ClientResult<void>> {
-        return await this.delete<void>(`/api/v1/Messages/${id}`);
+        return await this.delete<void>(`/api/v2/Messages/${id}`);
     }
 
     public async setRead(id: string): Promise<ClientResult<void>> {
-        return await this.put<void>(`/api/v1/Messages/${id}/setReadFlag`, undefined);
+        return await this.put<void>(`/api/v2/Messages/${id}/setReadFlag`, undefined);
     }
 }

@@ -65,7 +65,7 @@ describe("Offboarding", function () {
         await services2.transportServices.account.syncDatawallet();
 
         const identityDeletionProcessOnSecondAccount = (await services2.transportServices.identityDeletionProcesses.getActiveIdentityDeletionProcess()).value;
-        expect(identityDeletionProcessOnSecondAccount.status).toStrictEqual(IdentityDeletionProcessStatus.Approved);
+        expect(identityDeletionProcessOnSecondAccount.status).toStrictEqual(IdentityDeletionProcessStatus.Active);
 
         await runtime.accountServices.offboardAccount(localAccount2Id);
         await services1.transportServices.account.syncDatawallet();
