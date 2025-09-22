@@ -29,7 +29,7 @@ afterEach(async () => {
         return;
     }
     let abortResult;
-    if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Approved) {
+    if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Active) {
         abortResult = await services1.transport.identityDeletionProcesses.cancelIdentityDeletionProcess();
     }
     await syncUntilHasEvent(services2, PeerDeletionCancelledEvent, (e) => e.data.id === relationshipId);

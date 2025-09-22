@@ -26,7 +26,7 @@ describe("IdentityDeletionProcessStatusChanged", function () {
         const activeIdentityDeletionProcess = await session1.transportServices.identityDeletionProcesses.getActiveIdentityDeletionProcess();
         if (!activeIdentityDeletionProcess.isSuccess) return;
 
-        if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Approved) {
+        if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Active) {
             const abortResult = await session1.transportServices.identityDeletionProcesses.cancelIdentityDeletionProcess();
             if (abortResult.isError) throw abortResult.error;
 
@@ -115,7 +115,7 @@ describe("IdentityDeletionProcessStatusChanged", function () {
             expect(account.deletionDate).toBeUndefined();
         });
 
-        test("should handle multiple synced IdentityDeletionProcesses that happend while not syncing with the last one approved", async function () {
+        test("should handle multiple synced IdentityDeletionProcesses that happend while not syncing with the last one active", async function () {
             await session1.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess();
             await session1.transportServices.identityDeletionProcesses.cancelIdentityDeletionProcess();
             await session1.transportServices.identityDeletionProcesses.initiateIdentityDeletionProcess();
