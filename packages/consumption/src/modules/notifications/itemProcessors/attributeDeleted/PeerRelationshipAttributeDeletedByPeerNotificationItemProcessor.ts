@@ -76,7 +76,7 @@ export class PeerRelationshipAttributeDeletedByPeerNotificationItemProcessor ext
             deletionDate: CoreDate.utc()
         });
 
-        await this.consumptionController.attributes.setPeerDeletionInfoOfThirdPartyRelationshipAttributeAndPredecessors(attribute, deletionInfo, true);
+        await this.consumptionController.attributes.setPeerDeletionInfoOfReceivedAttributeAndPredecessors(attribute, deletionInfo, true);
 
         return new PeerRelationshipAttributeDeletedByPeerEvent(this.currentIdentityAddress.toString(), attribute);
     }
@@ -92,6 +92,6 @@ export class PeerRelationshipAttributeDeletedByPeerNotificationItemProcessor ext
         // the previous deletionState cannot be unambiguously known
         return attribute instanceof OwnRelationshipAttribute
             ? await this.consumptionController.attributes.setPeerDeletionInfoOfOwnRelationshipAttributeAndPredecessors(attribute, undefined, true)
-            : await this.consumptionController.attributes.setPeerDeletionInfoOfThirdPartyRelationshipAttributeAndPredecessors(attribute, undefined, true);
+            : await this.consumptionController.attributes.setPeerDeletionInfoOfReceivedAttributeAndPredecessors(attribute, undefined, true);
     }
 }

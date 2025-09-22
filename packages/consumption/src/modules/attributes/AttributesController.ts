@@ -1469,7 +1469,7 @@ export class AttributesController extends ConsumptionBaseController {
         if (attribute.isDeletedOrToBeDeletedByRecipient() && !overrideDeletedOrToBeDeleted) return;
 
         attribute.setPeerDeletionInfo(deletionInfo, overrideDeletedOrToBeDeleted);
-        await this.parent.attributes.updateAttributeUnsafe(attribute);
+        await this.updateAttributeUnsafe(attribute);
     }
 
     public async setPeerDeletionInfoOfReceivedAttribute(
@@ -1484,7 +1484,7 @@ export class AttributesController extends ConsumptionBaseController {
         if (attribute.isDeletedByEmitterOrToBeDeleted() && !overrideDeletedOrToBeDeleted) return;
 
         attribute.setPeerDeletionInfo(deletionInfo, overrideDeletedOrToBeDeleted);
-        await this.parent.attributes.updateAttributeUnsafe(attribute);
+        await this.updateAttributeUnsafe(attribute);
     }
 
     public async setForwardedDeletionInfoOfAttributeAndPredecessors(
@@ -1512,20 +1512,8 @@ export class AttributesController extends ConsumptionBaseController {
         }
     }
 
-    public async setPeerDeletionInfoOfPeerAttributeAndPredecessors(
-        attribute: PeerIdentityAttribute | PeerRelationshipAttribute,
-        deletionInfo: ReceivedAttributeDeletionInfo | undefined,
-        overrideDeletedOrToBeDeleted = false
-    ): Promise<void> {
-        const predecessors = await this.getPredecessorsOfAttribute(attribute);
-
-        for (const attr of [attribute, ...predecessors]) {
-            await this.setPeerDeletionInfoOfReceivedAttribute(attr, deletionInfo, overrideDeletedOrToBeDeleted);
-        }
-    }
-
-    public async setPeerDeletionInfoOfThirdPartyRelationshipAttributeAndPredecessors(
-        attribute: ThirdPartyRelationshipAttribute,
+    public async setPeerDeletionInfoOfReceivedAttributeAndPredecessors(
+        attribute: PeerIdentityAttribute | PeerRelationshipAttribute | ThirdPartyRelationshipAttribute,
         deletionInfo: ReceivedAttributeDeletionInfo | undefined,
         overrideDeletedOrToBeDeleted = false
     ): Promise<void> {

@@ -397,9 +397,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
             if (attribute.peerSharingDetails.deletionInfo?.deletionStatus !== ReceivedAttributeDeletionStatus.ToBeDeleted) return;
 
-            // TODO: AttributesController function (shared for PeerIdentityAttribute and ThirdPartyRelationshipAttribute) -> other PR where deletionStatus is refactored
-            attribute.peerSharingDetails.deletionInfo = undefined;
-            await this.consumptionController.attributes.updateAttributeUnsafe(attribute);
+            await this.consumptionController.attributes.setPeerDeletionInfoOfReceivedAttribute(attribute, undefined, true);
             return;
         }
 

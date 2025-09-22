@@ -58,23 +58,12 @@ export class OwnAttributeDeletedByOwnerNotificationItemProcessor extends Abstrac
 
         if (attribute.isToBeDeleted()) return;
 
-        if (attribute instanceof PeerIdentityAttribute || attribute instanceof PeerRelationshipAttribute) {
-            const deletionInfo = ReceivedAttributeDeletionInfo.from({
-                deletionStatus: ReceivedAttributeDeletionStatus.DeletedByEmitter,
-                deletionDate: CoreDate.utc()
-            });
-
-            await this.consumptionController.attributes.setPeerDeletionInfoOfPeerAttributeAndPredecessors(attribute, deletionInfo);
-
-            return new OwnAttributeDeletedByOwnerEvent(this.currentIdentityAddress.toString(), attribute);
-        }
-
         const deletionInfo = ReceivedAttributeDeletionInfo.from({
             deletionStatus: ReceivedAttributeDeletionStatus.DeletedByEmitter,
             deletionDate: CoreDate.utc()
         });
 
-        await this.consumptionController.attributes.setPeerDeletionInfoOfThirdPartyRelationshipAttributeAndPredecessors(attribute, deletionInfo);
+        await this.consumptionController.attributes.setPeerDeletionInfoOfReceivedAttributeAndPredecessors(attribute, deletionInfo);
 
         return new OwnAttributeDeletedByOwnerEvent(this.currentIdentityAddress.toString(), attribute);
     }

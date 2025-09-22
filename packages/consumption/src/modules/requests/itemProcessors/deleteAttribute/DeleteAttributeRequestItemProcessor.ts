@@ -112,27 +112,12 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
         if (!attribute) return AcceptResponseItem.from({ result: ResponseItemResult.Accepted });
 
         const deletionDate = CoreDate.from(params.deletionDate);
-
-        if (attribute instanceof PeerIdentityAttribute || attribute instanceof PeerRelationshipAttribute) {
-            const deletionInfo = ReceivedAttributeDeletionInfo.from({
-                deletionStatus: ReceivedAttributeDeletionStatus.ToBeDeleted,
-                deletionDate: deletionDate
-            });
-
-            await this.consumptionController.attributes.setPeerDeletionInfoOfPeerAttributeAndPredecessors(attribute, deletionInfo);
-
-            return DeleteAttributeAcceptResponseItem.from({
-                deletionDate: deletionDate,
-                result: ResponseItemResult.Accepted
-            });
-        }
-
         const deletionInfo = ReceivedAttributeDeletionInfo.from({
             deletionStatus: ReceivedAttributeDeletionStatus.ToBeDeleted,
             deletionDate: deletionDate
         });
 
-        await this.consumptionController.attributes.setPeerDeletionInfoOfThirdPartyRelationshipAttributeAndPredecessors(attribute, deletionInfo);
+        await this.consumptionController.attributes.setPeerDeletionInfoOfReceivedAttributeAndPredecessors(attribute, deletionInfo);
 
         return DeleteAttributeAcceptResponseItem.from({
             deletionDate: deletionDate,
