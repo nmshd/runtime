@@ -78,7 +78,7 @@ afterEach(async () => {
     }
 
     let abortResult;
-    if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Approved) {
+    if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Active) {
         abortResult = await services3.transport.identityDeletionProcesses.cancelIdentityDeletionProcess();
         if (abortResult.isError) throw abortResult.error;
     }

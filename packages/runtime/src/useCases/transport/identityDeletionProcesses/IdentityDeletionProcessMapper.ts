@@ -7,8 +7,6 @@ export class IdentityDeletionProcessMapper {
             id: identityDeletionProcess.id.toString(),
             createdAt: identityDeletionProcess.createdAt?.toString(),
             createdByDevice: identityDeletionProcess.createdByDevice?.toString(),
-            approvedAt: identityDeletionProcess.approvedAt?.toString(),
-            approvedByDevice: identityDeletionProcess.approvedByDevice?.toString(),
             gracePeriodEndsAt: identityDeletionProcess.gracePeriodEndsAt?.toString(),
             status: identityDeletionProcess.status,
             cancelledAt: identityDeletionProcess.cancelledAt?.toString(),

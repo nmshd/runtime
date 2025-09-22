@@ -17,10 +17,10 @@ export interface ChallengeClientCreateChallengeResponse {
 
 export class ChallengeAuthClient extends RESTClientAuthenticate {
     public async createChallenge(): Promise<ClientResult<ChallengeClientCreateChallengeResponse>> {
-        return await this.post<ChallengeClientCreateChallengeResponse>("/api/v1/Challenges", {});
+        return await this.post<ChallengeClientCreateChallengeResponse>("/api/v2/Challenges", {});
     }
 
     public async getChallenge(id: string): Promise<ClientResult<ChallengeClientGetChallengeResponse>> {
-        return await this.get<ChallengeClientGetChallengeResponse>(`/api/v1/Challenges/${id}`);
+        return await this.get<ChallengeClientGetChallengeResponse>(`/api/v2/Challenges/${id}`);
     }
 }
