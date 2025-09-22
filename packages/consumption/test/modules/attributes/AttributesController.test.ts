@@ -1439,7 +1439,7 @@ describe("AttributesController", function () {
 
                 const validationResult = await consumptionController.attributes.validatePeerIdentityAttributeSuccession(predecessor, successorData);
                 expect(validationResult).errorValidationResult({
-                    code: "error.consumption.attributes.cannotSucceedSharedAttributesDeletedByRecipient"
+                    code: "error.consumption.attributes.cannotSucceedSharedAttributesDeletedByPeer"
                 });
             });
 
