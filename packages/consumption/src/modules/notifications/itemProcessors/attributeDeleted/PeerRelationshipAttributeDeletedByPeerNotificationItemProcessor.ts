@@ -9,9 +9,9 @@ import {
     EmittedAttributeDeletionStatus,
     OwnRelationshipAttribute,
     PeerRelationshipAttributeDeletedByPeerEvent,
-    ThirdPartyRelationshipAttribute,
-    ThirdPartyRelationshipAttributeDeletionInfo,
-    ThirdPartyRelationshipAttributeDeletionStatus
+    ReceivedAttributeDeletionInfo,
+    ReceivedAttributeDeletionStatus,
+    ThirdPartyRelationshipAttribute
 } from "../../../attributes";
 import { ValidationResult } from "../../../common";
 import { LocalNotification } from "../../local/LocalNotification";
@@ -71,8 +71,8 @@ export class PeerRelationshipAttributeDeletedByPeerNotificationItemProcessor ext
             return new PeerRelationshipAttributeDeletedByPeerEvent(this.currentIdentityAddress.toString(), attribute);
         }
 
-        const deletionInfo = ThirdPartyRelationshipAttributeDeletionInfo.from({
-            deletionStatus: ThirdPartyRelationshipAttributeDeletionStatus.DeletedByPeer,
+        const deletionInfo = ReceivedAttributeDeletionInfo.from({
+            deletionStatus: ReceivedAttributeDeletionStatus.DeletedByEmitter,
             deletionDate: CoreDate.utc()
         });
 

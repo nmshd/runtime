@@ -1,17 +1,11 @@
 import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-serval";
 import { CoreAddress, CoreId, ICoreAddress, ICoreId } from "@nmshd/core-types";
-import {
-    AbstractAttributeDeletionInfo,
-    EmittedAttributeDeletionInfoJSON,
-    IAbstractAttributeDeletionInfo,
-    ReceivedAttributeDeletionInfoJSON,
-    ThirdPartyRelationshipAttributeDeletionInfoJSON
-} from "./deletionInfos";
+import { AbstractAttributeDeletionInfo, EmittedAttributeDeletionInfoJSON, IAbstractAttributeDeletionInfo, ReceivedAttributeDeletionInfoJSON } from "./deletionInfos";
 
 export interface AbstractAttributeSharingDetailsJSON {
     peer: string;
     sourceReference: string;
-    deletionInfo?: EmittedAttributeDeletionInfoJSON | ReceivedAttributeDeletionInfoJSON | ThirdPartyRelationshipAttributeDeletionInfoJSON;
+    deletionInfo?: EmittedAttributeDeletionInfoJSON | ReceivedAttributeDeletionInfoJSON | ReceivedAttributeDeletionInfoJSON;
 }
 
 export interface IAbstractAttributeSharingDetails extends ISerializable {

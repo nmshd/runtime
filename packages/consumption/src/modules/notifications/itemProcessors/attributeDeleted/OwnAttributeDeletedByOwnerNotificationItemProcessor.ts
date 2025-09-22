@@ -10,9 +10,7 @@ import {
     PeerRelationshipAttribute,
     ReceivedAttributeDeletionInfo,
     ReceivedAttributeDeletionStatus,
-    ThirdPartyRelationshipAttribute,
-    ThirdPartyRelationshipAttributeDeletionInfo,
-    ThirdPartyRelationshipAttributeDeletionStatus
+    ThirdPartyRelationshipAttribute
 } from "../../../attributes";
 import { ValidationResult } from "../../../common";
 import { LocalNotification } from "../../local/LocalNotification";
@@ -71,8 +69,8 @@ export class OwnAttributeDeletedByOwnerNotificationItemProcessor extends Abstrac
             return new OwnAttributeDeletedByOwnerEvent(this.currentIdentityAddress.toString(), attribute);
         }
 
-        const deletionInfo = ThirdPartyRelationshipAttributeDeletionInfo.from({
-            deletionStatus: ThirdPartyRelationshipAttributeDeletionStatus.DeletedByOwner,
+        const deletionInfo = ReceivedAttributeDeletionInfo.from({
+            deletionStatus: ReceivedAttributeDeletionStatus.DeletedByEmitter,
             deletionDate: CoreDate.utc()
         });
 

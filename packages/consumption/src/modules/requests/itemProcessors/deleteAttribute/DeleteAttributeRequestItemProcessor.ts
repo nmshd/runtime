@@ -10,9 +10,7 @@ import {
     PeerRelationshipAttribute,
     ReceivedAttributeDeletionInfo,
     ReceivedAttributeDeletionStatus,
-    ThirdPartyRelationshipAttribute,
-    ThirdPartyRelationshipAttributeDeletionInfo,
-    ThirdPartyRelationshipAttributeDeletionStatus
+    ThirdPartyRelationshipAttribute
 } from "../../../attributes";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
@@ -129,8 +127,8 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
             });
         }
 
-        const deletionInfo = ThirdPartyRelationshipAttributeDeletionInfo.from({
-            deletionStatus: ThirdPartyRelationshipAttributeDeletionStatus.ToBeDeleted,
+        const deletionInfo = ReceivedAttributeDeletionInfo.from({
+            deletionStatus: ReceivedAttributeDeletionStatus.ToBeDeleted,
             deletionDate: deletionDate
         });
 

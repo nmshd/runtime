@@ -31,8 +31,6 @@ import {
     ReceivedAttributeDeletionStatus,
     ShareAttributeRequestItemProcessor,
     ThirdPartyRelationshipAttribute,
-    ThirdPartyRelationshipAttributeDeletionInfo,
-    ThirdPartyRelationshipAttributeDeletionStatus,
     ValidationResult
 } from "../../../../../src";
 import { TestUtil } from "../../../../core/TestUtil";
@@ -1097,8 +1095,8 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             await consumptionController.attributes.setPeerDeletionInfoOfThirdPartyRelationshipAttribute(
                 existingThirdPartyRelationshipAttribute,
-                ThirdPartyRelationshipAttributeDeletionInfo.from({
-                    deletionStatus: ThirdPartyRelationshipAttributeDeletionStatus.DeletedByOwner,
+                ReceivedAttributeDeletionInfo.from({
+                    deletionStatus: ReceivedAttributeDeletionStatus.DeletedByEmitter,
                     deletionDate: CoreDate.utc().subtract({ days: 1 })
                 })
             );
@@ -1166,8 +1164,8 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
             await consumptionController.attributes.setPeerDeletionInfoOfThirdPartyRelationshipAttribute(
                 existingThirdPartyRelationshipAttribute,
-                ThirdPartyRelationshipAttributeDeletionInfo.from({
-                    deletionStatus: ThirdPartyRelationshipAttributeDeletionStatus.ToBeDeleted,
+                ReceivedAttributeDeletionInfo.from({
+                    deletionStatus: ReceivedAttributeDeletionStatus.ToBeDeleted,
                     deletionDate: CoreDate.utc().add({ days: 1 })
                 })
             );

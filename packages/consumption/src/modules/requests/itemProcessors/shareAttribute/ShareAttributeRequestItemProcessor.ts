@@ -13,13 +13,7 @@ import { CoreAddress } from "@nmshd/core-types";
 import { RelationshipStatus } from "@nmshd/transport";
 import _ from "lodash";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import {
-    OwnIdentityAttribute,
-    OwnRelationshipAttribute,
-    PeerRelationshipAttribute,
-    ReceivedAttributeDeletionStatus,
-    ThirdPartyRelationshipAttributeDeletionStatus
-} from "../../../attributes";
+import { OwnIdentityAttribute, OwnRelationshipAttribute, PeerRelationshipAttribute, ReceivedAttributeDeletionStatus } from "../../../attributes";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
@@ -178,7 +172,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             );
 
             if (existingThirdPartyRelationshipAttribute) {
-                if (existingThirdPartyRelationshipAttribute.peerSharingDetails.deletionInfo?.deletionStatus === ThirdPartyRelationshipAttributeDeletionStatus.ToBeDeleted) {
+                if (existingThirdPartyRelationshipAttribute.peerSharingDetails.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.ToBeDeleted) {
                     await this.consumptionController.attributes.setPeerDeletionInfoOfThirdPartyRelationshipAttribute(existingThirdPartyRelationshipAttribute, undefined, true);
                 }
 

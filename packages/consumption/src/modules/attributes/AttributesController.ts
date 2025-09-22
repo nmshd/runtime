@@ -45,8 +45,6 @@ import {
     PeerRelationshipAttributeSharingDetails,
     ReceivedAttributeDeletionInfo,
     ReceivedAttributeDeletionStatus,
-    ThirdPartyRelationshipAttributeDeletionInfo,
-    ThirdPartyRelationshipAttributeDeletionStatus,
     ThirdPartyRelationshipAttributeSharingDetails
 } from "./local/sharingDetails";
 import {
@@ -790,10 +788,7 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangeKey());
         }
 
-        if (
-            predecessor.peerSharingDetails.deletionInfo?.deletionStatus === ThirdPartyRelationshipAttributeDeletionStatus.DeletedByOwner ||
-            predecessor.peerSharingDetails.deletionInfo?.deletionStatus === ThirdPartyRelationshipAttributeDeletionStatus.DeletedByPeer
-        ) {
+        if (predecessor.peerSharingDetails.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.DeletedByEmitter) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedSharedAttributesDeletedByPeer());
         }
 
@@ -1112,9 +1107,7 @@ export class AttributesController extends ConsumptionBaseController {
             }
         });
         query["peerSharingDetails.peer"] = peer;
-        query["peerSharingDetails.deletionInfo.deletionStatus"] = {
-            $nin: [ThirdPartyRelationshipAttributeDeletionStatus.DeletedByOwner, ThirdPartyRelationshipAttributeDeletionStatus.DeletedByPeer]
-        };
+        query["peerSharingDetails.deletionInfo.deletionStatus"] = { $ne: ReceivedAttributeDeletionStatus.DeletedByEmitter };
 
         return (await this.getAttributeWithSameValue(value, query)) as ThirdPartyRelationshipAttribute | undefined;
     }
@@ -1432,18 +1425,16 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     private async setDeletionInfoOfThirdPartyRelationshipAttributes(peer: CoreAddress, deletionDate: CoreDate): Promise<void> {
-        const deletionInfo = ThirdPartyRelationshipAttributeDeletionInfo.from({
+        const deletionInfo = ReceivedAttributeDeletionInfo.from({
             // TODO: might also need to be DeletedByOwner -> refactor deletionStatus in further PR
-            deletionStatus: ThirdPartyRelationshipAttributeDeletionStatus.DeletedByPeer,
+            deletionStatus: ReceivedAttributeDeletionStatus.DeletedByEmitter,
             deletionDate
         });
 
         const attributesSharedWithPeer = (await this.getLocalAttributes({
             "@type": "ThirdPartyRelationshipAttribute",
             "peerSharingDetails.peer": peer.toString(),
-            "peerSharingDetails.deletionInfo.deletionStatus": {
-                $nin: [ThirdPartyRelationshipAttributeDeletionStatus.DeletedByPeer, ThirdPartyRelationshipAttributeDeletionStatus.DeletedByOwner]
-            }
+            "peerSharingDetails.deletionInfo.deletionStatus": { $ne: ReceivedAttributeDeletionStatus.DeletedByEmitter }
         })) as ThirdPartyRelationshipAttribute[];
 
         for (const attribute of attributesSharedWithPeer) {
@@ -1499,7 +1490,7 @@ export class AttributesController extends ConsumptionBaseController {
 
     public async setPeerDeletionInfoOfThirdPartyRelationshipAttribute(
         attribute: ThirdPartyRelationshipAttribute,
-        deletionInfo: ThirdPartyRelationshipAttributeDeletionInfo | undefined,
+        deletionInfo: ReceivedAttributeDeletionInfo | undefined,
         overrideDeletedOrToBeDeleted = false
     ): Promise<void> {
         const localAttribute = await this.getLocalAttribute(attribute.id);
@@ -1551,7 +1542,7 @@ export class AttributesController extends ConsumptionBaseController {
 
     public async setPeerDeletionInfoOfThirdPartyRelationshipAttributeAndPredecessors(
         attribute: ThirdPartyRelationshipAttribute,
-        deletionInfo: ThirdPartyRelationshipAttributeDeletionInfo | undefined,
+        deletionInfo: ReceivedAttributeDeletionInfo | undefined,
         overrideDeletedOrToBeDeleted = false
     ): Promise<void> {
         const predecessors = await this.getPredecessorsOfAttribute(attribute);

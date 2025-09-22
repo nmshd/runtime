@@ -4,8 +4,8 @@ import { nameof } from "ts-simple-nameof";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import {
     IThirdPartyRelationshipAttributeSharingDetails,
-    ThirdPartyRelationshipAttributeDeletionInfo,
-    ThirdPartyRelationshipAttributeDeletionStatus,
+    ReceivedAttributeDeletionInfo,
+    ReceivedAttributeDeletionStatus,
     ThirdPartyRelationshipAttributeSharingDetails,
     ThirdPartyRelationshipAttributeSharingDetailsJSON
 } from "../sharingDetails";
@@ -42,24 +42,16 @@ export class ThirdPartyRelationshipAttribute extends LocalAttribute implements I
     public isDeletedByOwnerOrPeerOrToBeDeleted(): boolean {
         if (!this.peerSharingDetails.deletionInfo) return false;
 
-        const deletionStatuses = [
-            ThirdPartyRelationshipAttributeDeletionStatus.DeletedByOwner,
-            ThirdPartyRelationshipAttributeDeletionStatus.DeletedByPeer,
-            ThirdPartyRelationshipAttributeDeletionStatus.ToBeDeleted
-        ];
+        const deletionStatuses = [ReceivedAttributeDeletionStatus.DeletedByEmitter, ReceivedAttributeDeletionStatus.ToBeDeleted];
         return deletionStatuses.includes(this.peerSharingDetails.deletionInfo.deletionStatus);
     }
 
     public isToBeDeleted(): boolean {
-        return this.peerSharingDetails.deletionInfo?.deletionStatus === ThirdPartyRelationshipAttributeDeletionStatus.ToBeDeleted;
+        return this.peerSharingDetails.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.ToBeDeleted;
     }
 
-    public setPeerDeletionInfo(deletionInfo: ThirdPartyRelationshipAttributeDeletionInfo | undefined, overrideDeleted = false): this {
-        if (
-            !overrideDeleted &&
-            (this.peerSharingDetails.deletionInfo?.deletionStatus === ThirdPartyRelationshipAttributeDeletionStatus.DeletedByOwner ||
-                this.peerSharingDetails.deletionInfo?.deletionStatus === ThirdPartyRelationshipAttributeDeletionStatus.DeletedByPeer)
-        ) {
+    public setPeerDeletionInfo(deletionInfo: ReceivedAttributeDeletionInfo | undefined, overrideDeleted = false): this {
+        if (!overrideDeleted && this.peerSharingDetails.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.DeletedByEmitter) {
             throw ConsumptionCoreErrors.attributes.cannotSetAttributeDeletionInfo(this.id);
         }
 
