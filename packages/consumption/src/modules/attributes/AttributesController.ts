@@ -1426,7 +1426,6 @@ export class AttributesController extends ConsumptionBaseController {
 
     private async setDeletionInfoOfThirdPartyRelationshipAttributes(peer: CoreAddress, deletionDate: CoreDate): Promise<void> {
         const deletionInfo = ReceivedAttributeDeletionInfo.from({
-            // TODO: might also need to be DeletedByOwner -> refactor deletionStatus in further PR
             deletionStatus: ReceivedAttributeDeletionStatus.DeletedByEmitter,
             deletionDate
         });
@@ -1497,7 +1496,7 @@ export class AttributesController extends ConsumptionBaseController {
         if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
         if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
-        if (attribute.isDeletedByOwnerOrPeerOrToBeDeleted() && !overrideDeletedOrToBeDeleted) return;
+        if (attribute.isDeletedByEmitterOrToBeDeleted() && !overrideDeletedOrToBeDeleted) return;
 
         attribute.setPeerDeletionInfo(deletionInfo, overrideDeletedOrToBeDeleted);
         await this.parent.attributes.updateAttributeUnsafe(attribute);

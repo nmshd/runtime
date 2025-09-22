@@ -39,7 +39,7 @@ export class ThirdPartyRelationshipAttribute extends LocalAttribute implements I
     @validate()
     public peerSharingDetails: ThirdPartyRelationshipAttributeSharingDetails;
 
-    public isDeletedByOwnerOrPeerOrToBeDeleted(): boolean {
+    public isDeletedByEmitterOrToBeDeleted(): boolean {
         if (!this.peerSharingDetails.deletionInfo) return false;
 
         const deletionStatuses = [ReceivedAttributeDeletionStatus.DeletedByEmitter, ReceivedAttributeDeletionStatus.ToBeDeleted];
