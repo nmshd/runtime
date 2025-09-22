@@ -41,7 +41,7 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
         if (
             (attribute instanceof OwnIdentityAttribute && !attribute.isForwardedTo(recipient, true)) ||
             (attribute instanceof OwnRelationshipAttribute &&
-                ((attribute.peerSharingDetails.peer.equals(recipient) && attribute.isDeletedOrToBeDeletedByPeer()) ||
+                ((attribute.peerSharingDetails.peer.equals(recipient) && attribute.isDeletedOrToBeDeletedByRecipient()) ||
                     (!attribute.peerSharingDetails.peer.equals(recipient) && !attribute.isForwardedTo(recipient, true))))
         ) {
             return ValidationResult.error(
@@ -170,7 +170,7 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
         peer: CoreAddress
     ): Promise<void> {
         const deletionInfo = EmittedAttributeDeletionInfo.from({
-            deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
+            deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByRecipient,
             deletionDate
         });
 

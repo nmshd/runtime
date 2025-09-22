@@ -247,7 +247,8 @@ export class GivenSteps {
             forwardedOwnIdentityAttribute,
             EmittedAttributeDeletionInfo.from({
                 deletionStatus: params.deletionStatus,
-                deletionDate: params.deletionStatus === EmittedAttributeDeletionStatus.ToBeDeletedByPeer ? CoreDate.utc().add({ days: 1 }) : CoreDate.utc().subtract({ days: 1 })
+                deletionDate:
+                    params.deletionStatus === EmittedAttributeDeletionStatus.ToBeDeletedByRecipient ? CoreDate.utc().add({ days: 1 }) : CoreDate.utc().subtract({ days: 1 })
             }),
             CoreAddress.from("peer")
         );
@@ -332,14 +333,14 @@ export class ThenSteps {
         expect(forwardedOwnIdentityAttribute.isForwardedTo(this.context.peerAddress)).toBe(true);
     }
 
-    public async theOwnIdentityAttributeIsDeletedByPeer(attribute: OwnIdentityAttribute, peer: CoreAddress): Promise<void> {
-        const attributesDeletedByPeer = await this.context.consumptionController.attributes.getLocalAttributes({
+    public async theOwnIdentityAttributeIsDeletedByRecipient(attribute: OwnIdentityAttribute, peer: CoreAddress): Promise<void> {
+        const attributesDeletedByRecipient = await this.context.consumptionController.attributes.getLocalAttributes({
             id: attribute.id.toString(),
             "peerSharingDetails.peer": peer.toString(),
-            "peerSharingDetails.deletionInfo.deletionStatus": { $ne: EmittedAttributeDeletionStatus.DeletedByPeer }
+            "peerSharingDetails.deletionInfo.deletionStatus": { $ne: EmittedAttributeDeletionStatus.DeletedByRecipient }
         });
 
-        expect(attributesDeletedByPeer).toBeDefined();
+        expect(attributesDeletedByRecipient).toBeDefined();
     }
 
     public async anOwnRelationshipAttributeIsCreated(): Promise<void> {
@@ -461,11 +462,11 @@ export class WhenSteps {
         });
     }
 
-    public async iMarkMyOwnRelationshipAttributeAsDeletedByPeer(attribute: OwnRelationshipAttribute): Promise<void> {
+    public async iMarkMyOwnRelationshipAttributeAsDeletedByRecipient(attribute: OwnRelationshipAttribute): Promise<void> {
         this.context.fillTestIdentitiesOfObject(attribute);
 
         attribute.peerSharingDetails.deletionInfo = EmittedAttributeDeletionInfo.from({
-            deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
+            deletionStatus: EmittedAttributeDeletionStatus.DeletedByRecipient,
             deletionDate: CoreDate.utc().subtract({ minutes: 5 })
         });
 

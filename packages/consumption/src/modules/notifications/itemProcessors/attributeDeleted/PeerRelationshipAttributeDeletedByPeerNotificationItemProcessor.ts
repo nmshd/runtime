@@ -62,7 +62,7 @@ export class PeerRelationshipAttributeDeletedByPeerNotificationItemProcessor ext
 
         if (attribute instanceof OwnRelationshipAttribute) {
             const deletionInfo = EmittedAttributeDeletionInfo.from({
-                deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
+                deletionStatus: EmittedAttributeDeletionStatus.DeletedByRecipient,
                 deletionDate: CoreDate.utc()
             });
 

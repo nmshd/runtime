@@ -346,7 +346,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             });
         });
 
-        test("returns success when the IdentityAttribute is already shared with the peer but DeletedByPeer", async function () {
+        test("returns success when the IdentityAttribute is already shared with the peer but DeletedByRecipient", async function () {
             const ownIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: IdentityAttribute.from({
                     owner: sender,
@@ -363,7 +363,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(
                 forwardedOwnIdentityAttribute,
                 EmittedAttributeDeletionInfo.from({
-                    deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
+                    deletionStatus: EmittedAttributeDeletionStatus.DeletedByRecipient,
                     deletionDate: CoreDate.utc().subtract({ days: 1 })
                 }),
                 recipient
@@ -385,7 +385,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             expect(result).successfulValidationResult();
         });
 
-        test("returns success when the IdentityAttribute is already shared with the peer but ToBeDeletedByPeer", async function () {
+        test("returns success when the IdentityAttribute is already shared with the peer but ToBeDeletedByRecipient", async function () {
             const ownIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: IdentityAttribute.from({
                     owner: sender,
@@ -402,7 +402,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(
                 forwardedOwnIdentityAttribute,
                 EmittedAttributeDeletionInfo.from({
-                    deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
+                    deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByRecipient,
                     deletionDate: CoreDate.utc().add({ days: 1 })
                 }),
                 recipient
@@ -461,7 +461,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             });
         });
 
-        test("returns success when a successor of the existing IdentityAttribute is already shared with the peer but DeletedByPeer", async function () {
+        test("returns success when a successor of the existing IdentityAttribute is already shared with the peer but DeletedByRecipient", async function () {
             const ownIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: TestObjectFactory.createIdentityAttribute({ owner: sender })
             });
@@ -486,7 +486,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(
                 forwardedSuccessor,
                 EmittedAttributeDeletionInfo.from({
-                    deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
+                    deletionStatus: EmittedAttributeDeletionStatus.DeletedByRecipient,
                     deletionDate: CoreDate.utc().subtract({ days: 1 })
                 }),
                 recipient
@@ -504,7 +504,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             expect(result).successfulValidationResult();
         });
 
-        test("returns an error when a successor of the existing IdentityAttribute is already shared with the peer but ToBeDeletedByPeer", async function () {
+        test("returns an error when a successor of the existing IdentityAttribute is already shared with the peer but ToBeDeletedByRecipient", async function () {
             const ownIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: TestObjectFactory.createIdentityAttribute({ owner: sender })
             });
@@ -529,7 +529,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(
                 forwardedSuccessor,
                 EmittedAttributeDeletionInfo.from({
-                    deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
+                    deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByRecipient,
                     deletionDate: CoreDate.utc().add({ days: 1 })
                 }),
                 recipient
@@ -587,7 +587,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             });
         });
 
-        test("returns success when a predecessor of the existing IdentityAttribute is already shared with the peer but DeletedByPeer", async function () {
+        test("returns success when a predecessor of the existing IdentityAttribute is already shared with the peer but DeletedByRecipient", async function () {
             const ownIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: TestObjectFactory.createIdentityAttribute({ owner: sender })
             });
@@ -612,7 +612,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(
                 forwardedPredecessor,
                 EmittedAttributeDeletionInfo.from({
-                    deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
+                    deletionStatus: EmittedAttributeDeletionStatus.DeletedByRecipient,
                     deletionDate: CoreDate.utc().subtract({ days: 1 })
                 }),
                 recipient
@@ -630,7 +630,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             expect(result).successfulValidationResult();
         });
 
-        test("returns error when a predecessor of the existing IdentityAttribute is already shared with the peer but ToBeDeletedByPeer", async function () {
+        test("returns error when a predecessor of the existing IdentityAttribute is already shared with the peer but ToBeDeletedByRecipient", async function () {
             const ownIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: TestObjectFactory.createIdentityAttribute({ owner: sender })
             });
@@ -655,7 +655,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(
                 forwardedPredecessor,
                 EmittedAttributeDeletionInfo.from({
-                    deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
+                    deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByRecipient,
                     deletionDate: CoreDate.utc().add({ days: 1 })
                 }),
                 recipient
@@ -736,7 +736,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             });
         });
 
-        test("returns success when a RelationshipAttribute is already shared with the peer but is ToBeDeletedByPeer", async function () {
+        test("returns success when a RelationshipAttribute is already shared with the peer but is ToBeDeletedByRecipient", async function () {
             const initialRelationshipAttribute = await consumptionController.attributes.createOwnRelationshipAttribute({
                 content: RelationshipAttribute.from({
                     owner: sender,
@@ -757,7 +757,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(
                 forwardedRelationshipAttribute,
                 EmittedAttributeDeletionInfo.from({
-                    deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
+                    deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByRecipient,
                     deletionDate: CoreDate.utc().add({ days: 1 })
                 }),
                 recipient
@@ -776,7 +776,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             expect(result).successfulValidationResult();
         });
 
-        test("returns success when a RelationshipAttribute is already shared with the peer but is DeletedByPeer", async function () {
+        test("returns success when a RelationshipAttribute is already shared with the peer but is DeletedByRecipient", async function () {
             const initialRelationshipAttribute = await consumptionController.attributes.createOwnRelationshipAttribute({
                 content: RelationshipAttribute.from({
                     owner: sender,
@@ -797,7 +797,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(
                 forwardedRelationshipAttribute,
                 EmittedAttributeDeletionInfo.from({
-                    deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
+                    deletionStatus: EmittedAttributeDeletionStatus.DeletedByRecipient,
                     deletionDate: CoreDate.utc().subtract({ days: 1 })
                 }),
                 recipient
@@ -920,7 +920,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             expect(createdAttribute!.content.owner).toStrictEqual(sender);
         });
 
-        test("returns AcceptResponseItem when accepting an already existing PeerIdentityAttribute that is DeletedByOwner", async function () {
+        test("returns AcceptResponseItem when accepting an already existing PeerIdentityAttribute that is DeletedByEmitter", async function () {
             const existingPeerIdentityAttribute = await consumptionController.attributes.createPeerIdentityAttribute({
                 content: TestObjectFactory.createIdentityAttribute({ owner: sender }),
                 sourceReference: CoreId.from("aSourceReferenceId"),
@@ -931,7 +931,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             await consumptionController.attributes.setPeerDeletionInfoOfPeerAttribute(
                 existingPeerIdentityAttribute,
                 ReceivedAttributeDeletionInfo.from({
-                    deletionStatus: ReceivedAttributeDeletionStatus.DeletedByOwner,
+                    deletionStatus: ReceivedAttributeDeletionStatus.DeletedByEmitter,
                     deletionDate: CoreDate.utc().subtract({ days: 1 })
                 })
             );
@@ -1086,7 +1086,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             expect(createdAttribute!.content.owner).toStrictEqual(sender);
         });
 
-        test("returns AcceptResponseItem when accepting an already shared RelationshipAttribute that is DeletedByOwner", async function () {
+        test("returns AcceptResponseItem when accepting an already shared RelationshipAttribute that is DeletedByEmitter", async function () {
             const existingThirdPartyRelationshipAttribute = await consumptionController.attributes.createThirdPartyRelationshipAttribute({
                 content: TestObjectFactory.createRelationshipAttribute({ owner: sender }),
                 sourceReference: CoreId.from("aSourceReferenceId"),
@@ -1324,7 +1324,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             expect((forwardedAttribute! as OwnRelationshipAttribute).peerSharingDetails.peer).toStrictEqual(aThirdParty);
         });
 
-        test("in case of an already shared Attribute that is ToBeDeletedByPeer, removes the deletionInfo", async function () {
+        test("in case of an already shared Attribute that is ToBeDeletedByRecipient, removes the deletionInfo", async function () {
             const sharedAttributeContent = TestObjectFactory.createIdentityAttribute({ owner: testAccount.identity.address });
             const sharedAttribute = await consumptionController.attributes.createOwnIdentityAttribute({ content: sharedAttributeContent });
 
@@ -1335,7 +1335,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             );
 
             const deletionInfo = EmittedAttributeDeletionInfo.from({
-                deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
+                deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByRecipient,
                 deletionDate: CoreDate.utc().add({ days: 1 })
             });
             await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(sharedAttribute, deletionInfo, CoreAddress.from("did:e:a-domain:dids:anidentity"));

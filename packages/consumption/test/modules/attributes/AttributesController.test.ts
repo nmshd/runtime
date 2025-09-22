@@ -443,7 +443,7 @@ describe("AttributesController", function () {
             ).rejects.toThrow("error.consumption.attributes.alreadyForwarded");
         });
 
-        test("should allow to add a ForwardedSharingDetails to an Attribute if it is already forwarded but DeletedByPeer", async function () {
+        test("should allow to add a ForwardedSharingDetails to an Attribute if it is already forwarded but DeletedByRecipient", async function () {
             const attributeParams = {
                 content: IdentityAttribute.from({
                     value: {
@@ -457,7 +457,7 @@ describe("AttributesController", function () {
             await consumptionController.attributes.addForwardedSharingDetailsToAttribute(attribute, CoreAddress.from("peer"), CoreId.from("aSourceReferenceId"));
 
             const deletionInfo = EmittedAttributeDeletionInfo.from({
-                deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
+                deletionStatus: EmittedAttributeDeletionStatus.DeletedByRecipient,
                 deletionDate: CoreDate.utc().subtract({ days: 1 })
             });
             await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(attribute, deletionInfo, CoreAddress.from("peer"));
@@ -470,7 +470,7 @@ describe("AttributesController", function () {
             expect(updatedAttribute.forwardedSharingDetails).toHaveLength(2);
         });
 
-        test("should updated a ForwardedSharingDetails of an Attribute if it is already forwarded but ToBeDeletedByPeer", async function () {
+        test("should updated a ForwardedSharingDetails of an Attribute if it is already forwarded but ToBeDeletedByRecipient", async function () {
             const attributeParams = {
                 content: IdentityAttribute.from({
                     value: {
@@ -484,7 +484,7 @@ describe("AttributesController", function () {
             await consumptionController.attributes.addForwardedSharingDetailsToAttribute(attribute, CoreAddress.from("peer"), CoreId.from("aSourceReferenceId"));
 
             const deletionInfo = EmittedAttributeDeletionInfo.from({
-                deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
+                deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByRecipient,
                 deletionDate: CoreDate.utc().add({ days: 1 })
             });
             await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(attribute, deletionInfo, CoreAddress.from("peer"));
@@ -1404,7 +1404,7 @@ describe("AttributesController", function () {
                 });
             });
 
-            test("should catch if the predecessor is a PeerIdentityAttribute with deletion status DeletedByOwner", async function () {
+            test("should catch if the predecessor is a PeerIdentityAttribute with deletion status DeletedByEmitter", async function () {
                 const predecessor = await consumptionController.attributes.createPeerIdentityAttribute({
                     content: IdentityAttribute.from({
                         value: {
@@ -1420,7 +1420,7 @@ describe("AttributesController", function () {
                 await consumptionController.attributes.setPeerDeletionInfoOfPeerAttribute(
                     predecessor,
                     ReceivedAttributeDeletionInfo.from({
-                        deletionStatus: ReceivedAttributeDeletionStatus.DeletedByOwner,
+                        deletionStatus: ReceivedAttributeDeletionStatus.DeletedByEmitter,
                         deletionDate: CoreDate.utc().subtract({ days: 1 })
                     })
                 );
@@ -1439,7 +1439,7 @@ describe("AttributesController", function () {
 
                 const validationResult = await consumptionController.attributes.validatePeerIdentityAttributeSuccession(predecessor, successorData);
                 expect(validationResult).errorValidationResult({
-                    code: "error.consumption.attributes.cannotSucceedSharedAttributesDeletedByPeer"
+                    code: "error.consumption.attributes.cannotSucceedSharedAttributesDeletedByRecipient"
                 });
             });
 
@@ -1494,7 +1494,7 @@ describe("AttributesController", function () {
                 await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(
                     predecessor,
                     EmittedAttributeDeletionInfo.from({
-                        deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
+                        deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByRecipient,
                         deletionDate: CoreDate.utc().subtract({ days: 1 })
                     }),
                     CoreAddress.from("peer")

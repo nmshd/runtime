@@ -1719,7 +1719,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 expect(updatedSuccessor.succeededBy).toStrictEqual(createdSuccessor.id);
             });
 
-            test("accept with existing IdentityAttribute whose predecessor was already shared but is DeletedByPeer", async function () {
+            test("accept with existing IdentityAttribute whose predecessor was already shared but is DeletedByRecipient", async function () {
                 const predecessor = await consumptionController.attributes.createOwnIdentityAttribute({
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: accountController.identity.address
@@ -1728,7 +1728,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 await consumptionController.attributes.addForwardedSharingDetailsToAttribute(predecessor, sender, CoreId.from("reqRef"));
 
                 const deletionInfo = EmittedAttributeDeletionInfo.from({
-                    deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
+                    deletionStatus: EmittedAttributeDeletionStatus.DeletedByRecipient,
                     deletionDate: CoreDate.utc().subtract({ days: 1 })
                 });
                 await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(predecessor, deletionInfo, sender);
@@ -1777,7 +1777,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 expect(updatedSuccessor.forwardedSharingDetails![0].deletionInfo).toBeUndefined();
             });
 
-            test("accept with existing IdentityAttribute whose predecessor was already shared but is ToBeDeletedByPeer", async function () {
+            test("accept with existing IdentityAttribute whose predecessor was already shared but is ToBeDeletedByRecipient", async function () {
                 const predecessor = await consumptionController.attributes.createOwnIdentityAttribute({
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: accountController.identity.address
@@ -1786,7 +1786,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 await consumptionController.attributes.addForwardedSharingDetailsToAttribute(predecessor, sender, CoreId.from("reqRef"));
 
                 const deletionInfo = EmittedAttributeDeletionInfo.from({
-                    deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
+                    deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByRecipient,
                     deletionDate: CoreDate.utc().subtract({ days: 1 })
                 });
                 await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(predecessor, deletionInfo, sender);
@@ -1833,7 +1833,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const updatedPredecessor = (await consumptionController.attributes.getLocalAttribute(predecessor.id)) as OwnIdentityAttribute;
                 expect(updatedPredecessor.forwardedSharingDetails).toHaveLength(1);
                 expect(updatedPredecessor.forwardedSharingDetails![0].peer).toStrictEqual(sender);
-                expect(updatedPredecessor.forwardedSharingDetails![0].deletionInfo!.deletionStatus).toStrictEqual(EmittedAttributeDeletionStatus.ToBeDeletedByPeer);
+                expect(updatedPredecessor.forwardedSharingDetails![0].deletionInfo!.deletionStatus).toStrictEqual(EmittedAttributeDeletionStatus.ToBeDeletedByRecipient);
 
                 const updatedSuccessor = (await consumptionController.attributes.getLocalAttribute(successor.id)) as OwnIdentityAttribute;
                 expect(updatedSuccessor.forwardedSharingDetails).toHaveLength(1);
@@ -1919,7 +1919,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 expect((successorOwnIdentityAttribute!.content as IdentityAttribute).tags).toStrictEqual(["x:anExistingTag", "x:aNewTag"]);
             });
 
-            test("accept with existing IdentityAttribute that is already shared and the latest shared version but is DeletedByPeer", async function () {
+            test("accept with existing IdentityAttribute that is already shared and the latest shared version but is DeletedByRecipient", async function () {
                 const ownIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: accountController.identity.address
@@ -1928,7 +1928,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 await consumptionController.attributes.addForwardedSharingDetailsToAttribute(ownIdentityAttribute, sender, CoreId.from("reqRef"));
 
                 const deletionInfo = EmittedAttributeDeletionInfo.from({
-                    deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
+                    deletionStatus: EmittedAttributeDeletionStatus.DeletedByRecipient,
                     deletionDate: CoreDate.utc().subtract({ days: 1 })
                 });
                 await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(ownIdentityAttribute, deletionInfo, sender);
@@ -1964,12 +1964,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const updatedOwnIdentityAttribute = (await consumptionController.attributes.getLocalAttribute(ownIdentityAttribute.id)) as OwnIdentityAttribute;
                 expect(updatedOwnIdentityAttribute.forwardedSharingDetails).toHaveLength(2);
                 expect(updatedOwnIdentityAttribute.forwardedSharingDetails![0].peer).toStrictEqual(sender);
-                expect(updatedOwnIdentityAttribute.forwardedSharingDetails![0].deletionInfo!.deletionStatus).toBe(EmittedAttributeDeletionStatus.DeletedByPeer);
+                expect(updatedOwnIdentityAttribute.forwardedSharingDetails![0].deletionInfo!.deletionStatus).toBe(EmittedAttributeDeletionStatus.DeletedByRecipient);
                 expect(updatedOwnIdentityAttribute.forwardedSharingDetails![1].peer).toStrictEqual(sender);
                 expect(updatedOwnIdentityAttribute.forwardedSharingDetails![1].deletionInfo).toBeUndefined();
             });
 
-            test("accept with existing IdentityAttribute that is already shared and the latest shared version but is ToBeDeletedByPeer", async function () {
+            test("accept with existing IdentityAttribute that is already shared and the latest shared version but is ToBeDeletedByRecipient", async function () {
                 const ownIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: accountController.identity.address
@@ -1978,7 +1978,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 await consumptionController.attributes.addForwardedSharingDetailsToAttribute(ownIdentityAttribute, sender, CoreId.from("reqRef"));
 
                 const deletionInfo = EmittedAttributeDeletionInfo.from({
-                    deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
+                    deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByRecipient,
                     deletionDate: CoreDate.utc().add({ days: 1 })
                 });
                 await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(ownIdentityAttribute, deletionInfo, sender);
@@ -2753,7 +2753,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 expect(updatedExistingOwnIdentityAttribute!.succeededBy).toStrictEqual(successorOwnIdentityAttribute!.id);
             });
 
-            test("accept with new IdentityAttribute that is already shared but DeletedByPeer", async function () {
+            test("accept with new IdentityAttribute that is already shared but DeletedByRecipient", async function () {
                 const existingOwnIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: recipient,
@@ -2763,7 +2763,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 await consumptionController.attributes.addForwardedSharingDetailsToAttribute(existingOwnIdentityAttribute, sender, CoreId.from("reqRef"));
 
                 const deletionInfo = EmittedAttributeDeletionInfo.from({
-                    deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
+                    deletionStatus: EmittedAttributeDeletionStatus.DeletedByRecipient,
                     deletionDate: CoreDate.utc().subtract({ days: 1 })
                 });
                 await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(existingOwnIdentityAttribute, deletionInfo, sender);
@@ -2805,12 +2805,12 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const updatedOwnIdentityAttribute = (await consumptionController.attributes.getLocalAttribute(existingOwnIdentityAttribute.id)) as OwnIdentityAttribute;
                 expect(updatedOwnIdentityAttribute.forwardedSharingDetails).toHaveLength(2);
                 expect(updatedOwnIdentityAttribute.forwardedSharingDetails![0].peer).toStrictEqual(sender);
-                expect(updatedOwnIdentityAttribute.forwardedSharingDetails![0].deletionInfo!.deletionStatus).toBe(EmittedAttributeDeletionStatus.DeletedByPeer);
+                expect(updatedOwnIdentityAttribute.forwardedSharingDetails![0].deletionInfo!.deletionStatus).toBe(EmittedAttributeDeletionStatus.DeletedByRecipient);
                 expect(updatedOwnIdentityAttribute.forwardedSharingDetails![1].peer).toStrictEqual(sender);
                 expect(updatedOwnIdentityAttribute.forwardedSharingDetails![1].deletionInfo).toBeUndefined();
             });
 
-            test("accept with new IdentityAttribute that is already shared but ToBeDeletedByPeer", async function () {
+            test("accept with new IdentityAttribute that is already shared but ToBeDeletedByRecipient", async function () {
                 const existingOwnIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: recipient,
@@ -2820,7 +2820,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 await consumptionController.attributes.addForwardedSharingDetailsToAttribute(existingOwnIdentityAttribute, sender, CoreId.from("reqRef"));
 
                 const deletionInfo = EmittedAttributeDeletionInfo.from({
-                    deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
+                    deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByRecipient,
                     deletionDate: CoreDate.utc().add({ days: 1 })
                 });
                 await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(existingOwnIdentityAttribute, deletionInfo, sender);
@@ -2987,7 +2987,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 expect((updatedExistingOwnIdentityAttributeSuccessor as OwnIdentityAttribute).forwardedSharingDetails).toBeUndefined();
             });
 
-            test("accept with new IdentityAttribute whose predecessor is already shared but DeletedByPeer", async function () {
+            test("accept with new IdentityAttribute whose predecessor is already shared but DeletedByRecipient", async function () {
                 const existingOwnIdentityAttributePredecessor = await consumptionController.attributes.createOwnIdentityAttribute({
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: recipient,
@@ -2997,7 +2997,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 await consumptionController.attributes.addForwardedSharingDetailsToAttribute(existingOwnIdentityAttributePredecessor, sender, CoreId.from("reqRef"));
 
                 const deletionInfo = EmittedAttributeDeletionInfo.from({
-                    deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
+                    deletionStatus: EmittedAttributeDeletionStatus.DeletedByRecipient,
                     deletionDate: CoreDate.utc().subtract({ days: 1 })
                 });
                 await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(existingOwnIdentityAttributePredecessor, deletionInfo, sender);
@@ -3046,7 +3046,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 expect((result as ReadAttributeAcceptResponseItem).attributeId).toStrictEqual(existingOwnIdentityAttributeSuccessor.id);
             });
 
-            test("accept with new IdentityAttribute whose predecessor is already shared but ToBeDeletedByPeer", async function () {
+            test("accept with new IdentityAttribute whose predecessor is already shared but ToBeDeletedByRecipient", async function () {
                 const existingOwnIdentityAttributePredecessor = await consumptionController.attributes.createOwnIdentityAttribute({
                     content: TestObjectFactory.createIdentityAttribute({
                         owner: recipient,
@@ -3056,7 +3056,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 await consumptionController.attributes.addForwardedSharingDetailsToAttribute(existingOwnIdentityAttributePredecessor, sender, CoreId.from("reqRef"));
 
                 const deletionInfo = EmittedAttributeDeletionInfo.from({
-                    deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
+                    deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByRecipient,
                     deletionDate: CoreDate.utc().add({ days: 1 })
                 });
                 await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(existingOwnIdentityAttributePredecessor, deletionInfo, sender);

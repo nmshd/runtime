@@ -62,7 +62,7 @@ export class OwnAttributeDeletedByOwnerNotificationItemProcessor extends Abstrac
 
         if (attribute instanceof PeerIdentityAttribute || attribute instanceof PeerRelationshipAttribute) {
             const deletionInfo = ReceivedAttributeDeletionInfo.from({
-                deletionStatus: ReceivedAttributeDeletionStatus.DeletedByOwner,
+                deletionStatus: ReceivedAttributeDeletionStatus.DeletedByEmitter,
                 deletionDate: CoreDate.utc()
             });
 

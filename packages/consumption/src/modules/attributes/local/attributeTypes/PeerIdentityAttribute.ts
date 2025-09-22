@@ -34,10 +34,10 @@ export class PeerIdentityAttribute extends LocalAttribute implements IPeerIdenti
     @validate()
     public peerSharingDetails: PeerIdentityAttributeSharingDetails;
 
-    public isDeletedByOwnerOrToBeDeleted(): boolean {
+    public isDeletedByEmitterOrToBeDeleted(): boolean {
         if (!this.peerSharingDetails.deletionInfo) return false;
 
-        const deletionStatuses = [ReceivedAttributeDeletionStatus.DeletedByOwner, ReceivedAttributeDeletionStatus.ToBeDeleted];
+        const deletionStatuses = [ReceivedAttributeDeletionStatus.DeletedByEmitter, ReceivedAttributeDeletionStatus.ToBeDeleted];
         return deletionStatuses.includes(this.peerSharingDetails.deletionInfo.deletionStatus);
     }
 
@@ -46,7 +46,7 @@ export class PeerIdentityAttribute extends LocalAttribute implements IPeerIdenti
     }
 
     public setPeerDeletionInfo(deletionInfo: ReceivedAttributeDeletionInfo | undefined, overrideDeleted = false): this {
-        if (!overrideDeleted && this.peerSharingDetails.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.DeletedByOwner) {
+        if (!overrideDeleted && this.peerSharingDetails.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.DeletedByEmitter) {
             throw ConsumptionCoreErrors.attributes.cannotSetAttributeDeletionInfo(this.id);
         }
 
