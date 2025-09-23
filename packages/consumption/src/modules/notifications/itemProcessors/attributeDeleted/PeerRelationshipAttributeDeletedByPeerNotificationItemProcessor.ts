@@ -9,9 +9,9 @@ import {
     EmittedAttributeDeletionStatus,
     OwnRelationshipAttribute,
     PeerRelationshipAttributeDeletedByPeerEvent,
-    ThirdPartyRelationshipAttribute,
-    ThirdPartyRelationshipAttributeDeletionInfo,
-    ThirdPartyRelationshipAttributeDeletionStatus
+    ReceivedAttributeDeletionInfo,
+    ReceivedAttributeDeletionStatus,
+    ThirdPartyRelationshipAttribute
 } from "../../../attributes";
 import { ValidationResult } from "../../../common";
 import { LocalNotification } from "../../local/LocalNotification";
@@ -62,7 +62,7 @@ export class PeerRelationshipAttributeDeletedByPeerNotificationItemProcessor ext
 
         if (attribute instanceof OwnRelationshipAttribute) {
             const deletionInfo = EmittedAttributeDeletionInfo.from({
-                deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
+                deletionStatus: EmittedAttributeDeletionStatus.DeletedByRecipient,
                 deletionDate: CoreDate.utc()
             });
 
@@ -71,12 +71,12 @@ export class PeerRelationshipAttributeDeletedByPeerNotificationItemProcessor ext
             return new PeerRelationshipAttributeDeletedByPeerEvent(this.currentIdentityAddress.toString(), attribute);
         }
 
-        const deletionInfo = ThirdPartyRelationshipAttributeDeletionInfo.from({
-            deletionStatus: ThirdPartyRelationshipAttributeDeletionStatus.DeletedByPeer,
+        const deletionInfo = ReceivedAttributeDeletionInfo.from({
+            deletionStatus: ReceivedAttributeDeletionStatus.DeletedByEmitter,
             deletionDate: CoreDate.utc()
         });
 
-        await this.consumptionController.attributes.setPeerDeletionInfoOfThirdPartyRelationshipAttributeAndPredecessors(attribute, deletionInfo, true);
+        await this.consumptionController.attributes.setPeerDeletionInfoOfReceivedAttributeAndPredecessors(attribute, deletionInfo, true);
 
         return new PeerRelationshipAttributeDeletedByPeerEvent(this.currentIdentityAddress.toString(), attribute);
     }
@@ -92,6 +92,6 @@ export class PeerRelationshipAttributeDeletedByPeerNotificationItemProcessor ext
         // the previous deletionState cannot be unambiguously known
         return attribute instanceof OwnRelationshipAttribute
             ? await this.consumptionController.attributes.setPeerDeletionInfoOfOwnRelationshipAttributeAndPredecessors(attribute, undefined, true)
-            : await this.consumptionController.attributes.setPeerDeletionInfoOfThirdPartyRelationshipAttributeAndPredecessors(attribute, undefined, true);
+            : await this.consumptionController.attributes.setPeerDeletionInfoOfReceivedAttributeAndPredecessors(attribute, undefined, true);
     }
 }

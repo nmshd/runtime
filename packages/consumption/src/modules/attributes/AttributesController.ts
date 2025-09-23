@@ -45,8 +45,6 @@ import {
     PeerRelationshipAttributeSharingDetails,
     ReceivedAttributeDeletionInfo,
     ReceivedAttributeDeletionStatus,
-    ThirdPartyRelationshipAttributeDeletionInfo,
-    ThirdPartyRelationshipAttributeDeletionStatus,
     ThirdPartyRelationshipAttributeSharingDetails
 } from "./local/sharingDetails";
 import {
@@ -458,9 +456,9 @@ export class AttributesController extends ConsumptionBaseController {
 
         if (attribute.isForwardedTo(peer, true)) throw ConsumptionCoreErrors.attributes.alreadyForwarded(attribute.id, peer);
 
-        const sharingDetails = attribute.hasDeletionStatusUnequalDeletedByPeer(peer)
+        const sharingDetails = attribute.hasDeletionStatusUnequalDeletedByRecipient(peer)
             ? (() => {
-                  const sharingDetailsForPeer = attribute.getForwardedSharingDetailsNotDeletedByPeer(peer)!;
+                  const sharingDetailsForPeer = attribute.getForwardedSharingDetailsNotDeletedByRecipient(peer)!;
                   sharingDetailsForPeer.deletionInfo = undefined;
                   return sharingDetailsForPeer;
               })()
@@ -684,7 +682,7 @@ export class AttributesController extends ConsumptionBaseController {
             peerSharingDetails
         });
 
-        if (predecessor.peerSharingDetails.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.DeletedByOwner) {
+        if (predecessor.peerSharingDetails.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.DeletedByEmitter) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedSharedAttributesDeletedByPeer());
         }
 
@@ -719,7 +717,7 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangeKey());
         }
 
-        if (predecessor.peerSharingDetails.deletionInfo?.deletionStatus === EmittedAttributeDeletionStatus.DeletedByPeer) {
+        if (predecessor.peerSharingDetails.deletionInfo?.deletionStatus === EmittedAttributeDeletionStatus.DeletedByRecipient) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedSharedAttributesDeletedByPeer());
         }
 
@@ -754,7 +752,7 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangeKey());
         }
 
-        if (predecessor.peerSharingDetails.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.DeletedByOwner) {
+        if (predecessor.peerSharingDetails.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.DeletedByEmitter) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedSharedAttributesDeletedByPeer());
         }
 
@@ -790,10 +788,7 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangeKey());
         }
 
-        if (
-            predecessor.peerSharingDetails.deletionInfo?.deletionStatus === ThirdPartyRelationshipAttributeDeletionStatus.DeletedByOwner ||
-            predecessor.peerSharingDetails.deletionInfo?.deletionStatus === ThirdPartyRelationshipAttributeDeletionStatus.DeletedByPeer
-        ) {
+        if (predecessor.peerSharingDetails.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.DeletedByEmitter) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedSharedAttributesDeletedByPeer());
         }
 
@@ -1092,7 +1087,7 @@ export class AttributesController extends ConsumptionBaseController {
                 owner: owner
             }
         });
-        query["peerSharingDetails.deletionInfo.deletionStatus"] = { $ne: ReceivedAttributeDeletionStatus.DeletedByOwner };
+        query["peerSharingDetails.deletionInfo.deletionStatus"] = { $ne: ReceivedAttributeDeletionStatus.DeletedByEmitter };
 
         return (await this.getAttributeWithSameValue(trimmedValue, query)) as PeerIdentityAttribute | undefined;
     }
@@ -1112,9 +1107,7 @@ export class AttributesController extends ConsumptionBaseController {
             }
         });
         query["peerSharingDetails.peer"] = peer;
-        query["peerSharingDetails.deletionInfo.deletionStatus"] = {
-            $nin: [ThirdPartyRelationshipAttributeDeletionStatus.DeletedByOwner, ThirdPartyRelationshipAttributeDeletionStatus.DeletedByPeer]
-        };
+        query["peerSharingDetails.deletionInfo.deletionStatus"] = { $ne: ReceivedAttributeDeletionStatus.DeletedByEmitter };
 
         return (await this.getAttributeWithSameValue(value, query)) as ThirdPartyRelationshipAttribute | undefined;
     }
@@ -1153,10 +1146,10 @@ export class AttributesController extends ConsumptionBaseController {
             "peerSharingDetails.peer": peer.toString(),
             "peerSharingDetails.deletionInfo.deletionStatus": {
                 $nin: [
-                    EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
-                    EmittedAttributeDeletionStatus.DeletedByPeer,
+                    EmittedAttributeDeletionStatus.ToBeDeletedByRecipient,
+                    EmittedAttributeDeletionStatus.DeletedByRecipient,
                     ReceivedAttributeDeletionStatus.ToBeDeleted,
-                    ReceivedAttributeDeletionStatus.DeletedByOwner
+                    ReceivedAttributeDeletionStatus.DeletedByEmitter
                 ]
             }
         };
@@ -1338,58 +1331,38 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     private async setDeletionInfoOfAttributesSharedWithPeer(peer: CoreAddress, deletionDate: CoreDate): Promise<void> {
-        await this.setDeletionInfoOfOwnIdentityAttributes(peer, deletionDate);
-        await this.setDeletionInfoOfPeerIdentityAttributes(peer, deletionDate);
-        await this.setDeletionInfoOfOwnRelationshipAttributes(peer, deletionDate);
-        await this.setDeletionInfoOfPeerRelationshipAttributes(peer, deletionDate);
-        await this.setDeletionInfoOfForwardedRelationshipAttributes(peer, deletionDate);
-        await this.setDeletionInfoOfThirdPartyRelationshipAttributes(peer, deletionDate);
+        await this.setForwardedDeletionInfoOfAttributes(peer, deletionDate);
+        await this.setPeerDeletionInfoOfOwnRelationshipAttributes(peer, deletionDate);
+        await this.setPeerDeletionInfoOfReceivedAttributes(peer, deletionDate);
     }
 
-    private async setDeletionInfoOfOwnIdentityAttributes(peer: CoreAddress, deletionDate: CoreDate): Promise<void> {
+    private async setForwardedDeletionInfoOfAttributes(peer: CoreAddress, deletionDate: CoreDate): Promise<void> {
         const deletionInfo = EmittedAttributeDeletionInfo.from({
-            deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
+            deletionStatus: EmittedAttributeDeletionStatus.DeletedByRecipient,
             deletionDate
         });
 
-        const attributesSharedWithPeer = (await this.getLocalAttributes({
-            "@type": "OwnIdentityAttribute",
+        const attributesForwardedToPeer = (await this.getLocalAttributes({
+            "@type": { $in: ["OwnIdentityAttribute", "OwnRelationshipAttribute", "PeerRelationshipAttribute"] },
             "forwardedSharingDetails.peer": peer.toString(),
-            "forwardedSharingDetails.deletionInfo.deletionStatus": { $ne: EmittedAttributeDeletionStatus.DeletedByPeer }
-        })) as OwnIdentityAttribute[];
+            "forwardedSharingDetails.deletionInfo.deletionStatus": { $ne: EmittedAttributeDeletionStatus.DeletedByRecipient }
+        })) as OwnIdentityAttribute[] | OwnRelationshipAttribute[] | PeerRelationshipAttribute[];
 
-        for (const attribute of attributesSharedWithPeer) {
+        for (const attribute of attributesForwardedToPeer) {
             await this.setForwardedDeletionInfoOfAttribute(attribute, deletionInfo, peer);
         }
     }
 
-    private async setDeletionInfoOfPeerIdentityAttributes(peer: CoreAddress, deletionDate: CoreDate): Promise<void> {
-        const deletionInfo = ReceivedAttributeDeletionInfo.from({
-            deletionStatus: ReceivedAttributeDeletionStatus.DeletedByOwner,
-            deletionDate
-        });
-
-        const attributesSharedWithPeer = (await this.getLocalAttributes({
-            "@type": "PeerIdentityAttribute",
-            "peerSharingDetails.peer": peer.toString(),
-            "peerSharingDetails.deletionInfo.deletionStatus": { $ne: ReceivedAttributeDeletionStatus.DeletedByOwner }
-        })) as PeerIdentityAttribute[];
-
-        for (const attribute of attributesSharedWithPeer) {
-            await this.setPeerDeletionInfoOfPeerAttribute(attribute, deletionInfo);
-        }
-    }
-
-    private async setDeletionInfoOfOwnRelationshipAttributes(peer: CoreAddress, deletionDate: CoreDate): Promise<void> {
+    private async setPeerDeletionInfoOfOwnRelationshipAttributes(peer: CoreAddress, deletionDate: CoreDate): Promise<void> {
         const deletionInfo = EmittedAttributeDeletionInfo.from({
-            deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
+            deletionStatus: EmittedAttributeDeletionStatus.DeletedByRecipient,
             deletionDate
         });
 
         const attributesSharedWithPeer = (await this.getLocalAttributes({
             "@type": "OwnRelationshipAttribute",
             "peerSharingDetails.peer": peer.toString(),
-            "peerSharingDetails.deletionInfo.deletionStatus": { $ne: EmittedAttributeDeletionStatus.DeletedByPeer }
+            "peerSharingDetails.deletionInfo.deletionStatus": { $ne: EmittedAttributeDeletionStatus.DeletedByRecipient }
         })) as OwnRelationshipAttribute[];
 
         for (const attribute of attributesSharedWithPeer) {
@@ -1397,57 +1370,20 @@ export class AttributesController extends ConsumptionBaseController {
         }
     }
 
-    private async setDeletionInfoOfPeerRelationshipAttributes(peer: CoreAddress, deletionDate: CoreDate): Promise<void> {
+    private async setPeerDeletionInfoOfReceivedAttributes(peer: CoreAddress, deletionDate: CoreDate): Promise<void> {
         const deletionInfo = ReceivedAttributeDeletionInfo.from({
-            deletionStatus: ReceivedAttributeDeletionStatus.DeletedByOwner,
+            deletionStatus: ReceivedAttributeDeletionStatus.DeletedByEmitter,
             deletionDate
         });
 
-        const attributesSharedWithPeer = (await this.getLocalAttributes({
-            "@type": "PeerRelationshipAttribute",
+        const attributesReceivedFromPeer = (await this.getLocalAttributes({
+            "@type": { $in: ["PeerIdentityAttribute", "PeerRelationshipAttribute", "ThirdPartyRelationshipAttribute"] },
             "peerSharingDetails.peer": peer.toString(),
-            "peerSharingDetails.deletionInfo.deletionStatus": { $ne: ReceivedAttributeDeletionStatus.DeletedByOwner }
-        })) as PeerRelationshipAttribute[];
+            "peerSharingDetails.deletionInfo.deletionStatus": { $ne: ReceivedAttributeDeletionStatus.DeletedByEmitter }
+        })) as PeerIdentityAttribute[];
 
-        for (const attribute of attributesSharedWithPeer) {
-            await this.setPeerDeletionInfoOfPeerAttribute(attribute, deletionInfo);
-        }
-    }
-
-    private async setDeletionInfoOfForwardedRelationshipAttributes(thirdParty: CoreAddress, deletionDate: CoreDate): Promise<void> {
-        const deletionInfo = EmittedAttributeDeletionInfo.from({
-            deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
-            deletionDate
-        });
-
-        const attributesSharedWithPeer = (await this.getLocalAttributes({
-            "@type": { $in: ["OwnRelationshipAttribute", "PeerRelationshipAttribute"] },
-            "forwardedSharingDetails.peer": thirdParty.toString(),
-            "forwardedSharingDetails.deletionInfo.deletionStatus": { $ne: EmittedAttributeDeletionStatus.DeletedByPeer }
-        })) as OwnRelationshipAttribute[] | PeerRelationshipAttribute[];
-
-        for (const attribute of attributesSharedWithPeer) {
-            await this.setForwardedDeletionInfoOfAttribute(attribute, deletionInfo, thirdParty);
-        }
-    }
-
-    private async setDeletionInfoOfThirdPartyRelationshipAttributes(peer: CoreAddress, deletionDate: CoreDate): Promise<void> {
-        const deletionInfo = ThirdPartyRelationshipAttributeDeletionInfo.from({
-            // TODO: might also need to be DeletedByOwner -> refactor deletionStatus in further PR
-            deletionStatus: ThirdPartyRelationshipAttributeDeletionStatus.DeletedByPeer,
-            deletionDate
-        });
-
-        const attributesSharedWithPeer = (await this.getLocalAttributes({
-            "@type": "ThirdPartyRelationshipAttribute",
-            "peerSharingDetails.peer": peer.toString(),
-            "peerSharingDetails.deletionInfo.deletionStatus": {
-                $nin: [ThirdPartyRelationshipAttributeDeletionStatus.DeletedByPeer, ThirdPartyRelationshipAttributeDeletionStatus.DeletedByOwner]
-            }
-        })) as ThirdPartyRelationshipAttribute[];
-
-        for (const attribute of attributesSharedWithPeer) {
-            await this.setPeerDeletionInfoOfThirdPartyRelationshipAttribute(attribute, deletionInfo);
+        for (const attribute of attributesReceivedFromPeer) {
+            await this.setPeerDeletionInfoOfReceivedAttribute(attribute, deletionInfo);
         }
     }
 
@@ -1476,14 +1412,14 @@ export class AttributesController extends ConsumptionBaseController {
         if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
         if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
-        if (attribute.isDeletedOrToBeDeletedByPeer() && !overrideDeletedOrToBeDeleted) return;
+        if (attribute.isDeletedOrToBeDeletedByRecipient() && !overrideDeletedOrToBeDeleted) return;
 
         attribute.setPeerDeletionInfo(deletionInfo, overrideDeletedOrToBeDeleted);
-        await this.parent.attributes.updateAttributeUnsafe(attribute);
+        await this.updateAttributeUnsafe(attribute);
     }
 
-    public async setPeerDeletionInfoOfPeerAttribute(
-        attribute: PeerIdentityAttribute | PeerRelationshipAttribute,
+    public async setPeerDeletionInfoOfReceivedAttribute(
+        attribute: PeerIdentityAttribute | PeerRelationshipAttribute | ThirdPartyRelationshipAttribute,
         deletionInfo: ReceivedAttributeDeletionInfo | undefined,
         overrideDeletedOrToBeDeleted = false
     ): Promise<void> {
@@ -1491,25 +1427,10 @@ export class AttributesController extends ConsumptionBaseController {
         if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
         if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
-        if (attribute.isDeletedByOwnerOrToBeDeleted() && !overrideDeletedOrToBeDeleted) return;
+        if (attribute.isDeletedByEmitterOrToBeDeleted() && !overrideDeletedOrToBeDeleted) return;
 
         attribute.setPeerDeletionInfo(deletionInfo, overrideDeletedOrToBeDeleted);
-        await this.parent.attributes.updateAttributeUnsafe(attribute);
-    }
-
-    public async setPeerDeletionInfoOfThirdPartyRelationshipAttribute(
-        attribute: ThirdPartyRelationshipAttribute,
-        deletionInfo: ThirdPartyRelationshipAttributeDeletionInfo | undefined,
-        overrideDeletedOrToBeDeleted = false
-    ): Promise<void> {
-        const localAttribute = await this.getLocalAttribute(attribute.id);
-        if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
-        if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
-
-        if (attribute.isDeletedByOwnerOrPeerOrToBeDeleted() && !overrideDeletedOrToBeDeleted) return;
-
-        attribute.setPeerDeletionInfo(deletionInfo, overrideDeletedOrToBeDeleted);
-        await this.parent.attributes.updateAttributeUnsafe(attribute);
+        await this.updateAttributeUnsafe(attribute);
     }
 
     public async setForwardedDeletionInfoOfAttributeAndPredecessors(
@@ -1537,27 +1458,15 @@ export class AttributesController extends ConsumptionBaseController {
         }
     }
 
-    public async setPeerDeletionInfoOfPeerAttributeAndPredecessors(
-        attribute: PeerIdentityAttribute | PeerRelationshipAttribute,
+    public async setPeerDeletionInfoOfReceivedAttributeAndPredecessors(
+        attribute: PeerIdentityAttribute | PeerRelationshipAttribute | ThirdPartyRelationshipAttribute,
         deletionInfo: ReceivedAttributeDeletionInfo | undefined,
         overrideDeletedOrToBeDeleted = false
     ): Promise<void> {
         const predecessors = await this.getPredecessorsOfAttribute(attribute);
 
         for (const attr of [attribute, ...predecessors]) {
-            await this.setPeerDeletionInfoOfPeerAttribute(attr, deletionInfo, overrideDeletedOrToBeDeleted);
-        }
-    }
-
-    public async setPeerDeletionInfoOfThirdPartyRelationshipAttributeAndPredecessors(
-        attribute: ThirdPartyRelationshipAttribute,
-        deletionInfo: ThirdPartyRelationshipAttributeDeletionInfo | undefined,
-        overrideDeletedOrToBeDeleted = false
-    ): Promise<void> {
-        const predecessors = await this.getPredecessorsOfAttribute(attribute);
-
-        for (const attr of [attribute, ...predecessors]) {
-            await this.setPeerDeletionInfoOfThirdPartyRelationshipAttribute(attr, deletionInfo, overrideDeletedOrToBeDeleted);
+            await this.setPeerDeletionInfoOfReceivedAttribute(attr, deletionInfo, overrideDeletedOrToBeDeleted);
         }
     }
 

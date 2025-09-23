@@ -250,7 +250,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             });
 
             const createdAttribute = await When.iCreateAnOwnRelationshipAttribute(relationshipAttributeOfSender);
-            await When.iMarkMyOwnRelationshipAttributeAsDeletedByPeer(createdAttribute);
+            await When.iMarkMyOwnRelationshipAttributeAsDeletedByRecipient(createdAttribute);
 
             const relationshipAttributeWithSameKey = TestObjectFactory.createRelationshipAttribute({
                 owner: TestIdentity.CURRENT_IDENTITY,
@@ -482,13 +482,13 @@ describe("CreateAttributeRequestItemProcessor", function () {
                 attributeOwner: TestIdentity.CURRENT_IDENTITY,
                 value: GivenName.from("aGivenName"),
                 peer: TestIdentity.PEER,
-                deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer
+                deletionStatus: EmittedAttributeDeletionStatus.DeletedByRecipient
             });
             await Given.aRequestItemWithAnIdentityAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, value: GivenName.from("aGivenName") });
             await When.iCallAccept();
             await Then.theResponseItemShouldBeOfType("CreateAttributeAcceptResponseItem");
             await Then.theOwnIdentityAttributeIsForwarded(ownIdentityAttribute);
-            await Then.theOwnIdentityAttributeIsDeletedByPeer(ownIdentityAttribute, TestIdentity.PEER);
+            await Then.theOwnIdentityAttributeIsDeletedByRecipient(ownIdentityAttribute, TestIdentity.PEER);
         });
 
         test("in case of an IdentityAttribute that already has a ForwardedSharingDetails but is to be deleted by peer: removes the EmittedAttributeDeletionInfo", async function () {
@@ -496,7 +496,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
                 attributeOwner: TestIdentity.CURRENT_IDENTITY,
                 value: GivenName.from("aGivenName"),
                 peer: TestIdentity.PEER,
-                deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer
+                deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByRecipient
             });
             await Given.aRequestItemWithAnIdentityAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, value: GivenName.from("aGivenName") });
             await When.iCallAccept();
@@ -579,7 +579,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
                 attributeOwner: TestIdentity.CURRENT_IDENTITY,
                 value: GivenName.from("aGivenName"),
                 peer: TestIdentity.PEER,
-                deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer
+                deletionStatus: EmittedAttributeDeletionStatus.DeletedByRecipient
             });
             const ownIdentityAttributeSuccessor = await Given.anOwnIdentityAttributeSuccession(forwardedOwnIdentityAttributePredecessor.id, {
                 value: GivenName.from("aSucceededGivenName")
@@ -598,7 +598,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
                 attributeOwner: TestIdentity.CURRENT_IDENTITY,
                 value: GivenName.from("aGivenName"),
                 peer: TestIdentity.PEER,
-                deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer
+                deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByRecipient
             });
             await Given.anOwnIdentityAttributeSuccession(forwardedOwnIdentityAttributePredecessor.id, { value: GivenName.from("aSucceededGivenName") });
             await Given.aRequestItemWithAnIdentityAttribute({

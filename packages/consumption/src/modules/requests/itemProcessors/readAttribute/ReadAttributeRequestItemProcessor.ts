@@ -307,7 +307,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
             const isLatestSharedVersion = latestSharedVersion[0]?.id.equals(existingAttribute.id);
             if (isLatestSharedVersion) {
-                if (latestSharedVersion[0].hasDeletionStatusUnequalDeletedByPeer(requestInfo.peer)) {
+                if (latestSharedVersion[0].hasDeletionStatusUnequalDeletedByRecipient(requestInfo.peer)) {
                     await this.consumptionController.attributes.setForwardedDeletionInfoOfAttribute(latestSharedVersion[0], undefined, requestInfo.peer, true);
                 }
 
@@ -397,9 +397,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
             if (attribute.peerSharingDetails.deletionInfo?.deletionStatus !== ReceivedAttributeDeletionStatus.ToBeDeleted) return;
 
-            // TODO: AttributesController function (shared for PeerIdentityAttribute and ThirdPartyRelationshipAttribute) -> other PR where deletionStatus is refactored
-            attribute.peerSharingDetails.deletionInfo = undefined;
-            await this.consumptionController.attributes.updateAttributeUnsafe(attribute);
+            await this.consumptionController.attributes.setPeerDeletionInfoOfReceivedAttribute(attribute, undefined, true);
             return;
         }
 

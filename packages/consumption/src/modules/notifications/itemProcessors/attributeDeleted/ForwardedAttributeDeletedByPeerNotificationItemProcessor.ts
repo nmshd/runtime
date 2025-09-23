@@ -60,7 +60,7 @@ export class ForwardedAttributeDeletedByPeerNotificationItemProcessor extends Ab
         }
 
         const deletionInfo = EmittedAttributeDeletionInfo.from({
-            deletionStatus: EmittedAttributeDeletionStatus.DeletedByPeer,
+            deletionStatus: EmittedAttributeDeletionStatus.DeletedByRecipient,
             deletionDate: CoreDate.utc()
         });
 

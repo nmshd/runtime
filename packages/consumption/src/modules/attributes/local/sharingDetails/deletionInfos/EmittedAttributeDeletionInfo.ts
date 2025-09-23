@@ -4,8 +4,8 @@ import { AbstractAttributeDeletionInfo, AbstractAttributeDeletionInfoJSON, IAbst
 export enum EmittedAttributeDeletionStatus {
     DeletionRequestSent = "DeletionRequestSent",
     DeletionRequestRejected = "DeletionRequestRejected",
-    ToBeDeletedByPeer = "ToBeDeletedByPeer",
-    DeletedByPeer = "DeletedByPeer"
+    ToBeDeletedByRecipient = "ToBeDeletedByRecipient",
+    DeletedByRecipient = "DeletedByRecipient"
 }
 
 export interface EmittedAttributeDeletionInfoJSON extends AbstractAttributeDeletionInfoJSON {

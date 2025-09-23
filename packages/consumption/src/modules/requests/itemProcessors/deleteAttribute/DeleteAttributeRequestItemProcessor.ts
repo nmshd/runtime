@@ -10,9 +10,7 @@ import {
     PeerRelationshipAttribute,
     ReceivedAttributeDeletionInfo,
     ReceivedAttributeDeletionStatus,
-    ThirdPartyRelationshipAttribute,
-    ThirdPartyRelationshipAttributeDeletionInfo,
-    ThirdPartyRelationshipAttributeDeletionStatus
+    ThirdPartyRelationshipAttribute
 } from "../../../attributes";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
@@ -41,7 +39,7 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
         if (
             (attribute instanceof OwnIdentityAttribute && !attribute.isForwardedTo(recipient, true)) ||
             (attribute instanceof OwnRelationshipAttribute &&
-                ((attribute.peerSharingDetails.peer.equals(recipient) && attribute.isDeletedOrToBeDeletedByPeer()) ||
+                ((attribute.peerSharingDetails.peer.equals(recipient) && attribute.isDeletedOrToBeDeletedByRecipient()) ||
                     (!attribute.peerSharingDetails.peer.equals(recipient) && !attribute.isForwardedTo(recipient, true))))
         ) {
             return ValidationResult.error(
@@ -114,27 +112,12 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
         if (!attribute) return AcceptResponseItem.from({ result: ResponseItemResult.Accepted });
 
         const deletionDate = CoreDate.from(params.deletionDate);
-
-        if (attribute instanceof PeerIdentityAttribute || attribute instanceof PeerRelationshipAttribute) {
-            const deletionInfo = ReceivedAttributeDeletionInfo.from({
-                deletionStatus: ReceivedAttributeDeletionStatus.ToBeDeleted,
-                deletionDate: deletionDate
-            });
-
-            await this.consumptionController.attributes.setPeerDeletionInfoOfPeerAttributeAndPredecessors(attribute, deletionInfo);
-
-            return DeleteAttributeAcceptResponseItem.from({
-                deletionDate: deletionDate,
-                result: ResponseItemResult.Accepted
-            });
-        }
-
-        const deletionInfo = ThirdPartyRelationshipAttributeDeletionInfo.from({
-            deletionStatus: ThirdPartyRelationshipAttributeDeletionStatus.ToBeDeleted,
+        const deletionInfo = ReceivedAttributeDeletionInfo.from({
+            deletionStatus: ReceivedAttributeDeletionStatus.ToBeDeleted,
             deletionDate: deletionDate
         });
 
-        await this.consumptionController.attributes.setPeerDeletionInfoOfThirdPartyRelationshipAttributeAndPredecessors(attribute, deletionInfo);
+        await this.consumptionController.attributes.setPeerDeletionInfoOfReceivedAttributeAndPredecessors(attribute, deletionInfo);
 
         return DeleteAttributeAcceptResponseItem.from({
             deletionDate: deletionDate,
@@ -170,7 +153,7 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
         peer: CoreAddress
     ): Promise<void> {
         const deletionInfo = EmittedAttributeDeletionInfo.from({
-            deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByPeer,
+            deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByRecipient,
             deletionDate
         });
 

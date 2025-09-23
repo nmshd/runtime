@@ -13,13 +13,7 @@ import { CoreAddress } from "@nmshd/core-types";
 import { RelationshipStatus } from "@nmshd/transport";
 import _ from "lodash";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import {
-    OwnIdentityAttribute,
-    OwnRelationshipAttribute,
-    PeerRelationshipAttribute,
-    ReceivedAttributeDeletionStatus,
-    ThirdPartyRelationshipAttributeDeletionStatus
-} from "../../../attributes";
+import { OwnIdentityAttribute, OwnRelationshipAttribute, PeerRelationshipAttribute, ReceivedAttributeDeletionStatus } from "../../../attributes";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
@@ -178,8 +172,8 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             );
 
             if (existingThirdPartyRelationshipAttribute) {
-                if (existingThirdPartyRelationshipAttribute.peerSharingDetails.deletionInfo?.deletionStatus === ThirdPartyRelationshipAttributeDeletionStatus.ToBeDeleted) {
-                    await this.consumptionController.attributes.setPeerDeletionInfoOfThirdPartyRelationshipAttribute(existingThirdPartyRelationshipAttribute, undefined, true);
+                if (existingThirdPartyRelationshipAttribute.peerSharingDetails.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.ToBeDeleted) {
+                    await this.consumptionController.attributes.setPeerDeletionInfoOfReceivedAttribute(existingThirdPartyRelationshipAttribute, undefined, true);
                 }
 
                 return AttributeAlreadySharedAcceptResponseItem.from({
@@ -206,7 +200,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
 
         if (existingPeerIdentityAttribute) {
             if (existingPeerIdentityAttribute.peerSharingDetails.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.ToBeDeleted) {
-                await this.consumptionController.attributes.setPeerDeletionInfoOfPeerAttribute(existingPeerIdentityAttribute, undefined, true);
+                await this.consumptionController.attributes.setPeerDeletionInfoOfReceivedAttribute(existingPeerIdentityAttribute, undefined, true);
             }
 
             return AttributeAlreadySharedAcceptResponseItem.from({
@@ -240,7 +234,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             return;
         }
 
-        if (responseItem instanceof AttributeAlreadySharedAcceptResponseItem && sharedAttribute.hasDeletionStatusUnequalDeletedByPeer(requestInfo.peer)) {
+        if (responseItem instanceof AttributeAlreadySharedAcceptResponseItem && sharedAttribute.hasDeletionStatusUnequalDeletedByRecipient(requestInfo.peer)) {
             await this.consumptionController.attributes.setForwardedDeletionInfoOfAttribute(sharedAttribute, undefined, requestInfo.peer, true);
             return;
         }

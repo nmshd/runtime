@@ -3,7 +3,7 @@ import { AbstractAttributeDeletionInfo, AbstractAttributeDeletionInfoJSON, IAbst
 
 export enum ReceivedAttributeDeletionStatus {
     ToBeDeleted = "ToBeDeleted",
-    DeletedByOwner = "DeletedByOwner"
+    DeletedByEmitter = "DeletedByEmitter"
 }
 
 export interface ReceivedAttributeDeletionInfoJSON extends AbstractAttributeDeletionInfoJSON {
