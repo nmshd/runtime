@@ -245,10 +245,10 @@ class Attributes {
         return new ApplicationError("error.runtime.attributes.setDefaultOwnIdentityAttributesIsDisabled", "Setting default OwnIdentityAttributes is disabled for this Account.");
     }
 
-    public cannotDeleteSharedAttributeWhileRelationshipIsPending(): ApplicationError {
+    public cannotDeleteSharedAttributeWhileRelationshipIsPending(attributeId: CoreId | string): ApplicationError {
         return new ApplicationError(
             "error.runtime.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending",
-            "The shared Attribute cannot be deleted while the Relationship to the peer is in status 'Pending'. If you want to delete it now, you'll have to accept, reject or revoke the pending Relationship."
+            `The shared Attribute '${attributeId.toString()}' cannot be deleted while the Relationship to a peer is in status 'Pending'. If you want to delete it now, you'll have to accept, reject or revoke the pending Relationship.`
         );
     }
 }
