@@ -55,7 +55,7 @@ function validateAttributeMatchesWithIdentityAttributeQuery(
 
     if (!recipientIsAttributeOwner) {
         return ValidationResult.error(
-            ConsumptionCoreErrors.requests.attributeQueryMismatch("The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes.")
+            ConsumptionCoreErrors.requests.attributeQueryMismatch("The provided IdentityAttribute belongs to someone else. You can only share OwnIdentityAttributes.")
         );
     }
 
@@ -87,7 +87,7 @@ function validateAttributeMatchesWithIQLQuery(_: IQLQuery, attribute: IdentityAt
 
     if (!recipientIsAttributeOwner) {
         return ValidationResult.error(
-            ConsumptionCoreErrors.requests.attributeQueryMismatch("The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes.")
+            ConsumptionCoreErrors.requests.attributeQueryMismatch("The provided IdentityAttribute belongs to someone else. You can only share OwnIdentityAttributes.")
         );
     }
 
