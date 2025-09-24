@@ -2462,6 +2462,93 @@ describe("AttributesController", function () {
         });
     });
 
+    describe("get peers with exclusiverly forwareded predecessors", function () {
+        test("should return empty list if Attribute has no predecessor", async function () {
+            const attribute = await consumptionController.attributes.createOwnIdentityAttribute({
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "GivenName",
+                        value: "aGivenName"
+                    },
+                    owner: testAccount.identity.address
+                })
+            });
+            await consumptionController.attributes.addForwardedSharingDetailsToAttribute(attribute, CoreAddress.from("peer1"), CoreId.from("aSourceReference"));
+
+            const peersWithPredecessors = await consumptionController.attributes.getPeersWithExclusivelyForwardedPredecessors(attribute.id);
+            expect(peersWithPredecessors).toHaveLength(0);
+        });
+
+        test("should return empty list if peers of predecessor are also peers of Attribute", async function () {
+            const predecessor = await consumptionController.attributes.createOwnIdentityAttribute({
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "GivenName",
+                        value: "aGivenName"
+                    },
+                    owner: testAccount.identity.address
+                })
+            });
+
+            const successor = (
+                await consumptionController.attributes.succeedOwnIdentityAttribute(
+                    predecessor,
+                    OwnIdentityAttributeSuccessorParams.from({
+                        content: IdentityAttribute.from({
+                            value: {
+                                "@type": "GivenName",
+                                value: "anotherGivenName"
+                            },
+                            owner: testAccount.identity.address
+                        })
+                    })
+                )
+            ).successor;
+
+            await consumptionController.attributes.addForwardedSharingDetailsToAttribute(predecessor, CoreAddress.from("peer1"), CoreId.from("sourceReferenceA"));
+            await consumptionController.attributes.addForwardedSharingDetailsToAttribute(successor, CoreAddress.from("peer1"), CoreId.from("sourceReferenceC"));
+            await consumptionController.attributes.addForwardedSharingDetailsToAttribute(successor, CoreAddress.from("peer2"), CoreId.from("sourceReferenceB"));
+
+            const peersWithPredecessors = await consumptionController.attributes.getPeersWithExclusivelyForwardedPredecessors(successor.id);
+            expect(peersWithPredecessors).toHaveLength(0);
+        });
+
+        test("should return peer of predecessor and predecessor id if peer is not peer of Attribute", async function () {
+            const predecessor = await consumptionController.attributes.createOwnIdentityAttribute({
+                content: IdentityAttribute.from({
+                    value: {
+                        "@type": "GivenName",
+                        value: "aGivenName"
+                    },
+                    owner: testAccount.identity.address
+                })
+            });
+
+            const successor = (
+                await consumptionController.attributes.succeedOwnIdentityAttribute(
+                    predecessor,
+                    OwnIdentityAttributeSuccessorParams.from({
+                        content: IdentityAttribute.from({
+                            value: {
+                                "@type": "GivenName",
+                                value: "anotherGivenName"
+                            },
+                            owner: testAccount.identity.address
+                        })
+                    })
+                )
+            ).successor;
+
+            await consumptionController.attributes.addForwardedSharingDetailsToAttribute(predecessor, CoreAddress.from("peer1"), CoreId.from("sourceReferenceA"));
+            await consumptionController.attributes.addForwardedSharingDetailsToAttribute(predecessor, CoreAddress.from("peer2"), CoreId.from("sourceReferenceB"));
+            await consumptionController.attributes.addForwardedSharingDetailsToAttribute(successor, CoreAddress.from("peer1"), CoreId.from("sourceReferenceC"));
+
+            const peersWithPredecessors = await consumptionController.attributes.getPeersWithExclusivelyForwardedPredecessors(successor.id);
+            expect(peersWithPredecessors).toHaveLength(1);
+            expect(peersWithPredecessors[0]).toStrictEqual([CoreAddress.from("peer2"), predecessor.id]);
+        });
+    });
+
     describe("get Attribute with same value", function () {
         test("should return an existing OwnIdentityAttribute duplicate", async function () {
             const existingOwnIdentityAttribute = await consumptionController.attributes.createOwnIdentityAttribute({
