@@ -172,6 +172,8 @@ export class DeleteAttributeAndNotifyUseCase extends UseCase<DeleteAttributeAndN
     }
 
     private async notifyPeersOfAttribute(attribute: LocalAttribute, peers: CoreAddress[]): Promise<string[]> {
+        if (peers.length === 0) return [];
+
         const notificationItem = this.createAttributeDeletedNotificationItem(attribute);
 
         const notificationIdsOfAttribute = [];
@@ -184,6 +186,8 @@ export class DeleteAttributeAndNotifyUseCase extends UseCase<DeleteAttributeAndN
     }
 
     private async notifyPeersOfPredecessors(attribute: LocalAttribute, peersOfPredecessors: [CoreAddress, CoreId][]): Promise<string[]> {
+        if (peersOfPredecessors.length === 0) return [];
+
         const notificationIdsOfPredecessors = [];
         for (const [peer, predecessorId] of peersOfPredecessors) {
             const notificationItem = this.createAttributeDeletedNotificationItem(attribute, predecessorId);
