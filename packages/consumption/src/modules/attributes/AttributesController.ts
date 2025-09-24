@@ -1067,6 +1067,38 @@ export class AttributesController extends ConsumptionBaseController {
         return matchingSuccessors;
     }
 
+    public async getPeersWithExclusivelyForwardedPredecessors(attributeId: CoreId): Promise<[CoreAddress, CoreId][]> {
+        let attribute = (await this.getLocalAttribute(attributeId)) as OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute | undefined;
+        if (!attribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attributeId.toString());
+
+        if (!(attribute instanceof OwnIdentityAttribute || attribute instanceof OwnRelationshipAttribute || attribute instanceof PeerRelationshipAttribute)) {
+            throw ConsumptionCoreErrors.attributes.wrongTypeOfAttribute(
+                `The Attribute ${attributeId} is not an OwnIdentityAttribute, an OwnRelationshipAttribute or a PeerRelationshipAttribute.`
+            );
+        }
+
+        const peersWithLaterSharedVersion = attribute.getForwardingPeers(true);
+
+        const peersWithExclusivelyForwardedPredecessors: [CoreAddress, CoreId][] = [];
+        while (attribute.succeeds) {
+            const predecessor = (await this.getLocalAttribute(attribute.succeeds)) as OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute | undefined;
+            if (!predecessor) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.succeeds.toString());
+
+            attribute = predecessor;
+            const forwardingPeers = attribute.getForwardingPeers(true);
+
+            const newPeers = forwardingPeers.filter((peer) => !peersWithLaterSharedVersion.some((peerWithLaterSharedVersion) => peerWithLaterSharedVersion.equals(peer)));
+            if (newPeers.length === 0) continue;
+
+            for (const peer of newPeers) {
+                peersWithExclusivelyForwardedPredecessors.push([peer, attribute.id]);
+            }
+
+            peersWithLaterSharedVersion.push(...newPeers);
+        }
+        return peersWithExclusivelyForwardedPredecessors;
+    }
+
     public async getOwnIdentityAttributeWithSameValue(value: AttributeValues.Identity.Json): Promise<OwnIdentityAttribute | undefined> {
         const trimmedValue = this.trimAttributeValue(value);
         const queryForOwnIdentityAttributeDuplicates = flattenObject({
