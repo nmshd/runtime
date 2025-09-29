@@ -2223,10 +2223,14 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "description": {
                     "type": "string"
                 },
+                "credoId": {
+                    "type": "string"
+                },
                 "value": {}
             },
             "required": [
                 "@type",
+                "credoId",
                 "title",
                 "value"
             ],
@@ -4702,10 +4706,14 @@ export const CompleteOutgoingRequestRequest: any = {
                 "description": {
                     "type": "string"
                 },
+                "credoId": {
+                    "type": "string"
+                },
                 "value": {}
             },
             "required": [
                 "@type",
+                "credoId",
                 "title",
                 "value"
             ],
@@ -7178,10 +7186,14 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                 "description": {
                     "type": "string"
                 },
+                "credoId": {
+                    "type": "string"
+                },
                 "value": {}
             },
             "required": [
                 "@type",
+                "credoId",
                 "title",
                 "value"
             ],
@@ -10268,10 +10280,14 @@ export const CreateOutgoingRequestRequest: any = {
                 "description": {
                     "type": "string"
                 },
+                "credoId": {
+                    "type": "string"
+                },
                 "value": {}
             },
             "required": [
                 "@type",
+                "credoId",
                 "title",
                 "value"
             ],
@@ -13750,10 +13766,14 @@ export const ReceivedIncomingRequestRequest: any = {
                 "description": {
                     "type": "string"
                 },
+                "credoId": {
+                    "type": "string"
+                },
                 "value": {}
             },
             "required": [
                 "@type",
+                "credoId",
                 "title",
                 "value"
             ],
@@ -18895,10 +18915,14 @@ export const SucceedRepositoryAttributeRequest: any = {
                 "description": {
                     "type": "string"
                 },
+                "credoId": {
+                    "type": "string"
+                },
                 "value": {}
             },
             "required": [
                 "@type",
+                "credoId",
                 "title",
                 "value"
             ],
@@ -19482,28 +19506,19 @@ export const SentNotificationRequest: any = {
     }
 }
 
-export const FetchedCredentialOfferRequest: any = {
+export const FetchCredentialOfferRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/FetchedCredentialOfferRequest",
+    "$ref": "#/definitions/FetchCredentialOfferRequest",
     "definitions": {
-        "FetchedCredentialOfferRequest": {
+        "FetchCredentialOfferRequest": {
             "type": "object",
             "properties": {
-                "data": {
+                "credentialOfferUrl": {
                     "type": "string"
-                },
-                "pinCode":{
-                    "type": "string"
-                },
-                "requestedCredentials":{
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
                 }
             },
             "required": [
-                "data"
+                "credentialOfferUrl"
             ],
             "additionalProperties": false
         }
@@ -19512,9 +19527,9 @@ export const FetchedCredentialOfferRequest: any = {
 
 export const FetchProofRequestRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/FetchedCredentialOfferRequest",
+    "$ref": "#/definitions/FetchProofRequestRequest",
     "definitions": {
-        "FetchedCredentialOfferRequest": {
+        "FetchProofRequestRequest": {
             "type": "object",
             "properties": {
                 "proofRequestUrl": {
@@ -19547,6 +19562,56 @@ export const ResolveCredentialOfferRequest: any = {
         }
     }
 }
+
+export const FetchedCredentialOfferRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/FetchedCredentialOfferRequest",
+    "definitions": {
+        "FetchedCredentialOfferRequest": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "string"
+                },
+                "pinCode": {
+                    "type": "string"
+                },
+                "requestedCredentials": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "required": [
+                "data",
+                "requestedCredentials"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
+export const AcceptProofRequestRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/AcceptProofRequestRequest",
+    "definitions": {
+        "AcceptProofRequestRequest": {
+            "type": "object",
+            "properties": {
+                "jsonEncodedRequest": {
+                    "type": "string"
+                },
+            },
+            "required": [
+                "jsonEncodedRequest"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
+
 
 export const CreateSettingRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -24213,10 +24278,14 @@ export const VerifiableCredential: any = {
                 "description": {
                     "type": "string"
                 },
+                "credoId": {
+                    "type": "string"
+                },
                 "value": {}
             },
             "required": [
                 "@type",
+                "credoId",
                 "title",
                 "value"
             ],

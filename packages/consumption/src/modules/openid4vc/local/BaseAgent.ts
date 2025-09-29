@@ -1,13 +1,24 @@
-import { Agent, ConsoleLogger, DependencyManager, DidKey, InjectionSymbols, LogLevel, type InitConfig, type ModulesMap, type VerificationMethod } from "@credo-ts/core";
+import {
+    Agent,
+    ConsoleLogger,
+    DependencyManager,
+    DidKey,
+    InjectionSymbols,
+    KeyDidCreateOptions,
+    LogLevel,
+    type InitConfig,
+    type ModulesMap,
+    type VerificationMethod
+} from "@credo-ts/core";
 import { KeyManagementModuleConfig } from "@credo-ts/core/build/modules/kms";
+import { AccountController } from "@nmshd/transport";
 import { JsonWebKey } from "crypto";
+import { AttributesController } from "../../attributes";
+import { EnmeshedStorageService } from "./EnmeshedStorageService";
 import { FakeKeyManagmentService } from "./FakeKeyManagmentService";
-import { FakeStorageService } from "./FakeStorageService";
 import { agentDependencies } from "./LocalAgentDependencies";
 
 export class BaseAgent<AgentModules extends ModulesMap> {
-    public port: number;
-    public name: string;
     public config: InitConfig;
     public agent: Agent<AgentModules>;
     public did!: string;
@@ -16,7 +27,13 @@ export class BaseAgent<AgentModules extends ModulesMap> {
     public verificationMethod!: VerificationMethod;
     private readonly keyStorage: Map<string, JsonWebKey> = new Map<string, JsonWebKey>();
 
-    public constructor({ port, name, modules }: { port: number; name: string; modules: AgentModules }) {
+    public constructor(
+        public readonly port: number,
+        public readonly name: string,
+        public readonly modules: AgentModules,
+        public readonly accountController: AccountController,
+        public readonly attributeController: AttributesController
+    ) {
         this.name = name;
         this.port = port;
 
@@ -27,8 +44,12 @@ export class BaseAgent<AgentModules extends ModulesMap> {
         } satisfies InitConfig;
 
         this.config = config;
+
+        this.accountController = accountController;
+        this.attributeController = attributeController;
+
         const dependencyManager = new DependencyManager();
-        dependencyManager.registerInstance(InjectionSymbols.StorageService, new FakeStorageService());
+        dependencyManager.registerInstance(InjectionSymbols.StorageService, new EnmeshedStorageService(accountController, attributeController));
         // dependencyManager.registerInstance(InjectionSymbols.StorageUpdateService, new FakeStorageService());
         if (!dependencyManager.isRegistered(InjectionSymbols.StorageService)) {
             // eslint-disable-next-line no-console
@@ -47,7 +68,7 @@ export class BaseAgent<AgentModules extends ModulesMap> {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public async initializeAgent(privateKey: string): Promise<any> {
         // as we are not using askar we need to set the storage version
-        const storrage = this.agent.dependencyManager.resolve<FakeStorageService<any>>(InjectionSymbols.StorageService);
+        const storrage = this.agent.dependencyManager.resolve<EnmeshedStorageService<any>>(InjectionSymbols.StorageService);
         const versionRecord = { id: "STORAGE_VERSION_RECORD_ID", storageVersion: "0.5.0", value: "0.5.0" };
         await storrage.save(this.agent.context, versionRecord);
         // as we are not using askar we need to setup our own key management service
@@ -59,13 +80,13 @@ export class BaseAgent<AgentModules extends ModulesMap> {
 
         await this.agent.initialize();
 
-        /* create a uuid based key id
+        // create a uuid based key id
         const keyId = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
             const r = (Math.random() * 16) | 0;
             const v = c === "x" ? r : (r & 0x3) | 0x8;
             return v.toString(16);
         });
-        
+
         const didCreateResult = await this.agent.dids.create<KeyDidCreateOptions>({
             method: "key",
             options: {
@@ -86,7 +107,6 @@ export class BaseAgent<AgentModules extends ModulesMap> {
         const verificationMethod = didCreateResult.didState.didDocument?.dereferenceKey(this.kid, ["authentication"]);
         if (!verificationMethod) throw new Error("No verification method found");
         this.verificationMethod = verificationMethod;
-        */
     }
 
     public async shutdown(): Promise<void> {

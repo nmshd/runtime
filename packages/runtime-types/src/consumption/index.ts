@@ -1,3 +1,4 @@
+export * from "./AcceptedProofRequestDTO";
 export * from "./AttributeTagCollectionDTO";
 export * from "./CredentialOfferDTO";
 export * from "./DraftDTO";

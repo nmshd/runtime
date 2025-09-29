@@ -10,7 +10,7 @@ export class OpenId4VcController extends ConsumptionBaseController {
     }
 
     public async fetchCredentialOffer(credentialOfferUrl: string): Promise<any> {
-        const holder = new Holder(3000, "OpenId4VcHolder");
+        const holder = new Holder(this.parent.accountController, this.parent.attributes);
         await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
         const res = await holder.resolveCredentialOffer(credentialOfferUrl);
         console.log("Fetched credential offer:", res);
@@ -19,18 +19,8 @@ export class OpenId4VcController extends ConsumptionBaseController {
         };
     }
 
-    public async fetchProofRequest(proofRequestUrl: string): Promise<any> {
-        const holder = new Holder(3000, "OpenId4VcHolder");
-        await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
-        const res = await holder.resolveProofRequest(proofRequestUrl);
-        console.log("Fetched proof request:", res);
-        return {
-            data: JSON.stringify(res)
-        };
-    }
-
     public async processFetchedCredentialOffer(fetchedCredentialOffer: string, requestedCredentialOffers: string[], pinCode?: string): Promise<any> {
-        const holder = new Holder(3000, "OpenId4VcHolder");
+        const holder = new Holder(this.parent.accountController, this.parent.attributes);
         await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
         const credentialOffer = JSON.parse(fetchedCredentialOffer);
         const credentials = await holder.requestAndStoreCredentials(credentialOffer, { credentialsToRequest: requestedCredentialOffers, txCode: pinCode });
@@ -38,40 +28,17 @@ export class OpenId4VcController extends ConsumptionBaseController {
         return {
             status: "success",
             message: "Credential offer processed successfully",
-            data: JSON.stringify(credentials)
+            data: JSON.stringify(credentials),
+            id: credentials.length > 0 ? credentials[0].id : undefined
         };
     }
 
     public async processCredentialOffer(credentialOffer: string): Promise<any> {
         try {
-            const holder = new Holder(3000, "OpenId4VcHolder");
+            const holder = new Holder(this.parent.accountController, this.parent.attributes);
             await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
             const res = await holder.resolveCredentialOffer(credentialOffer);
             const credentials = await holder.requestAndStoreCredentials(res, { credentialsToRequest: ["EmployeeIdCard-sdjwt"] });
-            console.log("Fetched credentials:", credentials);
-
-            /*
-            const attributes = [];
-
-            for (const credential of credentials) {
-                const owner = this.parent.accountController.identity.address;
-                
-                const identityAttribute = IdentityAttribute.from({
-                    value: {
-                        "@type": "VerifiableCredential",
-                        value: credential,
-                        title: "Employee ID Card",
-                        description: "An employee ID card credential"
-                    },
-                    owner: owner
-                });
-                const attribute = await this.parent.attributes.createRepositoryAttribute({
-                    content: identityAttribute
-                });
-                this._log.error("Created attribute:", attribute);
-                attributes.push(attribute);
-            }
-                */
 
             return {
                 status: "success",
@@ -94,6 +61,69 @@ export class OpenId4VcController extends ConsumptionBaseController {
             return {
                 status: "error",
                 message: `Failed to process credential offer: ${errorMessage}`,
+                data: JSON.stringify(errorStack)
+            };
+        }
+    }
+
+    public async fetchProofRequest(proofRequestUrl: string): Promise<any> {
+        try {
+            const holder = new Holder(this.parent.accountController, this.parent.attributes);
+            await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
+            const res = await holder.resolveProofRequest(proofRequestUrl);
+            console.log("Fetched proof request:", res);
+            return {
+                data: JSON.stringify(res)
+            };
+        } catch (error) {
+            let errorMessage = "Unknown error";
+            let errorStack = "";
+
+            if (error instanceof Error) {
+                errorMessage = error.message;
+                errorStack = error.stack ?? "";
+            } else if (typeof error === "string") {
+                errorMessage = error;
+            } else {
+                errorMessage = JSON.stringify(error);
+            }
+
+            return {
+                status: "error",
+                message: `Failed to fetch proof request: ${errorMessage}`,
+                data: JSON.stringify(errorStack)
+            };
+        }
+    }
+
+    public async acceptProofRequest(jsonEncodedRequest: string): Promise<any> {
+        try {
+            const holder = new Holder(this.parent.accountController, this.parent.attributes);
+            await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
+            const fetchedRequest = JSON.parse(jsonEncodedRequest);
+            // parse the credential type to be sdjwt
+
+            const serverResponse = await holder.acceptPresentationRequest(fetchedRequest);
+            console.log("Created proof:", JSON.stringify(serverResponse));
+            return {
+                status: serverResponse.status,
+                message: serverResponse.body
+            };
+        } catch (error) {
+            let errorMessage = "Unknown error";
+            let errorStack = "";
+
+            if (error instanceof Error) {
+                errorMessage = error.message;
+                errorStack = error.stack ?? "";
+            } else if (typeof error === "string") {
+                errorMessage = error;
+            } else {
+                errorMessage = JSON.stringify(error);
+            }
+            return {
+                status: "error",
+                message: `Failed to process proof request: ${errorMessage}`,
                 data: JSON.stringify(errorStack)
             };
         }

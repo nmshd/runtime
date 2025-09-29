@@ -1,5 +1,16 @@
 /* eslint-disable no-console */
-import { DidJwk, DidKey, JwkDidCreateOptions, KeyDidCreateOptions, Kms, Mdoc, W3cJsonLdVerifiableCredential, W3cJwtVerifiableCredential, X509Module } from "@credo-ts/core";
+import {
+    DidJwk,
+    DidKey,
+    JwkDidCreateOptions,
+    KeyDidCreateOptions,
+    Kms,
+    Mdoc,
+    SdJwtVcRecord,
+    W3cJsonLdVerifiableCredential,
+    W3cJwtVerifiableCredential,
+    X509Module
+} from "@credo-ts/core";
 import {
     OpenId4VcHolderModule,
     OpenId4VciAuthorizationFlow,
@@ -9,6 +20,8 @@ import {
     type OpenId4VciResolvedCredentialOffer,
     type OpenId4VpResolvedAuthorizationRequest
 } from "@credo-ts/openid4vc";
+import { AccountController } from "@nmshd/transport";
+import { AttributesController } from "../../attributes";
 import { BaseAgent } from "./BaseAgent";
 
 function getOpenIdHolderModules() {
@@ -29,21 +42,8 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         redirectUri: "http://localhost:3000/redirect"
     };
 
-    public constructor(port: number, name: string) {
-        super({
-            port,
-            name,
-            modules: getOpenIdHolderModules()
-        });
-    }
-
-    public static async build(): Promise<Holder> {
-        // the faked storrage service needs to be dependency injected before the agent is initialized
-
-        const holder = new Holder(3000, `OpenId4VcHolder ${Math.random().toString()}`);
-        await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
-
-        return holder;
+    public constructor(accountController: AccountController, attributeController: AttributesController) {
+        super(3000, `OpenId4VcHolder ${Math.random().toString()}`, getOpenIdHolderModules(), accountController, attributeController);
     }
 
     public async resolveCredentialOffer(credentialOffer: string): Promise<any> {
@@ -194,7 +194,32 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         if (!resolvedPresentationRequest.presentationExchange && !resolvedPresentationRequest.dcql) {
             throw new Error("Missing presentation exchange or dcql on resolved authorization request");
         }
+        // TODO: This is but a temporary fix... it shall not remain ... but be handled prroperly in this step
+        if (resolvedPresentationRequest.presentationExchange) {
+            console.log("Hunt1");
+            console.log(
+                JSON.stringify(resolvedPresentationRequest.presentationExchange.credentialsForRequest.requirements[0].submissionEntry[0].verifiableCredentials[0].credentialRecord)
+            );
+            // cast the credentialRecord to be a SdJwtVcRecord
+            const record123 = resolvedPresentationRequest.presentationExchange.credentialsForRequest.requirements[0].submissionEntry[0].verifiableCredentials[0]
+                .credentialRecord as SdJwtVcRecord;
 
+            const record = new SdJwtVcRecord({
+                id: record123.id,
+                createdAt: record123.createdAt,
+                compactSdJwtVc: record123.compactSdJwtVc
+                // ...other required fields
+            });
+
+            console.log("Hunt2");
+            resolvedPresentationRequest.presentationExchange.credentialsForRequest.requirements[0].submissionEntry[0].verifiableCredentials[0].credentialRecord = record;
+
+            console.log(typeof resolvedPresentationRequest.presentationExchange.credentialsForRequest.requirements[0].submissionEntry[0].verifiableCredentials[0].credentialRecord);
+            console.log(
+                resolvedPresentationRequest.presentationExchange.credentialsForRequest.requirements[0].submissionEntry[0].verifiableCredentials[0].credentialRecord.encoded
+            );
+        }
+        console.log("Hunt3");
         const submissionResult = await this.agent.modules.openId4VcHolder.acceptOpenId4VpAuthorizationRequest({
             authorizationRequestPayload: resolvedPresentationRequest.authorizationRequestPayload,
             presentationExchange: resolvedPresentationRequest.presentationExchange

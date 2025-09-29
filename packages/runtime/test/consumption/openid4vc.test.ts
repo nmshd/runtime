@@ -12,13 +12,13 @@ beforeAll(async () => {
 
 afterAll(async () => await runtimeServiceProvider.stop());
 
-describe("OpenID4VCI", () => {
+describe("OpenID4VCI and OpenID4VCP", () => {
+    let credentialOfferUrl: string;
+
     test("should process a given credential offer", async () => {
-        // this should fetch its own credential offer url
         const response = await fetch(`https://openid4vc-service.is.enmeshed.eu/issuance/credentialOffers`, {
             method: "POST",
             headers: {
-                // eslint-disable-next-line @typescript-eslint/naming-convention
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
@@ -26,19 +26,36 @@ describe("OpenID4VCI", () => {
             })
         });
         const data = await response.json();
-        const result = await consumptionServices.openId4Vc.resolveCredentialOffer({
-            credentialOfferUrl: data.result.credentialOffer
+        credentialOfferUrl = data.result.credentialOffer;
+        const result = await consumptionServices.openId4Vc.fetchCredentialOffer({
+            credentialOfferUrl
         });
-        // the result will always be a success - it however has a status field in it's value - which is a JSON string
-        // that contains the actual status of the flow
-        const status = result.value.status;
+
+        // analogously to the app code all presented credentials are accepted
+        const jsonRepresentation = result.value.jsonRepresentation;
+        const credentialOfferDecoded = JSON.parse(jsonRepresentation);
+        let requestedCredentials = [];
+        // determine which credentials to pick from the offer for all supported types of offers
+
+        if (credentialOfferDecoded["credentialOfferPayload"]["credentials"] !== undefined) {
+            requestedCredentials = credentialOfferDecoded["credentialOfferPayload"]["credentials"];
+        } else if (credentialOfferDecoded["credentialOfferPayload"]["credential_configuration_ids"] !== undefined) {
+            requestedCredentials = credentialOfferDecoded["credentialOfferPayload"]["credential_configuration_ids"];
+        }
+
+        const acceptanceResult = await consumptionServices.openId4Vc.resolveFetchedCredentialOffer({
+            data: jsonRepresentation,
+            requestedCredentials: requestedCredentials
+        });
+
+        const status = acceptanceResult.value.status;
         expect(status).toBe("success");
     }, 10000000);
-});
 
-describe("OpenID4VCP", () => {
-    test("should be able tp process a given credential presentation", async () => {
-        // this should fetch its own credential offer url
+    test("should be able to process a given credential presentation", async () => {
+        // Ensure the first test has completed and credentialOfferUrl is set
+        expect(credentialOfferUrl).toBeDefined();
+
         const response = await fetch(`https://openid4vc-service.is.enmeshed.eu/presentation/presentationRequests`, {
             method: "POST",
             headers: {
@@ -90,11 +107,13 @@ describe("OpenID4VCP", () => {
         });
         const data = await response.json();
         const result = await consumptionServices.openId4Vc.fetchProofRequest({
-            credentialOfferUrl: data.result.credentialOffer
+            proofRequestUrl: data.result.presentationRequest
         });
-        // the result will always be a success - it however has a status field in it's value - which is a JSON string
-        // that contains the actual status of the flow
         const jsonRepresentation = result.value.jsonRepresentation;
-        expect(jsonRepresentation).not.toBe("success");
+
+        const presentationResult = await consumptionServices.openId4Vc.acceptProofRequest({
+            jsonEncodedRequest: jsonRepresentation
+        });
+        expect(presentationResult.value.status).toBe(200);
     }, 10000000);
 });

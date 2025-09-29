@@ -25,10 +25,12 @@ import {
 } from "@credo-ts/core/build/modules/kms";
 import { ec as EC } from "elliptic";
 import _sodium from "libsodium-wrappers";
+import sjcl from "sjcl";
 
 export interface JwkKeyPair {
     publicKey: JsonWebKey;
     privateKey: JsonWebKey;
+    keyType?: string;
 }
 
 export class FakeKeyManagmentService implements KeyManagementService {
@@ -37,8 +39,37 @@ export class FakeKeyManagmentService implements KeyManagementService {
     public readonly backend = FakeKeyManagmentService.backend;
     public keystore: Map<string, string>;
 
+    private readonly b64url = (bytes: Uint8Array) => _sodium.to_base64(bytes, _sodium.base64_variants.URLSAFE_NO_PADDING);
+    private readonly b64urlDecode = (b64url: string) => _sodium.from_base64(b64url, _sodium.base64_variants.URLSAFE_NO_PADDING);
+
+    // please note: we cannot use buffer here - because it is not available in the browser
+    // and yes it could be pollyfilled but that extends the bundle size for no good reason
+    private readonly buf2hex = (bytes: Uint8Array) => {
+        return Array.from(bytes)
+            .map((b) => b.toString(16).padStart(2, "0"))
+            .join("");
+    };
+    private readonly hex2buf = (hex: string) => {
+        const bytes = new Uint8Array(hex.length / 2);
+        for (let i = 0; i < bytes.length; i++) {
+            bytes[i] = parseInt(hex.substring(i * 2, i * 2 + 2), 16);
+        }
+        return bytes;
+    };
+
     public constructor() {
-        this.keystore = new Map<string, string>();
+        if ((globalThis as any).fakeKeyStorage) {
+            this.keystore = (globalThis as any).fakeKeyStorage;
+        } else {
+            this.keystore = new Map<string, string>();
+        }
+        this.updateGlobalInstance(this.keystore);
+    }
+
+    public updateGlobalInstance(storrage: Map<string, string>): void {
+        // console.log(`FKM: updating global instance ${JSON.stringify(Array.from(storrage.entries()))}`);
+        (globalThis as any).fakeKeyStorage = storrage;
+        // console.log(`FKM: global instance state ${JSON.stringify(Array.from((globalThis as any).fakeKeyStorage.entries()))}`);
     }
 
     public isOperationSupported(agentContext: AgentContext, operation: KmsOperation): boolean {
@@ -61,11 +92,20 @@ export class FakeKeyManagmentService implements KeyManagementService {
         if (operation.operation === "randomBytes") {
             return true;
         }
+        if (operation.operation === "deleteKey") {
+            return true;
+        }
+        if (operation.operation === "encrypt") {
+            console.log(`FKM: encrypt is supported for algorithm: ${operation.encryption.algorithm.toString()}`);
+            return true;
+        }
         return false;
     }
     public getPublicKey(agentContext: AgentContext, keyId: string): Promise<KmsJwkPublic> {
         const keyPair = this.keystore.get(keyId);
+        console.log("FKM: getPublicKey for ID:", keyId, " keypair:", keyPair ? "found" : "not found");
         if (!keyPair) {
+            console.log(`FKM: Key with id ${keyId} not found`);
             throw new Error(`Key with id ${keyId} not found`);
         }
 
@@ -79,39 +119,31 @@ export class FakeKeyManagmentService implements KeyManagementService {
             return v.toString(16);
         });
 
+        console.log("FKM: creating key for ID:", JSON.stringify(options.keyId));
+
         if (options.type.kty === "EC" && options.type.crv === "P-256") {
             // Use P-256 (aka secp256r1)
             const ec = new EC("p256");
             const key = ec.genKeyPair();
 
-            const b64url = (bytes: Uint8Array) => {
-                // Convert Uint8Array to string for btoa
-                let binary = "";
-                for (const byte of bytes) {
-                    binary += String.fromCharCode(byte);
-                }
-                return btoa(binary).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
-            };
-
-            console.log("FKM: Created EC P-256 key pair", JSON.stringify(key));
-
             // Public JWK
             const publicJwk = {
                 kty: "EC", // Elliptic Curve
                 crv: "P-256",
-                x: b64url(new Uint8Array(key.getPublic().getX().toArray())),
-                y: b64url(new Uint8Array(key.getPublic().getY().toArray()))
+                x: this.b64url(new Uint8Array(key.getPublic().getX().toArray())),
+                y: this.b64url(new Uint8Array(key.getPublic().getY().toArray()))
             };
 
             // Private JWK
             const privateJwk = {
                 ...publicJwk,
-                d: b64url(new Uint8Array(key.getPrivate().toArray()))
+                d: this.b64url(new Uint8Array(key.getPrivate().toArray()))
             };
 
             const jwkKeyPair = {
                 publicKey: publicJwk,
-                privateKey: privateJwk
+                privateKey: privateJwk,
+                keyType: "EC"
             };
 
             console.log("FKM: created jwk-key pair:", JSON.stringify(jwkKeyPair));
@@ -119,6 +151,7 @@ export class FakeKeyManagmentService implements KeyManagementService {
             // store the key pair in the keystore
             this.keystore.set(options.keyId, JSON.stringify(jwkKeyPair));
 
+            this.updateGlobalInstance(this.keystore);
             return await Promise.resolve({
                 keyId: options.keyId,
                 publicJwk: publicJwk as KmsJwkPublic
@@ -134,29 +167,28 @@ export class FakeKeyManagmentService implements KeyManagementService {
         console.log("FKM: options type:", JSON.stringify(options.type));
         const seed = privateKey.slice(0, sodium.crypto_sign_SEEDBYTES);
 
-        const b64url = (bytes: Uint8Array) => sodium.to_base64(bytes, sodium.base64_variants.URLSAFE_NO_PADDING);
-
         // Public JWK
         const publicJwk = {
             kty: "OKP", // Octet Key Pair
             crv: "Ed25519",
-            x: b64url(publicKey)
+            x: this.b64url(publicKey)
         };
 
         // Private JWK
         const privateJwk = {
             ...publicJwk,
-            d: b64url(seed)
+            d: this.b64url(seed)
         };
 
         const jwkKeyPair = {
             publicKey: publicJwk,
-            privateKey: privateJwk
+            privateKey: privateJwk,
+            keyType: "OKP"
         };
 
         // store the key pair in the keystore
         this.keystore.set(options.keyId, JSON.stringify(jwkKeyPair));
-
+        this.updateGlobalInstance(this.keystore);
         return await Promise.resolve({
             keyId: options.keyId,
             publicJwk: publicJwk as KmsJwkPublic
@@ -166,7 +198,12 @@ export class FakeKeyManagmentService implements KeyManagementService {
         throw new Error("Method not implemented.");
     }
     public deleteKey(agentContext: AgentContext, options: KmsDeleteKeyOptions): Promise<boolean> {
-        throw new Error("Method not implemented.");
+        if (this.keystore.has(options.keyId)) {
+            this.keystore.delete(options.keyId);
+            this.updateGlobalInstance(this.keystore);
+            return Promise.resolve(true);
+        }
+        throw new Error(`key with id ${options.keyId} not found. and cannot be deleted`);
     }
     public async sign(agentContext: AgentContext, options: KmsSignOptions): Promise<KmsSignReturn> {
         // load key from keystore
@@ -184,17 +221,7 @@ export class FakeKeyManagmentService implements KeyManagementService {
                 throw new Error("Private JWK does not contain 'd' parameter");
             }
 
-            const b64urlDecode = (b64url: string) => {
-                // remove url specific characters
-                const base64 = b64url.replace(/-/g, "+").replace(/_/g, "/");
-                return Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
-            };
-            const i2hex = (bytes: Uint8Array) => {
-                return Array.from(bytes)
-                    .map((b) => b.toString(16).padStart(2, "0"))
-                    .join("");
-            };
-            const priv = i2hex(b64urlDecode(privateKey.d));
+            const priv = this.buf2hex(this.b64urlDecode(privateKey.d));
             const key = ec.keyFromPrivate(priv, "hex");
 
             // we need to hash the data using SHA-256
@@ -253,25 +280,13 @@ export class FakeKeyManagmentService implements KeyManagementService {
         const x = options.key.publicJwk.x;
         const y = options.key.publicJwk.y;
 
-        const b64urlDecode = (b64url: string) => {
-            // remove url specific characters
-            const base64 = b64url.replace(/-/g, "+").replace(/_/g, "/");
-            return Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
-        };
-
-        const i2hex = (bytes: Uint8Array) => {
-            return Array.from(bytes)
-                .map((b) => b.toString(16).padStart(2, "0"))
-                .join("");
-        };
-
-        const pub = { x: i2hex(b64urlDecode(x)), y: i2hex(b64urlDecode(y)) };
+        const pub = { x: this.buf2hex(this.b64urlDecode(x)), y: this.buf2hex(this.b64urlDecode(y)) };
         const key = ec.keyFromPublic(pub, "hex");
 
         const signatureBytes = options.signature;
         const r = signatureBytes.subarray(0, 32);
         const s = signatureBytes.subarray(32, 64);
-        const signature = { r: i2hex(r), s: i2hex(s) };
+        const signature = { r: this.buf2hex(r), s: this.buf2hex(s) };
 
         // we need to hash the data using SHA-256
         const dataHash = ec.hash().update(options.data).digest();
@@ -284,9 +299,150 @@ export class FakeKeyManagmentService implements KeyManagementService {
         }
     }
 
-    public encrypt(agentContext: AgentContext, options: KmsEncryptOptions): Promise<KmsEncryptReturn> {
-        throw new Error("Method not implemented.");
+    private ecdhEs(localKeyId: string, remotePublicJWK: any): Uint8Array {
+        const keyPairString = this.keystore.get(localKeyId);
+        if (!keyPairString) {
+            throw new Error(`Key with id ${localKeyId} not found`);
+        }
+
+        const localKeyPair = JSON.parse(keyPairString) as JwkKeyPair;
+        if (localKeyPair.keyType !== "EC") {
+            throw new Error("Key type is not EC");
+        }
+
+        const ec = new EC("p256");
+
+        if (localKeyPair.privateKey.d === undefined) {
+            throw new Error("Local private key does not contain 'd' parameter");
+        }
+        const localPriv = ec.keyFromPrivate(this.buf2hex(this.b64urlDecode(localKeyPair.privateKey.d)), "hex");
+        // the remote jwk is base64url encoded - we again decode and transform to hex to receive a fitting public key
+        const remoteBasePoint = ec.keyFromPublic(
+            {
+                x: this.buf2hex(this.b64urlDecode(remotePublicJWK.x)),
+                y: this.buf2hex(this.b64urlDecode(remotePublicJWK.y))
+            },
+            "hex"
+        );
+
+        const sharedSecret = localPriv.derive(remoteBasePoint.getPublic());
+        const sharedBytes = new Uint8Array(sharedSecret.toArray("be"));
+        return sharedBytes;
     }
+
+    // UTF-8 encode helper
+    private utf8(str: string): Uint8Array {
+        return new TextEncoder().encode(str);
+    }
+
+    // Concat Uint8Arrays
+    private concat(...arrays: Uint8Array[]): Uint8Array {
+        const total = arrays.reduce((sum, a) => sum + a.length, 0);
+        const out = new Uint8Array(total);
+        let offset = 0;
+        for (const a of arrays) {
+            out.set(a, offset);
+            offset += a.length;
+        }
+        return out;
+    }
+
+    // Encode a 32-bit big-endian length prefix
+    private lenPrefix(data: Uint8Array): Uint8Array {
+        const buf = new Uint8Array(4 + data.length);
+        const view = new DataView(buf.buffer);
+        view.setUint32(0, data.length, false); // big-endian
+        buf.set(data, 4);
+        return buf;
+    }
+
+    private concatKdf(sharedSecret: Uint8Array, keyLength: number, algorithmDescriptor: string, keyAgreement: any): Uint8Array {
+        if (keyAgreement.apu === undefined) {
+            throw new Error("Key agreement apu is undefined");
+        }
+        if (keyAgreement.apv === undefined) {
+            throw new Error("Key agreement apv is undefined");
+        }
+
+        const algId = this.lenPrefix(this.utf8(algorithmDescriptor));
+        const partyU = this.lenPrefix(keyAgreement.apu);
+        const partyV = this.lenPrefix(keyAgreement.apv);
+
+        const suppPubInfo = new Uint8Array(4);
+        new DataView(suppPubInfo.buffer).setUint32(0, keyLength, false);
+        const suppPrivInfo = new Uint8Array(0);
+        const otherInfo = this.concat(algId, partyU, partyV, suppPubInfo, suppPrivInfo);
+        const counter = new Uint8Array([0, 0, 0, 1]);
+        const input = this.concat(counter, sharedSecret, otherInfo);
+
+        // Hash with SHA-256 (SJCL)
+        const inputHex = this.buf2hex(input);
+        const inputBits = sjcl.codec.hex.toBits(inputHex);
+        const hashBits = sjcl.hash.sha256.hash(inputBits);
+        const hashHex = sjcl.codec.hex.fromBits(hashBits);
+        const hashBuf = this.hex2buf(hashHex);
+
+        // Truncate to desired key length
+        return hashBuf.subarray(0, keyLength / 8);
+    }
+
+    public encrypt(agentContext: AgentContext, options: KmsEncryptOptions): Promise<KmsEncryptReturn> {
+        try {
+            // encryption via A-256-GCM
+            // we will call the services side bob and the incoming side alice
+            if (options.key.keyAgreement === undefined) {
+                throw new Error("Key agreement is undefined");
+            }
+            if (options.key.keyAgreement.keyId === undefined) {
+                throw new Error("Key agreement keyId is undefined");
+            }
+
+            // 1. derive the shared secret via ECDH-ES
+            const sharedSecret = this.ecdhEs(options.key.keyAgreement.keyId, options.key.keyAgreement.externalPublicJwk);
+            console.log("FKM: shared secret", this.buf2hex(sharedSecret));
+
+            // 2. Concat KDF to form the final key
+            const derivedKey = this.concatKdf(sharedSecret, 256, "A256GCM", options.key.keyAgreement);
+            // 3. Encrypt the data via AES-256-GCM using libsodium
+
+            // create nonce
+            const iv = crypto.getRandomValues(new Uint8Array(12));
+            // transform to bit arrays for sjcl
+            const keyBits = sjcl.codec.hex.toBits(this.buf2hex(derivedKey));
+            const dataBits = sjcl.codec.hex.toBits(this.buf2hex(options.data));
+            const ivBits = sjcl.codec.hex.toBits(this.buf2hex(iv));
+            // do not forget to add the additional authenticated data
+            const aadBits = "aad" in options.encryption && options.encryption.aad ? sjcl.codec.hex.toBits(this.buf2hex(options.encryption.aad)) : [];
+            // setup aes
+            const aes = new sjcl.cipher.aes(keyBits);
+            // encrypt
+            const cyphertextBits = sjcl.mode.gcm.encrypt(aes, dataBits, ivBits, aadBits, 128);
+
+            // transform back to byte array
+            const cyphertextBuf = this.hex2buf(sjcl.codec.hex.fromBits(cyphertextBits));
+            // In SJCL, GCM output = ciphertext || tag
+            const cyphertext = cyphertextBuf.subarray(0, cyphertextBuf.length - 16);
+            const tag = cyphertextBuf.subarray(cyphertextBuf.length - 16);
+
+            const returnValue = {
+                encrypted: cyphertext,
+                iv: iv,
+                tag: tag
+            };
+
+            console.log(`FKM key(hex):${this.buf2hex(derivedKey)}`);
+            console.log(`FKM iv(hex):${this.buf2hex(iv)}`);
+            console.log(`FKM ciphertext(hex):${this.buf2hex(cyphertext)}`);
+            console.log(`FKM tag(hex):${this.buf2hex(tag)}`);
+            console.log(`FKM aad(hex):${"aad" in options.encryption && options.encryption.aad ? this.buf2hex(options.encryption.aad) : ""}`);
+
+            return Promise.resolve(returnValue);
+        } catch (e) {
+            console.log("FKM: error during encryption", e);
+            throw e;
+        }
+    }
+
     public decrypt(agentContext: AgentContext, options: KmsDecryptOptions): Promise<KmsDecryptReturn> {
         throw new Error("Method not implemented.");
     }
