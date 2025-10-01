@@ -11,7 +11,7 @@ import { ForwardedSharingDetailsDTO, LocalAttributeDTO } from "@nmshd/runtime-ty
 
 export class AttributeMapper {
     public static toAttributeDTO(attribute: LocalAttribute): LocalAttributeDTO {
-        const attributeIsSharable =
+        const attributeIsShared =
             attribute instanceof OwnRelationshipAttribute ||
             attribute instanceof PeerRelationshipAttribute ||
             attribute instanceof PeerIdentityAttribute ||
@@ -26,10 +26,10 @@ export class AttributeMapper {
             succeededBy: attribute.succeededBy?.toString(),
             wasViewedAt: attribute.wasViewedAt?.toString(),
             isDefault: attribute instanceof OwnIdentityAttribute ? attribute.isDefault : undefined,
-            peer: attributeIsSharable ? attribute.peer.toString() : undefined,
-            sourceReference: attributeIsSharable ? attribute.sourceReference.toString() : undefined,
+            peer: attributeIsShared ? attribute.peer.toString() : undefined,
+            sourceReference: attributeIsShared ? attribute.sourceReference.toString() : undefined,
             deletionInfo:
-                attributeIsSharable && attribute.deletionInfo
+                attributeIsShared && attribute.deletionInfo
                     ? { deletionStatus: attribute.deletionInfo.deletionStatus, deletionDate: attribute.deletionInfo.deletionDate.toString() }
                     : undefined,
             initialAttributePeer: attribute instanceof ThirdPartyRelationshipAttribute ? attribute.initialAttributePeer.toString() : undefined,
