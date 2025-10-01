@@ -7,5 +7,6 @@ export * from "./local/attributeTypes/OwnRelationshipAttribute";
 export * from "./local/attributeTypes/PeerIdentityAttribute";
 export * from "./local/attributeTypes/PeerRelationshipAttribute";
 export * from "./local/attributeTypes/ThirdPartyRelationshipAttribute";
+export * from "./local/deletionInfos";
 export * from "./local/sharingDetails";
 export * from "./local/successorParams";

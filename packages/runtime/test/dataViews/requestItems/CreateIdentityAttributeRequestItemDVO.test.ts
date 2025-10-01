@@ -225,7 +225,7 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
     test("check the MessageDVO for the sender after acceptance", async () => {
         const baselineNumberOfAttributes = (
             await sConsumptionServices.attributes.getAttributes({
-                query: { "content.value.@type": "DisplayName", "peerSharingDetails.peer": rAddress }
+                query: { "content.value.@type": "DisplayName", peer: rAddress }
             })
         ).value.length;
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
@@ -272,7 +272,7 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         const attributeResult = await sConsumptionServices.attributes.getAttributes({
-            query: { "content.value.@type": "DisplayName", "peerSharingDetails.peer": dvo.request.peer.id }
+            query: { "content.value.@type": "DisplayName", peer: dvo.request.peer.id }
         });
         expect(attributeResult).toBeSuccessful();
         const numberOfAttributes = attributeResult.value.length;

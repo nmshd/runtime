@@ -40,9 +40,7 @@ export class GetAttributesForRelationshipUseCase extends UseCase<GetAttributesFo
         }
 
         const peerAddress = relationship.peer.address.toString();
-        const queryForAttributesWithPeerSharingDetails: any = {
-            "peerSharingDetails.peer": peerAddress
-        };
+        const queryForAttributesWithPeer: any = { peer: peerAddress };
 
         const queryForForwardedAttributes: any = {
             "@type": { $in: ["OwnIdentityAttribute", "OwnRelationshipAttribute", "PeerRelationshipAttribute"] },
@@ -50,11 +48,11 @@ export class GetAttributesForRelationshipUseCase extends UseCase<GetAttributesFo
         };
 
         if (request.onlyLatestVersions ?? true) {
-            queryForAttributesWithPeerSharingDetails["succeededBy"] = { $exists: false };
+            queryForAttributesWithPeer["succeededBy"] = { $exists: false };
             queryForForwardedAttributes["succeededBy"] = { $exists: false };
         }
 
-        const attributes = await this.attributesController.getLocalAttributes(queryForAttributesWithPeerSharingDetails, request.hideTechnical);
+        const attributes = await this.attributesController.getLocalAttributes(queryForAttributesWithPeer, request.hideTechnical);
         const forwardedAttributes = (await this.attributesController.getLocalAttributes(queryForForwardedAttributes)) as (
             | OwnIdentityAttribute
             | OwnRelationshipAttribute

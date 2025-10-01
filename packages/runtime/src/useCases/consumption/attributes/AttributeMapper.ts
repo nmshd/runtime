@@ -5,13 +5,18 @@ import {
     OwnRelationshipAttribute,
     PeerIdentityAttribute,
     PeerRelationshipAttribute,
-    ThirdPartyRelationshipAttribute,
-    ThirdPartyRelationshipAttributeSharingDetails
+    ThirdPartyRelationshipAttribute
 } from "@nmshd/consumption";
-import { ForwardedSharingDetailsDTO, LocalAttributeDTO, PeerSharingDetailsDTO } from "@nmshd/runtime-types";
+import { ForwardedSharingDetailsDTO, LocalAttributeDTO } from "@nmshd/runtime-types";
 
 export class AttributeMapper {
     public static toAttributeDTO(attribute: LocalAttribute): LocalAttributeDTO {
+        const attributeIsShared =
+            attribute instanceof OwnRelationshipAttribute ||
+            attribute instanceof PeerRelationshipAttribute ||
+            attribute instanceof PeerIdentityAttribute ||
+            attribute instanceof ThirdPartyRelationshipAttribute;
+
         return {
             "@type": (attribute.constructor as any).name,
             id: attribute.id.toString(),
@@ -21,36 +26,19 @@ export class AttributeMapper {
             succeededBy: attribute.succeededBy?.toString(),
             wasViewedAt: attribute.wasViewedAt?.toString(),
             isDefault: attribute instanceof OwnIdentityAttribute ? attribute.isDefault : undefined,
-            peerSharingDetails: this.toPeerSharingDetails(attribute),
+            peer: attributeIsShared ? attribute.peer.toString() : undefined,
+            sourceReference: attributeIsShared ? attribute.sourceReference.toString() : undefined,
+            deletionInfo:
+                attributeIsShared && attribute.deletionInfo
+                    ? { deletionStatus: attribute.deletionInfo.deletionStatus, deletionDate: attribute.deletionInfo.deletionDate.toString() }
+                    : undefined,
+            initialAttributePeer: attribute instanceof ThirdPartyRelationshipAttribute ? attribute.initialAttributePeer.toString() : undefined,
             forwardedSharingDetails: this.toForwardedSharingDetails(attribute)
         };
     }
 
     public static toAttributeDTOList(attributes: LocalAttribute[]): LocalAttributeDTO[] {
         return attributes.map((attribute) => this.toAttributeDTO(attribute));
-    }
-
-    private static toPeerSharingDetails(attribute: LocalAttribute): PeerSharingDetailsDTO | undefined {
-        if (
-            !(
-                attribute instanceof OwnRelationshipAttribute ||
-                attribute instanceof PeerRelationshipAttribute ||
-                attribute instanceof PeerIdentityAttribute ||
-                attribute instanceof ThirdPartyRelationshipAttribute
-            )
-        ) {
-            return undefined;
-        }
-
-        return {
-            peer: attribute.peerSharingDetails.peer.toString(),
-            sourceReference: attribute.peerSharingDetails.sourceReference.toString(),
-            deletionInfo: attribute.peerSharingDetails.deletionInfo
-                ? { deletionStatus: attribute.peerSharingDetails.deletionInfo.deletionStatus, deletionDate: attribute.peerSharingDetails.deletionInfo.deletionDate.toString() }
-                : undefined,
-            initialAttributePeer:
-                attribute.peerSharingDetails instanceof ThirdPartyRelationshipAttributeSharingDetails ? attribute.peerSharingDetails.initialAttributePeer.toString() : undefined
-        };
     }
 
     private static toForwardedSharingDetails(attribute: LocalAttribute): ForwardedSharingDetailsDTO[] | undefined {

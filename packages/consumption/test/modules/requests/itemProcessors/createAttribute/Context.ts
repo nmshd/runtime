@@ -336,8 +336,8 @@ export class ThenSteps {
     public async theOwnIdentityAttributeIsDeletedByRecipient(attribute: OwnIdentityAttribute, peer: CoreAddress): Promise<void> {
         const attributesDeletedByRecipient = await this.context.consumptionController.attributes.getLocalAttributes({
             id: attribute.id.toString(),
-            "peerSharingDetails.peer": peer.toString(),
-            "peerSharingDetails.deletionInfo.deletionStatus": { $ne: EmittedAttributeDeletionStatus.DeletedByRecipient }
+            peer: peer.toString(),
+            "deletionInfo.deletionStatus": { $ne: EmittedAttributeDeletionStatus.DeletedByRecipient }
         });
 
         expect(attributesDeletedByRecipient).toBeDefined();
@@ -359,8 +359,7 @@ export class ThenSteps {
         }
 
         expect(createdAttribute).toBeDefined();
-        expect(createdAttribute.peerSharingDetails).toBeDefined();
-        expect(createdAttribute.peerSharingDetails.peer.toString()).toStrictEqual(this.context.peerAddress.toString());
+        expect(createdAttribute.peer.toString()).toStrictEqual(this.context.peerAddress.toString());
         expect(createdAttribute.forwardedSharingDetails).toBeUndefined();
     }
 
@@ -465,7 +464,7 @@ export class WhenSteps {
     public async iMarkMyOwnRelationshipAttributeAsDeletedByRecipient(attribute: OwnRelationshipAttribute): Promise<void> {
         this.context.fillTestIdentitiesOfObject(attribute);
 
-        attribute.peerSharingDetails.deletionInfo = EmittedAttributeDeletionInfo.from({
+        attribute.deletionInfo = EmittedAttributeDeletionInfo.from({
             deletionStatus: EmittedAttributeDeletionStatus.DeletedByRecipient,
             deletionDate: CoreDate.utc().subtract({ minutes: 5 })
         });

@@ -239,8 +239,8 @@ describe("AttributesController", function () {
             expect(peerIdentityAttribute).toBeInstanceOf(PeerIdentityAttribute);
             expect(peerIdentityAttribute.content.toJSON()).toStrictEqual(content.toJSON());
             expect(peerIdentityAttribute.content.value).toBeInstanceOf(Nationality);
-            expect(peerIdentityAttribute.peerSharingDetails.peer.toString()).toBe("address");
-            expect(peerIdentityAttribute.peerSharingDetails.sourceReference.toString()).toBe("aSourceReferenceId");
+            expect(peerIdentityAttribute.peer.toString()).toBe("address");
+            expect(peerIdentityAttribute.sourceReference.toString()).toBe("aSourceReferenceId");
 
             mockEventBus.expectLastPublishedEvent(AttributeCreatedEvent);
         });
@@ -265,8 +265,8 @@ describe("AttributesController", function () {
 
             expect(ownRelationshipAttribute).toBeInstanceOf(OwnRelationshipAttribute);
             expect(ownRelationshipAttribute.content.value).toBeInstanceOf(ProprietaryString);
-            expect(ownRelationshipAttribute.peerSharingDetails.peer.toString()).toBe(peerAddress.toString());
-            expect(ownRelationshipAttribute.peerSharingDetails.sourceReference.toString()).toBe("aSourceReferenceId");
+            expect(ownRelationshipAttribute.peer.toString()).toBe(peerAddress.toString());
+            expect(ownRelationshipAttribute.sourceReference.toString()).toBe("aSourceReferenceId");
 
             mockEventBus.expectLastPublishedEvent(AttributeCreatedEvent);
         });
@@ -291,8 +291,8 @@ describe("AttributesController", function () {
 
             expect(peerRelationshipAttribute).toBeInstanceOf(PeerRelationshipAttribute);
             expect(peerRelationshipAttribute.content.value).toBeInstanceOf(ProprietaryString);
-            expect(peerRelationshipAttribute.peerSharingDetails.peer.toString()).toBe(peerAddress.toString());
-            expect(peerRelationshipAttribute.peerSharingDetails.sourceReference.toString()).toBe("aSourceReferenceId");
+            expect(peerRelationshipAttribute.peer.toString()).toBe(peerAddress.toString());
+            expect(peerRelationshipAttribute.sourceReference.toString()).toBe("aSourceReferenceId");
 
             mockEventBus.expectLastPublishedEvent(AttributeCreatedEvent);
         });
@@ -320,8 +320,8 @@ describe("AttributesController", function () {
 
             expect(thirdPartyRelationshipAttribute).toBeInstanceOf(ThirdPartyRelationshipAttribute);
             expect(thirdPartyRelationshipAttribute.content.value).toBeInstanceOf(ProprietaryString);
-            expect(thirdPartyRelationshipAttribute.peerSharingDetails.peer.toString()).toBe(peerAddress.toString());
-            expect(thirdPartyRelationshipAttribute.peerSharingDetails.sourceReference.toString()).toBe("aSourceReferenceId");
+            expect(thirdPartyRelationshipAttribute.peer.toString()).toBe(peerAddress.toString());
+            expect(thirdPartyRelationshipAttribute.sourceReference.toString()).toBe("aSourceReferenceId");
 
             mockEventBus.expectLastPublishedEvent(AttributeCreatedEvent);
         });

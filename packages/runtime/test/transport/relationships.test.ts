@@ -1181,7 +1181,7 @@ describe("RelationshipDecomposition", () => {
 
         const peerAttributes = (await services2.consumption.attributes.getPeerAttributes({ peer: services1.address })).value;
         expect(peerAttributes).toHaveLength(1);
-        expect(peerAttributes[0].peerSharingDetails!.deletionInfo!.deletionStatus).toBe(ReceivedAttributeDeletionStatus.DeletedByEmitter);
+        expect(peerAttributes[0].deletionInfo!.deletionStatus).toBe(ReceivedAttributeDeletionStatus.DeletedByEmitter);
     });
 
     test("notifications should be deleted", async () => {

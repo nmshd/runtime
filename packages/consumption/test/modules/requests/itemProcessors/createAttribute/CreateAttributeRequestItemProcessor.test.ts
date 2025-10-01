@@ -2,7 +2,7 @@ import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { GivenName, ProprietaryInteger, ProprietaryString } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { Transport } from "@nmshd/transport";
-import { EmittedAttributeDeletionStatus } from "../../../../../src/modules/attributes/local/sharingDetails";
+import { EmittedAttributeDeletionStatus } from "../../../../../src";
 import { TestUtil } from "../../../../core/TestUtil";
 import { TestObjectFactory } from "../../testHelpers/TestObjectFactory";
 import { Context, GivenSteps, ThenSteps, WhenSteps } from "./Context";

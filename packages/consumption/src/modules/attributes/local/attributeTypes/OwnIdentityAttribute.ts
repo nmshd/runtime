@@ -3,7 +3,8 @@ import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute } from "@n
 import { CoreAddress } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { EmittedAttributeDeletionInfo, EmittedAttributeDeletionStatus, ForwardedSharingDetails, ForwardedSharingDetailsJSON, IForwardedSharingDetails } from "../sharingDetails";
+import { EmittedAttributeDeletionInfo, EmittedAttributeDeletionStatus } from "../deletionInfos";
+import { ForwardedSharingDetails, ForwardedSharingDetailsJSON, IForwardedSharingDetails } from "../sharingDetails";
 import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./LocalAttribute";
 
 export interface OwnIdentityAttributeJSON extends LocalAttributeJSON {

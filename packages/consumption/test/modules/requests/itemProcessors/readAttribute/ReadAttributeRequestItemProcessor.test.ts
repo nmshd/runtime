@@ -2367,7 +2367,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const createdAttribute = await consumptionController.attributes.getLocalAttribute((result as ReadAttributeAcceptResponseItem).attributeId);
                 expect(createdAttribute).toBeDefined();
                 expect(createdAttribute instanceof OwnRelationshipAttribute).toBe(true);
-                expect((createdAttribute as OwnRelationshipAttribute).peerSharingDetails.peer).toStrictEqual(sender);
+                expect((createdAttribute as OwnRelationshipAttribute).peer).toStrictEqual(sender);
             });
 
             test("accept with new IdentityAttribute that is a duplicate", async function () {
@@ -3149,8 +3149,8 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             const createdAttribute = await consumptionController.attributes.getLocalAttribute(attributeId);
             expect(createdAttribute instanceof PeerIdentityAttribute).toBe(true);
-            expect((createdAttribute as PeerIdentityAttribute).peerSharingDetails.peer).toStrictEqual(recipient);
-            expect((createdAttribute as PeerIdentityAttribute).peerSharingDetails.sourceReference).toStrictEqual(requestId);
+            expect((createdAttribute as PeerIdentityAttribute).peer).toStrictEqual(recipient);
+            expect((createdAttribute as PeerIdentityAttribute).sourceReference).toStrictEqual(requestId);
         });
 
         test("succeeds an existing PeerIdentityAttribute with the Attribute received in the ResponseItem", async function () {
@@ -3197,7 +3197,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             expect(event).toBeInstanceOf(AttributeSucceededEvent);
 
             const successorPeerIdentityAttribute = await consumptionController.attributes.getLocalAttribute(successorId);
-            expect((successorPeerIdentityAttribute as PeerIdentityAttribute).peerSharingDetails.peer).toStrictEqual(recipient);
+            expect((successorPeerIdentityAttribute as PeerIdentityAttribute).peer).toStrictEqual(recipient);
             expect(successorPeerIdentityAttribute!.succeeds).toStrictEqual(predecessorPeerIdentityAttribute.id);
 
             const updatedPredecessorPeerIdentityAttribute = await consumptionController.attributes.getLocalAttribute(predecessorPeerIdentityAttribute.id);
@@ -3254,13 +3254,13 @@ describe("ReadAttributeRequestItemProcessor", function () {
             expect(event).toBeInstanceOf(AttributeSucceededEvent);
 
             const successorPeerIdentityAttribute = await consumptionController.attributes.getLocalAttribute(successorId);
-            expect((successorPeerIdentityAttribute as PeerIdentityAttribute).peerSharingDetails.peer).toStrictEqual(recipient);
-            expect((successorPeerIdentityAttribute as PeerIdentityAttribute).peerSharingDetails.deletionInfo).toBeUndefined();
+            expect((successorPeerIdentityAttribute as PeerIdentityAttribute).peer).toStrictEqual(recipient);
+            expect((successorPeerIdentityAttribute as PeerIdentityAttribute).deletionInfo).toBeUndefined();
             expect(successorPeerIdentityAttribute!.succeeds).toStrictEqual(predecessorPeerIdentityAttribute.id);
 
             const updatedPredecessorPeerIdentityAttribute = await consumptionController.attributes.getLocalAttribute(predecessorPeerIdentityAttribute.id);
             expect(updatedPredecessorPeerIdentityAttribute!.succeededBy).toStrictEqual(successorPeerIdentityAttribute!.id);
-            expect((updatedPredecessorPeerIdentityAttribute as PeerIdentityAttribute).peerSharingDetails.deletionInfo).toStrictEqual(deletionInfo);
+            expect((updatedPredecessorPeerIdentityAttribute as PeerIdentityAttribute).deletionInfo).toStrictEqual(deletionInfo);
         });
 
         test("succeeds an existing ThirdPartyRelationshipAttribute with the Attribute received in the ResponseItem", async function () {
@@ -3314,9 +3314,9 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
             const successorThirdPartyRelationshipAttribute = await consumptionController.attributes.getLocalAttribute(successorId);
             expect(successorThirdPartyRelationshipAttribute instanceof ThirdPartyRelationshipAttribute).toBe(true);
-            expect((successorThirdPartyRelationshipAttribute as ThirdPartyRelationshipAttribute).peerSharingDetails.peer).toStrictEqual(recipient);
-            expect((successorThirdPartyRelationshipAttribute as ThirdPartyRelationshipAttribute).peerSharingDetails.sourceReference).toStrictEqual(requestId);
-            expect((successorThirdPartyRelationshipAttribute as ThirdPartyRelationshipAttribute).peerSharingDetails.initialAttributePeer).toStrictEqual(thirdPartyAddress);
+            expect((successorThirdPartyRelationshipAttribute as ThirdPartyRelationshipAttribute).peer).toStrictEqual(recipient);
+            expect((successorThirdPartyRelationshipAttribute as ThirdPartyRelationshipAttribute).sourceReference).toStrictEqual(requestId);
+            expect((successorThirdPartyRelationshipAttribute as ThirdPartyRelationshipAttribute).initialAttributePeer).toStrictEqual(thirdPartyAddress);
             expect(successorThirdPartyRelationshipAttribute!.succeeds).toStrictEqual(predecessorThirdPartyRelationshipAttribute.id);
 
             const updatedPredecessorThirdPartyRelationshipAttribute = await consumptionController.attributes.getLocalAttribute(predecessorThirdPartyRelationshipAttribute.id);
@@ -3366,7 +3366,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
             await processor.applyIncomingResponseItem(responseItem, requestItem, incomingRequest);
 
             const updatedExistingPeerIdentityAttribute = await consumptionController.attributes.getLocalAttribute(existingPeerIdentityAttribute.id);
-            expect((updatedExistingPeerIdentityAttribute as PeerIdentityAttribute).peerSharingDetails.deletionInfo).toBeUndefined();
+            expect((updatedExistingPeerIdentityAttribute as PeerIdentityAttribute).deletionInfo).toBeUndefined();
         });
     });
 });

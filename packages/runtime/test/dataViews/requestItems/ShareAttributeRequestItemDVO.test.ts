@@ -209,7 +209,7 @@ describe("ShareAttributeRequestItemDVO", () => {
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         const attributeResult = await rConsumptionServices.attributes.getAttributes({
-            query: { "content.value.@type": "DisplayName", "peerSharingDetails.peer": dvo.createdBy.id }
+            query: { "content.value.@type": "DisplayName", peer: dvo.createdBy.id }
         });
         expect(attributeResult).toBeSuccessful();
         expect(attributeResult.value).toHaveLength(1);

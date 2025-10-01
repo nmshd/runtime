@@ -354,13 +354,9 @@ describe("RelationshipTemplateDVO", () => {
         expect(item.items[0].type).toBe("ProposeAttributeRequestItemDVO");
         expect(item.items[1].type).toBe("ProposeAttributeRequestItemDVO");
 
-        const attributesWithPeerSharingDetails = await requestor.consumption.attributes.getAttributes({
-            query: {
-                "peerSharingDetails.peer": templator.address
-            }
-        });
-        expect(attributesWithPeerSharingDetails).toBeSuccessful();
-        expect(attributesWithPeerSharingDetails.value).toHaveLength(2);
+        const attributesWithPeer = await requestor.consumption.attributes.getAttributes({ query: { peer: templator.address } });
+        expect(attributesWithPeer).toBeSuccessful();
+        expect(attributesWithPeer.value).toHaveLength(2);
 
         const attributesWithForwardedSharingDetails = await requestor.consumption.attributes.getAttributes({
             query: {
@@ -391,12 +387,8 @@ describe("RelationshipTemplateDVO", () => {
         expect(dvo.content.items).toHaveLength(2);
         expect(dvo.isDecidable).toBe(false);
 
-        const attributesWithPeerSharingDetailsOfTemplator = await templator.consumption.attributes.getAttributes({
-            query: {
-                "peerSharingDetails.peer": requestor.address
-            }
-        });
-        expect(attributesWithPeerSharingDetailsOfTemplator).toBeSuccessful();
-        expect(attributesWithPeerSharingDetailsOfTemplator.value).toHaveLength(4);
+        const attributesWithTemplatorAsPeer = await templator.consumption.attributes.getAttributes({ query: { peer: requestor.address } });
+        expect(attributesWithTemplatorAsPeer).toBeSuccessful();
+        expect(attributesWithTemplatorAsPeer.value).toHaveLength(4);
     });
 });

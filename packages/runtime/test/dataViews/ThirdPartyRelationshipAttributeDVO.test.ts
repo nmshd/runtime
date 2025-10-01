@@ -79,11 +79,11 @@ describe("ThirdPartyRelationshipAttributeDVO", () => {
         expect(dvo.valueHints["@type"]).toBe("ValueHints");
         expect(dvo.succeeds).toBe(thirdPartyRelationshipAttribute.succeeds);
         expect(dvo.succeededBy).toBe(thirdPartyRelationshipAttribute.succeededBy);
-        expect(dvo.peer).toBe(thirdPartyRelationshipAttribute.peerSharingDetails!.peer);
-        expect(dvo.sourceReference).toBe(thirdPartyRelationshipAttribute.peerSharingDetails!.sourceReference);
+        expect(dvo.peer).toBe(thirdPartyRelationshipAttribute.peer);
+        expect(dvo.sourceReference).toBe(thirdPartyRelationshipAttribute.sourceReference);
         expect(dvo.initialAttributePeer).toBe(services2.address);
-        expect(dvo.deletionStatus).toBe(thirdPartyRelationshipAttribute.peerSharingDetails!.deletionInfo?.deletionStatus);
-        expect(dvo.deletionDate).toBe(thirdPartyRelationshipAttribute.peerSharingDetails!.deletionInfo?.deletionDate);
+        expect(dvo.deletionStatus).toBe(thirdPartyRelationshipAttribute.deletionInfo?.deletionStatus);
+        expect(dvo.deletionDate).toBe(thirdPartyRelationshipAttribute.deletionInfo?.deletionDate);
         expect(dvo.valueType).toBe(thirdPartyRelationshipAttribute.content.value["@type"]);
         expect(dvo.wasViewedAt).toBeUndefined();
     });
