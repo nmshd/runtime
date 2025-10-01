@@ -1,21 +1,21 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import {
     Agent,
     ConsoleLogger,
     DependencyManager,
     DidKey,
     InjectionSymbols,
-    KeyDidCreateOptions,
     LogLevel,
     type InitConfig,
+    type KeyDidCreateOptions,
     type ModulesMap,
     type VerificationMethod
 } from "@credo-ts/core";
 import { KeyManagementModuleConfig } from "@credo-ts/core/build/modules/kms";
 import { AccountController } from "@nmshd/transport";
-import { JsonWebKey } from "crypto";
 import { AttributesController } from "../../attributes";
+import { EnmshedHolderKeyManagmentService } from "./EnmeshedHolderKeyManagmentService";
 import { EnmeshedStorageService } from "./EnmeshedStorageService";
-import { FakeKeyManagmentService } from "./FakeKeyManagmentService";
 import { agentDependencies } from "./LocalAgentDependencies";
 
 export class BaseAgent<AgentModules extends ModulesMap> {
@@ -25,7 +25,6 @@ export class BaseAgent<AgentModules extends ModulesMap> {
     public didKey!: DidKey;
     public kid!: string;
     public verificationMethod!: VerificationMethod;
-    private readonly keyStorage: Map<string, JsonWebKey> = new Map<string, JsonWebKey>();
 
     public constructor(
         public readonly port: number,
@@ -38,7 +37,6 @@ export class BaseAgent<AgentModules extends ModulesMap> {
         this.port = port;
 
         const config = {
-            label: name,
             allowInsecureHttpUrls: true,
             logger: new ConsoleLogger(LogLevel.off)
         } satisfies InitConfig;
@@ -47,14 +45,8 @@ export class BaseAgent<AgentModules extends ModulesMap> {
 
         this.accountController = accountController;
         this.attributeController = attributeController;
-
         const dependencyManager = new DependencyManager();
         dependencyManager.registerInstance(InjectionSymbols.StorageService, new EnmeshedStorageService(accountController, attributeController));
-        // dependencyManager.registerInstance(InjectionSymbols.StorageUpdateService, new FakeStorageService());
-        if (!dependencyManager.isRegistered(InjectionSymbols.StorageService)) {
-            // eslint-disable-next-line no-console
-            console.log("StorageService not registered!!!");
-        }
         this.agent = new Agent(
             {
                 config,
@@ -63,30 +55,24 @@ export class BaseAgent<AgentModules extends ModulesMap> {
             },
             dependencyManager
         );
+        // only register the storrage service after the agent has been created
+        this.agent.dependencyManager.registerInstance(InjectionSymbols.StorageService, new EnmeshedStorageService(accountController, attributeController));
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public async initializeAgent(privateKey: string): Promise<any> {
         // as we are not using askar we need to set the storage version
         const storrage = this.agent.dependencyManager.resolve<EnmeshedStorageService<any>>(InjectionSymbols.StorageService);
         const versionRecord = { id: "STORAGE_VERSION_RECORD_ID", storageVersion: "0.5.0", value: "0.5.0" };
         await storrage.save(this.agent.context, versionRecord);
-        // as we are not using askar we need to setup our own key management service
+
         const kmsConfig = this.agent.dependencyManager.resolve(KeyManagementModuleConfig);
-        // TODO: think about adding the local key storrage to the FakeKMS constructor
-        kmsConfig.registerBackend(new FakeKeyManagmentService());
+        kmsConfig.registerBackend(new EnmshedHolderKeyManagmentService());
 
         if (kmsConfig.backends.length === 0) throw new Error("No KMS backend registered");
 
         await this.agent.initialize();
 
-        // create a uuid based key id
-        const keyId = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
-            const r = (Math.random() * 16) | 0;
-            const v = c === "x" ? r : (r & 0x3) | 0x8;
-            return v.toString(16);
-        });
-
+        const keyId = privateKey;
         const didCreateResult = await this.agent.dids.create<KeyDidCreateOptions>({
             method: "key",
             options: {

@@ -1,18 +1,7 @@
 /* eslint-disable no-console */
+import { ClaimFormat, DidJwk, DidKey, JwkDidCreateOptions, KeyDidCreateOptions, Kms, Mdoc, MdocRecord, SdJwtVcRecord, X509Module } from "@credo-ts/core";
 import {
-    DidJwk,
-    DidKey,
-    JwkDidCreateOptions,
-    KeyDidCreateOptions,
-    Kms,
-    Mdoc,
-    SdJwtVcRecord,
-    W3cJsonLdVerifiableCredential,
-    W3cJwtVerifiableCredential,
-    X509Module
-} from "@credo-ts/core";
-import {
-    OpenId4VcHolderModule,
+    OpenId4VcModule,
     OpenId4VciAuthorizationFlow,
     authorizationCodeGrantIdentifier,
     preAuthorizedCodeGrantIdentifier,
@@ -26,10 +15,10 @@ import { BaseAgent } from "./BaseAgent";
 
 function getOpenIdHolderModules() {
     return {
-        openId4VcHolder: new OpenId4VcHolderModule(),
+        openid4vc: new OpenId4VcModule(),
         x509: new X509Module({
-            getTrustedCertificatesForVerification: (_agentContext, { certificateChain }) => {
-                // console.log(greenText(`dyncamically trusting certificate ${certificateChain[0].getIssuerNameField("C")} for verification of ${verification.type}`, true));
+            getTrustedCertificatesForVerification: (_agentContext, { certificateChain, verification }) => {
+                console.log(`dyncamically trusting certificate ${certificateChain[0].getIssuerNameField("C")} for verification of ${verification.type}`);
                 return [certificateChain[0].toString("pem")];
             }
         })
@@ -47,11 +36,11 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
     }
 
     public async resolveCredentialOffer(credentialOffer: string): Promise<any> {
-        return await this.agent.modules.openId4VcHolder.resolveCredentialOffer(credentialOffer);
+        return await this.agent.openid4vc.holder.resolveCredentialOffer(credentialOffer);
     }
 
     public async resolveIssuerMetadata(credentialIssuer: string): Promise<OpenId4VciMetadata> {
-        return await this.agent.modules.openId4VcHolder.resolveIssuerMetadata(credentialIssuer);
+        return await this.agent.openid4vc.holder.resolveIssuerMetadata(credentialIssuer);
     }
 
     public async initiateAuthorization(resolvedCredentialOffer: OpenId4VciResolvedCredentialOffer, credentialsToRequest: string[]): Promise<any> {
@@ -64,7 +53,7 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
             } as const;
         }
         if (resolvedCredentialOffer.credentialOfferPayload.grants?.[authorizationCodeGrantIdentifier]) {
-            const resolvedAuthorizationRequest = await this.agent.modules.openId4VcHolder.resolveOpenId4VciAuthorizationRequest(resolvedCredentialOffer, {
+            const resolvedAuthorizationRequest = await this.agent.openid4vc.holder.resolveOpenId4VciAuthorizationRequest(resolvedCredentialOffer, {
                 clientId: this.client.clientId,
                 redirectUri: this.client.redirectUri,
                 scope: Object.entries(resolvedCredentialOffer.offeredCredentialConfigurations)
@@ -98,7 +87,7 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
             txCode?: string;
         }
     ): Promise<any> {
-        const tokenResponse = await this.agent.modules.openId4VcHolder.requestToken(
+        const tokenResponse = await this.agent.openid4vc.holder.requestToken(
             options.code && options.clientId
                 ? {
                       resolvedCredentialOffer,
@@ -115,7 +104,7 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
 
         console.log("Token response:", JSON.stringify(tokenResponse));
 
-        const credentialResponse = await this.agent.modules.openId4VcHolder.requestCredentials({
+        const credentialResponse = await this.agent.openid4vc.holder.requestCredentials({
             resolvedCredentialOffer,
             clientId: options.clientId,
             credentialConfigurationIds: options.credentialsToRequest,
@@ -167,15 +156,15 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
 
         const storedCredentials = await Promise.all(
             credentialResponse.credentials.map((response) => {
-                // TODO: handle batch issuance
+                // TODO: batch issuance not yet supported
                 const credential = response.credentials[0];
-                if (credential instanceof W3cJwtVerifiableCredential || credential instanceof W3cJsonLdVerifiableCredential) {
-                    return this.agent.w3cCredentials.storeCredential({ credential });
+                if (credential.claimFormat === ClaimFormat.MsoMdoc) {
+                    return this.agent.mdoc.store(Mdoc.fromBase64Url(credential.base64Url));
                 }
-                if (credential instanceof Mdoc) {
-                    return this.agent.mdoc.store(credential);
+                if (credential.claimFormat === ClaimFormat.SdJwtDc) {
+                    return this.agent.sdJwtVc.store(credential.compact);
                 }
-                return this.agent.sdJwtVc.store(credential.compact);
+                throw new Error("Unsupported credential format");
             })
         );
 
@@ -185,7 +174,7 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
     }
 
     public async resolveProofRequest(proofRequest: string): Promise<any> {
-        const resolvedProofRequest = await this.agent.modules.openId4VcHolder.resolveOpenId4VpAuthorizationRequest(proofRequest);
+        const resolvedProofRequest = await this.agent.openid4vc.holder.resolveOpenId4VpAuthorizationRequest(proofRequest);
 
         return resolvedProofRequest;
     }
@@ -194,44 +183,51 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         if (!resolvedPresentationRequest.presentationExchange && !resolvedPresentationRequest.dcql) {
             throw new Error("Missing presentation exchange or dcql on resolved authorization request");
         }
-        // TODO: This is but a temporary fix... it shall not remain ... but be handled prroperly in this step
+
+        // This fix ensures that the credential records which have been loaded here actually do provide the encoded() method
+        // this issue arises as the records are loaded and then communicated to the app as a json object, losing the class prototype
         if (resolvedPresentationRequest.presentationExchange) {
-            console.log("Hunt1");
-            console.log(
-                JSON.stringify(resolvedPresentationRequest.presentationExchange.credentialsForRequest.requirements[0].submissionEntry[0].verifiableCredentials[0].credentialRecord)
-            );
-            // cast the credentialRecord to be a SdJwtVcRecord
-            const record123 = resolvedPresentationRequest.presentationExchange.credentialsForRequest.requirements[0].submissionEntry[0].verifiableCredentials[0]
-                .credentialRecord as SdJwtVcRecord;
-
-            const record = new SdJwtVcRecord({
-                id: record123.id,
-                createdAt: record123.createdAt,
-                compactSdJwtVc: record123.compactSdJwtVc
-                // ...other required fields
-            });
-
-            console.log("Hunt2");
-            resolvedPresentationRequest.presentationExchange.credentialsForRequest.requirements[0].submissionEntry[0].verifiableCredentials[0].credentialRecord = record;
-
-            console.log(typeof resolvedPresentationRequest.presentationExchange.credentialsForRequest.requirements[0].submissionEntry[0].verifiableCredentials[0].credentialRecord);
-            console.log(
-                resolvedPresentationRequest.presentationExchange.credentialsForRequest.requirements[0].submissionEntry[0].verifiableCredentials[0].credentialRecord.encoded
-            );
+            for (const requirementKey in resolvedPresentationRequest.presentationExchange.credentialsForRequest.requirements) {
+                const requirement = resolvedPresentationRequest.presentationExchange.credentialsForRequest.requirements[requirementKey];
+                for (const submissionEntry of requirement.submissionEntry) {
+                    for (const vc of submissionEntry.verifiableCredentials) {
+                        if (vc.claimFormat === ClaimFormat.SdJwtDc) {
+                            const recordUncast = vc.credentialRecord;
+                            const record = new SdJwtVcRecord({
+                                id: recordUncast.id,
+                                createdAt: recordUncast.createdAt,
+                                compactSdJwtVc: recordUncast.compactSdJwtVc
+                            });
+                            vc.credentialRecord = record;
+                        } else if (vc.claimFormat === ClaimFormat.MsoMdoc) {
+                            const recordUncast = vc.credentialRecord;
+                            const record = new MdocRecord({
+                                id: recordUncast.id,
+                                createdAt: recordUncast.createdAt,
+                                mdoc: Mdoc.fromBase64Url(recordUncast.base64Url)
+                            });
+                            vc.credentialRecord = record;
+                        } else {
+                            // eslint-disable-next-line no-console
+                            console.log("Unsupported credential format in demo app, only sd-jwt-vc is supported at the moment");
+                        }
+                    }
+                }
+            }
         }
-        console.log("Hunt3");
-        const submissionResult = await this.agent.modules.openId4VcHolder.acceptOpenId4VpAuthorizationRequest({
+
+        const submissionResult = await this.agent.openid4vc.holder.acceptOpenId4VpAuthorizationRequest({
             authorizationRequestPayload: resolvedPresentationRequest.authorizationRequestPayload,
             presentationExchange: resolvedPresentationRequest.presentationExchange
                 ? {
-                      credentials: this.agent.modules.openId4VcHolder.selectCredentialsForPresentationExchangeRequest(
+                      credentials: this.agent.openid4vc.holder.selectCredentialsForPresentationExchangeRequest(
                           resolvedPresentationRequest.presentationExchange.credentialsForRequest
                       )
                   }
                 : undefined,
             dcql: resolvedPresentationRequest.dcql
                 ? {
-                      credentials: this.agent.modules.openId4VcHolder.selectCredentialsForDcqlRequest(resolvedPresentationRequest.dcql.queryResult)
+                      credentials: this.agent.openid4vc.holder.selectCredentialsForDcqlRequest(resolvedPresentationRequest.dcql.queryResult)
                   }
                 : undefined
         });
