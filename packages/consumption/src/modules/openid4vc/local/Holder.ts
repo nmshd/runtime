@@ -45,7 +45,6 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
 
     public async initiateAuthorization(resolvedCredentialOffer: OpenId4VciResolvedCredentialOffer, credentialsToRequest: string[]): Promise<any> {
         const grants = resolvedCredentialOffer.credentialOfferPayload.grants;
-        // TODO: extend iniateAuthorization in oid4vci lib? Or not?
         if (grants?.[preAuthorizedCodeGrantIdentifier]) {
             return {
                 authorizationFlow: "PreAuthorized",

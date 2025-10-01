@@ -18,7 +18,7 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
             this.storrage.set(record.id, record);
             return;
         }
-        // TODO: add loading and storing like for the keystore
+
         if (record.type === "DidRecord") {
             this.storrage.set(record.id, record);
             return;
@@ -79,7 +79,6 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
         await this.attributeController.deleteAttribute(attribute);
     }
 
-    // TODO: remove coreid
     public async deleteById(agentContext: AgentContext, recordClass: BaseRecordConstructor<T>, id: string): Promise<void> {
         agentContext.config.logger.debug(`Deleting record with id ${id} - with record class ${recordClass.name}`);
         const attribute = await this.attributeController.getLocalAttribute(CoreId.from(id));
