@@ -13612,7 +13612,7 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
-                "peerSharingDetails": {
+                "peer": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -13625,7 +13625,7 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
-                "peerSharingDetails.peer": {
+                "sourceReference": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -13638,7 +13638,7 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
-                "peerSharingDetails.sourceReference": {
+                "initialAttributePeer": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -13651,7 +13651,7 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
-                "peerSharingDetails.initialAttributePeer": {
+                "deletionInfo": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -13664,7 +13664,7 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
-                "peerSharingDetails.deletionInfo": {
+                "deletionInfo.deletionStatus": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -13677,20 +13677,7 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
-                "peerSharingDetails.deletionInfo.deletionStatus": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "peerSharingDetails.deletionInfo.deletionDate": {
+                "deletionInfo.deletionDate": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -13933,7 +13920,7 @@ export const GetOwnAttributesSharedWithPeerRequest: any = {
                         }
                     ]
                 },
-                "peerSharingDetails": {
+                "sourceReference": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -13946,7 +13933,7 @@ export const GetOwnAttributesSharedWithPeerRequest: any = {
                         }
                     ]
                 },
-                "peerSharingDetails.sourceReference": {
+                "deletionInfo": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -13959,7 +13946,7 @@ export const GetOwnAttributesSharedWithPeerRequest: any = {
                         }
                     ]
                 },
-                "peerSharingDetails.deletionInfo": {
+                "deletionInfo.deletionStatus": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -13972,20 +13959,7 @@ export const GetOwnAttributesSharedWithPeerRequest: any = {
                         }
                     ]
                 },
-                "peerSharingDetails.deletionInfo.deletionStatus": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "peerSharingDetails.deletionInfo.deletionDate": {
+                "deletionInfo.deletionDate": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -14374,7 +14348,7 @@ export const GetPeerAttributesRequest: any = {
                         }
                     ]
                 },
-                "peerSharingDetails": {
+                "sourceReference": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -14387,7 +14361,7 @@ export const GetPeerAttributesRequest: any = {
                         }
                     ]
                 },
-                "peerSharingDetails.sourceReference": {
+                "initialAttributePeer": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -14400,7 +14374,7 @@ export const GetPeerAttributesRequest: any = {
                         }
                     ]
                 },
-                "peerSharingDetails.initialAttributePeer": {
+                "deletionInfo": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -14413,7 +14387,7 @@ export const GetPeerAttributesRequest: any = {
                         }
                     ]
                 },
-                "peerSharingDetails.deletionInfo": {
+                "deletionInfo.deletionStatus": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -14426,20 +14400,7 @@ export const GetPeerAttributesRequest: any = {
                         }
                     ]
                 },
-                "peerSharingDetails.deletionInfo.deletionStatus": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "peerSharingDetails.deletionInfo.deletionDate": {
+                "deletionInfo.deletionDate": {
                     "anyOf": [
                         {
                             "type": "string"

@@ -274,8 +274,8 @@ describe("get attribute(s)", () => {
             expect(attributes[0].id).toBe(appAttributeIds[2]);
         });
 
-        test("should allow to get an Attribute by peer of peerSharingDetails", async function () {
-            const result = await services1.consumption.attributes.getAttributes({ query: { "peerSharingDetails.peer": services2.address } });
+        test("should allow to get an Attribute by peer", async function () {
+            const result = await services1.consumption.attributes.getAttributes({ query: { peer: services2.address } });
             expect(result).toBeSuccessful();
 
             const attributes = result.value;

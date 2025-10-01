@@ -28,11 +28,10 @@ export interface GetOwnAttributesSharedWithPeerRequestQuery {
     "content.isTechnical"?: string;
     "content.confidentiality"?: string | string[];
     "content.value.@type"?: string | string[];
-    peerSharingDetails?: string | string[];
-    "peerSharingDetails.sourceReference"?: string | string[];
-    "peerSharingDetails.deletionInfo"?: string | string[];
-    "peerSharingDetails.deletionInfo.deletionStatus"?: string | string[];
-    "peerSharingDetails.deletionInfo.deletionDate"?: string | string[];
+    sourceReference?: string | string[];
+    deletionInfo?: string | string[];
+    "deletionInfo.deletionStatus"?: string | string[];
+    "deletionInfo.deletionDate"?: string | string[];
     forwardedSharingDetails?: string | string[];
     "forwardedSharingDetails.sourceReference"?: string | string[];
     "forwardedSharingDetails.sharedAt"?: string | string[];
@@ -62,7 +61,7 @@ export class GetOwnAttributesSharedWithPeerUseCase extends UseCase<GetOwnAttribu
         const dbQuery = GetAttributesUseCase.queryTranslator.parse(flattenedQuery);
 
         dbQuery["@type"] = { $in: ["OwnIdentityAttribute", "OwnRelationshipAttribute"] };
-        dbQuery["$or"] = [{ "peerSharingDetails.peer": request.peer }, { "forwardedSharingDetails.peer": request.peer }];
+        dbQuery["$or"] = [{ peer: request.peer }, { "forwardedSharingDetails.peer": request.peer }];
 
         if (request.onlyLatestVersions ?? true) dbQuery["succeededBy"] = { $exists: false };
 

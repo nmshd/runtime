@@ -27,12 +27,11 @@ export interface GetPeerAttributesRequestQuery {
     "content.isTechnical"?: string;
     "content.confidentiality"?: string | string[];
     "content.value.@type"?: string | string[];
-    peerSharingDetails?: string | string[];
-    "peerSharingDetails.sourceReference"?: string | string[];
-    "peerSharingDetails.initialAttributePeer"?: string | string[];
-    "peerSharingDetails.deletionInfo"?: string | string[];
-    "peerSharingDetails.deletionInfo.deletionStatus"?: string | string[];
-    "peerSharingDetails.deletionInfo.deletionDate"?: string | string[];
+    sourceReference?: string | string[];
+    initialAttributePeer?: string | string[];
+    deletionInfo?: string | string[];
+    "deletionInfo.deletionStatus"?: string | string[];
+    "deletionInfo.deletionDate"?: string | string[];
     forwardedSharingDetails?: string | string[];
     "forwardedSharingDetails.peer"?: string | string[];
     "forwardedSharingDetails.sourceReference"?: string | string[];
@@ -63,7 +62,7 @@ export class GetPeerAttributesUseCase extends UseCase<GetPeerAttributesRequest, 
         const dbQuery = GetAttributesUseCase.queryTranslator.parse(flattenedQuery);
 
         dbQuery["@type"] = { $in: ["PeerIdentityAttribute", "PeerRelationshipAttribute", "ThirdPartyRelationshipAttribute"] };
-        dbQuery["peerSharingDetails.peer"] = request.peer;
+        dbQuery["peer"] = request.peer;
 
         if (request.onlyLatestVersions ?? true) dbQuery["succeededBy"] = { $exists: false };
 

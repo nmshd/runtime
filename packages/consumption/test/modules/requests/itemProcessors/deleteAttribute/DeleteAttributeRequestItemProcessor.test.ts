@@ -1110,12 +1110,12 @@ describe("DeleteAttributeRequestItemProcessor", function () {
             const timeAfterUpdate = CoreDate.utc();
 
             const updatedOwnIdentityAttribute = await consumptionController.attributes.getLocalAttribute(sOwnIdentityAttribute.id);
-            const peerSharingDetails = (updatedOwnIdentityAttribute as OwnIdentityAttribute).forwardedSharingDetails!.find((sharingDetails) =>
+            const forwardedSharingDetails = (updatedOwnIdentityAttribute as OwnIdentityAttribute).forwardedSharingDetails!.find((sharingDetails) =>
                 sharingDetails.peer.equals(peerAddress)
             );
-            expect(peerSharingDetails!.deletionInfo).toBeDefined();
-            expect(peerSharingDetails!.deletionInfo!.deletionStatus).toStrictEqual(EmittedAttributeDeletionStatus.DeletionRequestRejected);
-            expect(peerSharingDetails!.deletionInfo!.deletionDate.isBetween(timeBeforeUpdate, timeAfterUpdate.add({ milliseconds: 1 }), "millisecond")).toBe(true);
+            expect(forwardedSharingDetails!.deletionInfo).toBeDefined();
+            expect(forwardedSharingDetails!.deletionInfo!.deletionStatus).toStrictEqual(EmittedAttributeDeletionStatus.DeletionRequestRejected);
+            expect(forwardedSharingDetails!.deletionInfo!.deletionDate.isBetween(timeBeforeUpdate, timeAfterUpdate.add({ milliseconds: 1 }), "millisecond")).toBe(true);
         });
 
         test("sets the deletionInfo to DeletionRequestRejected of the predecessor of a forwarded OwnIdentityAttribute", async function () {
@@ -1172,12 +1172,12 @@ describe("DeleteAttributeRequestItemProcessor", function () {
             const timeAfterUpdate = CoreDate.utc();
 
             const updatedPredecessorOwnIdentityAttribute = await consumptionController.attributes.getLocalAttribute(sPredecessorOwnIdentityAttribute.id);
-            const peerSharingDetails = (updatedPredecessorOwnIdentityAttribute as OwnIdentityAttribute).forwardedSharingDetails!.find((sharingDetails) =>
+            const forwardedSharingDetails = (updatedPredecessorOwnIdentityAttribute as OwnIdentityAttribute).forwardedSharingDetails!.find((sharingDetails) =>
                 sharingDetails.peer.equals(peerAddress)
             );
-            expect(peerSharingDetails!.deletionInfo).toBeDefined();
-            expect(peerSharingDetails!.deletionInfo!.deletionStatus).toStrictEqual(EmittedAttributeDeletionStatus.DeletionRequestRejected);
-            expect(peerSharingDetails!.deletionInfo!.deletionDate.isBetween(timeBeforeUpdate, timeAfterUpdate.add({ milliseconds: 1 }), "millisecond")).toBe(true);
+            expect(forwardedSharingDetails!.deletionInfo).toBeDefined();
+            expect(forwardedSharingDetails!.deletionInfo!.deletionStatus).toStrictEqual(EmittedAttributeDeletionStatus.DeletionRequestRejected);
+            expect(forwardedSharingDetails!.deletionInfo!.deletionDate.isBetween(timeBeforeUpdate, timeAfterUpdate.add({ milliseconds: 1 }), "millisecond")).toBe(true);
         });
 
         test("doesn't change the deletionInfo to DeletionRequestRejected of a ToBeDeletedByRecipient predecessor of a forwarded OwnIdentityAttribute", async function () {

@@ -36,7 +36,7 @@ export class DeleteSharedAttributesForRejectedOrRevokedRelationshipUseCase exten
         }
 
         const sharedAttributes = await this.attributesController.getLocalAttributes({
-            "peerSharingDetails.peer": relationship.peer.address.toString(),
+            peer: relationship.peer.address.toString(),
             forwardedSharingDetails: { $exists: false }
         });
 
