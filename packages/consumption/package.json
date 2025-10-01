@@ -59,7 +59,6 @@
         }
     },
     "dependencies": {
-        "@credo-ts/askar": "v0.6.0-alpha-20250919145226",
         "@credo-ts/core": "v0.6.0-alpha-20250919145226",
         "@credo-ts/openid4vc": "v0.6.0-alpha-20250919145226",
         "@js-soft/docdb-querytranslator": "^1.1.5",

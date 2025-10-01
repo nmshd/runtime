@@ -34,7 +34,6 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
                 value: value,
                 title: (record as any).credential?.payload?.vct ?? "Credential",
                 description: JSON.stringify((record as any).credential?.payload ?? "No description"),
-                credoId: record.id,
                 type: typeof record
             },
             owner: owner
@@ -58,8 +57,7 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
                 "@type": "VerifiableCredential",
                 value: value,
                 title: "Employee ID Card",
-                description: "An employee ID card credential",
-                credoId: record.id
+                description: "An employee ID card credential"
             },
             owner: owner
         });

@@ -2223,14 +2223,10 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "description": {
                     "type": "string"
                 },
-                "credoId": {
-                    "type": "string"
-                },
                 "value": {}
             },
             "required": [
                 "@type",
-                "credoId",
                 "title",
                 "value"
             ],
@@ -4706,14 +4702,10 @@ export const CompleteOutgoingRequestRequest: any = {
                 "description": {
                     "type": "string"
                 },
-                "credoId": {
-                    "type": "string"
-                },
                 "value": {}
             },
             "required": [
                 "@type",
-                "credoId",
                 "title",
                 "value"
             ],
@@ -7186,14 +7178,10 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                 "description": {
                     "type": "string"
                 },
-                "credoId": {
-                    "type": "string"
-                },
                 "value": {}
             },
             "required": [
                 "@type",
-                "credoId",
                 "title",
                 "value"
             ],
@@ -10280,14 +10268,10 @@ export const CreateOutgoingRequestRequest: any = {
                 "description": {
                     "type": "string"
                 },
-                "credoId": {
-                    "type": "string"
-                },
                 "value": {}
             },
             "required": [
                 "@type",
-                "credoId",
                 "title",
                 "value"
             ],
@@ -13766,14 +13750,10 @@ export const ReceivedIncomingRequestRequest: any = {
                 "description": {
                     "type": "string"
                 },
-                "credoId": {
-                    "type": "string"
-                },
                 "value": {}
             },
             "required": [
                 "@type",
-                "credoId",
                 "title",
                 "value"
             ],
@@ -18915,14 +18895,10 @@ export const SucceedRepositoryAttributeRequest: any = {
                 "description": {
                     "type": "string"
                 },
-                "credoId": {
-                    "type": "string"
-                },
                 "value": {}
             },
             "required": [
                 "@type",
-                "credoId",
                 "title",
                 "value"
             ],
@@ -24278,14 +24254,10 @@ export const VerifiableCredential: any = {
                 "description": {
                     "type": "string"
                 },
-                "credoId": {
-                    "type": "string"
-                },
                 "value": {}
             },
             "required": [
                 "@type",
-                "credoId",
                 "title",
                 "value"
             ],

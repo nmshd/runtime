@@ -7,14 +7,12 @@ export interface VerifiableCredentialJSON extends AbstractAttributeValueJSON {
     "@type": "VerifiableCredential";
     title: string;
     description?: string;
-    credoId: string;
     value: unknown;
 }
 
 export interface IVerifiableCredential extends IAbstractAttributeValue {
     title: string;
     description?: string;
-    credoId: string;
     value: unknown;
 }
 
@@ -23,10 +21,6 @@ export class VerifiableCredential extends AbstractAttributeValue {
     @serialize()
     @validate({ max: PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH })
     public title: string;
-
-    @serialize()
-    @validate({ max: PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH })
-    public credoId: string;
 
     @serialize()
     @validate({ nullable: true, max: PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH })
