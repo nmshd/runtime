@@ -2,15 +2,13 @@
 import { AgentDependencies } from "@credo-ts/core";
 import { EventEmitter } from "events";
 import WebSocket from "ws";
-import { FakeFileSystem } from "./FakeFileSystem";
-// Example fetch implementation (using node-fetch or global fetch)
-const fetchImpl = globalThis.fetch;
+import { EnmeshedHolderFileSystem } from "./EnmeshedHolderFileSystem";
 
-// Example WebSocket implementation (using ws)
+const fetchImpl = globalThis.fetch;
 const webSocketImpl = WebSocket;
 
 export const agentDependencies: AgentDependencies = {
-    FileSystem: FakeFileSystem,
+    FileSystem: EnmeshedHolderFileSystem,
     EventEmitterClass: EventEmitter,
     fetch: fetchImpl,
     WebSocketClass: webSocketImpl

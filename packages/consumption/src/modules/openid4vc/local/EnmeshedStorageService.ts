@@ -1,7 +1,4 @@
-/* eslint-disable no-console */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { AgentContext, BaseRecord, BaseRecordConstructor, injectable, JsonTransformer, Query, QueryOptions, StorageService } from "@credo-ts/core";
-
 import { IdentityAttribute } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
 import { AccountController } from "@nmshd/transport";
@@ -28,7 +25,8 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
 
         const value = JsonTransformer.serialize(record);
         const owner = this.accountController.identity.address;
-        console.log("FFS: Saving record", record);
+        agentContext.config.logger.debug(`Saving record with id ${record.id} and value ${value}`);
+        // TODO: remove hard coded components
         const identityAttribute = IdentityAttribute.from({
             value: {
                 "@type": "VerifiableCredential",
@@ -43,13 +41,13 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
         const result = await this.attributeController.createRepositoryAttribute({
             content: identityAttribute
         });
-        console.log("FFS: Saved record", JSON.stringify(result));
+        agentContext.config.logger.debug(`Saved record: ${JSON.stringify(result)}`);
         return await Promise.resolve();
     }
 
     // TODO: remove coreid
     public async update(agentContext: AgentContext, record: T): Promise<void> {
-        console.log("FFS: Updating record", record);
+        agentContext.config.logger.debug(`Updating record with id ${record.id}`);
         const value = JsonTransformer.serialize(record);
         const owner = this.accountController.identity.address;
         const oldAttribute = await this.attributeController.getLocalAttribute(CoreId.from(record.id));
@@ -73,7 +71,7 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
     }
 
     public async delete(agentContext: AgentContext, record: T): Promise<void> {
-        console.log("FFS: Deleting record", record);
+        agentContext.config.logger.debug(`Deleting record with id ${record.id}`);
         const attribute = await this.attributeController.getLocalAttribute(CoreId.from(record.id));
         if (attribute === undefined) {
             throw new Error(`Attribute with id ${record.id} not found`);
@@ -83,7 +81,7 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
 
     // TODO: remove coreid
     public async deleteById(agentContext: AgentContext, recordClass: BaseRecordConstructor<T>, id: string): Promise<void> {
-        console.log("FFS: Deleting record by id", id);
+        agentContext.config.logger.debug(`Deleting record with id ${id} - with record class ${recordClass.name}`);
         const attribute = await this.attributeController.getLocalAttribute(CoreId.from(id));
         if (attribute === undefined) {
             throw new Error(`Attribute with id ${id} not found`);
@@ -98,7 +96,7 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
             return record;
         }
 
-        console.log("FFS: Getting record by id", id);
+        agentContext.config.logger.debug(`Getting record with id ${id}`);
         const attribute = await this.attributeController.getLocalAttribute(CoreId.from(id));
         // parse the value field of attribute as JSON into T
         if (attribute === undefined) {
@@ -109,24 +107,22 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
     }
 
     public async getAll(agentContext: AgentContext, recordClass: BaseRecordConstructor<T>): Promise<T[]> {
-        console.log("FFS: Getting all records");
         const records: T[] = [];
         const attributes = await this.attributeController.getLocalAttributes();
-        console.log(`FFS: Found ${attributes.length} local attributes`);
+        agentContext.config.logger.debug(`Getting all records, found ${attributes.length} attributes`);
         for (const attribute of attributes) {
-            console.log("FFS: Processing attribute", JsonTransformer.serialize(attribute));
             const record = JsonTransformer.deserialize((attribute.content.value as any).value, recordClass);
+            // ToDo: think about how to handle this for different record types
             if (record.type !== "SdJwtVcRecord") {
                 continue;
             }
             records.push(record);
         }
-        console.log(`FFS: Actually found ${attributes.length} local attributes`);
         return records;
     }
 
     public async findByQuery(agentContext: AgentContext, recordClass: BaseRecordConstructor<T>, query: Query<T>, queryOptions?: QueryOptions): Promise<T[]> {
-        console.log("FFS: Finding records by query", query);
+        agentContext.config.logger.debug(`Finding records by query ${JSON.stringify(query)} and options ${JSON.stringify(queryOptions)}`);
         const records: T[] = [];
         for (const record of await this.getAll(agentContext, recordClass)) {
             let match = true;
@@ -145,27 +141,9 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
             for (const record of this.storrage.values()) {
                 let match = true;
                 // there may be keys labeled with an $or - solve them accordingly
+                // TODO: update this to handle $or and other operators
                 for (const [key, value] of Object.entries(query)) {
-                    if (key === "$or" && Array.isArray(value)) {
-                        let orMatch = false;
-                        for (const orCondition of value) {
-                            let conditionMatch = true;
-                            for (const [orKey, orValue] of Object.entries(orCondition)) {
-                                if ((record as any)[orKey] !== orValue) {
-                                    conditionMatch = false;
-                                    break;
-                                }
-                            }
-                            if (conditionMatch) {
-                                orMatch = true;
-                                break;
-                            }
-                        }
-                        if (!orMatch) {
-                            match = false;
-                            break;
-                        }
-                    } else if ((record as any)[key] !== value) {
+                    if ((record as any)[key] !== value) {
                         match = false;
                         break;
                     }
@@ -175,7 +153,6 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
                 }
             }
         }
-        console.log(`FFS: Found ${records.length} records by query`);
         return records;
     }
 }

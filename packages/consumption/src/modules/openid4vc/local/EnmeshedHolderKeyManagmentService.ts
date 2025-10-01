@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { AgentContext } from "@credo-ts/core";
 import {
     KeyManagementService,
@@ -33,10 +31,10 @@ export interface JwkKeyPair {
     keyType?: string;
 }
 
-export class FakeKeyManagmentService implements KeyManagementService {
+export class EnmshedHolderKeyManagmentService implements KeyManagementService {
     public static readonly backend = "fakeKeyManagementService";
 
-    public readonly backend = FakeKeyManagmentService.backend;
+    public readonly backend = EnmshedHolderKeyManagmentService.backend;
     public keystore: Map<string, string>;
 
     private readonly b64url = (bytes: Uint8Array) => _sodium.to_base64(bytes, _sodium.base64_variants.URLSAFE_NO_PADDING);
@@ -73,8 +71,8 @@ export class FakeKeyManagmentService implements KeyManagementService {
     }
 
     public isOperationSupported(agentContext: AgentContext, operation: KmsOperation): boolean {
+        agentContext.config.logger.debug(`EKM: Checking if operation is supported: ${JSON.stringify(operation)}`);
         if (operation.operation === "createKey") {
-            console.log("FKM: Trying to createKey for type", JSON.stringify(operation.type));
             if (operation.type.kty === "OKP") {
                 return true;
             }
@@ -96,16 +94,14 @@ export class FakeKeyManagmentService implements KeyManagementService {
             return true;
         }
         if (operation.operation === "encrypt") {
-            console.log(`FKM: encrypt is supported for algorithm: ${operation.encryption.algorithm.toString()}`);
             return true;
         }
         return false;
     }
     public getPublicKey(agentContext: AgentContext, keyId: string): Promise<KmsJwkPublic> {
         const keyPair = this.keystore.get(keyId);
-        console.log("FKM: getPublicKey for ID:", keyId, " keypair:", keyPair ? "found" : "not found");
         if (!keyPair) {
-            console.log(`FKM: Key with id ${keyId} not found`);
+            agentContext.config.logger.error(`EKM: Key with id ${keyId} not found`);
             throw new Error(`Key with id ${keyId} not found`);
         }
 
@@ -119,7 +115,7 @@ export class FakeKeyManagmentService implements KeyManagementService {
             return v.toString(16);
         });
 
-        console.log("FKM: creating key for ID:", JSON.stringify(options.keyId));
+        agentContext.config.logger.debug(`EKM: Creating key with id ${options.keyId} and type ${JSON.stringify(options.type)}`);
 
         if (options.type.kty === "EC" && options.type.crv === "P-256") {
             // Use P-256 (aka secp256r1)
@@ -146,8 +142,7 @@ export class FakeKeyManagmentService implements KeyManagementService {
                 keyType: "EC"
             };
 
-            console.log("FKM: created jwk-key pair:", JSON.stringify(jwkKeyPair));
-
+            agentContext.config.logger.debug(`EKM: Created EC key pair with id ${options.keyId}`);
             // store the key pair in the keystore
             this.keystore.set(options.keyId, JSON.stringify(jwkKeyPair));
 
@@ -162,9 +157,7 @@ export class FakeKeyManagmentService implements KeyManagementService {
         const sodium = _sodium;
 
         const { keyType, publicKey, privateKey } = sodium.crypto_sign_keypair();
-
-        console.log("FKM: key type:", keyType);
-        console.log("FKM: options type:", JSON.stringify(options.type));
+        agentContext.config.logger.debug(`EKM: Created OKP key pair with id ${options.keyId} and keyType ${keyType}`);
         const seed = privateKey.slice(0, sodium.crypto_sign_SEEDBYTES);
 
         // Public JWK
@@ -195,10 +188,12 @@ export class FakeKeyManagmentService implements KeyManagementService {
         } as KmsCreateKeyReturn<Type>);
     }
     public importKey<Jwk extends KmsJwkPrivate>(agentContext: AgentContext, options: KmsImportKeyOptions<Jwk>): Promise<KmsImportKeyReturn<Jwk>> {
+        agentContext.config.logger.debug(`EKM: Importing key with  ${JSON.stringify(options)}`);
         throw new Error("Method not implemented.");
     }
     public deleteKey(agentContext: AgentContext, options: KmsDeleteKeyOptions): Promise<boolean> {
         if (this.keystore.has(options.keyId)) {
+            agentContext.config.logger.debug(`EKM: Deleting key with id ${options.keyId}`);
             this.keystore.delete(options.keyId);
             this.updateGlobalInstance(this.keystore);
             return Promise.resolve(true);
@@ -206,7 +201,8 @@ export class FakeKeyManagmentService implements KeyManagementService {
         throw new Error(`key with id ${options.keyId} not found. and cannot be deleted`);
     }
     public async sign(agentContext: AgentContext, options: KmsSignOptions): Promise<KmsSignReturn> {
-        // load key from keystore
+        agentContext.config.logger.debug(`EKM: Signing data with key id ${options.keyId} using algorithm ${options.algorithm}`);
+
         const stringifiedKeyPair = this.keystore.get(options.keyId);
         if (!stringifiedKeyPair) {
             throw new Error(`Key with id ${options.keyId} not found`);
@@ -267,7 +263,7 @@ export class FakeKeyManagmentService implements KeyManagementService {
     }
 
     public verify(agentContext: AgentContext, options: KmsVerifyOptions): Promise<KmsVerifyReturn> {
-        console.log("FKM: verifying signature");
+        agentContext.config.logger.debug(`EKM: Verifying signature with key id ${options.key.keyId} using algorithm ${options.algorithm}`);
         // Use P-256 (aka secp256r1)
         const ec = new EC("p256");
         if (!options.key.publicJwk) {
@@ -294,7 +290,7 @@ export class FakeKeyManagmentService implements KeyManagementService {
             const verified = key.verify(dataHash, signature);
             return Promise.resolve({ verified: verified } as KmsVerifyReturn);
         } catch (e) {
-            console.log("FKM: error during verification", e);
+            agentContext.config.logger.error(`EKM: Error during signature verification: ${e}`);
             throw e;
         }
     }
@@ -399,8 +395,7 @@ export class FakeKeyManagmentService implements KeyManagementService {
 
             // 1. derive the shared secret via ECDH-ES
             const sharedSecret = this.ecdhEs(options.key.keyAgreement.keyId, options.key.keyAgreement.externalPublicJwk);
-            console.log("FKM: shared secret", this.buf2hex(sharedSecret));
-
+            agentContext.config.logger.debug(`EKM: Derived shared secret for encryption using ECDH-ES`);
             // 2. Concat KDF to form the final key
             const derivedKey = this.concatKdf(sharedSecret, 256, "A256GCM", options.key.keyAgreement);
             // 3. Encrypt the data via AES-256-GCM using libsodium
@@ -430,23 +425,19 @@ export class FakeKeyManagmentService implements KeyManagementService {
                 tag: tag
             };
 
-            console.log(`FKM key(hex):${this.buf2hex(derivedKey)}`);
-            console.log(`FKM iv(hex):${this.buf2hex(iv)}`);
-            console.log(`FKM ciphertext(hex):${this.buf2hex(cyphertext)}`);
-            console.log(`FKM tag(hex):${this.buf2hex(tag)}`);
-            console.log(`FKM aad(hex):${"aad" in options.encryption && options.encryption.aad ? this.buf2hex(options.encryption.aad) : ""}`);
-
             return Promise.resolve(returnValue);
         } catch (e) {
-            console.log("FKM: error during encryption", e);
+            agentContext.config.logger.error(`EKM: Error during encryption: ${e}`);
             throw e;
         }
     }
 
     public decrypt(agentContext: AgentContext, options: KmsDecryptOptions): Promise<KmsDecryptReturn> {
+        agentContext.config.logger.debug(`EKM: Decrypting data with key id ${options.key.keyId} using options ${options}`);
         throw new Error("Method not implemented.");
     }
     public randomBytes(agentContext: AgentContext, options: KmsRandomBytesOptions): KmsRandomBytesReturn {
+        agentContext.config.logger.debug(`EKM: Generating ${options.length} random bytes`);
         return _sodium.randombytes_buf(options.length); // Uint8Array
     }
 }
