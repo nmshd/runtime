@@ -79,7 +79,6 @@ export class GetAttributesUseCase extends UseCase<GetAttributesRequest, LocalAtt
             [`${nameof<LocalAttributeDTO>((x) => x.content)}.${nameof<RelationshipAttributeJSON>((x) => x.isTechnical)}`]: true,
             [`${nameof<LocalAttributeDTO>((x) => x.content)}.${nameof<RelationshipAttributeJSON>((x) => x.confidentiality)}`]: true,
 
-            // shareable attributes
             [`${nameof<LocalAttributeDTO>((x) => x.peer)}`]: true,
             [`${nameof<LocalAttributeDTO>((x) => x.sourceReference)}`]: true,
             [`${nameof<LocalAttributeDTO>((x) => x.initialAttributePeer)}`]: true,
