@@ -1,20 +1,26 @@
 import { IdentityAttributeJSON, RelationshipAttributeJSON } from "@nmshd/content";
 
-export interface LocalAttributeShareInfoDTO {
-    requestReference?: string;
-    notificationReference?: string;
-    peer: string;
-    sourceAttribute?: string;
-    thirdPartyAddress?: string;
+export interface LocalAttributeDTO {
+    "@type": "OwnIdentityAttribute" | "PeerIdentityAttribute" | "OwnRelationshipAttribute" | "PeerRelationshipAttribute" | "ThirdPartyRelationshipAttribute";
+    id: string;
+    createdAt: string;
+    content: IdentityAttributeJSON | RelationshipAttributeJSON;
+    succeeds?: string;
+    succeededBy?: string;
+    wasViewedAt?: string;
+    isDefault?: true;
+    peer?: string;
+    sourceReference?: string;
+    deletionInfo?: LocalAttributeDeletionInfoDTO;
+    initialAttributePeer?: string;
+    forwardedSharingDetails?: ForwardedSharingDetailsDTO[];
 }
 
-export enum LocalAttributeDeletionStatus {
-    DeletionRequestSent = "DeletionRequestSent",
-    DeletionRequestRejected = "DeletionRequestRejected",
-    ToBeDeleted = "ToBeDeleted",
-    ToBeDeletedByPeer = "ToBeDeletedByPeer",
-    DeletedByPeer = "DeletedByPeer",
-    DeletedByOwner = "DeletedByOwner"
+export interface ForwardedSharingDetailsDTO {
+    peer: string;
+    sourceReference: string;
+    sharedAt: string;
+    deletionInfo?: LocalAttributeDeletionInfoDTO;
 }
 
 export interface LocalAttributeDeletionInfoDTO {
@@ -22,15 +28,4 @@ export interface LocalAttributeDeletionInfoDTO {
     deletionDate: string;
 }
 
-export interface LocalAttributeDTO {
-    id: string;
-    parentId?: string;
-    createdAt: string;
-    content: IdentityAttributeJSON | RelationshipAttributeJSON;
-    succeeds?: string;
-    succeededBy?: string;
-    shareInfo?: LocalAttributeShareInfoDTO;
-    deletionInfo?: LocalAttributeDeletionInfoDTO;
-    isDefault?: true;
-    wasViewedAt?: string;
-}
+export type LocalAttributeDeletionStatus = "DeletionRequestSent" | "DeletionRequestRejected" | "ToBeDeleted" | "ToBeDeletedByRecipient" | "DeletedByRecipient" | "DeletedByEmitter";
