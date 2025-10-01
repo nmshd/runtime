@@ -97,13 +97,13 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("You cannot share ThirdPartyRelationshipAttributes."));
         }
 
-        if (recipient && foundAttribute.peerSharingDetails.peer.equals(recipient)) {
+        if (recipient && foundAttribute.peer.equals(recipient)) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidRequestItem("The provided RelationshipAttribute already exists in the context of the Relationship with the peer.")
             );
         }
 
-        const initialPeer = foundAttribute.peerSharingDetails.peer;
+        const initialPeer = foundAttribute.peer;
         const queryForNonPendingRelationships = {
             "peer.address": initialPeer.toString(),
             status: { $in: [RelationshipStatus.Active, RelationshipStatus.Terminated, RelationshipStatus.DeletionProposed] }
@@ -172,7 +172,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             );
 
             if (existingThirdPartyRelationshipAttribute) {
-                if (existingThirdPartyRelationshipAttribute.peerSharingDetails.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.ToBeDeleted) {
+                if (existingThirdPartyRelationshipAttribute.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.ToBeDeleted) {
                     await this.consumptionController.attributes.setPeerDeletionInfoOfReceivedAttribute(existingThirdPartyRelationshipAttribute, undefined, true);
                 }
 
@@ -199,7 +199,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
         );
 
         if (existingPeerIdentityAttribute) {
-            if (existingPeerIdentityAttribute.peerSharingDetails.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.ToBeDeleted) {
+            if (existingPeerIdentityAttribute.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.ToBeDeleted) {
                 await this.consumptionController.attributes.setPeerDeletionInfoOfReceivedAttribute(existingPeerIdentityAttribute, undefined, true);
             }
 

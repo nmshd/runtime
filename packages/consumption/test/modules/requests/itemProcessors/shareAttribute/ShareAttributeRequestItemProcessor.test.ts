@@ -833,7 +833,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 mustBeAccepted: false,
                 attribute: relationshipAttribute.content,
                 attributeId: relationshipAttribute.id,
-                thirdPartyAddress: relationshipAttribute.peerSharingDetails.peer
+                thirdPartyAddress: relationshipAttribute.peer
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -877,7 +877,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 mustBeAccepted: true,
                 attribute: ownRelationshipAttribute.content,
                 attributeId: ownRelationshipAttribute.id,
-                thirdPartyAddress: ownRelationshipAttribute.peerSharingDetails.peer
+                thirdPartyAddress: ownRelationshipAttribute.peer
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -914,7 +914,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             expect(responseItem).toBeInstanceOf(AcceptResponseItem);
 
             const createdAttribute = await consumptionController.attributes.getLocalAttribute(requestItem.attributeId);
-            expect((createdAttribute as PeerIdentityAttribute).peerSharingDetails.peer).toStrictEqual(sender);
+            expect((createdAttribute as PeerIdentityAttribute).peer).toStrictEqual(sender);
             expect(createdAttribute!.content.owner).toStrictEqual(sender);
         });
 
@@ -1020,7 +1020,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             expect((responseItem as AttributeAlreadySharedAcceptResponseItem).attributeId).toStrictEqual(existingPeerIdentityAttribute.id);
 
             const updatedAttribute = (await consumptionController.attributes.getLocalAttribute(existingPeerIdentityAttribute.id)) as PeerIdentityAttribute;
-            expect(updatedAttribute.peerSharingDetails.deletionInfo).toBeUndefined();
+            expect(updatedAttribute.deletionInfo).toBeUndefined();
         });
 
         test("returns AttributeAlreadySharedAcceptResponseItem when accepting an already existing PeerIdentityAttribute that has a successor", async function () {
@@ -1080,7 +1080,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             expect(responseItem).toBeInstanceOf(AcceptResponseItem);
 
             const createdAttribute = await consumptionController.attributes.getLocalAttribute(requestItem.attributeId);
-            expect((createdAttribute! as PeerIdentityAttribute).peerSharingDetails.peer).toStrictEqual(sender);
+            expect((createdAttribute! as PeerIdentityAttribute).peer).toStrictEqual(sender);
             expect(createdAttribute!.content.owner).toStrictEqual(sender);
         });
 
@@ -1192,7 +1192,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             expect((responseItem as AttributeAlreadySharedAcceptResponseItem).attributeId).toStrictEqual(existingThirdPartyRelationshipAttribute.id);
 
             const updatedAttribute = (await consumptionController.attributes.getLocalAttribute(existingThirdPartyRelationshipAttribute.id)) as ThirdPartyRelationshipAttribute;
-            expect(updatedAttribute.peerSharingDetails.deletionInfo).toBeUndefined();
+            expect(updatedAttribute.deletionInfo).toBeUndefined();
         });
     });
 
@@ -1319,7 +1319,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const forwardedAttribute = await consumptionController.attributes.getLocalAttribute(sharedAttribute.id);
             expect((forwardedAttribute! as OwnRelationshipAttribute).isForwardedTo(localRequest.peer)).toBe(true);
             expect(forwardedAttribute!.content.owner).toStrictEqual(testAccount.identity.address);
-            expect((forwardedAttribute! as OwnRelationshipAttribute).peerSharingDetails.peer).toStrictEqual(aThirdParty);
+            expect((forwardedAttribute! as OwnRelationshipAttribute).peer).toStrictEqual(aThirdParty);
         });
 
         test("in case of an already shared Attribute that is ToBeDeletedByRecipient, removes the deletionInfo", async function () {
@@ -1355,7 +1355,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             mustBeAccepted: true,
             attribute: sharedAttribute.content,
             attributeId: sharedAttribute.id,
-            thirdPartyAddress: sharedAttribute.content instanceof RelationshipAttribute ? (sharedAttribute as OwnRelationshipAttribute).peerSharingDetails.peer : undefined
+            thirdPartyAddress: sharedAttribute.content instanceof RelationshipAttribute ? (sharedAttribute as OwnRelationshipAttribute).peer : undefined
         });
 
         const requestId = await ConsumptionIds.request.generate();

@@ -152,7 +152,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 requestItem.query instanceof ThirdPartyRelationshipAttributeQuery &&
                 (foundLocalAttribute instanceof OwnRelationshipAttribute || foundLocalAttribute instanceof PeerRelationshipAttribute)
             ) {
-                const initialPeer = foundLocalAttribute.peerSharingDetails.peer.toString();
+                const initialPeer = foundLocalAttribute.peer.toString();
                 const queriedThirdParties = requestItem.query.thirdParty.map((aThirdParty) => aThirdParty.toString());
 
                 if (
@@ -322,9 +322,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             const wasNotSharedBefore = latestSharedVersion.length === 0;
             if (wasNotSharedBefore) {
                 const thirdPartyAddress =
-                    existingAttribute instanceof OwnRelationshipAttribute || existingAttribute instanceof PeerRelationshipAttribute
-                        ? existingAttribute.peerSharingDetails.peer
-                        : undefined;
+                    existingAttribute instanceof OwnRelationshipAttribute || existingAttribute instanceof PeerRelationshipAttribute ? existingAttribute.peer : undefined;
 
                 return ReadAttributeAcceptResponseItem.from({
                     result: ResponseItemResult.Accepted,
@@ -395,7 +393,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             const attribute = await this.consumptionController.attributes.getLocalAttribute(responseItem.attributeId);
             if (!attribute || !(attribute instanceof PeerIdentityAttribute || attribute instanceof ThirdPartyRelationshipAttribute)) return;
 
-            if (attribute.peerSharingDetails.deletionInfo?.deletionStatus !== ReceivedAttributeDeletionStatus.ToBeDeleted) return;
+            if (attribute.deletionInfo?.deletionStatus !== ReceivedAttributeDeletionStatus.ToBeDeleted) return;
 
             await this.consumptionController.attributes.setPeerDeletionInfoOfReceivedAttribute(attribute, undefined, true);
             return;

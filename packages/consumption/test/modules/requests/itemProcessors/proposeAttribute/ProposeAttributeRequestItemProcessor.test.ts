@@ -1458,8 +1458,8 @@ describe("ProposeAttributeRequestItemProcessor", function () {
                 const createdAttribute = await consumptionController.attributes.getLocalAttribute((result as ProposeAttributeAcceptResponseItem).attributeId);
 
                 expect(createdAttribute).toBeInstanceOf(OwnRelationshipAttribute);
-                expect((createdAttribute as OwnRelationshipAttribute).peerSharingDetails.peer).toStrictEqual(sender);
-                expect((createdAttribute as OwnRelationshipAttribute).peerSharingDetails.sourceReference).toStrictEqual(requestId);
+                expect((createdAttribute as OwnRelationshipAttribute).peer).toStrictEqual(sender);
+                expect((createdAttribute as OwnRelationshipAttribute).sourceReference).toStrictEqual(requestId);
                 expect((createdAttribute as OwnRelationshipAttribute).forwardedSharingDetails).toBeUndefined();
             });
 
@@ -2245,8 +2245,8 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
             const createdAttribute = await consumptionController.attributes.getLocalAttribute(attributeId);
             expect(createdAttribute).toBeInstanceOf(PeerIdentityAttribute);
-            expect((createdAttribute as PeerIdentityAttribute).peerSharingDetails.peer).toStrictEqual(peer);
-            expect((createdAttribute as PeerIdentityAttribute).peerSharingDetails.sourceReference).toStrictEqual(requestId);
+            expect((createdAttribute as PeerIdentityAttribute).peer).toStrictEqual(peer);
+            expect((createdAttribute as PeerIdentityAttribute).sourceReference).toStrictEqual(requestId);
         });
 
         test("succeeds an existing PeerIdentityAttribute with the Attribute received in the ResponseItem", async function () {
@@ -2288,7 +2288,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
             const successorPeerIdentityAttribute = await consumptionController.attributes.getLocalAttribute(successorId);
             expect(successorPeerIdentityAttribute).toBeInstanceOf(PeerIdentityAttribute);
-            expect((successorPeerIdentityAttribute as PeerIdentityAttribute).peerSharingDetails.peer).toStrictEqual(sender);
+            expect((successorPeerIdentityAttribute as PeerIdentityAttribute).peer).toStrictEqual(sender);
             expect(successorPeerIdentityAttribute!.succeeds).toStrictEqual(predecessorIdentityAttribute.id);
 
             const updatedPredecessorPeerIdentityAttribute = await consumptionController.attributes.getLocalAttribute(predecessorIdentityAttribute.id);
@@ -2348,13 +2348,13 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             expect(event).toBeInstanceOf(AttributeSucceededEvent);
 
             const successorPeerIdentityAttribute = await consumptionController.attributes.getLocalAttribute(successorId);
-            expect((successorPeerIdentityAttribute as PeerIdentityAttribute).peerSharingDetails.peer).toStrictEqual(recipient);
-            expect((successorPeerIdentityAttribute as PeerIdentityAttribute).peerSharingDetails.deletionInfo).toBeUndefined();
+            expect((successorPeerIdentityAttribute as PeerIdentityAttribute).peer).toStrictEqual(recipient);
+            expect((successorPeerIdentityAttribute as PeerIdentityAttribute).deletionInfo).toBeUndefined();
             expect(successorPeerIdentityAttribute!.succeeds).toStrictEqual(predecessorPeerIdentityAttribute.id);
 
             const updatedPredecessorPeerIdentityAttribute = await consumptionController.attributes.getLocalAttribute(predecessorPeerIdentityAttribute.id);
             expect(updatedPredecessorPeerIdentityAttribute!.succeededBy).toStrictEqual(successorPeerIdentityAttribute!.id);
-            expect((updatedPredecessorPeerIdentityAttribute as PeerIdentityAttribute).peerSharingDetails.deletionInfo).toStrictEqual(deletionInfo);
+            expect((updatedPredecessorPeerIdentityAttribute as PeerIdentityAttribute).deletionInfo).toStrictEqual(deletionInfo);
         });
 
         test("removes deletionInfo of an existing PeerIdentityAttribute that is ToBeDeleted if it is shared again", async function () {
@@ -2403,7 +2403,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
             await processor.applyIncomingResponseItem(responseItem, requestItem, incomingRequest);
 
             const updatedExistingPeerIdentityAttribute = await consumptionController.attributes.getLocalAttribute(existingPeerIdentityAttribute.id);
-            expect((updatedExistingPeerIdentityAttribute as PeerIdentityAttribute).peerSharingDetails.deletionInfo).toBeUndefined();
+            expect((updatedExistingPeerIdentityAttribute as PeerIdentityAttribute).deletionInfo).toBeUndefined();
         });
     });
 });

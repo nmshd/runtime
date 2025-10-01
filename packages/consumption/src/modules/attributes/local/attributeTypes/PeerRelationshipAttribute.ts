@@ -1,6 +1,6 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { IRelationshipAttribute, RelationshipAttribute, RelationshipAttributeJSON } from "@nmshd/content";
-import { CoreAddress } from "@nmshd/core-types";
+import { CoreAddress, CoreId, ICoreAddress, ICoreId } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import {
@@ -9,10 +9,9 @@ import {
     ForwardedSharingDetails,
     ForwardedSharingDetailsJSON,
     IForwardedSharingDetails,
-    IPeerRelationshipAttributeSharingDetails,
-    PeerRelationshipAttributeSharingDetails,
-    PeerRelationshipAttributeSharingDetailsJSON,
+    IReceivedAttributeDeletionInfo,
     ReceivedAttributeDeletionInfo,
+    ReceivedAttributeDeletionInfoJSON,
     ReceivedAttributeDeletionStatus
 } from "../sharingDetails";
 import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./LocalAttribute";
@@ -20,13 +19,17 @@ import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./LocalAttr
 export interface PeerRelationshipAttributeJSON extends LocalAttributeJSON {
     "@type": "PeerRelationshipAttribute";
     content: RelationshipAttributeJSON;
-    peerSharingDetails: PeerRelationshipAttributeSharingDetailsJSON;
+    peer: string;
+    sourceReference: string;
+    deletionInfo?: ReceivedAttributeDeletionInfoJSON;
     forwardedSharingDetails?: ForwardedSharingDetailsJSON[];
 }
 
 export interface IPeerRelationshipAttribute extends ILocalAttribute {
     content: IRelationshipAttribute;
-    peerSharingDetails: IPeerRelationshipAttributeSharingDetails;
+    peer: ICoreAddress;
+    sourceReference: ICoreId;
+    deletionInfo?: IReceivedAttributeDeletionInfo;
     forwardedSharingDetails?: IForwardedSharingDetails[];
 }
 
@@ -36,7 +39,9 @@ export class PeerRelationshipAttribute extends LocalAttribute implements IPeerRe
         ...this.technicalProperties,
         "@type",
         "@context",
-        nameof<PeerRelationshipAttribute>((r) => r.peerSharingDetails),
+        nameof<PeerRelationshipAttribute>((r) => r.peer),
+        nameof<PeerRelationshipAttribute>((r) => r.sourceReference),
+        nameof<PeerRelationshipAttribute>((r) => r.deletionInfo),
         nameof<PeerRelationshipAttribute>((r) => r.forwardedSharingDetails)
     ];
 
@@ -44,9 +49,17 @@ export class PeerRelationshipAttribute extends LocalAttribute implements IPeerRe
     @validate()
     public override content: RelationshipAttribute;
 
+    @validate()
+    @serialize()
+    public peer: CoreAddress;
+
     @serialize()
     @validate()
-    public peerSharingDetails: PeerRelationshipAttributeSharingDetails;
+    public sourceReference: CoreId;
+
+    @serialize()
+    @validate({ nullable: true })
+    public deletionInfo?: ReceivedAttributeDeletionInfo;
 
     @serialize({ type: ForwardedSharingDetails })
     @validate({ nullable: true })
@@ -66,14 +79,14 @@ export class PeerRelationshipAttribute extends LocalAttribute implements IPeerRe
     }
 
     public isDeletedByEmitterOrToBeDeleted(): boolean {
-        if (!this.peerSharingDetails.deletionInfo) return false;
+        if (!this.deletionInfo) return false;
 
         const deletionStatuses = [ReceivedAttributeDeletionStatus.DeletedByEmitter, ReceivedAttributeDeletionStatus.ToBeDeleted];
-        return deletionStatuses.includes(this.peerSharingDetails.deletionInfo.deletionStatus);
+        return deletionStatuses.includes(this.deletionInfo.deletionStatus);
     }
 
     public isToBeDeleted(): boolean {
-        return this.peerSharingDetails.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.ToBeDeleted;
+        return this.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.ToBeDeleted;
     }
 
     public isDeletedOrToBeDeletedByForwardingPeer(peer: CoreAddress): boolean {
@@ -108,11 +121,11 @@ export class PeerRelationshipAttribute extends LocalAttribute implements IPeerRe
     }
 
     public setPeerDeletionInfo(deletionInfo: ReceivedAttributeDeletionInfo | undefined, overrideDeleted = false): this {
-        if (!overrideDeleted && this.peerSharingDetails.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.DeletedByEmitter) {
+        if (!overrideDeleted && this.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.DeletedByEmitter) {
             throw ConsumptionCoreErrors.attributes.cannotSetAttributeDeletionInfo(this.id);
         }
 
-        this.peerSharingDetails.deletionInfo = deletionInfo;
+        this.deletionInfo = deletionInfo;
         return this;
     }
 
@@ -152,7 +165,7 @@ export class PeerRelationshipAttribute extends LocalAttribute implements IPeerRe
     }
 
     public upsertForwardedSharingDetailsForPeer(peer: CoreAddress, sharingDetails: ForwardedSharingDetails): this {
-        if (peer.equals(this.peerSharingDetails.peer)) throw ConsumptionCoreErrors.attributes.cannotSetForwardedSharingDetailsForPeer(this.id, peer);
+        if (peer.equals(this.peer)) throw ConsumptionCoreErrors.attributes.cannotSetForwardedSharingDetailsForPeer(this.id, peer);
 
         if (!this.forwardedSharingDetails) {
             this.forwardedSharingDetails = [sharingDetails];

@@ -649,11 +649,9 @@ describe("DeleteAttributeRequestItemProcessor", function () {
             await processor.accept(requestItem, acceptParams, incomingRequest);
 
             const updatedPeerIdentityAttribute = await consumptionController.attributes.getLocalAttribute(rPeerIdentityAttribute.id);
-            expect((updatedPeerIdentityAttribute as PeerIdentityAttribute).peerSharingDetails.deletionInfo).toBeDefined();
-            expect((updatedPeerIdentityAttribute as PeerIdentityAttribute).peerSharingDetails.deletionInfo!.deletionStatus).toStrictEqual(
-                ReceivedAttributeDeletionStatus.ToBeDeleted
-            );
-            expect((updatedPeerIdentityAttribute as PeerIdentityAttribute).peerSharingDetails.deletionInfo!.deletionDate).toStrictEqual(dateInFuture);
+            expect((updatedPeerIdentityAttribute as PeerIdentityAttribute).deletionInfo).toBeDefined();
+            expect((updatedPeerIdentityAttribute as PeerIdentityAttribute).deletionInfo!.deletionStatus).toStrictEqual(ReceivedAttributeDeletionStatus.ToBeDeleted);
+            expect((updatedPeerIdentityAttribute as PeerIdentityAttribute).deletionInfo!.deletionDate).toStrictEqual(dateInFuture);
         });
 
         test("sets the deletionInfo of a PeerRelationshipAttribute", async function () {
@@ -700,11 +698,9 @@ describe("DeleteAttributeRequestItemProcessor", function () {
             await processor.accept(requestItem, acceptParams, incomingRequest);
 
             const updatedPeerRelationshipAttribute = await consumptionController.attributes.getLocalAttribute(rPeerRelationshipAttribute.id);
-            expect((updatedPeerRelationshipAttribute as PeerRelationshipAttribute).peerSharingDetails.deletionInfo).toBeDefined();
-            expect((updatedPeerRelationshipAttribute as PeerRelationshipAttribute).peerSharingDetails.deletionInfo!.deletionStatus).toStrictEqual(
-                ReceivedAttributeDeletionStatus.ToBeDeleted
-            );
-            expect((updatedPeerRelationshipAttribute as PeerRelationshipAttribute).peerSharingDetails.deletionInfo!.deletionDate).toStrictEqual(dateInFuture);
+            expect((updatedPeerRelationshipAttribute as PeerRelationshipAttribute).deletionInfo).toBeDefined();
+            expect((updatedPeerRelationshipAttribute as PeerRelationshipAttribute).deletionInfo!.deletionStatus).toStrictEqual(ReceivedAttributeDeletionStatus.ToBeDeleted);
+            expect((updatedPeerRelationshipAttribute as PeerRelationshipAttribute).deletionInfo!.deletionDate).toStrictEqual(dateInFuture);
         });
 
         test("returns an AcceptResponseItem", async function () {
@@ -937,11 +933,9 @@ describe("DeleteAttributeRequestItemProcessor", function () {
             await processor.applyIncomingResponseItem(responseItem, requestItem, incomingRequest);
 
             const updatedOwnRelationshipAttribute = await consumptionController.attributes.getLocalAttribute(sOwnRelationshipAttribute.id);
-            expect((updatedOwnRelationshipAttribute as OwnRelationshipAttribute).peerSharingDetails.deletionInfo).toBeDefined();
-            expect((updatedOwnRelationshipAttribute as OwnRelationshipAttribute).peerSharingDetails.deletionInfo!.deletionStatus).toStrictEqual(
-                EmittedAttributeDeletionStatus.ToBeDeletedByRecipient
-            );
-            expect((updatedOwnRelationshipAttribute as OwnRelationshipAttribute).peerSharingDetails.deletionInfo!.deletionDate).toStrictEqual(deletionDate);
+            expect((updatedOwnRelationshipAttribute as OwnRelationshipAttribute).deletionInfo).toBeDefined();
+            expect((updatedOwnRelationshipAttribute as OwnRelationshipAttribute).deletionInfo!.deletionStatus).toStrictEqual(EmittedAttributeDeletionStatus.ToBeDeletedByRecipient);
+            expect((updatedOwnRelationshipAttribute as OwnRelationshipAttribute).deletionInfo!.deletionDate).toStrictEqual(deletionDate);
         });
 
         test("sets the deletionInfo to ToBeDeletedByRecipient of the predecessor of a forwarded OwnIdentityAttribute", async function () {

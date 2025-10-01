@@ -39,8 +39,8 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
         if (
             (attribute instanceof OwnIdentityAttribute && !attribute.isForwardedTo(recipient, true)) ||
             (attribute instanceof OwnRelationshipAttribute &&
-                ((attribute.peerSharingDetails.peer.equals(recipient) && attribute.isDeletedOrToBeDeletedByRecipient()) ||
-                    (!attribute.peerSharingDetails.peer.equals(recipient) && !attribute.isForwardedTo(recipient, true))))
+                ((attribute.peer.equals(recipient) && attribute.isDeletedOrToBeDeletedByRecipient()) ||
+                    (!attribute.peer.equals(recipient) && !attribute.isForwardedTo(recipient, true))))
         ) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidRequestItem(
@@ -50,7 +50,7 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
         }
 
         if (attribute instanceof PeerRelationshipAttribute) {
-            if (attribute.peerSharingDetails.peer.equals(recipient)) {
+            if (attribute.peer.equals(recipient)) {
                 return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("The deletion of a PeerRelationshipAttribute cannot be requested for the owner."));
             }
 
@@ -77,7 +77,7 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
 
         if (
             !(attribute instanceof PeerIdentityAttribute || attribute instanceof PeerRelationshipAttribute || attribute instanceof ThirdPartyRelationshipAttribute) ||
-            !attribute.peerSharingDetails.peer.equals(requestInfo.peer)
+            !attribute.peer.equals(requestInfo.peer)
         ) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidRequestItem(
@@ -157,7 +157,7 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
             deletionDate
         });
 
-        const deletionWasRequestedFromInitialPeer = attribute instanceof OwnRelationshipAttribute && attribute.peerSharingDetails.peer.equals(peer);
+        const deletionWasRequestedFromInitialPeer = attribute instanceof OwnRelationshipAttribute && attribute.peer.equals(peer);
         return deletionWasRequestedFromInitialPeer
             ? await this.consumptionController.attributes.setPeerDeletionInfoOfOwnRelationshipAttributeAndPredecessors(attribute, deletionInfo)
             : await this.consumptionController.attributes.setForwardedDeletionInfoOfAttributeAndPredecessors(attribute, deletionInfo, peer);
@@ -173,7 +173,7 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
             deletionDate
         });
 
-        const deletionWasRequestedFromInitialPeer = attribute instanceof OwnRelationshipAttribute && attribute.peerSharingDetails.peer.equals(peer);
+        const deletionWasRequestedFromInitialPeer = attribute instanceof OwnRelationshipAttribute && attribute.peer.equals(peer);
         return deletionWasRequestedFromInitialPeer
             ? await this.consumptionController.attributes.setPeerDeletionInfoOfOwnRelationshipAttributeAndPredecessors(attribute, deletionInfo)
             : await this.consumptionController.attributes.setForwardedDeletionInfoOfAttributeAndPredecessors(attribute, deletionInfo, peer);

@@ -39,7 +39,7 @@ export class OwnAttributeDeletedByOwnerNotificationItemProcessor extends Abstrac
             );
         }
 
-        if (!notification.peer.equals(attribute.peerSharingDetails.peer)) {
+        if (!notification.peer.equals(attribute.peer)) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.senderIsNotPeerOfSharedAttribute(notification.peer, notificationItem.attributeId));
         }
 
@@ -78,7 +78,7 @@ export class OwnAttributeDeletedByOwnerNotificationItemProcessor extends Abstrac
         for (const attr of [attribute, ...predecessors]) {
             if (attr.isToBeDeleted()) continue;
 
-            attr.peerSharingDetails.deletionInfo = undefined;
+            attr.deletionInfo = undefined;
             await this.consumptionController.attributes.updateAttributeUnsafe(attr);
         }
     }

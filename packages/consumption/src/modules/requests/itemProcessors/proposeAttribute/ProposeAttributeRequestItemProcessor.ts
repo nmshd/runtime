@@ -320,7 +320,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
             const attribute = await this.consumptionController.attributes.getLocalAttribute(responseItem.attributeId);
             if (!attribute || !(attribute instanceof PeerIdentityAttribute)) return;
 
-            if (attribute.peerSharingDetails.deletionInfo?.deletionStatus !== ReceivedAttributeDeletionStatus.ToBeDeleted) return;
+            if (attribute.deletionInfo?.deletionStatus !== ReceivedAttributeDeletionStatus.ToBeDeleted) return;
 
             await this.consumptionController.attributes.setPeerDeletionInfoOfReceivedAttribute(attribute, undefined, true);
             return;

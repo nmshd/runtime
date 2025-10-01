@@ -1,27 +1,39 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreDate, ICoreDate } from "@nmshd/core-types";
-import { AbstractAttributeSharingDetails, AbstractAttributeSharingDetailsJSON, IAbstractAttributeSharingDetails } from "./AbstractAttributeSharingDetails";
+import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreDate, ICoreId } from "@nmshd/core-types";
 import { EmittedAttributeDeletionInfo, EmittedAttributeDeletionInfoJSON, IEmittedAttributeDeletionInfo } from "./deletionInfos";
 
-export interface ForwardedSharingDetailsJSON extends AbstractAttributeSharingDetailsJSON {
+export interface ForwardedSharingDetailsJSON {
+    "@type": "ForwardedSharingDetails";
+    peer: string;
+    sourceReference: string;
     sharedAt: string;
     deletionInfo?: EmittedAttributeDeletionInfoJSON;
 }
 
-export interface IForwardedSharingDetails extends IAbstractAttributeSharingDetails {
+export interface IForwardedSharingDetails extends ISerializable {
+    peer: ICoreAddress;
+    sourceReference: ICoreId;
     sharedAt: ICoreDate;
     deletionInfo?: IEmittedAttributeDeletionInfo;
 }
 
 @type("ForwardedSharingDetails")
-export class ForwardedSharingDetails extends AbstractAttributeSharingDetails implements IForwardedSharingDetails {
+export class ForwardedSharingDetails extends Serializable implements IForwardedSharingDetails {
+    @validate()
+    @serialize()
+    public peer: CoreAddress;
+
+    @serialize()
+    @validate()
+    public sourceReference: CoreId;
+
     @serialize()
     @validate()
     public sharedAt: CoreDate;
 
     @serialize()
     @validate({ nullable: true })
-    public override deletionInfo?: EmittedAttributeDeletionInfo;
+    public deletionInfo?: EmittedAttributeDeletionInfo;
 
     public static from(value: IForwardedSharingDetails | ForwardedSharingDetailsJSON): ForwardedSharingDetails {
         return super.fromAny(value) as ForwardedSharingDetails;

@@ -40,12 +40,8 @@ import {
     EmittedAttributeDeletionInfo,
     EmittedAttributeDeletionStatus,
     ForwardedSharingDetails,
-    OwnRelationshipAttributeSharingDetails,
-    PeerIdentityAttributeSharingDetails,
-    PeerRelationshipAttributeSharingDetails,
     ReceivedAttributeDeletionInfo,
-    ReceivedAttributeDeletionStatus,
-    ThirdPartyRelationshipAttributeSharingDetails
+    ReceivedAttributeDeletionStatus
 } from "./local/sharingDetails";
 import {
     IOwnIdentityAttributeSuccessorParams,
@@ -310,14 +306,11 @@ export class AttributesController extends ConsumptionBaseController {
 
         await this.validateAttributeCreation(attribute);
 
-        const peerSharingDetails = PeerIdentityAttributeSharingDetails.from({
-            peer: params.peer,
-            sourceReference: params.sourceReference
-        });
         const peerIdentityAttribute = PeerIdentityAttribute.from({
             id: params.id,
             content: attribute,
-            peerSharingDetails,
+            peer: params.peer,
+            sourceReference: params.sourceReference,
             createdAt: CoreDate.utc()
         });
         await this.attributes.create(peerIdentityAttribute);
@@ -344,14 +337,11 @@ export class AttributesController extends ConsumptionBaseController {
 
         await this.validateAttributeCreation(attribute);
 
-        const peerSharingDetails = OwnRelationshipAttributeSharingDetails.from({
-            peer: params.peer,
-            sourceReference: params.sourceReference
-        });
         const ownRelationshipAttribute = OwnRelationshipAttribute.from({
             id: params.id ?? (await ConsumptionIds.attribute.generate()),
             content: attribute,
-            peerSharingDetails,
+            peer: params.peer,
+            sourceReference: params.sourceReference,
             createdAt: CoreDate.utc()
         });
         await this.attributes.create(ownRelationshipAttribute);
@@ -378,14 +368,11 @@ export class AttributesController extends ConsumptionBaseController {
 
         await this.validateAttributeCreation(attribute);
 
-        const peerSharingDetails = PeerRelationshipAttributeSharingDetails.from({
-            peer: params.peer,
-            sourceReference: params.sourceReference
-        });
         const peerRelationshipAttribute = PeerRelationshipAttribute.from({
             id: params.id ?? (await ConsumptionIds.attribute.generate()),
             content: attribute,
-            peerSharingDetails,
+            peer: params.peer,
+            sourceReference: params.sourceReference,
             createdAt: CoreDate.utc()
         });
         await this.attributes.create(peerRelationshipAttribute);
@@ -419,15 +406,12 @@ export class AttributesController extends ConsumptionBaseController {
 
         await this.validateAttributeCreation(attribute);
 
-        const peerSharingDetails = ThirdPartyRelationshipAttributeSharingDetails.from({
-            peer: params.peer,
-            sourceReference: params.sourceReference,
-            initialAttributePeer: params.initialAttributePeer
-        });
         const thirdPartyRelationshipAttribute = ThirdPartyRelationshipAttribute.from({
             id: params.id,
             content: attribute,
-            peerSharingDetails,
+            peer: params.peer,
+            sourceReference: params.sourceReference,
+            initialAttributePeer: params.initialAttributePeer,
             createdAt: CoreDate.utc()
         });
         await this.attributes.create(thirdPartyRelationshipAttribute);
@@ -527,17 +511,13 @@ export class AttributesController extends ConsumptionBaseController {
             if (validationResult.isError()) throw validationResult.error;
         }
 
-        const peerSharingDetails = PeerIdentityAttributeSharingDetails.from({
-            peer: predecessor.peerSharingDetails.peer,
-            sourceReference: parsedSuccessorParams.sourceReference
-        });
-
         const successor = PeerIdentityAttribute.from({
             id: parsedSuccessorParams.id,
             content: attribute,
             createdAt: CoreDate.utc(),
             succeeds: predecessor.id,
-            peerSharingDetails
+            peer: predecessor.peer,
+            sourceReference: parsedSuccessorParams.sourceReference
         });
         await this.succeedAttributeUnsafe(predecessor, successor);
 
@@ -556,17 +536,13 @@ export class AttributesController extends ConsumptionBaseController {
             if (validationResult.isError()) throw validationResult.error;
         }
 
-        const peerSharingDetails = OwnRelationshipAttributeSharingDetails.from({
-            peer: predecessor.peerSharingDetails.peer,
-            sourceReference: parsedSuccessorParams.sourceReference
-        });
-
         const successor = OwnRelationshipAttribute.from({
             id: await ConsumptionIds.attribute.generate(),
             content: parsedSuccessorParams.content,
             createdAt: CoreDate.utc(),
             succeeds: predecessor.id,
-            peerSharingDetails
+            peer: predecessor.peer,
+            sourceReference: parsedSuccessorParams.sourceReference
         });
         await this.succeedAttributeUnsafe(predecessor, successor);
 
@@ -586,17 +562,13 @@ export class AttributesController extends ConsumptionBaseController {
             if (validationResult.isError()) throw validationResult.error;
         }
 
-        const peerSharingDetails = PeerRelationshipAttributeSharingDetails.from({
-            peer: predecessor.peerSharingDetails.peer,
-            sourceReference: parsedSuccessorParams.sourceReference
-        });
-
         const successor = PeerRelationshipAttribute.from({
             id: parsedSuccessorParams.id,
             content: parsedSuccessorParams.content,
             createdAt: CoreDate.utc(),
             succeeds: predecessor.id,
-            peerSharingDetails
+            peer: predecessor.peer,
+            sourceReference: parsedSuccessorParams.sourceReference
         });
         await this.succeedAttributeUnsafe(predecessor, successor);
 
@@ -615,18 +587,14 @@ export class AttributesController extends ConsumptionBaseController {
             if (validationResult.isError()) throw validationResult.error;
         }
 
-        const peerSharingDetails = ThirdPartyRelationshipAttributeSharingDetails.from({
-            peer: predecessor.peerSharingDetails.peer,
-            sourceReference: parsedSuccessorParams.sourceReference,
-            initialAttributePeer: predecessor.peerSharingDetails.initialAttributePeer
-        });
-
         const successor = ThirdPartyRelationshipAttribute.from({
             id: parsedSuccessorParams.id,
             content: parsedSuccessorParams.content,
             createdAt: CoreDate.utc(),
             succeeds: predecessor.id,
-            peerSharingDetails
+            peer: predecessor.peer,
+            sourceReference: parsedSuccessorParams.sourceReference,
+            initialAttributePeer: predecessor.initialAttributePeer
         });
         await this.succeedAttributeUnsafe(predecessor, successor);
 
@@ -669,20 +637,16 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotAValidAttribute(e));
         }
 
-        const peerSharingDetails = PeerIdentityAttributeSharingDetails.from({
-            peer: predecessor.peerSharingDetails.peer,
-            sourceReference: parsedSuccessorParams.sourceReference
-        });
-
         const successor = PeerIdentityAttribute.from({
             id: parsedSuccessorParams.id,
             content: parsedSuccessorParams.content,
             createdAt: CoreDate.utc(),
             succeeds: predecessor.id,
-            peerSharingDetails
+            peer: predecessor.peer,
+            sourceReference: parsedSuccessorParams.sourceReference
         });
 
-        if (predecessor.peerSharingDetails.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.DeletedByEmitter) {
+        if (predecessor.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.DeletedByEmitter) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedSharedAttributesDeletedByPeer());
         }
 
@@ -700,24 +664,20 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotAValidAttribute(e));
         }
 
-        const peerSharingDetails = OwnRelationshipAttributeSharingDetails.from({
-            peer: predecessor.peerSharingDetails.peer,
-            sourceReference: parsedSuccessorParams.sourceReference
-        });
-
         const successor = OwnRelationshipAttribute.from({
             id: await ConsumptionIds.attribute.generate(),
             content: parsedSuccessorParams.content,
             createdAt: CoreDate.utc(),
             succeeds: predecessor.id,
-            peerSharingDetails
+            peer: predecessor.peer,
+            sourceReference: parsedSuccessorParams.sourceReference
         });
 
         if (predecessor.content.key !== successor.content.key) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangeKey());
         }
 
-        if (predecessor.peerSharingDetails.deletionInfo?.deletionStatus === EmittedAttributeDeletionStatus.DeletedByRecipient) {
+        if (predecessor.deletionInfo?.deletionStatus === EmittedAttributeDeletionStatus.DeletedByRecipient) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedSharedAttributesDeletedByPeer());
         }
 
@@ -735,24 +695,20 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotAValidAttribute(e));
         }
 
-        const peerSharingDetails = PeerRelationshipAttributeSharingDetails.from({
-            peer: predecessor.peerSharingDetails.peer,
-            sourceReference: parsedSuccessorParams.sourceReference
-        });
-
         const successor = PeerRelationshipAttribute.from({
             id: parsedSuccessorParams.id,
             content: parsedSuccessorParams.content,
             createdAt: CoreDate.utc(),
             succeeds: predecessor.id,
-            peerSharingDetails
+            peer: predecessor.peer,
+            sourceReference: parsedSuccessorParams.sourceReference
         });
 
         if (predecessor.content.key !== successor.content.key) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangeKey());
         }
 
-        if (predecessor.peerSharingDetails.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.DeletedByEmitter) {
+        if (predecessor.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.DeletedByEmitter) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedSharedAttributesDeletedByPeer());
         }
 
@@ -770,25 +726,21 @@ export class AttributesController extends ConsumptionBaseController {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successorIsNotAValidAttribute(e));
         }
 
-        const peerSharingDetails = ThirdPartyRelationshipAttributeSharingDetails.from({
-            peer: predecessor.peerSharingDetails.peer,
-            sourceReference: parsedSuccessorParams.sourceReference,
-            initialAttributePeer: predecessor.peerSharingDetails.initialAttributePeer
-        });
-
         const successor = ThirdPartyRelationshipAttribute.from({
             id: parsedSuccessorParams.id,
             content: parsedSuccessorParams.content,
             createdAt: CoreDate.utc(),
             succeeds: predecessor.id,
-            peerSharingDetails
+            peer: predecessor.peer,
+            sourceReference: parsedSuccessorParams.sourceReference,
+            initialAttributePeer: predecessor.initialAttributePeer
         });
 
         if (predecessor.content.key !== successor.content.key) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.successionMustNotChangeKey());
         }
 
-        if (predecessor.peerSharingDetails.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.DeletedByEmitter) {
+        if (predecessor.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.DeletedByEmitter) {
             return ValidationResult.error(ConsumptionCoreErrors.attributes.cannotSucceedSharedAttributesDeletedByPeer());
         }
 
@@ -842,7 +794,7 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async deleteAttributesExchangedWithPeer(peer: CoreAddress): Promise<void> {
-        const receivedAttributes = await this.getLocalAttributes({ "peerSharingDetails.peer": peer.toString() });
+        const receivedAttributes = await this.getLocalAttributes({ peer: peer.toString() });
         for (const attribute of receivedAttributes) {
             await this.deleteAttributeUnsafe(attribute.id);
         }
@@ -1119,7 +1071,7 @@ export class AttributesController extends ConsumptionBaseController {
                 owner: owner
             }
         });
-        query["peerSharingDetails.deletionInfo.deletionStatus"] = { $ne: ReceivedAttributeDeletionStatus.DeletedByEmitter };
+        query["deletionInfo.deletionStatus"] = { $ne: ReceivedAttributeDeletionStatus.DeletedByEmitter };
 
         return (await this.getAttributeWithSameValue(trimmedValue, query)) as PeerIdentityAttribute | undefined;
     }
@@ -1138,8 +1090,8 @@ export class AttributesController extends ConsumptionBaseController {
                 key: key
             }
         });
-        query["peerSharingDetails.peer"] = peer;
-        query["peerSharingDetails.deletionInfo.deletionStatus"] = { $ne: ReceivedAttributeDeletionStatus.DeletedByEmitter };
+        query["peer"] = peer;
+        query["deletionInfo.deletionStatus"] = { $ne: ReceivedAttributeDeletionStatus.DeletedByEmitter };
 
         return (await this.getAttributeWithSameValue(value, query)) as ThirdPartyRelationshipAttribute | undefined;
     }
@@ -1175,8 +1127,8 @@ export class AttributesController extends ConsumptionBaseController {
             "content.owner": owner.toString(),
             "content.key": key,
             "content.value.@type": valueType,
-            "peerSharingDetails.peer": peer.toString(),
-            "peerSharingDetails.deletionInfo.deletionStatus": {
+            peer: peer.toString(),
+            "deletionInfo.deletionStatus": {
                 $nin: [
                     EmittedAttributeDeletionStatus.ToBeDeletedByRecipient,
                     EmittedAttributeDeletionStatus.DeletedByRecipient,
@@ -1393,8 +1345,8 @@ export class AttributesController extends ConsumptionBaseController {
 
         const attributesSharedWithPeer = (await this.getLocalAttributes({
             "@type": "OwnRelationshipAttribute",
-            "peerSharingDetails.peer": peer.toString(),
-            "peerSharingDetails.deletionInfo.deletionStatus": { $ne: EmittedAttributeDeletionStatus.DeletedByRecipient }
+            peer: peer.toString(),
+            "deletionInfo.deletionStatus": { $ne: EmittedAttributeDeletionStatus.DeletedByRecipient }
         })) as OwnRelationshipAttribute[];
 
         for (const attribute of attributesSharedWithPeer) {
@@ -1410,8 +1362,8 @@ export class AttributesController extends ConsumptionBaseController {
 
         const attributesReceivedFromPeer = (await this.getLocalAttributes({
             "@type": { $in: ["PeerIdentityAttribute", "PeerRelationshipAttribute", "ThirdPartyRelationshipAttribute"] },
-            "peerSharingDetails.peer": peer.toString(),
-            "peerSharingDetails.deletionInfo.deletionStatus": { $ne: ReceivedAttributeDeletionStatus.DeletedByEmitter }
+            peer: peer.toString(),
+            "deletionInfo.deletionStatus": { $ne: ReceivedAttributeDeletionStatus.DeletedByEmitter }
         })) as PeerIdentityAttribute[];
 
         for (const attribute of attributesReceivedFromPeer) {
