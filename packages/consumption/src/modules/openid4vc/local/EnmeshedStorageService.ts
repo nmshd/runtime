@@ -18,6 +18,7 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
             this.storrage.set(record.id, record);
             return;
         }
+        // TODO: add loading and storing like for the keystore
         if (record.type === "DidRecord") {
             this.storrage.set(record.id, record);
             return;
@@ -26,13 +27,13 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
         const value = JsonTransformer.serialize(record);
         const owner = this.accountController.identity.address;
         agentContext.config.logger.debug(`Saving record with id ${record.id} and value ${value}`);
-        // TODO: remove hard coded components
+
         const identityAttribute = IdentityAttribute.from({
             value: {
                 "@type": "VerifiableCredential",
                 value: value,
-                title: "Employee ID Card",
-                description: "An employee ID card credential",
+                title: (record as any).credential?.payload?.vct ?? "Credential",
+                description: JSON.stringify((record as any).credential?.payload ?? "No description"),
                 credoId: record.id,
                 type: typeof record
             },
@@ -45,7 +46,6 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
         return await Promise.resolve();
     }
 
-    // TODO: remove coreid
     public async update(agentContext: AgentContext, record: T): Promise<void> {
         agentContext.config.logger.debug(`Updating record with id ${record.id}`);
         const value = JsonTransformer.serialize(record);
@@ -141,7 +141,7 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
             for (const record of this.storrage.values()) {
                 let match = true;
                 // there may be keys labeled with an $or - solve them accordingly
-                // TODO: update this to handle $or and other operators
+                // TODO: $or and other operators not yet supported
                 for (const [key, value] of Object.entries(query)) {
                     if ((record as any)[key] !== value) {
                         match = false;
