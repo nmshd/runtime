@@ -118,8 +118,7 @@ export class DeleteAttributeAndNotifyUseCase extends UseCase<DeleteAttributeAndN
     private async getPeerOfAttribute(
         attribute: OwnRelationshipAttribute | PeerRelationshipAttribute | PeerIdentityAttribute | ThirdPartyRelationshipAttribute
     ): Promise<Result<CoreAddress[]>> {
-        const peer = attribute.peerSharingDetails.peer;
-        const relationship = await this.relationshipsController.getRelationshipToIdentity(peer);
+        const relationship = await this.relationshipsController.getRelationshipToIdentity(attribute.peer);
         if (
             !relationship ||
             relationship.peerDeletionInfo?.deletionStatus === PeerDeletionStatus.Deleted ||
@@ -132,7 +131,7 @@ export class DeleteAttributeAndNotifyUseCase extends UseCase<DeleteAttributeAndN
             return Result.fail(RuntimeErrors.attributes.cannotDeleteSharedAttributeWhileRelationshipIsPending(attribute.id));
         }
 
-        return Result.ok([peer]);
+        return Result.ok([attribute.peer]);
     }
 
     private async getPeersOfPredecessorsToNotify(attribute: LocalAttribute): Promise<Result<[CoreAddress, CoreId][]>> {

@@ -5,8 +5,7 @@ import {
     OwnRelationshipAttribute,
     PeerIdentityAttribute,
     PeerRelationshipAttribute,
-    ThirdPartyRelationshipAttribute,
-    ThirdPartyRelationshipAttributeSharingDetails
+    ThirdPartyRelationshipAttribute
 } from "@nmshd/consumption";
 import { ForwardedSharingDetailsDTO, LocalAttributeDTO, PeerSharingDetailsDTO } from "@nmshd/runtime-types";
 
@@ -43,13 +42,12 @@ export class AttributeMapper {
         }
 
         return {
-            peer: attribute.peerSharingDetails.peer.toString(),
-            sourceReference: attribute.peerSharingDetails.sourceReference.toString(),
-            deletionInfo: attribute.peerSharingDetails.deletionInfo
-                ? { deletionStatus: attribute.peerSharingDetails.deletionInfo.deletionStatus, deletionDate: attribute.peerSharingDetails.deletionInfo.deletionDate.toString() }
+            peer: attribute.peer.toString(),
+            sourceReference: attribute.sourceReference.toString(),
+            deletionInfo: attribute.deletionInfo
+                ? { deletionStatus: attribute.deletionInfo.deletionStatus, deletionDate: attribute.deletionInfo.deletionDate.toString() }
                 : undefined,
-            initialAttributePeer:
-                attribute.peerSharingDetails instanceof ThirdPartyRelationshipAttributeSharingDetails ? attribute.peerSharingDetails.initialAttributePeer.toString() : undefined
+            initialAttributePeer: attribute instanceof ThirdPartyRelationshipAttribute ? attribute.initialAttributePeer.toString() : undefined
         };
     }
 

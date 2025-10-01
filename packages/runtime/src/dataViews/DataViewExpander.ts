@@ -1035,10 +1035,10 @@ export class DataViewExpander {
                 succeeds: attribute.succeeds,
                 succeededBy: attribute.succeededBy,
                 tags: localAttribute.content.tags,
-                peer: localAttribute.peerSharingDetails.peer.toString(),
-                sourceReference: localAttribute.peerSharingDetails.sourceReference.toString(),
-                deletionDate: localAttribute.peerSharingDetails.deletionInfo?.deletionDate.toString(),
-                deletionStatus: localAttribute.peerSharingDetails.deletionInfo?.deletionStatus
+                peer: localAttribute.peer.toString(),
+                sourceReference: localAttribute.sourceReference.toString(),
+                deletionDate: localAttribute.deletionInfo?.deletionDate.toString(),
+                deletionStatus: localAttribute.deletionInfo?.deletionStatus
             };
         }
 
@@ -1064,10 +1064,10 @@ export class DataViewExpander {
                 key: localAttribute.content.key,
                 confidentiality: localAttribute.content.confidentiality,
                 isTechnical: localAttribute.content.isTechnical,
-                peer: localAttribute.peerSharingDetails.peer.toString(),
-                sourceReference: localAttribute.peerSharingDetails.sourceReference.toString(),
-                deletionStatus: localAttribute.peerSharingDetails.deletionInfo?.deletionStatus,
-                deletionDate: localAttribute.peerSharingDetails.deletionInfo?.deletionDate.toString(),
+                peer: localAttribute.peer.toString(),
+                sourceReference: localAttribute.sourceReference.toString(),
+                deletionStatus: localAttribute.deletionInfo?.deletionStatus,
+                deletionDate: localAttribute.deletionInfo?.deletionDate.toString(),
                 forwardingPeers: this.expandForwardingPeers(localAttribute),
                 forwardedSharingDetails: this.expandForwardedSharingDetails(localAttribute)
             };
@@ -1095,10 +1095,10 @@ export class DataViewExpander {
                 key: localAttribute.content.key,
                 confidentiality: localAttribute.content.confidentiality,
                 isTechnical: localAttribute.content.isTechnical,
-                peer: localAttribute.peerSharingDetails.peer.toString(),
-                sourceReference: localAttribute.peerSharingDetails.sourceReference.toString(),
-                deletionStatus: localAttribute.peerSharingDetails.deletionInfo?.deletionStatus,
-                deletionDate: localAttribute.peerSharingDetails.deletionInfo?.deletionDate.toString(),
+                peer: localAttribute.peer.toString(),
+                sourceReference: localAttribute.sourceReference.toString(),
+                deletionStatus: localAttribute.deletionInfo?.deletionStatus,
+                deletionDate: localAttribute.deletionInfo?.deletionDate.toString(),
                 forwardingPeers: this.expandForwardingPeers(localAttribute),
                 forwardedSharingDetails: this.expandForwardedSharingDetails(localAttribute)
             };
@@ -1125,11 +1125,11 @@ export class DataViewExpander {
             key: localAttribute.content.key,
             confidentiality: localAttribute.content.confidentiality,
             isTechnical: localAttribute.content.isTechnical,
-            peer: localAttribute.peerSharingDetails.peer.toString(),
-            initialAttributePeer: localAttribute.peerSharingDetails.initialAttributePeer.toString(),
-            sourceReference: localAttribute.peerSharingDetails.sourceReference.toString(),
-            deletionStatus: localAttribute.peerSharingDetails.deletionInfo?.deletionStatus,
-            deletionDate: localAttribute.peerSharingDetails.deletionInfo?.deletionDate.toString()
+            peer: localAttribute.peer.toString(),
+            initialAttributePeer: localAttribute.initialAttributePeer.toString(),
+            sourceReference: localAttribute.sourceReference.toString(),
+            deletionStatus: localAttribute.deletionInfo?.deletionStatus,
+            deletionDate: localAttribute.deletionInfo?.deletionDate.toString()
         };
     }
 

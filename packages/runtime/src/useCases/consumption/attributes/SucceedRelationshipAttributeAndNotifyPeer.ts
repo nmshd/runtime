@@ -52,8 +52,6 @@ export class SucceedRelationshipAttributeAndNotifyPeerUseCase extends UseCase<Su
             owner: predecessor.content.owner.toString()
         });
 
-        const peer = predecessor.peerSharingDetails.peer;
-
         const notificationId = await ConsumptionIds.notification.generate();
 
         const successorParams = OwnRelationshipAttributeSuccessorParams.from({
@@ -77,7 +75,7 @@ export class SucceedRelationshipAttributeAndNotifyPeerUseCase extends UseCase<Su
         });
 
         await this.messageController.sendMessage({
-            recipients: [peer],
+            recipients: [predecessor.peer],
             content: notification
         });
 
