@@ -1437,8 +1437,8 @@ describe("DeciderModule", () => {
             expect((responseContent.items[0] as DeleteAttributeAcceptResponseItemJSON).deletionDate).toBe(deletionDate);
 
             const updatedSharedAttribute = (await recipient.consumption.attributes.getAttribute({ id: sharedAttribute.id })).value;
-            expect(updatedSharedAttribute.peerSharingDetails!.deletionInfo!.deletionStatus).toBe(ReceivedAttributeDeletionStatus.ToBeDeleted);
-            expect(updatedSharedAttribute.peerSharingDetails!.deletionInfo!.deletionDate).toBe(deletionDate);
+            expect(updatedSharedAttribute.deletionInfo!.deletionStatus).toBe(ReceivedAttributeDeletionStatus.ToBeDeleted);
+            expect(updatedSharedAttribute.deletionInfo!.deletionDate).toBe(deletionDate);
         });
 
         test("accepts a ProposeAttributeRequestItem given a ProposeAttributeRequestItemConfig with all fields set for an IdentityAttribute", async () => {

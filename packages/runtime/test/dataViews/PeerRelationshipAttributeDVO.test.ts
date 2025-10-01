@@ -69,10 +69,10 @@ describe("PeerRelationshipAttributeDVO", () => {
         expect(dvo.valueHints["@type"]).toBe("ValueHints");
         expect(dvo.succeeds).toBe(peerRelationshipAttribute.succeeds);
         expect(dvo.succeededBy).toBe(peerRelationshipAttribute.succeededBy);
-        expect(dvo.peer).toBe(peerRelationshipAttribute.peerSharingDetails!.peer);
-        expect(dvo.sourceReference).toBe(peerRelationshipAttribute.peerSharingDetails!.sourceReference);
-        expect(dvo.deletionStatus).toBe(peerRelationshipAttribute.peerSharingDetails!.deletionInfo?.deletionStatus);
-        expect(dvo.deletionDate).toBe(peerRelationshipAttribute.peerSharingDetails!.deletionInfo?.deletionDate);
+        expect(dvo.peer).toBe(peerRelationshipAttribute.peer);
+        expect(dvo.sourceReference).toBe(peerRelationshipAttribute.sourceReference);
+        expect(dvo.deletionStatus).toBe(peerRelationshipAttribute.deletionInfo?.deletionStatus);
+        expect(dvo.deletionDate).toBe(peerRelationshipAttribute.deletionInfo?.deletionDate);
         expect(dvo.forwardingPeers).toBeUndefined();
         expect(dvo.forwardedSharingDetails).toBeUndefined();
         expect(dvo.valueType).toBe(peerRelationshipAttribute.content.value["@type"]);
@@ -130,10 +130,10 @@ describe("PeerRelationshipAttributeDVO", () => {
         expect(dvo.valueHints["@type"]).toBe("ValueHints");
         expect(dvo.succeeds).toBe(peerRelationshipAttribute.succeeds);
         expect(dvo.succeededBy).toBe(peerRelationshipAttribute.succeededBy);
-        expect(dvo.peer).toBe(peerRelationshipAttribute.peerSharingDetails!.peer);
-        expect(dvo.sourceReference).toBe(peerRelationshipAttribute.peerSharingDetails!.sourceReference);
-        expect(dvo.deletionStatus).toBe(peerRelationshipAttribute.peerSharingDetails!.deletionInfo?.deletionStatus);
-        expect(dvo.deletionDate).toBe(peerRelationshipAttribute.peerSharingDetails!.deletionInfo?.deletionDate);
+        expect(dvo.peer).toBe(peerRelationshipAttribute.peer);
+        expect(dvo.sourceReference).toBe(peerRelationshipAttribute.sourceReference);
+        expect(dvo.deletionStatus).toBe(peerRelationshipAttribute.deletionInfo?.deletionStatus);
+        expect(dvo.deletionDate).toBe(peerRelationshipAttribute.deletionInfo?.deletionDate);
         expect(dvo.forwardingPeers).toStrictEqual([services3.address]);
         expect(dvo.forwardedSharingDetails).toStrictEqual([
             {
