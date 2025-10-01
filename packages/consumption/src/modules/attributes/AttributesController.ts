@@ -35,14 +35,9 @@ import { OwnRelationshipAttribute } from "./local/attributeTypes/OwnRelationship
 import { PeerIdentityAttribute } from "./local/attributeTypes/PeerIdentityAttribute";
 import { PeerRelationshipAttribute } from "./local/attributeTypes/PeerRelationshipAttribute";
 import { ThirdPartyRelationshipAttribute } from "./local/attributeTypes/ThirdPartyRelationshipAttribute";
+import { EmittedAttributeDeletionInfo, EmittedAttributeDeletionStatus, ReceivedAttributeDeletionInfo, ReceivedAttributeDeletionStatus } from "./local/deletionInfos";
 import { IdentityAttributeQueryTranslator, RelationshipAttributeQueryTranslator, ThirdPartyRelationshipAttributeQueryTranslator } from "./local/QueryTranslator";
-import {
-    EmittedAttributeDeletionInfo,
-    EmittedAttributeDeletionStatus,
-    ForwardedSharingDetails,
-    ReceivedAttributeDeletionInfo,
-    ReceivedAttributeDeletionStatus
-} from "./local/sharingDetails";
+import { ForwardedSharingDetails } from "./local/sharingDetails";
 import {
     IOwnIdentityAttributeSuccessorParams,
     IOwnRelationshipAttributeSuccessorParams,

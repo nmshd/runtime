@@ -3,15 +3,8 @@ import { IRelationshipAttribute, RelationshipAttribute, RelationshipAttributeJSO
 import { CoreAddress, CoreId, ICoreAddress, ICoreId } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import {
-    EmittedAttributeDeletionInfo,
-    EmittedAttributeDeletionInfoJSON,
-    EmittedAttributeDeletionStatus,
-    ForwardedSharingDetails,
-    ForwardedSharingDetailsJSON,
-    IEmittedAttributeDeletionInfo,
-    IForwardedSharingDetails
-} from "../sharingDetails";
+import { EmittedAttributeDeletionInfo, EmittedAttributeDeletionInfoJSON, EmittedAttributeDeletionStatus, IEmittedAttributeDeletionInfo } from "../deletionInfos";
+import { ForwardedSharingDetails, ForwardedSharingDetailsJSON, IForwardedSharingDetails } from "../sharingDetails";
 import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./LocalAttribute";
 
 export interface OwnRelationshipAttributeJSON extends LocalAttributeJSON {

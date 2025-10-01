@@ -6,14 +6,12 @@ import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreEr
 import {
     EmittedAttributeDeletionInfo,
     EmittedAttributeDeletionStatus,
-    ForwardedSharingDetails,
-    ForwardedSharingDetailsJSON,
-    IForwardedSharingDetails,
     IReceivedAttributeDeletionInfo,
     ReceivedAttributeDeletionInfo,
     ReceivedAttributeDeletionInfoJSON,
     ReceivedAttributeDeletionStatus
-} from "../sharingDetails";
+} from "../deletionInfos";
+import { ForwardedSharingDetails, ForwardedSharingDetailsJSON, IForwardedSharingDetails } from "../sharingDetails";
 import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./LocalAttribute";
 
 export interface PeerRelationshipAttributeJSON extends LocalAttributeJSON {
