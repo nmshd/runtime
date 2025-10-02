@@ -2,7 +2,7 @@ name: runtime-tests
 
 services:
   runtime-mongo:
-    image: mongo
+    image: mongo@sha256:4a995c5ce82d50b8552ae00f884a4aaf64994490b6cd4cf1bca066ac3a1c5509
     container_name: runtime-mongo
     ports:
       - "27021:27017"
@@ -11,7 +11,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: example
 
   runtime-postgres:
-    image: ghcr.io/ferretdb/postgres-documentdb:17
+    image: ghcr.io/ferretdb/postgres-documentdb:17@sha256:4a2364db8c91fd82855a4eab326202e247aa9ed6a6e8a85c76c1693a5a9ab408
     container_name: runtime-postgres
     hostname: postgres
     # documentdb does currently not support arm64
@@ -22,7 +22,7 @@ services:
       POSTGRES_DB: postgres
 
   runtime-ferret:
-    image: ghcr.io/ferretdb/ferretdb:2
+    image: ghcr.io/ferretdb/ferretdb:2@sha256:7449f6ce1e75b187c328c9ce65ec4e8963767b34b4d604f9b9b6605c6d8d3ee7
     container_name: runtime-ferretdb
     ports:
       - "27022:27017"
