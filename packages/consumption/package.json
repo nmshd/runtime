@@ -82,7 +82,6 @@
         "@nmshd/crypto": "2.1.2",
         "@types/lodash": "^4.17.20",
         "@types/sjcl": "^1.0.34",
-        "libsodium-wrappers": "^0.7.9",
         "ts-mockito": "^2.6.1"
     },
     "publishConfig": {
