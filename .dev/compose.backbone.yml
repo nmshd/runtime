@@ -1,3 +1,5 @@
+name: local-test-backbone
+
 services:
   consumer-api:
     image: ghcr.io/nmshd/backbone-consumer-api:6.58.0@sha256:d4c7e241ed0455ca3c5d1fc31def61c84f2cbce1e4226119a24dd65fe9fe9638
@@ -121,10 +123,6 @@ services:
     configs:
       - source: Config
         target: app/appsettings.override.json
-
-networks:
-  default:
-    name: backbone
 
 configs:
   Config:
