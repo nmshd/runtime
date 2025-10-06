@@ -323,7 +323,7 @@ export class TestUtil {
         await new GenericContainer(`ghcr.io/nmshd/backbone-identity-deletion-jobs:${backboneVersion}`)
             .withWaitStrategy(Wait.forOneShotStartup())
             .withCommand(["--Worker", "ActualDeletionWorker"])
-            .withNetworkMode("backbone")
+            .withNetworkMode("local-test-backbone")
             .withCopyFilesToContainer([{ source: appsettingsOverrideLocation, target: "/app/appsettings.override.json" }])
             .start();
     }
