@@ -105,7 +105,9 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
 
     public async getAll(agentContext: AgentContext, recordClass: BaseRecordConstructor<T>): Promise<T[]> {
         const records: T[] = [];
-        const attributes = await this.attributeController.getLocalAttributes();
+        const attributes = await this.attributeController.getLocalAttributes({
+            "content.value.@type": "VerifiableCredential"
+        });
         agentContext.config.logger.debug(`Getting all records, found ${attributes.length} attributes`);
         for (const attribute of attributes) {
             const record = JsonTransformer.deserialize((attribute.content.value as any).value, recordClass);
