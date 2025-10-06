@@ -1,7 +1,7 @@
 {
     $schema: "https://docs.renovatebot.com/renovate-schema.json",
     rangeStrategy: "bump",
-    extends: ["config:recommended", ":disableDependencyDashboard"],
+    extends: ["config:recommended", "docker:pinDigests", ":disableDependencyDashboard"],
     labels: ["dependencies"],
     schedule: ["after 10pm every weekday", "before 5am every weekday", "every weekend"],
     reviewers: ["jkoenig134", "Milena-Czierlinski"],
