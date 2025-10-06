@@ -246,8 +246,8 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         return submissionResult.serverResponse;
     }
 
-    public getMatchingCredentialsForDcql(query: DcqlQuery): DcqlQueryResult {
-        const serviceResult = (this.agent.openid4vc.holder as any).openId4VpHolderService.handleDcqlRequest(this.agent.context, query); // the service is private
+    public async getMatchingCredentialsForDcql(query: DcqlQuery): Promise<DcqlQueryResult> {
+        const serviceResult = await (this.agent.openid4vc.holder as any).openId4VpHolderService.handleDcqlRequest(this.agent.context, query); // the service is private
         return serviceResult.dcql.queryResult.credential_matches;
     }
 

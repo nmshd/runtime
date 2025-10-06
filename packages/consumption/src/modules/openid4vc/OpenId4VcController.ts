@@ -62,7 +62,7 @@ export class OpenId4VcController extends ConsumptionBaseController {
 
         // this assumes the simplest form of the dcql query - where only one credential is requested
         const dcqlQueryId = query.credentials[0].id;
-        const queryResult = holder.getMatchingCredentialsForDcql(query);
+        const queryResult = await holder.getMatchingCredentialsForDcql(query);
 
         if (!queryResult.can_be_satisfied) throw new Error("Query can't be satisfied");
         const matchingCredentials = queryResult.credential_matches[dcqlQueryId].valid_credentials!.map((c) => (c as DcqlValidCredential).record);
