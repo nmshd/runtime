@@ -674,7 +674,7 @@ export class TestUtil {
 
         const composeFile = fs.readFileSync(path.resolve(`${__dirname}/../../../../.dev/compose.backbone.yml`));
 
-        const regex = /image: ghcr\.io\/nmshd\/backbone-consumer-api:(?<version>[^\r\n]*)/;
+        const regex = /image: ghcr\.io\/nmshd\/backbone-consumer-api:(?<version>[^\r\n]*)@.*/;
         const match = composeFile.toString().match(regex);
         if (!match?.groups?.version) throw new Error("Could not find backbone version in compose file");
 

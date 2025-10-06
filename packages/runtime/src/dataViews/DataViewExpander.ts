@@ -1824,6 +1824,7 @@ export class DataViewExpander {
             filename: file.filename,
             filesize: file.filesize,
             createdBy: await this.expandAddress(file.createdBy),
+            owner: await this.expandAddress(file.owner),
             reference: file.reference
         };
     }
