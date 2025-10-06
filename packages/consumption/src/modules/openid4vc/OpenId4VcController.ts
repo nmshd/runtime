@@ -1,4 +1,4 @@
-import { DcqlQuery, DcqlValidCredential } from "@credo-ts/core";
+import { DcqlQuery } from "@credo-ts/core";
 import { VerifiableCredential } from "@nmshd/content";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../consumption/ConsumptionController";
@@ -64,8 +64,7 @@ export class OpenId4VcController extends ConsumptionBaseController {
         const dcqlQueryId = query.credentials[0].id;
         const queryResult = await holder.getMatchingCredentialsForDcql(query);
 
-        if (!queryResult.can_be_satisfied) throw new Error("Query can't be satisfied");
-        const matchingCredentials = queryResult.credential_matches[dcqlQueryId].valid_credentials!.map((c) => (c as DcqlValidCredential).record);
+        const matchingCredentials = queryResult[dcqlQueryId].valid_credentials!.map((c: any) => c.record);
         const credentialAttributes = await this.parent.attributes.getLocalAttributes({
             shareInfo: {
                 $exists: false

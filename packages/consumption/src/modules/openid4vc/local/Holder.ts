@@ -1,8 +1,8 @@
 /* eslint-disable no-console */
 import {
     ClaimFormat,
+    DcqlMatchWithRecord,
     DcqlQuery,
-    DcqlQueryResult,
     DidJwk,
     DidKey,
     JwkDidCreateOptions,
@@ -246,7 +246,7 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         return submissionResult.serverResponse;
     }
 
-    public async getMatchingCredentialsForDcql(query: DcqlQuery): Promise<DcqlQueryResult> {
+    public async getMatchingCredentialsForDcql(query: DcqlQuery): Promise<Record<string, DcqlMatchWithRecord>> {
         const serviceResult = await (this.agent.openid4vc.holder as any).openId4VpHolderService.handleDcqlRequest(this.agent.context, query); // the service is private
         return serviceResult.dcql.queryResult.credential_matches;
     }
