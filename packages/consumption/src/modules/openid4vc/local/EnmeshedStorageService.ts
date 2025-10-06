@@ -125,7 +125,7 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
 
     public async findByQuery(agentContext: AgentContext, recordClass: BaseRecordConstructor<T>, query: Query<T>, queryOptions?: QueryOptions): Promise<T[]> {
         agentContext.config.logger.debug(`Finding records by query ${JSON.stringify(query)} and options ${JSON.stringify(queryOptions)}`);
-        const records = (await this.getAll(agentContext, recordClass)).filter((r) => this.matches(query, r));
+        const records = (await this.getAll(agentContext, recordClass)).filter((r) => this.matches(query, (r as any).credential.payload)); // TODO: test with other credential types
 
         return records;
     }
