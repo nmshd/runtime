@@ -3,6 +3,7 @@ export * from "./AbstractAttributeQuery";
 export * from "./AbstractAttributeValue";
 export * from "./AbstractComplexValue";
 export * from "./AttributeValueTypes";
+export * from "./DCQLQuery";
 export * from "./IQLQuery";
 export * from "./IdentityAttribute";
 export * from "./IdentityAttributeQuery";

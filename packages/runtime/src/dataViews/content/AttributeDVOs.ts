@@ -1,4 +1,5 @@
 import {
+    DCQLQuery,
     IdentityAttributeJSON,
     IQLQuery,
     IQLQueryCreationHintsJSON,
@@ -80,4 +81,9 @@ export interface IQLQueryDVO extends AttributeQueryDVO, Pick<IQLQuery, "queryStr
     renderHints?: RenderHintsJSON;
     valueHints?: ValueHintsJSON;
     tags?: string[];
+}
+
+export interface DCQLQueryDVO extends AttributeQueryDVO, Pick<DCQLQuery, "query"> {
+    type: "DCQLQueryDVO";
+    isProcessed: false;
 }

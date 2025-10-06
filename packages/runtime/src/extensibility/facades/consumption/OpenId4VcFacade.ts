@@ -1,9 +1,11 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
-import { AcceptProofRequestDTO, FetchedCredentialOfferDTO, FetchedProofRequestDTO, VerifiableCredentialDTO } from "@nmshd/runtime-types";
+import { AcceptProofRequestDTO, FetchedCredentialOfferDTO, FetchedProofRequestDTO, LocalAttributeDTO, VerifiableCredentialDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
 import {
     AcceptProofRequestRequest,
     AcceptProofRequestUseCase,
+    ExecuteDCQLQueryRequest,
+    ExecuteDCQLQueryUseCase,
     FetchCredentialOfferRequest,
     FetchCredentialOfferUseCase,
     FetchedCredentialOfferRequest,
@@ -20,7 +22,8 @@ export class OpenId4VcFacade {
         @Inject private readonly fetchOfferUseCase: FetchCredentialOfferUseCase,
         @Inject private readonly resolveFetchedOfferUseCase: ResolveFetchedCredentialOfferUseCase,
         @Inject private readonly fetchProofRequestUseCase: FetchProofRequestUseCase,
-        @Inject private readonly accepProofRequestUseCase: AcceptProofRequestUseCase
+        @Inject private readonly accepProofRequestUseCase: AcceptProofRequestUseCase,
+        @Inject private readonly executeDCQLQueryUseCase: ExecuteDCQLQueryUseCase
     ) {}
 
     public async resolveCredentialOffer(request: ResolveCredentialOfferRequest): Promise<Result<VerifiableCredentialDTO, ApplicationError>> {
@@ -41,5 +44,9 @@ export class OpenId4VcFacade {
 
     public async acceptProofRequest(request: AcceptProofRequestRequest): Promise<Result<AcceptProofRequestDTO, ApplicationError>> {
         return await this.accepProofRequestUseCase.execute(request);
+    }
+
+    public async executeDCQLQuery(request: ExecuteDCQLQueryRequest): Promise<Result<LocalAttributeDTO[], ApplicationError>> {
+        return await this.executeDCQLQueryUseCase.execute(request);
     }
 }

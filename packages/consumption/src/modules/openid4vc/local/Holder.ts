@@ -1,5 +1,18 @@
 /* eslint-disable no-console */
-import { ClaimFormat, DidJwk, DidKey, JwkDidCreateOptions, KeyDidCreateOptions, Kms, Mdoc, MdocRecord, SdJwtVcRecord, X509Module } from "@credo-ts/core";
+import {
+    ClaimFormat,
+    DcqlQuery,
+    DcqlQueryResult,
+    DidJwk,
+    DidKey,
+    JwkDidCreateOptions,
+    KeyDidCreateOptions,
+    Kms,
+    Mdoc,
+    MdocRecord,
+    SdJwtVcRecord,
+    X509Module
+} from "@credo-ts/core";
 import {
     OpenId4VcModule,
     OpenId4VciAuthorizationFlow,
@@ -231,6 +244,11 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
                 : undefined
         });
         return submissionResult.serverResponse;
+    }
+
+    public getMatchingCredentialsForDcql(query: DcqlQuery): DcqlQueryResult {
+        const serviceResult = (this.agent.openid4vc.holder as any).openId4VpHolderService.handleDcqlRequest(this.agent.context, query); // the service is private
+        return serviceResult.dcql.queryResult.credential_matches;
     }
 
     public async exit(): Promise<any> {

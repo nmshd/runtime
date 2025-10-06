@@ -7,6 +7,7 @@ import {
     ConsentRequestItemJSON,
     CreateAttributeAcceptResponseItemJSON,
     CreateAttributeRequestItemJSON,
+    DCQLQueryJSON,
     DeleteAttributeAcceptResponseItemJSON,
     DeleteAttributeRequestItemJSON,
     DisplayNameJSON,
@@ -82,6 +83,7 @@ import {
     PeerRelationshipAttributeDVO,
     PeerRelationshipTemplateDVO,
     ProcessedAttributeQueryDVO,
+    ProcessedDCQLQueryDVO,
     ProcessedIQLQueryDVO,
     ProcessedIdentityAttributeQueryDVO,
     ProcessedRelationshipAttributeQueryDVO,
@@ -99,6 +101,7 @@ import {
     ConsentRequestItemDVO,
     CreateAttributeAcceptResponseItemDVO,
     CreateAttributeRequestItemDVO,
+    DCQLQueryDVO,
     DeleteAttributeAcceptResponseItemDVO,
     DeleteAttributeRequestItemDVO,
     DraftIdentityAttributeDVO,
@@ -1177,7 +1180,7 @@ export class DataViewExpander {
     }
 
     public async expandAttributeQuery(
-        query: IdentityAttributeQueryJSON | RelationshipAttributeQueryJSON | ThirdPartyRelationshipAttributeQueryJSON | IQLQueryJSON
+        query: IdentityAttributeQueryJSON | RelationshipAttributeQueryJSON | ThirdPartyRelationshipAttributeQueryJSON | IQLQueryJSON | DCQLQueryJSON
     ): Promise<AttributeQueryDVO> {
         switch (query["@type"]) {
             case "IdentityAttributeQuery":
@@ -1188,6 +1191,8 @@ export class DataViewExpander {
                 return await this.expandThirdPartyRelationshipAttributeQuery(query);
             case "IQLQuery":
                 return this.expandIQLQuery(query);
+            case "DCQLQuery":
+                return this.expandDCQLQuery(query);
             default:
                 throw new Error("Wrong attribute query");
         }
@@ -1297,6 +1302,20 @@ export class DataViewExpander {
         };
     }
 
+    public expandDCQLQuery(query: DCQLQueryJSON): DCQLQueryDVO {
+        const name = "i18n://dvo.attributeQuery.name.DCQLQuery";
+        const description = "i18n://dvo.attributeQuery.description.DCQLQuery";
+
+        return {
+            type: "DCQLQueryDVO",
+            id: "",
+            name,
+            description,
+            query: query.query,
+            isProcessed: false
+        };
+    }
+
     private getHintsForValueType(valueType: string): { renderHints: RenderHintsJSON; valueHints: ValueHintsJSON } {
         const valueTypeClass = SerializableBase.getModule(valueType, 1);
         if (!valueTypeClass) {
@@ -1322,7 +1341,7 @@ export class DataViewExpander {
     }
 
     public async processAttributeQuery(
-        attributeQuery: IdentityAttributeQueryJSON | RelationshipAttributeQueryJSON | ThirdPartyRelationshipAttributeQueryJSON | IQLQueryJSON
+        attributeQuery: IdentityAttributeQueryJSON | RelationshipAttributeQueryJSON | ThirdPartyRelationshipAttributeQueryJSON | IQLQueryJSON | DCQLQueryJSON
     ): Promise<ProcessedAttributeQueryDVO> {
         switch (attributeQuery["@type"]) {
             case "IdentityAttributeQuery":
@@ -1333,6 +1352,8 @@ export class DataViewExpander {
                 return await this.processThirdPartyRelationshipAttributeQuery(attributeQuery);
             case "IQLQuery":
                 return await this.processIQLQuery(attributeQuery);
+            case "DCQLQuery":
+                return await this.processDCQLQuery(attributeQuery);
             default:
                 throw new Error("Wrong attribute query");
         }
@@ -1425,6 +1446,18 @@ export class DataViewExpander {
             valueType,
             renderHints,
             valueHints
+        };
+    }
+
+    public async processDCQLQuery(query: any): Promise<ProcessedDCQLQueryDVO> {
+        const matchedAttributeDTOs = await this.consumption.openId4Vc.executeDCQLQuery({ dcql: query });
+        const matchedAttributeDVOs = await this.expandLocalAttributeDTOs(matchedAttributeDTOs.value);
+
+        return {
+            ...this.expandIQLQuery(query),
+            type: "ProcessedDCQLQueryDVO",
+            results: matchedAttributeDVOs as RepositoryAttributeDVO[],
+            isProcessed: true
         };
     }
 

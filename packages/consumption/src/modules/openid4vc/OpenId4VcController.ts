@@ -1,6 +1,9 @@
+import { DcqlQuery, DcqlValidCredential } from "@credo-ts/core";
+import { VerifiableCredential } from "@nmshd/content";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../consumption/ConsumptionController";
 import { ConsumptionControllerName } from "../../consumption/ConsumptionControllerName";
+import { LocalAttribute } from "../attributes";
 import { Holder } from "./local/Holder";
 
 export class OpenId4VcController extends ConsumptionBaseController {
@@ -51,6 +54,28 @@ export class OpenId4VcController extends ConsumptionBaseController {
         return {
             data: JSON.stringify(res)
         };
+    }
+
+    public async getMatchingCredentialsForDcql(query: DcqlQuery): Promise<LocalAttribute[]> {
+        const holder = new Holder(this.parent.accountController, this.parent.attributes);
+        await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
+
+        // this assumes the simplest form of the dcql query - where only one credential is requested
+        const dcqlQueryId = query.credentials[0].id;
+        const queryResult = holder.getMatchingCredentialsForDcql(query);
+
+        if (!queryResult.can_be_satisfied) throw new Error("Query can't be satisfied");
+        const matchingCredentials = queryResult.credential_matches[dcqlQueryId].valid_credentials!.map((c) => (c as DcqlValidCredential).record);
+        const credentialAttributes = await this.parent.attributes.getLocalAttributes({
+            shareInfo: {
+                $exists: false
+            },
+            "content.value.@type": "VerifiableCredential"
+        });
+
+        const matchingAttributes = credentialAttributes.filter((attr) => matchingCredentials.includes((attr.content.value as VerifiableCredential).value as any));
+        // TODO: implement SD
+        return matchingAttributes;
     }
 
     public async acceptProofRequest(jsonEncodedRequest: string): Promise<any> {

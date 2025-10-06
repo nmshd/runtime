@@ -167,3 +167,8 @@ export interface ProcessedIQLQueryDVO extends ProcessedAttributeQueryDVO {
     valueHints?: ValueHintsJSON;
     tags?: string[];
 }
+
+export interface ProcessedDCQLQueryDVO extends ProcessedAttributeQueryDVO {
+    type: "ProcessedDCQLQueryDVO";
+    results: RepositoryAttributeDVO[];
+}
