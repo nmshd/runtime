@@ -4,6 +4,7 @@ import {
     AbstractAttributeValue,
     AbstractComplexValue,
     AttributeValues,
+    DCQLQuery,
     IdentityAttribute,
     IdentityAttributeQuery,
     IIdentityAttributeQuery,
@@ -1470,12 +1471,13 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async validateAttributeQueryTags(
-        attributeQuery: IdentityAttributeQuery | IQLQuery | RelationshipAttributeQuery | ThirdPartyRelationshipAttributeQuery
+        attributeQuery: IdentityAttributeQuery | IQLQuery | RelationshipAttributeQuery | ThirdPartyRelationshipAttributeQuery | DCQLQuery
     ): Promise<ValidationResult> {
         if (
             (attributeQuery instanceof IQLQuery && !attributeQuery.attributeCreationHints) ||
             attributeQuery instanceof RelationshipAttributeQuery ||
-            attributeQuery instanceof ThirdPartyRelationshipAttributeQuery
+            attributeQuery instanceof ThirdPartyRelationshipAttributeQuery ||
+            attributeQuery instanceof DCQLQuery
         ) {
             return ValidationResult.success();
         }

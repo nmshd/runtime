@@ -1,11 +1,11 @@
-import { IdentityAttributeQuery, IQLQuery, RelationshipAttributeQuery, ThirdPartyRelationshipAttributeQuery } from "@nmshd/content";
+import { DCQLQuery, IdentityAttributeQuery, IQLQuery, RelationshipAttributeQuery, ThirdPartyRelationshipAttributeQuery } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { validate as iqlValidate } from "@nmshd/iql";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import { ValidationResult } from "../../../common/ValidationResult";
 
 export default function validateQuery(
-    query: IdentityAttributeQuery | RelationshipAttributeQuery | ThirdPartyRelationshipAttributeQuery | IQLQuery,
+    query: IdentityAttributeQuery | RelationshipAttributeQuery | ThirdPartyRelationshipAttributeQuery | IQLQuery | DCQLQuery,
     sender: CoreAddress,
     recipient?: CoreAddress
 ): ValidationResult {

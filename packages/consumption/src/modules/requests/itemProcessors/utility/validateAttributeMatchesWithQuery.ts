@@ -1,5 +1,6 @@
 import {
     Consent,
+    DCQLQuery,
     IdentityAttribute,
     IdentityAttributeQuery,
     IQLQuery,
@@ -12,11 +13,14 @@ import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreEr
 import { ValidationResult } from "../../../common/ValidationResult";
 
 export default function validateAttributeMatchesWithQuery(
-    query: IdentityAttributeQuery | IQLQuery | RelationshipAttributeQuery | ThirdPartyRelationshipAttributeQuery,
+    query: IdentityAttributeQuery | IQLQuery | RelationshipAttributeQuery | ThirdPartyRelationshipAttributeQuery | DCQLQuery,
     attribute: IdentityAttribute | RelationshipAttribute,
     recipient: CoreAddress,
     sender: CoreAddress
 ): ValidationResult {
+    if (query instanceof DCQLQuery) {
+        return ValidationResult.success();
+    }
     if (query instanceof IdentityAttributeQuery) {
         const result = validateAttributeMatchesWithIdentityAttributeQuery(query, attribute, recipient);
         if (result.isError()) return result;
