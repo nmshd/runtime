@@ -319,11 +319,12 @@ export class TestUtil {
     public static async runDeletionJob(): Promise<void> {
         const backboneVersion = this.getBackboneVersion();
         const appsettingsOverrideLocation = process.env.APPSETTINGS_OVERRIDE_LOCATION ?? `${__dirname}/../../../../.dev/appsettings.override.json`;
+        const backboneNetwork = process.env.BACKBONE_NETWORK ?? "local-test-backbone";
 
         await new GenericContainer(`ghcr.io/nmshd/backbone-identity-deletion-jobs:${backboneVersion}`)
             .withWaitStrategy(Wait.forOneShotStartup())
             .withCommand(["--Worker", "ActualDeletionWorker"])
-            .withNetworkMode("local-test-backbone")
+            .withNetworkMode(backboneNetwork)
             .withCopyFilesToContainer([{ source: appsettingsOverrideLocation, target: "/app/appsettings.override.json" }])
             .start();
     }
