@@ -7,13 +7,13 @@ export interface VerifiableCredentialJSON extends AbstractAttributeValueJSON {
     "@type": "VerifiableCredential";
     title: string;
     description?: string;
-    value: unknown;
+    value: string | Record<string, unknown>;
 }
 
 export interface IVerifiableCredential extends IAbstractAttributeValue {
     title: string;
     description?: string;
-    value: unknown;
+    value: string | Record<string, unknown>;
 }
 
 @type("VerifiableCredential")
@@ -28,7 +28,7 @@ export class VerifiableCredential extends AbstractAttributeValue {
 
     @serialize({ any: true })
     @validate({ customValidator: validateValue })
-    public value: unknown;
+    public value: string | Record<string, unknown>;
 
     public static get valueHints(): ValueHints {
         return ValueHints.from({});

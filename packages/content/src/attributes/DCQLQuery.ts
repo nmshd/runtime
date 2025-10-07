@@ -3,18 +3,18 @@ import { AbstractAttributeQuery, AbstractAttributeQueryJSON, IAbstractAttributeQ
 
 export interface DCQLQueryJSON extends AbstractAttributeQueryJSON {
     "@type": "DCQLQuery";
-    query: Object;
+    query: Record<string, unknown>;
 }
 
 export interface IDCQLQuery extends IAbstractAttributeQuery {
-    query: Object;
+    query: Record<string, unknown>;
 }
 
 @type("DCQLQuery")
 export class DCQLQuery extends AbstractAttributeQuery implements IDCQLQuery {
     @serialize()
     @validate()
-    public query: Object;
+    public query: Record<string, unknown>;
 
     public static from(value: IDCQLQuery | Omit<DCQLQueryJSON, "@type">): DCQLQuery {
         return this.fromAny(value);

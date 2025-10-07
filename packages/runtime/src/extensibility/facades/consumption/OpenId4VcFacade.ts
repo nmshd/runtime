@@ -13,7 +13,10 @@ import {
     FetchProofRequestUseCase,
     ResolveCredentialOfferRequest,
     ResolveCredentialOfferUseCase,
-    ResolveFetchedCredentialOfferUseCase
+    ResolveFetchedCredentialOfferUseCase,
+    VerifySharedCredentialRequest,
+    VerifySharedCredentialResponse,
+    VerifySharedCredentialUseCase
 } from "../../../useCases";
 
 export class OpenId4VcFacade {
@@ -23,7 +26,8 @@ export class OpenId4VcFacade {
         @Inject private readonly resolveFetchedOfferUseCase: ResolveFetchedCredentialOfferUseCase,
         @Inject private readonly fetchProofRequestUseCase: FetchProofRequestUseCase,
         @Inject private readonly accepProofRequestUseCase: AcceptProofRequestUseCase,
-        @Inject private readonly executeDCQLQueryUseCase: ExecuteDCQLQueryUseCase
+        @Inject private readonly executeDCQLQueryUseCase: ExecuteDCQLQueryUseCase,
+        @Inject private readonly verifySharedCredentialUseCase: VerifySharedCredentialUseCase
     ) {}
 
     public async resolveCredentialOffer(request: ResolveCredentialOfferRequest): Promise<Result<VerifiableCredentialDTO, ApplicationError>> {
@@ -48,5 +52,9 @@ export class OpenId4VcFacade {
 
     public async executeDCQLQuery(request: ExecuteDCQLQueryRequest): Promise<Result<LocalAttributeDTO[], ApplicationError>> {
         return await this.executeDCQLQueryUseCase.execute(request);
+    }
+
+    public async verifySharedCredential(request: VerifySharedCredentialRequest): Promise<Result<VerifySharedCredentialResponse>> {
+        return await this.verifySharedCredentialUseCase.execute(request);
     }
 }

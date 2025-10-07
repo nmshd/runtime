@@ -14,11 +14,13 @@ import {
     Mdoc,
     MdocRecord,
     SdJwtVcRecord,
+    VerifiablePresentation,
     X509Module
 } from "@credo-ts/core";
 import {
     OpenId4VcModule,
     OpenId4VciAuthorizationFlow,
+    OpenId4VpVerifierService,
     authorizationCodeGrantIdentifier,
     preAuthorizedCodeGrantIdentifier,
     type OpenId4VciMetadata,
@@ -269,6 +271,49 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         return presentation.dcqlPresentation;
     }
 
+    public async verifyPresentationForDcql(
+        query: DcqlQuery,
+        presentation: string | Record<string, unknown>
+    ): Promise<
+        | {
+              verified: true;
+          }
+        | { verified: false; reason: string }
+    > {
+        const credentialFormat = dcqlCredentialQueryToPresentationFormat(query.credentials[0]);
+        const queryId = query.credentials[0].id;
+
+        const openId4VpVerifierService = this.agent.context.dependencyManager.resolve(OpenId4VpVerifierService);
+        const verificationResult = (await (openId4VpVerifierService as any).verifyPresentation(this.agent.context, {
+            format: credentialFormat,
+            presentation,
+            nonce: undefined, // only required if key binding is used?
+            audience: undefined // only required if key binding is used?
+        })) as
+            | {
+                  verified: true;
+                  presentation: VerifiablePresentation;
+              }
+            | { verified: false; reason: string };
+
+        if (!verificationResult.verified) return verificationResult;
+
+        const dcqlService = this.agent.context.dependencyManager.resolve(DcqlService);
+        const dcqlCheckResult = await dcqlService.assertValidDcqlPresentation(
+            this.agent.context,
+            { [queryId]: [verificationResult.presentation] },
+            dcqlService.validateDcqlQuery(query) // ts complains for some reason if it isn't validated
+        );
+        if (!dcqlCheckResult.can_be_satisfied) {
+            return {
+                verified: false,
+                reason: "Credential doesn't fit to query"
+            };
+        }
+
+        return { verified: true };
+    }
+
     public async exit(): Promise<any> {
         await this.shutdown();
         process.exit(0);
@@ -276,5 +321,25 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
 
     public async restart(): Promise<any> {
         await this.shutdown();
+    }
+}
+
+// copied from openid4vc/src/shared/utils.ts
+export function dcqlCredentialQueryToPresentationFormat(credential: DcqlQuery["credentials"][number]): ClaimFormat {
+    switch (credential.format) {
+        case "dc+sd-jwt":
+            return ClaimFormat.SdJwtDc;
+        case "vc+sd-jwt":
+            if (credential.meta && "type_values" in credential.meta) {
+                return ClaimFormat.SdJwtW3cVp;
+            }
+
+            return ClaimFormat.SdJwtDc;
+        case "jwt_vc_json":
+            return ClaimFormat.JwtVp;
+        case "ldp_vc":
+            return ClaimFormat.LdpVp;
+        case "mso_mdoc":
+            return ClaimFormat.MsoMdoc;
     }
 }
