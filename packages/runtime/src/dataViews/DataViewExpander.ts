@@ -1449,12 +1449,12 @@ export class DataViewExpander {
         };
     }
 
-    public async processDCQLQuery(query: any): Promise<ProcessedDCQLQueryDVO> {
-        const matchedAttributeDTOs = await this.consumption.openId4Vc.executeDCQLQuery({ dcql: query });
+    public async processDCQLQuery(query: DCQLQueryJSON): Promise<ProcessedDCQLQueryDVO> {
+        const matchedAttributeDTOs = await this.consumption.openId4Vc.executeDCQLQuery({ dcql: query.query });
         const matchedAttributeDVOs = await this.expandLocalAttributeDTOs(matchedAttributeDTOs.value);
 
         return {
-            ...this.expandIQLQuery(query),
+            ...this.expandDCQLQuery(query),
             type: "ProcessedDCQLQueryDVO",
             results: matchedAttributeDVOs as RepositoryAttributeDVO[],
             isProcessed: true
