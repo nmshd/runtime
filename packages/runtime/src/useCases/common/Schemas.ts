@@ -2718,6 +2718,9 @@ export const CanCreateOutgoingRequestRequest: any = {
                         },
                         {
                             "$ref": "#/definitions/IQLQueryJSON"
+                        },
+                        {
+                            "$ref": "#/definitions/DCQLQueryJSON"
                         }
                     ]
                 }
@@ -2765,6 +2768,75 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "key",
                 "owner",
                 "thirdParty"
+            ],
+            "additionalProperties": false
+        },
+        "DCQLQueryJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "DCQLQuery"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "query": {
+                    "type": "object",
+                    "properties": {
+                        "constructor": {
+                            "type": "object",
+                            "properties": {
+                                "prototype": {},
+                                "length": {
+                                    "type": "number"
+                                },
+                                "arguments": {},
+                                "caller": {
+                                    "$ref": "#/definitions/interface-2033348025-9888-11315-2033348025-0-218439"
+                                }
+                            },
+                            "required": [
+                                "prototype",
+                                "length",
+                                "arguments",
+                                "caller"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "constructor"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "@type",
+                "query"
+            ],
+            "additionalProperties": false
+        },
+        "interface-2033348025-9888-11315-2033348025-0-218439": {
+            "type": "object",
+            "properties": {
+                "prototype": {},
+                "length": {
+                    "type": "number"
+                },
+                "arguments": {},
+                "caller": {
+                    "$ref": "#/definitions/interface-2033348025-9888-11315-2033348025-0-218439"
+                }
+            },
+            "required": [
+                "prototype",
+                "length",
+                "arguments",
+                "caller"
             ],
             "additionalProperties": false
         },
@@ -10763,6 +10835,9 @@ export const CreateOutgoingRequestRequest: any = {
                         },
                         {
                             "$ref": "#/definitions/IQLQueryJSON"
+                        },
+                        {
+                            "$ref": "#/definitions/DCQLQueryJSON"
                         }
                     ]
                 }
@@ -10810,6 +10885,75 @@ export const CreateOutgoingRequestRequest: any = {
                 "key",
                 "owner",
                 "thirdParty"
+            ],
+            "additionalProperties": false
+        },
+        "DCQLQueryJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "DCQLQuery"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "query": {
+                    "type": "object",
+                    "properties": {
+                        "constructor": {
+                            "type": "object",
+                            "properties": {
+                                "prototype": {},
+                                "length": {
+                                    "type": "number"
+                                },
+                                "arguments": {},
+                                "caller": {
+                                    "$ref": "#/definitions/interface-2033348025-9888-11315-2033348025-0-218439"
+                                }
+                            },
+                            "required": [
+                                "prototype",
+                                "length",
+                                "arguments",
+                                "caller"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "constructor"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "@type",
+                "query"
+            ],
+            "additionalProperties": false
+        },
+        "interface-2033348025-9888-11315-2033348025-0-218439": {
+            "type": "object",
+            "properties": {
+                "prototype": {},
+                "length": {
+                    "type": "number"
+                },
+                "arguments": {},
+                "caller": {
+                    "$ref": "#/definitions/interface-2033348025-9888-11315-2033348025-0-218439"
+                }
+            },
+            "required": [
+                "prototype",
+                "length",
+                "arguments",
+                "caller"
             ],
             "additionalProperties": false
         },
@@ -14245,6 +14389,9 @@ export const ReceivedIncomingRequestRequest: any = {
                         },
                         {
                             "$ref": "#/definitions/IQLQueryJSON"
+                        },
+                        {
+                            "$ref": "#/definitions/DCQLQueryJSON"
                         }
                     ]
                 }
@@ -14292,6 +14439,75 @@ export const ReceivedIncomingRequestRequest: any = {
                 "key",
                 "owner",
                 "thirdParty"
+            ],
+            "additionalProperties": false
+        },
+        "DCQLQueryJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "DCQLQuery"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "query": {
+                    "type": "object",
+                    "properties": {
+                        "constructor": {
+                            "type": "object",
+                            "properties": {
+                                "prototype": {},
+                                "length": {
+                                    "type": "number"
+                                },
+                                "arguments": {},
+                                "caller": {
+                                    "$ref": "#/definitions/interface-2033348025-9888-11315-2033348025-0-218439"
+                                }
+                            },
+                            "required": [
+                                "prototype",
+                                "length",
+                                "arguments",
+                                "caller"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "constructor"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "@type",
+                "query"
+            ],
+            "additionalProperties": false
+        },
+        "interface-2033348025-9888-11315-2033348025-0-218439": {
+            "type": "object",
+            "properties": {
+                "prototype": {},
+                "length": {
+                    "type": "number"
+                },
+                "arguments": {},
+                "caller": {
+                    "$ref": "#/definitions/interface-2033348025-9888-11315-2033348025-0-218439"
+                }
+            },
+            "required": [
+                "prototype",
+                "length",
+                "arguments",
+                "caller"
             ],
             "additionalProperties": false
         },
@@ -19482,6 +19698,42 @@ export const SentNotificationRequest: any = {
     }
 }
 
+export const AcceptProofRequestRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/AcceptProofRequestRequest",
+    "definitions": {
+        "AcceptProofRequestRequest": {
+            "type": "object",
+            "properties": {
+                "jsonEncodedRequest": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "jsonEncodedRequest"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
+export const ExecuteDCQLQueryRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/ExecuteDCQLQueryRequest",
+    "definitions": {
+        "ExecuteDCQLQueryRequest": {
+            "type": "object",
+            "properties": {
+                "dcql": {}
+            },
+            "required": [
+                "dcql"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
 export const FetchCredentialOfferRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/FetchCredentialOfferRequest",
@@ -19567,27 +19819,6 @@ export const FetchedCredentialOfferRequest: any = {
         }
     }
 }
-
-export const AcceptProofRequestRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/AcceptProofRequestRequest",
-    "definitions": {
-        "AcceptProofRequestRequest": {
-            "type": "object",
-            "properties": {
-                "jsonEncodedRequest": {
-                    "type": "string"
-                },
-            },
-            "required": [
-                "jsonEncodedRequest"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
-
 
 export const CreateSettingRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
