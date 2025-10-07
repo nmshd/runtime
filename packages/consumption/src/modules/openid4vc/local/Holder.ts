@@ -2,7 +2,10 @@
 import {
     ClaimFormat,
     DcqlMatchWithRecord,
+    DcqlModule,
+    DcqlPresentation,
     DcqlQuery,
+    DcqlService,
     DidJwk,
     DidKey,
     JwkDidCreateOptions,
@@ -34,7 +37,8 @@ function getOpenIdHolderModules() {
                 console.log(`dyncamically trusting certificate ${certificateChain[0].getIssuerNameField("C")} for verification of ${verification.type}`);
                 return [certificateChain[0].toString("pem")];
             }
-        })
+        }),
+        dcql: new DcqlModule()
     } as const;
 }
 
@@ -249,6 +253,20 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
     public async getMatchingCredentialsForDcql(query: DcqlQuery): Promise<Record<string, DcqlMatchWithRecord>> {
         const serviceResult = await (this.agent.openid4vc.holder as any).openId4VpHolderService.handleDcqlRequest(this.agent.context, query); // the service is private
         return serviceResult.dcql.queryResult.credential_matches;
+    }
+
+    public async createPresentationForDcql(queryId: string, credential: unknown): Promise<DcqlPresentation> {
+        const dcqlService = this.agent.context.dependencyManager.resolve(DcqlService);
+        const enrichedCredential = (dcqlService as any).dcqlCredentialForRequestForValidCredential(credential);
+
+        const presentation = await dcqlService.createPresentation(this.agent.context, {
+            credentialQueryToCredential: {
+                [queryId]: enrichedCredential
+            },
+            challenge: "aChallengeString"
+        });
+
+        return presentation.dcqlPresentation;
     }
 
     public async exit(): Promise<any> {

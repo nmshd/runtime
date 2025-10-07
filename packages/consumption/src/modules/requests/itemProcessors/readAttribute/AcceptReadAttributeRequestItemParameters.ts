@@ -14,9 +14,15 @@ export interface AcceptReadAttributeRequestItemParametersWithNewAttributeJSON ex
     newAttribute: IdentityAttributeJSON | RelationshipAttributeJSON;
 }
 
+export interface AcceptReadAttributeRequestItemParametersWithSelectiveDisclosureJSON extends AcceptRequestItemParametersJSON {
+    existingAttributeId: string;
+    newAttribute: IdentityAttributeJSON;
+}
+
 export type AcceptReadAttributeRequestItemParametersJSON =
     | AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON
-    | AcceptReadAttributeRequestItemParametersWithNewAttributeJSON;
+    | AcceptReadAttributeRequestItemParametersWithNewAttributeJSON
+    | AcceptReadAttributeRequestItemParametersWithSelectiveDisclosureJSON;
 
 @type("AcceptReadAttributeRequestItemParameters")
 export class AcceptReadAttributeRequestItemParameters extends Serializable {
@@ -38,6 +44,10 @@ export class AcceptReadAttributeRequestItemParameters extends Serializable {
 
     public isWithNewAttribute(): this is { newAttribute: IdentityAttribute | RelationshipAttribute } {
         return !!this.newAttribute;
+    }
+
+    public isWithSelectiveDisclosure(): this is { newAttribute: IdentityAttribute; existingAttributeId: CoreId } {
+        return !!this.newAttribute && !!this.existingAttributeId;
     }
 
     public static from(value: AcceptReadAttributeRequestItemParametersJSON): AcceptReadAttributeRequestItemParameters {

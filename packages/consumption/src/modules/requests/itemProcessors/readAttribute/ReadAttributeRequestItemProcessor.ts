@@ -282,6 +282,21 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
         const parsedParams = AcceptReadAttributeRequestItemParameters.from(params);
         let sharedLocalAttribute;
 
+        if (parsedParams.isWithSelectiveDisclosure()) {
+            sharedLocalAttribute = await this.consumptionController.attributes.createSharedLocalAttributeCopy({
+                sourceAttributeId: CoreId.from(parsedParams.existingAttributeId.id),
+                newAttribute: parsedParams.newAttribute,
+                peer: CoreAddress.from(requestInfo.peer),
+                requestReference: CoreId.from(requestInfo.id)
+            });
+            return ReadAttributeAcceptResponseItem.from({
+                result: ResponseItemResult.Accepted,
+                attributeId: sharedLocalAttribute.id,
+                attribute: sharedLocalAttribute.content,
+                thirdPartyAddress: sharedLocalAttribute.shareInfo?.thirdPartyAddress
+            });
+        }
+
         if (parsedParams.isWithExistingAttribute()) {
             let existingSourceAttribute = await this.consumptionController.attributes.getLocalAttribute(parsedParams.existingAttributeId);
             if (!existingSourceAttribute) {

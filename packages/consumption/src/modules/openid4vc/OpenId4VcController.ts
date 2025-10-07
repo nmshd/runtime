@@ -56,13 +56,15 @@ export class OpenId4VcController extends ConsumptionBaseController {
         };
     }
 
-    public async getMatchingCredentialsForDcql(query: DcqlQuery): Promise<LocalAttribute[]> {
+    public async getMatchingCredentialsForDcql(query: DcqlQuery): Promise<{ attribute: LocalAttribute; presentation: unknown }[]> {
         const holder = new Holder(this.parent.accountController, this.parent.attributes);
         await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
 
         // this assumes the simplest form of the dcql query - where only one credential is requested
         const dcqlQueryId = query.credentials[0].id;
         const queryResult = await holder.getMatchingCredentialsForDcql(query);
+
+        const presentations = await Promise.all(queryResult[dcqlQueryId].valid_credentials!.map(async (c) => await holder.createPresentationForDcql(dcqlQueryId, c)));
 
         const matchingCredentials = queryResult[dcqlQueryId].valid_credentials!.map((c: any) => JsonTransformer.serialize(c.record));
         const credentialAttributes = await this.parent.attributes.getLocalAttributes({
@@ -72,9 +74,11 @@ export class OpenId4VcController extends ConsumptionBaseController {
             "content.value.@type": "VerifiableCredential"
         });
 
-        const matchingAttributes = credentialAttributes.filter((attr) => matchingCredentials.includes((attr.content.value as VerifiableCredential).value as any));
+        const matchingAttributes = matchingCredentials.map((c) => credentialAttributes.find((a) => ((a.content.value as VerifiableCredential).value as any) === c));
         // TODO: implement SD
-        return matchingAttributes;
+        return presentations.map((p, i) => {
+            return { presentation: p, attribute: matchingAttributes[i]! };
+        });
     }
 
     public async acceptProofRequest(jsonEncodedRequest: string): Promise<any> {
