@@ -4,6 +4,7 @@ import { EmittedAttributeDeletionInfo, EmittedAttributeDeletionInfoJSON, IEmitte
 
 export interface ForwardedSharingDetailsJSON {
     "@type": "ForwardedSharingDetails";
+    attributeId: string;
     peer: string;
     sourceReference: string;
     sharedAt: string;
@@ -11,6 +12,7 @@ export interface ForwardedSharingDetailsJSON {
 }
 
 export interface IForwardedSharingDetails extends ISerializable {
+    attributeId: ICoreId;
     peer: ICoreAddress;
     sourceReference: ICoreId;
     sharedAt: ICoreDate;
@@ -19,6 +21,10 @@ export interface IForwardedSharingDetails extends ISerializable {
 
 @type("ForwardedSharingDetails")
 export class ForwardedSharingDetails extends Serializable implements IForwardedSharingDetails {
+    @validate()
+    @serialize()
+    public attributeId: CoreId;
+
     @validate()
     @serialize()
     public peer: CoreAddress;

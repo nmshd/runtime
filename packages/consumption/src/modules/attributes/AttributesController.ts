@@ -441,7 +441,7 @@ export class AttributesController extends ConsumptionBaseController {
                   sharingDetailsForPeer.deletionInfo = undefined;
                   return sharingDetailsForPeer;
               })()
-            : ForwardedSharingDetails.from({ peer, sourceReference, sharedAt: CoreDate.utc() });
+            : ForwardedSharingDetails.from({ attributeId: localAttribute.id, peer, sourceReference, sharedAt: CoreDate.utc() });
 
         attribute.upsertForwardedSharingDetailsForPeer(peer, sharingDetails);
         await this.updateAttributeUnsafe(attribute);
