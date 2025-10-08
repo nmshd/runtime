@@ -263,7 +263,7 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
 
         const presentation = await dcqlService.createPresentation(this.agent.context, {
             credentialQueryToCredential: {
-                [queryId]: enrichedCredential
+                [queryId]: [enrichedCredential]
             },
             challenge: "aChallengeString"
         });
