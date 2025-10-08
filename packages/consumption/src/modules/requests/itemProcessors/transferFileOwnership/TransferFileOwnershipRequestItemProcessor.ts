@@ -1,5 +1,4 @@
 import {
-    AcceptResponseItem,
     IdentityAttribute,
     IdentityFileReference,
     RejectResponseItem,
@@ -135,7 +134,7 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
 
         const ownFile = await this.accountController.files.claimFileOwnership(peerFile.id, requestItem.ownershipToken);
 
-        const repositoryAttribute = await this.consumptionController.attributes.createRepositoryAttribute({
+        const ownIdentityAttribute = await this.consumptionController.attributes.createOwnIdentityAttribute({
             content: IdentityAttribute.from({
                 value: IdentityFileReference.from({
                     value: ownFile.toFileReference(this.accountController.config.baseUrl).truncate()
@@ -145,21 +144,17 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
             })
         });
 
-        const ownSharedIdentityAttribute = await this.consumptionController.attributes.createSharedLocalAttributeCopy({
-            sourceAttributeId: repositoryAttribute.id,
-            peer: requestInfo.peer,
-            requestReference: requestInfo.id
-        });
+        const updatedAttribute = await this.consumptionController.attributes.addForwardedSharingDetailsToAttribute(ownIdentityAttribute, requestInfo.peer, requestInfo.id);
 
         return TransferFileOwnershipAcceptResponseItem.from({
             result: ResponseItemResult.Accepted,
-            attributeId: ownSharedIdentityAttribute.id,
-            attribute: ownSharedIdentityAttribute.content as IdentityAttribute
+            attributeId: updatedAttribute.id,
+            attribute: updatedAttribute.content
         });
     }
 
     public override async applyIncomingResponseItem(
-        responseItem: TransferFileOwnershipAcceptResponseItem | AcceptResponseItem | RejectResponseItem,
+        responseItem: TransferFileOwnershipAcceptResponseItem | RejectResponseItem,
         _requestItem: TransferFileOwnershipRequestItem,
         requestInfo: LocalRequestInfo
     ): Promise<void> {
@@ -167,11 +162,11 @@ export class TransferFileOwnershipRequestItemProcessor extends GenericRequestIte
             return;
         }
 
-        await this.consumptionController.attributes.createSharedLocalAttribute({
+        await this.consumptionController.attributes.createPeerIdentityAttribute({
             id: responseItem.attributeId,
             content: responseItem.attribute,
-            requestReference: requestInfo.id,
-            peer: requestInfo.peer
+            peer: requestInfo.peer,
+            sourceReference: requestInfo.id
         });
     }
 }
