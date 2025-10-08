@@ -1450,8 +1450,8 @@ export class DataViewExpander {
     }
 
     public async processDCQLQuery(query: DCQLQueryJSON): Promise<ProcessedDCQLQueryDVO> {
-        const matchedAttributeDTOs = await this.consumption.openId4Vc.executeDCQLQuery({ dcql: query.query });
-        const matchedAttributeDVOs = await this.expandLocalAttributeDTOs(matchedAttributeDTOs.value);
+        const matchedAttributeDTOs = (await this.consumption.openId4Vc.executeDCQLQuery({ dcql: query.query })).value.map((c) => c.attribute);
+        const matchedAttributeDVOs = await this.expandLocalAttributeDTOs(matchedAttributeDTOs);
 
         return {
             ...this.expandDCQLQuery(query),

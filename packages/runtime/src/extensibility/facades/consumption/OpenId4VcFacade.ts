@@ -1,10 +1,11 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
-import { AcceptProofRequestDTO, FetchedCredentialOfferDTO, FetchedProofRequestDTO, LocalAttributeDTO, VerifiableCredentialDTO } from "@nmshd/runtime-types";
+import { AcceptProofRequestDTO, FetchedCredentialOfferDTO, FetchedProofRequestDTO, VerifiableCredentialDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
 import {
     AcceptProofRequestRequest,
     AcceptProofRequestUseCase,
     ExecuteDCQLQueryRequest,
+    ExecuteDCQLQueryResponse,
     ExecuteDCQLQueryUseCase,
     FetchCredentialOfferRequest,
     FetchCredentialOfferUseCase,
@@ -50,7 +51,7 @@ export class OpenId4VcFacade {
         return await this.accepProofRequestUseCase.execute(request);
     }
 
-    public async executeDCQLQuery(request: ExecuteDCQLQueryRequest): Promise<Result<LocalAttributeDTO[], ApplicationError>> {
+    public async executeDCQLQuery(request: ExecuteDCQLQueryRequest): Promise<Result<ExecuteDCQLQueryResponse, ApplicationError>> {
         return await this.executeDCQLQueryUseCase.execute(request);
     }
 

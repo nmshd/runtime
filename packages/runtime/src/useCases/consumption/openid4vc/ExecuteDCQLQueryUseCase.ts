@@ -9,13 +9,22 @@ export interface ExecuteDCQLQueryRequest {
     dcql: any;
 }
 
-export class ExecuteDCQLQueryUseCase extends UseCase<ExecuteDCQLQueryRequest, LocalAttributeDTO[]> {
+export type ExecuteDCQLQueryResponse = {
+    attribute: LocalAttributeDTO;
+    presentation: unknown;
+}[];
+
+export class ExecuteDCQLQueryUseCase extends UseCase<ExecuteDCQLQueryRequest, ExecuteDCQLQueryResponse> {
     public constructor(@Inject private readonly openId4VcController: OpenId4VcController) {
         super();
     }
 
-    protected override async executeInternal(request: ExecuteDCQLQueryRequest): Promise<Result<LocalAttributeDTO[]>> {
+    protected override async executeInternal(request: ExecuteDCQLQueryRequest): Promise<Result<ExecuteDCQLQueryResponse>> {
         const result = await this.openId4VcController.getMatchingCredentialsForDcql(request.dcql);
-        return Result.ok(AttributeMapper.toAttributeDTOList(result));
+        return Result.ok(
+            result.map((c) => {
+                return { attribute: AttributeMapper.toAttributeDTO(c.attribute), presentation: c.presentation };
+            })
+        );
     }
 }
