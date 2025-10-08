@@ -265,7 +265,8 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
             credentialQueryToCredential: {
                 [queryId]: [enrichedCredential]
             },
-            challenge: "aChallengeString"
+            challenge: "aChallengeString",
+            domain: "aDomain" // needed for key binding JWT - and generally needed due to implementation
         });
 
         return presentation.dcqlPresentation;

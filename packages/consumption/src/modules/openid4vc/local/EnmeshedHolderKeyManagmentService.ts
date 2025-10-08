@@ -23,6 +23,7 @@ import {
 } from "@credo-ts/core/build/modules/kms";
 import { ec as EC } from "elliptic";
 import _sodium from "libsodium-wrappers";
+import _ from "lodash";
 import sjcl from "sjcl";
 
 export interface JwkKeyPair {
@@ -61,7 +62,29 @@ export class EnmshedHolderKeyManagmentService implements KeyManagementService {
         } else {
             this.keystore = new Map<string, string>();
         }
+        this.importUniversalKeyBindingKey();
+
         this.updateGlobalInstance(this.keystore);
+    }
+
+    private importUniversalKeyBindingKey() {
+        const privateJwk = {
+            kty: "EC",
+            crv: "P-256",
+            x: "MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4",
+            y: "4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM",
+            d: "870MB6gfuTJ4HtUnUvYMyJpr5eUZNP4Bk43bVdj3eAE"
+        };
+
+        const publicJwk = _.omit(privateJwk, "d");
+
+        const jwkKeyPair = {
+            publicKey: publicJwk,
+            privateKey: privateJwk,
+            keyType: "EC"
+        };
+
+        this.keystore.set("universalKeyBindingKey", JSON.stringify(jwkKeyPair));
     }
 
     public updateGlobalInstance(storrage: Map<string, string>): void {
