@@ -2223,7 +2223,17 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "description": {
                     "type": "string"
                 },
-                "value": {}
+                "value": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "additionalProperties": {}
+                        }
+                    ]
+                }
             },
             "required": [
                 "@type",
@@ -2786,57 +2796,12 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "query": {
                     "type": "object",
-                    "properties": {
-                        "constructor": {
-                            "type": "object",
-                            "properties": {
-                                "prototype": {},
-                                "length": {
-                                    "type": "number"
-                                },
-                                "arguments": {},
-                                "caller": {
-                                    "$ref": "#/definitions/interface-2033348025-9888-11315-2033348025-0-218439"
-                                }
-                            },
-                            "required": [
-                                "prototype",
-                                "length",
-                                "arguments",
-                                "caller"
-                            ],
-                            "additionalProperties": false
-                        }
-                    },
-                    "required": [
-                        "constructor"
-                    ],
-                    "additionalProperties": false
+                    "additionalProperties": {}
                 }
             },
             "required": [
                 "@type",
                 "query"
-            ],
-            "additionalProperties": false
-        },
-        "interface-2033348025-9888-11315-2033348025-0-218439": {
-            "type": "object",
-            "properties": {
-                "prototype": {},
-                "length": {
-                    "type": "number"
-                },
-                "arguments": {},
-                "caller": {
-                    "$ref": "#/definitions/interface-2033348025-9888-11315-2033348025-0-218439"
-                }
-            },
-            "required": [
-                "prototype",
-                "length",
-                "arguments",
-                "caller"
             ],
             "additionalProperties": false
         },
@@ -4774,7 +4739,17 @@ export const CompleteOutgoingRequestRequest: any = {
                 "description": {
                     "type": "string"
                 },
-                "value": {}
+                "value": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "additionalProperties": {}
+                        }
+                    ]
+                }
             },
             "required": [
                 "@type",
@@ -7250,7 +7225,17 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                 "description": {
                     "type": "string"
                 },
-                "value": {}
+                "value": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "additionalProperties": {}
+                        }
+                    ]
+                }
             },
             "required": [
                 "@type",
@@ -10340,7 +10325,17 @@ export const CreateOutgoingRequestRequest: any = {
                 "description": {
                     "type": "string"
                 },
-                "value": {}
+                "value": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "additionalProperties": {}
+                        }
+                    ]
+                }
             },
             "required": [
                 "@type",
@@ -10903,57 +10898,12 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "query": {
                     "type": "object",
-                    "properties": {
-                        "constructor": {
-                            "type": "object",
-                            "properties": {
-                                "prototype": {},
-                                "length": {
-                                    "type": "number"
-                                },
-                                "arguments": {},
-                                "caller": {
-                                    "$ref": "#/definitions/interface-2033348025-9888-11315-2033348025-0-218439"
-                                }
-                            },
-                            "required": [
-                                "prototype",
-                                "length",
-                                "arguments",
-                                "caller"
-                            ],
-                            "additionalProperties": false
-                        }
-                    },
-                    "required": [
-                        "constructor"
-                    ],
-                    "additionalProperties": false
+                    "additionalProperties": {}
                 }
             },
             "required": [
                 "@type",
                 "query"
-            ],
-            "additionalProperties": false
-        },
-        "interface-2033348025-9888-11315-2033348025-0-218439": {
-            "type": "object",
-            "properties": {
-                "prototype": {},
-                "length": {
-                    "type": "number"
-                },
-                "arguments": {},
-                "caller": {
-                    "$ref": "#/definitions/interface-2033348025-9888-11315-2033348025-0-218439"
-                }
-            },
-            "required": [
-                "prototype",
-                "length",
-                "arguments",
-                "caller"
             ],
             "additionalProperties": false
         },
@@ -13894,7 +13844,17 @@ export const ReceivedIncomingRequestRequest: any = {
                 "description": {
                     "type": "string"
                 },
-                "value": {}
+                "value": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "additionalProperties": {}
+                        }
+                    ]
+                }
             },
             "required": [
                 "@type",
@@ -14457,57 +14417,12 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "query": {
                     "type": "object",
-                    "properties": {
-                        "constructor": {
-                            "type": "object",
-                            "properties": {
-                                "prototype": {},
-                                "length": {
-                                    "type": "number"
-                                },
-                                "arguments": {},
-                                "caller": {
-                                    "$ref": "#/definitions/interface-2033348025-9888-11315-2033348025-0-218439"
-                                }
-                            },
-                            "required": [
-                                "prototype",
-                                "length",
-                                "arguments",
-                                "caller"
-                            ],
-                            "additionalProperties": false
-                        }
-                    },
-                    "required": [
-                        "constructor"
-                    ],
-                    "additionalProperties": false
+                    "additionalProperties": {}
                 }
             },
             "required": [
                 "@type",
                 "query"
-            ],
-            "additionalProperties": false
-        },
-        "interface-2033348025-9888-11315-2033348025-0-218439": {
-            "type": "object",
-            "properties": {
-                "prototype": {},
-                "length": {
-                    "type": "number"
-                },
-                "arguments": {},
-                "caller": {
-                    "$ref": "#/definitions/interface-2033348025-9888-11315-2033348025-0-218439"
-                }
-            },
-            "required": [
-                "prototype",
-                "length",
-                "arguments",
-                "caller"
             ],
             "additionalProperties": false
         },
@@ -19111,7 +19026,17 @@ export const SucceedRepositoryAttributeRequest: any = {
                 "description": {
                     "type": "string"
                 },
-                "value": {}
+                "value": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "additionalProperties": {}
+                        }
+                    ]
+                }
             },
             "required": [
                 "@type",
@@ -19814,6 +19739,91 @@ export const FetchedCredentialOfferRequest: any = {
             "required": [
                 "data",
                 "requestedCredentials"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
+export const VerifySharedCredentialRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/VerifySharedCredentialRequest",
+    "definitions": {
+        "VerifySharedCredentialRequest": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "$ref": "#/definitions/DCQLQueryJSON"
+                },
+                "credential": {
+                    "$ref": "#/definitions/VerifiableCredentialJSON"
+                }
+            },
+            "required": [
+                "query",
+                "credential"
+            ],
+            "additionalProperties": false
+        },
+        "DCQLQueryJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "DCQLQuery"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "query": {
+                    "type": "object",
+                    "additionalProperties": {}
+                }
+            },
+            "required": [
+                "@type",
+                "query"
+            ],
+            "additionalProperties": false
+        },
+        "VerifiableCredentialJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "VerifiableCredential"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "value": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "additionalProperties": {}
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "@type",
+                "title",
+                "value"
             ],
             "additionalProperties": false
         }
@@ -24485,7 +24495,17 @@ export const VerifiableCredential: any = {
                 "description": {
                     "type": "string"
                 },
-                "value": {}
+                "value": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "additionalProperties": {}
+                        }
+                    ]
+                }
             },
             "required": [
                 "@type",
