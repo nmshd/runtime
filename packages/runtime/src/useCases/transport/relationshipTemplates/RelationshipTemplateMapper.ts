@@ -4,29 +4,24 @@ import { RelationshipTemplateDTO } from "@nmshd/runtime-types";
 import { RelationshipTemplate } from "@nmshd/transport";
 import { Container } from "@nmshd/typescript-ioc";
 import { ConfigHolder } from "../../../ConfigHolder";
-import { PasswordProtectionMapper, RuntimeErrors } from "../../common";
+import { PasswordProtectionMapper } from "../../common";
 
 export class RelationshipTemplateMapper {
     public static toRelationshipTemplateDTO(template: RelationshipTemplate): RelationshipTemplateDTO {
-        if (!template.cache) {
-            throw RuntimeErrors.general.cacheEmpty(RelationshipTemplate, template.id.toString());
-        }
-
         const backboneBaseUrl = Container.get<ConfigHolder>(ConfigHolder).getConfig().transportLibrary.baseUrl;
         const reference = template.toRelationshipTemplateReference(backboneBaseUrl);
 
         return {
             id: template.id.toString(),
             isOwn: template.isOwn,
-            createdBy: template.cache.createdBy.toString(),
-            createdByDevice: template.cache.createdByDevice.toString(),
-            createdAt: template.cache.createdAt.toString(),
-            forIdentity: template.cache.forIdentity?.toString(),
+            createdBy: template.createdBy.toString(),
+            createdByDevice: template.createdByDevice.toString(),
+            createdAt: template.createdAt.toString(),
+            forIdentity: template.forIdentity?.toString(),
             passwordProtection: PasswordProtectionMapper.toPasswordProtectionDTO(template.passwordProtection),
-            content: this.toTemplateContent(template.cache.content),
-            expiresAt: template.cache.expiresAt?.toString(),
-            maxNumberOfAllocations: template.cache.maxNumberOfAllocations,
-            truncatedReference: reference.truncate(),
+            content: this.toTemplateContent(template.content),
+            expiresAt: template.expiresAt?.toString(),
+            maxNumberOfAllocations: template.maxNumberOfAllocations,
             reference: {
                 truncated: reference.truncate(),
                 url: reference.toUrl()

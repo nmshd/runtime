@@ -82,7 +82,7 @@ describe("End2End Notification via Messages", function () {
     test("recipient: syncEverything to get Message with Notification", async function () {
         const messages = await TestUtil.syncUntilHasMessages(rAccountController);
         rMessageWithNotification = messages[0];
-        expect(rMessageWithNotification.cache!.content).toBeInstanceOf(Notification);
+        expect(rMessageWithNotification.content).toBeInstanceOf(Notification);
     });
 
     test("recipient: received Notification", async function () {

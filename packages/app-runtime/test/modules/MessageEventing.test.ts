@@ -30,8 +30,8 @@ describe("MessageEventingTest", function () {
         const mail: MailJSON = {
             "@type": "Mail",
             to: [recipient],
-            subject: "Hallo Horst",
-            body: "Hallo, hier ist eine Mail."
+            subject: "aSubject",
+            body: "aBody"
         };
         const message = await TestUtil.sendMessage(sessionA, sessionB, mail);
         const eventListener = new EventListener(runtime, [MailReceivedEvent, MessageReceivedEvent]);

@@ -27,12 +27,11 @@ describe("Onboarding", function () {
     afterEach(async () => await onboardingRuntime.stop());
 
     test("should throw when onboarding a second account with the same address", async function () {
-        const createDeviceResult = await services.transportServices.devices.createDevice({});
-        const onboardingInfoResult = await services.transportServices.devices.getDeviceOnboardingInfo({ id: createDeviceResult.value.id });
+        const emptyToken = await onboardingRuntime.anonymousServices.tokens.createEmptyToken();
+        const fillResult = await services.transportServices.devices.fillDeviceOnboardingTokenWithNewDevice({ reference: emptyToken.value.reference.truncated });
+        const deviceOnboardingDTO = DeviceMapper.toDeviceOnboardingInfoDTO(TokenContentDeviceSharedSecret.from(fillResult.value.content).sharedSecret);
 
-        await expect(() => runtimeWithExistingAccount.accountServices.onboardAccount(onboardingInfoResult.value)).rejects.toThrow(
-            "error.app-runtime.onboardedAccountAlreadyExists"
-        );
+        await expect(() => runtimeWithExistingAccount.accountServices.onboardAccount(deviceOnboardingDTO)).rejects.toThrow("error.app-runtime.onboardedAccountAlreadyExists");
     });
 
     test("should onboard with a recovery kit and meanwhile delete the token", async () => {
@@ -41,14 +40,14 @@ describe("Onboarding", function () {
             passwordProtection: { password: "aPassword" }
         });
 
-        const token = await onboardingRuntime.anonymousServices.tokens.loadPeerToken({ reference: recoveryKitResponse.value.truncatedReference, password: "aPassword" });
+        const token = await onboardingRuntime.anonymousServices.tokens.loadPeerToken({ reference: recoveryKitResponse.value.reference.truncated, password: "aPassword" });
         const deviceOnboardingDTO = DeviceMapper.toDeviceOnboardingInfoDTO(DeviceSharedSecret.from(token.value.content.sharedSecret));
 
         const result = await onboardingRuntime.accountServices.onboardAccount(deviceOnboardingDTO);
         expect(result.address!).toBe((await services.transportServices.account.getIdentityInfo()).value.address);
 
         const anonymousTokenResponse = await onboardingRuntime.anonymousServices.tokens.loadPeerToken({
-            reference: recoveryKitResponse.value.truncatedReference,
+            reference: recoveryKitResponse.value.reference.truncated,
             password: "aPassword"
         });
         expect(anonymousTokenResponse).toBeAnError(
@@ -65,7 +64,7 @@ describe("Onboarding", function () {
             passwordProtection: { password: "aPassword" }
         });
 
-        const token = await onboardingRuntime.anonymousServices.tokens.loadPeerToken({ reference: recoveryKitResponse.value.truncatedReference, password: "aPassword" });
+        const token = await onboardingRuntime.anonymousServices.tokens.loadPeerToken({ reference: recoveryKitResponse.value.reference.truncated, password: "aPassword" });
         const deviceOnboardingDTO = DeviceMapper.toDeviceOnboardingInfoDTO(DeviceSharedSecret.from(token.value.content.sharedSecret));
 
         const result = await onboardingRuntime.accountServices.onboardAccount(deviceOnboardingDTO);
@@ -102,10 +101,11 @@ describe("Onboarding", function () {
     });
 
     test("should store the device name during onboarding", async function () {
-        const createDeviceResult = await services.transportServices.devices.createDevice({});
-        const onboardingInfoResult = await services.transportServices.devices.getDeviceOnboardingInfo({ id: createDeviceResult.value.id });
+        const emptyToken = await onboardingRuntime.anonymousServices.tokens.createEmptyToken();
+        const fillResult = await services.transportServices.devices.fillDeviceOnboardingTokenWithNewDevice({ reference: emptyToken.value.reference.truncated });
+        const deviceOnboardingDTO = DeviceMapper.toDeviceOnboardingInfoDTO(TokenContentDeviceSharedSecret.from(fillResult.value.content).sharedSecret);
 
-        const result = await onboardingRuntime.accountServices.onboardAccount(onboardingInfoResult.value, undefined, "aDeviceName");
+        const result = await onboardingRuntime.accountServices.onboardAccount(deviceOnboardingDTO, undefined, "aDeviceName");
         expect(result.address).toBe((await services.transportServices.account.getIdentityInfo()).value.address);
 
         const services2 = await onboardingRuntime.getServices(result.id);
@@ -115,6 +115,6 @@ describe("Onboarding", function () {
 
         await services.transportServices.account.syncDatawallet();
         const devicesAfterSync = (await services.transportServices.devices.getDevices()).value;
-        expect(devicesAfterSync.find((d) => d.id === createDeviceResult.value.id)!.name).toBe("aDeviceName");
+        expect(devicesAfterSync.find((d) => d.id === deviceOnboardingDTO.id)!.name).toBe("aDeviceName");
     });
 });

@@ -50,7 +50,7 @@ export class SSEModule extends AppRuntimeModule<SSEModuleConfiguration> {
         }
 
         const baseUrl = this.configuration.baseUrlOverride ?? this.runtime["runtimeConfig"].transportLibrary.baseUrl;
-        const sseUrl = `${baseUrl}/api/v1/sse`;
+        const sseUrl = `${baseUrl}/api/v2/sse`;
 
         this.logger.info(`Connecting to SSE endpoint: ${sseUrl}`);
 

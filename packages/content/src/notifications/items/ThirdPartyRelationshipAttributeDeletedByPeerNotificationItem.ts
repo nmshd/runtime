@@ -11,8 +11,6 @@ export interface IThirdPartyRelationshipAttributeDeletedByPeerNotificationItem e
     attributeId: ICoreId;
 }
 
-// deprecated
-@type("ThirdPartyOwnedRelationshipAttributeDeletedByPeerNotificationItem")
 @type("ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem")
 export class ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem extends NotificationItem implements IThirdPartyRelationshipAttributeDeletedByPeerNotificationItem {
     @validate()

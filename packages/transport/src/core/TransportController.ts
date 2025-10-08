@@ -10,9 +10,6 @@ import { TransportLoggerFactory } from "./TransportLoggerFactory";
 export enum ControllerName {
     Account = "Account",
     Attribute = "Attribute",
-    Certificate = "Certificate",
-    CertificateIssuer = "CertificateIssuer",
-    CertificateValidator = "CertificateValidator",
     Challenge = "Challenge",
     Device = "Device",
     Devices = "Devices",
@@ -92,10 +89,11 @@ export class TransportController {
     }
 
     protected parseArray<T extends Serializable>(values: Object[], type: new () => T): T[] {
-        return values.map((v) => (type as any).fromAny(v));
-    }
+        return values.map((v) => {
+            const parsed = (type as any).fromUnknown(v);
+            if (!(parsed instanceof type)) throw new Error(`Parsed value is not an instance of ${type.name}`);
 
-    protected newCacheEmptyError(entityName: string | Function, id: string): Error {
-        return new TransportError(`The cache of ${entityName instanceof Function ? entityName.name : entityName} with id "${id}" is empty.`);
+            return parsed;
+        });
     }
 }

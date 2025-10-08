@@ -19,9 +19,8 @@ import { SynchronizedCollection } from "../sync/SynchronizedCollection";
 import { BackboneGetMessagesResponse } from "./backbone/BackboneGetMessages";
 import { BackbonePostMessagesRecipientRequest } from "./backbone/BackbonePostMessages";
 import { MessageClient } from "./backbone/MessageClient";
-import { CachedMessage } from "./local/CachedMessage";
-import { CachedMessageRecipient } from "./local/CachedMessageRecipient";
-import { Message } from "./local/Message";
+import { IBackboneMessageContents, Message } from "./local/Message";
+import { MessageRecipient } from "./local/MessageRecipient";
 import { ISendMessageParameters, SendMessageParameters } from "./local/SendMessageParameters";
 import { MessageContentWrapper } from "./transmission/MessageContentWrapper";
 import { MessageEnvelope } from "./transmission/MessageEnvelope";
@@ -60,7 +59,7 @@ export class MessageController extends TransportController {
 
     public async getMessagesByRelationshipId(id: CoreId): Promise<Message[]> {
         return await this.getMessages({
-            [`${nameof<Message>((m) => m.cache)}.${nameof<CachedMessage>((m) => m.recipients)}.${nameof<CachedMessageRecipient>((m) => m.relationshipId)}`]: id.toString()
+            [`${nameof<Message>((m) => m.recipients)}.${nameof<MessageRecipient>((m) => m.relationshipId)}`]: id.toString()
         });
     }
 
@@ -77,12 +76,12 @@ export class MessageController extends TransportController {
 
         // a received message only has one recipient (yourself) so it can be deleted without further looking into the recipients
         // also if the message is not own, it can be deleted when there is only one recipient
-        if (!message.isOwn || message.cache!.recipients.length === 1) {
+        if (!message.isOwn || message.recipients.length === 1) {
             await this.messages.delete(message);
             return;
         }
 
-        const recipient = message.cache!.recipients.find((r) => r.relationshipId?.equals(relationship.id));
+        const recipient = message.recipients.find((r) => r.relationshipId?.equals(relationship.id));
         if (!recipient) {
             this.log.warn(`Recipient not found in message ${message.id.toString()}`);
             return;
@@ -93,7 +92,7 @@ export class MessageController extends TransportController {
         recipient.address = pseudonym;
         recipient.relationshipId = undefined;
 
-        if (message.cache!.recipients.every((r) => r.address.equals(pseudonym))) {
+        if (message.recipients.every((r) => r.address.equals(pseudonym))) {
             await this.messages.delete(message);
             return;
         }
@@ -123,7 +122,7 @@ export class MessageController extends TransportController {
         return messageDoc ? Message.from(messageDoc) : undefined;
     }
 
-    public async updateCache(ids: string[]): Promise<Message[]> {
+    public async updateBackboneData(ids: string[]): Promise<Message[]> {
         if (ids.length < 1) {
             return [];
         }
@@ -131,38 +130,13 @@ export class MessageController extends TransportController {
         const paginator = (await this.client.getMessages({ ids })).value;
         const promises = [];
         for await (const resultItem of paginator) {
-            promises.push(this.updateCacheOfExistingMessageInDb(resultItem.id, resultItem));
+            promises.push(this.updateBackboneDataOfExistingMessageInDb(resultItem.id, resultItem));
         }
         return await Promise.all(promises);
     }
 
-    public async fetchCaches(ids: CoreId[]): Promise<{ id: CoreId; cache: CachedMessage }[]> {
-        if (ids.length === 0) return [];
-
-        const backboneMessages = await (await this.client.getMessages({ ids: ids.map((id) => id.toString()) })).value.collect();
-
-        const decryptionPromises = backboneMessages.map(async (m) => {
-            const messageDoc = await this.messages.read(m.id);
-            if (!messageDoc) {
-                this._log.error(
-                    `Message '${m.id}' not found in local database and the cache fetching was therefore skipped. This should not happen and might be a bug in the application logic.`
-                );
-                return;
-            }
-
-            const message = Message.from(messageDoc);
-            const envelope = this.getEnvelopeFromBackboneGetMessagesResponse(m);
-
-            const cachedMessage = (await this.decryptMessage(envelope, message.secretKey))[0];
-            return { id: CoreId.from(m.id), cache: cachedMessage };
-        });
-
-        const caches = await Promise.all(decryptionPromises);
-        return caches.filter((c) => c !== undefined);
-    }
-
     @log()
-    private async updateCacheOfExistingMessageInDb(id: string, response?: BackboneGetMessagesResponse) {
+    private async updateBackboneDataOfExistingMessageInDb(id: string, response?: BackboneGetMessagesResponse) {
         const messageDoc = await this.messages.read(id);
         if (!messageDoc) {
             throw TransportCoreErrors.general.recordNotFound(Message, id);
@@ -170,21 +144,22 @@ export class MessageController extends TransportController {
 
         const message = Message.from(messageDoc);
 
-        await this.updateCacheOfMessage(message, response);
+        await this.updateBackboneDataOfMessage(message, response);
         await this.messages.update(messageDoc, message);
         return message;
     }
 
-    private async updateCacheOfMessage(message: Message, response?: BackboneGetMessagesResponse) {
+    private async updateBackboneDataOfMessage(message: Message, response?: BackboneGetMessagesResponse) {
         const messageId = message.id.toString();
 
         response ??= (await this.client.getMessage(messageId)).value;
 
         const envelope = this.getEnvelopeFromBackboneGetMessagesResponse(response);
-        const [cachedMessage, messageKey] = await this.decryptMessage(envelope, message.secretKey);
+        const [backboneData, messageKey] = await this.decryptMessage(envelope, message.secretKey);
 
         message.secretKey = messageKey;
-        message.setCache(cachedMessage);
+
+        message.updateWithBackboneData(backboneData);
     }
 
     @log()
@@ -192,7 +167,7 @@ export class MessageController extends TransportController {
         const response = (await this.client.getMessage(id.toString())).value;
 
         const envelope = this.getEnvelopeFromBackboneGetMessagesResponse(response);
-        const [cachedMessage, messageKey, relationship] = await this.decryptMessage(envelope);
+        const [backboneData, messageKey, relationship] = await this.decryptMessage(envelope);
 
         if (!relationship) {
             throw TransportCoreErrors.general.recordNotFound(Relationship, envelope.id.toString());
@@ -201,9 +176,9 @@ export class MessageController extends TransportController {
         const message = Message.from({
             id: envelope.id,
             isOwn: false,
-            secretKey: messageKey
+            secretKey: messageKey,
+            ...backboneData
         });
-        message.setCache(cachedMessage);
         await this.messages.create(message);
 
         return message;
@@ -382,7 +357,7 @@ export class MessageController extends TransportController {
         const value = result.value;
 
         const recipients = envelopeRecipients.map((r) =>
-            CachedMessageRecipient.from({
+            MessageRecipient.from({
                 address: r.address,
                 encryptedKey: r.encryptedKey,
                 receivedAt: r.receivedAt,
@@ -391,21 +366,16 @@ export class MessageController extends TransportController {
             })
         );
 
-        const cachedMessage = CachedMessage.from({
+        const message = Message.from({
+            id: CoreId.from(value.id),
+            secretKey: secret,
             content: parsedParams.content,
             createdAt: CoreDate.from(value.createdAt),
             createdBy: this.parent.identity.identity.address,
             createdByDevice: this.parent.activeDevice.id,
             recipients,
             attachments: publicAttachmentArray,
-            receivedByEveryone: false
-        });
-
-        const message = Message.from({
-            id: CoreId.from(value.id),
-            secretKey: secret,
-            cache: cachedMessage,
-            cachedAt: CoreDate.utc(),
+            receivedByEveryone: false,
             isOwn: true
         });
 
@@ -501,12 +471,12 @@ export class MessageController extends TransportController {
     }
 
     @log()
-    private async decryptMessage(envelope: MessageEnvelope, secretKey?: CryptoSecretKey): Promise<[CachedMessage, CryptoSecretKey, Relationship?]> {
+    private async decryptMessage(envelope: MessageEnvelope, secretKey?: CryptoSecretKey): Promise<[IBackboneMessageContents, CryptoSecretKey, Relationship?]> {
         this.log.trace(`Decrypting MessageEnvelope with id ${envelope.id}...`);
         let plainMessage: MessageContentWrapper;
         let messageKey: CryptoSecretKey;
 
-        const recipients: CachedMessageRecipient[] = [];
+        const recipients: MessageRecipient[] = [];
 
         let relationship;
         if (this.parent.identity.isMe(envelope.createdBy)) {
@@ -526,7 +496,7 @@ export class MessageController extends TransportController {
                 }
 
                 recipients.push(
-                    CachedMessageRecipient.from({
+                    MessageRecipient.from({
                         // make sure to save the pseudonym instead of the real address if the relationship was removed
                         // in cases the Backbone did not already process the relationship termination
                         address: relationship ? recipient.address : pseudonym,
@@ -551,7 +521,7 @@ export class MessageController extends TransportController {
             // we don't care about other recipients in the envelope, because we do not need them
             const currentIdentityAsRecipient = envelope.recipients.find((r) => this.parent.identity.isMe(r.address))!;
             recipients.push(
-                CachedMessageRecipient.from({
+                MessageRecipient.from({
                     address: currentIdentityAsRecipient.address,
                     encryptedKey: currentIdentityAsRecipient.encryptedKey,
                     receivedAt: currentIdentityAsRecipient.receivedAt,
@@ -572,7 +542,7 @@ export class MessageController extends TransportController {
 
         this.log.trace("Attachments fetched. Creating message...");
 
-        const cachedMessage = CachedMessage.from({
+        const backboneData = {
             createdBy: envelope.createdBy,
             createdByDevice: envelope.createdByDevice,
             recipients,
@@ -580,8 +550,8 @@ export class MessageController extends TransportController {
             content: plainMessage.content,
             createdAt: envelope.createdAt,
             receivedByEveryone: false
-        });
+        };
 
-        return [cachedMessage, messageKey, relationship];
+        return [backboneData, messageKey, relationship];
     }
 }
