@@ -1,9 +1,9 @@
 /* eslint-disable no-console */
 import {
     ClaimFormat,
+    DcqlEncodedPresentations,
     DcqlMatchWithRecord,
     DcqlModule,
-    DcqlPresentation,
     DcqlQuery,
     DcqlService,
     DidJwk,
@@ -259,7 +259,7 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         return serviceResult.dcql.queryResult.credential_matches;
     }
 
-    public async createPresentationForDcql(queryId: string, credential: unknown): Promise<DcqlPresentation> {
+    public async createPresentationForDcql(queryId: string, credential: unknown): Promise<DcqlEncodedPresentations> {
         const dcqlService = this.agent.context.dependencyManager.resolve(DcqlService);
         const enrichedCredential = (dcqlService as any).dcqlCredentialForRequestForValidCredential(credential);
 
@@ -271,7 +271,7 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
             domain: "aDomain" // needed for key binding JWT - and generally needed due to implementation
         });
 
-        return presentation.dcqlPresentation;
+        return presentation.encodedDcqlPresentation;
     }
 
     public async verifyPresentationForDcql(
