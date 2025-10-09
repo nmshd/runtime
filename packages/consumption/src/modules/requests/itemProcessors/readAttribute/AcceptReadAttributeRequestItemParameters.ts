@@ -59,16 +59,6 @@ export class AcceptReadAttributeRequestItemParameters extends Serializable {
             throw new ConsumptionError("this should never happen");
         }
 
-        if (value.existingAttributeId && value.newAttribute) {
-            throw new ValidationError(
-                AcceptReadAttributeRequestItemParameters.name,
-                nameof<AcceptReadAttributeRequestItemParameters>((x) => x.newAttribute),
-                `You cannot specify both ${nameof<AcceptReadAttributeRequestItemParameters>(
-                    (x) => x.newAttribute
-                )} and ${nameof<AcceptReadAttributeRequestItemParameters>((x) => x.existingAttributeId)}.`
-            );
-        }
-
         if (value.newAttribute && value.tags) {
             throw new ValidationError(
                 AcceptReadAttributeRequestItemParameters.name,
