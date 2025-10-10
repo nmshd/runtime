@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import {
     ClaimFormat,
-    DcqlEncodedPresentations,
+    DcqlEncodedPresentationsEntry,
     DcqlMatchWithRecord,
     DcqlModule,
     DcqlQuery,
@@ -263,7 +263,7 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         return serviceResult.dcql.queryResult.credential_matches;
     }
 
-    public async createPresentationForDcql(queryId: string, credential: unknown): Promise<DcqlEncodedPresentations> {
+    public async createPresentationForDcql(queryId: string, credential: unknown): Promise<DcqlEncodedPresentationsEntry> {
         const dcqlService = this.agent.context.dependencyManager.resolve(DcqlService);
         const enrichedCredential = (dcqlService as any).dcqlCredentialForRequestForValidCredential(credential);
 
@@ -272,10 +272,10 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
                 [queryId]: [enrichedCredential]
             },
             challenge: "aChallengeString",
-            domain: "aDomain" // needed for key binding JWT - and generally needed due to implementation
+            domain: "aDomain" // needed for key binding JWT
         });
 
-        return presentation.encodedDcqlPresentation;
+        return presentation.encodedDcqlPresentation[queryId][0]; // don't know why there might be multiple presentations such that [0] access is required
     }
 
     public async verifyPresentationForDcql(
