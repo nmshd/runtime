@@ -10,7 +10,7 @@ import { LocalRequestStatus } from "@nmshd/runtime-types";
 import { OutgoingRequestStatusChangedEvent } from "../events";
 import { RuntimeModule } from "../extensibility/modules/RuntimeModule";
 
-export class RequestModule extends RuntimeModule {
+export class OpenId4VpVerifierModule extends RuntimeModule {
     public init(): void {
         // Nothing to do here
     }
