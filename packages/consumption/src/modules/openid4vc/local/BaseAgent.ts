@@ -55,8 +55,6 @@ export class BaseAgent<AgentModules extends ModulesMap> {
             },
             dependencyManager
         );
-        // only register the storrage service after the agent has been created
-        this.agent.dependencyManager.registerInstance(InjectionSymbols.StorageService, new EnmeshedStorageService(accountController, attributeController));
     }
 
     public async initializeAgent(privateKey: string): Promise<any> {

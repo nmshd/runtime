@@ -48,8 +48,8 @@ describe("OpenID4VCI and OpenID4VCP", () => {
             requestedCredentials: requestedCredentials
         });
 
-        const status = acceptanceResult.value.status;
-        expect(status).toBe("success");
+        const status = acceptanceResult.isSuccess;
+        expect(status).toBe(true);
     }, 10000000);
 
     test("should be able to process a given credential presentation", async () => {
@@ -111,9 +111,34 @@ describe("OpenID4VCI and OpenID4VCP", () => {
         });
         const jsonRepresentation = result.value.jsonRepresentation;
 
+        // parse json and determine if requirements Satisfied is true
+        const proofRequest = JSON.parse(jsonRepresentation);
+        expect(proofRequest.presentationExchange.credentialsForRequest.areRequirementsSatisfied).toBe(true);
+
         const presentationResult = await consumptionServices.openId4Vc.acceptProofRequest({
             jsonEncodedRequest: jsonRepresentation
         });
         expect(presentationResult.value.status).toBe(200);
+    }, 10000000);
+
+    test("getting all verifiable credentials should not return an empy list", async () => {
+        // Ensure the first test has completed and credentialOfferUrl is set
+        expect(credentialOfferUrl).toBeDefined();
+        const acceptanceResult = await consumptionServices.openId4Vc.getVerifiableCredentials(undefined);
+        expect(acceptanceResult.isError).toBe(false);
+        expect(acceptanceResult.value.length).toBeGreaterThan(0);
+    }, 10000000);
+
+    test("getting the eralier created verifiable credential by id should return exactly one credential", async () => {
+        // Ensure the first test has completed and credentialOfferUrl is set
+        expect(credentialOfferUrl).toBeDefined();
+        const allCredentialsResult = await consumptionServices.openId4Vc.getVerifiableCredentials(undefined);
+        expect(allCredentialsResult.isError).toBe(false);
+        expect(allCredentialsResult.value.length).toBeGreaterThan(0);
+        const firstCredentialId = allCredentialsResult.value[0].id;
+        const singleCredentialResult = await consumptionServices.openId4Vc.getVerifiableCredentials([firstCredentialId]);
+        expect(singleCredentialResult.isError).toBe(false);
+        expect(singleCredentialResult.value).toHaveLength(1);
+        expect(singleCredentialResult.value[0].id).toBe(firstCredentialId);
     }, 10000000);
 });

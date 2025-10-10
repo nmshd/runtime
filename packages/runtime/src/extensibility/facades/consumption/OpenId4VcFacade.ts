@@ -13,6 +13,7 @@ import {
     ResolveCredentialOfferUseCase,
     ResolveFetchedCredentialOfferUseCase
 } from "../../../useCases";
+import { GetVerifiableCredentialsUseCase } from "../../../useCases/consumption/openid4vc/GetVerifiableCredentialsUseCase";
 
 export class OpenId4VcFacade {
     public constructor(
@@ -20,7 +21,8 @@ export class OpenId4VcFacade {
         @Inject private readonly fetchOfferUseCase: FetchCredentialOfferUseCase,
         @Inject private readonly resolveFetchedOfferUseCase: ResolveFetchedCredentialOfferUseCase,
         @Inject private readonly fetchProofRequestUseCase: FetchProofRequestUseCase,
-        @Inject private readonly accepProofRequestUseCase: AcceptProofRequestUseCase
+        @Inject private readonly accepProofRequestUseCase: AcceptProofRequestUseCase,
+        @Inject private readonly getVerifiableCredentialsUseCase: GetVerifiableCredentialsUseCase
     ) {}
 
     public async resolveCredentialOffer(request: ResolveCredentialOfferRequest): Promise<Result<VerifiableCredentialDTO, ApplicationError>> {
@@ -41,5 +43,11 @@ export class OpenId4VcFacade {
 
     public async acceptProofRequest(request: AcceptProofRequestRequest): Promise<Result<AcceptProofRequestDTO, ApplicationError>> {
         return await this.accepProofRequestUseCase.execute(request);
+    }
+
+    public async getVerifiableCredentials(ids: string[] | undefined): Promise<Result<VerifiableCredentialDTO[], ApplicationError>> {
+        // eslint-disable-next-line no-console
+        console.log("OpenId4VcFacade: getVerifiableCredentials called with ids:", JSON.stringify(ids));
+        return await this.getVerifiableCredentialsUseCase.execute({ ids });
     }
 }

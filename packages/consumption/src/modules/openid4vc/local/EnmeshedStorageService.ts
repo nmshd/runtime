@@ -1,4 +1,20 @@
-import { AgentContext, BaseRecord, BaseRecordConstructor, injectable, JsonTransformer, Query, QueryOptions, StorageService } from "@credo-ts/core";
+import {
+    AgentContext,
+    BaseRecord,
+    BaseRecordConstructor,
+    ClaimFormat,
+    injectable,
+    JsonTransformer,
+    Mdoc,
+    MdocRecord,
+    Query,
+    QueryOptions,
+    SdJwtVcRecord,
+    StorageService,
+    VerifiableCredential,
+    W3cCredentialRecord,
+    W3cJwtVerifiableCredential
+} from "@credo-ts/core";
 import { IdentityAttribute } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
 import { AccountController } from "@nmshd/transport";
@@ -24,17 +40,20 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
             return;
         }
 
-        const value = JsonTransformer.serialize(record);
+        let value = (record as unknown as VerifiableCredential).encoded;
+        if (typeof value !== "string") {
+            agentContext.config.logger.warn(`Record is not a string, serializing to JSON`);
+            value = JSON.stringify(value);
+        }
         const owner = this.accountController.identity.address;
         agentContext.config.logger.debug(`Saving record with id ${record.id} and value ${value}`);
 
         const identityAttribute = IdentityAttribute.from({
             value: {
                 "@type": "VerifiableCredential",
-                value: value,
                 title: (record as any).credential?.payload?.vct ?? "Credential",
-                description: JSON.stringify((record as any).credential?.payload ?? "No description"),
-                type: typeof record
+                value: value,
+                type: record.type
             },
             owner: owner
         });
@@ -43,6 +62,25 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
         });
         agentContext.config.logger.debug(`Saved record: ${JSON.stringify(result)}`);
         return await Promise.resolve();
+    }
+
+    public async saveWithDisplay(agentContext: AgentContext, value: string, type: string, displayInformation: string, title: string): Promise<any> {
+        const owner = this.accountController.identity.address;
+        const identityAttribute = IdentityAttribute.from({
+            value: {
+                "@type": "VerifiableCredential",
+                value: value,
+                type: type,
+                displayInformation: displayInformation,
+                title: title
+            },
+            owner: owner
+        });
+        const result = await this.attributeController.createRepositoryAttribute({
+            content: identityAttribute
+        });
+        agentContext.config.logger.debug(`Saved record: ${JSON.stringify(result)}`);
+        return await Promise.resolve(result);
     }
 
     public async update(agentContext: AgentContext, record: T): Promise<void> {
@@ -57,7 +95,7 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
                 "@type": "VerifiableCredential",
                 value: value,
                 title: "Employee ID Card",
-                description: "An employee ID card credential"
+                displayInformation: (oldAttribute.content.value as any).displayInformation
             },
             owner: owner
         });
@@ -105,17 +143,50 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
 
     public async getAll(agentContext: AgentContext, recordClass: BaseRecordConstructor<T>): Promise<T[]> {
         const records: T[] = [];
-        const attributes = await this.attributeController.getLocalAttributes();
-        agentContext.config.logger.debug(`Getting all records, found ${attributes.length} attributes`);
+        const attributes = await this.attributeController.getLocalAttributes({ "content.value.@type": "VerifiableCredential", shareInfo: { $exists: false } });
         for (const attribute of attributes) {
-            const record = JsonTransformer.deserialize((attribute.content.value as any).value, recordClass);
-            // ToDo: think about how to handle this for different record types
-            if (record.type !== "SdJwtVcRecord") {
+            // TODO: Correct casting
+            const type = (attribute as any).content.value.type;
+            let record: T;
+            if (type === ClaimFormat.SdJwtDc.toString() && recordClass.name === SdJwtVcRecord.name) {
+                record = new SdJwtVcRecord({ id: (attribute as any).content.id, compactSdJwtVc: (attribute as any).content.value.value }) as unknown as T;
+            } else if (type === ClaimFormat.MsoMdoc.toString() && recordClass.name === MdocRecord.name) {
+                record = new MdocRecord({ id: (attribute as any).content.id, mdoc: Mdoc.fromBase64Url((attribute as any).content.value.value) }) as unknown as T;
+            } else if (type === ClaimFormat.SdJwtW3cVc.toString() && recordClass.name === W3cCredentialRecord.name) {
+                const credential = W3cJwtVerifiableCredential.fromSerializedJwt((attribute as any).content.value.value);
+                record = new W3cCredentialRecord({
+                    id: (attribute as any).content.id,
+                    credential: credential,
+                    tags: {}
+                }) as unknown as T;
+            } else {
+                agentContext.config.logger.info(`Skipping attribute with id ${attribute.id} and type ${type} as it does not match record class ${recordClass.name}`);
                 continue;
+            }
+            if ((attribute as any).content.value.key !== undefined) {
+                // TODO: Remove as this is only a workaround for demo purposes
+                agentContext.config.logger.info("Found keys to possibly import");
+                const parsed = JSON.parse((attribute as any).content.value.key) as Map<string, any>;
+                for (const [k, v] of parsed) {
+                    const currentKeys = (globalThis as any).fakeKeyStorage as Map<string, any>;
+                    if (!currentKeys.has(k)) {
+                        (globalThis as any).fakeKeyStorage.set(k, v);
+                        agentContext.config.logger.info(`Added key ${k} to fake keystore`);
+                    } else {
+                        agentContext.config.logger.info(`Key ${k} already in fake keystore`);
+                    }
+                }
             }
             records.push(record);
         }
         return records;
+    }
+
+    // should only be used for exporting data out of the credo environment
+    public async getAllAsAttributes(agentContext: AgentContext, recordClass: BaseRecordConstructor<T>): Promise<any[]> {
+        agentContext.config.logger.debug(`Getting all records of type ${recordClass.name}`);
+        const attributes = await this.attributeController.getLocalAttributes({ "content.value.@type": "VerifiableCredential", shareInfo: { $exists: false } });
+        return attributes;
     }
 
     public async findByQuery(agentContext: AgentContext, recordClass: BaseRecordConstructor<T>, query: Query<T>, queryOptions?: QueryOptions): Promise<T[]> {

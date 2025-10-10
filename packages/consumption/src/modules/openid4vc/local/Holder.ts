@@ -1,5 +1,17 @@
-/* eslint-disable no-console */
-import { ClaimFormat, DidJwk, DidKey, JwkDidCreateOptions, KeyDidCreateOptions, Kms, Mdoc, MdocRecord, SdJwtVcRecord, X509Module } from "@credo-ts/core";
+import {
+    BaseRecord,
+    ClaimFormat,
+    DidJwk,
+    DidKey,
+    InjectionSymbols,
+    JwkDidCreateOptions,
+    KeyDidCreateOptions,
+    Kms,
+    Mdoc,
+    MdocRecord,
+    SdJwtVcRecord,
+    X509Module
+} from "@credo-ts/core";
 import {
     OpenId4VcModule,
     OpenId4VciAuthorizationFlow,
@@ -12,12 +24,14 @@ import {
 import { AccountController } from "@nmshd/transport";
 import { AttributesController } from "../../attributes";
 import { BaseAgent } from "./BaseAgent";
+import { EnmeshedStorageService } from "./EnmeshedStorageService";
 
 function getOpenIdHolderModules() {
     return {
         openid4vc: new OpenId4VcModule(),
         x509: new X509Module({
             getTrustedCertificatesForVerification: (_agentContext, { certificateChain, verification }) => {
+                // eslint-disable-next-line no-console
                 console.log(`dyncamically trusting certificate ${certificateChain[0].getIssuerNameField("C")} for verification of ${verification.type}`);
                 return [certificateChain[0].toString("pem")];
             }
@@ -33,6 +47,15 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
 
     public constructor(accountController: AccountController, attributeController: AttributesController) {
         super(3000, `OpenId4VcHolder ${Math.random().toString()}`, getOpenIdHolderModules(), accountController, attributeController);
+    }
+
+    public async getVerifiableCredentials(ids: string[] | undefined): Promise<any[]> {
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        const storageService = this.agent.dependencyManager.resolve(InjectionSymbols.StorageService) as EnmeshedStorageService<BaseRecord>;
+        const allCredentials = await storageService.getAllAsAttributes(this.agent.context, SdJwtVcRecord);
+
+        if (!ids) return allCredentials;
+        return allCredentials.filter((vc) => ids.includes(vc.id.toString()));
     }
 
     public async resolveCredentialOffer(credentialOffer: string): Promise<any> {
@@ -101,8 +124,6 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
                   }
         );
 
-        console.log("Token response:", JSON.stringify(tokenResponse));
-
         const credentialResponse = await this.agent.openid4vc.holder.requestCredentials({
             resolvedCredentialOffer,
             clientId: options.clientId,
@@ -151,24 +172,62 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
             ...tokenResponse
         });
 
-        console.log("Credential response:", credentialResponse);
+        this.agent.config.logger.info("Credential response:", credentialResponse);
 
         const storedCredentials = await Promise.all(
             credentialResponse.credentials.map((response) => {
                 // TODO: batch issuance not yet supported
                 const credential = response.credentials[0];
-                if (credential.claimFormat === ClaimFormat.MsoMdoc) {
-                    return this.agent.mdoc.store(Mdoc.fromBase64Url(credential.base64Url));
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+                const enmeshedStorageService = this.agent.dependencyManager.resolve(InjectionSymbols.StorageService) as EnmeshedStorageService<BaseRecord>;
+                let credentialKey = "";
+                for (const resolved in resolvedCredentialOffer.offeredCredentialConfigurations) {
+                    credentialKey = resolved;
                 }
-                if (credential.claimFormat === ClaimFormat.SdJwtDc) {
-                    return this.agent.sdJwtVc.store(credential.compact);
+                const displayInfo = resolvedCredentialOffer.offeredCredentialConfigurations[credentialKey].display as any;
+
+                // if the displayInfo does not provide a logo - we try to load a logo from the issuers attributes
+                if (
+                    displayInfo !== undefined &&
+                    displayInfo[0]?.logo === undefined &&
+                    resolvedCredentialOffer.metadata.credentialIssuer.display !== undefined &&
+                    (resolvedCredentialOffer.metadata.credentialIssuer.display as any)?.[0] !== undefined &&
+                    (resolvedCredentialOffer.metadata.credentialIssuer.display as any)?.[0]?.["logo"] !== undefined
+                ) {
+                    const logoInformation = (resolvedCredentialOffer.metadata.credentialIssuer.display as any)?.[0]?.["logo"];
+                    displayInfo[0]["logo"] = logoInformation;
+                }
+
+                if (credential.claimFormat === ClaimFormat.MsoMdoc) {
+                    return enmeshedStorageService.saveWithDisplay(
+                        this.agent.context,
+                        credential.base64Url,
+                        credential.claimFormat.toString(),
+                        JSON.stringify(displayInfo),
+                        credentialKey
+                    );
+                } else if (credential.claimFormat === ClaimFormat.SdJwtDc) {
+                    return enmeshedStorageService.saveWithDisplay(
+                        this.agent.context,
+                        credential.compact,
+                        credential.claimFormat.toString(),
+                        JSON.stringify(displayInfo),
+                        credentialKey
+                    );
+                } else if (credential.claimFormat === ClaimFormat.SdJwtW3cVc) {
+                    return enmeshedStorageService.saveWithDisplay(
+                        this.agent.context,
+                        credential.encoded,
+                        credential.claimFormat.toString(),
+                        JSON.stringify(displayInfo),
+                        credentialKey
+                    );
                 }
                 throw new Error("Unsupported credential format");
             })
         );
 
-        console.log("Stored credentials:", storedCredentials);
-
+        this.agent.config.logger.info(`Stored credentials: ${JSON.stringify(storedCredentials)}`);
         return storedCredentials;
     }
 

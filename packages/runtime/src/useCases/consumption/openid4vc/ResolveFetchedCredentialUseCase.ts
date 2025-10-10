@@ -26,6 +26,11 @@ export class ResolveFetchedCredentialOfferUseCase extends UseCase<FetchedCredent
 
     protected override async executeInternal(request: FetchedCredentialOfferRequest): Promise<Result<VerifiableCredentialDTO>> {
         const result = await this.openId4VcContoller.processFetchedCredentialOffer(request.data, request.requestedCredentials, request.pinCode);
-        return Result.ok({ status: result.status, message: result.message, data: result.data, id: result.id } as VerifiableCredentialDTO);
+        return Result.ok({
+            data: result.data,
+            id: result.id,
+            type: result.type,
+            displayInformation: result.displayInformation
+        } as VerifiableCredentialDTO);
     }
 }

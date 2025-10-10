@@ -6,14 +6,18 @@ import { PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH, PROPRIETARY_ATTRIBUTE_MAX
 export interface VerifiableCredentialJSON extends AbstractAttributeValueJSON {
     "@type": "VerifiableCredential";
     title: string;
-    description?: string;
-    value: unknown;
+    value: string;
+    type: string;
+    displayInformation?: string;
+    key?: string;
 }
 
 export interface IVerifiableCredential extends IAbstractAttributeValue {
     title: string;
-    description?: string;
-    value: unknown;
+    value: string;
+    type: string;
+    displayInformation?: string;
+    key?: string;
 }
 
 @type("VerifiableCredential")
@@ -22,13 +26,21 @@ export class VerifiableCredential extends AbstractAttributeValue {
     @validate({ max: PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH })
     public title: string;
 
-    @serialize()
-    @validate({ nullable: true, max: PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH })
-    public description?: string;
-
     @serialize({ any: true })
     @validate({ customValidator: validateValue })
-    public value: unknown;
+    public value: string;
+
+    @serialize()
+    @validate({ nullable: true })
+    public type: string;
+
+    @serialize()
+    @validate({ nullable: true, max: PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH })
+    public displayInformation?: string;
+
+    @serialize()
+    @validate({ nullable: true, max: PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH })
+    public key?: string;
 
     public static get valueHints(): ValueHints {
         return ValueHints.from({});

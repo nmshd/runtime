@@ -2220,14 +2220,23 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "value": {}
+                "type": {
+                    "type": "string"
+                },
+                "displayInformation": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                }
             },
             "required": [
                 "@type",
                 "title",
+                "type",
                 "value"
             ],
             "additionalProperties": false
@@ -4699,14 +4708,23 @@ export const CompleteOutgoingRequestRequest: any = {
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "value": {}
+                "type": {
+                    "type": "string"
+                },
+                "displayInformation": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                }
             },
             "required": [
                 "@type",
                 "title",
+                "type",
                 "value"
             ],
             "additionalProperties": false
@@ -7175,14 +7193,23 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "value": {}
+                "type": {
+                    "type": "string"
+                },
+                "displayInformation": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                }
             },
             "required": [
                 "@type",
                 "title",
+                "type",
                 "value"
             ],
             "additionalProperties": false
@@ -10265,14 +10292,23 @@ export const CreateOutgoingRequestRequest: any = {
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "value": {}
+                "type": {
+                    "type": "string"
+                },
+                "displayInformation": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                }
             },
             "required": [
                 "@type",
                 "title",
+                "type",
                 "value"
             ],
             "additionalProperties": false
@@ -13747,14 +13783,23 @@ export const ReceivedIncomingRequestRequest: any = {
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "value": {}
+                "type": {
+                    "type": "string"
+                },
+                "displayInformation": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                }
             },
             "required": [
                 "@type",
                 "title",
+                "type",
                 "value"
             ],
             "additionalProperties": false
@@ -18892,14 +18937,23 @@ export const SucceedRepositoryAttributeRequest: any = {
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "value": {}
+                "type": {
+                    "type": "string"
+                },
+                "displayInformation": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                }
             },
             "required": [
                 "@type",
                 "title",
+                "type",
                 "value"
             ],
             "additionalProperties": false
@@ -19482,6 +19536,25 @@ export const SentNotificationRequest: any = {
     }
 }
 
+export const AcceptProofRequestRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/AcceptProofRequestRequest",
+    "definitions": {
+        "AcceptProofRequestRequest": {
+            "type": "object",
+            "properties": {
+                "jsonEncodedRequest": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "jsonEncodedRequest"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
 export const FetchCredentialOfferRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/FetchCredentialOfferRequest",
@@ -19567,27 +19640,6 @@ export const FetchedCredentialOfferRequest: any = {
         }
     }
 }
-
-export const AcceptProofRequestRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/AcceptProofRequestRequest",
-    "definitions": {
-        "AcceptProofRequestRequest": {
-            "type": "object",
-            "properties": {
-                "jsonEncodedRequest": {
-                    "type": "string"
-                },
-            },
-            "required": [
-                "jsonEncodedRequest"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
-
 
 export const CreateSettingRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -22881,6 +22933,25 @@ export const LoadPeerTokenRequest: any = {
     }
 }
 
+export const GetVerifiableCredentialsRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetVerifiableCredentialsRequest",
+    "definitions": {
+        "GetVerifiableCredentialsRequest": {
+            "type": "object",
+            "properties": {
+                "ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}
+
 export const City: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/City",
@@ -24251,14 +24322,23 @@ export const VerifiableCredential: any = {
                 "title": {
                     "type": "string"
                 },
-                "description": {
+                "value": {
                     "type": "string"
                 },
-                "value": {}
+                "type": {
+                    "type": "string"
+                },
+                "displayInformation": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                }
             },
             "required": [
                 "@type",
                 "title",
+                "type",
                 "value"
             ],
             "additionalProperties": false

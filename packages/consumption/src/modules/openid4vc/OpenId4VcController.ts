@@ -22,12 +22,16 @@ export class OpenId4VcController extends ConsumptionBaseController {
         await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
         const credentialOffer = JSON.parse(fetchedCredentialOffer);
         const credentials = await holder.requestAndStoreCredentials(credentialOffer, { credentialsToRequest: requestedCredentialOffers, txCode: pinCode });
+
+        // TODO: support multiple credentials
+        const credential = credentials[0].content.value;
+
         return {
-            status: "success",
-            message: "Credential offer processed successfully",
-            data: JSON.stringify(credentials),
+            data: credential.value,
             // multi credentials not supported yet
-            id: credentials.length > 0 ? credentials[0].id : undefined
+            id: credentials[0].id,
+            type: credential.type,
+            displayInformation: credential.displayInformation
         };
     }
 
@@ -38,8 +42,7 @@ export class OpenId4VcController extends ConsumptionBaseController {
         const credentials = await holder.requestAndStoreCredentials(res, { credentialsToRequest: ["EmployeeIdCard-sdjwt"] });
 
         return {
-            status: "success",
-            message: "Credential offer processed successfully",
+            id: credentials.length > 0 ? credentials[0].id : undefined,
             data: JSON.stringify(credentials)
         };
     }
@@ -64,5 +67,23 @@ export class OpenId4VcController extends ConsumptionBaseController {
             status: serverResponse.status,
             message: serverResponse.body
         };
+    }
+
+    public async getVerifiableCredentials(ids: string[] | undefined): Promise<any[]> {
+        const holder = new Holder(this.parent.accountController, this.parent.attributes);
+        await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
+        // eslint-disable-next-line no-console
+        console.log("Fetching credentials with ids:", JSON.stringify(ids));
+        const credentials = await holder.getVerifiableCredentials(ids);
+        const result = [];
+        for (const credential of credentials) {
+            result.push({
+                id: credential.id.toString(),
+                data: credential.content.value.value.toString(),
+                displayInformation: credential.content.value.displayInformation ?? undefined,
+                type: credential.content.value.type ?? undefined
+            });
+        }
+        return result;
     }
 }
