@@ -34,7 +34,11 @@ import { BaseAgent } from "./BaseAgent";
 
 function getOpenIdHolderModules() {
     return {
-        openid4vc: new OpenId4VcModule(),
+        openid4vc: new OpenId4VcModule({
+            verifier: {
+                baseUrl: "aBaseUrl"
+            }
+        }),
         x509: new X509Module({
             getTrustedCertificatesForVerification: (_agentContext, { certificateChain, verification }) => {
                 console.log(`dyncamically trusting certificate ${certificateChain[0].getIssuerNameField("C")} for verification of ${verification.type}`);
@@ -290,8 +294,8 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         const verificationResult = (await (openId4VpVerifierService as any).verifyPresentation(this.agent.context, {
             format: credentialFormat,
             presentation,
-            nonce: undefined, // only required if key binding is used?
-            audience: undefined // only required if key binding is used?
+            nonce: "aChallengeString",
+            audience: "aDomain"
         })) as
             | {
                   verified: true;
