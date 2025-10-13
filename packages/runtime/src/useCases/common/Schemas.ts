@@ -21088,80 +21088,6 @@ export const ValidateChallengeRequest: any = {
     }
 }
 
-export const CreateDeviceRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CreateDeviceRequest",
-    "definitions": {
-        "CreateDeviceRequest": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "isAdmin": {
-                    "type": "boolean"
-                }
-            },
-            "additionalProperties": false
-        }
-    }
-}
-
-export const CreateDeviceOnboardingTokenRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CreateDeviceOnboardingTokenRequest",
-    "definitions": {
-        "CreateDeviceOnboardingTokenRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/DeviceIdString"
-                },
-                "expiresAt": {
-                    "$ref": "#/definitions/ISO8601DateTimeString"
-                },
-                "profileName": {
-                    "type": "string"
-                },
-                "passwordProtection": {
-                    "type": "object",
-                    "properties": {
-                        "password": {
-                            "type": "string",
-                            "minLength": 1
-                        },
-                        "passwordIsPin": {
-                            "type": "boolean",
-                            "const": true
-                        },
-                        "passwordLocationIndicator": {}
-                    },
-                    "required": [
-                        "password"
-                    ],
-                    "additionalProperties": false
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "additionalProperties": false
-        },
-        "DeviceIdString": {
-            "type": "string",
-            "pattern": "DVC[A-Za-z0-9]{17}"
-        },
-        "ISO8601DateTimeString": {
-            "type": "string",
-            "errorMessage": "must match ISO8601 datetime format",
-            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
-        }
-    }
-}
-
 export const DeleteDeviceRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/DeleteDeviceRequest",
@@ -21244,32 +21170,6 @@ export const GetDeviceRequest: any = {
         "DeviceIdString": {
             "type": "string",
             "pattern": "DVC[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const GetDeviceOnboardingInfoRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetDeviceOnboardingInfoRequest",
-    "definitions": {
-        "GetDeviceOnboardingInfoRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/GenericIdString"
-                },
-                "profileName": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "additionalProperties": false
-        },
-        "GenericIdString": {
-            "type": "string",
-            "pattern": "[A-Za-z0-9]{20}"
         }
     }
 }

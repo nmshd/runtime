@@ -3638,7 +3638,7 @@ describe("AttributesController", function () {
             const attributeTagClient = consumptionController.attributes["attributeTagClient"];
 
             attributeTagClientSpy = spy(attributeTagClient);
-            when(attributeTagClientSpy.get("/api/v1/Tags", anything(), anything())).thenResolve(
+            when(attributeTagClientSpy.get("/api/v2/Tags", anything(), anything())).thenResolve(
                 ClientResult.ok(
                     AttributeTagCollection.from({
                         supportedLanguages: ["en"],
@@ -3698,7 +3698,7 @@ describe("AttributesController", function () {
             attributesControllerSpy = spy(consumptionController.attributes);
 
             etag = "some-e-tag";
-            when(attributeTagClientSpy.get("/api/v1/Tags", anything(), anything())).thenCall((_path, _params, config) => {
+            when(attributeTagClientSpy.get("/api/v2/Tags", anything(), anything())).thenCall((_path, _params, config) => {
                 const etagMatched = etag === config?.headers?.["if-none-match"];
                 const platformParameters = {
                     etag,

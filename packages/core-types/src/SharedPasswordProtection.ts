@@ -58,6 +58,10 @@ export class SharedPasswordProtection extends Serializable implements ISharedPas
     }
 
     public truncate(): string {
-        return `${this.passwordType}&${this.salt.toBase64()}&${this.passwordLocationIndicator ?? ""}&${this.password ?? ""}`;
+        const base = `${this.passwordType}&${this.salt.toBase64()}`;
+
+        if (this.passwordLocationIndicator === undefined && this.password === undefined) return base;
+
+        return `${base}&${this.passwordLocationIndicator ?? ""}${this.password ? `&${this.password}` : ""}`;
     }
 }

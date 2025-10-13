@@ -17,4 +17,5 @@ export interface FileDVO extends DataViewObject {
         truncated: string;
         url: string;
     };
+    owner: IdentityDVO;
 }

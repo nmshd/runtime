@@ -660,11 +660,12 @@ export class TestUtil {
     public static async runDeletionJob(): Promise<void> {
         const backboneVersion = this.getBackboneVersion();
         const appsettingsOverrideLocation = process.env.APPSETTINGS_OVERRIDE_LOCATION ?? `${__dirname}/../../../../.dev/appsettings.override.json`;
+        const backboneNetwork = process.env.BACKBONE_NETWORK ?? "local-test-backbone";
 
         await new GenericContainer(`ghcr.io/nmshd/backbone-identity-deletion-jobs:${backboneVersion}`)
             .withWaitStrategy(Wait.forOneShotStartup())
             .withCommand(["--Worker", "ActualDeletionWorker"])
-            .withNetworkMode("backbone")
+            .withNetworkMode(backboneNetwork)
             .withCopyFilesToContainer([{ source: appsettingsOverrideLocation, target: "/app/appsettings.override.json" }])
             .start();
     }
@@ -674,7 +675,7 @@ export class TestUtil {
 
         const composeFile = fs.readFileSync(path.resolve(`${__dirname}/../../../../.dev/compose.backbone.yml`));
 
-        const regex = /image: ghcr\.io\/nmshd\/backbone-consumer-api:(?<version>[^\r\n]*)/;
+        const regex = /image: ghcr\.io\/nmshd\/backbone-consumer-api:(?<version>[^\r\n]*)@.*/;
         const match = composeFile.toString().match(regex);
         if (!match?.groups?.version) throw new Error("Could not find backbone version in compose file");
 

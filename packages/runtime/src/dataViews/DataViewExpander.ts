@@ -18,7 +18,6 @@ import {
     IdentityAttribute,
     IdentityAttributeJSON,
     IdentityAttributeQueryJSON,
-    MailJSON,
     MiddleNameJSON,
     ProposeAttributeAcceptResponseItemJSON,
     ProposeAttributeRequestItemJSON,
@@ -270,7 +269,7 @@ export class DataViewExpander {
         };
 
         if (message.content["@type"] === "Mail") {
-            const mailContent = message.content as MailJSON;
+            const mailContent = message.content;
 
             const to: RecipientDVO[] = mailContent.to.map((value) => addressMap[value]);
 
@@ -1825,6 +1824,7 @@ export class DataViewExpander {
             filename: file.filename,
             filesize: file.filesize,
             createdBy: await this.expandAddress(file.createdBy),
+            owner: await this.expandAddress(file.owner),
             reference: file.reference
         };
     }

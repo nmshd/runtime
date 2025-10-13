@@ -233,22 +233,6 @@ describe("AppStringProcessor", function () {
 
         afterAll(async () => await runtime3.stop());
 
-        test("device onboarding with a password protected Token", async function () {
-            const deviceResult = await runtime1Session.transportServices.devices.createDevice({});
-            const tokenResult = await runtime1Session.transportServices.devices.createDeviceOnboardingToken({
-                id: deviceResult.value.id,
-                passwordProtection: { password: "password" }
-            });
-
-            mockUiBridge.setPasswordToReturnForAttempt(1, "password");
-
-            const result = await runtime2.stringProcessor.processDeviceOnboardingReference(tokenResult.value.reference.truncated);
-            expect(result).toBeSuccessful();
-            expect(result.value).toBeUndefined();
-
-            expect(mockUiBridge).showDeviceOnboardingCalled((deviceOnboardingInfo: DeviceOnboardingInfoDTO) => deviceOnboardingInfo.id === deviceResult.value.id);
-        });
-
         test("backup device onboarding with a password protected Token", async function () {
             const tokenResult = await runtime1Session.transportServices.identityRecoveryKits.createIdentityRecoveryKit({
                 profileName: "profileNameForBackupDevice",
@@ -343,24 +327,6 @@ describe("AppStringProcessor", function () {
 
                 expect(mockUiBridge).enterPasswordCalled("pw");
                 expect(mockUiBridge).requestAccountSelectionNotCalled();
-            });
-
-            test("device onboarding with a password protected Token", async function () {
-                const deviceResult = await runtime1Session.transportServices.devices.createDevice({});
-                const tokenResult = await runtime1Session.transportServices.devices.createDeviceOnboardingToken({
-                    id: deviceResult.value.id,
-                    passwordProtection: { password: "password" }
-                });
-
-                mockUiBridge.setPasswordToReturnForAttempt(1, "password");
-
-                const result = await runtime2.stringProcessor.processURL(tokenResult.value.reference.url);
-                expect(result).toBeAnError(
-                    "The Token contains a device onboarding info, but this is not allowed in this context.",
-                    "error.appruntime.appStringProcessor.deviceOnboardingNotAllowed"
-                );
-
-                expect(mockUiBridge).showDeviceOnboardingNotCalled();
             });
         });
     });

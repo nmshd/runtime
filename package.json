@@ -22,9 +22,8 @@
         "lint:prettier": "prettier --check .",
         "lint:tsc": "npm run --workspaces lint:tsc",
         "outdated": "ncu -i && ncu -i --workspaces",
-        "pull:backbone": "docker compose -p runtime-test-backbone -f .dev/compose.backbone.yml pull",
-        "start:backbone": "docker compose -p runtime-test-backbone -f .dev/compose.backbone.yml up -d",
-        "teardown:backbone": "docker compose -p runtime-test-backbone -f .dev/compose.backbone.yml down -v",
+        "start:backbone": "docker compose -f .dev/compose.backbone.yml up -d",
+        "teardown:backbone": "docker compose -f .dev/compose.backbone.yml down -v",
         "test:teardown": "docker compose -f .dev/compose.yml down -fsv",
         "postinstall": "patch-package && echo 'Postinstall done.'"
     },
@@ -33,19 +32,18 @@
         "@js-soft/license-check": "^1.0.9",
         "@types/jest": "^30.0.0",
         "@types/libsodium-wrappers": "^0.7.14",
-        "@types/node": "^24.3.0",
+        "@types/node": "^24.7.0",
         "enhanced-publish": "^1.1.5",
-        "eslint": "^9.34.0",
-        "jest": "^30.1.3",
+        "eslint": "^9.37.0",
+        "jest": "^30.2.0",
         "jest-expect-message": "^1.1.3",
         "madge": "^8.0.0",
-        "npm-check-updates": "^18.0.3",
+        "npm-check-updates": "^19.0.0",
         "prettier": "^3.6.2",
-        "ts-jest": "^29.4.1",
+        "ts-jest": "^29.4.4",
         "ts-node": "^10.9.2",
         "tsconfig-paths": "^4.2.0",
-        "typescript": "^5.9.2",
+        "typescript": "^5.9.3",
         "patch-package": "^8.0.1"
-    },
-    "dependencies": {}
+    }
 }
