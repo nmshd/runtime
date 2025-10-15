@@ -22444,6 +22444,7 @@ export const SendMessageRequest: any = {
     "definitions": {
         "SendMessageRequest": {
             "type": "object",
+            "additionalProperties": false,
             "properties": {
                 "recipients": {
                     "type": "array",
@@ -22463,10 +22464,9 @@ export const SendMessageRequest: any = {
                 }
             },
             "required": [
-                "recipients",
-                "content"
-            ],
-            "additionalProperties": false
+                "content",
+                "recipients"
+            ]
         },
         "AddressString": {
             "type": "string",
