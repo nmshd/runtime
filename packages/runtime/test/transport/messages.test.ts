@@ -228,7 +228,7 @@ describe("Message errors", () => {
                 "@type": "Mail",
                 subject: "aSubject",
                 body: "aBody"
-            }
+            } as any
         });
         expect(result).toBeAnError("Mail.to :: Value is not defined", "error.runtime.requestDeserialization");
     });
@@ -326,7 +326,7 @@ describe("Message errors", () => {
     test("should throw correct error for false content type", async () => {
         const result = await client1.transport.messages.sendMessage({
             recipients: [client2.address],
-            content: {}
+            content: {} as any
         });
         expect(result).toBeAnError("The content of a Message", "error.runtime.validation.invalidPropertyValue");
     });
