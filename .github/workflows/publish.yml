@@ -22,7 +22,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: current
-          registry-url: https://registry.npmjs.org/
+          registry-url: https://registry.npmjs.org
       - run: npm ci
       - run: npm run build:ci --workspaces
         env:
@@ -31,6 +31,5 @@ jobs:
           VERSION: ${{ github.ref_name }}
       - run: bash .ci/publishNpm.sh
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           VERSION: ${{ github.ref_name }}
     needs: ["run-checks"]
