@@ -2,6 +2,8 @@ import {
     AuthenticationRequestItem,
     ConsentRequestItem,
     CreateAttributeRequestItem,
+    CreateAttributeWithKeyBindingNotificationItem,
+    CreateAttributeWithKeyBindingRequestItem,
     DeleteAttributeRequestItem,
     FormFieldRequestItem,
     OwnSharedAttributeDeletedByOwnerNotificationItem,
@@ -18,6 +20,8 @@ import { AccountController, Transport } from "@nmshd/transport";
 import {
     AttributesController,
     CreateAttributeRequestItemProcessor,
+    CreateAttributeWithKeyBindingNotificationItemProcessor,
+    CreateAttributeWithKeyBindingRequestItemProcessor,
     DeleteAttributeRequestItemProcessor,
     DraftsController,
     FormFieldRequestItemProcessor,
@@ -154,6 +158,7 @@ export class ConsumptionController {
         return new Map<RequestItemConstructor, RequestItemProcessorConstructor>([
             [ShareAttributeRequestItem, ShareAttributeRequestItemProcessor],
             [CreateAttributeRequestItem, CreateAttributeRequestItemProcessor],
+            [CreateAttributeWithKeyBindingRequestItem, CreateAttributeWithKeyBindingRequestItemProcessor],
             [DeleteAttributeRequestItem, DeleteAttributeRequestItemProcessor],
             [ReadAttributeRequestItem, ReadAttributeRequestItemProcessor],
             [ProposeAttributeRequestItem, ProposeAttributeRequestItemProcessor],
@@ -169,7 +174,8 @@ export class ConsumptionController {
             [PeerSharedAttributeSucceededNotificationItem, PeerSharedAttributeSucceededNotificationItemProcessor],
             [OwnSharedAttributeDeletedByOwnerNotificationItem, OwnSharedAttributeDeletedByOwnerNotificationItemProcessor],
             [PeerSharedAttributeDeletedByPeerNotificationItem, PeerSharedAttributeDeletedByPeerNotificationItemProcessor],
-            [ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem, ThirdPartyRelationshipAttributeDeletedByPeerNotificationItemProcessor]
+            [ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem, ThirdPartyRelationshipAttributeDeletedByPeerNotificationItemProcessor],
+            [CreateAttributeWithKeyBindingNotificationItem, CreateAttributeWithKeyBindingNotificationItemProcessor]
         ]);
     }
 
