@@ -1,7 +1,18 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { LocalRequestStatus, OutgoingRequestsController } from "@nmshd/consumption";
-import { ArbitraryMessageContent, Mail, Notification, Request, ResponseWrapper } from "@nmshd/content";
+import {
+    ArbitraryMessageContent,
+    ArbitraryMessageContentJSON,
+    Mail,
+    MailJSON,
+    Notification,
+    NotificationJSON,
+    Request,
+    RequestJSON,
+    ResponseWrapper,
+    ResponseWrapperJSON
+} from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreError, CoreId } from "@nmshd/core-types";
 import { MessageDTO } from "@nmshd/runtime-types";
 import { AccountController, File, FileController, MessageController, PeerDeletionStatus, RelationshipsController, RelationshipStatus, TransportCoreErrors } from "@nmshd/transport";
@@ -10,18 +21,22 @@ import _ from "lodash";
 import { AddressString, FileIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { MessageMapper } from "./MessageMapper";
 
-export interface SendMessageRequest {
+interface AbstractSendMessageRequest<T> {
     /**
      * @minItems 1
      * @uniqueItems true
      */
     recipients: AddressString[];
-    content: any;
+    content: T;
     /**
      * @uniqueItems true
      */
     attachments?: FileIdString[];
 }
+
+export interface SendMessageRequest extends AbstractSendMessageRequest<MailJSON | ResponseWrapperJSON | NotificationJSON | ArbitraryMessageContentJSON | RequestJSON> {}
+
+export interface SchemaValidatableSendMessageRequest extends AbstractSendMessageRequest<unknown> {}
 
 class Validator extends SchemaValidator<SendMessageRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
