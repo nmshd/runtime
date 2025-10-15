@@ -1,5 +1,5 @@
 import { ILogger } from "@js-soft/logging-abstractions";
-import { CreateAttributeWithKeyBindingAcceptResponseItem, CreateAttributeWithKeyBindingNotificationItem, ResponseItemGroup } from "@nmshd/content";
+import { CreateAttributeWithKeyBindingNotificationItem } from "@nmshd/content";
 import { TransportLoggerFactory } from "@nmshd/transport";
 import { ConsumptionController } from "../../../../consumption/ConsumptionController";
 import { ValidationResult } from "../../../common";
@@ -34,24 +34,18 @@ export class CreateAttributeWithKeyBindingNotificationItemProcessor extends Abst
     }
 
     public override async process(notificationItem: CreateAttributeWithKeyBindingNotificationItem, notification: LocalNotification): Promise<void> {
-        const sourceRequest = await this.consumptionController.incomingRequests.getIncomingRequest(notificationItem.requestId);
-        if (!sourceRequest) throw new Error("Request ID doesn't belong to an existing request.");
-
-        const sourceResponseItem = (
-            notificationItem.requestItemIdentifier[1]
-                ? (sourceRequest.response!.content.items[notificationItem.requestItemIdentifier[0]!] as ResponseItemGroup).items[notificationItem.requestItemIdentifier[1]]
-                : sourceRequest.response!.content.items[notificationItem.requestItemIdentifier[0]!]
-        ) as CreateAttributeWithKeyBindingAcceptResponseItem;
-
-        const sharedAttributeId = sourceResponseItem.sharedAttributeId;
         const repositoryAttribute = await this.consumptionController.attributes.createRepositoryAttribute({
-            content: notificationItem.attribute
+            content: {
+                owner: this.accountController.identity.address,
+                value: notificationItem.attribute
+            },
+            id: notificationItem.sharedAttributeId
         });
         await this.consumptionController.attributes.createSharedLocalAttributeCopy({
             peer: notification.peer,
             requestReference: notificationItem.requestId,
             sourceAttributeId: repositoryAttribute.id,
-            attributeId: sharedAttributeId
+            attributeId: notificationItem.sharedAttributeId
         });
     }
 

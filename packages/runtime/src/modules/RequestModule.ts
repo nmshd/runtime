@@ -1,6 +1,10 @@
 import { LocalRequestStatus } from "@nmshd/consumption";
 import {
+    CreateAttributeWithKeyBindingAcceptResponseItemJSON,
+    CreateAttributeWithKeyBindingNotificationItem,
+    CreateAttributeWithKeyBindingRequestItemJSON,
     DCQLQueryJSON,
+    NotificationJSON,
     ReadAttributeAcceptResponseItemJSON,
     ReadAttributeRequestItemJSON,
     RelationshipCreationContent,
@@ -12,8 +16,9 @@ import {
     ResponseWrapper,
     VerifiableCredentialJSON
 } from "@nmshd/content";
-import { CoreDate } from "@nmshd/core-types";
+import { CoreDate, CoreIdHelper } from "@nmshd/core-types";
 import { LocalRequestDTO, RelationshipStatus } from "@nmshd/runtime-types";
+import axios from "axios";
 import {
     IncomingRequestStatusChangedEvent,
     MessageProcessedEvent,
@@ -388,6 +393,8 @@ export class RequestModule extends RuntimeModule {
     private async handleOutgoingRequestStatusChanged(event: OutgoingRequestStatusChangedEvent) {
         if (event.data.newStatus !== LocalRequestStatus.Completed) return;
 
+        const services = await this.runtime.getServices(event.eventTargetAddress);
+
         const requestItems = event.data.request.content.items.map((i) => (i["@type"] === "RequestItemGroup" ? (i as RequestItemGroupJSON).items : [i])).flat();
         const responseItems = event.data.request.response!.content.items.map((i) => (i["@type"] === "ResponseItemGroup" ? (i as ResponseItemGroupJSON).items : [i])).flat();
         const requestResponseCombinedItems = requestItems.map((item, i) => {
@@ -396,6 +403,34 @@ export class RequestModule extends RuntimeModule {
                 responseItem: responseItems[i]
             };
         });
+
+        const itemsWithKeyBinding = requestResponseCombinedItems.filter((i) => i.requestItem["@type"] === "CreateAttributeWithKeyBindingRequestItem");
+
+        await Promise.all(
+            itemsWithKeyBinding.map(async (i) => {
+                const credentialWithKeyBinding = (
+                    await axios.post("http://localhost:3000/issuance/credentialForEnmeshed", {
+                        enmeshedAddress: event.data.request.peer,
+                        bindingKey: (i.responseItem as CreateAttributeWithKeyBindingAcceptResponseItemJSON).jwk,
+                        credentialConfigurationId: (i.requestItem as CreateAttributeWithKeyBindingRequestItemJSON).credentialConfigurationId
+                    })
+                ).data;
+
+                const notificationWithCredential = CreateAttributeWithKeyBindingNotificationItem.from({
+                    attribute: credentialWithKeyBinding,
+                    sharedAttributeId: (await new CoreIdHelper("ATT").generate()).toString(),
+                    requestId: event.data.request.id
+                });
+
+                await services.transportServices.messages.sendMessage({
+                    recipients: [event.data.request.peer],
+                    content: {
+                        "@type": "Notification",
+                        items: [notificationWithCredential.toJSON()]
+                    } as NotificationJSON
+                });
+            })
+        );
 
         const itemsWithPresentedCredential = requestResponseCombinedItems.filter(
             (i) => i.requestItem["@type"] === "ReadAttributeRequestItem" && (i.requestItem as ReadAttributeRequestItemJSON).query["@type"] === "DCQLQuery"
@@ -408,7 +443,6 @@ export class RequestModule extends RuntimeModule {
             };
         });
 
-        const services = await this.runtime.getServices(event.eventTargetAddress);
         const verificationResults = await Promise.all(queryPresentationCombinedItems.map((i) => services.consumptionServices.openId4Vc.verifySharedCredential(i)));
 
         this.logger.info(

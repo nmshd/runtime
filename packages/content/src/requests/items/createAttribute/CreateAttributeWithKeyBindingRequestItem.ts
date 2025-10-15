@@ -6,10 +6,12 @@ import { IRequestItem, RequestItem } from "../../RequestItem";
 export interface CreateAttributeWithKeyBindingRequestItemJSON extends RequestItemJSON {
     "@type": "CreateAttributeWithKeyBindingRequestItem";
     attribute: IdentityAttributeJSON<VerifiableCredentialJSON>;
+    credentialConfigurationId: string;
 }
 
 export interface ICreateAttributeWithKeyBindingRequestItem extends IRequestItem {
     attribute: IIdentityAttribute;
+    credentialConfigurationId: string;
 }
 
 @type("CreateAttributeWithKeyBindingRequestItem")
@@ -17,6 +19,10 @@ export class CreateAttributeWithKeyBindingRequestItem extends RequestItem implem
     @validate()
     @serialize()
     public attribute: IdentityAttribute<VerifiableCredential>;
+
+    @validate()
+    @serialize()
+    public credentialConfigurationId: string;
 
     public static from(
         value: ICreateAttributeWithKeyBindingRequestItem | Omit<CreateAttributeWithKeyBindingRequestItemJSON, "@type"> | CreateAttributeWithKeyBindingRequestItemJSON

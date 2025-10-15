@@ -8,7 +8,6 @@ import {
 } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { ConsumptionIds } from "../../../../consumption/ConsumptionIds";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
@@ -90,7 +89,6 @@ export class CreateAttributeWithKeyBindingRequestItemProcessor extends GenericRe
 
         return CreateAttributeWithKeyBindingAcceptResponseItem.from({
             result: ResponseItemResult.Accepted,
-            sharedAttributeId: await ConsumptionIds.attribute.generate(),
             jwk: keyBindingKey
         });
     }
