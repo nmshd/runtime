@@ -4,6 +4,7 @@ export * from "./CanCreateRepositoryAttribute";
 export * from "./ChangeDefaultRepositoryAttribute";
 export * from "./CreateAndShareRelationshipAttribute";
 export * from "./CreateRepositoryAttribute";
+export * from "./CreateSharedLocalAttribute";
 export * from "./DeleteOwnSharedAttributeAndNotifyPeer";
 export * from "./DeletePeerSharedAttributeAndNotifyOwner";
 export * from "./DeleteRepositoryAttribute";

@@ -11,6 +11,8 @@ import {
     CreateAndShareRelationshipAttributeUseCase,
     CreateRepositoryAttributeRequest,
     CreateRepositoryAttributeUseCase,
+    CreateSharedLocalAttributeRequest,
+    CreateSharedLocalAttributeUseCase,
     DeleteOwnSharedAttributeAndNotifyPeerRequest,
     DeleteOwnSharedAttributeAndNotifyPeerResponse,
     DeleteOwnSharedAttributeAndNotifyPeerUseCase,
@@ -96,7 +98,8 @@ export class AttributesFacade {
         @Inject private readonly deleteSharedAttributesForRejectedOrRevokedRelationshipUseCase: DeleteSharedAttributesForRejectedOrRevokedRelationshipUseCase,
         @Inject private readonly getAttributeTagCollectionUseCase: GetAttributeTagCollectionUseCase,
         @Inject private readonly setAttributeDeletionInfoOfDeletionProposedRelationshipUseCase: SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase,
-        @Inject private readonly markAttributeAsViewedUseCase: MarkAttributeAsViewedUseCase
+        @Inject private readonly markAttributeAsViewedUseCase: MarkAttributeAsViewedUseCase,
+        @Inject private readonly createSharedLocalAttributeUseCase: CreateSharedLocalAttributeUseCase
     ) {}
 
     public async canCreateRepositoryAttribute(request: CanCreateRepositoryAttributeRequest): Promise<Result<CanCreateRepositoryAttributeResponse>> {
@@ -217,5 +220,9 @@ export class AttributesFacade {
 
     public async markAttributeAsViewed(request: MarkAttributeAsViewedRequest): Promise<Result<LocalAttributeDTO>> {
         return await this.markAttributeAsViewedUseCase.execute(request);
+    }
+
+    public async createSharedLocalAttribute(request: CreateSharedLocalAttributeRequest): Promise<Result<LocalAttributeDTO>> {
+        return await this.createSharedLocalAttributeUseCase.execute(request);
     }
 }

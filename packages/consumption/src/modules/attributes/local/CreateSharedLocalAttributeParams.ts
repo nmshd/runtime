@@ -5,7 +5,7 @@ import { CoreAddress, CoreId, ICoreAddress, ICoreId } from "@nmshd/core-types";
 export interface CreateSharedLocalAttributeParamsJSON {
     id?: string;
     content: IdentityAttributeJSON | RelationshipAttributeJSON;
-    requestReferece: string;
+    requestReference: string;
     peer: string;
     thirdPartyAddress?: string;
 }
