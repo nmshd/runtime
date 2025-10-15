@@ -409,16 +409,25 @@ export class RequestModule extends RuntimeModule {
         await Promise.all(
             itemsWithKeyBinding.map(async (i) => {
                 const credentialWithKeyBinding = (
-                    await axios.post("http://localhost:3000/issuance/credentialForEnmeshed", {
+                    await axios.post("http://host.docker.internal:1234/issuance/credentialForEnmeshed", {
                         enmeshedAddress: event.data.request.peer,
                         bindingKey: (i.responseItem as CreateAttributeWithKeyBindingAcceptResponseItemJSON).jwk,
                         credentialConfigurationId: (i.requestItem as CreateAttributeWithKeyBindingRequestItemJSON).credentialConfigurationId
                     })
                 ).data;
 
+                const sharedAttributeId = (await new CoreIdHelper("ATT").generate()).toString();
+
+                await services.consumptionServices.attributes.createSharedLocalAttribute({
+                    content: credentialWithKeyBinding,
+                    id: sharedAttributeId,
+                    peer: event.data.request.peer,
+                    requestReference: event.data.request.id
+                });
+
                 const notificationWithCredential = CreateAttributeWithKeyBindingNotificationItem.from({
                     attribute: credentialWithKeyBinding,
-                    sharedAttributeId: (await new CoreIdHelper("ATT").generate()).toString(),
+                    sharedAttributeId,
                     requestId: event.data.request.id
                 });
 
