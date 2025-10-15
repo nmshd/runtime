@@ -67,6 +67,10 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         return await this.agent.openid4vc.holder.resolveIssuerMetadata(credentialIssuer);
     }
 
+    public async generateKeyBindingKey(): Promise<Kms.KmsCreateKeyReturn> {
+        return await this.agent.kms.createKeyForSignatureAlgorithm({ algorithm: "ES256" });
+    }
+
     public async initiateAuthorization(resolvedCredentialOffer: OpenId4VciResolvedCredentialOffer, credentialsToRequest: string[]): Promise<any> {
         const grants = resolvedCredentialOffer.credentialOfferPayload.grants;
         if (grants?.[preAuthorizedCodeGrantIdentifier]) {

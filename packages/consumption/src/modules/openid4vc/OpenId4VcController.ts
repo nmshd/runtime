@@ -1,4 +1,4 @@
-import { DcqlQuery, JsonTransformer } from "@credo-ts/core";
+import { DcqlQuery, JsonTransformer, Kms } from "@credo-ts/core";
 import { DCQLQueryJSON, VerifiableCredential, VerifiableCredentialJSON } from "@nmshd/content";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../consumption/ConsumptionController";
@@ -9,6 +9,12 @@ import { Holder } from "./local/Holder";
 export class OpenId4VcController extends ConsumptionBaseController {
     public constructor(parent: ConsumptionController) {
         super(ConsumptionControllerName.OpenId4VcController, parent);
+    }
+
+    public async generateKeyBindingKey(): Promise<Kms.KmsCreateKeyReturn> {
+        const holder = new Holder(this.parent.accountController, this.parent.attributes);
+        await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
+        return await holder.generateKeyBindingKey();
     }
 
     public async fetchCredentialOffer(credentialOfferUrl: string): Promise<any> {

@@ -4,6 +4,8 @@ export * from "./common/AttributeSuccessionAcceptResponseItem";
 export * from "./consent/ConsentRequestItem";
 export * from "./createAttribute/CreateAttributeAcceptResponseItem";
 export * from "./createAttribute/CreateAttributeRequestItem";
+export * from "./createAttribute/CreateAttributeWithKeyBindingAcceptResponseItem";
+export * from "./createAttribute/CreateAttributeWithKeyBindingRequestItem";
 export * from "./deleteAttribute/DeleteAttributeAcceptResponseItem";
 export * from "./deleteAttribute/DeleteAttributeRequestItem";
 export * from "./formField/FormFieldAcceptResponseItem";
