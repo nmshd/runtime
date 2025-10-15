@@ -397,11 +397,11 @@ export class RequestModule extends RuntimeModule {
             };
         });
 
-        const itemsWithSharedCredential = requestResponseCombinedItems.filter(
+        const itemsWithPresentedCredential = requestResponseCombinedItems.filter(
             (i) => i.requestItem["@type"] === "ReadAttributeRequestItem" && (i.requestItem as ReadAttributeRequestItemJSON).query["@type"] === "DCQLQuery"
         );
 
-        const queryPresentationCombinedItems = itemsWithSharedCredential.map((i) => {
+        const queryPresentationCombinedItems = itemsWithPresentedCredential.map((i) => {
             return {
                 query: (i.requestItem as ReadAttributeRequestItemJSON).query as DCQLQueryJSON,
                 credential: (i.responseItem as ReadAttributeAcceptResponseItemJSON).attribute.value as VerifiableCredentialJSON
