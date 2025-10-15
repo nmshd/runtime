@@ -1,5 +1,6 @@
-import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
+import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreDate, ICoreId } from "@nmshd/core-types";
+import { CoreSynchronizable, ICoreSynchronizable } from "@nmshd/transport";
 import { EmittedAttributeDeletionInfo, EmittedAttributeDeletionInfoJSON, IEmittedAttributeDeletionInfo } from "../deletionInfos";
 
 export interface ForwardedSharingDetailsJSON {
@@ -11,7 +12,7 @@ export interface ForwardedSharingDetailsJSON {
     deletionInfo?: EmittedAttributeDeletionInfoJSON;
 }
 
-export interface IForwardedSharingDetails extends ISerializable {
+export interface IForwardedSharingDetails extends ICoreSynchronizable {
     attributeId: ICoreId;
     peer: ICoreAddress;
     sourceReference: ICoreId;
@@ -20,7 +21,7 @@ export interface IForwardedSharingDetails extends ISerializable {
 }
 
 @type("ForwardedSharingDetails")
-export class ForwardedSharingDetails extends Serializable implements IForwardedSharingDetails {
+export class ForwardedSharingDetails extends CoreSynchronizable implements IForwardedSharingDetails {
     @validate()
     @serialize()
     public attributeId: CoreId;

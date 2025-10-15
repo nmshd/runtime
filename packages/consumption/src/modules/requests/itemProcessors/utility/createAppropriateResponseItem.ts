@@ -70,7 +70,8 @@ export default async function createAppropriateResponseItem(
     }
 
     if (latestSharedVersion.id.equals(ownIdentityAttribute.id)) {
-        if (latestSharedVersion.hasDeletionStatusUnequalDeletedByRecipient(requestInfo.peer)) {
+        const deletionStatus = await attributesController.getForwardedSharingDetailsNotDeletedByRecipient(latestSharedVersion, requestInfo.peer);
+        if (deletionStatus) {
             await attributesController.setForwardedDeletionInfoOfAttribute(latestSharedVersion, undefined, requestInfo.peer, true);
         }
 

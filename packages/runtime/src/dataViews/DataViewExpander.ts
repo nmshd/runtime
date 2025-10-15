@@ -1140,31 +1140,39 @@ export class DataViewExpander {
         return await Promise.all(attributesPromise);
     }
 
-    private expandForwardingPeers(localAttribute: OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute): string[] | undefined {
-        if (!localAttribute.forwardedSharingDetails || localAttribute.forwardedSharingDetails.length === 0) return;
+    private expandForwardingPeers(_localAttribute: OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute): string[] | undefined {
+        // TODO: enable when finding out how to proceed with this
 
-        if (localAttribute instanceof OwnIdentityAttribute) {
-            return localAttribute.getForwardingPeers().map((peerAddress) => peerAddress.toString());
-        }
+        return;
 
-        return localAttribute.getForwardingPeers().map((thirdPartyAddress) => thirdPartyAddress.toString());
+        // if (!localAttribute.forwardedSharingDetails || localAttribute.forwardedSharingDetails.length === 0) return;
+
+        // if (localAttribute instanceof OwnIdentityAttribute) {
+        //     return localAttribute.getForwardingPeers().map((peerAddress) => peerAddress.toString());
+        // }
+
+        // return localAttribute.getForwardingPeers().map((thirdPartyAddress) => thirdPartyAddress.toString());
     }
 
-    private expandForwardedSharingDetails(localAttribute: OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute): ForwardedSharingDetailsDVO[] | undefined {
-        if (!localAttribute.forwardedSharingDetails || localAttribute.forwardedSharingDetails.length === 0) return;
+    private expandForwardedSharingDetails(_localAttribute: OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute): ForwardedSharingDetailsDVO[] | undefined {
+        // TODO: enable when finding out how to proceed with this
 
-        return localAttribute.forwardedSharingDetails.map((sharingDetails) => {
-            const result: ForwardedSharingDetailsDVO = {
-                peer: sharingDetails.peer.toString(),
-                sourceReference: sharingDetails.sourceReference.toString(),
-                sharedAt: sharingDetails.sharedAt.toString()
-            };
-            if (sharingDetails.deletionInfo) {
-                result.deletionDate = sharingDetails.deletionInfo.deletionDate.toString();
-                result.deletionStatus = sharingDetails.deletionInfo.deletionStatus;
-            }
-            return result;
-        });
+        return;
+
+        // if (!localAttribute.forwardedSharingDetails || localAttribute.forwardedSharingDetails.length === 0) return;
+
+        // return localAttribute.forwardedSharingDetails.map((sharingDetails) => {
+        //     const result: ForwardedSharingDetailsDVO = {
+        //         peer: sharingDetails.peer.toString(),
+        //         sourceReference: sharingDetails.sourceReference.toString(),
+        //         sharedAt: sharingDetails.sharedAt.toString()
+        //     };
+        //     if (sharingDetails.deletionInfo) {
+        //         result.deletionDate = sharingDetails.deletionInfo.deletionDate.toString();
+        //         result.deletionStatus = sharingDetails.deletionInfo.deletionStatus;
+        //     }
+        //     return result;
+        // });
     }
 
     public async expandAttributeQuery(

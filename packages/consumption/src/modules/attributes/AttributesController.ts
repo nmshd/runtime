@@ -60,6 +60,7 @@ import {
 
 export class AttributesController extends ConsumptionBaseController {
     private attributes: SynchronizedCollection;
+    private forwardedSharingDetails: SynchronizedCollection;
     private tagCollection: IDatabaseCollection;
     private attributeTagClient: TagClient;
     private readTagCollectionPromise: Promise<AttributeTagCollection> | undefined;
@@ -81,6 +82,7 @@ export class AttributesController extends ConsumptionBaseController {
         await super.init();
 
         this.attributes = await this.parent.accountController.getSynchronizedCollection("Attributes");
+        this.forwardedSharingDetails = await this.parent.accountController.getSynchronizedCollection("AttributeForwardedSharingDetails");
         this.tagCollection = await this.parent.accountController.db.getCollection("TagCollection");
         this.attributeTagClient = new TagClient(this.parent.transport.config, this.parent.accountController.authenticator, this.parent.transport.correlator);
 
@@ -103,7 +105,11 @@ export class AttributesController extends ConsumptionBaseController {
         });
 
         if (!result) return;
-        return LocalAttribute.from(result);
+        const attribute = LocalAttribute.from(result);
+
+        await this.updateNumberOfForwards(attribute);
+
+        return attribute;
     }
 
     public async getLocalAttributes(query?: any, hideTechnical = false): Promise<LocalAttribute[]> {
@@ -114,6 +120,8 @@ export class AttributesController extends ConsumptionBaseController {
         const sorted = parsed.sort((a, b) => {
             return a.createdAt.compare(b.createdAt);
         });
+
+        for (const attribute of sorted) await this.updateNumberOfForwards(attribute);
 
         return sorted;
     }
@@ -433,18 +441,25 @@ export class AttributesController extends ConsumptionBaseController {
         if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
         if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
-        if (attribute.isForwardedTo(peer, true)) throw ConsumptionCoreErrors.attributes.alreadyForwarded(attribute.id, peer);
+        if (await this.isForwardedTo(attribute, peer, true)) throw ConsumptionCoreErrors.attributes.alreadyForwarded(attribute.id, peer);
 
-        const sharingDetails = attribute.hasDeletionStatusUnequalDeletedByRecipient(peer)
+        const existingSharingDetails = await this.getForwardedSharingDetailsNotDeletedByRecipient(attribute, peer);
+        const sharingDetails = existingSharingDetails
             ? (() => {
-                  const sharingDetailsForPeer = attribute.getForwardedSharingDetailsNotDeletedByRecipient(peer)!;
-                  sharingDetailsForPeer.deletionInfo = undefined;
-                  return sharingDetailsForPeer;
+                  existingSharingDetails.deletionInfo = undefined;
+                  return existingSharingDetails;
               })()
-            : ForwardedSharingDetails.from({ attributeId: localAttribute.id, peer, sourceReference, sharedAt: CoreDate.utc() });
+            : ForwardedSharingDetails.from({
+                  id: await ConsumptionIds.attributeForwardedSharingDetails.generate(),
+                  attributeId: localAttribute.id,
+                  peer,
+                  sourceReference,
+                  sharedAt: CoreDate.utc()
+              });
 
-        attribute.upsertForwardedSharingDetailsForPeer(peer, sharingDetails);
-        await this.updateAttributeUnsafe(attribute);
+        await this.upsertForwardedSharingDetailsForPeer(attribute, peer, sharingDetails);
+
+        // TODO: this event is strange, why do you want to listen on that?
 
         this.eventBus.publish(new AttributeForwardedSharingDetailsChangedEvent(this.identity.address.toString(), attribute));
         return attribute;
@@ -812,9 +827,16 @@ export class AttributesController extends ConsumptionBaseController {
         if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
         if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
-        attribute.forwardedSharingDetails = attribute.forwardedSharingDetails?.filter((sharingDetails) => !sharingDetails.peer.equals(peer));
-        await this.updateAttributeUnsafe(attribute);
+        const existingForwardedSharingDetailObjects = await this.forwardedSharingDetails.find({ attributeId: attribute.id, peer: peer.toString() });
+        const existingForwardedSharingDetails = existingForwardedSharingDetailObjects.map((obj) => ForwardedSharingDetails.from(obj));
 
+        for (const detail of existingForwardedSharingDetails) {
+            await this.forwardedSharingDetails.delete(detail);
+        }
+
+        await this.updateNumberOfForwards(attribute);
+
+        // TODO: this event is strange, why do you want to listen on that?
         this.eventBus.publish(new AttributeForwardedSharingDetailsChangedEvent(this.identity.address.toString(), attribute));
         return attribute;
     }
@@ -959,7 +981,7 @@ export class AttributesController extends ConsumptionBaseController {
         if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
         if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
-        const sharedAttribute = attribute.isForwardedTo(peerAddress, excludeToBeDeleted) ? [attribute] : [];
+        const sharedAttribute = (await this.isForwardedTo(attribute, peerAddress, excludeToBeDeleted)) ? [attribute] : [];
         const sharedPredecessors = await this.getPredecessorsOfAttributeSharedWithPeer(attribute, peerAddress, excludeToBeDeleted);
         const sharedSuccessors = await this.getSuccessorsOfAttributeSharedWithPeer(attribute, peerAddress, excludeToBeDeleted);
 
@@ -986,7 +1008,7 @@ export class AttributesController extends ConsumptionBaseController {
 
             referenceAttribute = predecessor;
 
-            if (referenceAttribute.isForwardedTo(peerAddress, excludeToBeDeleted)) matchingPredecessors.push(referenceAttribute);
+            if (await this.isForwardedTo(referenceAttribute, peerAddress, excludeToBeDeleted)) matchingPredecessors.push(referenceAttribute);
         }
 
         return matchingPredecessors;
@@ -1008,7 +1030,7 @@ export class AttributesController extends ConsumptionBaseController {
 
             referenceAttribute = successor;
 
-            if (referenceAttribute.isForwardedTo(peerAddress, excludeToBeDeleted)) matchingSuccessors.push(referenceAttribute);
+            if (await this.isForwardedTo(referenceAttribute, peerAddress, excludeToBeDeleted)) matchingSuccessors.push(referenceAttribute);
         }
 
         return matchingSuccessors;
@@ -1024,7 +1046,7 @@ export class AttributesController extends ConsumptionBaseController {
             );
         }
 
-        const peersWithLaterSharedVersion = attribute.getForwardingPeers(true);
+        const peersWithLaterSharedVersion = await this.getForwardingPeers(attribute, true);
 
         const peersWithExclusivelyForwardedPredecessors: [CoreAddress, CoreId][] = [];
         while (attribute.succeeds) {
@@ -1032,7 +1054,7 @@ export class AttributesController extends ConsumptionBaseController {
             if (!predecessor) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.succeeds.toString());
 
             attribute = predecessor;
-            const forwardingPeers = attribute.getForwardingPeers(true);
+            const forwardingPeers = await this.getForwardingPeers(attribute, true);
 
             const newPeers = forwardingPeers.filter((peer) => !peersWithLaterSharedVersion.some((peerWithLaterSharedVersion) => peerWithLaterSharedVersion.equals(peer)));
             if (newPeers.length === 0) continue;
@@ -1376,10 +1398,9 @@ export class AttributesController extends ConsumptionBaseController {
         if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
         if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
-        if (attribute.isDeletedOrToBeDeletedByForwardingPeer(peer) && !overrideDeletedOrToBeDeleted) return;
+        if ((await this.isDeletedOrToBeDeletedByForwardingPeer(attribute, peer)) && !overrideDeletedOrToBeDeleted) return;
 
-        attribute.setDeletionInfoForForwardingPeer(deletionInfo, peer, overrideDeletedOrToBeDeleted);
-        await this.updateAttributeUnsafe(attribute);
+        await this.setDeletionInfoForForwardingPeer(localAttribute, deletionInfo, peer, overrideDeletedOrToBeDeleted);
     }
 
     public async setPeerDeletionInfoOfOwnRelationshipAttribute(
@@ -1464,5 +1485,127 @@ export class AttributesController extends ConsumptionBaseController {
         this.eventBus.publish(new AttributeWasViewedAtChangedEvent(this.identity.address.toString(), localAttribute));
 
         return localAttribute;
+    }
+
+    public async isForwardedTo(attribute: LocalAttribute, peer: CoreAddress, excludeToBeDeleted = false): Promise<boolean> {
+        const forwardedSharingDetails = await this.forwardedSharingDetails.find({
+            attributeId: attribute.id.toString(),
+            peer: peer.toString(),
+            "deletionInfo.deletionStatus": { $ne: EmittedAttributeDeletionStatus.DeletedByRecipient }
+        });
+
+        if (forwardedSharingDetails.length === 0) return false;
+
+        if (!excludeToBeDeleted) return true;
+
+        return forwardedSharingDetails.some((sharingDetails) => sharingDetails.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.ToBeDeletedByRecipient);
+    }
+
+    public async getForwardedSharingDetailsNotDeletedByRecipient(attribute: LocalAttribute, peer: CoreAddress): Promise<ForwardedSharingDetails | undefined> {
+        const existingForwardedSharingDetails = await this.forwardedSharingDetails.find({
+            attributeId: attribute.id.toString(),
+            peer: peer.toString(),
+            "deletionInfo.deletionStatus": { $ne: EmittedAttributeDeletionStatus.DeletedByRecipient }
+        });
+
+        if (existingForwardedSharingDetails.length === 0) return undefined;
+        return ForwardedSharingDetails.from(existingForwardedSharingDetails[0]);
+    }
+
+    public async upsertForwardedSharingDetailsForPeer(attribute: LocalAttribute, peer: CoreAddress, sharingDetails: ForwardedSharingDetails): Promise<void> {
+        const existingForwardedSharingDetails = await this.forwardedSharingDetails.find({
+            attributeId: attribute.id.toString(),
+            peer: peer.toString(),
+            "deletionInfo.deletionStatus": { $ne: EmittedAttributeDeletionStatus.DeletedByRecipient }
+        });
+
+        if (existingForwardedSharingDetails.length === 0) {
+            await this.forwardedSharingDetails.create(sharingDetails);
+            await this.updateNumberOfForwards(attribute);
+            return;
+        }
+
+        await this.forwardedSharingDetails.update(existingForwardedSharingDetails[0], sharingDetails);
+    }
+
+    private async updateNumberOfForwards(attribute: LocalAttribute): Promise<void> {
+        const count = await this.forwardedSharingDetails.count({ [nameof<ForwardedSharingDetails>((c) => c.attributeId)]: attribute.id.toString() });
+        attribute.numberOfForwards = count;
+    }
+
+    public async getForwardingPeers(attribute: LocalAttribute, includeToBeDeleted = false): Promise<CoreAddress[]> {
+        const existingForwardedSharingDetailsDocs = await this.forwardedSharingDetails.find({
+            attributeId: attribute.id.toString(),
+            "deletionInfo.deletionStatus": { $ne: EmittedAttributeDeletionStatus.DeletedByRecipient }
+        });
+        const existingForwardedSharingDetails = existingForwardedSharingDetailsDocs.map((doc) => ForwardedSharingDetails.from(doc));
+
+        if (existingForwardedSharingDetails.length === 0) return [];
+
+        const sharingDetails = includeToBeDeleted
+            ? existingForwardedSharingDetails
+            : existingForwardedSharingDetails.filter((sharingDetails) => {
+                  return sharingDetails.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.ToBeDeletedByRecipient;
+              });
+
+        const peers = sharingDetails.map((sharingDetails) => sharingDetails.peer.toString());
+        const uniquePeers = Array.from(new Set(peers)).map((address) => CoreAddress.from(address));
+        return uniquePeers;
+    }
+
+    public async hasDeletionStatusUnequalDeletedByRecipient(localAttribute: LocalAttribute, peer: CoreAddress): Promise<boolean> {
+        const deletionStatuses = [
+            EmittedAttributeDeletionStatus.ToBeDeletedByRecipient,
+            EmittedAttributeDeletionStatus.DeletionRequestSent,
+            EmittedAttributeDeletionStatus.DeletionRequestRejected
+        ];
+
+        const found = await this.forwardedSharingDetails.find({
+            attributeId: localAttribute.id.toString(),
+            peer: peer.toString(),
+            "deletionInfo.deletionStatus": { $in: deletionStatuses }
+        });
+
+        return found.length > 0;
+    }
+
+    public async isDeletedOrToBeDeletedByForwardingPeer(localAttribute: LocalAttribute, peer: CoreAddress): Promise<boolean> {
+        const docs = await this.forwardedSharingDetails.find({ attributeId: localAttribute.id.toString(), peer: peer.toString() });
+        const sharingDetailsWithPeer = docs.map((doc) => ForwardedSharingDetails.from(doc));
+
+        const deletionStatuses = [EmittedAttributeDeletionStatus.DeletedByRecipient, EmittedAttributeDeletionStatus.ToBeDeletedByRecipient];
+
+        const hasSharingDetailsWithDeletionStatus = sharingDetailsWithPeer.some(
+            (sharingDetails) => sharingDetails.deletionInfo && deletionStatuses.includes(sharingDetails.deletionInfo.deletionStatus)
+        );
+        const hasSharingDetailsWithoutDeletionStatus = sharingDetailsWithPeer.some(
+            (sharingDetails) => !sharingDetails.deletionInfo || !deletionStatuses.includes(sharingDetails.deletionInfo.deletionStatus)
+        );
+        return hasSharingDetailsWithDeletionStatus && !hasSharingDetailsWithoutDeletionStatus;
+    }
+
+    public async setDeletionInfoForForwardingPeer(
+        localAttribute: LocalAttribute,
+        deletionInfo: EmittedAttributeDeletionInfo | undefined,
+        peer: CoreAddress,
+        overrideDeleted = false
+    ): Promise<void> {
+        const query: any = { attributeId: localAttribute.id.toString(), peer: peer.toString() };
+
+        if (overrideDeleted) query["deletionInfo.deletionStatus"] = { $ne: EmittedAttributeDeletionStatus.ToBeDeletedByRecipient };
+
+        const doc = await this.forwardedSharingDetails.findOne(query);
+
+        if (!doc) throw ConsumptionCoreErrors.attributes.cannotSetAttributeDeletionInfo(localAttribute.id, peer);
+
+        const sharingDetails = ForwardedSharingDetails.from(doc);
+        sharingDetails.deletionInfo = deletionInfo;
+
+        await this.forwardedSharingDetails.update(doc, sharingDetails);
+    }
+
+    public async getForwardedSharingDetailsForAttribute(attribute: LocalAttribute): Promise<ForwardedSharingDetails[]> {
+        const docs = await this.forwardedSharingDetails.find({ attributeId: attribute.id.toString() });
+        return docs.map((doc) => ForwardedSharingDetails.from(doc));
     }
 }

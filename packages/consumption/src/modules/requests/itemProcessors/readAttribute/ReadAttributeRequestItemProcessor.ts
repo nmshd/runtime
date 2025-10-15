@@ -307,7 +307,7 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
             const isLatestSharedVersion = latestSharedVersion[0]?.id.equals(existingAttribute.id);
             if (isLatestSharedVersion) {
-                if (latestSharedVersion[0].hasDeletionStatusUnequalDeletedByRecipient(requestInfo.peer)) {
+                if (await this.consumptionController.attributes.hasDeletionStatusUnequalDeletedByRecipient(latestSharedVersion[0], requestInfo.peer)) {
                     await this.consumptionController.attributes.setForwardedDeletionInfoOfAttribute(latestSharedVersion[0], undefined, requestInfo.peer, true);
                 }
 

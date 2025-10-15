@@ -1,5 +1,4 @@
 import {
-    ForwardedSharingDetails,
     LocalAttribute,
     OwnIdentityAttribute,
     OwnRelationshipAttribute,
@@ -7,7 +6,7 @@ import {
     PeerRelationshipAttribute,
     ThirdPartyRelationshipAttribute
 } from "@nmshd/consumption";
-import { ForwardedSharingDetailsDTO, LocalAttributeDTO } from "@nmshd/runtime-types";
+import { LocalAttributeDTO } from "@nmshd/runtime-types";
 
 export class AttributeMapper {
     public static toAttributeDTO(attribute: LocalAttribute): LocalAttributeDTO {
@@ -33,7 +32,7 @@ export class AttributeMapper {
                     ? { deletionStatus: attribute.deletionInfo.deletionStatus, deletionDate: attribute.deletionInfo.deletionDate.toString() }
                     : undefined,
             initialAttributePeer: attribute instanceof ThirdPartyRelationshipAttribute ? attribute.initialAttributePeer.toString() : undefined,
-            forwardedSharingDetails: this.toForwardedSharingDetails(attribute)
+            numberOfForwards: attribute.numberOfForwards
         };
     }
 
@@ -41,20 +40,14 @@ export class AttributeMapper {
         return attributes.map((attribute) => this.toAttributeDTO(attribute));
     }
 
-    private static toForwardedSharingDetails(attribute: LocalAttribute): ForwardedSharingDetailsDTO[] | undefined {
-        if (!(attribute instanceof OwnIdentityAttribute || attribute instanceof OwnRelationshipAttribute || attribute instanceof PeerRelationshipAttribute)) return undefined;
-
-        return attribute.forwardedSharingDetails?.map((sharingDetails) => this.toForwardedSharingDetailsDTO(sharingDetails));
-    }
-
-    private static toForwardedSharingDetailsDTO(sharingDetails: ForwardedSharingDetails): ForwardedSharingDetailsDTO {
-        return {
-            peer: sharingDetails.peer.toString(),
-            sourceReference: sharingDetails.sourceReference.toString(),
-            sharedAt: sharingDetails.sharedAt.toString(),
-            deletionInfo: sharingDetails.deletionInfo
-                ? { deletionStatus: sharingDetails.deletionInfo.deletionStatus, deletionDate: sharingDetails.deletionInfo.deletionDate.toString() }
-                : undefined
-        };
-    }
+    // private static toForwardedSharingDetailsDTO(sharingDetails: ForwardedSharingDetails): ForwardedSharingDetailsDTO {
+    //     return {
+    //         peer: sharingDetails.peer.toString(),
+    //         sourceReference: sharingDetails.sourceReference.toString(),
+    //         sharedAt: sharingDetails.sharedAt.toString(),
+    //         deletionInfo: sharingDetails.deletionInfo
+    //             ? { deletionStatus: sharingDetails.deletionInfo.deletionStatus, deletionDate: sharingDetails.deletionInfo.deletionDate.toString() }
+    //             : undefined
+    //     };
+    // }
 }
