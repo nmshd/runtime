@@ -47,10 +47,6 @@ class General {
         return new ApplicationError("error.runtime.invalidTokenContent", "The given Token has an invalid content for this route.");
     }
 
-    public cacheEmpty(entityName: string | Function, id: string) {
-        return new ApplicationError("error.runtime.cacheEmpty", `The cache of ${entityName instanceof Function ? entityName.name : entityName} with id '${id}' is empty.`);
-    }
-
     public invalidReference(): ApplicationError {
         return new ApplicationError("error.runtime.invalidReference", "The given reference is invalid for performing the requested action.");
     }
@@ -282,10 +278,6 @@ class Attributes {
 class IdentityDeletionProcess {
     public noActiveIdentityDeletionProcess() {
         return new ApplicationError("error.runtime.identityDeletionProcess.noActiveIdentityDeletionProcess", "No active IdentityDeletionProcess found.");
-    }
-
-    public noApprovedIdentityDeletionProcess() {
-        return new ApplicationError("error.runtime.identityDeletionProcess.noApprovedIdentityDeletionProcess", "No approved IdentityDeletionProcess found.");
     }
 
     public activeIdentityDeletionProcessAlreadyExists() {

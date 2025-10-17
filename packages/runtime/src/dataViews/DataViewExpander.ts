@@ -13,8 +13,6 @@ import {
     ErrorResponseItemJSON,
     FormFieldAcceptResponseItemJSON,
     FormFieldRequestItemJSON,
-    FreeTextAcceptResponseItemJSON,
-    FreeTextRequestItemJSON,
     GivenNameJSON,
     IQLQueryJSON,
     IdentityAttribute,
@@ -25,8 +23,6 @@ import {
     ProposeAttributeRequestItemJSON,
     ReadAttributeAcceptResponseItemJSON,
     ReadAttributeRequestItemJSON,
-    RegisterAttributeListenerAcceptResponseItemJSON,
-    RegisterAttributeListenerRequestItemJSON,
     RejectResponseItemJSON,
     RelationshipAttribute,
     RelationshipAttributeJSON,
@@ -59,7 +55,6 @@ import {
     FileDTO,
     IdentityDTO,
     LocalAttributeDTO,
-    LocalAttributeListenerDTO,
     LocalRequestDTO,
     LocalResponseDTO,
     MessageDTO,
@@ -79,7 +74,6 @@ import { DataViewTranslateable } from "./DataViewTranslateable";
 import { DVOError } from "./common";
 import {
     LocalAttributeDVO,
-    LocalAttributeListenerDVO,
     LocalRequestDVO,
     LocalResponseDVO,
     OwnRelationshipAttributeDVO,
@@ -111,8 +105,6 @@ import {
     ErrorResponseItemDVO,
     FormFieldAcceptResponseItemDVO,
     FormFieldRequestItemDVO,
-    FreeTextAcceptResponseItemDVO,
-    FreeTextRequestItemDVO,
     IQLQueryDVO,
     IdentityAttributeQueryDVO,
     MailDVO,
@@ -120,8 +112,6 @@ import {
     ProposeAttributeRequestItemDVO,
     ReadAttributeAcceptResponseItemDVO,
     ReadAttributeRequestItemDVO,
-    RegisterAttributeListenerAcceptResponseItemDVO,
-    RegisterAttributeListenerRequestItemDVO,
     RejectResponseItemDVO,
     RelationshipAttributeQueryDVO,
     RequestDVO,
@@ -485,7 +475,7 @@ export class DataViewExpander {
                         ...readAttributeRequestItem,
                         type: "ReadAttributeRequestItemDVO",
                         id: "",
-                        name: requestItem.title ?? this.generateRequestItemName(requestItem["@type"], isDecidable),
+                        name: this.generateRequestItemName(requestItem["@type"], isDecidable),
                         query: processedQuery,
                         isDecidable,
                         error,
@@ -497,7 +487,7 @@ export class DataViewExpander {
                     ...readAttributeRequestItem,
                     type: "ReadAttributeRequestItemDVO",
                     id: "",
-                    name: requestItem.title ?? this.generateRequestItemName(requestItem["@type"], isDecidable),
+                    name: this.generateRequestItemName(requestItem["@type"], isDecidable),
                     query: await this.expandAttributeQuery(readAttributeRequestItem.query),
                     isDecidable,
                     response: responseItemDVO
@@ -511,7 +501,7 @@ export class DataViewExpander {
                     ...createAttributeRequestItem,
                     type: "CreateAttributeRequestItemDVO",
                     id: "",
-                    name: requestItem.title ?? this.generateRequestItemName(requestItem["@type"], isDecidable),
+                    name: this.generateRequestItemName(requestItem["@type"], isDecidable),
                     attribute,
                     isDecidable,
                     response: responseItemDVO
@@ -526,7 +516,7 @@ export class DataViewExpander {
                     ...deleteAttributeRequestItem,
                     type: "DeleteAttributeRequestItemDVO",
                     id: "",
-                    name: requestItem.title ?? this.generateRequestItemName(requestItem["@type"], isDecidable),
+                    name: this.generateRequestItemName(requestItem["@type"], isDecidable),
                     isDecidable,
                     response: responseItemDVO,
                     attribute: localAttributeDVOForDelete
@@ -556,7 +546,7 @@ export class DataViewExpander {
                     ...proposeAttributeRequestItem,
                     type: "ProposeAttributeRequestItemDVO",
                     id: "",
-                    name: requestItem.title ?? this.generateRequestItemName(requestItem["@type"], isDecidable),
+                    name: this.generateRequestItemName(requestItem["@type"], isDecidable),
                     attribute: await this.expandAttribute(proposeAttributeRequestItem.attribute),
                     query: isDecidable ? await this.processAttributeQuery(proposeAttributeRequestItem.query) : await this.expandAttributeQuery(proposeAttributeRequestItem.query),
                     isDecidable,
@@ -578,7 +568,7 @@ export class DataViewExpander {
                     ...shareAttributeRequestItem,
                     type: "ShareAttributeRequestItemDVO",
                     id: "",
-                    name: requestItem.title ?? this.generateRequestItemName(requestItem["@type"], isDecidable),
+                    name: this.generateRequestItemName(requestItem["@type"], isDecidable),
                     attribute: attributeDVO,
                     isDecidable,
                     response: responseItemDVO
@@ -591,7 +581,7 @@ export class DataViewExpander {
                     ...authenticationRequestItem,
                     type: "AuthenticationRequestItemDVO",
                     id: "",
-                    name: requestItem.title ?? this.generateRequestItemName(requestItem["@type"], isDecidable),
+                    name: authenticationRequestItem.title,
                     isDecidable,
                     response: responseItemDVO
                 } as AuthenticationRequestItemDVO;
@@ -603,22 +593,10 @@ export class DataViewExpander {
                     ...consentRequestItem,
                     type: "ConsentRequestItemDVO",
                     id: "",
-                    name: requestItem.title ?? this.generateRequestItemName(requestItem["@type"], isDecidable),
+                    name: this.generateRequestItemName(requestItem["@type"], isDecidable),
                     isDecidable,
                     response: responseItemDVO
                 } as ConsentRequestItemDVO;
-
-            case "FreeTextRequestItem":
-                const freeTextRequestItem = requestItem as FreeTextRequestItemJSON;
-
-                return {
-                    ...freeTextRequestItem,
-                    type: "FreeTextRequestItemDVO",
-                    id: "",
-                    name: requestItem.title ?? this.generateRequestItemName(requestItem["@type"], isDecidable),
-                    isDecidable,
-                    response: responseItemDVO
-                } as FreeTextRequestItemDVO;
 
             case "FormFieldRequestItem":
                 const formFieldRequestItem = requestItem as FormFieldRequestItemJSON;
@@ -627,26 +605,10 @@ export class DataViewExpander {
                     ...formFieldRequestItem,
                     type: "FormFieldRequestItemDVO",
                     id: "",
-                    name: requestItem.title ?? this.generateRequestItemName(requestItem["@type"], isDecidable),
+                    name: formFieldRequestItem.title,
                     isDecidable,
                     response: responseItemDVO
                 } as FormFieldRequestItemDVO;
-
-            case "RegisterAttributeListenerRequestItem":
-                const registerAttributeListenerRequestItem = requestItem as RegisterAttributeListenerRequestItemJSON;
-                const queryDVO = (await this.expandAttributeQuery(registerAttributeListenerRequestItem.query)) as
-                    | IdentityAttributeQueryDVO
-                    | ThirdPartyRelationshipAttributeQueryDVO;
-
-                return {
-                    ...registerAttributeListenerRequestItem,
-                    type: "RegisterAttributeListenerRequestItemDVO",
-                    id: "",
-                    query: queryDVO,
-                    name: requestItem.title ?? this.generateRequestItemName(requestItem["@type"], isDecidable),
-                    isDecidable,
-                    response: responseItemDVO
-                } as RegisterAttributeListenerRequestItemDVO;
 
             case "TransferFileOwnershipRequestItem":
                 const transferFileOwnershipRequestItem = requestItem as TransferFileOwnershipRequestItemJSON;
@@ -658,7 +620,7 @@ export class DataViewExpander {
                     ...transferFileOwnershipRequestItem,
                     type: "TransferFileOwnershipRequestItemDVO",
                     id: "",
-                    name: requestItem.title ?? this.generateRequestItemName(requestItem["@type"], isDecidable),
+                    name: this.generateRequestItemName(requestItem["@type"], isDecidable),
                     isDecidable,
                     response: responseItemDVO,
                     file
@@ -669,7 +631,7 @@ export class DataViewExpander {
                     ...requestItem,
                     type: "RequestItemDVO",
                     id: "",
-                    name: requestItem.title ?? "i18n://dvo.requestItem.name",
+                    name: "i18n://dvo.requestItem.name",
                     isDecidable,
                     response: responseItemDVO
                 };
@@ -693,21 +655,22 @@ export class DataViewExpander {
                 isDecidable = true;
             }
 
-            const requestGroup = requestGroupOrItem as RequestItemGroupJSON;
-            const responseGroup = responseGroupOrItemDVO as ResponseItemGroupDVO | undefined;
+            const requestItemGroup = requestGroupOrItem as RequestItemGroupJSON;
+            const responseItemGroup = responseGroupOrItemDVO as ResponseItemGroupDVO | undefined;
             const itemDVOs = [];
-            for (let i = 0; i < requestGroup.items.length; i++) {
-                const requestItem = requestGroup.items[i];
-                const responseItem = responseGroup?.items[i];
+            for (let i = 0; i < requestItemGroup.items.length; i++) {
+                const requestItem = requestItemGroup.items[i];
+                const responseItem = responseItemGroup?.items[i];
                 itemDVOs.push(await this.expandRequestItem(requestItem, localRequestDTO, responseItem));
             }
+
             return {
                 type: "RequestItemGroupDVO",
                 items: itemDVOs,
                 isDecidable,
-                title: requestGroupOrItem.title,
-                description: requestGroupOrItem.description,
-                response: responseGroup
+                title: requestItemGroup.title,
+                description: requestItemGroup.description,
+                response: responseItemGroup
             };
         }
 
@@ -825,16 +788,6 @@ export class DataViewExpander {
                         attribute: localAttributeDVOForShare
                     } as ShareAttributeAcceptResponseItemDVO;
 
-                case "FreeTextAcceptResponseItem":
-                    const freeTextResponseItem = responseItem as FreeTextAcceptResponseItemJSON;
-
-                    return {
-                        ...freeTextResponseItem,
-                        type: "FreeTextAcceptResponseItemDVO",
-                        id: "",
-                        name: name
-                    } as FreeTextAcceptResponseItemDVO;
-
                 case "FormFieldAcceptResponseItem":
                     const formFieldResponseItem = responseItem as FormFieldAcceptResponseItemJSON;
 
@@ -844,26 +797,6 @@ export class DataViewExpander {
                         id: "",
                         name: name
                     } as FormFieldAcceptResponseItemDVO;
-
-                case "RegisterAttributeListenerAcceptResponseItem":
-                    const registerAttributeListenerResponseItem = responseItem as RegisterAttributeListenerAcceptResponseItemJSON;
-
-                    const localAttributeListenerResult = await this.consumption.attributeListeners.getAttributeListener({ id: registerAttributeListenerResponseItem.listenerId });
-                    if (localAttributeListenerResult.isError && !localAttributeListenerResult.error.equals(RuntimeErrors.general.recordNotFound())) {
-                        throw localAttributeListenerResult.error;
-                    }
-
-                    const localAttributeListenerDVO = localAttributeListenerResult.isSuccess
-                        ? await this.expandLocalAttributeListenerDTO(localAttributeListenerResult.value)
-                        : undefined;
-
-                    return {
-                        ...registerAttributeListenerResponseItem,
-                        type: "RegisterAttributeListenerAcceptResponseItemDVO",
-                        id: registerAttributeListenerResponseItem.listenerId,
-                        name: name,
-                        listener: localAttributeListenerDVO
-                    } as RegisterAttributeListenerAcceptResponseItemDVO;
 
                 case "TransferFileOwnershipAcceptResponseItem":
                     const transferFileOwnershipResponseItem = responseItem as TransferFileOwnershipAcceptResponseItemJSON;
@@ -985,19 +918,6 @@ export class DataViewExpander {
                 name: "i18n://dvo.responseItem.error"
             } as ErrorResponseItemDVO;
         }
-    }
-
-    public async expandLocalAttributeListenerDTO(attributeListener: LocalAttributeListenerDTO): Promise<LocalAttributeListenerDVO> {
-        const query = (await this.expandAttributeQuery(attributeListener.query)) as IdentityAttributeQueryDVO | ThirdPartyRelationshipAttributeQueryDVO;
-        const peer = await this.expandAddress(attributeListener.peer);
-        return {
-            type: "LocalAttributeListenerDVO",
-            name: "dvo.localAttributeListener.name",
-            description: "dvo.localAttributeListener.description",
-            ...attributeListener,
-            query,
-            peer
-        };
     }
 
     public async expandResponseGroupOrItem(responseGroupOrItem: ResponseItemGroupJSON | ResponseItemJSON): Promise<ResponseItemGroupDVO | ResponseItemDVO> {
@@ -1122,7 +1042,6 @@ export class DataViewExpander {
                         owner,
                         renderHints,
                         valueHints,
-                        isValid: true,
                         createdAt: attribute.createdAt,
                         isOwn: false,
                         peer: peer,
@@ -1152,7 +1071,6 @@ export class DataViewExpander {
                     owner,
                     renderHints,
                     valueHints,
-                    isValid: true,
                     createdAt: attribute.createdAt,
                     isOwn: true,
                     peer: peer,
@@ -1183,7 +1101,6 @@ export class DataViewExpander {
                     owner: owner,
                     renderHints,
                     valueHints,
-                    isValid: true,
                     createdAt: attribute.createdAt,
                     isOwn: false,
                     peer: peer,
@@ -1209,7 +1126,6 @@ export class DataViewExpander {
                 owner: owner,
                 renderHints,
                 valueHints,
-                isValid: true,
                 createdAt: attribute.createdAt,
                 isOwn: true,
                 peer: peer,
@@ -1241,7 +1157,6 @@ export class DataViewExpander {
             owner: owner,
             renderHints,
             valueHints,
-            isValid: true,
             createdAt: attribute.createdAt,
             isOwn: true,
             isDraft: false,
@@ -1290,8 +1205,6 @@ export class DataViewExpander {
             name,
             description,
             valueType,
-            validFrom: query.validFrom,
-            validTo: query.validTo,
             renderHints: hints.renderHints,
             valueHints: hints.valueHints,
             isProcessed: false
@@ -1319,8 +1232,6 @@ export class DataViewExpander {
             id: "",
             name,
             description,
-            validFrom: query.validFrom,
-            validTo: query.validTo,
             owner: await this.expandAddress(query.owner),
             key: query.key,
             attributeCreationHints: query.attributeCreationHints,
@@ -1341,8 +1252,6 @@ export class DataViewExpander {
             id: "",
             name,
             description,
-            validFrom: query.validFrom,
-            validTo: query.validTo,
             owner: await this.expandAddress(query.owner),
             thirdParty,
             key: query.key,
@@ -1730,7 +1639,7 @@ export class DataViewExpander {
         const relationshipSetting = await this.getRelationshipSettingDVO(relationship);
 
         const stringByType: Record<string, undefined | string> = {};
-        const relationshipAttributesResult = await this.consumption.attributes.getPeerSharedAttributes({ onlyValid: true, peer: relationship.peer });
+        const relationshipAttributesResult = await this.consumption.attributes.getPeerSharedAttributes({ peer: relationship.peer });
         const expandedAttributes = await this.expandLocalAttributeDTOs(relationshipAttributesResult.value);
         const attributesByType: Record<string, undefined | LocalAttributeDVO[]> = {};
         for (const attribute of expandedAttributes) {
@@ -1760,10 +1669,7 @@ export class DataViewExpander {
         });
         const sendMailDisabled = sendMailDisabledResult.value.length > 0;
 
-        let direction = RelationshipDirection.Incoming;
-        if (!relationship.template.isOwn) {
-            direction = RelationshipDirection.Outgoing;
-        }
+        const direction = this.identityController.isMe(CoreAddress.from(relationship.auditLog[0].createdBy)) ? RelationshipDirection.Outgoing : RelationshipDirection.Incoming;
 
         let statusText = "";
         switch (relationship.status) {
@@ -1822,7 +1728,7 @@ export class DataViewExpander {
             attributeMap: attributesByType,
             items: expandedAttributes,
             nameMap: stringByType,
-            templateId: relationship.template.id,
+            templateId: relationship.templateId,
             auditLog: relationship.auditLog,
             creationContent: relationship.creationContent,
             sendMailDisabled
@@ -1909,9 +1815,10 @@ export class DataViewExpander {
     public async expandFileDTO(file: FileDTO): Promise<FileDVO> {
         return {
             ...file,
+            title: file.title ?? file.filename,
             type: "FileDVO",
             id: file.id,
-            name: file.title ? file.title : file.filename,
+            name: file.title ?? file.filename,
             date: file.createdAt,
             image: "",
             filename: file.filename,

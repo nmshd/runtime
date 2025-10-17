@@ -66,7 +66,7 @@ describe("IncomingRequestsController", function () {
         test("creates an incoming Request with an incoming Message as sourceObject", async function () {
             const incomingMessage = TestObjectFactory.createIncomingMessage(context.currentIdentity);
             await When.iCreateAnIncomingRequestWith({ requestSourceObject: incomingMessage });
-            await Then.theCreatedRequestHasAllProperties(incomingMessage.cache!.createdBy, incomingMessage.id, "Message");
+            await Then.theCreatedRequestHasAllProperties(incomingMessage.createdBy, incomingMessage.id, "Message");
             await Then.theRequestIsInStatus(LocalRequestStatus.Open);
             await Then.theNewRequestIsPersistedInTheDatabase();
             await Then.eventHasBeenPublished(IncomingRequestReceivedEvent);
@@ -75,7 +75,7 @@ describe("IncomingRequestsController", function () {
         test("creates an incoming Request with an incoming RelationshipTemplate as source", async function () {
             const incomingTemplate = TestObjectFactory.createIncomingRelationshipTemplate();
             await When.iCreateAnIncomingRequestWith({ requestSourceObject: incomingTemplate });
-            await Then.theCreatedRequestHasAllProperties(incomingTemplate.cache!.createdBy, incomingTemplate.id, "RelationshipTemplate");
+            await Then.theCreatedRequestHasAllProperties(incomingTemplate.createdBy, incomingTemplate.id, "RelationshipTemplate");
             await Then.theRequestIsInStatus(LocalRequestStatus.Open);
             await Then.theNewRequestIsPersistedInTheDatabase();
             await Then.eventHasBeenPublished(IncomingRequestReceivedEvent);

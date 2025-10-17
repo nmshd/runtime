@@ -596,11 +596,11 @@ export class TestUtil {
     public static async fetchRelationshipTemplateFromTokenReference(account: AccountController, tokenReference: string): Promise<RelationshipTemplate> {
         const receivedToken = await account.tokens.loadPeerTokenByReference(TokenReference.from(tokenReference), false);
 
-        if (!(receivedToken.cache!.content instanceof TokenContentRelationshipTemplate)) {
+        if (!(receivedToken.content instanceof TokenContentRelationshipTemplate)) {
             throw new Error("token content not instanceof TokenContentRelationshipTemplate");
         }
 
-        const template = await account.relationshipTemplates.loadPeerRelationshipTemplateByTokenContent(receivedToken.cache!.content);
+        const template = await account.relationshipTemplates.loadPeerRelationshipTemplateByTokenContent(receivedToken.content);
         return template;
     }
 

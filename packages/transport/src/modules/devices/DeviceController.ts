@@ -21,10 +21,6 @@ export class DeviceController extends TransportController {
         return this.device.publicKey;
     }
 
-    public get certificate(): string | undefined {
-        return this.device.certificate;
-    }
-
     public get name(): string | undefined {
         return this.device.name;
     }

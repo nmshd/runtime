@@ -7,10 +7,10 @@ export class IdentityClient extends RESTClient {
     protected override _logDirective = RESTClientLogDirective.LogResponse;
 
     public async createIdentity(value: BackbonePostIdentityRequest): Promise<ClientResult<BackbonePostIdentityResponse>> {
-        return await this.post<BackbonePostIdentityResponse>("/api/v1/Identities", value);
+        return await this.post<BackbonePostIdentityResponse>("/api/v2/Identities", value);
     }
 
     public async checkIfIdentityIsDeleted(username: string): Promise<ClientResult<BackboneCheckIfIdentityIsDeletedResponse>> {
-        return await this.get<BackboneCheckIfIdentityIsDeletedResponse>(`/api/v1/Identities/IsDeleted?username=${username}`);
+        return await this.get<BackboneCheckIfIdentityIsDeletedResponse>(`/api/v2/Identities/IsDeleted?username=${username}`);
     }
 }

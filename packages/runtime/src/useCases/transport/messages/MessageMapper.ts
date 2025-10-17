@@ -2,56 +2,43 @@ import { Serializable } from "@js-soft/ts-serval";
 import { ArbitraryMessageContent, Mail, Notification, Request, ResponseWrapper } from "@nmshd/content";
 import { CoreBuffer } from "@nmshd/crypto";
 import { MessageDTO, MessageWithAttachmentsDTO } from "@nmshd/runtime-types";
-import { CachedMessageRecipient, File, Message } from "@nmshd/transport";
-import { RuntimeErrors } from "../../common";
+import { File, Message, MessageRecipient } from "@nmshd/transport";
 import { FileMapper } from "../files/FileMapper";
 import { DownloadAttachmentResponse } from "./DownloadAttachment";
 
 export class MessageMapper {
     public static toDownloadAttachmentResponse(buffer: CoreBuffer, file: File): DownloadAttachmentResponse {
-        if (!file.cache) {
-            throw RuntimeErrors.general.cacheEmpty(File, file.id.toString());
-        }
-
         return {
             content: buffer.buffer,
-            filename: file.cache.filename ? file.cache.filename : file.id.toString(),
-            mimetype: file.cache.mimetype
+            filename: file.filename,
+            mimetype: file.mimetype
         };
     }
 
     public static toMessageWithAttachmentsDTO(message: Message, attachments: File[]): MessageWithAttachmentsDTO {
-        if (!message.cache) {
-            throw RuntimeErrors.general.cacheEmpty(Message, message.id.toString());
-        }
-
         return {
             id: message.id.toString(),
             isOwn: message.isOwn,
-            content: this.toMessageContent(message.cache.content),
-            createdBy: message.cache.createdBy.toString(),
-            createdByDevice: message.cache.createdByDevice.toString(),
-            recipients: this.toRecipients(message.cache.recipients),
-            createdAt: message.cache.createdAt.toString(),
+            content: this.toMessageContent(message.content),
+            createdBy: message.createdBy.toString(),
+            createdByDevice: message.createdByDevice.toString(),
+            recipients: this.toRecipients(message.recipients),
+            createdAt: message.createdAt.toString(),
             attachments: attachments.map((f) => FileMapper.toFileDTO(f)),
             wasReadAt: message.wasReadAt?.toString()
         };
     }
 
     public static toMessageDTO(message: Message): MessageDTO {
-        if (!message.cache) {
-            throw RuntimeErrors.general.cacheEmpty(Message, message.id.toString());
-        }
-
         return {
             id: message.id.toString(),
             isOwn: message.isOwn,
-            content: this.toMessageContent(message.cache.content),
-            createdBy: message.cache.createdBy.toString(),
-            createdByDevice: message.cache.createdByDevice.toString(),
-            recipients: this.toRecipients(message.cache.recipients),
-            createdAt: message.cache.createdAt.toString(),
-            attachments: message.cache.attachments.map((a) => a.toString()),
+            content: this.toMessageContent(message.content),
+            createdBy: message.createdBy.toString(),
+            createdByDevice: message.createdByDevice.toString(),
+            recipients: this.toRecipients(message.recipients),
+            createdAt: message.createdAt.toString(),
+            attachments: message.attachments.map((a) => a.toString()),
             wasReadAt: message.wasReadAt?.toString()
         };
     }
@@ -60,7 +47,7 @@ export class MessageMapper {
         return messages.map((message) => this.toMessageDTO(message));
     }
 
-    private static toRecipients(recipients: CachedMessageRecipient[]) {
+    private static toRecipients(recipients: MessageRecipient[]) {
         return recipients.map((r) => {
             return {
                 address: r.address.toString(),

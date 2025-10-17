@@ -1,4 +1,4 @@
 export enum IdentityDeletionProcessStatus {
-    Approved = "Approved",
+    Active = "Active",
     Cancelled = "Cancelled"
 }
