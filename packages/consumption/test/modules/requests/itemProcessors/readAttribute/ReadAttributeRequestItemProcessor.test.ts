@@ -602,7 +602,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 })
             });
 
-            await consumptionController.attributes.addForwardedSharingDetailsToAttribute(successorOwnIdentityAttribute, sender, await CoreIdHelper.notPrefixed.generate());
+            await consumptionController.attributes.addForwardingDetailsToAttribute(successorOwnIdentityAttribute, sender, await CoreIdHelper.notPrefixed.generate());
 
             const requestItem = ReadAttributeRequestItem.from({
                 mustBeAccepted: true,
@@ -794,7 +794,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     }
                 });
 
-                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(successorOwnIdentityAttribute, sender, await ConsumptionIds.request.generate());
+                await consumptionController.attributes.addForwardingDetailsToAttribute(successorOwnIdentityAttribute, sender, await ConsumptionIds.request.generate());
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -1621,7 +1621,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     })
                 });
 
-                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(predecessorOwnIdentityAttribute, sender, CoreId.from("initialRequest"));
+                await consumptionController.attributes.addForwardingDetailsToAttribute(predecessorOwnIdentityAttribute, sender, CoreId.from("initialRequest"));
 
                 const { successor: successorOwnIdentityAttribute } = await consumptionController.attributes.succeedOwnIdentityAttribute(predecessorOwnIdentityAttribute, {
                     content: IdentityAttribute.from({
@@ -1670,7 +1670,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     })
                 });
 
-                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(predecessor, sender, CoreId.from("initialRequest"));
+                await consumptionController.attributes.addForwardingDetailsToAttribute(predecessor, sender, CoreId.from("initialRequest"));
 
                 const { successor } = await consumptionController.attributes.succeedOwnIdentityAttribute(predecessor, {
                     content: IdentityAttribute.from({
@@ -1725,7 +1725,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         owner: accountController.identity.address
                     })
                 });
-                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(predecessor, sender, CoreId.from("reqRef"));
+                await consumptionController.attributes.addForwardingDetailsToAttribute(predecessor, sender, CoreId.from("reqRef"));
 
                 const deletionInfo = EmittedAttributeDeletionInfo.from({
                     deletionStatus: EmittedAttributeDeletionStatus.DeletedByRecipient,
@@ -1783,7 +1783,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         owner: accountController.identity.address
                     })
                 });
-                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(predecessor, sender, CoreId.from("reqRef"));
+                await consumptionController.attributes.addForwardingDetailsToAttribute(predecessor, sender, CoreId.from("reqRef"));
 
                 const deletionInfo = EmittedAttributeDeletionInfo.from({
                     deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByRecipient,
@@ -1847,7 +1847,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         owner: accountController.identity.address
                     })
                 });
-                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(ownIdentityAttribute, sender, CoreId.from("reqRef"));
+                await consumptionController.attributes.addForwardingDetailsToAttribute(ownIdentityAttribute, sender, CoreId.from("reqRef"));
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -1885,7 +1885,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         tags: ["x:anExistingTag"]
                     })
                 });
-                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(ownIdentityAttribute, sender, CoreId.from("reqRef"));
+                await consumptionController.attributes.addForwardingDetailsToAttribute(ownIdentityAttribute, sender, CoreId.from("reqRef"));
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -1925,7 +1925,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         owner: accountController.identity.address
                     })
                 });
-                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(ownIdentityAttribute, sender, CoreId.from("reqRef"));
+                await consumptionController.attributes.addForwardingDetailsToAttribute(ownIdentityAttribute, sender, CoreId.from("reqRef"));
 
                 const deletionInfo = EmittedAttributeDeletionInfo.from({
                     deletionStatus: EmittedAttributeDeletionStatus.DeletedByRecipient,
@@ -1975,7 +1975,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         owner: accountController.identity.address
                     })
                 });
-                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(ownIdentityAttribute, sender, CoreId.from("reqRef"));
+                await consumptionController.attributes.addForwardingDetailsToAttribute(ownIdentityAttribute, sender, CoreId.from("reqRef"));
 
                 const deletionInfo = EmittedAttributeDeletionInfo.from({
                     deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByRecipient,
@@ -2122,7 +2122,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     peer: thirdPartyAddress,
                     sourceReference: CoreId.from("reqRef")
                 });
-                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(predecessor, sender, CoreId.from("initialRequest"));
+                await consumptionController.attributes.addForwardingDetailsToAttribute(predecessor, sender, CoreId.from("initialRequest"));
 
                 const { successor } = await consumptionController.attributes.succeedOwnRelationshipAttribute(predecessor, {
                     content: RelationshipAttribute.from({
@@ -2185,7 +2185,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                     peer: thirdPartyAddress,
                     sourceReference: CoreId.from("reqRef")
                 });
-                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(predecessor, sender, CoreId.from("initialRequest"));
+                await consumptionController.attributes.addForwardingDetailsToAttribute(predecessor, sender, CoreId.from("initialRequest"));
 
                 const { successor } = await consumptionController.attributes.succeedPeerRelationshipAttribute(predecessor, {
                     content: RelationshipAttribute.from({
@@ -2566,7 +2566,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         value: GivenName.fromAny({ value: "aGivenName" })
                     })
                 });
-                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(existingOwnIdentityAttribute, sender, CoreId.from("reqRef"));
+                await consumptionController.attributes.addForwardingDetailsToAttribute(existingOwnIdentityAttribute, sender, CoreId.from("reqRef"));
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -2610,7 +2610,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         value: GivenName.fromAny({ value: "aGivenName" })
                     })
                 });
-                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(existingOwnIdentityAttribute, sender, CoreId.from("reqRef"));
+                await consumptionController.attributes.addForwardingDetailsToAttribute(existingOwnIdentityAttribute, sender, CoreId.from("reqRef"));
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -2655,7 +2655,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         tags: ["x:tag1"]
                     })
                 });
-                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(existingOwnIdentityAttribute, sender, CoreId.from("reqRef"));
+                await consumptionController.attributes.addForwardingDetailsToAttribute(existingOwnIdentityAttribute, sender, CoreId.from("reqRef"));
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -2708,7 +2708,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         tags: ["x:tag1"]
                     })
                 });
-                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(existingOwnIdentityAttribute, sender, CoreId.from("reqRef"));
+                await consumptionController.attributes.addForwardingDetailsToAttribute(existingOwnIdentityAttribute, sender, CoreId.from("reqRef"));
 
                 const requestItem = ReadAttributeRequestItem.from({
                     mustBeAccepted: true,
@@ -2760,7 +2760,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         value: GivenName.fromAny({ value: "aGivenName" })
                     })
                 });
-                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(existingOwnIdentityAttribute, sender, CoreId.from("reqRef"));
+                await consumptionController.attributes.addForwardingDetailsToAttribute(existingOwnIdentityAttribute, sender, CoreId.from("reqRef"));
 
                 const deletionInfo = EmittedAttributeDeletionInfo.from({
                     deletionStatus: EmittedAttributeDeletionStatus.DeletedByRecipient,
@@ -2817,7 +2817,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         value: GivenName.fromAny({ value: "aGivenName" })
                     })
                 });
-                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(existingOwnIdentityAttribute, sender, CoreId.from("reqRef"));
+                await consumptionController.attributes.addForwardingDetailsToAttribute(existingOwnIdentityAttribute, sender, CoreId.from("reqRef"));
 
                 const deletionInfo = EmittedAttributeDeletionInfo.from({
                     deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByRecipient,
@@ -2871,7 +2871,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         value: GivenName.fromAny({ value: "aGivenName" })
                     })
                 });
-                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(existingOwnIdentityAttributePredecessor, sender, CoreId.from("reqRef"));
+                await consumptionController.attributes.addForwardingDetailsToAttribute(existingOwnIdentityAttributePredecessor, sender, CoreId.from("reqRef"));
 
                 const existingOwnIdentityAttributeSuccessor = (
                     await consumptionController.attributes.succeedOwnIdentityAttribute(existingOwnIdentityAttributePredecessor, {
@@ -2929,7 +2929,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         value: GivenName.fromAny({ value: "aGivenName" })
                     })
                 });
-                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(existingOwnIdentityAttributePredecessor, sender, CoreId.from("reqRef"));
+                await consumptionController.attributes.addForwardingDetailsToAttribute(existingOwnIdentityAttributePredecessor, sender, CoreId.from("reqRef"));
 
                 const existingOwnIdentityAttributeSuccessor = (
                     await consumptionController.attributes.succeedOwnIdentityAttribute(existingOwnIdentityAttributePredecessor, {
@@ -2994,7 +2994,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         value: GivenName.fromAny({ value: "aGivenName" })
                     })
                 });
-                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(existingOwnIdentityAttributePredecessor, sender, CoreId.from("reqRef"));
+                await consumptionController.attributes.addForwardingDetailsToAttribute(existingOwnIdentityAttributePredecessor, sender, CoreId.from("reqRef"));
 
                 const deletionInfo = EmittedAttributeDeletionInfo.from({
                     deletionStatus: EmittedAttributeDeletionStatus.DeletedByRecipient,
@@ -3053,7 +3053,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                         value: GivenName.fromAny({ value: "aGivenName" })
                     })
                 });
-                await consumptionController.attributes.addForwardedSharingDetailsToAttribute(existingOwnIdentityAttributePredecessor, sender, CoreId.from("reqRef"));
+                await consumptionController.attributes.addForwardingDetailsToAttribute(existingOwnIdentityAttributePredecessor, sender, CoreId.from("reqRef"));
 
                 const deletionInfo = EmittedAttributeDeletionInfo.from({
                     deletionStatus: EmittedAttributeDeletionStatus.ToBeDeletedByRecipient,

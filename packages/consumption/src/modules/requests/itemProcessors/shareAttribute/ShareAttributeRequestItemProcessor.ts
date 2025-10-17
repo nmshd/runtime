@@ -242,6 +242,6 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             return;
         }
 
-        await this.consumptionController.attributes.addForwardedSharingDetailsToAttribute(sharedAttribute, requestInfo.peer, requestInfo.id);
+        await this.consumptionController.attributes.addForwardingDetailsToAttribute(sharedAttribute, requestInfo.peer, requestInfo.id);
     }
 }

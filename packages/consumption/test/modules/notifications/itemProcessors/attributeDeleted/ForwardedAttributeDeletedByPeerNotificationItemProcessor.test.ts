@@ -56,7 +56,7 @@ describe("ForwardedAttributeDeletedByPeerNotificationItemProcessor", function ()
                 owner: testAccount.identity.address
             })
         });
-        await consumptionController.attributes.addForwardedSharingDetailsToAttribute(ownIdentityAttribute, CoreAddress.from("peer"), CoreId.from("reqRef"));
+        await consumptionController.attributes.addForwardingDetailsToAttribute(ownIdentityAttribute, CoreAddress.from("peer"), CoreId.from("reqRef"));
 
         const notificationItem = ForwardedAttributeDeletedByPeerNotificationItem.from({ attributeId: ownIdentityAttribute.id });
         const notification = LocalNotification.from({
@@ -82,14 +82,14 @@ describe("ForwardedAttributeDeletedByPeerNotificationItemProcessor", function ()
         expect(notificationItem.attributeId.equals(updatedAttribute.id)).toBe(true);
 
         const databaseAttribute = (await consumptionController.attributes.getLocalAttribute(updatedAttribute.id)) as OwnIdentityAttribute;
-        const updatedPredecessorForwardedSharingDetails = await consumptionController.attributes.getForwardedSharingDetailsForAttribute(databaseAttribute);
-        expect(updatedPredecessorForwardedSharingDetails[0].deletionInfo!.deletionStatus).toStrictEqual(EmittedAttributeDeletionStatus.DeletedByRecipient);
+        const updatedPredecessorForwardingDetails = await consumptionController.attributes.getForwardingDetailsForAttribute(databaseAttribute);
+        expect(updatedPredecessorForwardingDetails[0].deletionInfo!.deletionStatus).toStrictEqual(EmittedAttributeDeletionStatus.DeletedByRecipient);
 
         /* Manually trigger and verify rollback. */
         await processor.rollback(notificationItem, notification);
         const attributeAfterRollback = (await consumptionController.attributes.getLocalAttribute(notificationItem.attributeId)) as OwnIdentityAttribute;
-        const rolledBackPredecessorForwardedSharingDetails = await consumptionController.attributes.getForwardedSharingDetailsForAttribute(attributeAfterRollback);
-        expect(rolledBackPredecessorForwardedSharingDetails[0].deletionInfo).toBeUndefined();
+        const rolledBackPredecessorForwardingDetails = await consumptionController.attributes.getForwardingDetailsForAttribute(attributeAfterRollback);
+        expect(rolledBackPredecessorForwardingDetails[0].deletionInfo).toBeUndefined();
     });
 
     test("runs all processor methods for an OwnRelationshipAttribute", async function () {
@@ -107,7 +107,7 @@ describe("ForwardedAttributeDeletedByPeerNotificationItemProcessor", function ()
             peer: CoreAddress.from("initialPeer"),
             sourceReference: CoreId.from("reqRef")
         });
-        await consumptionController.attributes.addForwardedSharingDetailsToAttribute(ownRelationshipAttribute, CoreAddress.from("thirdParty"), CoreId.from("reRef2"));
+        await consumptionController.attributes.addForwardingDetailsToAttribute(ownRelationshipAttribute, CoreAddress.from("thirdParty"), CoreId.from("reRef2"));
 
         const notificationItem = ForwardedAttributeDeletedByPeerNotificationItem.from({ attributeId: ownRelationshipAttribute.id });
         const notification = LocalNotification.from({
@@ -133,14 +133,14 @@ describe("ForwardedAttributeDeletedByPeerNotificationItemProcessor", function ()
         expect(notificationItem.attributeId.equals(updatedAttribute.id)).toBe(true);
 
         const databaseAttribute = (await consumptionController.attributes.getLocalAttribute(updatedAttribute.id)) as OwnRelationshipAttribute;
-        const updatedPredecessorForwardedSharingDetails = await consumptionController.attributes.getForwardedSharingDetailsForAttribute(databaseAttribute);
-        expect(updatedPredecessorForwardedSharingDetails[0].deletionInfo!.deletionStatus).toStrictEqual(EmittedAttributeDeletionStatus.DeletedByRecipient);
+        const updatedPredecessorForwardingDetails = await consumptionController.attributes.getForwardingDetailsForAttribute(databaseAttribute);
+        expect(updatedPredecessorForwardingDetails[0].deletionInfo!.deletionStatus).toStrictEqual(EmittedAttributeDeletionStatus.DeletedByRecipient);
 
         /* Manually trigger and verify rollback. */
         await processor.rollback(notificationItem, notification);
         const attributeAfterRollback = (await consumptionController.attributes.getLocalAttribute(notificationItem.attributeId)) as OwnRelationshipAttribute;
-        const rolledBackPredecessorForwardedSharingDetails = await consumptionController.attributes.getForwardedSharingDetailsForAttribute(attributeAfterRollback);
-        expect(rolledBackPredecessorForwardedSharingDetails[0].deletionInfo).toBeUndefined();
+        const rolledBackPredecessorForwardingDetails = await consumptionController.attributes.getForwardingDetailsForAttribute(attributeAfterRollback);
+        expect(rolledBackPredecessorForwardingDetails[0].deletionInfo).toBeUndefined();
     });
 
     test("runs all processor methods for a PeerRelationshipAttribute", async function () {
@@ -158,7 +158,7 @@ describe("ForwardedAttributeDeletedByPeerNotificationItemProcessor", function ()
             peer: CoreAddress.from("initialPeer"),
             sourceReference: CoreId.from("reqRef")
         });
-        await consumptionController.attributes.addForwardedSharingDetailsToAttribute(peerRelationshipAttribute, CoreAddress.from("thirdParty"), CoreId.from("reRef2"));
+        await consumptionController.attributes.addForwardingDetailsToAttribute(peerRelationshipAttribute, CoreAddress.from("thirdParty"), CoreId.from("reRef2"));
 
         const notificationItem = ForwardedAttributeDeletedByPeerNotificationItem.from({ attributeId: peerRelationshipAttribute.id });
         const notification = LocalNotification.from({
@@ -184,14 +184,14 @@ describe("ForwardedAttributeDeletedByPeerNotificationItemProcessor", function ()
         expect(notificationItem.attributeId.equals(updatedAttribute.id)).toBe(true);
 
         const databaseAttribute = (await consumptionController.attributes.getLocalAttribute(updatedAttribute.id)) as PeerRelationshipAttribute;
-        const updatedPredecessorForwardedSharingDetails = await consumptionController.attributes.getForwardedSharingDetailsForAttribute(databaseAttribute);
-        expect(updatedPredecessorForwardedSharingDetails[0].deletionInfo!.deletionStatus).toStrictEqual(EmittedAttributeDeletionStatus.DeletedByRecipient);
+        const updatedPredecessorForwardingDetails = await consumptionController.attributes.getForwardingDetailsForAttribute(databaseAttribute);
+        expect(updatedPredecessorForwardingDetails[0].deletionInfo!.deletionStatus).toStrictEqual(EmittedAttributeDeletionStatus.DeletedByRecipient);
 
         /* Manually trigger and verify rollback. */
         await processor.rollback(notificationItem, notification);
         const attributeAfterRollback = (await consumptionController.attributes.getLocalAttribute(notificationItem.attributeId)) as PeerRelationshipAttribute;
-        const rolledBackPredecessorForwardedSharingDetails = await consumptionController.attributes.getForwardedSharingDetailsForAttribute(attributeAfterRollback);
-        expect(rolledBackPredecessorForwardedSharingDetails[0].deletionInfo).toBeUndefined();
+        const rolledBackPredecessorForwardingDetails = await consumptionController.attributes.getForwardingDetailsForAttribute(attributeAfterRollback);
+        expect(rolledBackPredecessorForwardingDetails[0].deletionInfo).toBeUndefined();
     });
 
     test("runs all processor methods for an Attribute that is to be deleted by peer", async function () {
@@ -204,7 +204,7 @@ describe("ForwardedAttributeDeletedByPeerNotificationItemProcessor", function ()
                 owner: testAccount.identity.address
             })
         });
-        await consumptionController.attributes.addForwardedSharingDetailsToAttribute(ownIdentityAttribute, CoreAddress.from("peer"), CoreId.from("reqRef"));
+        await consumptionController.attributes.addForwardingDetailsToAttribute(ownIdentityAttribute, CoreAddress.from("peer"), CoreId.from("reqRef"));
 
         await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(
             ownIdentityAttribute,
@@ -236,14 +236,14 @@ describe("ForwardedAttributeDeletedByPeerNotificationItemProcessor", function ()
         expect(notificationItem.attributeId.equals(updatedAttribute.id)).toBe(true);
 
         const databaseAttribute = (await consumptionController.attributes.getLocalAttribute(updatedAttribute.id)) as OwnIdentityAttribute;
-        const updatedPredecessorForwardedSharingDetails = await consumptionController.attributes.getForwardedSharingDetailsForAttribute(databaseAttribute);
-        expect(updatedPredecessorForwardedSharingDetails[0].deletionInfo!.deletionStatus).toStrictEqual(EmittedAttributeDeletionStatus.DeletedByRecipient);
+        const updatedPredecessorForwardingDetails = await consumptionController.attributes.getForwardingDetailsForAttribute(databaseAttribute);
+        expect(updatedPredecessorForwardingDetails[0].deletionInfo!.deletionStatus).toStrictEqual(EmittedAttributeDeletionStatus.DeletedByRecipient);
 
         /* Manually trigger and verify rollback. */
         await processor.rollback(notificationItem, notification);
         const attributeAfterRollback = (await consumptionController.attributes.getLocalAttribute(notificationItem.attributeId)) as OwnIdentityAttribute;
-        const rolledBackPredecessorForwardedSharingDetails = await consumptionController.attributes.getForwardedSharingDetailsForAttribute(attributeAfterRollback);
-        expect(rolledBackPredecessorForwardedSharingDetails[0].deletionInfo).toBeUndefined();
+        const rolledBackPredecessorForwardingDetails = await consumptionController.attributes.getForwardingDetailsForAttribute(attributeAfterRollback);
+        expect(rolledBackPredecessorForwardingDetails[0].deletionInfo).toBeUndefined();
     });
 
     test("runs all processor methods for a succeeded Attribute", async function () {
@@ -256,7 +256,7 @@ describe("ForwardedAttributeDeletedByPeerNotificationItemProcessor", function ()
                 owner: testAccount.identity.address
             })
         });
-        await consumptionController.attributes.addForwardedSharingDetailsToAttribute(predecessorOwnIdentityAttribute, CoreAddress.from("peer"), CoreId.from("reqRef"));
+        await consumptionController.attributes.addForwardingDetailsToAttribute(predecessorOwnIdentityAttribute, CoreAddress.from("peer"), CoreId.from("reqRef"));
 
         const { successor: successorOwnIdentityAttribute } = await consumptionController.attributes.succeedOwnIdentityAttribute(predecessorOwnIdentityAttribute, {
             content: IdentityAttribute.from({
@@ -267,7 +267,7 @@ describe("ForwardedAttributeDeletedByPeerNotificationItemProcessor", function ()
                 owner: testAccount.identity.address
             })
         });
-        await consumptionController.attributes.addForwardedSharingDetailsToAttribute(successorOwnIdentityAttribute, CoreAddress.from("peer"), CoreId.from("notRef"));
+        await consumptionController.attributes.addForwardingDetailsToAttribute(successorOwnIdentityAttribute, CoreAddress.from("peer"), CoreId.from("notRef"));
 
         const notificationItem = ForwardedAttributeDeletedByPeerNotificationItem.from({ attributeId: successorOwnIdentityAttribute.id });
         const notification = LocalNotification.from({
@@ -291,14 +291,14 @@ describe("ForwardedAttributeDeletedByPeerNotificationItemProcessor", function ()
         expect(event).toBeInstanceOf(ForwardedAttributeDeletedByPeerEvent);
 
         const updatedPredecessor = (await consumptionController.attributes.getLocalAttribute(predecessorOwnIdentityAttribute.id)) as OwnIdentityAttribute;
-        const updatedPredecessorForwardedSharingDetils = await consumptionController.attributes.getForwardedSharingDetailsForAttribute(updatedPredecessor);
+        const updatedPredecessorForwardedSharingDetils = await consumptionController.attributes.getForwardingDetailsForAttribute(updatedPredecessor);
         expect(updatedPredecessorForwardedSharingDetils[0].deletionInfo!.deletionStatus).toStrictEqual(EmittedAttributeDeletionStatus.DeletedByRecipient);
 
         /* Manually trigger and verify rollback. */
         await processor.rollback(notificationItem, notification);
         const predecessorAfterRollback = (await consumptionController.attributes.getLocalAttribute(predecessorOwnIdentityAttribute.id)) as OwnIdentityAttribute;
-        const predecessorAfterRollbackForwardedSharingDetails = await consumptionController.attributes.getForwardedSharingDetailsForAttribute(predecessorAfterRollback);
-        expect(predecessorAfterRollbackForwardedSharingDetails[0].deletionInfo).toBeUndefined();
+        const predecessorAfterRollbackForwardingDetails = await consumptionController.attributes.getForwardingDetailsForAttribute(predecessorAfterRollback);
+        expect(predecessorAfterRollbackForwardingDetails[0].deletionInfo).toBeUndefined();
     });
 
     test("runs all processor methods for an unknown Attribute", async function () {
@@ -372,7 +372,7 @@ describe("ForwardedAttributeDeletedByPeerNotificationItemProcessor", function ()
                 owner: testAccount.identity.address
             })
         });
-        await consumptionController.attributes.addForwardedSharingDetailsToAttribute(ownIdentityAttribute, CoreAddress.from("otherPeer"), CoreId.from("reqRef"));
+        await consumptionController.attributes.addForwardingDetailsToAttribute(ownIdentityAttribute, CoreAddress.from("otherPeer"), CoreId.from("reqRef"));
 
         const notificationItem = ForwardedAttributeDeletedByPeerNotificationItem.from({ attributeId: ownIdentityAttribute.id });
 

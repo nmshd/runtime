@@ -403,7 +403,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await Then.aForwardedOwnIdentityAttributeIsCreated(GivenName.from("aGivenName").toJSON());
         });
 
-        test("in case of an IdentityAttribute that already exists as OwnIdentityAttribute: adds a ForwardedSharingDetails to the existing OwnIdentityAttribute", async function () {
+        test("in case of an IdentityAttribute that already exists as OwnIdentityAttribute: adds a ForwardingDetails to the existing OwnIdentityAttribute", async function () {
             const ownIdentityAttribute = await Given.anOwnIdentityAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, value: GivenName.from("aGivenName") });
             await Given.aRequestItemWithAnIdentityAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, value: GivenName.from("aGivenName") });
             await When.iCallAccept();
@@ -411,7 +411,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await Then.theOwnIdentityAttributeIsForwarded(ownIdentityAttribute);
         });
 
-        test("in case of an IdentityAttribute where an OwnIdentityAttribute exists after trimming: adds a ForwardedSharingDetails to the existing OwnIdentityAttribute", async function () {
+        test("in case of an IdentityAttribute where an OwnIdentityAttribute exists after trimming: adds a ForwardingDetails to the existing OwnIdentityAttribute", async function () {
             const ownIdentityAttribute = await Given.anOwnIdentityAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, value: GivenName.from("aGivenName") });
             await Given.aRequestItemWithAnIdentityAttribute({ attributeOwner: TestIdentity.CURRENT_IDENTITY, value: GivenName.from("    aGivenName    ") });
             await When.iCallAccept();
@@ -465,7 +465,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await Then.theIdOfTheAlreadySharedAttributeMatches(forwardedOwnIdentityAttribute.id);
         });
 
-        test("in case of an IdentityAttribute that after trimming already exists and has as a ForwardedSharingDetails: returns an AttributeAlreadySharedAcceptResponseItem", async function () {
+        test("in case of an IdentityAttribute that after trimming already exists and has as a ForwardingDetails: returns an AttributeAlreadySharedAcceptResponseItem", async function () {
             const ownIdentityAttribute = await Given.aForwardedOwnIdentityAttribute({
                 attributeOwner: TestIdentity.CURRENT_IDENTITY,
                 value: GivenName.from("aGivenName"),
@@ -477,7 +477,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await Then.theIdOfTheAlreadySharedAttributeMatches(ownIdentityAttribute.id);
         });
 
-        test("in case of an IdentityAttribute that already has a ForwardedSharingDetails but is deleted by peer: adds another forwardedSharingDetails without deletionInfo", async function () {
+        test("in case of an IdentityAttribute that already has a ForwardingDetails but is deleted by peer: adds another forwardedSharingDetails without deletionInfo", async function () {
             const ownIdentityAttribute = await Given.aForwardedOwnIdentityAttributeWithDeletionInfo({
                 attributeOwner: TestIdentity.CURRENT_IDENTITY,
                 value: GivenName.from("aGivenName"),
@@ -491,7 +491,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await Then.theOwnIdentityAttributeIsDeletedByRecipient(ownIdentityAttribute, TestIdentity.PEER);
         });
 
-        test("in case of an IdentityAttribute that already has a ForwardedSharingDetails but is to be deleted by peer: removes the EmittedAttributeDeletionInfo", async function () {
+        test("in case of an IdentityAttribute that already has a ForwardingDetails but is to be deleted by peer: removes the EmittedAttributeDeletionInfo", async function () {
             const ownIdentityAttribute = await Given.aForwardedOwnIdentityAttributeWithDeletionInfo({
                 attributeOwner: TestIdentity.CURRENT_IDENTITY,
                 value: GivenName.from("aGivenName"),
@@ -504,7 +504,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await Then.theOwnIdentityAttributeIsForwarded(ownIdentityAttribute);
         });
 
-        test("in case of an IdentityAttribute that already exists with different tags and has as a ForwardedSharingDetails: returns an AttributeSuccessionAcceptResponseItem", async function () {
+        test("in case of an IdentityAttribute that already exists with different tags and has as a ForwardingDetails: returns an AttributeSuccessionAcceptResponseItem", async function () {
             await Given.aForwardedOwnIdentityAttribute({
                 attributeOwner: TestIdentity.CURRENT_IDENTITY,
                 tags: ["x:tag1", "x:tag2"],
@@ -521,7 +521,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await Then.theTagsOfTheSucceededOwnIdentityAttributeMatch(["x:tag1", "x:tag2", "x:tag3"]);
         });
 
-        test("in case of an IdentityAttribute that after trimming already exists with different tags and has as a ForwardedSharingDetails: returns an AttributeSuccessionAcceptResponseItem", async function () {
+        test("in case of an IdentityAttribute that after trimming already exists with different tags and has as a ForwardingDetails: returns an AttributeSuccessionAcceptResponseItem", async function () {
             await Given.aForwardedOwnIdentityAttribute({
                 attributeOwner: TestIdentity.CURRENT_IDENTITY,
                 tags: ["x:tag1", "x:tag2"],

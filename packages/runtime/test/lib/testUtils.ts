@@ -828,7 +828,7 @@ export async function cleanupAttributes(services: TestRuntimeServices[]): Promis
     );
 }
 
-export async function cleanupForwardedSharingDetails(services: TestRuntimeServices[]): Promise<void> {
+export async function cleanupForwardingDetails(services: TestRuntimeServices[]): Promise<void> {
     const query = { forwardedSharingDetails: { $exists: true } };
     await Promise.all(
         services.map(async (services) => {

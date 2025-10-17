@@ -80,7 +80,7 @@ import { DataViewObject } from "./DataViewObject";
 import { DataViewTranslateable } from "./DataViewTranslateable";
 import { DVOError } from "./common";
 import {
-    ForwardedSharingDetailsDVO,
+    ForwardingDetailsDVO,
     LocalAttributeDVO,
     LocalRequestDVO,
     LocalResponseDVO,
@@ -1011,7 +1011,7 @@ export class DataViewExpander {
                 tags: localAttribute.content.tags,
                 isDefault: attribute.isDefault,
                 forwardingPeers: this.expandForwardingPeers(localAttribute),
-                forwardedSharingDetails: this.expandForwardedSharingDetails(localAttribute)
+                forwardingDetails: this.expandForwardingDetails(localAttribute)
             };
         }
 
@@ -1069,7 +1069,7 @@ export class DataViewExpander {
                 deletionStatus: localAttribute.deletionInfo?.deletionStatus,
                 deletionDate: localAttribute.deletionInfo?.deletionDate.toString(),
                 forwardingPeers: this.expandForwardingPeers(localAttribute),
-                forwardedSharingDetails: this.expandForwardedSharingDetails(localAttribute)
+                forwardingDetails: this.expandForwardingDetails(localAttribute)
             };
         }
 
@@ -1100,7 +1100,7 @@ export class DataViewExpander {
                 deletionStatus: localAttribute.deletionInfo?.deletionStatus,
                 deletionDate: localAttribute.deletionInfo?.deletionDate.toString(),
                 forwardingPeers: this.expandForwardingPeers(localAttribute),
-                forwardedSharingDetails: this.expandForwardedSharingDetails(localAttribute)
+                forwardingDetails: this.expandForwardingDetails(localAttribute)
             };
         }
 
@@ -1154,7 +1154,7 @@ export class DataViewExpander {
         // return localAttribute.getForwardingPeers().map((thirdPartyAddress) => thirdPartyAddress.toString());
     }
 
-    private expandForwardedSharingDetails(_localAttribute: OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute): ForwardedSharingDetailsDVO[] | undefined {
+    private expandForwardingDetails(_localAttribute: OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute): ForwardingDetailsDVO[] | undefined {
         // TODO: enable when finding out how to proceed with this
 
         return;
@@ -1162,7 +1162,7 @@ export class DataViewExpander {
         // if (!localAttribute.forwardedSharingDetails || localAttribute.forwardedSharingDetails.length === 0) return;
 
         // return localAttribute.forwardedSharingDetails.map((sharingDetails) => {
-        //     const result: ForwardedSharingDetailsDVO = {
+        //     const result: ForwardingDetailsDVO = {
         //         peer: sharingDetails.peer.toString(),
         //         sourceReference: sharingDetails.sourceReference.toString(),
         //         sharedAt: sharingDetails.sharedAt.toString()

@@ -3,8 +3,8 @@ import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreDate, ICoreId } from 
 import { CoreSynchronizable, ICoreSynchronizable } from "@nmshd/transport";
 import { EmittedAttributeDeletionInfo, EmittedAttributeDeletionInfoJSON, IEmittedAttributeDeletionInfo } from "../deletionInfos";
 
-export interface ForwardedSharingDetailsJSON {
-    "@type": "ForwardedSharingDetails";
+export interface ForwardingDetailsJSON {
+    "@type": "ForwardingDetails";
     attributeId: string;
     peer: string;
     sourceReference: string;
@@ -12,7 +12,7 @@ export interface ForwardedSharingDetailsJSON {
     deletionInfo?: EmittedAttributeDeletionInfoJSON;
 }
 
-export interface IForwardedSharingDetails extends ICoreSynchronizable {
+export interface IForwardingDetails extends ICoreSynchronizable {
     attributeId: ICoreId;
     peer: ICoreAddress;
     sourceReference: ICoreId;
@@ -20,8 +20,8 @@ export interface IForwardedSharingDetails extends ICoreSynchronizable {
     deletionInfo?: IEmittedAttributeDeletionInfo;
 }
 
-@type("ForwardedSharingDetails")
-export class ForwardedSharingDetails extends CoreSynchronizable implements IForwardedSharingDetails {
+@type("ForwardingDetails")
+export class ForwardingDetails extends CoreSynchronizable implements IForwardingDetails {
     @validate()
     @serialize()
     public attributeId: CoreId;
@@ -42,7 +42,7 @@ export class ForwardedSharingDetails extends CoreSynchronizable implements IForw
     @validate({ nullable: true })
     public deletionInfo?: EmittedAttributeDeletionInfo;
 
-    public static from(value: IForwardedSharingDetails | ForwardedSharingDetailsJSON): ForwardedSharingDetails {
-        return super.fromAny(value) as ForwardedSharingDetails;
+    public static from(value: IForwardingDetails | ForwardingDetailsJSON): ForwardingDetails {
+        return super.fromAny(value) as ForwardingDetails;
     }
 }

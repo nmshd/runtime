@@ -262,7 +262,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
                 });
             }
 
-            const updatedAttribute = await this.consumptionController.attributes.addForwardedSharingDetailsToAttribute(existingAttribute, requestInfo.peer, requestInfo.id);
+            const updatedAttribute = await this.consumptionController.attributes.addForwardingDetailsToAttribute(existingAttribute, requestInfo.peer, requestInfo.id);
 
             const wasNotSharedBefore = latestSharedVersion.length === 0;
             if (wasNotSharedBefore) {

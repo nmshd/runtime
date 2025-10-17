@@ -40,7 +40,7 @@ export class AttributeMapper {
         return attributes.map((attribute) => this.toAttributeDTO(attribute));
     }
 
-    // private static toForwardedSharingDetailsDTO(sharingDetails: ForwardedSharingDetails): ForwardedSharingDetailsDTO {
+    // private static toForwardingDetailsDTO(sharingDetails: ForwardingDetails): ForwardingDetailsDTO {
     //     return {
     //         peer: sharingDetails.peer.toString(),
     //         sourceReference: sharingDetails.sourceReference.toString(),
