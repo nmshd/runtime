@@ -13,10 +13,10 @@ export interface LocalAttributeDTO {
     sourceReference?: string;
     deletionInfo?: LocalAttributeDeletionInfoDTO;
     initialAttributePeer?: string;
-    forwardedSharingDetails?: ForwardedSharingDetailsDTO[];
+    numberOfForwards?: number;
 }
 
-export interface ForwardedSharingDetailsDTO {
+export interface ForwardingDetailsDTO {
     peer: string;
     sourceReference: string;
     sharedAt: string;

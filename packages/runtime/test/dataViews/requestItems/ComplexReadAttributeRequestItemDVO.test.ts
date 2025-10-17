@@ -22,7 +22,7 @@ import {
 } from "../../../src";
 import {
     cleanupAttributes,
-    cleanupForwardedSharingDetails,
+    cleanupForwardingDetails,
     establishRelationship,
     exchangeAndAcceptRequestByMessage,
     exchangeMessageWithRequest,
@@ -55,7 +55,7 @@ afterAll(() => serviceProvider.stop());
 beforeEach(async function () {
     eventBus1.reset();
     eventBus2.reset();
-    await cleanupForwardedSharingDetails([runtimeServices2]);
+    await cleanupForwardingDetails([runtimeServices2]);
     await cleanupAttributes([runtimeServices1]);
 });
 

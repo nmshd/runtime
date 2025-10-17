@@ -96,7 +96,7 @@ export class DeleteAttributeAndNotifyUseCase extends UseCase<DeleteAttributeAndN
     }
 
     private async getForwardingPeersOfAttribute(attribute: OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute): Promise<Result<CoreAddress[]>> {
-        const forwardingPeers = attribute.getForwardingPeers(true);
+        const forwardingPeers = await this.attributesController.getForwardingPeers(attribute, true);
         if (forwardingPeers.length === 0) return Result.ok([]);
 
         const queryForRelationshipsToNotify = {

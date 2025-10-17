@@ -701,7 +701,7 @@ export class RequestsWhen {
                 owner: this.context.currentIdentity
             })
         });
-        await this.context.consumptionController.attributes.addForwardedSharingDetailsToAttribute(
+        await this.context.consumptionController.attributes.addForwardingDetailsToAttribute(
             sOwnIdentityAttribute1,
             CoreAddress.from("did:e:a-domain:dids:anidentity"),
             CoreId.from("shareSourceReference1")
@@ -716,7 +716,7 @@ export class RequestsWhen {
                 owner: this.context.currentIdentity
             })
         });
-        await this.context.consumptionController.attributes.addForwardedSharingDetailsToAttribute(
+        await this.context.consumptionController.attributes.addForwardingDetailsToAttribute(
             sOwnIdentityAttribute2,
             CoreAddress.from("did:e:a-domain:dids:anidentity"),
             CoreId.from("shareSourceReference2")
@@ -731,7 +731,7 @@ export class RequestsWhen {
                 owner: this.context.currentIdentity
             })
         });
-        await this.context.consumptionController.attributes.addForwardedSharingDetailsToAttribute(
+        await this.context.consumptionController.attributes.addForwardingDetailsToAttribute(
             sSucceededOwnIdentityAttribute2,
             CoreAddress.from("did:e:a-domain:dids:anidentity"),
             CoreId.from("shareSourceReference3")

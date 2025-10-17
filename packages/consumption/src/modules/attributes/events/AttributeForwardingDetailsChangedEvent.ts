@@ -3,10 +3,10 @@ import { OwnIdentityAttribute } from "../local/attributeTypes/OwnIdentityAttribu
 import { OwnRelationshipAttribute } from "../local/attributeTypes/OwnRelationshipAttribute";
 import { PeerRelationshipAttribute } from "../local/attributeTypes/PeerRelationshipAttribute";
 
-export class AttributeForwardedSharingDetailsChangedEvent extends TransportDataEvent<OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute> {
-    public static readonly namespace = "consumption.attributeForwardedSharingDetailsChanged";
+export class AttributeForwardingDetailsChangedEvent extends TransportDataEvent<OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute> {
+    public static readonly namespace = "consumption.attributeForwardingDetailsChanged";
 
     public constructor(eventTargetAddress: string, data: OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute) {
-        super(AttributeForwardedSharingDetailsChangedEvent.namespace, eventTargetAddress, data);
+        super(AttributeForwardingDetailsChangedEvent.namespace, eventTargetAddress, data);
     }
 }

@@ -96,10 +96,10 @@ class Attributes {
         return new CoreError("error.consumption.attributes.cannotSetAttributeDeletionInfo", errorMessage);
     }
 
-    public cannotSetForwardedSharingDetailsForPeer(attributeId: string | CoreId, peer: CoreAddress | string) {
+    public cannotSetForwardingDetailsForPeer(attributeId: string | CoreId, peer: CoreAddress | string) {
         return new CoreError(
-            "error.consumption.attributes.cannotSetForwardedSharingDetailsForPeer",
-            `You cannot set the forwardedSharingDetails of Attribute '${attributeId.toString()}' for peer '${peer.toString()}' since they are the peer of the Relationship in whose context the RelationshipAttribute exists.`
+            "error.consumption.attributes.cannotSetForwardingDetailsForPeer",
+            `You cannot set the forwardingDeails of Attribute '${attributeId.toString()}' for peer '${peer.toString()}' since they are the peer of the Relationship in whose context the RelationshipAttribute exists.`
         );
     }
 

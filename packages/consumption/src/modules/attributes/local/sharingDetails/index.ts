@@ -1,1 +1,1 @@
-export * from "./ForwardedSharingDetails";
+export * from "./ForwardingDetails";

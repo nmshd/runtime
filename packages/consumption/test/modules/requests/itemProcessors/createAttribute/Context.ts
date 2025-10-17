@@ -202,7 +202,7 @@ export class GivenSteps {
 
         const createdOwnIdentityAttribute = await this.context.consumptionController.attributes.createOwnIdentityAttribute({ content: attribute });
 
-        const forwardedOwnIdentityAttribute = await this.context.consumptionController.attributes.addForwardedSharingDetailsToAttribute(
+        const forwardedOwnIdentityAttribute = await this.context.consumptionController.attributes.addForwardingDetailsToAttribute(
             createdOwnIdentityAttribute,
             this.context.translateTestIdentity(params.peer)!,
             CoreId.from("aSourceReferenceId")
@@ -237,7 +237,7 @@ export class GivenSteps {
 
         const createdOwnIdentityAttribute = await this.context.consumptionController.attributes.createOwnIdentityAttribute({ content: attribute });
 
-        const forwardedOwnIdentityAttribute = await this.context.consumptionController.attributes.addForwardedSharingDetailsToAttribute(
+        const forwardedOwnIdentityAttribute = await this.context.consumptionController.attributes.addForwardingDetailsToAttribute(
             createdOwnIdentityAttribute,
             this.context.translateTestIdentity(params.peer)!,
             CoreId.from("aSourceReferenceId")
