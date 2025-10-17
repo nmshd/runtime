@@ -40,8 +40,8 @@ describe("List Relationship Messages", function () {
         const messageList = await TestUtil.syncUntilHasMessages(recipient);
         expect(messageList).toHaveLength(2);
 
-        const messageListDb = await recipient.messages.getMessages();
-        expect(messageListDb).toHaveLength(2);
+        const messageCount = (await recipient.messages.getMessages()).messageCount;
+        expect(messageCount).toBe(2);
     });
 
     test("should list messages over all relationships", async function () {
