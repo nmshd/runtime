@@ -16,7 +16,7 @@ export class AbstractInteger extends AbstractAttributeValue implements IAbstract
     public value: number;
 
     public static override preFrom(value: any): any {
-        if (typeof value === "number") value = { value };
+        if (typeof value !== "object") value = { value };
         return value;
     }
 

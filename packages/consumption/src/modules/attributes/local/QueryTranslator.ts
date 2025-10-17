@@ -12,8 +12,9 @@ import {
 } from "@nmshd/content";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionError } from "../../../consumption/ConsumptionError";
-import { LocalAttribute } from "./LocalAttribute";
-import { LocalAttributeShareInfo } from "./LocalAttributeShareInfo";
+import { LocalAttribute } from "./attributeTypes/LocalAttribute";
+import { OwnRelationshipAttribute } from "./attributeTypes/OwnRelationshipAttribute";
+import { PeerRelationshipAttribute } from "./attributeTypes/PeerRelationshipAttribute";
 
 export class IdentityAttributeQueryTranslator {
     public static translate(query: IdentityAttributeQuery): any {
@@ -95,7 +96,7 @@ export class ThirdPartyRelationshipAttributeQueryTranslator {
             // owner
             [nameof<IThirdPartyRelationshipAttributeQuery>((x) => x.owner)]: `${nameof<LocalAttribute>((x) => x.content)}.${nameof<RelationshipAttribute>((x) => x.owner)}`,
             // peer
-            [nameof<IThirdPartyRelationshipAttributeQuery>((x) => x.thirdParty)]: `${nameof<LocalAttribute>((x) => x.shareInfo)}.${nameof<LocalAttributeShareInfo>((x) => x.peer)}`
+            [nameof<IThirdPartyRelationshipAttributeQuery>((x) => x.thirdParty)]: `${nameof<OwnRelationshipAttribute | PeerRelationshipAttribute>((x) => x.peer)}`
         }
     });
 }

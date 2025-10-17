@@ -354,13 +354,17 @@ describe("RelationshipTemplateDVO", () => {
         expect(item.items[0].type).toBe("ProposeAttributeRequestItemDVO");
         expect(item.items[1].type).toBe("ProposeAttributeRequestItemDVO");
 
-        const attributeResult = await requestor.consumption.attributes.getAttributes({
+        const attributesWithPeer = await requestor.consumption.attributes.getAttributes({ query: { peer: templator.address } });
+        expect(attributesWithPeer).toBeSuccessful();
+        expect(attributesWithPeer.value).toHaveLength(2);
+
+        const attributesWithForwardedSharingDetails = await requestor.consumption.attributes.getAttributes({
             query: {
-                "shareInfo.peer": templator.address
+                "forwardedSharingDetails.peer": templator.address
             }
         });
-        expect(attributeResult).toBeSuccessful();
-        expect(attributeResult.value).toHaveLength(4);
+        expect(attributesWithForwardedSharingDetails).toBeSuccessful();
+        expect(attributesWithForwardedSharingDetails.value).toHaveLength(2);
 
         await syncUntilHasRelationships(templator.transport);
         await templator.eventBus.waitForEvent(OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent);
@@ -383,12 +387,8 @@ describe("RelationshipTemplateDVO", () => {
         expect(dvo.content.items).toHaveLength(2);
         expect(dvo.isDecidable).toBe(false);
 
-        const attributeResultTemplator = await templator.consumption.attributes.getAttributes({
-            query: {
-                "shareInfo.peer": requestor.address
-            }
-        });
-        expect(attributeResultTemplator).toBeSuccessful();
-        expect(attributeResultTemplator.value).toHaveLength(4);
+        const attributesWithTemplatorAsPeer = await templator.consumption.attributes.getAttributes({ query: { peer: requestor.address } });
+        expect(attributesWithTemplatorAsPeer).toBeSuccessful();
+        expect(attributesWithTemplatorAsPeer.value).toHaveLength(4);
     });
 });
