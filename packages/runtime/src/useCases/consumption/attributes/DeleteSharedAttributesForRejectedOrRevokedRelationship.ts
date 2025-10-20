@@ -41,7 +41,7 @@ export class DeleteSharedAttributesForRejectedOrRevokedRelationshipUseCase exten
         });
 
         for (const sharedAttribute of sharedAttributes) {
-            const validationResult = await this.attributesController.validateFullAttributeDeletionProcess(sharedAttribute);
+            const validationResult = await this.attributesController.validateFullAttributeDeletionProcess(sharedAttribute.id);
             if (validationResult.isError()) {
                 return Result.fail(validationResult.error);
             }

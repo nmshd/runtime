@@ -328,7 +328,7 @@ describe("AttributesController", function () {
     });
 
     describe("change ForwardingDetails of Attributes", function () {
-        test("should allow to add a ForwardingDetails to an OwnIdentityAttribute", async function () {
+        test("should allow to add ForwardingDetails to an OwnIdentityAttribute", async function () {
             const attributeParams = {
                 content: IdentityAttribute.from({
                     value: {
@@ -345,10 +345,12 @@ describe("AttributesController", function () {
 
             const forwardedAttribute = await consumptionController.attributes.addForwardingDetailsToAttribute(attribute, peer, sourceReference);
             expect(forwardedAttribute).toBeInstanceOf(OwnIdentityAttribute);
-            expect(consumptionController.attributes.isForwardedTo(forwardedAttribute, peer)).toBe(true);
+
+            const isForwarded = await consumptionController.attributes.isForwardedTo(forwardedAttribute, peer)
+            expect(isForwarded).toBe(true);
         });
 
-        test("should allow to add a ForwardingDetails to an OwnRelationshipAttribute", async function () {
+        test("should allow to add ForwardingDetails to an OwnRelationshipAttribute", async function () {
             const thirdPartyAddress = CoreAddress.from("thirdPartyAdress");
             const peerAddress = CoreAddress.from("peerAddress");
 
@@ -374,10 +376,12 @@ describe("AttributesController", function () {
             );
 
             expect(forwardedOwnRelationshipAttribute).toBeInstanceOf(OwnRelationshipAttribute);
-            expect(consumptionController.attributes.isForwardedTo(forwardedOwnRelationshipAttribute, peerAddress)).toBe(true);
+
+            const isForwarded = await consumptionController.attributes.isForwardedTo(forwardedOwnRelationshipAttribute, peerAddress)
+            expect(isForwarded).toBe(true);
         });
 
-        test("should allow to add a ForwardingDetails to a PeerRelationshipAttribute", async function () {
+        test("should allow to add ForwardingDetails to a PeerRelationshipAttribute", async function () {
             const thirdPartyAddress = CoreAddress.from("thirdPartyAdress");
             const peerAddress = CoreAddress.from("peerAddress");
 
@@ -403,10 +407,12 @@ describe("AttributesController", function () {
             );
 
             expect(forwardedPeerRelationshipAttribute).toBeInstanceOf(PeerRelationshipAttribute);
-            expect(consumptionController.attributes.isForwardedTo(forwardedPeerRelationshipAttribute, peerAddress)).toBe(true);
+
+            const isForwarded = await consumptionController.attributes.isForwardedTo(forwardedPeerRelationshipAttribute, peerAddress);
+            expect(isForwarded).toBe(true);
         });
 
-        test("should publish an event adding a ForwardingDetails to an Attribute", async function () {
+        test("should publish an event adding ForwardingDetails to an Attribute", async function () {
             const attributeParams = {
                 content: IdentityAttribute.from({
                     value: {
@@ -425,7 +431,7 @@ describe("AttributesController", function () {
             mockEventBus.expectLastPublishedEvent(AttributeForwardingDetailsChangedEvent, forwardedAttribute);
         });
 
-        test("should throw trying to add a ForwardingDetails to an Attribute if it is already forwarded", async function () {
+        test("should throw trying to add ForwardingDetails to an Attribute if it is already forwarded", async function () {
             const attributeParams = {
                 content: IdentityAttribute.from({
                     value: {
@@ -443,7 +449,7 @@ describe("AttributesController", function () {
             );
         });
 
-        test("should allow to add a ForwardingDetails to an Attribute if it is already forwarded but DeletedByRecipient", async function () {
+        test("should allow to add ForwardingDetails to an Attribute if it is already forwarded but DeletedByRecipient", async function () {
             const attributeParams = {
                 content: IdentityAttribute.from({
                     value: {
@@ -504,10 +510,12 @@ describe("AttributesController", function () {
             const peer = CoreAddress.from("address");
 
             const forwardedAttribute = await consumptionController.attributes.addForwardingDetailsToAttribute(attribute, peer, CoreId.from("aSourceReferenceId"));
-            expect(consumptionController.attributes.isForwardedTo(forwardedAttribute, peer)).toBe(true);
+            const isForwarded = await consumptionController.attributes.isForwardedTo(forwardedAttribute, peer)
+            expect(isForwarded).toBe(true);
 
             const updatedAttribute = await consumptionController.attributes.removeForwardingDetailsFromAttribute(forwardedAttribute, peer);
-            expect(consumptionController.attributes.isForwardedTo(updatedAttribute, peer)).toBe(false);
+            const updatedIsForwarded = await consumptionController.attributes.isForwardedTo(updatedAttribute, peer)
+            expect(updatedIsForwarded).toBe(false);
         });
 
         test("should publish an event removing a ForwardingDetails from an Attribute", async function () {
@@ -1063,7 +1071,7 @@ describe("AttributesController", function () {
             });
 
             test("should return validation success for full attribute deletion process of valid succeeded OwnIdentityAttribute", async function () {
-                const result = await consumptionController.attributes.validateFullAttributeDeletionProcess(successorOwnIdentityAttribute);
+                const result = await consumptionController.attributes.validateFullAttributeDeletionProcess(successorOwnIdentityAttribute.id);
                 expect(result.isSuccess()).toBe(true);
             });
 
@@ -1079,7 +1087,7 @@ describe("AttributesController", function () {
                 invalidPredecessor.succeededBy = CoreId.from("invalidSuccessorId");
                 await consumptionController.attributes.updateAttributeUnsafe(invalidPredecessor);
 
-                const result = await consumptionController.attributes.validateFullAttributeDeletionProcess(invalidPredecessor);
+                const result = await consumptionController.attributes.validateFullAttributeDeletionProcess(invalidPredecessor.id);
                 expect(result).errorValidationResult({ message: "The successor does not exist.", code: "error.consumption.attributes.successorDoesNotExist" });
             });
 

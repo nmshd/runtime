@@ -839,7 +839,7 @@ export class AttributesController extends ConsumptionBaseController {
         if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
         if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
-        const existingForwardedSharingDetailObjects = await this.forwardingDetails.find({ attributeId: attribute.id, peer: peer.toString() });
+        const existingForwardedSharingDetailObjects = await this.forwardingDetails.find({ attributeId: attribute.id.toString(), peer: peer.toString() });
         const existingForwardingDetails = existingForwardedSharingDetailObjects.map((obj) => ForwardingDetails.from(obj));
 
         for (const detail of existingForwardingDetails) {
@@ -854,7 +854,7 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async executeFullAttributeDeletionProcess(attribute: LocalAttribute): Promise<void> {
-        const validationResult = await this.validateFullAttributeDeletionProcess(attribute);
+        const validationResult = await this.validateFullAttributeDeletionProcess(attribute.id);
         if (validationResult.isError()) throw validationResult.error;
 
         if (attribute.succeededBy) {
@@ -871,9 +871,9 @@ export class AttributesController extends ConsumptionBaseController {
         await this.deleteAttribute(attribute);
     }
 
-    public async validateFullAttributeDeletionProcess(attribute: LocalAttribute): Promise<ValidationResult> {
-        const localAttribute = await this.getLocalAttribute(attribute.id);
-        if (localAttribute && !_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+    public async validateFullAttributeDeletionProcess(attributeId: CoreId): Promise<ValidationResult> {
+        const attribute = await this.getLocalAttribute(attributeId);
+        if (!attribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attributeId.toString());
 
         if (attribute.succeededBy) {
             const successor = await this.getLocalAttribute(attribute.succeededBy);
@@ -1606,7 +1606,7 @@ export class AttributesController extends ConsumptionBaseController {
     ): Promise<void> {
         const query: any = { attributeId: localAttribute.id.toString(), peer: peer.toString() };
 
-        if (overrideDeleted) query["deletionInfo.deletionStatus"] = { $ne: EmittedAttributeDeletionStatus.ToBeDeletedByRecipient };
+        if (!overrideDeleted) query["deletionInfo.deletionStatus"] = { $ne: EmittedAttributeDeletionStatus.DeletedByRecipient };
 
         const doc = await this.forwardingDetails.findOne(query);
 
