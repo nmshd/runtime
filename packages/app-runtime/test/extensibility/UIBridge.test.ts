@@ -18,6 +18,7 @@ describe("UIBridge", function () {
 
         runtime.registerUIBridge(new FakeUIBridge());
 
+        // eslint-disable-next-line @typescript-eslint/await-thenable
         const results = await Promise.all(promises);
         for (const bridge of results) expect(bridge).toBeInstanceOf(FakeUIBridge);
     });

@@ -49,9 +49,9 @@
         }
     },
     "dependencies": {
-        "@js-soft/logging-abstractions": "^1.0.1",
-        "@js-soft/ts-serval": "2.0.13",
-        "@nmshd/crypto": "^2.1.2",
+        "@js-soft/logging-abstractions": "^1.0.2",
+        "@js-soft/ts-serval": "2.0.14",
+        "@nmshd/crypto": "^2.1.3",
         "json-stringify-safe": "^5.0.1",
         "luxon": "^3.7.2",
         "uuid": "^11.1.0"
