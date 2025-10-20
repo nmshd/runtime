@@ -770,7 +770,7 @@ export class AttributesController extends ConsumptionBaseController {
 
     private async validateAttributeSuccession(predecessor: LocalAttribute, successor: LocalAttribute): Promise<ValidationResult> {
         const localAttribute = await this.getLocalAttribute(predecessor.id);
-        if (!_.isEqual(predecessor, localAttribute)) return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorDoesNotExist());
+        if (!_.isEqual(_.omit(predecessor, ["numberOfForwards"]), _.omit(localAttribute, ["numberOfForwards"]))) return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorDoesNotExist());
 
         const existingAttributeWithSameId = await this.getLocalAttribute(successor.id);
         if (existingAttributeWithSameId) return ValidationResult.error(ConsumptionCoreErrors.attributes.successorMustNotYetExist());
@@ -802,11 +802,11 @@ export class AttributesController extends ConsumptionBaseController {
         return ValidationResult.success();
     }
 
-    public async deleteAttribute(attribute: LocalAttribute): Promise<void> {
-        const localAttribute = await this.getLocalAttribute(attribute.id);
-        if (localAttribute && !_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+    public async deleteAttribute(attributeId: CoreId): Promise<void> {
+        const attribute = await this.getLocalAttribute(attributeId);
+        if (!attribute ) throw  TransportCoreErrors.general.recordNotFound(LocalAttribute, attributeId.toString());
 
-        await this.deleteAttributeUnsafe(attribute.id);
+        await this.deleteAttributeUnsafe(attributeId);
         this.eventBus.publish(new AttributeDeletedEvent(this.identity.address.toString(), attribute));
     }
 
@@ -868,7 +868,7 @@ export class AttributesController extends ConsumptionBaseController {
 
         if (attribute instanceof OwnIdentityAttribute && this.setDefaultOwnIdentityAttributes) await this.transferDefault(attribute);
 
-        await this.deleteAttribute(attribute);
+        await this.deleteAttribute(attribute.id);
     }
 
     public async validateFullAttributeDeletionProcess(attributeId: CoreId): Promise<ValidationResult> {
@@ -891,7 +891,7 @@ export class AttributesController extends ConsumptionBaseController {
     private async deletePredecessorsOfAttribute(attribute: LocalAttribute): Promise<void> {
         const predecessors = await this.getPredecessorsOfAttribute(attribute);
         for (const predecessor of predecessors) {
-            await this.deleteAttribute(predecessor);
+            await this.deleteAttribute(predecessor.id);
         }
     }
 
@@ -920,7 +920,7 @@ export class AttributesController extends ConsumptionBaseController {
     public async getVersionsOfAttribute<T extends LocalAttribute>(attribute: T): Promise<T[]> {
         const localAttribute = await this.getLocalAttribute(attribute.id);
         if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
-        if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+        if (!_.isEqual(_.omit(attribute, ["numberOfForwards"]), _.omit(localAttribute, ["numberOfForwards"]))) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
         const predecessors = await this.getPredecessorsOfAttribute(attribute);
         const successors = await this.getSuccessorsOfAttribute(attribute);
@@ -932,7 +932,7 @@ export class AttributesController extends ConsumptionBaseController {
     public async getPredecessorsOfAttribute<T extends LocalAttribute>(attribute: T): Promise<T[]> {
         const localAttribute = await this.getLocalAttribute(attribute.id);
         if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
-        if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+        if (!_.isEqual(_.omit(attribute, ['numberOfForwards']), _.omit(localAttribute, ["numberOfForwards"]))) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
         const predecessors: T[] = [];
         while (attribute.succeeds) {
@@ -949,7 +949,7 @@ export class AttributesController extends ConsumptionBaseController {
     public async getSuccessorsOfAttribute<T extends LocalAttribute>(attribute: T): Promise<T[]> {
         const localAttribute = await this.getLocalAttribute(attribute.id);
         if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
-        if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+        if (!_.isEqual(_.omit(attribute, ['numberOfForwards']), _.omit(localAttribute, ["numberOfForwards"]))) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
         const successors: T[] = [];
         while (attribute.succeededBy) {
@@ -963,14 +963,12 @@ export class AttributesController extends ConsumptionBaseController {
         return successors;
     }
 
-    public async isSubsequentInSuccession(predecessor: LocalAttribute, successor: LocalAttribute): Promise<boolean> {
-        const predecessorLocalAttribute = await this.getLocalAttribute(predecessor.id);
-        if (!predecessorLocalAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, predecessor.id.toString());
-        if (!_.isEqual(predecessor, predecessorLocalAttribute)) throw ConsumptionCoreErrors.attributes.predecessorDoesNotExist();
+    public async isSubsequentInSuccession(predecessorId: CoreId, successorId: CoreId): Promise<boolean> {
+        var predecessor = await this.getLocalAttribute(predecessorId);
+        if (!predecessor) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, predecessorId.toString());
 
-        const successorlocalAttribute = await this.getLocalAttribute(successor.id);
-        if (!successorlocalAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, successor.id.toString());
-        if (!_.isEqual(successor, successorlocalAttribute)) throw ConsumptionCoreErrors.attributes.successorDoesNotExist();
+        const successor = await this.getLocalAttribute(successorId);
+        if (!successor) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, successorId.toString());
 
         while (predecessor.succeededBy) {
             const directSuccessor = await this.getLocalAttribute(predecessor.succeededBy);

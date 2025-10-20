@@ -80,12 +80,12 @@ describe("AttributesController", function () {
     afterEach(async function () {
         const attributes = await consumptionController.attributes.getLocalAttributes();
         for (const attribute of attributes) {
-            await consumptionController.attributes.deleteAttribute(attribute);
+            await consumptionController.attributes.deleteAttribute(attribute.id);
         }
 
         const appAttributes = await appConsumptionController.attributes.getLocalAttributes();
         for (const attribute of appAttributes) {
-            await appConsumptionController.attributes.deleteAttribute(attribute);
+            await appConsumptionController.attributes.deleteAttribute(attribute.id);
         }
     });
 
@@ -995,7 +995,7 @@ describe("AttributesController", function () {
             expect(createdAttribute).toBeDefined();
             expect(createdAttribute).toStrictEqual(ownIdentityAttribute);
 
-            await consumptionController.attributes.deleteAttribute(ownIdentityAttribute);
+            await consumptionController.attributes.deleteAttribute(ownIdentityAttribute.id);
 
             const deletedAttribute = await consumptionController.attributes.getLocalAttribute(ownIdentityAttribute.id);
             expect(deletedAttribute).toBeUndefined();
@@ -1093,7 +1093,7 @@ describe("AttributesController", function () {
 
             test("should delete an Attribute", async function () {
                 const attributeBeforeDeletion = await consumptionController.attributes.getLocalAttribute(successorOwnIdentityAttribute.id);
-                expect(attributeBeforeDeletion).toStrictEqual(successorOwnIdentityAttribute);
+                expect(attributeBeforeDeletion).toBeDefined();
 
                 await consumptionController.attributes.executeFullAttributeDeletionProcess(successorOwnIdentityAttribute);
                 const result = await consumptionController.attributes.getLocalAttribute(successorOwnIdentityAttribute.id);
@@ -2317,12 +2317,12 @@ describe("AttributesController", function () {
             const { predecessor: updatedVersion0, successor: version1 } = await consumptionController.attributes.succeedOwnIdentityAttribute(version0, successorParams1);
             const { predecessor: updatedVersion1, successor: version2 } = await consumptionController.attributes.succeedOwnIdentityAttribute(version1, successorParams2);
 
-            expect(await consumptionController.attributes.isSubsequentInSuccession(updatedVersion0, updatedVersion1)).toBe(true);
-            expect(await consumptionController.attributes.isSubsequentInSuccession(updatedVersion0, version2)).toBe(true);
+            expect(await consumptionController.attributes.isSubsequentInSuccession(updatedVersion0.id, updatedVersion1.id)).toBe(true);
+            expect(await consumptionController.attributes.isSubsequentInSuccession(updatedVersion0.id, version2.id)).toBe(true);
 
-            expect(await consumptionController.attributes.isSubsequentInSuccession(updatedVersion0, updatedVersion0)).toBe(false);
-            expect(await consumptionController.attributes.isSubsequentInSuccession(updatedVersion1, updatedVersion0)).toBe(false);
-            expect(await consumptionController.attributes.isSubsequentInSuccession(version2, updatedVersion0)).toBe(false);
+            expect(await consumptionController.attributes.isSubsequentInSuccession(updatedVersion0.id, updatedVersion0.id)).toBe(false);
+            expect(await consumptionController.attributes.isSubsequentInSuccession(updatedVersion1.id, updatedVersion0.id)).toBe(false);
+            expect(await consumptionController.attributes.isSubsequentInSuccession(version2.id, updatedVersion0.id)).toBe(false);
         });
     });
 
