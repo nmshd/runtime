@@ -964,7 +964,7 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async isSubsequentInSuccession(predecessorId: CoreId, successorId: CoreId): Promise<boolean> {
-        var predecessor = await this.getLocalAttribute(predecessorId);
+        let predecessor = await this.getLocalAttribute(predecessorId);
         if (!predecessor) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, predecessorId.toString());
 
         const successor = await this.getLocalAttribute(successorId);
