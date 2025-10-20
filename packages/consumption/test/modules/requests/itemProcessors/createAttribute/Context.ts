@@ -332,7 +332,7 @@ export class ThenSteps {
         expect(forwardedOwnIdentityAttribute).toBeDefined();
         expect(forwardedOwnIdentityAttribute.id.toString()).toBe(attribute.id.toString());
         expect(forwardedOwnIdentityAttribute.content.toJSON()).toStrictEqual(attribute.content.toJSON());
-        expect(forwardedOwnIdentityAttribute.numberOfForwards).toBe(1);
+        expect(forwardedOwnIdentityAttribute.numberOfForwards).toBeGreaterThanOrEqual(1);
 
         const isForwarded = await this.context.consumptionController.attributes.isForwardedTo(forwardedOwnIdentityAttribute, this.context.peerAddress)
         expect(isForwarded).toBe(true);

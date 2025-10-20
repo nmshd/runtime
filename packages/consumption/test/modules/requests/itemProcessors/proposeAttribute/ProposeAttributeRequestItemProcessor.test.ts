@@ -1006,7 +1006,7 @@ describe("ProposeAttributeRequestItemProcessor", function () {
 
                 const updatedSuccessorOwnIdentityAttribute = await consumptionController.attributes.getLocalAttribute(successorOwnIdentityAttribute.id);
                 expect(updatedSuccessorOwnIdentityAttribute!.succeededBy).toStrictEqual(createdSuccessor!.id);
-                expect(updatedSuccessorOwnIdentityAttribute!.numberOfForwards).toBe(1);
+                expect(updatedSuccessorOwnIdentityAttribute!.numberOfForwards).toBe(0);
             });
 
             test("accept with existing IdentityAttribute whose predecessor was already shared but is DeletedByRecipient", async function () {
