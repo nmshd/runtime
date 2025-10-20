@@ -307,7 +307,10 @@ export class ThenSteps {
         expect(createdForwardedOwnIdentityAttribute).toBeDefined();
         expect(createdForwardedOwnIdentityAttribute instanceof OwnIdentityAttribute).toBe(true);
         expect(createdForwardedOwnIdentityAttribute.numberOfForwards).toBe(1);
-        expect(this.context.consumptionController.attributes.isForwardedTo(createdForwardedOwnIdentityAttribute, this.context.peerAddress)).toBe(true);
+
+        const isForwarded = await this.context.consumptionController.attributes.isForwardedTo(createdForwardedOwnIdentityAttribute, this.context.peerAddress)
+        expect(isForwarded).toBe(true);
+
         if (value) expect(createdForwardedOwnIdentityAttribute.content.value.toJSON()).toStrictEqual(value);
     }
 
@@ -330,7 +333,9 @@ export class ThenSteps {
         expect(forwardedOwnIdentityAttribute.id.toString()).toBe(attribute.id.toString());
         expect(forwardedOwnIdentityAttribute.content.toJSON()).toStrictEqual(attribute.content.toJSON());
         expect(forwardedOwnIdentityAttribute.numberOfForwards).toBe(1);
-        expect(this.context.consumptionController.attributes.isForwardedTo(forwardedOwnIdentityAttribute, this.context.peerAddress)).toBe(true);
+
+        const isForwarded = await this.context.consumptionController.attributes.isForwardedTo(forwardedOwnIdentityAttribute, this.context.peerAddress)
+        expect(isForwarded).toBe(true);
     }
 
     public async theOwnIdentityAttributeIsDeletedByRecipient(attribute: OwnIdentityAttribute, peer: CoreAddress): Promise<void> {
