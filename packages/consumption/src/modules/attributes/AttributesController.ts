@@ -247,6 +247,8 @@ export class AttributesController extends ConsumptionBaseController {
 
         if (this.setDefaultOwnIdentityAttributes) ownIdentityAttribute = await this.setAsDefaultOwnIdentityAttribute(ownIdentityAttribute, true);
 
+        await this.updateNumberOfForwards(ownIdentityAttribute);
+
         this.eventBus.publish(new AttributeCreatedEvent(this.identity.address.toString(), ownIdentityAttribute));
         return ownIdentityAttribute;
     }
@@ -318,6 +320,8 @@ export class AttributesController extends ConsumptionBaseController {
         });
         await this.attributes.create(peerIdentityAttribute);
 
+        await this.updateNumberOfForwards(peerIdentityAttribute);
+
         this.eventBus.publish(new AttributeCreatedEvent(this.identity.address.toString(), peerIdentityAttribute));
         return peerIdentityAttribute;
     }
@@ -349,6 +353,8 @@ export class AttributesController extends ConsumptionBaseController {
         });
         await this.attributes.create(ownRelationshipAttribute);
 
+        await this.updateNumberOfForwards(ownRelationshipAttribute);
+
         this.eventBus.publish(new AttributeCreatedEvent(this.identity.address.toString(), ownRelationshipAttribute));
         return ownRelationshipAttribute;
     }
@@ -379,6 +385,8 @@ export class AttributesController extends ConsumptionBaseController {
             createdAt: CoreDate.utc()
         });
         await this.attributes.create(peerRelationshipAttribute);
+
+        await this.updateNumberOfForwards(peerRelationshipAttribute);
 
         this.eventBus.publish(new AttributeCreatedEvent(this.identity.address.toString(), peerRelationshipAttribute));
         return peerRelationshipAttribute;
@@ -418,6 +426,8 @@ export class AttributesController extends ConsumptionBaseController {
             createdAt: CoreDate.utc()
         });
         await this.attributes.create(thirdPartyRelationshipAttribute);
+
+        await this.updateNumberOfForwards(thirdPartyRelationshipAttribute);
 
         this.eventBus.publish(new AttributeCreatedEvent(this.identity.address.toString(), thirdPartyRelationshipAttribute));
         return thirdPartyRelationshipAttribute;
