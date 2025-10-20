@@ -450,7 +450,7 @@ export class AttributesController extends ConsumptionBaseController {
         const localAttribute = await this.getLocalAttribute(attribute.id);
         if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
         // TODO: 1. why do we need this check? 2. if we need it, we should only compare some properties
-        // if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+        // if (!_.isEqual(_.omit(attribute, ["numberOfForwards"]), _.omit(localAttribute, ["numberOfForwards"]))) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
         if (await this.isForwardedTo(attribute, peer, true)) throw ConsumptionCoreErrors.attributes.alreadyForwarded(attribute.id, peer);
 
@@ -837,7 +837,7 @@ export class AttributesController extends ConsumptionBaseController {
     ): Promise<T> {
         const localAttribute = await this.getLocalAttribute(attribute.id);
         if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
-        if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+        if (!_.isEqual(_.omit(attribute, ["numberOfForwards"]), _.omit(localAttribute, ["numberOfForwards"]))) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
         const existingForwardedSharingDetailObjects = await this.forwardingDetails.find({ attributeId: attribute.id.toString(), peer: peer.toString() });
         const existingForwardingDetails = existingForwardedSharingDetailObjects.map((obj) => ForwardingDetails.from(obj));
@@ -989,7 +989,7 @@ export class AttributesController extends ConsumptionBaseController {
     ): Promise<T[]> {
         const localAttribute = await this.getLocalAttribute(attribute.id);
         if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
-        if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+        if (!_.isEqual(_.omit(attribute, ['numberOfForwards']), _.omit(localAttribute, ["numberOfForwards"]))) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
         const sharedAttribute = (await this.isForwardedTo(attribute, peerAddress, excludeToBeDeleted)) ? [attribute] : [];
         const sharedPredecessors = await this.getPredecessorsOfAttributeSharedWithPeer(attribute, peerAddress, excludeToBeDeleted);
@@ -1009,7 +1009,7 @@ export class AttributesController extends ConsumptionBaseController {
     ): Promise<T[]> {
         const localAttribute = await this.getLocalAttribute(referenceAttribute.id);
         if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, referenceAttribute.id.toString());
-        if (!_.isEqual(referenceAttribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+        if (!_.isEqual(_.omit(referenceAttribute, ['numberOfForwards']), _.omit(localAttribute, ["numberOfForwards"]))) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
         const matchingPredecessors: T[] = [];
         while (referenceAttribute.succeeds) {
@@ -1031,7 +1031,7 @@ export class AttributesController extends ConsumptionBaseController {
     ): Promise<T[]> {
         const localAttribute = await this.getLocalAttribute(referenceAttribute.id);
         if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, referenceAttribute.id.toString());
-        if (!_.isEqual(referenceAttribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+        if (!_.isEqual(_.omit(referenceAttribute, ['numberOfForwards']), _.omit(localAttribute, ["numberOfForwards"]))) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
         const matchingSuccessors: T[] = [];
         while (referenceAttribute.succeededBy) {
@@ -1412,7 +1412,7 @@ export class AttributesController extends ConsumptionBaseController {
 
         if ((await this.isDeletedOrToBeDeletedByForwardingPeer(attribute, peer)) && !overrideDeletedOrToBeDeleted) return;
 
-        await this.setDeletionInfoForForwardingPeer(localAttribute, deletionInfo, peer, overrideDeletedOrToBeDeleted);
+        await this.setDeletionInfoForForwardingPeer(attribute, deletionInfo, peer, overrideDeletedOrToBeDeleted);
     }
 
     public async setPeerDeletionInfoOfOwnRelationshipAttribute(
@@ -1597,7 +1597,7 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async setDeletionInfoForForwardingPeer(
-        localAttribute: LocalAttribute,
+        localAttribute: OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute,
         deletionInfo: EmittedAttributeDeletionInfo | undefined,
         peer: CoreAddress,
         overrideDeleted = false
