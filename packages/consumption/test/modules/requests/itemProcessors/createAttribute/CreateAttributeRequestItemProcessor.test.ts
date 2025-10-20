@@ -477,7 +477,7 @@ describe("CreateAttributeRequestItemProcessor", function () {
             await Then.theIdOfTheAlreadySharedAttributeMatches(ownIdentityAttribute.id);
         });
 
-        test("in case of an IdentityAttribute that already has a ForwardingDetails but is deleted by peer: adds another forwardedSharingDetails without deletionInfo", async function () {
+        test("in case of an IdentityAttribute that already has a ForwardingDetails but is deleted by peer: adds another forwardingDetail without deletionInfo", async function () {
             const ownIdentityAttribute = await Given.aForwardedOwnIdentityAttributeWithDeletionInfo({
                 attributeOwner: TestIdentity.CURRENT_IDENTITY,
                 value: GivenName.from("aGivenName"),
