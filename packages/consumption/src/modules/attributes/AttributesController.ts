@@ -439,7 +439,8 @@ export class AttributesController extends ConsumptionBaseController {
     ): Promise<T> {
         const localAttribute = await this.getLocalAttribute(attribute.id);
         if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
-        if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+        // TODO: 1. why do we need this check? 2. if we need it, we should only compare some properties
+        // if (!_.isEqual(attribute, localAttribute)) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
         if (await this.isForwardedTo(attribute, peer, true)) throw ConsumptionCoreErrors.attributes.alreadyForwarded(attribute.id, peer);
 

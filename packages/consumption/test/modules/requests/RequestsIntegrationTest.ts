@@ -41,7 +41,6 @@ import {
     LocalRequestStatus,
     LocalResponse,
     OutgoingRequestsController,
-    OwnIdentityAttribute,
     ProposeAttributeRequestItemProcessor,
     ReadAttributeRequestItemProcessor,
     ReceivedIncomingRequestParameters,
@@ -1083,10 +1082,9 @@ export class RequestsThen {
         expect(sUpdatedOwnIdentityAttributes).toBeDefined();
         expect(sUpdatedOwnIdentityAttributes).toHaveLength(3);
         for (const sUpdatedOwnIdentityAttribute of sUpdatedOwnIdentityAttributes) {
-            expect((sUpdatedOwnIdentityAttribute as OwnIdentityAttribute).forwardedSharingDetails![0].deletionInfo).toBeDefined();
-            expect((sUpdatedOwnIdentityAttribute as OwnIdentityAttribute).forwardedSharingDetails![0].deletionInfo!.deletionStatus).toBe(
-                EmittedAttributeDeletionStatus.DeletionRequestSent
-            );
+            const forwardingDetails = await this.context.consumptionController.attributes.getForwardingDetailsForAttribute(sUpdatedOwnIdentityAttribute);
+            expect(forwardingDetails[0].deletionInfo).toBeDefined();
+            expect(forwardingDetails[0].deletionInfo!.deletionStatus).toBe(EmittedAttributeDeletionStatus.DeletionRequestSent);
         }
     }
 
