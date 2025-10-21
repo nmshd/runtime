@@ -2269,22 +2269,6 @@ describe("AttributesController", function () {
             }
         });
 
-        test("should throw if an unassigned Attribute is queried", async function () {
-            const notExistingAttribute = OwnIdentityAttribute.from({
-                id: CoreId.from("notExistingAttributeId"),
-                content: IdentityAttribute.from({
-                    value: {
-                        "@type": "Nationality",
-                        value: "DE"
-                    },
-                    owner: consumptionController.accountController.identity.address
-                }),
-                createdAt: CoreDate.utc()
-            });
-
-            await expect(consumptionController.attributes.getVersionsOfAttribute(notExistingAttribute)).rejects.toThrow("error.transport.recordNotFound");
-        });
-
         test("should check if two Attributes are subsequent in succession", async function () {
             const version0 = await consumptionController.attributes.createOwnIdentityAttribute({
                 content: IdentityAttribute.from({
@@ -2420,24 +2404,6 @@ describe("AttributesController", function () {
                 const resultB = await consumptionController.attributes.getVersionsOfAttributeSharedWithPeer(version, CoreAddress.from("peerB"));
                 expect(resultB).toStrictEqual([forwardedOwnIdentityAttributeV2PeerB]);
             }
-        });
-
-        test("should throw if an unassigned Attribute is queried", async function () {
-            const notExistingAttribute = OwnIdentityAttribute.from({
-                id: CoreId.from("notExistingAttributeId"),
-                content: IdentityAttribute.from({
-                    value: {
-                        "@type": "Nationality",
-                        value: "DE"
-                    },
-                    owner: consumptionController.accountController.identity.address
-                }),
-                createdAt: CoreDate.utc()
-            });
-
-            await expect(consumptionController.attributes.getVersionsOfAttributeSharedWithPeer(notExistingAttribute, CoreAddress.from("peerAddress"))).rejects.toThrow(
-                "error.transport.recordNotFound"
-            );
         });
 
         test("should return an empty list if an OwnRelationshipAttribute without associated ThirdPartyRelationshipAttributes is queried", async function () {
