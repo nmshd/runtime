@@ -22,6 +22,7 @@ import { AttributeMapper } from "./AttributeMapper";
 export interface GetAttributesRequest {
     query?: GetAttributesRequestQuery;
     hideTechnical?: boolean;
+    minNumberOfForwards?: number;
 }
 
 export interface GetAttributesRequestQuery {
@@ -44,7 +45,6 @@ export interface GetAttributesRequestQuery {
     deletionInfo?: string | string[];
     "deletionInfo.deletionStatus"?: string | string[];
     "deletionInfo.deletionDate"?: string | string[];
-    numberOfForwards?: string | string[];
 }
 
 export class GetAttributesUseCase extends UseCase<GetAttributesRequest, LocalAttributeDTO[]> {
@@ -132,8 +132,12 @@ export class GetAttributesUseCase extends UseCase<GetAttributesRequest, LocalAtt
 
         const attributes = await this.attributeController.getLocalAttributes(dbQuery, request.hideTechnical);
 
-        // TODO: get the number of forwards
-        // TODO: filter for query.numberOfForwards
+        if (request.minNumberOfForwards !== undefined) {
+            const minNumberOfForwards = request.minNumberOfForwards;
+            const filtered = attributes.filter((attr) => (attr.numberOfForwards ?? 0) >= minNumberOfForwards);
+
+            return Result.ok(AttributeMapper.toAttributeDTOList(filtered));
+        }
 
         return Result.ok(AttributeMapper.toAttributeDTOList(attributes));
     }

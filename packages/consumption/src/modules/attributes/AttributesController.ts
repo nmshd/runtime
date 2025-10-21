@@ -465,8 +465,6 @@ export class AttributesController extends ConsumptionBaseController {
 
         await this.upsertForwardingDetailsForPeer(attribute, peer, forwardingDetails);
 
-        // TODO: this event is strange, why do you want to listen on that?
-
         this.eventBus.publish(new AttributeForwardingDetailsChangedEvent(this.identity.address.toString(), attribute));
         return attribute;
     }
@@ -817,12 +815,14 @@ export class AttributesController extends ConsumptionBaseController {
             await this.deleteAttributeUnsafe(attribute.id);
         }
 
-        // TODO: this is not how to get forwarded attributes
-        const forwardedAttributes = (await this.getLocalAttributes({ "forwardingDetails.peer": peer.toString() })) as (
-            | OwnIdentityAttribute
-            | OwnRelationshipAttribute
-            | PeerRelationshipAttribute
-        )[];
+        const forwardedAttributes = (await this.getLocalAttributesExchangedWithPeer(
+            peer,
+            {
+                "@type": { $in: ["OwnIdentityAttribute", "OwnRelationshipAttribute", "PeerRelationshipAttribute"] }
+            },
+            undefined,
+            true
+        )) as (OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute)[];
         for (const attribute of forwardedAttributes) {
             await this.removeForwardingDetailsFromAttribute(attribute, peer);
         }
@@ -841,7 +841,6 @@ export class AttributesController extends ConsumptionBaseController {
 
         await this.updateNumberOfForwards(attribute);
 
-        // TODO: this event is strange, why do you want to listen on that?
         this.eventBus.publish(new AttributeForwardingDetailsChangedEvent(this.identity.address.toString(), attribute));
         return attribute;
     }
@@ -1326,12 +1325,17 @@ export class AttributesController extends ConsumptionBaseController {
             deletionDate
         });
 
+        const forwardingDetailsForPeer = await this.forwardingDetails.find({
+            peer: peer.toString(),
+            "deletionInfo.deletionStatus": { $ne: EmittedAttributeDeletionStatus.DeletedByRecipient }
+        });
+        if (forwardingDetailsForPeer.length === 0) return;
+
+        const attributeIds = forwardingDetailsForPeer.map((detail) => CoreId.from(detail.attributeId));
+
         const attributesForwardedToPeer = (await this.getLocalAttributes({
             "@type": { $in: ["OwnIdentityAttribute", "OwnRelationshipAttribute", "PeerRelationshipAttribute"] },
-            // TODO: this query will fail
-            "forwardingDetails.peer": peer.toString(),
-            // TODO: this query will fail
-            "forwardingDetails.deletionInfo.deletionStatus": { $ne: EmittedAttributeDeletionStatus.DeletedByRecipient }
+            id: { $in: attributeIds.map((id) => id.toString()) }
         })) as OwnIdentityAttribute[] | OwnRelationshipAttribute[] | PeerRelationshipAttribute[];
 
         for (const attribute of attributesForwardedToPeer) {
@@ -1582,7 +1586,7 @@ export class AttributesController extends ConsumptionBaseController {
         return docs.map((doc) => ForwardingDetails.from(doc));
     }
 
-    public async getLocalAttributesExchangedWithPeer(peer: CoreAddress, query: any, hideTechnical = false): Promise<LocalAttribute[]> {
+    public async getLocalAttributesExchangedWithPeer(peer: CoreAddress, query: any, hideTechnical = false, onlyForwarded = false): Promise<LocalAttribute[]> {
         const forwardingDetailsDocs = await this.forwardingDetails.find({ peer: peer.toString() });
         const forwardingDetails = forwardingDetailsDocs.map((doc) => ForwardingDetails.from(doc));
 
@@ -1591,19 +1595,20 @@ export class AttributesController extends ConsumptionBaseController {
 
         this.addHideTechnicalToQuery(hideTechnical, query);
 
-        const actualQuery = {
-            ...query,
-            $or: [
+        if (onlyForwarded) {
+            query.id = { $in: uniqueAttributeIds.map((id) => id.toString()) };
+        } else {
+            query.$or = [
                 {
                     id: { $in: uniqueAttributeIds.map((id) => id.toString()) }
                 },
                 {
                     peer: peer.toString()
                 }
-            ]
-        };
+            ];
+        }
 
-        const docs = await this.attributes.find(actualQuery);
+        const docs = await this.attributes.find(query);
 
         return docs.map((doc) => LocalAttribute.from(doc));
     }

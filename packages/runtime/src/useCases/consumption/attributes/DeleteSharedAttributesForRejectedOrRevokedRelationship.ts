@@ -36,8 +36,8 @@ export class DeleteSharedAttributesForRejectedOrRevokedRelationshipUseCase exten
         }
 
         const sharedAttributes = await this.attributesController.getLocalAttributes({
-            peer: relationship.peer.address.toString(),
-            forwardedSharingDetails: { $exists: false }
+            "@type": "PeerIdentityAttribute",
+            peer: relationship.peer.address.toString()
         });
 
         for (const sharedAttribute of sharedAttributes) {
@@ -49,15 +49,9 @@ export class DeleteSharedAttributesForRejectedOrRevokedRelationshipUseCase exten
             await this.attributesController.executeFullAttributeDeletionProcess(sharedAttribute);
         }
 
-        const queryForForwardedAttributes = {
-            "@type": { $in: ["OwnIdentityAttribute", "OwnRelationshipAttribute", "PeerRelationshipAttribute"] },
-            "forwardedSharingDetails.peer": relationship.peer.address.toString()
-        };
-        const forwardedAttributes = (await this.attributesController.getLocalAttributes(queryForForwardedAttributes)) as (
-            | OwnIdentityAttribute
-            | OwnRelationshipAttribute
-            | PeerRelationshipAttribute
-        )[];
+        const forwardedAttributes = (await this.attributesController.getLocalAttributesExchangedWithPeer(relationship.peer.address, {
+            "@type": { $in: ["OwnIdentityAttribute", "OwnRelationshipAttribute", "PeerRelationshipAttribute"] }
+        })) as (OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute)[];
 
         for (const forwardedAttribute of forwardedAttributes) {
             await this.attributesController.removeForwardingDetailsFromAttribute(forwardedAttribute, relationship.peer.address);
