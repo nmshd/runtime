@@ -1,4 +1,5 @@
 import {
+    ForwardingDetails,
     LocalAttribute,
     OwnIdentityAttribute,
     OwnRelationshipAttribute,
@@ -6,7 +7,7 @@ import {
     PeerRelationshipAttribute,
     ThirdPartyRelationshipAttribute
 } from "@nmshd/consumption";
-import { LocalAttributeDTO } from "@nmshd/runtime-types";
+import { ForwardingDetailsDTO, LocalAttributeDTO } from "@nmshd/runtime-types";
 
 export class AttributeMapper {
     public static toAttributeDTO(attribute: LocalAttribute): LocalAttributeDTO {
@@ -40,14 +41,14 @@ export class AttributeMapper {
         return attributes.map((attribute) => this.toAttributeDTO(attribute));
     }
 
-    // private static toForwardingDetailsDTO(sharingDetails: ForwardingDetails): ForwardingDetailsDTO {
-    //     return {
-    //         peer: sharingDetails.peer.toString(),
-    //         sourceReference: sharingDetails.sourceReference.toString(),
-    //         sharedAt: sharingDetails.sharedAt.toString(),
-    //         deletionInfo: sharingDetails.deletionInfo
-    //             ? { deletionStatus: sharingDetails.deletionInfo.deletionStatus, deletionDate: sharingDetails.deletionInfo.deletionDate.toString() }
-    //             : undefined
-    //     };
-    // }
+    public static toForwardingDetailsDTO(forwardingDetails: ForwardingDetails): ForwardingDetailsDTO {
+        return {
+            peer: forwardingDetails.peer.toString(),
+            sourceReference: forwardingDetails.sourceReference.toString(),
+            sharedAt: forwardingDetails.sharedAt.toString(),
+            deletionInfo: forwardingDetails.deletionInfo
+                ? { deletionStatus: forwardingDetails.deletionInfo.deletionStatus, deletionDate: forwardingDetails.deletionInfo.deletionDate.toString() }
+                : undefined
+        };
+    }
 }

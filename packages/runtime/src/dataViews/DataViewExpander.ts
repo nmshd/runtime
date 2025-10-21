@@ -60,6 +60,7 @@ import {
 import { CoreAddress, CoreId, FileReference } from "@nmshd/core-types";
 import {
     FileDTO,
+    ForwardingDetailsDTO,
     IdentityDTO,
     LocalAttributeDTO,
     LocalRequestDTO,
@@ -990,6 +991,9 @@ export class DataViewExpander {
         const valueHints = localAttribute.content.value.valueHints.toJSON();
 
         if (localAttribute instanceof OwnIdentityAttribute) {
+            const forwardingDetailsResult = await this.consumption.attributes.getForwardingDetailsForAttribute({ attributeId: localAttribute.id.toString() });
+            const forwardingDetails = forwardingDetailsResult.value;
+
             return {
                 type: "OwnIdentityAttributeDVO",
                 id: attribute.id,
@@ -1010,8 +1014,8 @@ export class DataViewExpander {
                 succeededBy: attribute.succeededBy,
                 tags: localAttribute.content.tags,
                 isDefault: attribute.isDefault,
-                forwardingPeers: this.expandForwardingPeers(localAttribute),
-                forwardingDetails: this.expandForwardingDetails(localAttribute)
+                forwardingPeers: this.expandForwardingPeers(forwardingDetails),
+                forwardingDetails: this.expandForwardingDetails(forwardingDetails)
             };
         }
 
@@ -1043,6 +1047,9 @@ export class DataViewExpander {
         }
 
         if (localAttribute instanceof OwnRelationshipAttribute) {
+            const forwardingDetailsResult = await this.consumption.attributes.getForwardingDetailsForAttribute({ attributeId: localAttribute.id.toString() });
+            const forwardingDetails = forwardingDetailsResult.value;
+
             return {
                 type: "OwnRelationshipAttributeDVO",
                 id: attribute.id,
@@ -1068,12 +1075,15 @@ export class DataViewExpander {
                 sourceReference: localAttribute.sourceReference.toString(),
                 deletionStatus: localAttribute.deletionInfo?.deletionStatus,
                 deletionDate: localAttribute.deletionInfo?.deletionDate.toString(),
-                forwardingPeers: this.expandForwardingPeers(localAttribute),
-                forwardingDetails: this.expandForwardingDetails(localAttribute)
+                forwardingPeers: this.expandForwardingPeers(forwardingDetails),
+                forwardingDetails: this.expandForwardingDetails(forwardingDetails)
             };
         }
 
         if (localAttribute instanceof PeerRelationshipAttribute) {
+            const forwardingDetailsResult = await this.consumption.attributes.getForwardingDetailsForAttribute({ attributeId: localAttribute.id.toString() });
+            const forwardingDetails = forwardingDetailsResult.value;
+
             return {
                 type: "PeerRelationshipAttributeDVO",
                 id: attribute.id,
@@ -1099,8 +1109,8 @@ export class DataViewExpander {
                 sourceReference: localAttribute.sourceReference.toString(),
                 deletionStatus: localAttribute.deletionInfo?.deletionStatus,
                 deletionDate: localAttribute.deletionInfo?.deletionDate.toString(),
-                forwardingPeers: this.expandForwardingPeers(localAttribute),
-                forwardingDetails: this.expandForwardingDetails(localAttribute)
+                forwardingPeers: this.expandForwardingPeers(forwardingDetails),
+                forwardingDetails: this.expandForwardingDetails(forwardingDetails)
             };
         }
 
@@ -1140,39 +1150,28 @@ export class DataViewExpander {
         return await Promise.all(attributesPromise);
     }
 
-    private expandForwardingPeers(_localAttribute: OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute): string[] | undefined {
-        // TODO: enable when finding out how to proceed with this
+    private expandForwardingPeers(forwardingDetails: ForwardingDetailsDTO[]): string[] | undefined {
+        if (forwardingDetails.length === 0) return;
 
-        return;
-
-        // if (!localAttribute.forwardedSharingDetails || localAttribute.forwardedSharingDetails.length === 0) return;
-
-        // if (localAttribute instanceof OwnIdentityAttribute) {
-        //     return localAttribute.getForwardingPeers().map((peerAddress) => peerAddress.toString());
-        // }
-
-        // return localAttribute.getForwardingPeers().map((thirdPartyAddress) => thirdPartyAddress.toString());
+        return forwardingDetails.map((detail) => detail.peer.toString());
     }
 
-    private expandForwardingDetails(_localAttribute: OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute): ForwardingDetailsDVO[] | undefined {
-        // TODO: enable when finding out how to proceed with this
+    private expandForwardingDetails(forwardingDetails: ForwardingDetailsDTO[]): ForwardingDetailsDVO[] | undefined {
+        if (forwardingDetails.length === 0) return;
 
-        return;
+        return forwardingDetails.map((sharingDetails) => {
+            const result: ForwardingDetailsDVO = {
+                peer: sharingDetails.peer.toString(),
+                sourceReference: sharingDetails.sourceReference.toString(),
+                sharedAt: sharingDetails.sharedAt.toString()
+            };
 
-        // if (!localAttribute.forwardedSharingDetails || localAttribute.forwardedSharingDetails.length === 0) return;
-
-        // return localAttribute.forwardedSharingDetails.map((sharingDetails) => {
-        //     const result: ForwardingDetailsDVO = {
-        //         peer: sharingDetails.peer.toString(),
-        //         sourceReference: sharingDetails.sourceReference.toString(),
-        //         sharedAt: sharingDetails.sharedAt.toString()
-        //     };
-        //     if (sharingDetails.deletionInfo) {
-        //         result.deletionDate = sharingDetails.deletionInfo.deletionDate.toString();
-        //         result.deletionStatus = sharingDetails.deletionInfo.deletionStatus;
-        //     }
-        //     return result;
-        // });
+            if (sharingDetails.deletionInfo) {
+                result.deletionDate = sharingDetails.deletionInfo.deletionDate.toString();
+                result.deletionStatus = sharingDetails.deletionInfo.deletionStatus;
+            }
+            return result;
+        });
     }
 
     public async expandAttributeQuery(

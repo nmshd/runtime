@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { AttributeTagCollectionDTO, LocalAttributeDTO, LocalRequestDTO } from "@nmshd/runtime-types";
+import { AttributeTagCollectionDTO, ForwardingDetailsDTO, LocalAttributeDTO, LocalRequestDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
 import {
     CanCreateOwnIdentityAttributeRequest,
@@ -29,6 +29,8 @@ import {
     GetAttributeUseCase,
     GetAttributesRequest,
     GetAttributesUseCase,
+    GetForwardingDetailsForAttributeRequest,
+    GetForwardingDetailsForAttributeUseCase,
     GetOwnAttributesSharedWithPeerRequest,
     GetOwnAttributesSharedWithPeerUseCase,
     GetOwnIdentityAttributesRequest,
@@ -85,7 +87,8 @@ export class AttributesFacade {
         @Inject private readonly deleteSharedAttributesForRejectedOrRevokedRelationshipUseCase: DeleteSharedAttributesForRejectedOrRevokedRelationshipUseCase,
         @Inject private readonly getAttributeTagCollectionUseCase: GetAttributeTagCollectionUseCase,
         @Inject private readonly setAttributeDeletionInfoOfDeletionProposedRelationshipUseCase: SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase,
-        @Inject private readonly markAttributeAsViewedUseCase: MarkAttributeAsViewedUseCase
+        @Inject private readonly markAttributeAsViewedUseCase: MarkAttributeAsViewedUseCase,
+        @Inject private readonly getForwardingDetailsForAttributeUseCase: GetForwardingDetailsForAttributeUseCase
     ) {}
 
     public async canCreateOwnIdentityAttribute(request: CanCreateOwnIdentityAttributeRequest): Promise<Result<CanCreateOwnIdentityAttributeResponse>> {
@@ -190,5 +193,9 @@ export class AttributesFacade {
 
     public async markAttributeAsViewed(request: MarkAttributeAsViewedRequest): Promise<Result<LocalAttributeDTO>> {
         return await this.markAttributeAsViewedUseCase.execute(request);
+    }
+
+    public async getForwardingDetailsForAttribute(request: GetForwardingDetailsForAttributeRequest): Promise<Result<ForwardingDetailsDTO[]>> {
+        return await this.getForwardingDetailsForAttributeUseCase.execute(request);
     }
 }

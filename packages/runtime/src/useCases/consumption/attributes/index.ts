@@ -13,6 +13,7 @@ export * from "./ExecuteThirdPartyRelationshipAttributeQuery";
 export * from "./GetAttribute";
 export * from "./GetAttributes";
 export * from "./GetAttributeTagCollection";
+export * from "./GetForwardingDetailsForAttribute";
 export * from "./GetOwnAttributesSharedWithPeer";
 export * from "./GetOwnIdentityAttributes";
 export * from "./GetPeerAttributes";
