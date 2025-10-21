@@ -3439,7 +3439,7 @@ describe("ThirdPartyRelationshipAttributes", () => {
         );
 
         const thirdPartyRelationshipAttribute = (await services3.consumption.attributes.getAttribute({ id: peerRelationshipAttribute.id })).value;
-        const forwardingDetails = (await services1.consumption.attributes.getForwardingDetailsForAttribute({ attributeId: peerRelationshipAttribute.id })).value;
+        const forwardingDetails = (await services3.consumption.attributes.getForwardingDetailsForAttribute({ attributeId: peerRelationshipAttribute.id })).value;
 
         expect(forwardingDetails[0].peer).toBe(services3.address);
         expect(thirdPartyRelationshipAttribute.initialAttributePeer).toBe(services1.address);
@@ -3564,7 +3564,7 @@ describe(SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase.name, () 
 
         const ownAttributesSharedWithPeer = (await services2.consumption.attributes.getOwnAttributesSharedWithPeer({ peer: services1.address })).value;
         expect(ownAttributesSharedWithPeer).toHaveLength(1);
-        const forwardingDetails = (await services1.consumption.attributes.getForwardingDetailsForAttribute({ attributeId: ownAttributesSharedWithPeer[0].id })).value;
+        const forwardingDetails = (await services2.consumption.attributes.getForwardingDetailsForAttribute({ attributeId: ownAttributesSharedWithPeer[0].id })).value;
         expect(forwardingDetails[0].deletionInfo!.deletionStatus).toBe("DeletedByRecipient");
         expect(forwardingDetails[0].deletionInfo!.deletionDate).toStrictEqual(deletionDate);
     });

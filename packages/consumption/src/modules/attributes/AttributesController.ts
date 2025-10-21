@@ -924,6 +924,8 @@ export class AttributesController extends ConsumptionBaseController {
             const predecessor = (await this.getLocalAttribute(attribute.succeeds)) as T | undefined;
             if (!predecessor) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.succeeds.toString());
 
+            await this.updateNumberOfForwards(predecessor);
+
             attribute = predecessor;
             predecessors.push(attribute);
         }
@@ -936,6 +938,8 @@ export class AttributesController extends ConsumptionBaseController {
         while (attribute.succeededBy) {
             const successor = (await this.getLocalAttribute(attribute.succeededBy)) as T | undefined;
             if (!successor) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.succeededBy.toString());
+
+            await this.updateNumberOfForwards(successor);
 
             attribute = successor;
             successors.push(successor);
@@ -1576,5 +1580,31 @@ export class AttributesController extends ConsumptionBaseController {
     public async getForwardingDetailsForAttribute(attribute: LocalAttribute): Promise<ForwardingDetails[]> {
         const docs = await this.forwardingDetails.find({ attributeId: attribute.id.toString() });
         return docs.map((doc) => ForwardingDetails.from(doc));
+    }
+
+    public async getLocalAttributesExchangedWithPeer(peer: CoreAddress, query: any, hideTechnical = false): Promise<LocalAttribute[]> {
+        const forwardingDetailsDocs = await this.forwardingDetails.find({ peer: peer.toString() });
+        const forwardingDetails = forwardingDetailsDocs.map((doc) => ForwardingDetails.from(doc));
+
+        const attributeIds = forwardingDetails.map((details) => CoreId.from(details.attributeId));
+        const uniqueAttributeIds = Array.from(new Set(attributeIds.map((id) => id.toString()))).map((id) => CoreId.from(id));
+
+        this.addHideTechnicalToQuery(hideTechnical, query);
+
+        const actualQuery = {
+            ...query,
+            $or: [
+                {
+                    id: { $in: uniqueAttributeIds.map((id) => id.toString()) }
+                },
+                {
+                    peer: peer.toString()
+                }
+            ]
+        };
+
+        const docs = await this.attributes.find(actualQuery);
+
+        return docs.map((doc) => LocalAttribute.from(doc));
     }
 }

@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController, OwnIdentityAttribute, OwnRelationshipAttribute, PeerRelationshipAttribute } from "@nmshd/consumption";
-import { CoreId } from "@nmshd/core-types";
+import { AttributesController } from "@nmshd/consumption";
+import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { Relationship, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
@@ -39,26 +39,14 @@ export class GetAttributesForRelationshipUseCase extends UseCase<GetAttributesFo
             return Result.fail(RuntimeErrors.general.recordNotFound(Relationship));
         }
 
-        const peerAddress = relationship.peer.address.toString();
-        const queryForAttributesWithPeer: any = { peer: peerAddress };
+        const query: any = {};
+        if (request.onlyLatestVersions ?? true) query["succeededBy"] = { $exists: false };
 
-        const queryForForwardedAttributes: any = {
-            "@type": { $in: ["OwnIdentityAttribute", "OwnRelationshipAttribute", "PeerRelationshipAttribute"] },
-            "forwardedSharingDetails.peer": relationship.peer.address.toString()
-        };
-
-        if (request.onlyLatestVersions ?? true) {
-            queryForAttributesWithPeer["succeededBy"] = { $exists: false };
-            queryForForwardedAttributes["succeededBy"] = { $exists: false };
-        }
-
-        const attributes = await this.attributesController.getLocalAttributes(queryForAttributesWithPeer, request.hideTechnical);
-        const forwardedAttributes = (await this.attributesController.getLocalAttributes(queryForForwardedAttributes)) as (
-            | OwnIdentityAttribute
-            | OwnRelationshipAttribute
-            | PeerRelationshipAttribute
-        )[];
-        attributes.push(...forwardedAttributes);
+        const attributes = await this.attributesController.getLocalAttributesExchangedWithPeer(
+            CoreAddress.from(relationship.peer.address.toString()),
+            query,
+            request.hideTechnical
+        );
 
         return Result.ok(AttributeMapper.toAttributeDTOList(attributes));
     }

@@ -924,6 +924,7 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
 
         const predecessorResult = await consumptionServices2.attributes.getOwnAttributesSharedWithPeer({
             peer: dvo.createdBy.id,
+            onlyLatestVersions: false,
             query: { "content.value.@type": "GivenName", "content.tags": "x:predecessor" }
         });
         expect(predecessorResult).toBeSuccessful();

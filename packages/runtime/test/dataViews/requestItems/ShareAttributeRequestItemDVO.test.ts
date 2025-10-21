@@ -270,11 +270,14 @@ describe("ShareAttributeRequestItemDVO", () => {
         expect(responseItem.type).toBe("AcceptResponseItemDVO");
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
-        const attributeResult = await sConsumptionServices.attributes.getOwnAttributesSharedWithPeer({ peer: dvo.createdBy.id, query: { "content.value.@type": "DisplayName" } });
+        const attributeResult = await sConsumptionServices.attributes.getOwnAttributesSharedWithPeer({
+            peer: rRuntimeServices.address,
+            query: { "content.value.@type": "DisplayName" }
+        });
         expect(attributeResult).toBeSuccessful();
         const attributes = attributeResult.value;
         expect(attributes).toHaveLength(1);
-        expect(attributes[0].id).toBeDefined();
+        expect(attributes[0].id).toBe(sharedAttributeId);
         expect((attributes[0].content.value as DisplayNameJSON).value).toBe("aDisplayName");
     });
 
