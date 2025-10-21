@@ -32,12 +32,6 @@ export interface GetOwnAttributesSharedWithPeerRequestQuery {
     deletionInfo?: string | string[];
     "deletionInfo.deletionStatus"?: string | string[];
     "deletionInfo.deletionDate"?: string | string[];
-    forwardedSharingDetails?: string | string[];
-    "forwardedSharingDetails.sourceReference"?: string | string[];
-    "forwardedSharingDetails.sharedAt"?: string | string[];
-    "forwardedSharingDetails.deletionInfo"?: string | string[];
-    "forwardedSharingDetails.deletionInfo.deletionStatus"?: string | string[];
-    "forwardedSharingDetails.deletionInfo.deletionDate"?: string | string[];
 }
 
 class Validator extends SchemaValidator<GetOwnAttributesSharedWithPeerRequest> {
