@@ -1159,16 +1159,16 @@ export class DataViewExpander {
     private expandForwardingDetails(forwardingDetails: ForwardingDetailsDTO[]): ForwardingDetailsDVO[] | undefined {
         if (forwardingDetails.length === 0) return;
 
-        return forwardingDetails.map((sharingDetails) => {
+        return forwardingDetails.map((details) => {
             const result: ForwardingDetailsDVO = {
-                peer: sharingDetails.peer.toString(),
-                sourceReference: sharingDetails.sourceReference.toString(),
-                sharedAt: sharingDetails.sharedAt.toString()
+                peer: details.peer.toString(),
+                sourceReference: details.sourceReference.toString(),
+                sharedAt: details.sharedAt.toString()
             };
 
-            if (sharingDetails.deletionInfo) {
-                result.deletionDate = sharingDetails.deletionInfo.deletionDate.toString();
-                result.deletionStatus = sharingDetails.deletionInfo.deletionStatus;
+            if (details.deletionInfo) {
+                result.deletionDate = details.deletionInfo.deletionDate.toString();
+                result.deletionStatus = details.deletionInfo.deletionStatus;
             }
             return result;
         });
