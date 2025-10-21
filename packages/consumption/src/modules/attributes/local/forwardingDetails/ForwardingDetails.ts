@@ -1,6 +1,7 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreDate, ICoreId } from "@nmshd/core-types";
 import { CoreSynchronizable, ICoreSynchronizable } from "@nmshd/transport";
+import { nameof } from "ts-simple-nameof";
 import { EmittedAttributeDeletionInfo, EmittedAttributeDeletionInfoJSON, IEmittedAttributeDeletionInfo } from "../deletionInfos";
 
 export interface ForwardingDetailsJSON {
@@ -22,6 +23,14 @@ export interface IForwardingDetails extends ICoreSynchronizable {
 
 @type("ForwardingDetails")
 export class ForwardingDetails extends CoreSynchronizable implements IForwardingDetails {
+    public override technicalProperties = [
+        nameof<ForwardingDetails>((f) => f.attributeId),
+        nameof<ForwardingDetails>((f) => f.peer),
+        nameof<ForwardingDetails>((f) => f.sourceReference),
+        nameof<ForwardingDetails>((f) => f.sharedAt),
+        nameof<ForwardingDetails>((f) => f.deletionInfo)
+    ];
+
     @validate()
     @serialize()
     public attributeId: CoreId;
