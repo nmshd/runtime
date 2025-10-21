@@ -3438,10 +3438,10 @@ describe("ThirdPartyRelationshipAttributes", () => {
             })
         );
 
-        const thirdPartyRelationshipAttribute = (await services3.consumption.attributes.getAttribute({ id: peerRelationshipAttribute.id })).value;
-        const forwardingDetails = (await services3.consumption.attributes.getForwardingDetailsForAttribute({ attributeId: thirdPartyRelationshipAttribute.id })).value;
-
+        const forwardingDetails = (await services2.consumption.attributes.getForwardingDetailsForAttribute({ attributeId: peerRelationshipAttribute.id })).value;
         expect(forwardingDetails[0].peer).toBe(services3.address);
+
+        const thirdPartyRelationshipAttribute = (await services3.consumption.attributes.getAttribute({ id: peerRelationshipAttribute.id })).value;
         expect(thirdPartyRelationshipAttribute.initialAttributePeer).toBe(services1.address);
     });
 
