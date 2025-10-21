@@ -560,6 +560,8 @@ export class AttributesController extends ConsumptionBaseController {
         });
         await this.succeedAttributeUnsafe(predecessor, successor);
 
+        await this.updateNumberOfForwards(successor);
+
         this.eventBus.publish(new AttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
         return { predecessor, successor };
     }
@@ -1593,8 +1595,6 @@ export class AttributesController extends ConsumptionBaseController {
         const attributeIds = forwardingDetails.map((details) => CoreId.from(details.attributeId));
         const uniqueAttributeIds = Array.from(new Set(attributeIds.map((id) => id.toString()))).map((id) => CoreId.from(id));
 
-        this.addHideTechnicalToQuery(hideTechnical, query);
-
         if (onlyForwarded) {
             query.id = { $in: uniqueAttributeIds.map((id) => id.toString()) };
         } else {
@@ -1608,7 +1608,7 @@ export class AttributesController extends ConsumptionBaseController {
             ];
         }
 
-        const docs = await this.attributes.find(query);
+        const docs = await this.attributes.find(this.addHideTechnicalToQuery(query, hideTechnical));
 
         return docs.map((doc) => LocalAttribute.from(doc));
     }
