@@ -78,7 +78,7 @@ describe("OwnIdentityAttributeDVO", () => {
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
         expect(dvo.forwardingPeers).toBeUndefined();
-        expect(dvo.forwardedSharingDetails).toBeUndefined();
+        expect(dvo.forwardingDetails).toBeUndefined();
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");
@@ -105,7 +105,7 @@ describe("OwnIdentityAttributeDVO", () => {
         expect(dvo.isOwn).toBe(true);
         expect(dvo.isDefault).toBe(attribute.isDefault);
         expect(dvo.forwardingPeers).toBeUndefined();
-        expect(dvo.forwardedSharingDetails).toBeUndefined();
+        expect(dvo.forwardingDetails).toBeUndefined();
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");
@@ -132,7 +132,7 @@ describe("OwnIdentityAttributeDVO", () => {
         expect(dvo.isOwn).toBe(true);
         expect(dvo.isDefault).toBe(attribute.isDefault);
         expect(dvo.forwardingPeers).toBeUndefined();
-        expect(dvo.forwardedSharingDetails).toBeUndefined();
+        expect(dvo.forwardingDetails).toBeUndefined();
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");
@@ -164,7 +164,7 @@ describe("OwnIdentityAttributeDVO", () => {
         expect(dvo.isOwn).toBe(true);
         expect(dvo.isDefault).toBe(attribute.isDefault);
         expect(dvo.forwardingPeers).toBeUndefined();
-        expect(dvo.forwardedSharingDetails).toBeUndefined();
+        expect(dvo.forwardingDetails).toBeUndefined();
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");
@@ -179,6 +179,8 @@ describe("OwnIdentityAttributeDVO", () => {
 
     test("check the CommunicationLanguage for forwarded OwnIdentityAttribute", async () => {
         const attribute = await executeFullCreateAndShareOwnIdentityAttributeFlow(services1, services2, requests[4]);
+
+        const forwardingDetails = (await services1.consumption.attributes.getForwardingDetailsForAttribute({ attributeId: attribute.id })).value;
 
         const dvo = (await services1.expander.expandLocalAttributeDTO(attribute)) as OwnIdentityAttributeDVO;
         expect(dvo).toBeDefined();
@@ -196,11 +198,11 @@ describe("OwnIdentityAttributeDVO", () => {
         expect(dvo.isOwn).toBe(true);
         expect(dvo.isDefault).toBe(attribute.isDefault);
         expect(dvo.forwardingPeers).toStrictEqual([services2.address]);
-        expect(dvo.forwardedSharingDetails).toStrictEqual([
+        expect(dvo.forwardingDetails).toStrictEqual([
             {
                 peer: services2.address,
-                sourceReference: attribute.forwardedSharingDetails![0].sourceReference,
-                sharedAt: attribute.forwardedSharingDetails![0].sharedAt
+                sourceReference: forwardingDetails[0].sourceReference,
+                sharedAt: forwardingDetails[0].sharedAt
             }
         ]);
         expect(dvo.owner).toStrictEqual(attribute.content.owner);

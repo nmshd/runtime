@@ -2037,7 +2037,7 @@ describe("DeciderModule", () => {
             const sharedAttributeId = (responseContent.items[0] as TransferFileOwnershipAcceptResponseItemJSON).attributeId;
             const sharedAttribute = (await recipient.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;
             expect(sharedAttribute.content.value["@type"]).toBe("IdentityFileReference");
-            expect(sharedAttribute.forwardedSharingDetails).toHaveLength(1);
+            expect(sharedAttribute.numberOfForwards).toHaveLength(1);
         });
     });
 

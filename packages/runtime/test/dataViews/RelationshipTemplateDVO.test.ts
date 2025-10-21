@@ -358,11 +358,7 @@ describe("RelationshipTemplateDVO", () => {
         expect(attributesWithPeer).toBeSuccessful();
         expect(attributesWithPeer.value).toHaveLength(2);
 
-        const attributesWithForwardingDetails = await requestor.consumption.attributes.getAttributes({
-            query: {
-                "forwardedSharingDetails.peer": templator.address
-            }
-        });
+        const attributesWithForwardingDetails = await requestor.consumption.attributes.getOwnAttributesSharedWithPeer({ peer: templator.address });
         expect(attributesWithForwardingDetails).toBeSuccessful();
         expect(attributesWithForwardingDetails.value).toHaveLength(2);
 

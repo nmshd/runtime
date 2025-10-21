@@ -73,7 +73,7 @@ describe("OwnRelationshipAttributeDVO", () => {
         expect(dvo.deletionStatus).toBe(ownRelationshipAttribute.deletionInfo?.deletionStatus);
         expect(dvo.deletionDate).toBe(ownRelationshipAttribute.deletionInfo?.deletionDate);
         expect(dvo.forwardingPeers).toBeUndefined();
-        expect(dvo.forwardedSharingDetails).toBeUndefined();
+        expect(dvo.forwardingDetails).toBeUndefined();
         expect(dvo.valueType).toBe(ownRelationshipAttribute.content.value["@type"]);
         expect(dvo.wasViewedAt).toBeUndefined();
     });
@@ -101,6 +101,8 @@ describe("OwnRelationshipAttributeDVO", () => {
                 mustBeAccepted: true
             })
         );
+
+        const forwardingDetails = (await services1.consumption.attributes.getForwardingDetailsForAttribute({ attributeId: ownRelationshipAttribute.id })).value;
 
         const dto = (await services1.consumption.attributes.getAttribute({ id: ownRelationshipAttribute.id })).value;
         const dvo = (await services1.expander.expandLocalAttributeDTO(dto)) as OwnRelationshipAttributeDVO;
@@ -133,11 +135,11 @@ describe("OwnRelationshipAttributeDVO", () => {
         expect(dvo.deletionStatus).toBe(ownRelationshipAttribute.deletionInfo?.deletionStatus);
         expect(dvo.deletionDate).toBe(ownRelationshipAttribute.deletionInfo?.deletionDate);
         expect(dvo.forwardingPeers).toStrictEqual([services3.address]);
-        expect(dvo.forwardedSharingDetails).toStrictEqual([
+        expect(dvo.forwardingDetails).toStrictEqual([
             {
                 peer: services3.address,
-                sourceReference: ownRelationshipAttribute.forwardedSharingDetails![0].sourceReference,
-                sharedAt: ownRelationshipAttribute.forwardedSharingDetails![0].sharedAt
+                sourceReference: forwardingDetails[0].sourceReference,
+                sharedAt: forwardingDetails[0].sharedAt
             }
         ]);
         expect(dvo.valueType).toBe(ownRelationshipAttribute.content.value["@type"]);
