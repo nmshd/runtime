@@ -346,7 +346,7 @@ describe("AttributesController", function () {
             const forwardedAttribute = await consumptionController.attributes.addForwardingDetailsToAttribute(attribute, peer, sourceReference);
             expect(forwardedAttribute).toBeInstanceOf(OwnIdentityAttribute);
 
-            const isForwarded = await consumptionController.attributes.isForwardedTo(forwardedAttribute, peer)
+            const isForwarded = await consumptionController.attributes.isForwardedTo(forwardedAttribute, peer);
             expect(isForwarded).toBe(true);
         });
 
@@ -377,7 +377,7 @@ describe("AttributesController", function () {
 
             expect(forwardedOwnRelationshipAttribute).toBeInstanceOf(OwnRelationshipAttribute);
 
-            const isForwarded = await consumptionController.attributes.isForwardedTo(forwardedOwnRelationshipAttribute, peerAddress)
+            const isForwarded = await consumptionController.attributes.isForwardedTo(forwardedOwnRelationshipAttribute, peerAddress);
             expect(isForwarded).toBe(true);
         });
 
@@ -510,11 +510,11 @@ describe("AttributesController", function () {
             const peer = CoreAddress.from("address");
 
             const forwardedAttribute = await consumptionController.attributes.addForwardingDetailsToAttribute(attribute, peer, CoreId.from("aSourceReferenceId"));
-            const isForwarded = await consumptionController.attributes.isForwardedTo(forwardedAttribute, peer)
+            const isForwarded = await consumptionController.attributes.isForwardedTo(forwardedAttribute, peer);
             expect(isForwarded).toBe(true);
 
             const updatedAttribute = await consumptionController.attributes.removeForwardingDetailsFromAttribute(forwardedAttribute, peer);
-            const updatedIsForwarded = await consumptionController.attributes.isForwardedTo(updatedAttribute, peer)
+            const updatedIsForwarded = await consumptionController.attributes.isForwardedTo(updatedAttribute, peer);
             expect(updatedIsForwarded).toBe(false);
         });
 

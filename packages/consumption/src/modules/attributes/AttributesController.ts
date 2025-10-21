@@ -449,8 +449,7 @@ export class AttributesController extends ConsumptionBaseController {
     ): Promise<T> {
         const localAttribute = await this.getLocalAttribute(attribute.id);
         if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
-        // TODO: 1. why do we need this check? 2. if we need it, we should only compare some properties
-        // if (!_.isEqual(_.omit(attribute, ["numberOfForwards"]), _.omit(localAttribute, ["numberOfForwards"]))) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+        if (!_.isEqual(_.omit(attribute, ["numberOfForwards"]), _.omit(localAttribute, ["numberOfForwards"]))) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
         if (await this.isForwardedTo(attribute, peer, true)) throw ConsumptionCoreErrors.attributes.alreadyForwarded(attribute.id, peer);
 
@@ -770,7 +769,9 @@ export class AttributesController extends ConsumptionBaseController {
 
     private async validateAttributeSuccession(predecessor: LocalAttribute, successor: LocalAttribute): Promise<ValidationResult> {
         const localAttribute = await this.getLocalAttribute(predecessor.id);
-        if (!_.isEqual(_.omit(predecessor, ["numberOfForwards"]), _.omit(localAttribute, ["numberOfForwards"]))) return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorDoesNotExist());
+        if (!_.isEqual(_.omit(predecessor, ["numberOfForwards"]), _.omit(localAttribute, ["numberOfForwards"]))) {
+            return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorDoesNotExist());
+        }
 
         const existingAttributeWithSameId = await this.getLocalAttribute(successor.id);
         if (existingAttributeWithSameId) return ValidationResult.error(ConsumptionCoreErrors.attributes.successorMustNotYetExist());
@@ -804,7 +805,7 @@ export class AttributesController extends ConsumptionBaseController {
 
     public async deleteAttribute(attributeId: CoreId): Promise<void> {
         const attribute = await this.getLocalAttribute(attributeId);
-        if (!attribute ) throw  TransportCoreErrors.general.recordNotFound(LocalAttribute, attributeId.toString());
+        if (!attribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attributeId.toString());
 
         await this.deleteAttributeUnsafe(attributeId);
         this.eventBus.publish(new AttributeDeletedEvent(this.identity.address.toString(), attribute));
@@ -932,7 +933,7 @@ export class AttributesController extends ConsumptionBaseController {
     public async getPredecessorsOfAttribute<T extends LocalAttribute>(attribute: T): Promise<T[]> {
         const localAttribute = await this.getLocalAttribute(attribute.id);
         if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
-        if (!_.isEqual(_.omit(attribute, ['numberOfForwards']), _.omit(localAttribute, ["numberOfForwards"]))) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+        if (!_.isEqual(_.omit(attribute, ["numberOfForwards"]), _.omit(localAttribute, ["numberOfForwards"]))) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
         const predecessors: T[] = [];
         while (attribute.succeeds) {
@@ -949,7 +950,7 @@ export class AttributesController extends ConsumptionBaseController {
     public async getSuccessorsOfAttribute<T extends LocalAttribute>(attribute: T): Promise<T[]> {
         const localAttribute = await this.getLocalAttribute(attribute.id);
         if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
-        if (!_.isEqual(_.omit(attribute, ['numberOfForwards']), _.omit(localAttribute, ["numberOfForwards"]))) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+        if (!_.isEqual(_.omit(attribute, ["numberOfForwards"]), _.omit(localAttribute, ["numberOfForwards"]))) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
         const successors: T[] = [];
         while (attribute.succeededBy) {
@@ -989,7 +990,7 @@ export class AttributesController extends ConsumptionBaseController {
     ): Promise<T[]> {
         const localAttribute = await this.getLocalAttribute(attribute.id);
         if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.id.toString());
-        if (!_.isEqual(_.omit(attribute, ['numberOfForwards']), _.omit(localAttribute, ["numberOfForwards"]))) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+        if (!_.isEqual(_.omit(attribute, ["numberOfForwards"]), _.omit(localAttribute, ["numberOfForwards"]))) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
 
         const sharedAttribute = (await this.isForwardedTo(attribute, peerAddress, excludeToBeDeleted)) ? [attribute] : [];
         const sharedPredecessors = await this.getPredecessorsOfAttributeSharedWithPeer(attribute, peerAddress, excludeToBeDeleted);
@@ -1009,7 +1010,9 @@ export class AttributesController extends ConsumptionBaseController {
     ): Promise<T[]> {
         const localAttribute = await this.getLocalAttribute(referenceAttribute.id);
         if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, referenceAttribute.id.toString());
-        if (!_.isEqual(_.omit(referenceAttribute, ['numberOfForwards']), _.omit(localAttribute, ["numberOfForwards"]))) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+        if (!_.isEqual(_.omit(referenceAttribute, ["numberOfForwards"]), _.omit(localAttribute, ["numberOfForwards"]))) {
+            throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+        }
 
         const matchingPredecessors: T[] = [];
         while (referenceAttribute.succeeds) {
@@ -1031,7 +1034,9 @@ export class AttributesController extends ConsumptionBaseController {
     ): Promise<T[]> {
         const localAttribute = await this.getLocalAttribute(referenceAttribute.id);
         if (!localAttribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, referenceAttribute.id.toString());
-        if (!_.isEqual(_.omit(referenceAttribute, ['numberOfForwards']), _.omit(localAttribute, ["numberOfForwards"]))) throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+        if (!_.isEqual(_.omit(referenceAttribute, ["numberOfForwards"]), _.omit(localAttribute, ["numberOfForwards"]))) {
+            throw ConsumptionCoreErrors.attributes.attributeDoesNotExist();
+        }
 
         const matchingSuccessors: T[] = [];
         while (referenceAttribute.succeededBy) {
