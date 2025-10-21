@@ -13709,6 +13709,25 @@ export const GetAttributesRequest: any = {
     }
 }
 
+export const GetForwardingDetailsForAttributeRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetForwardingDetailsForAttributeRequest",
+    "definitions": {
+        "GetForwardingDetailsForAttributeRequest": {
+            "type": "object",
+            "properties": {
+                "attributeId": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "attributeId"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
 export const GetOwnAttributesSharedWithPeerRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/GetOwnAttributesSharedWithPeerRequest",
