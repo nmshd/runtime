@@ -2,10 +2,6 @@ import { ApplicationError } from "@js-soft/ts-utils";
 import { CoreAddress, CoreError, CoreId } from "@nmshd/core-types";
 
 class Attributes {
-    public attributeDoesNotExist() {
-        return new CoreError("error.consumption.attributes.attributeDoesNotExist", "The specified Attribute does not exist.");
-    }
-
     public alreadyForwarded(attributeId: CoreId, peer: CoreAddress) {
         return new CoreError("error.consumption.attributes.alreadyForwarded", `The Attribute '${attributeId.toString()} is already forwarded to peer '${peer.toString()}'.`);
     }
