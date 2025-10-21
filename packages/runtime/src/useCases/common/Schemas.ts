@@ -13466,6 +13466,9 @@ export const GetAttributesRequest: any = {
                 },
                 "hideTechnical": {
                     "type": "boolean"
+                },
+                "minNumberOfForwards": {
+                    "type": "number"
                 }
             },
             "additionalProperties": false
@@ -13678,19 +13681,6 @@ export const GetAttributesRequest: any = {
                     ]
                 },
                 "deletionInfo.deletionDate": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "numberOfForwards": {
                     "anyOf": [
                         {
                             "type": "string"
