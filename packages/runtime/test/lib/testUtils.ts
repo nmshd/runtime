@@ -6,9 +6,7 @@ import {
     DecideRequestItemGroupParametersJSON,
     DecideRequestItemParametersJSON,
     DecideRequestParametersJSON,
-    OwnIdentityAttribute,
-    OwnRelationshipAttribute,
-    PeerRelationshipAttribute
+    ForwardingDetails
 } from "@nmshd/consumption";
 import {
     ArbitraryRelationshipCreationContent,
@@ -31,7 +29,7 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId, PasswordLocationIndicator } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
-import { IdentityUtil } from "@nmshd/transport";
+import { IdentityUtil, SynchronizedCollection } from "@nmshd/transport";
 import fs from "fs";
 import _ from "lodash";
 import { DateTime } from "luxon";
@@ -829,20 +827,15 @@ export async function cleanupAttributes(services: TestRuntimeServices[]): Promis
 }
 
 export async function cleanupForwardingDetails(services: TestRuntimeServices[]): Promise<void> {
-    const query = { forwardedSharingDetails: { $exists: true } };
     await Promise.all(
         services.map(async (services) => {
             const servicesAttributeController = services.consumption.attributes["getAttributeUseCase"]["attributeController"];
+            const collection = servicesAttributeController["forwardingDetails"] as SynchronizedCollection;
 
-            const servicesAttributes = (await servicesAttributeController.getLocalAttributes(query)) as (
-                | OwnIdentityAttribute
-                | OwnRelationshipAttribute
-                | PeerRelationshipAttribute
-            )[];
-            for (const attribute of servicesAttributes) {
-                attribute.forwardedSharingDetails = undefined;
-                await servicesAttributeController.updateAttributeUnsafe(attribute);
-            }
+            const forwardingDetailsDocs = await collection.find({});
+            const forwardingDetails = forwardingDetailsDocs.map((doc) => ForwardingDetails.from(doc));
+
+            for (const detail of forwardingDetails) await collection.delete(detail);
         })
     );
 }
