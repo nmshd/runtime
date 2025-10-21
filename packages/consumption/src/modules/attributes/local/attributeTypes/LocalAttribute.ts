@@ -54,7 +54,7 @@ export class LocalAttribute extends CoreSynchronizable implements ILocalAttribut
     @serialize()
     public wasViewedAt?: CoreDate;
 
-    // this is not persisted, only used when returning attributes via the API
+    // this is not persisted, only used when returning Attributes via the API
     public numberOfForwards?: number;
 
     public static from(value: ILocalAttribute | LocalAttributeJSON): LocalAttribute {
