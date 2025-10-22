@@ -1571,8 +1571,8 @@ export class AttributesController extends ConsumptionBaseController {
         await this.forwardingDetails.update(doc, forwardingDetails);
     }
 
-    public async getForwardingDetailsForAttribute(attribute: LocalAttribute): Promise<AttributeForwardingDetails[]> {
-        const docs = await this.forwardingDetails.find({ attributeId: attribute.id.toString() });
+    public async getForwardingDetailsForAttribute(attribute: LocalAttribute, query: any): Promise<AttributeForwardingDetails[]> {
+        const docs = await this.forwardingDetails.find({ ...query, attributeId: attribute.id.toString() });
 
         return docs.map((doc) => AttributeForwardingDetails.from(doc));
     }
