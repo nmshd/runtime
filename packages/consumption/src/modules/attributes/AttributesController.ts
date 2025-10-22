@@ -764,11 +764,6 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     private async validateAttributeSuccession(predecessor: LocalAttribute, successor: LocalAttribute): Promise<ValidationResult> {
-        const localAttribute = await this.getLocalAttribute(predecessor.id);
-        if (!_.isEqual(_.omit(predecessor, ["numberOfForwards"]), _.omit(localAttribute, ["numberOfForwards"]))) {
-            return ValidationResult.error(ConsumptionCoreErrors.attributes.predecessorDoesNotExist());
-        }
-
         const existingAttributeWithSameId = await this.getLocalAttribute(successor.id);
         if (existingAttributeWithSameId) return ValidationResult.error(ConsumptionCoreErrors.attributes.successorMustNotYetExist());
 
