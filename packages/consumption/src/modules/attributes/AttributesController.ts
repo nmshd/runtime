@@ -829,8 +829,8 @@ export class AttributesController extends ConsumptionBaseController {
         attribute: T,
         peer: CoreAddress
     ): Promise<T> {
-        const existingForwardedSharingDetailObjects = await this.forwardingDetails.find({ attributeId: attribute.id.toString(), peer: peer.toString() });
-        const existingForwardingDetails = existingForwardedSharingDetailObjects.map((obj) => ForwardingDetails.from(obj));
+        const existingForwardingDetailsDocs = await this.forwardingDetails.find({ attributeId: attribute.id.toString(), peer: peer.toString() });
+        const existingForwardingDetails = existingForwardingDetailsDocs.map((obj) => ForwardingDetails.from(obj));
 
         for (const detail of existingForwardingDetails) {
             await this.forwardingDetails.delete(detail);
