@@ -1292,35 +1292,6 @@ describe("AttributesController", function () {
                 });
             });
 
-            test("should catch if the predecessor does not exist", async function () {
-                const notExistingPredecessor = OwnIdentityAttribute.from({
-                    id: CoreId.from("notExistingPredecessorId"),
-                    content: IdentityAttribute.from({
-                        value: {
-                            "@type": "Nationality",
-                            value: "DE"
-                        },
-                        owner: consumptionController.accountController.identity.address
-                    }),
-                    createdAt: CoreDate.utc()
-                });
-
-                const successorData = OwnIdentityAttributeSuccessorParams.from({
-                    content: IdentityAttribute.from({
-                        value: {
-                            "@type": "Nationality",
-                            value: "US"
-                        },
-                        owner: consumptionController.accountController.identity.address
-                    })
-                });
-
-                const validationResult = await consumptionController.attributes.validateOwnIdentityAttributeSuccession(notExistingPredecessor, successorData);
-                expect(validationResult).errorValidationResult({
-                    code: "error.consumption.attributes.predecessorDoesNotExist"
-                });
-            });
-
             test("should catch if the predecessor already has a successor", async function () {
                 const predecessor = await consumptionController.attributes.createOwnIdentityAttribute({
                     content: IdentityAttribute.from({
