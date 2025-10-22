@@ -493,6 +493,8 @@ export class AttributesController extends ConsumptionBaseController {
 
         await this.removeDefault(predecessor);
 
+        await this.updateNumberOfForwards(successor);
+
         this.eventBus.publish(new AttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
         return { predecessor, successor };
     }
@@ -534,6 +536,8 @@ export class AttributesController extends ConsumptionBaseController {
             sourceReference: parsedSuccessorParams.sourceReference
         });
         await this.succeedAttributeUnsafe(predecessor, successor);
+
+        await this.updateNumberOfForwards(successor);
 
         return { predecessor, successor };
     }
@@ -588,6 +592,8 @@ export class AttributesController extends ConsumptionBaseController {
         });
         await this.succeedAttributeUnsafe(predecessor, successor);
 
+        await this.updateNumberOfForwards(successor);
+
         return { predecessor, successor };
     }
 
@@ -613,6 +619,8 @@ export class AttributesController extends ConsumptionBaseController {
             initialAttributePeer: predecessor.initialAttributePeer
         });
         await this.succeedAttributeUnsafe(predecessor, successor);
+
+        await this.updateNumberOfForwards(successor);
 
         this.eventBus.publish(new AttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
         return { predecessor, successor };
@@ -1578,6 +1586,7 @@ export class AttributesController extends ConsumptionBaseController {
 
     public async getForwardingDetailsForAttribute(attribute: LocalAttribute): Promise<ForwardingDetails[]> {
         const docs = await this.forwardingDetails.find({ attributeId: attribute.id.toString() });
+
         return docs.map((doc) => ForwardingDetails.from(doc));
     }
 
@@ -1602,6 +1611,10 @@ export class AttributesController extends ConsumptionBaseController {
 
         const docs = await this.attributes.find(this.addHideTechnicalToQuery(query, hideTechnical));
 
-        return docs.map((doc) => LocalAttribute.from(doc));
+        const attributes = docs.map((doc) => LocalAttribute.from(doc));
+
+        for (const attribute of attributes) await this.updateNumberOfForwards(attribute);
+
+        return attributes;
     }
 }

@@ -1,6 +1,4 @@
-import { SerializableBase } from "@js-soft/ts-serval";
 import { ApplicationError, EventConstructor, Result } from "@js-soft/ts-utils";
-import { set } from "lodash";
 import { MockEventBus } from "./lib";
 
 expect.extend({
@@ -66,64 +64,6 @@ expect.extend({
             };
         }
         return { pass: false, message: () => `The expected event wasn't published. The published events are: ${JSON.stringify(eventBus.publishedEvents, undefined, 2)}` };
-    },
-
-    toStrictEqualExcluding(received: unknown, expected: unknown, ...excludes: string[]) {
-        if (received instanceof SerializableBase) {
-            received = received.toJSON();
-        }
-        if (expected instanceof SerializableBase) {
-            expected = expected.toJSON();
-        }
-
-        const receivedClone = JSON.parse(JSON.stringify(received));
-        const expectedClone = JSON.parse(JSON.stringify(expected));
-
-        excludes.forEach((exclude) => {
-            if (Array.isArray(receivedClone)) {
-                for (const item of receivedClone) {
-                    set(item, exclude, undefined);
-                }
-            } else {
-                set(receivedClone, exclude, undefined);
-            }
-
-            if (Array.isArray(expectedClone)) {
-                for (const item of expectedClone) {
-                    set(item, exclude, undefined);
-                }
-            } else {
-                set(expectedClone, exclude, undefined);
-            }
-        });
-
-        const matcherName = "toStrictEqual";
-        const options = {
-            comment: "deep equality",
-            isNot: this.isNot,
-            promise: this.promise
-        };
-
-        const pass = this.equals(receivedClone, expectedClone, undefined, true);
-
-        let message: string;
-        if (pass) {
-            message =
-                `${this.utils.matcherHint(matcherName, undefined, undefined, options)}\n\n` +
-                `Expected: not ${this.utils.printExpected(expectedClone)}\n${
-                    this.utils.stringify(expectedClone) === this.utils.stringify(receivedClone) ? "" : `Received:     ${this.utils.printReceived(receivedClone)}`
-                }`;
-        } else {
-            message = `${this.utils.matcherHint(matcherName, undefined, undefined, options)}\n\n${this.utils.printDiffOrStringify(
-                expectedClone,
-                receivedClone,
-                "Expected",
-                "Received",
-                this.expand ?? true
-            )}`;
-        }
-
-        return { message: () => message, pass };
     }
 });
 
@@ -133,7 +73,6 @@ declare global {
             toBeSuccessful(): R;
             toBeAnError(expectedMessage: string | RegExp, expectedCode: string | RegExp): R;
             toHavePublished<TEvent>(eventConstructor: EventConstructor<TEvent>, eventConditions?: (event: TEvent) => boolean): Promise<R>;
-            toStrictEqualExcluding(expected: unknown, ...ignoreProperties: string[]): R;
         }
     }
 }

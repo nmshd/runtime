@@ -493,17 +493,14 @@ describe("get OwnIdentityAttributes, own Attributes shared with peer and peer At
             const result = await services1.consumption.attributes.getOwnIdentityAttributes({});
             expect(result).toBeSuccessful();
             const ownIdentityAttributes = result.value;
-            expect(ownIdentityAttributes).toStrictEqualExcluding([services1OwnSurnameV1, services1OwnGivenNameV1], "numberOfForwards");
+            expect(ownIdentityAttributes).toStrictEqual([services1OwnSurnameV1, services1OwnGivenNameV1]);
         });
 
         test("get all versions of OwnIdentityAttributes", async () => {
             const result = await services1.consumption.attributes.getOwnIdentityAttributes({ onlyLatestVersions: false });
             expect(result).toBeSuccessful();
             const ownIdentityAttributes = result.value;
-            expect(ownIdentityAttributes).toStrictEqualExcluding(
-                [services1OwnSurnameV0, services1OwnSurnameV1, services1OwnGivenNameV0, services1OwnGivenNameV1],
-                "numberOfForwards"
-            );
+            expect(ownIdentityAttributes).toStrictEqual([services1OwnSurnameV0, services1OwnSurnameV1, services1OwnGivenNameV0, services1OwnGivenNameV1]);
         });
 
         test("should allow to get only default attributes", async function () {
@@ -564,10 +561,7 @@ describe("get OwnIdentityAttributes, own Attributes shared with peer and peer At
                 const result = await services1.consumption.attributes.getOwnAttributesSharedWithPeer(request);
                 expect(result).toBeSuccessful();
                 const ownAttributesSharedWithPeer = result.value;
-                expect(ownAttributesSharedWithPeer).toStrictEqualExcluding(
-                    [services1OwnGivenNameV1, services1OwnRelationshipAttributeV1, services1TechnicalOwnRelationshipAttribute],
-                    "numberOfForwards"
-                );
+                expect(ownAttributesSharedWithPeer).toStrictEqual([services1OwnGivenNameV1, services1OwnRelationshipAttributeV1, services1TechnicalOwnRelationshipAttribute]);
             }
         });
 
@@ -575,23 +569,20 @@ describe("get OwnIdentityAttributes, own Attributes shared with peer and peer At
             const result = await services1.consumption.attributes.getOwnAttributesSharedWithPeer({ peer: services2.address, onlyLatestVersions: false });
             expect(result).toBeSuccessful();
             const ownAttributesSharedWithPeer = result.value;
-            expect(ownAttributesSharedWithPeer).toStrictEqualExcluding(
-                [
-                    services1OwnGivenNameV0,
-                    services1OwnGivenNameV1,
-                    services1OwnRelationshipAttributeV0,
-                    services1OwnRelationshipAttributeV1,
-                    services1TechnicalOwnRelationshipAttribute
-                ],
-                "numberOfForwards"
-            );
+            expect(ownAttributesSharedWithPeer).toStrictEqual([
+                services1OwnGivenNameV0,
+                services1OwnGivenNameV1,
+                services1OwnRelationshipAttributeV0,
+                services1OwnRelationshipAttributeV1,
+                services1TechnicalOwnRelationshipAttribute
+            ]);
         });
 
         test("should hide technical own Attributes shared with peer when hideTechnical=true", async () => {
             const result = await services1.consumption.attributes.getOwnAttributesSharedWithPeer({ peer: services2.address, hideTechnical: true });
             expect(result).toBeSuccessful();
             const ownAttributesSharedWithPeer = result.value;
-            expect(ownAttributesSharedWithPeer).toStrictEqualExcluding([services1OwnGivenNameV1, services1OwnRelationshipAttributeV1], "numberOfForwards");
+            expect(ownAttributesSharedWithPeer).toStrictEqual([services1OwnGivenNameV1, services1OwnRelationshipAttributeV1]);
         });
     });
 
@@ -2314,7 +2305,7 @@ describe("Get (shared) versions of Attribute", () => {
                 expect(result).toBeSuccessful();
 
                 const returnedVersions = result.value;
-                expect(returnedVersions).toStrictEqualExcluding(sOwnIdentityAttributeVersions, "numberOfForwards");
+                expect(returnedVersions).toStrictEqual(sOwnIdentityAttributeVersions);
             }
         });
 
