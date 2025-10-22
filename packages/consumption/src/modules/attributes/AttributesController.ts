@@ -1328,11 +1328,9 @@ export class AttributesController extends ConsumptionBaseController {
         });
         if (forwardingDetailsForPeer.length === 0) return;
 
-        const attributeIds = forwardingDetailsForPeer.map((detail) => CoreId.from(detail.attributeId));
-
         const attributesForwardedToPeer = (await this.getLocalAttributes({
             "@type": { $in: ["OwnIdentityAttribute", "OwnRelationshipAttribute", "PeerRelationshipAttribute"] },
-            id: { $in: attributeIds.map((id) => id.toString()) }
+            id: { $in: forwardingDetailsForPeer.map((detail) => detail.attributeId.toString()) }
         })) as OwnIdentityAttribute[] | OwnRelationshipAttribute[] | PeerRelationshipAttribute[];
 
         for (const attribute of attributesForwardedToPeer) {
@@ -1587,15 +1585,14 @@ export class AttributesController extends ConsumptionBaseController {
         const forwardingDetailsDocs = await this.forwardingDetails.find({ peer: peer.toString() });
         const forwardingDetails = forwardingDetailsDocs.map((doc) => ForwardingDetails.from(doc));
 
-        const attributeIds = forwardingDetails.map((details) => CoreId.from(details.attributeId));
-        const uniqueAttributeIds = Array.from(new Set(attributeIds.map((id) => id.toString()))).map((id) => CoreId.from(id));
+        const attributeIds = Array.from(new Set(forwardingDetails.map((details) => details.attributeId.toString())));
 
         if (onlyForwarded) {
-            query.id = { $in: uniqueAttributeIds.map((id) => id.toString()) };
+            query.id = { $in: attributeIds.map((id) => id.toString()) };
         } else {
             query.$or = [
                 {
-                    id: { $in: uniqueAttributeIds.map((id) => id.toString()) }
+                    id: { $in: attributeIds.map((id) => id.toString()) }
                 },
                 {
                     peer: peer.toString()
