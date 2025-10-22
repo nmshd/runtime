@@ -48,6 +48,9 @@ export class OwnRelationshipAttribute extends LocalAttribute implements IOwnRela
     @validate({ nullable: true })
     public deletionInfo?: EmittedAttributeDeletionInfo;
 
+    // this is not persisted, only used when returning Attributes via the API
+    public numberOfForwards?: number;
+
     public isDeletedOrToBeDeletedByRecipient(): boolean {
         if (!this.deletionInfo) return false;
 

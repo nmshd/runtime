@@ -48,6 +48,9 @@ export class PeerRelationshipAttribute extends LocalAttribute implements IPeerRe
     @validate({ nullable: true })
     public deletionInfo?: ReceivedAttributeDeletionInfo;
 
+    // this is not persisted, only used when returning Attributes via the API
+    public numberOfForwards?: number;
+
     public isDeletedByEmitterOrToBeDeleted(): boolean {
         if (!this.deletionInfo) return false;
 

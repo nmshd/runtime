@@ -134,7 +134,12 @@ export class GetAttributesUseCase extends UseCase<GetAttributesRequest, LocalAtt
 
         if (request.minNumberOfForwards !== undefined) {
             const minNumberOfForwards = request.minNumberOfForwards;
-            const filtered = attributes.filter((attr) => (attr.numberOfForwards ?? 0) >= minNumberOfForwards);
+            const filtered = attributes.filter((attr) => {
+                if (!(attr instanceof OwnIdentityAttribute || attr instanceof OwnRelationshipAttribute || attr instanceof PeerRelationshipAttribute)) return false;
+
+                const numberOfForwards = attr.numberOfForwards ?? 0;
+                return numberOfForwards >= minNumberOfForwards;
+            });
 
             return Result.ok(AttributeMapper.toAttributeDTOList(filtered));
         }

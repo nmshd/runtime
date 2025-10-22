@@ -26,6 +26,9 @@ export class OwnIdentityAttribute extends LocalAttribute implements IOwnIdentity
     @validate({ nullable: true })
     public isDefault?: true;
 
+    // this is not persisted, only used when returning Attributes via the API
+    public numberOfForwards?: number;
+
     public static override from(value: IOwnIdentityAttribute | OwnIdentityAttributeJSON): OwnIdentityAttribute {
         return super.fromAny(value) as OwnIdentityAttribute;
     }

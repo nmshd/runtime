@@ -33,7 +33,10 @@ export class AttributeMapper {
                     ? { deletionStatus: attribute.deletionInfo.deletionStatus, deletionDate: attribute.deletionInfo.deletionDate.toString() }
                     : undefined,
             initialAttributePeer: attribute instanceof ThirdPartyRelationshipAttribute ? attribute.initialAttributePeer.toString() : undefined,
-            numberOfForwards: attribute.numberOfForwards
+            numberOfForwards:
+                attribute instanceof OwnIdentityAttribute || attribute instanceof OwnRelationshipAttribute || attribute instanceof PeerRelationshipAttribute
+                    ? attribute.numberOfForwards
+                    : undefined
         };
     }
 

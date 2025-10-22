@@ -43,6 +43,8 @@ import {
 import { TestUtil } from "../../../../core/TestUtil";
 import { TestObjectFactory } from "../../testHelpers/TestObjectFactory";
 
+type ForwardableAttribute = OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute;
+
 describe("ReadAttributeRequestItemProcessor", function () {
     let connection: IDatabaseConnection;
     let transport: Transport;
@@ -1608,7 +1610,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const ownIdentityAttributeSuccessor = await consumptionController.attributes.getLocalAttribute((result as ReadAttributeAcceptResponseItem).attributeId);
                 expect(ownIdentityAttributeSuccessor!.succeeds).toStrictEqual(ownIdentityAttribute.id);
                 expect((ownIdentityAttributeSuccessor!.content as IdentityAttribute).tags).toStrictEqual(["x:anExistingTag", "x:aNewTag"]);
-                expect(ownIdentityAttributeSuccessor!.numberOfForwards).toBe(1);
+                expect((ownIdentityAttributeSuccessor as ForwardableAttribute).numberOfForwards).toBe(1);
                 const forwardingDetails = await consumptionController.attributes.getForwardingDetailsForAttribute(ownIdentityAttributeSuccessor!);
                 expect(forwardingDetails[0].peer).toStrictEqual(sender);
 
@@ -2292,7 +2294,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
 
                 const createdAttribute = await consumptionController.attributes.getLocalAttribute((result as ReadAttributeAcceptResponseItem).attributeId);
                 expect(createdAttribute instanceof OwnIdentityAttribute).toBe(true);
-                expect(createdAttribute!.numberOfForwards).toBe(1);
+                expect((createdAttribute as ForwardableAttribute).numberOfForwards).toBe(1);
 
                 const forwardingDetails = await consumptionController.attributes.getForwardingDetailsForAttribute(createdAttribute!);
                 expect(forwardingDetails[0].peer).toStrictEqual(sender);
@@ -2937,7 +2939,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 expect((result as AttributeSuccessionAcceptResponseItem).successorId).toStrictEqual(existingOwnIdentityAttributeSuccessor.id);
 
                 const updatedOwnIdentityAttributeSuccessor = await consumptionController.attributes.getLocalAttribute(existingOwnIdentityAttributeSuccessor.id);
-                expect(updatedOwnIdentityAttributeSuccessor!.numberOfForwards).toBe(1);
+                expect((updatedOwnIdentityAttributeSuccessor as ForwardableAttribute).numberOfForwards).toBe(1);
 
                 const forwardingDetails = await consumptionController.attributes.getForwardingDetailsForAttribute(updatedOwnIdentityAttributeSuccessor!);
                 expect(forwardingDetails[0].peer).toStrictEqual(sender);
@@ -3000,14 +3002,14 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const createdSuccessor = await consumptionController.attributes.getLocalAttribute((result as AttributeSuccessionAcceptResponseItem).successorId);
                 expect(createdSuccessor!.succeeds).toStrictEqual(existingOwnIdentityAttributeSuccessor.id);
                 expect((createdSuccessor!.content as IdentityAttribute).tags).toStrictEqual(["x:tag1", "x:tag2"]);
-                expect(createdSuccessor!.numberOfForwards).toBe(1);
+                expect((createdSuccessor as ForwardableAttribute).numberOfForwards).toBe(1);
 
                 const createdSuccessorForwardingDetails = await consumptionController.attributes.getForwardingDetailsForAttribute(createdSuccessor!);
                 expect(createdSuccessorForwardingDetails[0].peer).toStrictEqual(sender);
 
                 const updatedExistingOwnIdentityAttributeSuccessor = await consumptionController.attributes.getLocalAttribute(existingOwnIdentityAttributeSuccessor.id);
                 expect(updatedExistingOwnIdentityAttributeSuccessor!.succeededBy).toStrictEqual(createdSuccessor!.id);
-                expect(updatedExistingOwnIdentityAttributeSuccessor!.numberOfForwards).toBe(0);
+                expect((updatedExistingOwnIdentityAttributeSuccessor as ForwardableAttribute).numberOfForwards).toBe(0);
             });
 
             test("accept with new IdentityAttribute whose predecessor is already shared but DeletedByRecipient", async function () {
@@ -3129,7 +3131,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 expect((result as AttributeSuccessionAcceptResponseItem).successorId).toStrictEqual(existingOwnIdentityAttributeSuccessor.id);
 
                 const updatedOwnIdentityAttributeSuccessor = await consumptionController.attributes.getLocalAttribute(existingOwnIdentityAttributeSuccessor.id);
-                expect(updatedOwnIdentityAttributeSuccessor!.numberOfForwards).toBe(1);
+                expect((updatedOwnIdentityAttributeSuccessor as ForwardableAttribute).numberOfForwards).toBe(1);
                 const forwardingDetails = await consumptionController.attributes.getForwardingDetailsForAttribute(updatedOwnIdentityAttributeSuccessor!);
                 expect(forwardingDetails[0].peer).toStrictEqual(sender);
                 expect(forwardingDetails[0].deletionInfo).toBeUndefined();

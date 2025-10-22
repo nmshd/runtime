@@ -247,7 +247,7 @@ export class AttributesController extends ConsumptionBaseController {
 
         if (this.setDefaultOwnIdentityAttributes) ownIdentityAttribute = await this.setAsDefaultOwnIdentityAttribute(ownIdentityAttribute, true);
 
-        await this.updateNumberOfForwards(ownIdentityAttribute);
+        ownIdentityAttribute.numberOfForwards = 0;
 
         this.eventBus.publish(new AttributeCreatedEvent(this.identity.address.toString(), ownIdentityAttribute));
         return ownIdentityAttribute;
@@ -320,8 +320,6 @@ export class AttributesController extends ConsumptionBaseController {
         });
         await this.attributes.create(peerIdentityAttribute);
 
-        await this.updateNumberOfForwards(peerIdentityAttribute);
-
         this.eventBus.publish(new AttributeCreatedEvent(this.identity.address.toString(), peerIdentityAttribute));
         return peerIdentityAttribute;
     }
@@ -353,7 +351,7 @@ export class AttributesController extends ConsumptionBaseController {
         });
         await this.attributes.create(ownRelationshipAttribute);
 
-        await this.updateNumberOfForwards(ownRelationshipAttribute);
+        ownRelationshipAttribute.numberOfForwards = 0;
 
         this.eventBus.publish(new AttributeCreatedEvent(this.identity.address.toString(), ownRelationshipAttribute));
         return ownRelationshipAttribute;
@@ -385,8 +383,6 @@ export class AttributesController extends ConsumptionBaseController {
             createdAt: CoreDate.utc()
         });
         await this.attributes.create(peerRelationshipAttribute);
-
-        await this.updateNumberOfForwards(peerRelationshipAttribute);
 
         this.eventBus.publish(new AttributeCreatedEvent(this.identity.address.toString(), peerRelationshipAttribute));
         return peerRelationshipAttribute;
@@ -493,7 +489,7 @@ export class AttributesController extends ConsumptionBaseController {
 
         await this.removeDefault(predecessor);
 
-        await this.updateNumberOfForwards(successor);
+        successor.numberOfForwards = 0;
 
         this.eventBus.publish(new AttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
         return { predecessor, successor };
@@ -537,8 +533,6 @@ export class AttributesController extends ConsumptionBaseController {
         });
         await this.succeedAttributeUnsafe(predecessor, successor);
 
-        await this.updateNumberOfForwards(successor);
-
         return { predecessor, successor };
     }
 
@@ -564,7 +558,7 @@ export class AttributesController extends ConsumptionBaseController {
         });
         await this.succeedAttributeUnsafe(predecessor, successor);
 
-        await this.updateNumberOfForwards(successor);
+        successor.numberOfForwards = 0;
 
         this.eventBus.publish(new AttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
         return { predecessor, successor };
@@ -592,7 +586,7 @@ export class AttributesController extends ConsumptionBaseController {
         });
         await this.succeedAttributeUnsafe(predecessor, successor);
 
-        await this.updateNumberOfForwards(successor);
+        successor.numberOfForwards = 0;
 
         return { predecessor, successor };
     }
@@ -619,8 +613,6 @@ export class AttributesController extends ConsumptionBaseController {
             initialAttributePeer: predecessor.initialAttributePeer
         });
         await this.succeedAttributeUnsafe(predecessor, successor);
-
-        await this.updateNumberOfForwards(successor);
 
         this.eventBus.publish(new AttributeSucceededEvent(this.identity.address.toString(), predecessor, successor));
         return { predecessor, successor };
@@ -840,8 +832,8 @@ export class AttributesController extends ConsumptionBaseController {
         const existingForwardingDetailsDocs = await this.forwardingDetails.find({ attributeId: attribute.id.toString(), peer: peer.toString() });
         const existingForwardingDetails = existingForwardingDetailsDocs.map((obj) => AttributeForwardingDetails.from(obj));
 
-        for (const detail of existingForwardingDetails) {
-            await this.forwardingDetails.delete(detail);
+        for (const entry of existingForwardingDetails) {
+            await this.forwardingDetails.delete(entry);
         }
 
         await this.updateNumberOfForwards(attribute);
@@ -1522,6 +1514,8 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     private async updateNumberOfForwards(attribute: LocalAttribute): Promise<void> {
+        if (!(attribute instanceof OwnIdentityAttribute || attribute instanceof OwnRelationshipAttribute || attribute instanceof PeerRelationshipAttribute)) return;
+
         const count = await this.forwardingDetails.count({ [nameof<AttributeForwardingDetails>((c) => c.attributeId)]: attribute.id.toString() });
         attribute.numberOfForwards = count;
     }
