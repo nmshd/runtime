@@ -449,7 +449,7 @@ export class AttributesController extends ConsumptionBaseController {
     ): Promise<T> {
         if (await this.isForwardedTo(attribute, peer, true)) throw ConsumptionCoreErrors.attributes.alreadyForwarded(attribute.id, peer);
 
-        const existingForwardingDetails = await this.getForwardingDetailsNotDeletedByRecipient(attribute, peer);
+        const existingForwardingDetails = await this.getForwardingDetailsForRecipient(attribute, peer, true);
         const forwardingDetails = existingForwardingDetails
             ? (() => {
                   existingForwardingDetails.deletionInfo = undefined;
@@ -1481,12 +1481,15 @@ export class AttributesController extends ConsumptionBaseController {
         return forwardingDetails.some((details) => details.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.ToBeDeletedByRecipient);
     }
 
-    public async getForwardingDetailsNotDeletedByRecipient(attribute: LocalAttribute, peer: CoreAddress): Promise<AttributeForwardingDetails | undefined> {
-        const existingForwardingDetails = await this.forwardingDetails.find({
-            attributeId: attribute.id.toString(),
-            peer: peer.toString(),
-            "deletionInfo.deletionStatus": { $ne: EmittedAttributeDeletionStatus.DeletedByRecipient }
-        });
+    public async getForwardingDetailsForRecipient(
+        attribute: LocalAttribute,
+        peer: CoreAddress,
+        excludeDeletedByRecipient = false
+    ): Promise<AttributeForwardingDetails | undefined> {
+        const query: any = { attributeId: attribute.id.toString(), peer: peer.toString() };
+        if (excludeDeletedByRecipient) query["deletionInfo.deletionStatus"] = { $ne: EmittedAttributeDeletionStatus.DeletedByRecipient };
+
+        const existingForwardingDetails = await this.forwardingDetails.find(query);
 
         if (existingForwardingDetails.length === 0) return undefined;
         return AttributeForwardingDetails.from(existingForwardingDetails[0]);
@@ -1531,22 +1534,6 @@ export class AttributesController extends ConsumptionBaseController {
         const peers = forwardingDetails.map((details) => details.peer.toString());
         const uniquePeers = Array.from(new Set(peers)).map((address) => CoreAddress.from(address));
         return uniquePeers;
-    }
-
-    public async hasDeletionStatusUnequalDeletedByRecipient(localAttribute: LocalAttribute, peer: CoreAddress): Promise<boolean> {
-        const deletionStatuses = [
-            EmittedAttributeDeletionStatus.ToBeDeletedByRecipient,
-            EmittedAttributeDeletionStatus.DeletionRequestSent,
-            EmittedAttributeDeletionStatus.DeletionRequestRejected
-        ];
-
-        const found = await this.forwardingDetails.find({
-            attributeId: localAttribute.id.toString(),
-            peer: peer.toString(),
-            "deletionInfo.deletionStatus": { $in: deletionStatuses }
-        });
-
-        return found.length > 0;
     }
 
     public async isDeletedOrToBeDeletedByForwardingPeer(localAttribute: LocalAttribute, peer: CoreAddress): Promise<boolean> {

@@ -252,7 +252,8 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
 
             const isLatestSharedVersion = latestSharedVersion[0]?.id.toString() === existingAttribute.id.toString();
             if (isLatestSharedVersion) {
-                if (await this.consumptionController.attributes.hasDeletionStatusUnequalDeletedByRecipient(latestSharedVersion[0], requestInfo.peer)) {
+                const forwardingDetails = await this.consumptionController.attributes.getForwardingDetailsForRecipient(latestSharedVersion[0], requestInfo.peer, true);
+                if (forwardingDetails) {
                     await this.consumptionController.attributes.setForwardedDeletionInfoOfAttribute(latestSharedVersion[0], undefined, requestInfo.peer, true);
                 }
 

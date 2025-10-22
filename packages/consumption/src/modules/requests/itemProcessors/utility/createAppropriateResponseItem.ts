@@ -70,8 +70,8 @@ export default async function createAppropriateResponseItem(
     }
 
     if (latestSharedVersion.id.equals(ownIdentityAttribute.id)) {
-        const deletionStatus = await attributesController.getForwardingDetailsNotDeletedByRecipient(latestSharedVersion, requestInfo.peer);
-        if (deletionStatus) {
+        const forwardingDetails = await attributesController.getForwardingDetailsForRecipient(latestSharedVersion, requestInfo.peer, true);
+        if (forwardingDetails) {
             await attributesController.setForwardedDeletionInfoOfAttribute(latestSharedVersion, undefined, requestInfo.peer, true);
         }
 

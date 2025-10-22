@@ -234,10 +234,13 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             return;
         }
 
-        if (
-            responseItem instanceof AttributeAlreadySharedAcceptResponseItem &&
-            (await this.consumptionController.attributes.hasDeletionStatusUnequalDeletedByRecipient(sharedAttribute, requestInfo.peer))
-        ) {
+        if (!(responseItem instanceof AttributeAlreadySharedAcceptResponseItem)) {
+            await this.consumptionController.attributes.addForwardingDetailsToAttribute(sharedAttribute, requestInfo.peer, requestInfo.id);
+            return;
+        }
+
+        const forwardingDetails = await this.consumptionController.attributes.getForwardingDetailsForRecipient(sharedAttribute, requestInfo.peer, true);
+        if (forwardingDetails) {
             await this.consumptionController.attributes.setForwardedDeletionInfoOfAttribute(sharedAttribute, undefined, requestInfo.peer, true);
             return;
         }
