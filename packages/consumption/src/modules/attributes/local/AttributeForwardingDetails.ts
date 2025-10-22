@@ -2,9 +2,9 @@ import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreDate, ICoreId } from "@nmshd/core-types";
 import { CoreSynchronizable, ICoreSynchronizable } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
-import { EmittedAttributeDeletionInfo, EmittedAttributeDeletionInfoJSON, IEmittedAttributeDeletionInfo } from "../deletionInfos";
+import { EmittedAttributeDeletionInfo, EmittedAttributeDeletionInfoJSON, IEmittedAttributeDeletionInfo } from "./deletionInfos";
 
-export interface ForwardingDetailsJSON {
+export interface AttributeForwardingDetailsJSON {
     "@type": "ForwardingDetails";
     attributeId: string;
     peer: string;
@@ -13,7 +13,7 @@ export interface ForwardingDetailsJSON {
     deletionInfo?: EmittedAttributeDeletionInfoJSON;
 }
 
-export interface IForwardingDetails extends ICoreSynchronizable {
+export interface IAttributeForwardingDetails extends ICoreSynchronizable {
     attributeId: ICoreId;
     peer: ICoreAddress;
     sourceReference: ICoreId;
@@ -21,14 +21,14 @@ export interface IForwardingDetails extends ICoreSynchronizable {
     deletionInfo?: IEmittedAttributeDeletionInfo;
 }
 
-@type("ForwardingDetails")
-export class ForwardingDetails extends CoreSynchronizable implements IForwardingDetails {
+@type("AttributeForwardingDetails")
+export class AttributeForwardingDetails extends CoreSynchronizable implements IAttributeForwardingDetails {
     public override technicalProperties = [
-        nameof<ForwardingDetails>((f) => f.attributeId),
-        nameof<ForwardingDetails>((f) => f.peer),
-        nameof<ForwardingDetails>((f) => f.sourceReference),
-        nameof<ForwardingDetails>((f) => f.sharedAt),
-        nameof<ForwardingDetails>((f) => f.deletionInfo)
+        nameof<AttributeForwardingDetails>((f) => f.attributeId),
+        nameof<AttributeForwardingDetails>((f) => f.peer),
+        nameof<AttributeForwardingDetails>((f) => f.sourceReference),
+        nameof<AttributeForwardingDetails>((f) => f.sharedAt),
+        nameof<AttributeForwardingDetails>((f) => f.deletionInfo)
     ];
 
     @validate()
@@ -51,7 +51,7 @@ export class ForwardingDetails extends CoreSynchronizable implements IForwarding
     @validate({ nullable: true })
     public deletionInfo?: EmittedAttributeDeletionInfo;
 
-    public static from(value: IForwardingDetails | ForwardingDetailsJSON): ForwardingDetails {
-        return super.fromAny(value) as ForwardingDetails;
+    public static from(value: IAttributeForwardingDetails | AttributeForwardingDetailsJSON): AttributeForwardingDetails {
+        return super.fromAny(value) as AttributeForwardingDetails;
     }
 }

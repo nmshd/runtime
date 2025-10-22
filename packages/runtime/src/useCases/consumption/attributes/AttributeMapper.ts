@@ -1,5 +1,5 @@
 import {
-    ForwardingDetails,
+    AttributeForwardingDetails,
     LocalAttribute,
     OwnIdentityAttribute,
     OwnRelationshipAttribute,
@@ -41,7 +41,7 @@ export class AttributeMapper {
         return attributes.map((attribute) => this.toAttributeDTO(attribute));
     }
 
-    public static toForwardingDetailsDTO(forwardingDetails: ForwardingDetails): LocalAttributeForwardingDetailsDTO {
+    public static toForwardingDetailsDTO(forwardingDetails: AttributeForwardingDetails): LocalAttributeForwardingDetailsDTO {
         return {
             peer: forwardingDetails.peer.toString(),
             sourceReference: forwardingDetails.sourceReference.toString(),
