@@ -95,7 +95,7 @@ class Attributes {
     public cannotSetForwardingDetailsForPeer(attributeId: string | CoreId, peer: CoreAddress | string) {
         return new CoreError(
             "error.consumption.attributes.cannotSetForwardingDetailsForPeer",
-            `You cannot set the forwardingDeails of Attribute '${attributeId.toString()}' for peer '${peer.toString()}' since they are the peer of the Relationship in whose context the RelationshipAttribute exists.`
+            `You cannot set the forwardingDetails of Attribute '${attributeId.toString()}' for peer '${peer.toString()}' since they are the peer of the Relationship in whose context the RelationshipAttribute exists.`
         );
     }
 

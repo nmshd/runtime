@@ -472,7 +472,7 @@ describe("AttributesController", function () {
             expect(updatedAttribute.numberOfForwards).toBe(2);
         });
 
-        test("should updated a ForwardingDetails of an Attribute if it is already forwarded but ToBeDeletedByRecipient", async function () {
+        test("should updated ForwardingDetails of an Attribute if it is already forwarded but ToBeDeletedByRecipient", async function () {
             const attributeParams = {
                 content: IdentityAttribute.from({
                     value: {
@@ -495,7 +495,7 @@ describe("AttributesController", function () {
             expect(updatedAttribute.numberOfForwards).toBe(1);
         });
 
-        test("should remove a ForwardingDetails from an Attribute", async function () {
+        test("should remove ForwardingDetails from an Attribute", async function () {
             const attributeParams = {
                 content: IdentityAttribute.from({
                     value: {
@@ -518,7 +518,7 @@ describe("AttributesController", function () {
             expect(updatedIsForwarded).toBe(false);
         });
 
-        test("should publish an event removing a ForwardingDetails from an Attribute", async function () {
+        test("should publish an event when removing ForwardingDetails from an Attribute", async function () {
             const attributeParams = {
                 content: IdentityAttribute.from({
                     value: {
@@ -538,7 +538,7 @@ describe("AttributesController", function () {
             mockEventBus.expectLastPublishedEvent(AttributeForwardingDetailsChangedEvent, updatedAttribute);
         });
 
-        test("should not change Attribute trying to remove a ForwardingDetails from an Attribute without ForwardingDetails", async function () {
+        test("should not change Attribute trying to remove ForwardingDetails from an Attribute without ForwardingDetails", async function () {
             const attributeParams = {
                 content: IdentityAttribute.from({
                     value: {

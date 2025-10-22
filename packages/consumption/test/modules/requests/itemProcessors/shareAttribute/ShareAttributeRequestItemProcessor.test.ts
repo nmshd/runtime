@@ -1275,7 +1275,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
     });
 
     describe("applyIncomingResponseItem", function () {
-        test("in case of an IdentityAttribute, adds a ForwardingDetails to the Attribute from the RequestItem for the peer of the Request", async function () {
+        test("in case of an IdentityAttribute, adds ForwardingDetails to the Attribute from the RequestItem for the peer of the Request", async function () {
             const sharedAttributeContent = TestObjectFactory.createIdentityAttribute({ owner: testAccount.identity.address });
             const sharedAttribute = await consumptionController.attributes.createOwnIdentityAttribute({ content: sharedAttributeContent });
 
@@ -1290,7 +1290,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             expect(forwardedAttribute!.content.owner).toStrictEqual(testAccount.identity.address);
         });
 
-        test("in case of a RelationshipAttribute, adds a ForwardingDetails to the Attribute from the RequestItem for the peer of the Request", async function () {
+        test("in case of a RelationshipAttribute, adds ForwardingDetails to the Attribute from the RequestItem for the peer of the Request", async function () {
             const sharedAttributeContent = TestObjectFactory.createRelationshipAttribute({ owner: testAccount.identity.address });
             const sharedAttribute = await consumptionController.attributes.createOwnRelationshipAttribute({
                 content: sharedAttributeContent,
