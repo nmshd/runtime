@@ -70,7 +70,7 @@ export default async function createAppropriateResponseItem(
     }
 
     if (latestSharedVersion.id.equals(ownIdentityAttribute.id)) {
-        const forwardingDetails = await attributesController.getForwardingDetailsForRecipient(latestSharedVersion, requestInfo.peer, true);
+        const forwardingDetails = await attributesController.getForwardingDetailsForPeer(latestSharedVersion, requestInfo.peer, true);
         if (forwardingDetails) {
             await attributesController.setForwardedDeletionInfoOfAttribute(latestSharedVersion, undefined, requestInfo.peer, true);
         }

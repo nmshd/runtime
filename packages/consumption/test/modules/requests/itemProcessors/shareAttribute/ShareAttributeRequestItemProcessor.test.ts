@@ -1286,7 +1286,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             await processor.applyIncomingResponseItem(responseItem, requestItem, localRequest);
 
             const forwardedAttribute = await consumptionController.attributes.getLocalAttribute(sharedAttribute.id);
-            expect(await consumptionController.attributes.isForwardedTo(forwardedAttribute!, localRequest.peer)).toBe(true);
+            expect(await consumptionController.attributes.isAttributeForwardedToPeer(forwardedAttribute!, localRequest.peer)).toBe(true);
             expect(forwardedAttribute!.content.owner).toStrictEqual(testAccount.identity.address);
         });
 
@@ -1305,7 +1305,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             await processor.applyIncomingResponseItem(responseItem, requestItem, localRequest);
 
             const forwardedAttribute = await consumptionController.attributes.getLocalAttribute(sharedAttribute.id);
-            expect(await consumptionController.attributes.isForwardedTo(forwardedAttribute!, localRequest.peer)).toBe(true);
+            expect(await consumptionController.attributes.isAttributeForwardedToPeer(forwardedAttribute!, localRequest.peer)).toBe(true);
             expect(forwardedAttribute!.content.owner).toStrictEqual(testAccount.identity.address);
             expect((forwardedAttribute! as OwnRelationshipAttribute).peer).toStrictEqual(aThirdParty);
         });
@@ -1333,7 +1333,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             await processor.applyIncomingResponseItem(responseItem, requestItem, localRequest);
 
             const forwardedAttribute = (await consumptionController.attributes.getLocalAttribute(sharedAttribute.id)) as OwnIdentityAttribute;
-            expect(await consumptionController.attributes.isForwardedTo(forwardedAttribute, localRequest.peer)).toBe(true);
+            expect(await consumptionController.attributes.isAttributeForwardedToPeer(forwardedAttribute, localRequest.peer)).toBe(true);
             const forwardingDetails = await consumptionController.attributes.getForwardingDetailsForAttribute(forwardedAttribute);
             expect(forwardingDetails[0].deletionInfo).toBeUndefined();
         });
