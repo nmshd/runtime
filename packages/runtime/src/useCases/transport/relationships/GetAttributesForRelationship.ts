@@ -43,7 +43,7 @@ export class GetAttributesForRelationshipUseCase extends UseCase<GetAttributesFo
         if (request.onlyLatestVersions ?? true) query["succeededBy"] = { $exists: false };
 
         const attributes = await this.attributesController.getLocalAttributesExchangedWithPeer(
-            CoreAddress.from(relationship.peer.address.toString()),
+            relationship.peer.address,
             query,
             request.hideTechnical
         );
