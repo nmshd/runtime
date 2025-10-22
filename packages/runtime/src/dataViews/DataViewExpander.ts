@@ -60,9 +60,9 @@ import {
 import { CoreAddress, CoreId, FileReference } from "@nmshd/core-types";
 import {
     FileDTO,
-    ForwardingDetailsDTO,
     IdentityDTO,
     LocalAttributeDTO,
+    LocalAttributeForwardingDetailsDTO,
     LocalRequestDTO,
     LocalResponseDTO,
     MessageDTO,
@@ -1150,13 +1150,13 @@ export class DataViewExpander {
         return await Promise.all(attributesPromise);
     }
 
-    private expandForwardingPeers(forwardingDetails: ForwardingDetailsDTO[]): string[] | undefined {
+    private expandForwardingPeers(forwardingDetails: LocalAttributeForwardingDetailsDTO[]): string[] | undefined {
         if (forwardingDetails.length === 0) return;
 
         return forwardingDetails.map((detail) => detail.peer.toString());
     }
 
-    private expandForwardingDetails(forwardingDetails: ForwardingDetailsDTO[]): ForwardingDetailsDVO[] | undefined {
+    private expandForwardingDetails(forwardingDetails: LocalAttributeForwardingDetailsDTO[]): ForwardingDetailsDVO[] | undefined {
         if (forwardingDetails.length === 0) return;
 
         return forwardingDetails.map((details) => {

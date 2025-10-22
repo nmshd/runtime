@@ -7,7 +7,7 @@ import {
     PeerRelationshipAttribute,
     ThirdPartyRelationshipAttribute
 } from "@nmshd/consumption";
-import { ForwardingDetailsDTO, LocalAttributeDTO } from "@nmshd/runtime-types";
+import { LocalAttributeDTO, LocalAttributeForwardingDetailsDTO } from "@nmshd/runtime-types";
 
 export class AttributeMapper {
     public static toAttributeDTO(attribute: LocalAttribute): LocalAttributeDTO {
@@ -41,7 +41,7 @@ export class AttributeMapper {
         return attributes.map((attribute) => this.toAttributeDTO(attribute));
     }
 
-    public static toForwardingDetailsDTO(forwardingDetails: ForwardingDetails): ForwardingDetailsDTO {
+    public static toForwardingDetailsDTO(forwardingDetails: ForwardingDetails): LocalAttributeForwardingDetailsDTO {
         return {
             peer: forwardingDetails.peer.toString(),
             sourceReference: forwardingDetails.sourceReference.toString(),

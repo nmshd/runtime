@@ -1,7 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController, LocalAttribute } from "@nmshd/consumption";
 import { CoreId } from "@nmshd/core-types";
-import { ForwardingDetailsDTO } from "@nmshd/runtime-types";
+import { LocalAttributeForwardingDetailsDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
 import { RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { AttributeMapper } from "./AttributeMapper";
@@ -16,7 +16,7 @@ class Validator extends SchemaValidator<GetForwardingDetailsForAttributeRequest>
     }
 }
 
-export class GetForwardingDetailsForAttributeUseCase extends UseCase<GetForwardingDetailsForAttributeRequest, ForwardingDetailsDTO[]> {
+export class GetForwardingDetailsForAttributeUseCase extends UseCase<GetForwardingDetailsForAttributeRequest, LocalAttributeForwardingDetailsDTO[]> {
     public constructor(
         @Inject private readonly attributeController: AttributesController,
         @Inject validator: Validator
@@ -24,7 +24,7 @@ export class GetForwardingDetailsForAttributeUseCase extends UseCase<GetForwardi
         super(validator);
     }
 
-    protected async executeInternal(request: GetForwardingDetailsForAttributeRequest): Promise<Result<ForwardingDetailsDTO[]>> {
+    protected async executeInternal(request: GetForwardingDetailsForAttributeRequest): Promise<Result<LocalAttributeForwardingDetailsDTO[]>> {
         const attribute = await this.attributeController.getLocalAttribute(CoreId.from(request.attributeId));
         if (!attribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
 

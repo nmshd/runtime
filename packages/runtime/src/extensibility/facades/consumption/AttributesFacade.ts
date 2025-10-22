@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { AttributeTagCollectionDTO, ForwardingDetailsDTO, LocalAttributeDTO, LocalRequestDTO } from "@nmshd/runtime-types";
+import { AttributeTagCollectionDTO, LocalAttributeDTO, LocalAttributeForwardingDetailsDTO, LocalRequestDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
 import {
     CanCreateOwnIdentityAttributeRequest,
@@ -195,7 +195,7 @@ export class AttributesFacade {
         return await this.markAttributeAsViewedUseCase.execute(request);
     }
 
-    public async getForwardingDetailsForAttribute(request: GetForwardingDetailsForAttributeRequest): Promise<Result<ForwardingDetailsDTO[]>> {
+    public async getForwardingDetailsForAttribute(request: GetForwardingDetailsForAttributeRequest): Promise<Result<LocalAttributeForwardingDetailsDTO[]>> {
         return await this.getForwardingDetailsForAttributeUseCase.execute(request);
     }
 }

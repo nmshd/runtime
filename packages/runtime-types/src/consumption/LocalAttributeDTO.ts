@@ -1,4 +1,5 @@
 import { IdentityAttributeJSON, RelationshipAttributeJSON } from "@nmshd/content";
+import { LocalAttributeDeletionInfoDTO } from "./LocalAttributeDeletionInfoDTO";
 
 export interface LocalAttributeDTO {
     "@type": "OwnIdentityAttribute" | "PeerIdentityAttribute" | "OwnRelationshipAttribute" | "PeerRelationshipAttribute" | "ThirdPartyRelationshipAttribute";
@@ -15,17 +16,3 @@ export interface LocalAttributeDTO {
     initialAttributePeer?: string;
     numberOfForwards?: number;
 }
-
-export interface ForwardingDetailsDTO {
-    peer: string;
-    sourceReference: string;
-    sharedAt: string;
-    deletionInfo?: LocalAttributeDeletionInfoDTO;
-}
-
-export interface LocalAttributeDeletionInfoDTO {
-    deletionStatus: LocalAttributeDeletionStatus;
-    deletionDate: string;
-}
-
-export type LocalAttributeDeletionStatus = "DeletionRequestSent" | "DeletionRequestRejected" | "ToBeDeleted" | "ToBeDeletedByRecipient" | "DeletedByRecipient" | "DeletedByEmitter";
