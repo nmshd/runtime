@@ -493,6 +493,9 @@ describe("AttributesController", function () {
 
             const updatedAttribute = await consumptionController.attributes.addForwardingDetailsToAttribute(attribute, CoreAddress.from("peer"), CoreId.from("aSourceReferenceId"));
             expect(updatedAttribute.numberOfForwards).toBe(1);
+
+            const forwardingDetails = await consumptionController.attributes.getForwardingDetailsForAttribute(updatedAttribute);
+            expect(forwardingDetails[0].deletionInfo).toBeUndefined();
         });
 
         test("should remove ForwardingDetails from an Attribute", async function () {
