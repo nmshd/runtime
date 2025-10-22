@@ -5,7 +5,7 @@ import { nameof } from "ts-simple-nameof";
 import { EmittedAttributeDeletionInfo, EmittedAttributeDeletionInfoJSON, IEmittedAttributeDeletionInfo } from "./deletionInfos";
 
 export interface AttributeForwardingDetailsJSON {
-    "@type": "ForwardingDetails";
+    "@type": "AttributeForwardingDetails";
     attributeId: string;
     peer: string;
     sourceReference: string;
