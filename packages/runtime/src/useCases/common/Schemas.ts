@@ -13708,11 +13708,98 @@ export const GetForwardingDetailsForAttributeRequest: any = {
             "properties": {
                 "attributeId": {
                     "type": "string"
+                },
+                "query": {
+                    "$ref": "#/definitions/GetForwardingDetailsForAttributeRequestQuery"
                 }
             },
             "required": [
                 "attributeId"
             ],
+            "additionalProperties": false
+        },
+        "GetForwardingDetailsForAttributeRequestQuery": {
+            "type": "object",
+            "properties": {
+                "peer": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "sourceReference": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "sharedAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo.deletionStatus": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo.deletionDate": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                }
+            },
             "additionalProperties": false
         }
     }

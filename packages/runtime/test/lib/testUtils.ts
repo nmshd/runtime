@@ -2,11 +2,11 @@ import { Event, EventBus, Result, sleep, SubscriptionTarget } from "@js-soft/ts-
 import {
     AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON,
     AcceptRequestItemParametersJSON,
+    AttributeForwardingDetails,
     ConsumptionIds,
     DecideRequestItemGroupParametersJSON,
     DecideRequestItemParametersJSON,
-    DecideRequestParametersJSON,
-    ForwardingDetails
+    DecideRequestParametersJSON
 } from "@nmshd/consumption";
 import {
     ArbitraryRelationshipCreationContent,
@@ -833,7 +833,7 @@ export async function cleanupForwardingDetails(services: TestRuntimeServices[]):
             const collection = servicesAttributeController["forwardingDetails"] as SynchronizedCollection;
 
             const forwardingDetailsDocs = await collection.find({});
-            const forwardingDetails = forwardingDetailsDocs.map((doc) => ForwardingDetails.from(doc));
+            const forwardingDetails = forwardingDetailsDocs.map((doc) => AttributeForwardingDetails.from(doc));
 
             for (const detail of forwardingDetails) await collection.delete(detail);
         })

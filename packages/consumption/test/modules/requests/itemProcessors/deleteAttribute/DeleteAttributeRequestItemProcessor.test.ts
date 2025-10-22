@@ -1114,7 +1114,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
             const timeAfterUpdate = CoreDate.utc();
 
             const updatedOwnIdentityAttribute = await consumptionController.attributes.getLocalAttribute(sOwnIdentityAttribute.id);
-            const forwardingDetails = await consumptionController.attributes.getForwardingDetailsNotDeletedByRecipient(updatedOwnIdentityAttribute!, peerAddress);
+            const forwardingDetails = await consumptionController.attributes.getForwardingDetailsForPeer(updatedOwnIdentityAttribute!, peerAddress, true);
             expect(forwardingDetails).toBeDefined();
             expect(forwardingDetails!.deletionInfo).toBeDefined();
             expect(forwardingDetails!.deletionInfo!.deletionStatus).toStrictEqual(EmittedAttributeDeletionStatus.DeletionRequestRejected);
@@ -1175,7 +1175,7 @@ describe("DeleteAttributeRequestItemProcessor", function () {
             const timeAfterUpdate = CoreDate.utc();
 
             const updatedPredecessorOwnIdentityAttribute = await consumptionController.attributes.getLocalAttribute(sPredecessorOwnIdentityAttribute.id);
-            const forwardingDetails = await consumptionController.attributes.getForwardingDetailsNotDeletedByRecipient(updatedPredecessorOwnIdentityAttribute!, peerAddress);
+            const forwardingDetails = await consumptionController.attributes.getForwardingDetailsForPeer(updatedPredecessorOwnIdentityAttribute!, peerAddress, true);
             expect(forwardingDetails).toBeDefined();
             expect(forwardingDetails!.deletionInfo).toBeDefined();
             expect(forwardingDetails!.deletionInfo!.deletionStatus).toStrictEqual(EmittedAttributeDeletionStatus.DeletionRequestRejected);
