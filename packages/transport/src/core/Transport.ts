@@ -62,7 +62,7 @@ export class Transport {
         supportedDatawalletVersion: 1,
         supportedIdentityVersion: -1,
         supportedMinBackboneVersion: 6,
-        supportedMaxBackboneVersion: 6,
+        supportedMaxBackboneVersion: 7,
         debug: false,
         platformClientId: "",
         platformClientSecret: "",
