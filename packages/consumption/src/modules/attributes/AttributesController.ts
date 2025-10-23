@@ -384,6 +384,8 @@ export class AttributesController extends ConsumptionBaseController {
         });
         await this.attributes.create(peerRelationshipAttribute);
 
+        peerRelationshipAttribute.numberOfForwards = 0;
+
         this.eventBus.publish(new AttributeCreatedEvent(this.identity.address.toString(), peerRelationshipAttribute));
         return peerRelationshipAttribute;
     }
@@ -422,8 +424,6 @@ export class AttributesController extends ConsumptionBaseController {
             createdAt: CoreDate.utc()
         });
         await this.attributes.create(thirdPartyRelationshipAttribute);
-
-        await this.updateNumberOfForwards(thirdPartyRelationshipAttribute);
 
         this.eventBus.publish(new AttributeCreatedEvent(this.identity.address.toString(), thirdPartyRelationshipAttribute));
         return thirdPartyRelationshipAttribute;
