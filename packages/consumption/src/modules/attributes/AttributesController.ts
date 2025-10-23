@@ -218,9 +218,12 @@ export class AttributesController extends ConsumptionBaseController {
                 break;
         }
 
-        const attributes = await this.attributes.find(dbQuery);
+        const attributeDocs = await this.attributes.find(dbQuery);
+        const attributes = this.parseArray(attributeDocs, LocalAttribute);
 
-        return this.parseArray(attributes, LocalAttribute);
+        for (const attribute of attributes) await this.updateNumberOfForwards(attribute);
+
+        return attributes;
     }
 
     public async executeIdentityAttributeQuery(query: IIdentityAttributeQuery): Promise<LocalAttribute[]> {
