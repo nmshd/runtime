@@ -1014,7 +1014,7 @@ export class DataViewExpander {
                 succeededBy: attribute.succeededBy,
                 tags: localAttribute.content.tags,
                 isDefault: attribute.isDefault,
-                forwardingPeers: this.expandForwardingPeers(forwardingDetails),
+                forwardingPeers: await this.expandForwardingPeers(forwardingDetails),
                 forwardingDetails: this.expandForwardingDetails(forwardingDetails)
             };
         }
@@ -1075,7 +1075,7 @@ export class DataViewExpander {
                 sourceReference: localAttribute.sourceReference.toString(),
                 deletionStatus: localAttribute.deletionInfo?.deletionStatus,
                 deletionDate: localAttribute.deletionInfo?.deletionDate.toString(),
-                forwardingPeers: this.expandForwardingPeers(forwardingDetails),
+                forwardingPeers: await this.expandForwardingPeers(forwardingDetails),
                 forwardingDetails: this.expandForwardingDetails(forwardingDetails)
             };
         }
@@ -1109,7 +1109,7 @@ export class DataViewExpander {
                 sourceReference: localAttribute.sourceReference.toString(),
                 deletionStatus: localAttribute.deletionInfo?.deletionStatus,
                 deletionDate: localAttribute.deletionInfo?.deletionDate.toString(),
-                forwardingPeers: this.expandForwardingPeers(forwardingDetails),
+                forwardingPeers: await this.expandForwardingPeers(forwardingDetails),
                 forwardingDetails: this.expandForwardingDetails(forwardingDetails)
             };
         }
@@ -1150,10 +1150,13 @@ export class DataViewExpander {
         return await Promise.all(attributesPromise);
     }
 
-    private expandForwardingPeers(forwardingDetails: LocalAttributeForwardingDetailsDTO[]): string[] | undefined {
+    private async expandForwardingPeers(forwardingDetails: LocalAttributeForwardingDetailsDTO[]): Promise<IdentityDVO[] | undefined> {
         if (forwardingDetails.length === 0) return;
 
-        return forwardingDetails.map((detail) => detail.peer.toString());
+        const addresses = [...new Set(forwardingDetails.map((detail) => detail.peer.toString()))];
+        const promises = addresses.map((address) => this.expandAddress(address));
+
+        return await Promise.all(promises);
     }
 
     private expandForwardingDetails(forwardingDetails: LocalAttributeForwardingDetailsDTO[]): ForwardingDetailsDVO[] | undefined {

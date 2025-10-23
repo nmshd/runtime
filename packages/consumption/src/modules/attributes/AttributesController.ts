@@ -1531,7 +1531,7 @@ export class AttributesController extends ConsumptionBaseController {
         if (forwardingDetails.length === 0) return [];
 
         const peers = forwardingDetails.map((details) => details.peer.toString());
-        const uniquePeers = Array.from(new Set(peers)).map((address) => CoreAddress.from(address));
+        const uniquePeers = [...new Set(peers)].map((address) => CoreAddress.from(address));
         return uniquePeers;
     }
 
@@ -1565,7 +1565,7 @@ export class AttributesController extends ConsumptionBaseController {
         const forwardingDetailsDocs = await this.forwardingDetails.find({ peer: peer.toString() });
         const forwardingDetails = forwardingDetailsDocs.map((doc) => AttributeForwardingDetails.from(doc));
 
-        const attributeIds = Array.from(new Set(forwardingDetails.map((details) => details.attributeId.toString())));
+        const attributeIds = [...new Set(forwardingDetails.map((details) => details.attributeId.toString()))];
 
         if (onlyForwarded) {
             query.id = { $in: attributeIds.map((id) => id.toString()) };
