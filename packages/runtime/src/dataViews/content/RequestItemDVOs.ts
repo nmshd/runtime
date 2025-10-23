@@ -35,7 +35,6 @@ export interface ProposeAttributeRequestItemDVO extends RequestItemDVO {
 export interface CreateAttributeRequestItemDVO extends RequestItemDVO {
     type: "CreateAttributeRequestItemDVO";
     attribute: DraftIdentityAttributeDVO | DraftRelationshipAttributeDVO;
-    sourceAttributeId?: string;
 }
 
 export interface DeleteAttributeRequestItemDVO extends RequestItemDVO {
@@ -46,7 +45,7 @@ export interface DeleteAttributeRequestItemDVO extends RequestItemDVO {
 
 export interface ShareAttributeRequestItemDVO extends RequestItemDVO {
     type: "ShareAttributeRequestItemDVO";
-    sourceAttributeId: string;
+    attributeId: string;
     thirdPartyAddress?: string;
     attribute: DraftIdentityAttributeDVO;
 }

@@ -1,5 +1,5 @@
 import { ResponseItemResult } from "@nmshd/content";
-import { LocalAttributeDVO } from "../consumption";
+import { LocalAttributeDVO, OwnIdentityAttributeDVO } from "../consumption";
 import { DataViewObject } from "../DataViewObject";
 
 export interface ResponseItemGroupDVO {
@@ -32,7 +32,6 @@ export interface AcceptResponseItemDVO extends ResponseItemDVO {
         | "ProposeAttributeAcceptResponseItemDVO"
         | "CreateAttributeAcceptResponseItemDVO"
         | "DeleteAttributeAcceptResponseItemDVO"
-        | "ShareAttributeAcceptResponseItemDVO"
         | "FormFieldAcceptResponseItemDVO"
         | "TransferFileOwnershipAcceptResponseItemDVO"
         | "AttributeSuccessionAcceptResponseItemDVO"
@@ -65,12 +64,6 @@ export interface DeleteAttributeAcceptResponseItemDVO extends AcceptResponseItem
     deletionDate: string;
 }
 
-export interface ShareAttributeAcceptResponseItemDVO extends AcceptResponseItemDVO {
-    type: "ShareAttributeAcceptResponseItemDVO";
-    attributeId: string;
-    attribute: LocalAttributeDVO;
-}
-
 export interface FormFieldAcceptResponseItemDVO extends AcceptResponseItemDVO {
     type: "FormFieldAcceptResponseItemDVO";
     response: string | number | boolean | string[];
@@ -78,9 +71,8 @@ export interface FormFieldAcceptResponseItemDVO extends AcceptResponseItemDVO {
 
 export interface TransferFileOwnershipAcceptResponseItemDVO extends AcceptResponseItemDVO {
     type: "TransferFileOwnershipAcceptResponseItemDVO";
-    repositoryAttribute?: LocalAttributeDVO;
-    sharedAttributeId: string;
-    sharedAttribute: LocalAttributeDVO;
+    attributeId: string;
+    attribute: OwnIdentityAttributeDVO;
 }
 
 export interface AttributeSuccessionAcceptResponseItemDVO extends AcceptResponseItemDVO {

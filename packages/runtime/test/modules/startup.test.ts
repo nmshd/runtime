@@ -20,7 +20,7 @@ describe("Runtime Module Startup", () => {
                     notification2: { enabled: true, location: "@nmshd/runtime:NotificationModule" }
                 }
             },
-            { setDefaultRepositoryAttributes: false }
+            { setDefaultOwnIdentityAttributes: false }
         );
         runtimes.push(runtime);
 
@@ -37,7 +37,7 @@ describe("Runtime Module Startup", () => {
                     customModule2: { enabled: true, location: "CustomModuleAllowingMultipleInstances" }
                 }
             },
-            { setDefaultRepositoryAttributes: false }
+            { setDefaultOwnIdentityAttributes: false }
         );
         runtimes.push(runtime);
 

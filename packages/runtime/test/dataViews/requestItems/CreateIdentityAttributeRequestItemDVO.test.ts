@@ -198,9 +198,7 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
         const responseItem = response!.content.items[0] as CreateAttributeAcceptResponseItemDVO;
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
-        const attributeResult = await rConsumptionServices.attributes.getAttributes({
-            query: { "content.value.@type": "DisplayName", "shareInfo.peer": dvo.createdBy.id }
-        });
+        const attributeResult = await rConsumptionServices.attributes.getOwnAttributesSharedWithPeer({ peer: dvo.createdBy.id, query: { "content.value.@type": "DisplayName" } });
         expect(attributeResult).toBeSuccessful();
         expect(attributeResult.value).toHaveLength(1);
         expect(attributeResult.value[0].id).toBeDefined();
@@ -225,7 +223,7 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
     test("check the MessageDVO for the sender after acceptance", async () => {
         const baselineNumberOfAttributes = (
             await sConsumptionServices.attributes.getAttributes({
-                query: { "content.value.@type": "DisplayName", "shareInfo.peer": rAddress }
+                query: { "content.value.@type": "DisplayName", peer: rAddress }
             })
         ).value.length;
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
@@ -272,7 +270,7 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         const attributeResult = await sConsumptionServices.attributes.getAttributes({
-            query: { "content.value.@type": "DisplayName", "shareInfo.peer": dvo.request.peer.id }
+            query: { "content.value.@type": "DisplayName", peer: dvo.request.peer.id }
         });
         expect(attributeResult).toBeSuccessful();
         const numberOfAttributes = attributeResult.value.length;
@@ -291,7 +289,7 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
     test("check the attributes for the sender", async () => {
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
         const dvo = (await sExpander.expandMessageDTO(senderMessage)) as RequestMessageDVO;
-        const attributeResult = await sConsumptionServices.attributes.getOwnSharedAttributes({
+        const attributeResult = await sConsumptionServices.attributes.getOwnAttributesSharedWithPeer({
             peer: dvo.request.peer.id
         });
 
@@ -314,7 +312,7 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
         const localRequest = (await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: requestId })).value;
         const sharedAttributeId = (localRequest.response!.content.items[0] as CreateAttributeAcceptResponseItemJSON).attributeId;
 
-        await rRuntimeServices.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: sharedAttributeId });
+        await rRuntimeServices.consumption.attributes.deleteAttributeAndNotify({ attributeId: sharedAttributeId });
 
         const recipientMessage = (await rRuntimeServices.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await rExpander.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
@@ -328,7 +326,7 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
         const localRequest = (await sRuntimeServices.consumption.outgoingRequests.getRequest({ id: requestId })).value;
         const sharedAttributeId = (localRequest.response!.content.items[0] as CreateAttributeAcceptResponseItemJSON).attributeId;
 
-        await sRuntimeServices.consumption.attributes.deletePeerSharedAttributeAndNotifyOwner({ attributeId: sharedAttributeId });
+        await sRuntimeServices.consumption.attributes.deleteAttributeAndNotify({ attributeId: sharedAttributeId });
 
         const senderMessageAfterDeletion = (await sRuntimeServices.transport.messages.getMessage({ id: senderMessage.id })).value;
         const dvo = (await sExpander.expandMessageDTO(senderMessageAfterDeletion)) as RequestMessageDVO;

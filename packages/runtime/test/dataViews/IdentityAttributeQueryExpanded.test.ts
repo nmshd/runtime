@@ -1,5 +1,5 @@
 import { AbstractStringJSON, IdentityAttributeQueryJSON } from "@nmshd/content";
-import { ConsumptionServices, DataViewExpander, LocalAttributeDTO, RepositoryAttributeDVO } from "../../src";
+import { ConsumptionServices, DataViewExpander, LocalAttributeDTO, OwnIdentityAttributeDVO } from "../../src";
 import { RuntimeServiceProvider } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
@@ -8,7 +8,7 @@ let expander1: DataViewExpander;
 
 beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(1, {
-        enableDefaultRepositoryAttributes: true
+        enableDefaultOwnIdentityAttributes: true
     });
     consumptionServices1 = runtimeServices[0].consumption;
     expander1 = runtimeServices[0].expander;
@@ -21,7 +21,7 @@ describe("IdentityAttributeQueryExpanded", () => {
 
     beforeAll(async () => {
         const firstlyCreatedGivenName = (
-            await consumptionServices1.attributes.createRepositoryAttribute({
+            await consumptionServices1.attributes.createOwnIdentityAttribute({
                 content: {
                     value: {
                         "@type": "GivenName",
@@ -33,7 +33,7 @@ describe("IdentityAttributeQueryExpanded", () => {
         ).value;
 
         const secondlyCreatedGivenName = (
-            await consumptionServices1.attributes.createRepositoryAttribute({
+            await consumptionServices1.attributes.createOwnIdentityAttribute({
                 content: {
                     value: {
                         "@type": "GivenName",
@@ -44,7 +44,7 @@ describe("IdentityAttributeQueryExpanded", () => {
             })
         ).value;
 
-        const updatedSecondlyCreatedGivenName = (await consumptionServices1.attributes.changeDefaultRepositoryAttribute({ attributeId: secondlyCreatedGivenName.id })).value;
+        const updatedSecondlyCreatedGivenName = (await consumptionServices1.attributes.changeDefaultOwnIdentityAttribute({ attributeId: secondlyCreatedGivenName.id })).value;
         const updatedFirstlyCreatedGivenName = (await consumptionServices1.attributes.getAttribute({ id: firstlyCreatedGivenName.id })).value;
 
         attributes.push(updatedSecondlyCreatedGivenName, updatedFirstlyCreatedGivenName);
@@ -68,10 +68,10 @@ describe("IdentityAttributeQueryExpanded", () => {
         expect(expandedQuery.valueHints.max).toBe(100);
         expect(expandedQuery.results).toHaveLength(2);
 
-        let dvo: RepositoryAttributeDVO = expandedQuery.results[0] as RepositoryAttributeDVO;
+        let dvo: OwnIdentityAttributeDVO = expandedQuery.results[0];
         let attribute = attributes[0];
         expect(dvo).toBeDefined();
-        expect(dvo.type).toBe("RepositoryAttributeDVO");
+        expect(dvo.type).toBe("OwnIdentityAttributeDVO");
         expect(dvo.id).toStrictEqual(attribute.id);
         expect(dvo.name).toBe("i18n://dvo.attribute.name.GivenName");
         expect(dvo.description).toBe("i18n://dvo.attribute.description.GivenName");
@@ -84,7 +84,8 @@ describe("IdentityAttributeQueryExpanded", () => {
         expect(dvo.isDefault).toBe(true);
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.sharedWith).toStrictEqual([]);
+        expect(dvo.forwardingPeers).toBeUndefined();
+        expect(dvo.forwardingDetails).toBeUndefined();
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");
@@ -92,10 +93,10 @@ describe("IdentityAttributeQueryExpanded", () => {
         expect(dvo.valueHints["@type"]).toBe("ValueHints");
         expect(dvo.valueHints.max).toBe(100);
 
-        dvo = expandedQuery.results[1] as RepositoryAttributeDVO;
+        dvo = expandedQuery.results[1];
         attribute = attributes[1];
         expect(dvo).toBeDefined();
-        expect(dvo.type).toBe("RepositoryAttributeDVO");
+        expect(dvo.type).toBe("OwnIdentityAttributeDVO");
         expect(dvo.id).toStrictEqual(attribute.id);
         expect(dvo.name).toBe("i18n://dvo.attribute.name.GivenName");
         expect(dvo.description).toBe("i18n://dvo.attribute.description.GivenName");
@@ -108,7 +109,8 @@ describe("IdentityAttributeQueryExpanded", () => {
         expect(dvo.isDefault).toBeUndefined();
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.sharedWith).toStrictEqual([]);
+        expect(dvo.forwardingPeers).toBeUndefined();
+        expect(dvo.forwardingDetails).toBeUndefined();
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");

@@ -206,7 +206,7 @@ describe("CreateRelationshipAttributeRequestItemDVO", () => {
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         const attributeResult = await rConsumptionServices.attributes.getAttributes({
-            query: { "content.value.@type": "ProprietaryString", "shareInfo.peer": dvo.createdBy.id }
+            query: { "content.value.@type": "ProprietaryString", peer: dvo.createdBy.id }
         });
         expect(attributeResult).toBeSuccessful();
         expect(attributeResult.value).toHaveLength(1);
@@ -277,7 +277,7 @@ describe("CreateRelationshipAttributeRequestItemDVO", () => {
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
         const attributeResult = await sConsumptionServices.attributes.getAttributes({
-            query: { "content.value.@type": "ProprietaryString", "shareInfo.peer": dvo.request.peer.id }
+            query: { "content.value.@type": "ProprietaryString", peer: dvo.request.peer.id }
         });
         expect(attributeResult).toBeSuccessful();
         const numberOfAttributes = attributeResult.value.length;
@@ -295,7 +295,7 @@ describe("CreateRelationshipAttributeRequestItemDVO", () => {
     test("check the attributes for the sender", async () => {
         const senderMessage = await exchangeAndAcceptRequestByMessage(sRuntimeServices, rRuntimeServices, requestContent, responseItems);
         const dvo = (await sExpander.expandMessageDTO(senderMessage)) as RequestMessageDVO;
-        const attributeResult = await sConsumptionServices.attributes.getOwnSharedAttributes({
+        const attributeResult = await sConsumptionServices.attributes.getOwnAttributesSharedWithPeer({
             peer: dvo.request.peer.id
         });
 
@@ -305,7 +305,7 @@ describe("CreateRelationshipAttributeRequestItemDVO", () => {
         expect((attributeResult.value[numberOfAttributes - 1].content.value as ProprietaryStringJSON).value).toBe("0815");
 
         const relationshipAttributeResult = await sConsumptionServices.attributes.getAttributes({
-            query: { "shareInfo.peer": dvo.request.peer.id, "content.@type": "RelationshipAttribute" }
+            query: { peer: dvo.request.peer.id, "content.@type": "RelationshipAttribute" }
         });
         expect(relationshipAttributeResult).toBeSuccessful();
     });

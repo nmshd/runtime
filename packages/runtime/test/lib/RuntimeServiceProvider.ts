@@ -19,7 +19,7 @@ export interface LaunchConfiguration {
     deciderModuleAutomations?: AutomationConfig[];
     enableRequestModule?: boolean;
     enableNotificationModule?: boolean;
-    enableDefaultRepositoryAttributes?: boolean;
+    enableDefaultOwnIdentityAttributes?: boolean;
     useCorrelator?: boolean;
 }
 
@@ -75,7 +75,7 @@ export class RuntimeServiceProvider {
             const runtime = new TestRuntime(
                 config,
                 {
-                    setDefaultRepositoryAttributes: launchConfiguration.enableDefaultRepositoryAttributes ?? false
+                    setDefaultOwnIdentityAttributes: launchConfiguration.enableDefaultOwnIdentityAttributes ?? false
                 },
                 launchConfiguration.useCorrelator ? correlator : undefined
             );

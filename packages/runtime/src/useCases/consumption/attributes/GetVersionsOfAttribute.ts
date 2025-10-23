@@ -28,7 +28,7 @@ export class GetVersionsOfAttributeUseCase extends UseCase<GetVersionsOfAttribut
         const attribute = await this.attributeController.getLocalAttribute(CoreId.from(request.attributeId));
         if (!attribute) throw RuntimeErrors.general.recordNotFound(LocalAttribute);
 
-        const allVersions = await this.attributeController.getVersionsOfAttribute(CoreId.from(request.attributeId));
+        const allVersions = await this.attributeController.getVersionsOfAttribute(attribute);
 
         return Result.ok(AttributeMapper.toAttributeDTOList(allVersions));
     }
