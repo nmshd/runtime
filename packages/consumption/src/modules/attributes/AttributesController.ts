@@ -1374,6 +1374,16 @@ export class AttributesController extends ConsumptionBaseController {
         peer: CoreAddress,
         overrideDeletedOrToBeDeleted = false
     ): Promise<void> {
+        const isDeletedOrToBeDeletedByForwardingPeer = await this.isAttributeDeletedOrToBeDeletedByForwardingPeer(attribute, peer);
+        if (isDeletedOrToBeDeletedByForwardingPeer && !overrideDeletedOrToBeDeleted) return;
+
+        await this.setDeletionInfoForForwardingPeer(attribute, deletionInfo, peer, overrideDeletedOrToBeDeleted);
+    }
+
+    private async isAttributeDeletedOrToBeDeletedByForwardingPeer(
+        attribute: OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute,
+        peer: CoreAddress
+    ): Promise<boolean> {
         const docs = await this.forwardingDetails.find({ attributeId: attribute.id.toString(), peer: peer.toString() });
         const forwardingDetailsWithPeer = docs.map((doc) => AttributeForwardingDetails.from(doc));
 
@@ -1386,11 +1396,7 @@ export class AttributesController extends ConsumptionBaseController {
             (details) => !details.deletionInfo || !deletionStatuses.includes(details.deletionInfo.deletionStatus)
         );
 
-        const isDeletedOrToBeDeletedByForwardingPeer = hasSharingDetailsWithDeletionStatus && !hasSharingDetailsWithoutDeletionStatus;
-
-        if (isDeletedOrToBeDeletedByForwardingPeer && !overrideDeletedOrToBeDeleted) return;
-
-        await this.setDeletionInfoForForwardingPeer(attribute, deletionInfo, peer, overrideDeletedOrToBeDeleted);
+        return hasSharingDetailsWithDeletionStatus && !hasSharingDetailsWithoutDeletionStatus;
     }
 
     public async setPeerDeletionInfoOfOwnRelationshipAttribute(
