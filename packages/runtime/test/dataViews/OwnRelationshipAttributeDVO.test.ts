@@ -134,7 +134,7 @@ describe("OwnRelationshipAttributeDVO", () => {
         expect(dvo.sourceReference).toBe(ownRelationshipAttribute.sourceReference);
         expect(dvo.deletionStatus).toBe(ownRelationshipAttribute.deletionInfo?.deletionStatus);
         expect(dvo.deletionDate).toBe(ownRelationshipAttribute.deletionInfo?.deletionDate);
-        expect(dvo.forwardingPeers).toStrictEqual([services3.address]);
+        expect(dvo.forwardingPeers![0].id).toStrictEqual(services3.address);
         expect(dvo.forwardingDetails).toStrictEqual([
             {
                 peer: services3.address,
