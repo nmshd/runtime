@@ -167,6 +167,9 @@ export class AttributesController extends ConsumptionBaseController {
         /* Map matched indices back to their respective attributes and return. */
         const matchedAttributes = indices.map((ii) => envelopedAttributes[ii]);
         const result = this.parseArray(matchedAttributes, LocalAttribute);
+
+        for (const attribute of result) await this.updateNumberOfForwards(attribute);
+
         return result;
     }
 
