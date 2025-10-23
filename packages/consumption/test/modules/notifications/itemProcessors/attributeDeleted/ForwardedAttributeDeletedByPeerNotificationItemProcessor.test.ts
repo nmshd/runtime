@@ -291,8 +291,8 @@ describe("ForwardedAttributeDeletedByPeerNotificationItemProcessor", function ()
         expect(event).toBeInstanceOf(ForwardedAttributeDeletedByPeerEvent);
 
         const updatedPredecessor = (await consumptionController.attributes.getLocalAttribute(predecessorOwnIdentityAttribute.id)) as OwnIdentityAttribute;
-        const updatedPredecessorForwardedSharingDetils = await consumptionController.attributes.getForwardingDetailsForAttribute(updatedPredecessor);
-        expect(updatedPredecessorForwardedSharingDetils[0].deletionInfo!.deletionStatus).toStrictEqual(EmittedAttributeDeletionStatus.DeletedByRecipient);
+        const updatedPredecessorForwardingDetails = await consumptionController.attributes.getForwardingDetailsForAttribute(updatedPredecessor);
+        expect(updatedPredecessorForwardingDetails[0].deletionInfo!.deletionStatus).toStrictEqual(EmittedAttributeDeletionStatus.DeletedByRecipient);
 
         /* Manually trigger and verify rollback. */
         await processor.rollback(notificationItem, notification);
