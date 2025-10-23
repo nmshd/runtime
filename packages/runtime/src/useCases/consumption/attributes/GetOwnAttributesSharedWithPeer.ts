@@ -1,5 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController } from "@nmshd/consumption";
+import { CoreAddress } from "@nmshd/core-types";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
 import { AddressString, SchemaRepository, SchemaValidator, UseCase } from "../../common";
@@ -32,12 +33,6 @@ export interface GetOwnAttributesSharedWithPeerRequestQuery {
     deletionInfo?: string | string[];
     "deletionInfo.deletionStatus"?: string | string[];
     "deletionInfo.deletionDate"?: string | string[];
-    forwardedSharingDetails?: string | string[];
-    "forwardedSharingDetails.sourceReference"?: string | string[];
-    "forwardedSharingDetails.sharedAt"?: string | string[];
-    "forwardedSharingDetails.deletionInfo"?: string | string[];
-    "forwardedSharingDetails.deletionInfo.deletionStatus"?: string | string[];
-    "forwardedSharingDetails.deletionInfo.deletionDate"?: string | string[];
 }
 
 class Validator extends SchemaValidator<GetOwnAttributesSharedWithPeerRequest> {
@@ -61,11 +56,9 @@ export class GetOwnAttributesSharedWithPeerUseCase extends UseCase<GetOwnAttribu
         const dbQuery = GetAttributesUseCase.queryTranslator.parse(flattenedQuery);
 
         dbQuery["@type"] = { $in: ["OwnIdentityAttribute", "OwnRelationshipAttribute"] };
-        dbQuery["$or"] = [{ peer: request.peer }, { "forwardedSharingDetails.peer": request.peer }];
-
         if (request.onlyLatestVersions ?? true) dbQuery["succeededBy"] = { $exists: false };
 
-        const attributes = await this.attributeController.getLocalAttributes(dbQuery, request.hideTechnical);
+        const attributes = await this.attributeController.getLocalAttributesExchangedWithPeer(CoreAddress.from(request.peer), dbQuery, request.hideTechnical);
 
         return Result.ok(AttributeMapper.toAttributeDTOList(attributes));
     }

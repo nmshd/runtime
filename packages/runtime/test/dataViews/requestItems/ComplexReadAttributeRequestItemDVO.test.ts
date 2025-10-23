@@ -22,7 +22,7 @@ import {
 } from "../../../src";
 import {
     cleanupAttributes,
-    cleanupForwardedSharingDetails,
+    cleanupForwardingDetails,
     establishRelationship,
     exchangeAndAcceptRequestByMessage,
     exchangeMessageWithRequest,
@@ -55,7 +55,7 @@ afterAll(() => serviceProvider.stop());
 beforeEach(async function () {
     eventBus1.reset();
     eventBus2.reset();
-    await cleanupForwardedSharingDetails([runtimeServices2]);
+    await cleanupForwardingDetails([runtimeServices2]);
     await cleanupAttributes([runtimeServices1]);
 });
 
@@ -250,8 +250,9 @@ describe("ComplexReadAttributeRequestItemDVO with IdentityAttributeQuery", () =>
         expect(attributeValue.state).toBeUndefined();
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
-        const attributeResult = await consumptionServices2.attributes.getAttributes({
-            query: { "content.value.@type": "StreetAddress", "forwardedSharingDetails.peer": dvo.createdBy.id }
+        const attributeResult = await consumptionServices2.attributes.getOwnAttributesSharedWithPeer({
+            peer: dvo.createdBy.id,
+            query: { "content.value.@type": "StreetAddress" }
         });
         expect(attributeResult).toBeSuccessful();
         const numberOfAttributes = attributeResult.value.length;
@@ -514,9 +515,7 @@ describe("ComplexReadAttributeRequestItemDVO with IQL", () => {
         expect(attributeValue.state).toBeUndefined();
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
-        const attributeResult = await consumptionServices2.attributes.getAttributes({
-            query: { "content.value.@type": "StreetAddress", "forwardedSharingDetails.peer": dvo.createdBy.id }
-        });
+        const attributeResult = await consumptionServices2.attributes.getOwnAttributesSharedWithPeer({ peer: dvo.createdBy.id, query: { "content.value.@type": "StreetAddress" } });
         expect(attributeResult).toBeSuccessful();
         expect(attributeResult.value).toHaveLength(1);
         expect(attributeResult.value[0].id).toBeDefined();

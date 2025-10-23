@@ -46,7 +46,7 @@ export default async function createAppropriateResponseItem(
     const latestSharedVersion = latestSharedVersions.length > 0 ? latestSharedVersions[0] : undefined;
 
     if (!latestSharedVersion) {
-        const updatedAttribute = await attributesController.addForwardedSharingDetailsToAttribute(ownIdentityAttribute, requestInfo.peer, requestInfo.id);
+        const updatedAttribute = await attributesController.addForwardingDetailsToAttribute(ownIdentityAttribute, requestInfo.peer, requestInfo.id);
 
         switch (itemType) {
             case "Create":
@@ -70,7 +70,8 @@ export default async function createAppropriateResponseItem(
     }
 
     if (latestSharedVersion.id.equals(ownIdentityAttribute.id)) {
-        if (latestSharedVersion.hasDeletionStatusUnequalDeletedByRecipient(requestInfo.peer)) {
+        const forwardingDetails = await attributesController.getForwardingDetailsForPeer(latestSharedVersion, requestInfo.peer, true);
+        if (forwardingDetails) {
             await attributesController.setForwardedDeletionInfoOfAttribute(latestSharedVersion, undefined, requestInfo.peer, true);
         }
 
@@ -80,7 +81,7 @@ export default async function createAppropriateResponseItem(
         });
     }
 
-    const updatedAttribute = await attributesController.addForwardedSharingDetailsToAttribute(ownIdentityAttribute, requestInfo.peer, requestInfo.id);
+    const updatedAttribute = await attributesController.addForwardingDetailsToAttribute(ownIdentityAttribute, requestInfo.peer, requestInfo.id);
 
     return AttributeSuccessionAcceptResponseItem.from({
         result: ResponseItemResult.Accepted,

@@ -323,7 +323,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 })
             });
 
-            const forwardedOwnIdentityAttribute = await consumptionController.attributes.addForwardedSharingDetailsToAttribute(
+            const forwardedOwnIdentityAttribute = await consumptionController.attributes.addForwardingDetailsToAttribute(
                 ownIdentityAttribute,
                 recipient,
                 CoreId.from("aSourceReferenceId")
@@ -352,7 +352,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 })
             });
 
-            const forwardedOwnIdentityAttribute = await consumptionController.attributes.addForwardedSharingDetailsToAttribute(
+            const forwardedOwnIdentityAttribute = await consumptionController.attributes.addForwardingDetailsToAttribute(
                 ownIdentityAttribute,
                 recipient,
                 CoreId.from("aSourceReferenceId")
@@ -391,7 +391,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 })
             });
 
-            const forwardedOwnIdentityAttribute = await consumptionController.attributes.addForwardedSharingDetailsToAttribute(
+            const forwardedOwnIdentityAttribute = await consumptionController.attributes.addForwardingDetailsToAttribute(
                 ownIdentityAttribute,
                 recipient,
                 CoreId.from("aSourceReferenceId")
@@ -438,7 +438,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 }
             });
 
-            const forwardedSuccessor = await consumptionController.attributes.addForwardedSharingDetailsToAttribute(
+            const forwardedSuccessor = await consumptionController.attributes.addForwardingDetailsToAttribute(
                 successorOfOwnIdentityAttribute,
                 recipient,
                 CoreId.from("aSourceReferenceId")
@@ -475,7 +475,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 }
             });
 
-            const forwardedSuccessor = await consumptionController.attributes.addForwardedSharingDetailsToAttribute(
+            const forwardedSuccessor = await consumptionController.attributes.addForwardingDetailsToAttribute(
                 successorOfOwnIdentityAttribute,
                 recipient,
                 CoreId.from("aSourceReferenceId")
@@ -518,7 +518,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 }
             });
 
-            const forwardedSuccessor = await consumptionController.attributes.addForwardedSharingDetailsToAttribute(
+            const forwardedSuccessor = await consumptionController.attributes.addForwardingDetailsToAttribute(
                 successorOfOwnIdentityAttribute,
                 recipient,
                 CoreId.from("aSourceReferenceId")
@@ -553,11 +553,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 content: TestObjectFactory.createIdentityAttribute({ owner: sender })
             });
 
-            const forwardedPredecessor = await consumptionController.attributes.addForwardedSharingDetailsToAttribute(
-                ownIdentityAttribute,
-                recipient,
-                CoreId.from("aSourceReferenceId")
-            );
+            const forwardedPredecessor = await consumptionController.attributes.addForwardingDetailsToAttribute(ownIdentityAttribute, recipient, CoreId.from("aSourceReferenceId"));
 
             const { successor: successorOfOwnIdentityAttribute } = await consumptionController.attributes.succeedOwnIdentityAttribute(ownIdentityAttribute, {
                 content: {
@@ -601,11 +597,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 }
             });
 
-            const forwardedPredecessor = await consumptionController.attributes.addForwardedSharingDetailsToAttribute(
-                ownIdentityAttribute,
-                recipient,
-                CoreId.from("aSourceReferenceId")
-            );
+            const forwardedPredecessor = await consumptionController.attributes.addForwardingDetailsToAttribute(ownIdentityAttribute, recipient, CoreId.from("aSourceReferenceId"));
 
             await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(
                 forwardedPredecessor,
@@ -644,11 +636,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 }
             });
 
-            const forwardedPredecessor = await consumptionController.attributes.addForwardedSharingDetailsToAttribute(
-                ownIdentityAttribute,
-                recipient,
-                CoreId.from("aSourceReferenceId")
-            );
+            const forwardedPredecessor = await consumptionController.attributes.addForwardingDetailsToAttribute(ownIdentityAttribute, recipient, CoreId.from("aSourceReferenceId"));
 
             await consumptionController.attributes.setForwardedDeletionInfoOfAttribute(
                 forwardedPredecessor,
@@ -716,7 +704,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 sourceReference: CoreId.from("aSourceReferenceId")
             });
 
-            await consumptionController.attributes.addForwardedSharingDetailsToAttribute(initialRelationshipAttribute, recipient, CoreId.from("aSourceReferenceId"));
+            await consumptionController.attributes.addForwardingDetailsToAttribute(initialRelationshipAttribute, recipient, CoreId.from("aSourceReferenceId"));
 
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
@@ -746,7 +734,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 sourceReference: CoreId.from("aSourceReferenceId")
             });
 
-            const forwardedRelationshipAttribute = await consumptionController.attributes.addForwardedSharingDetailsToAttribute(
+            const forwardedRelationshipAttribute = await consumptionController.attributes.addForwardingDetailsToAttribute(
                 initialRelationshipAttribute,
                 recipient,
                 CoreId.from("anotherSourceReferenceId")
@@ -786,7 +774,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 sourceReference: CoreId.from("aSourceReferenceId")
             });
 
-            const forwardedRelationshipAttribute = await consumptionController.attributes.addForwardedSharingDetailsToAttribute(
+            const forwardedRelationshipAttribute = await consumptionController.attributes.addForwardingDetailsToAttribute(
                 initialRelationshipAttribute,
                 recipient,
                 CoreId.from("anotherSourceReferenceId")
@@ -867,7 +855,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 sourceReference: "anotherSourceReferenceId"
             });
 
-            const forwardedSuccessor = await consumptionController.attributes.addForwardedSharingDetailsToAttribute(
+            const forwardedSuccessor = await consumptionController.attributes.addForwardingDetailsToAttribute(
                 successorOfOwnRelationshipAttribute,
                 recipient,
                 CoreId.from("aForwardingSourceReferenceId")
@@ -1287,7 +1275,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
     });
 
     describe("applyIncomingResponseItem", function () {
-        test("in case of an IdentityAttribute, adds a ForwardedSharingDetails to the Attribute from the RequestItem for the peer of the Request", async function () {
+        test("in case of an IdentityAttribute, adds ForwardingDetails to the Attribute from the RequestItem for the peer of the Request", async function () {
             const sharedAttributeContent = TestObjectFactory.createIdentityAttribute({ owner: testAccount.identity.address });
             const sharedAttribute = await consumptionController.attributes.createOwnIdentityAttribute({ content: sharedAttributeContent });
 
@@ -1298,11 +1286,11 @@ describe("ShareAttributeRequestItemProcessor", function () {
             await processor.applyIncomingResponseItem(responseItem, requestItem, localRequest);
 
             const forwardedAttribute = await consumptionController.attributes.getLocalAttribute(sharedAttribute.id);
-            expect((forwardedAttribute! as OwnIdentityAttribute).isForwardedTo(localRequest.peer)).toBe(true);
+            expect(await consumptionController.attributes.isAttributeForwardedToPeer(forwardedAttribute!, localRequest.peer)).toBe(true);
             expect(forwardedAttribute!.content.owner).toStrictEqual(testAccount.identity.address);
         });
 
-        test("in case of a RelationshipAttribute, adds a ForwardedSharingDetails to the Attribute from the RequestItem for the peer of the Request", async function () {
+        test("in case of a RelationshipAttribute, adds ForwardingDetails to the Attribute from the RequestItem for the peer of the Request", async function () {
             const sharedAttributeContent = TestObjectFactory.createRelationshipAttribute({ owner: testAccount.identity.address });
             const sharedAttribute = await consumptionController.attributes.createOwnRelationshipAttribute({
                 content: sharedAttributeContent,
@@ -1317,7 +1305,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             await processor.applyIncomingResponseItem(responseItem, requestItem, localRequest);
 
             const forwardedAttribute = await consumptionController.attributes.getLocalAttribute(sharedAttribute.id);
-            expect((forwardedAttribute! as OwnRelationshipAttribute).isForwardedTo(localRequest.peer)).toBe(true);
+            expect(await consumptionController.attributes.isAttributeForwardedToPeer(forwardedAttribute!, localRequest.peer)).toBe(true);
             expect(forwardedAttribute!.content.owner).toStrictEqual(testAccount.identity.address);
             expect((forwardedAttribute! as OwnRelationshipAttribute).peer).toStrictEqual(aThirdParty);
         });
@@ -1326,7 +1314,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             const sharedAttributeContent = TestObjectFactory.createIdentityAttribute({ owner: testAccount.identity.address });
             const sharedAttribute = await consumptionController.attributes.createOwnIdentityAttribute({ content: sharedAttributeContent });
 
-            await consumptionController.attributes.addForwardedSharingDetailsToAttribute(
+            await consumptionController.attributes.addForwardingDetailsToAttribute(
                 sharedAttribute,
                 CoreAddress.from("did:e:a-domain:dids:anidentity"),
                 CoreId.from("aSourceReferenceId")
@@ -1345,8 +1333,9 @@ describe("ShareAttributeRequestItemProcessor", function () {
             await processor.applyIncomingResponseItem(responseItem, requestItem, localRequest);
 
             const forwardedAttribute = (await consumptionController.attributes.getLocalAttribute(sharedAttribute.id)) as OwnIdentityAttribute;
-            expect(forwardedAttribute.isForwardedTo(localRequest.peer, true)).toBe(true);
-            expect(forwardedAttribute.forwardedSharingDetails![0].deletionInfo).toBeUndefined();
+            expect(await consumptionController.attributes.isAttributeForwardedToPeer(forwardedAttribute, localRequest.peer)).toBe(true);
+            const forwardingDetails = await consumptionController.attributes.getForwardingDetailsForAttribute(forwardedAttribute);
+            expect(forwardingDetails[0].deletionInfo).toBeUndefined();
         });
     });
 

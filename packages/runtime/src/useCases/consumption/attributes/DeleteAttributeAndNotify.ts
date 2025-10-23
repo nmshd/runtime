@@ -50,7 +50,7 @@ export class DeleteAttributeAndNotifyUseCase extends UseCase<DeleteAttributeAndN
         const attribute = await this.attributesController.getLocalAttribute(CoreId.from(request.attributeId));
         if (!attribute) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
 
-        const validationResult = await this.attributesController.validateFullAttributeDeletionProcess(attribute);
+        const validationResult = await this.attributesController.validateFullAttributeDeletionProcess(attribute.id);
         if (validationResult.isError()) return Result.fail(validationResult.error);
 
         const peersOfAttributeResult = await this.getPeersOfAttributeToNotify(attribute);
@@ -96,7 +96,7 @@ export class DeleteAttributeAndNotifyUseCase extends UseCase<DeleteAttributeAndN
     }
 
     private async getForwardingPeersOfAttribute(attribute: OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute): Promise<Result<CoreAddress[]>> {
-        const forwardingPeers = attribute.getForwardingPeers(true);
+        const forwardingPeers = await this.attributesController.getForwardingPeers(attribute, true);
         if (forwardingPeers.length === 0) return Result.ok([]);
 
         const queryForRelationshipsToNotify = {

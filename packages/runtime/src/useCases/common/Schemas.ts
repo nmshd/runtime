@@ -13689,8 +13689,36 @@ export const GetAttributesRequest: any = {
                             }
                         }
                     ]
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}
+
+export const GetForwardingDetailsForAttributeRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetForwardingDetailsForAttributeRequest",
+    "definitions": {
+        "GetForwardingDetailsForAttributeRequest": {
+            "type": "object",
+            "properties": {
+                "attributeId": {
+                    "type": "string"
                 },
-                "forwardedSharingDetails": {
+                "query": {
+                    "$ref": "#/definitions/GetForwardingDetailsForAttributeRequestQuery"
+                }
+            },
+            "required": [
+                "attributeId"
+            ],
+            "additionalProperties": false
+        },
+        "GetForwardingDetailsForAttributeRequestQuery": {
+            "type": "object",
+            "properties": {
+                "peer": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -13703,7 +13731,7 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
-                "forwardedSharingDetails.peer": {
+                "sourceReference": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -13716,7 +13744,7 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
-                "forwardedSharingDetails.sourceReference": {
+                "sharedAt": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -13729,7 +13757,7 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
-                "forwardedSharingDetails.sharedAt": {
+                "deletionInfo": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -13742,7 +13770,7 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
-                "forwardedSharingDetails.deletionInfo": {
+                "deletionInfo.deletionStatus": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -13755,20 +13783,7 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
-                "forwardedSharingDetails.deletionInfo.deletionStatus": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "forwardedSharingDetails.deletionInfo.deletionDate": {
+                "deletionInfo.deletionDate": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -13971,84 +13986,6 @@ export const GetOwnAttributesSharedWithPeerRequest: any = {
                             }
                         }
                     ]
-                },
-                "forwardedSharingDetails": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "forwardedSharingDetails.sourceReference": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "forwardedSharingDetails.sharedAt": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "forwardedSharingDetails.deletionInfo": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "forwardedSharingDetails.deletionInfo.deletionStatus": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "forwardedSharingDetails.deletionInfo.deletionDate": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
                 }
             },
             "additionalProperties": false
@@ -14109,97 +14046,6 @@ export const GetOwnIdentityAttributesRequest: any = {
                     ]
                 },
                 "content.value.@type": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "forwardedSharingDetails": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "forwardedSharingDetails.peer": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "forwardedSharingDetails.sourceReference": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "forwardedSharingDetails.sharedAt": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "forwardedSharingDetails.deletionInfo": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "forwardedSharingDetails.deletionInfo.deletionStatus": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "forwardedSharingDetails.deletionInfo.deletionDate": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -14401,97 +14247,6 @@ export const GetPeerAttributesRequest: any = {
                     ]
                 },
                 "deletionInfo.deletionDate": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "forwardedSharingDetails": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "forwardedSharingDetails.peer": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "forwardedSharingDetails.sourceReference": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "forwardedSharingDetails.sharedAt": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "forwardedSharingDetails.deletionInfo": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "forwardedSharingDetails.deletionInfo.deletionStatus": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "forwardedSharingDetails.deletionInfo.deletionDate": {
                     "anyOf": [
                         {
                             "type": "string"

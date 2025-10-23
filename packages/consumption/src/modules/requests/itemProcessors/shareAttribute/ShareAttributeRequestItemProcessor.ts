@@ -47,7 +47,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
         }
 
         if (recipient) {
-            if (foundAttribute.isForwardedTo(recipient, true)) {
+            if (await this.consumptionController.attributes.isAttributeForwardedToPeer(foundAttribute, recipient, true)) {
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.invalidRequestItem(
                         `The Attribute with the given attributeId '${requestItem.attributeId.toString()}' is already shared with the peer.`
@@ -234,11 +234,17 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             return;
         }
 
-        if (responseItem instanceof AttributeAlreadySharedAcceptResponseItem && sharedAttribute.hasDeletionStatusUnequalDeletedByRecipient(requestInfo.peer)) {
+        if (!(responseItem instanceof AttributeAlreadySharedAcceptResponseItem)) {
+            await this.consumptionController.attributes.addForwardingDetailsToAttribute(sharedAttribute, requestInfo.peer, requestInfo.id);
+            return;
+        }
+
+        const forwardingDetails = await this.consumptionController.attributes.getForwardingDetailsForPeer(sharedAttribute, requestInfo.peer, true);
+        if (forwardingDetails) {
             await this.consumptionController.attributes.setForwardedDeletionInfoOfAttribute(sharedAttribute, undefined, requestInfo.peer, true);
             return;
         }
 
-        await this.consumptionController.attributes.addForwardedSharingDetailsToAttribute(sharedAttribute, requestInfo.peer, requestInfo.id);
+        await this.consumptionController.attributes.addForwardingDetailsToAttribute(sharedAttribute, requestInfo.peer, requestInfo.id);
     }
 }

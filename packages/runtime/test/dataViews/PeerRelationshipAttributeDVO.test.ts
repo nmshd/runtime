@@ -74,7 +74,7 @@ describe("PeerRelationshipAttributeDVO", () => {
         expect(dvo.deletionStatus).toBe(peerRelationshipAttribute.deletionInfo?.deletionStatus);
         expect(dvo.deletionDate).toBe(peerRelationshipAttribute.deletionInfo?.deletionDate);
         expect(dvo.forwardingPeers).toBeUndefined();
-        expect(dvo.forwardedSharingDetails).toBeUndefined();
+        expect(dvo.forwardingDetails).toBeUndefined();
         expect(dvo.valueType).toBe(peerRelationshipAttribute.content.value["@type"]);
         expect(dvo.wasViewedAt).toBeUndefined();
     });
@@ -103,6 +103,8 @@ describe("PeerRelationshipAttributeDVO", () => {
                 mustBeAccepted: true
             })
         );
+
+        const forwardingDetails = (await services1.consumption.attributes.getForwardingDetailsForAttribute({ attributeId: peerRelationshipAttribute.id })).value;
 
         const dto = (await services1.consumption.attributes.getAttribute({ id: peerRelationshipAttribute.id })).value;
         const dvo = (await services1.expander.expandLocalAttributeDTO(dto)) as PeerRelationshipAttributeDVO;
@@ -134,12 +136,12 @@ describe("PeerRelationshipAttributeDVO", () => {
         expect(dvo.sourceReference).toBe(peerRelationshipAttribute.sourceReference);
         expect(dvo.deletionStatus).toBe(peerRelationshipAttribute.deletionInfo?.deletionStatus);
         expect(dvo.deletionDate).toBe(peerRelationshipAttribute.deletionInfo?.deletionDate);
-        expect(dvo.forwardingPeers).toStrictEqual([services3.address]);
-        expect(dvo.forwardedSharingDetails).toStrictEqual([
+        expect(dvo.forwardingPeers![0].id).toStrictEqual(services3.address);
+        expect(dvo.forwardingDetails).toStrictEqual([
             {
                 peer: services3.address,
-                sourceReference: peerRelationshipAttribute.forwardedSharingDetails![0].sourceReference,
-                sharedAt: peerRelationshipAttribute.forwardedSharingDetails![0].sharedAt
+                sourceReference: forwardingDetails[0].sourceReference,
+                sharedAt: forwardingDetails[0].sharedAt
             }
         ]);
         expect(dvo.valueType).toBe(peerRelationshipAttribute.content.value["@type"]);

@@ -198,9 +198,7 @@ describe("CreateIdentityAttributeRequestItemDVO", () => {
         const responseItem = response!.content.items[0] as CreateAttributeAcceptResponseItemDVO;
         expect(requestItemDVO.response).toStrictEqual(responseItem);
 
-        const attributeResult = await rConsumptionServices.attributes.getAttributes({
-            query: { "content.value.@type": "DisplayName", "forwardedSharingDetails.peer": dvo.createdBy.id }
-        });
+        const attributeResult = await rConsumptionServices.attributes.getOwnAttributesSharedWithPeer({ peer: dvo.createdBy.id, query: { "content.value.@type": "DisplayName" } });
         expect(attributeResult).toBeSuccessful();
         expect(attributeResult.value).toHaveLength(1);
         expect(attributeResult.value[0].id).toBeDefined();

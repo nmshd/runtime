@@ -58,7 +58,7 @@ export class NotifyPeerAboutOwnIdentityAttributeSuccessionUseCase extends UseCas
             return Result.fail(RuntimeErrors.attributes.ownIdentityAttributeHasAlreadyBeenSharedWithPeer(request.attributeId, peerAddress));
         }
 
-        const latestSharedVersionIsSuccessor = await this.attributeController.isSubsequentInSuccession(attribute, latestVersionSharedWithPeer);
+        const latestSharedVersionIsSuccessor = await this.attributeController.isSubsequentInSuccession(attribute.id, latestVersionSharedWithPeer.id);
         if (latestSharedVersionIsSuccessor) {
             return Result.fail(
                 RuntimeErrors.attributes.successorOfOwnIdentityAttributeHasAlreadyBeenSharedWithPeer(request.attributeId, latestVersionSharedWithPeer.id, peerAddress)
@@ -66,7 +66,7 @@ export class NotifyPeerAboutOwnIdentityAttributeSuccessionUseCase extends UseCas
         }
 
         const notificationId = await ConsumptionIds.notification.generate();
-        const updatedAttribute = await this.attributeController.addForwardedSharingDetailsToAttribute(attribute, peerAddress, notificationId);
+        const updatedAttribute = await this.attributeController.addForwardingDetailsToAttribute(attribute, peerAddress, notificationId);
 
         const notificationItem = PeerAttributeSucceededNotificationItem.from({
             predecessorId: latestVersionSharedWithPeer.id,

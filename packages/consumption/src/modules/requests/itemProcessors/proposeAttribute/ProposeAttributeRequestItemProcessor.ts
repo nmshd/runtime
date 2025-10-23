@@ -252,7 +252,8 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
 
             const isLatestSharedVersion = latestSharedVersion[0]?.id.toString() === existingAttribute.id.toString();
             if (isLatestSharedVersion) {
-                if (latestSharedVersion[0].hasDeletionStatusUnequalDeletedByRecipient(requestInfo.peer)) {
+                const forwardingDetails = await this.consumptionController.attributes.getForwardingDetailsForPeer(latestSharedVersion[0], requestInfo.peer, true);
+                if (forwardingDetails) {
                     await this.consumptionController.attributes.setForwardedDeletionInfoOfAttribute(latestSharedVersion[0], undefined, requestInfo.peer, true);
                 }
 
@@ -262,7 +263,7 @@ export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProc
                 });
             }
 
-            const updatedAttribute = await this.consumptionController.attributes.addForwardedSharingDetailsToAttribute(existingAttribute, requestInfo.peer, requestInfo.id);
+            const updatedAttribute = await this.consumptionController.attributes.addForwardingDetailsToAttribute(existingAttribute, requestInfo.peer, requestInfo.id);
 
             const wasNotSharedBefore = latestSharedVersion.length === 0;
             if (wasNotSharedBefore) {

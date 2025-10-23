@@ -314,9 +314,10 @@ describe("TransferFileOwnershipRequestItemProcessor", function () {
             expect(claimedFile!.toFileReference(recipientAccountController.config.baseUrl)).toStrictEqual(senderFileReference);
 
             const ownIdentityAttribute = (await recipientConsumptionController.attributes.getLocalAttribute(responseItem.attributeId)) as OwnIdentityAttribute;
-            expect(ownIdentityAttribute.forwardedSharingDetails).toHaveLength(1);
-            expect(ownIdentityAttribute.forwardedSharingDetails![0].peer).toStrictEqual(sender);
-            expect(ownIdentityAttribute.forwardedSharingDetails![0].sourceReference).toStrictEqual(incomingRequest.id);
+            expect(ownIdentityAttribute.numberOfForwards).toBe(1);
+            const forwardingDetails = await recipientConsumptionController.attributes.getForwardingDetailsForAttribute(ownIdentityAttribute);
+            expect(forwardingDetails[0].peer).toStrictEqual(sender);
+            expect(forwardingDetails[0].sourceReference).toStrictEqual(incomingRequest.id);
             expect(ownIdentityAttribute.content.value).toBeInstanceOf(IdentityFileReference);
             expect((ownIdentityAttribute.content.value as IdentityFileReference).value).toStrictEqual(senderFileReference.truncate());
             expect(ownIdentityAttribute.content.tags).toStrictEqual(["x:tag"]);

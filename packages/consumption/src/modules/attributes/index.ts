@@ -1,5 +1,6 @@
 export * from "./AttributesController";
 export * from "./events";
+export * from "./local/AttributeForwardingDetails";
 export * from "./local/AttributeTagCollection";
 export * from "./local/attributeTypes/LocalAttribute";
 export * from "./local/attributeTypes/OwnIdentityAttribute";
@@ -8,5 +9,4 @@ export * from "./local/attributeTypes/PeerIdentityAttribute";
 export * from "./local/attributeTypes/PeerRelationshipAttribute";
 export * from "./local/attributeTypes/ThirdPartyRelationshipAttribute";
 export * from "./local/deletionInfos";
-export * from "./local/sharingDetails";
 export * from "./local/successorParams";

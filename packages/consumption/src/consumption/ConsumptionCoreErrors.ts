@@ -2,10 +2,6 @@ import { ApplicationError } from "@js-soft/ts-utils";
 import { CoreAddress, CoreError, CoreId } from "@nmshd/core-types";
 
 class Attributes {
-    public attributeDoesNotExist() {
-        return new CoreError("error.consumption.attributes.attributeDoesNotExist", "The specified Attribute does not exist.");
-    }
-
     public alreadyForwarded(attributeId: CoreId, peer: CoreAddress) {
         return new CoreError("error.consumption.attributes.alreadyForwarded", `The Attribute '${attributeId.toString()} is already forwarded to peer '${peer.toString()}'.`);
     }
@@ -96,10 +92,10 @@ class Attributes {
         return new CoreError("error.consumption.attributes.cannotSetAttributeDeletionInfo", errorMessage);
     }
 
-    public cannotSetForwardedSharingDetailsForPeer(attributeId: string | CoreId, peer: CoreAddress | string) {
+    public cannotSetForwardingDetailsForPeer(attributeId: string | CoreId, peer: CoreAddress | string) {
         return new CoreError(
-            "error.consumption.attributes.cannotSetForwardedSharingDetailsForPeer",
-            `You cannot set the forwardedSharingDetails of Attribute '${attributeId.toString()}' for peer '${peer.toString()}' since they are the peer of the Relationship in whose context the RelationshipAttribute exists.`
+            "error.consumption.attributes.cannotSetForwardingDetailsForPeer",
+            `You cannot set the ForwardingDetails of Attribute '${attributeId.toString()}' for peer '${peer.toString()}' since they are the peer of the Relationship in whose context the RelationshipAttribute exists.`
         );
     }
 

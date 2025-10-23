@@ -202,7 +202,7 @@ export class GivenSteps {
 
         const createdOwnIdentityAttribute = await this.context.consumptionController.attributes.createOwnIdentityAttribute({ content: attribute });
 
-        const forwardedOwnIdentityAttribute = await this.context.consumptionController.attributes.addForwardedSharingDetailsToAttribute(
+        const forwardedOwnIdentityAttribute = await this.context.consumptionController.attributes.addForwardingDetailsToAttribute(
             createdOwnIdentityAttribute,
             this.context.translateTestIdentity(params.peer)!,
             CoreId.from("aSourceReferenceId")
@@ -237,7 +237,7 @@ export class GivenSteps {
 
         const createdOwnIdentityAttribute = await this.context.consumptionController.attributes.createOwnIdentityAttribute({ content: attribute });
 
-        const forwardedOwnIdentityAttribute = await this.context.consumptionController.attributes.addForwardedSharingDetailsToAttribute(
+        const forwardedOwnIdentityAttribute = await this.context.consumptionController.attributes.addForwardingDetailsToAttribute(
             createdOwnIdentityAttribute,
             this.context.translateTestIdentity(params.peer)!,
             CoreId.from("aSourceReferenceId")
@@ -306,8 +306,11 @@ export class ThenSteps {
 
         expect(createdForwardedOwnIdentityAttribute).toBeDefined();
         expect(createdForwardedOwnIdentityAttribute instanceof OwnIdentityAttribute).toBe(true);
-        expect(createdForwardedOwnIdentityAttribute.forwardedSharingDetails).toBeDefined();
-        expect(createdForwardedOwnIdentityAttribute.isForwardedTo(this.context.peerAddress)).toBe(true);
+        expect(createdForwardedOwnIdentityAttribute.numberOfForwards).toBe(1);
+
+        const isForwarded = await this.context.consumptionController.attributes.isAttributeForwardedToPeer(createdForwardedOwnIdentityAttribute, this.context.peerAddress);
+        expect(isForwarded).toBe(true);
+
         if (value) expect(createdForwardedOwnIdentityAttribute.content.value.toJSON()).toStrictEqual(value);
     }
 
@@ -329,8 +332,10 @@ export class ThenSteps {
         expect(forwardedOwnIdentityAttribute).toBeDefined();
         expect(forwardedOwnIdentityAttribute.id.toString()).toBe(attribute.id.toString());
         expect(forwardedOwnIdentityAttribute.content.toJSON()).toStrictEqual(attribute.content.toJSON());
-        expect(forwardedOwnIdentityAttribute.forwardedSharingDetails).toBeDefined();
-        expect(forwardedOwnIdentityAttribute.isForwardedTo(this.context.peerAddress)).toBe(true);
+        expect(forwardedOwnIdentityAttribute.numberOfForwards).toBeGreaterThanOrEqual(1);
+
+        const isForwarded = await this.context.consumptionController.attributes.isAttributeForwardedToPeer(forwardedOwnIdentityAttribute, this.context.peerAddress);
+        expect(isForwarded).toBe(true);
     }
 
     public async theOwnIdentityAttributeIsDeletedByRecipient(attribute: OwnIdentityAttribute, peer: CoreAddress): Promise<void> {
@@ -360,7 +365,7 @@ export class ThenSteps {
 
         expect(createdAttribute).toBeDefined();
         expect(createdAttribute.peer.toString()).toStrictEqual(this.context.peerAddress.toString());
-        expect(createdAttribute.forwardedSharingDetails).toBeUndefined();
+        expect(createdAttribute.numberOfForwards).toBe(0);
     }
 
     public theIdOfTheAlreadySharedAttributeMatches(id: CoreId): Promise<void> {
