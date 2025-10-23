@@ -8,40 +8,40 @@ new GenericValueTest().runParametrized({
     typeClass: StreetAddress,
     expectedJSON: {
         "@type": "StreetAddress",
-        recipient: "Hugo Becker",
-        street: "Luisenstr.",
-        houseNo: "7",
-        zipCode: "76646",
-        city: "Bruchsal",
+        recipient: "aRecipient",
+        street: "aStreet",
+        houseNo: "1",
+        zipCode: "12345",
+        city: "aCity",
         country: CountryAlpha2.DE
     },
     valueJSON: {
         "@type": "StreetAddress",
-        recipient: "Hugo Becker",
-        street: "Luisenstr.",
-        houseNo: "7",
-        zipCode: "76646",
-        city: "Bruchsal",
+        recipient: "aRecipient",
+        street: "aStreet",
+        houseNo: "1",
+        zipCode: "12345",
+        city: "aCity",
         country: CountryAlpha2.DE
     },
     valueVerboseJSON: {
         "@type": "StreetAddress",
-        recipient: "Hugo Becker",
-        street: { value: "Luisenstr." },
-        houseNo: { value: "7" },
-        zipCode: { value: "76646" },
-        city: { value: "Bruchsal" },
+        recipient: "aRecipient",
+        street: { value: "aStreet" },
+        houseNo: { value: "1" },
+        zipCode: { value: "12345" },
+        city: { value: "aCity" },
         country: { value: CountryAlpha2.DE }
     },
     valueInterface: {
-        recipient: "Hugo Becker",
-        street: Street.fromAny("Luisenstr."),
-        houseNo: HouseNumber.fromAny("7"),
-        zipCode: ZipCode.fromAny("76646"),
-        city: City.fromAny("Bruchsal"),
+        recipient: "aRecipient",
+        street: Street.fromAny("aStreet"),
+        houseNo: HouseNumber.fromAny("1"),
+        zipCode: ZipCode.fromAny("12345"),
+        city: City.fromAny("aCity"),
         country: Country.fromAny(CountryAlpha2.DE)
     },
-    valueString: "Hugo Becker\nLuisenstr. 7\n76646 Bruchsal\nGermany"
+    valueString: "aRecipient\naStreet 1\n12345 aCity\nGermany"
 });
 
 new GenericValueTest().runParametrized({
@@ -50,44 +50,44 @@ new GenericValueTest().runParametrized({
     typeClass: StreetAddress,
     expectedJSON: {
         "@type": "StreetAddress",
-        recipient: "Hugo Becker",
-        street: "Luisenstr.",
-        houseNo: "7",
-        zipCode: "76646",
-        city: "Bruchsal",
+        recipient: "aRecipient",
+        street: "aStreet",
+        houseNo: "1",
+        zipCode: "12345",
+        city: "aCity",
         country: CountryAlpha2.DE,
-        state: "Baden-Württemberg"
+        state: "aState"
     },
     valueJSON: {
         "@type": "StreetAddress",
-        recipient: "Hugo Becker",
-        street: "Luisenstr.",
-        houseNo: "7",
-        zipCode: "76646",
-        city: "Bruchsal",
+        recipient: "aRecipient",
+        street: "aStreet",
+        houseNo: "1",
+        zipCode: "12345",
+        city: "aCity",
         country: CountryAlpha2.DE,
-        state: "Baden-Württemberg"
+        state: "aState"
     },
     valueVerboseJSON: {
         "@type": "StreetAddress",
-        recipient: "Hugo Becker",
-        street: { value: "Luisenstr." },
-        houseNo: { value: "7" },
-        zipCode: { value: "76646" },
-        city: { value: "Bruchsal" },
+        recipient: "aRecipient",
+        street: { value: "aStreet" },
+        houseNo: { value: "1" },
+        zipCode: { value: "12345" },
+        city: { value: "aCity" },
         country: { value: CountryAlpha2.DE },
-        state: { value: "Baden-Württemberg" }
+        state: { value: "aState" }
     },
     valueInterface: {
-        recipient: "Hugo Becker",
-        street: Street.fromAny("Luisenstr."),
-        houseNo: HouseNumber.fromAny("7"),
-        zipCode: ZipCode.fromAny("76646"),
-        city: City.fromAny("Bruchsal"),
+        recipient: "aRecipient",
+        street: Street.fromAny("aStreet"),
+        houseNo: HouseNumber.fromAny("1"),
+        zipCode: ZipCode.fromAny("12345"),
+        city: City.fromAny("aCity"),
         country: Country.fromAny(CountryAlpha2.DE),
-        state: State.fromAny("Baden-Württemberg")
+        state: State.fromAny("aState")
     },
-    valueString: "Hugo Becker\nLuisenstr. 7\n76646 Bruchsal\nBaden-Württemberg\nGermany"
+    valueString: "aRecipient\naStreet 1\n12345 aCity\naState\nGermany"
 });
 
 new GenericValueTest().runParametrized({
@@ -96,36 +96,36 @@ new GenericValueTest().runParametrized({
     typeClass: PostOfficeBoxAddress,
     expectedJSON: {
         "@type": "PostOfficeBoxAddress",
-        recipient: "Hugo Becker",
-        boxId: "Postfach 7788",
-        zipCode: "76646",
-        city: "Bruchsal",
+        recipient: "aRecipient",
+        boxId: "aBoxId",
+        zipCode: "12345",
+        city: "aCity",
         country: CountryAlpha2.DE
     },
     valueJSON: {
         "@type": "PostOfficeBoxAddress",
-        recipient: "Hugo Becker",
-        boxId: "Postfach 7788",
-        zipCode: "76646",
-        city: "Bruchsal",
+        recipient: "aRecipient",
+        boxId: "aBoxId",
+        zipCode: "12345",
+        city: "aCity",
         country: CountryAlpha2.DE
     },
     valueVerboseJSON: {
         "@type": "PostOfficeBoxAddress",
-        recipient: "Hugo Becker",
-        boxId: "Postfach 7788",
-        zipCode: { value: "76646" },
-        city: { value: "Bruchsal" },
+        recipient: "aRecipient",
+        boxId: "aBoxId",
+        zipCode: { value: "12345" },
+        city: { value: "aCity" },
         country: { value: CountryAlpha2.DE }
     },
     valueInterface: {
-        recipient: "Hugo Becker",
-        boxId: "Postfach 7788",
-        zipCode: ZipCode.fromAny("76646"),
-        city: City.fromAny("Bruchsal"),
+        recipient: "aRecipient",
+        boxId: "aBoxId",
+        zipCode: ZipCode.fromAny("12345"),
+        city: City.fromAny("aCity"),
         country: Country.fromAny(CountryAlpha2.DE)
     },
-    valueString: "Hugo Becker\nPostfach 7788\n76646 Bruchsal\nGermany"
+    valueString: "aRecipient\naBoxId\n12345 aCity\nGermany"
 });
 
 new GenericValueTest().runParametrized({
@@ -134,40 +134,40 @@ new GenericValueTest().runParametrized({
     typeClass: PostOfficeBoxAddress,
     expectedJSON: {
         "@type": "PostOfficeBoxAddress",
-        recipient: "Hugo Becker",
-        boxId: "Postfach 7788",
-        zipCode: "76646",
-        city: "Bruchsal",
+        recipient: "aRecipient",
+        boxId: "aBoxId",
+        zipCode: "12345",
+        city: "aCity",
         country: CountryAlpha2.DE,
-        state: "Baden-Württemberg"
+        state: "aState"
     },
     valueJSON: {
         "@type": "PostOfficeBoxAddress",
-        recipient: "Hugo Becker",
-        boxId: "Postfach 7788",
-        zipCode: "76646",
-        city: "Bruchsal",
+        recipient: "aRecipient",
+        boxId: "aBoxId",
+        zipCode: "12345",
+        city: "aCity",
         country: CountryAlpha2.DE,
-        state: "Baden-Württemberg"
+        state: "aState"
     },
     valueVerboseJSON: {
         "@type": "PostOfficeBoxAddress",
-        recipient: "Hugo Becker",
-        boxId: "Postfach 7788",
-        zipCode: { value: "76646" },
-        city: { value: "Bruchsal" },
+        recipient: "aRecipient",
+        boxId: "aBoxId",
+        zipCode: { value: "12345" },
+        city: { value: "aCity" },
         country: { value: CountryAlpha2.DE },
-        state: { value: "Baden-Württemberg" }
+        state: { value: "aState" }
     },
     valueInterface: {
-        recipient: "Hugo Becker",
-        boxId: "Postfach 7788",
-        zipCode: ZipCode.fromAny("76646"),
-        city: City.fromAny("Bruchsal"),
+        recipient: "aRecipient",
+        boxId: "aBoxId",
+        zipCode: ZipCode.fromAny("12345"),
+        city: City.fromAny("aCity"),
         country: Country.fromAny(CountryAlpha2.DE),
-        state: State.fromAny("Baden-Württemberg")
+        state: State.fromAny("aState")
     },
-    valueString: "Hugo Becker\nPostfach 7788\n76646 Bruchsal\nBaden-Württemberg\nGermany"
+    valueString: "aRecipient\naBoxId\n12345 aCity\naState\nGermany"
 });
 
 new GenericValueTest().runParametrized({
@@ -176,40 +176,40 @@ new GenericValueTest().runParametrized({
     typeClass: DeliveryBoxAddress,
     expectedJSON: {
         "@type": "DeliveryBoxAddress",
-        recipient: "Hugo Becker",
-        userId: "Postnummer 883989238",
-        deliveryBoxId: "Packstation 705",
-        zipCode: "76646",
-        city: "Bruchsal",
+        recipient: "aRecipient",
+        userId: "aUserId",
+        deliveryBoxId: "aDeliveryBoxId",
+        zipCode: "12345",
+        city: "aCity",
         country: CountryAlpha2.DE
     },
     valueJSON: {
         "@type": "DeliveryBoxAddress",
-        recipient: "Hugo Becker",
-        userId: "Postnummer 883989238",
-        deliveryBoxId: "Packstation 705",
-        zipCode: "76646",
-        city: "Bruchsal",
+        recipient: "aRecipient",
+        userId: "aUserId",
+        deliveryBoxId: "aDeliveryBoxId",
+        zipCode: "12345",
+        city: "aCity",
         country: CountryAlpha2.DE
     },
     valueVerboseJSON: {
         "@type": "DeliveryBoxAddress",
-        recipient: "Hugo Becker",
-        userId: "Postnummer 883989238",
-        deliveryBoxId: "Packstation 705",
-        zipCode: { value: "76646" },
-        city: { value: "Bruchsal" },
+        recipient: "aRecipient",
+        userId: "aUserId",
+        deliveryBoxId: "aDeliveryBoxId",
+        zipCode: { value: "12345" },
+        city: { value: "aCity" },
         country: { value: CountryAlpha2.DE }
     },
     valueInterface: {
-        recipient: "Hugo Becker",
-        userId: "Postnummer 883989238",
-        deliveryBoxId: "Packstation 705",
-        zipCode: ZipCode.fromAny("76646"),
-        city: City.fromAny("Bruchsal"),
+        recipient: "aRecipient",
+        userId: "aUserId",
+        deliveryBoxId: "aDeliveryBoxId",
+        zipCode: ZipCode.fromAny("12345"),
+        city: City.fromAny("aCity"),
         country: Country.fromAny(CountryAlpha2.DE)
     },
-    valueString: "Hugo Becker\nPostnummer 883989238\nPackstation 705\n76646 Bruchsal\nGermany"
+    valueString: "aRecipient\naUserId\naDeliveryBoxId\n12345 aCity\nGermany"
 });
 
 new GenericValueTest().runParametrized({
@@ -218,44 +218,44 @@ new GenericValueTest().runParametrized({
     typeClass: DeliveryBoxAddress,
     expectedJSON: {
         "@type": "DeliveryBoxAddress",
-        recipient: "Hugo Becker",
-        userId: "Postnummer 883989238",
-        deliveryBoxId: "Packstation 705",
-        zipCode: "76646",
-        city: "Bruchsal",
+        recipient: "aRecipient",
+        userId: "aUserId",
+        deliveryBoxId: "aDeliveryBoxId",
+        zipCode: "12345",
+        city: "aCity",
         country: CountryAlpha2.DE,
-        state: "Baden-Württemberg"
+        state: "aState"
     },
     valueJSON: {
         "@type": "DeliveryBoxAddress",
-        recipient: "Hugo Becker",
-        userId: "Postnummer 883989238",
-        deliveryBoxId: "Packstation 705",
-        zipCode: "76646",
-        city: "Bruchsal",
+        recipient: "aRecipient",
+        userId: "aUserId",
+        deliveryBoxId: "aDeliveryBoxId",
+        zipCode: "12345",
+        city: "aCity",
         country: CountryAlpha2.DE,
-        state: "Baden-Württemberg"
+        state: "aState"
     },
     valueVerboseJSON: {
         "@type": "DeliveryBoxAddress",
-        recipient: "Hugo Becker",
-        userId: "Postnummer 883989238",
-        deliveryBoxId: "Packstation 705",
-        zipCode: { value: "76646" },
-        city: { value: "Bruchsal" },
+        recipient: "aRecipient",
+        userId: "aUserId",
+        deliveryBoxId: "aDeliveryBoxId",
+        zipCode: { value: "12345" },
+        city: { value: "aCity" },
         country: { value: CountryAlpha2.DE },
-        state: { value: "Baden-Württemberg" }
+        state: { value: "aState" }
     },
     valueInterface: {
-        recipient: "Hugo Becker",
-        userId: "Postnummer 883989238",
-        deliveryBoxId: "Packstation 705",
-        zipCode: ZipCode.fromAny("76646"),
-        city: City.fromAny("Bruchsal"),
+        recipient: "aRecipient",
+        userId: "aUserId",
+        deliveryBoxId: "aDeliveryBoxId",
+        zipCode: ZipCode.fromAny("12345"),
+        city: City.fromAny("aCity"),
         country: Country.fromAny(CountryAlpha2.DE),
-        state: State.fromAny("Baden-Württemberg")
+        state: State.fromAny("aState")
     },
-    valueString: "Hugo Becker\nPostnummer 883989238\nPackstation 705\n76646 Bruchsal\nBaden-Württemberg\nGermany"
+    valueString: "aRecipient\naUserId\naDeliveryBoxId\n12345 aCity\naState\nGermany"
 });
 
 new GenericValueTest().runParametrized({
@@ -264,46 +264,46 @@ new GenericValueTest().runParametrized({
     typeClass: DeliveryBoxAddress,
     expectedJSON: {
         "@type": "DeliveryBoxAddress",
-        recipient: "Hugo Becker",
-        userId: "Postnummer 883989238",
+        recipient: "aRecipient",
+        userId: "aUserId",
         phoneNumber: "+49111222333444555",
-        deliveryBoxId: "Packstation 705",
-        zipCode: "76646",
-        city: "Bruchsal",
+        deliveryBoxId: "aDeliveryBoxId",
+        zipCode: "12345",
+        city: "aCity",
         country: CountryAlpha2.DE,
-        state: "Baden-Württemberg"
+        state: "aState"
     },
     valueJSON: {
         "@type": "DeliveryBoxAddress",
-        recipient: "Hugo Becker",
-        userId: "Postnummer 883989238",
+        recipient: "aRecipient",
+        userId: "aUserId",
         phoneNumber: "+49111222333444555",
-        deliveryBoxId: "Packstation 705",
-        zipCode: "76646",
-        city: "Bruchsal",
+        deliveryBoxId: "aDeliveryBoxId",
+        zipCode: "12345",
+        city: "aCity",
         country: CountryAlpha2.DE,
-        state: "Baden-Württemberg"
+        state: "aState"
     },
     valueVerboseJSON: {
         "@type": "DeliveryBoxAddress",
-        recipient: "Hugo Becker",
-        userId: "Postnummer 883989238",
+        recipient: "aRecipient",
+        userId: "aUserId",
         phoneNumber: { value: "+49111222333444555" },
-        deliveryBoxId: "Packstation 705",
-        zipCode: { value: "76646" },
-        city: { value: "Bruchsal" },
+        deliveryBoxId: "aDeliveryBoxId",
+        zipCode: { value: "12345" },
+        city: { value: "aCity" },
         country: { value: CountryAlpha2.DE },
-        state: { value: "Baden-Württemberg" }
+        state: { value: "aState" }
     },
     valueInterface: {
-        recipient: "Hugo Becker",
-        userId: "Postnummer 883989238",
+        recipient: "aRecipient",
+        userId: "aUserId",
         phoneNumber: PhoneNumber.fromAny("+49111222333444555"),
-        deliveryBoxId: "Packstation 705",
-        zipCode: ZipCode.fromAny("76646"),
-        city: City.fromAny("Bruchsal"),
+        deliveryBoxId: "aDeliveryBoxId",
+        zipCode: ZipCode.fromAny("12345"),
+        city: City.fromAny("aCity"),
         country: Country.fromAny(CountryAlpha2.DE),
-        state: State.fromAny("Baden-Württemberg")
+        state: State.fromAny("aState")
     },
-    valueString: "Hugo Becker\nPostnummer 883989238\n+49111222333444555\nPackstation 705\n76646 Bruchsal\nBaden-Württemberg\nGermany"
+    valueString: "aRecipient\naUserId\n+49111222333444555\naDeliveryBoxId\n12345 aCity\naState\nGermany"
 });

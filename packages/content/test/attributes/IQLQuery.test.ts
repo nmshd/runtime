@@ -20,9 +20,7 @@ describe("IQLQuery", function () {
     });
 
     test("can be created with creation hints", function () {
-        const hint: IQLQueryCreationHintsJSON = {
-            valueType: "ZipCode"
-        };
+        const hint: IQLQueryCreationHintsJSON = { valueType: "BirthDate" };
 
         const serializable = IQLQuery.from({
             queryString: validIqlQueries[0],
@@ -36,7 +34,7 @@ describe("IQLQuery", function () {
     test("can be created with creation hints that include tags", function () {
         const hint: IQLQueryCreationHintsJSON = {
             valueType: "GivenName",
-            tags: ["foo", "bar"]
+            tags: ["x:tag1", "x:tag2"]
         };
 
         const serializable = IQLQuery.from({

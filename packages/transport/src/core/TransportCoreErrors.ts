@@ -127,10 +127,6 @@ class Challenges {
 }
 
 class Datawallet {
-    public unsupportedModification(message: string) {
-        return new CoreError("error.transport.datawallet.unsupportedModification", message);
-    }
-
     public insufficientSupportedDatawalletVersion(supportedVersion: number, requiredVersion: number) {
         return new CoreError(
             "error.transport.datawallet.insufficientSupportedDatawalletVersion",

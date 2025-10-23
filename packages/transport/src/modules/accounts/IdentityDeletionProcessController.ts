@@ -1,12 +1,10 @@
 import { log } from "@js-soft/ts-utils";
-import { CoreId } from "@nmshd/core-types";
 import { ClientResult, ControllerName, DbCollectionName, TransportController } from "../../core";
 import { IdentityDeletionProcessStatusChangedEvent } from "../../events";
 import { AccountController } from "../accounts/AccountController";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
 import { BackboneIdentityDeletionProcess } from "./backbone/BackboneIdentityDeletionProcess";
 import { IdentityDeletionProcessClient } from "./backbone/IdentityDeletionProcessClient";
-import { CachedIdentityDeletionProcess } from "./data/CachedIdentityDeletionProcess";
 import { IdentityDeletionProcess } from "./data/IdentityDeletionProcess";
 import { IdentityDeletionProcessStatus } from "./data/IdentityDeletionProcessStatus";
 
@@ -37,7 +35,7 @@ export class IdentityDeletionProcessController extends TransportController {
         return newIdentityDeletionProcess;
     }
 
-    public async updateCacheOfExistingIdentityDeletionProcess(identityDeletionProcess: string): Promise<IdentityDeletionProcess> {
+    public async updateExistingIdentityDeletionProcessFromBackbone(identityDeletionProcess: string): Promise<IdentityDeletionProcess> {
         const identityDeletionProcessJSONResponse = await this.identityDeletionProcessClient.getIdentityDeletionProcess(identityDeletionProcess);
         const newIdentityDeletionProcess = this.createIdentityDeletionProcessFromBackboneResponse(identityDeletionProcessJSONResponse);
 
@@ -52,11 +50,7 @@ export class IdentityDeletionProcessController extends TransportController {
     }
 
     public createIdentityDeletionProcessFromBackboneResponse(response: ClientResult<BackboneIdentityDeletionProcess>): IdentityDeletionProcess {
-        const { id, ...cache } = response.value;
-
-        const identityDeletionProcess = IdentityDeletionProcess.from({ id: id });
-        const cachedIdentityDeletionProcess = CachedIdentityDeletionProcess.from(cache);
-        identityDeletionProcess.setCache(cachedIdentityDeletionProcess);
+        const identityDeletionProcess = IdentityDeletionProcess.from({ ...response.value });
         return identityDeletionProcess;
     }
 
@@ -89,27 +83,12 @@ export class IdentityDeletionProcessController extends TransportController {
             .filter((identityDeletionProcess) => !!identityDeletionProcess);
     }
 
-    public async getIdentityDeletionProcessByStatus(...identityDeletionProcessStatus: IdentityDeletionProcessStatus[]): Promise<IdentityDeletionProcess | undefined> {
-        const identityDeletionProcess = await this.identityDeletionProcessCollection.findOne({
-            $or: identityDeletionProcessStatus.map((status) => {
-                return { "cache.status": status };
-            })
-        });
+    public async getIdentityDeletionProcessByStatus(
+        ...identityDeletionProcessStatus: [IdentityDeletionProcessStatus, ...IdentityDeletionProcessStatus[]]
+    ): Promise<IdentityDeletionProcess | undefined> {
+        const query: any = { $or: identityDeletionProcessStatus.map((status) => ({ status: status })) };
+
+        const identityDeletionProcess = await this.identityDeletionProcessCollection.findOne(query);
         return identityDeletionProcess ? IdentityDeletionProcess.from(identityDeletionProcess) : undefined;
-    }
-
-    public async fetchCaches(ids: CoreId[]): Promise<{ id: CoreId; cache: CachedIdentityDeletionProcess }[]> {
-        if (ids.length === 0) return [];
-        const getIdentityDeletionPromises = ids.map((id) => this.identityDeletionProcessClient.getIdentityDeletionProcess(id.toString()));
-        const backboneTokens: { id: CoreId; cache: CachedIdentityDeletionProcess }[] = [];
-
-        const identityDeletionProcesses = await Promise.all(getIdentityDeletionPromises);
-
-        for (const identityDeletionProcess of identityDeletionProcesses) {
-            const { id, ...cache } = identityDeletionProcess.value;
-            backboneTokens.push({ id: CoreId.from(id), cache: CachedIdentityDeletionProcess.from(cache) });
-        }
-
-        return backboneTokens;
     }
 }

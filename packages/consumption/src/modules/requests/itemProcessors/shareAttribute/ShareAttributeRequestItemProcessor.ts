@@ -1,4 +1,5 @@
 import {
+    AcceptResponseItem,
     AttributeAlreadySharedAcceptResponseItem,
     IdentityAttribute,
     RejectResponseItem,
@@ -6,14 +7,13 @@ import {
     RelationshipAttributeConfidentiality,
     Request,
     ResponseItemResult,
-    ShareAttributeAcceptResponseItem,
     ShareAttributeRequestItem
 } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { RelationshipStatus } from "@nmshd/transport";
 import _ from "lodash";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { LocalAttributeDeletionStatus } from "../../../attributes";
+import { OwnIdentityAttribute, OwnRelationshipAttribute, PeerRelationshipAttribute, ReceivedAttributeDeletionStatus } from "../../../attributes";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
@@ -21,156 +21,135 @@ import { LocalRequestInfo } from "../IRequestItemProcessor";
 
 export class ShareAttributeRequestItemProcessor extends GenericRequestItemProcessor<ShareAttributeRequestItem> {
     public override async canCreateOutgoingRequestItem(requestItem: ShareAttributeRequestItem, _request: Request, recipient?: CoreAddress): Promise<ValidationResult> {
-        const foundAttribute = await this.consumptionController.attributes.getLocalAttribute(requestItem.sourceAttributeId);
+        const foundAttribute = await this.consumptionController.attributes.getLocalAttribute(requestItem.attributeId);
 
         if (!foundAttribute) {
             return ValidationResult.error(
+                ConsumptionCoreErrors.requests.invalidRequestItem(`The Attribute with the given attributeId '${requestItem.attributeId.toString()}' could not be found.`)
+            );
+        }
+
+        if (!(foundAttribute instanceof OwnIdentityAttribute || foundAttribute instanceof OwnRelationshipAttribute || foundAttribute instanceof PeerRelationshipAttribute)) {
+            return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidRequestItem(
-                    `The Attribute with the given sourceAttributeId '${requestItem.sourceAttributeId.toString()}' could not be found.`
+                    `The Attribute with the given attributeId '${requestItem.attributeId.toString()}' is not an OwnIdentityAttribute, an OwnRelationshipAttribute or a PeerRelationshipAttribute.`
                 )
             );
         }
 
         const requestItemAttributeJSON = requestItem.attribute.toJSON();
-
         if (!_.isEqual(foundAttribute.content.toJSON(), requestItemAttributeJSON)) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidRequestItem(
-                    `The Attribute with the given sourceAttributeId '${requestItem.sourceAttributeId.toString()}' does not match the given Attribute.`
+                    `The Attribute with the given attributeId '${requestItem.attributeId.toString()}' does not match the given Attribute.`
                 )
             );
         }
 
-        if (requestItem.attribute instanceof IdentityAttribute && this.accountController.identity.isMe(requestItem.attribute.owner)) {
-            if (foundAttribute.isShared()) {
+        if (recipient) {
+            if (await this.consumptionController.attributes.isAttributeForwardedToPeer(foundAttribute, recipient, true)) {
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.invalidRequestItem(
-                        "The provided IdentityAttribute is a shared copy of a RepositoryAttribute. You can only share RepositoryAttributes."
+                        `The Attribute with the given attributeId '${requestItem.attributeId.toString()}' is already shared with the peer.`
                     )
                 );
             }
 
-            if (recipient) {
-                const query = {
-                    "shareInfo.sourceAttribute": requestItem.sourceAttributeId.toString(),
-                    "shareInfo.peer": recipient.toString(),
-                    "deletionInfo.deletionStatus": { $nin: [LocalAttributeDeletionStatus.DeletedByPeer, LocalAttributeDeletionStatus.ToBeDeletedByPeer] }
-                };
-
-                if ((await this.consumptionController.attributes.getLocalAttributes(query)).length > 0) {
-                    return ValidationResult.error(
-                        ConsumptionCoreErrors.requests.invalidRequestItem(
-                            `The IdentityAttribute with the given sourceAttributeId '${requestItem.sourceAttributeId.toString()}' is already shared with the peer.`
-                        )
-                    );
-                }
-
-                const ownSharedIdentityAttributeSuccessors = await this.consumptionController.attributes.getSharedSuccessorsOfAttribute(foundAttribute, {
-                    "shareInfo.peer": recipient.toString(),
-                    "deletionInfo.deletionStatus": { $nin: [LocalAttributeDeletionStatus.DeletedByPeer, LocalAttributeDeletionStatus.ToBeDeletedByPeer] }
-                });
-
-                if (ownSharedIdentityAttributeSuccessors.length > 0) {
-                    return ValidationResult.error(
-                        ConsumptionCoreErrors.requests.invalidRequestItem(
-                            `The provided IdentityAttribute is outdated. Its successor '${ownSharedIdentityAttributeSuccessors[0].shareInfo?.sourceAttribute}' is already shared with the peer.`
-                        )
-                    );
-                }
-
-                const ownSharedIdentityAttributePredecessors = await this.consumptionController.attributes.getSharedPredecessorsOfAttribute(foundAttribute, {
-                    "shareInfo.peer": recipient.toString(),
-                    "deletionInfo.deletionStatus": { $nin: [LocalAttributeDeletionStatus.DeletedByPeer, LocalAttributeDeletionStatus.ToBeDeletedByPeer] }
-                });
-
-                if (ownSharedIdentityAttributePredecessors.length > 0) {
-                    return ValidationResult.error(
-                        ConsumptionCoreErrors.requests.invalidRequestItem(
-                            `The predecessor '${ownSharedIdentityAttributePredecessors[0].shareInfo?.sourceAttribute}' of the IdentityAttribute is already shared with the peer. Instead of sharing it, you should notify the peer about the Attribute succession.`
-                        )
-                    );
-                }
-            }
-
-            if (requestItem.thirdPartyAddress) {
-                return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("When sharing a RepositoryAttribute, no thirdPartyAddress may be specified."));
-            }
-        }
-
-        if (requestItem.attribute instanceof RelationshipAttribute) {
-            if (!foundAttribute.isShared()) {
-                throw new Error(
-                    "The LocalAttribute found is faulty because its shareInfo is undefined, although its content is given by a RelationshipAttribute. Since RelationshipAttributes only make sense in the context of Relationships, they must always be shared."
-                );
-            }
-
-            if (foundAttribute.shareInfo.sourceAttribute) {
-                return ValidationResult.error(
-                    ConsumptionCoreErrors.requests.invalidRequestItem("You can only share RelationshipAttributes that are not a copy of a sourceAttribute.")
-                );
-            }
-
-            if (recipient) {
-                const query = {
-                    "shareInfo.sourceAttribute": requestItem.sourceAttributeId.toString(),
-                    "shareInfo.peer": recipient.toString(),
-                    "deletionInfo.deletionStatus": { $nin: [LocalAttributeDeletionStatus.DeletedByPeer, LocalAttributeDeletionStatus.ToBeDeletedByPeer] }
-                };
-                const thirdPartyRelationshipAttribute = await this.consumptionController.attributes.getLocalAttributes(query);
-
-                if (foundAttribute.shareInfo.peer.equals(recipient) || thirdPartyRelationshipAttribute.length > 0) {
-                    return ValidationResult.error(
-                        ConsumptionCoreErrors.requests.invalidRequestItem("The provided RelationshipAttribute already exists in the context of the Relationship with the peer.")
-                    );
-                }
-            }
-
-            const queryForNonPendingRelationships = {
-                "peer.address": foundAttribute.shareInfo.peer.address,
-                status: { $in: [RelationshipStatus.Active, RelationshipStatus.Terminated, RelationshipStatus.DeletionProposed] }
-            };
-
-            const nonPendingRelationshipsToPeer = await this.accountController.relationships.getRelationships(queryForNonPendingRelationships);
-
-            if (nonPendingRelationshipsToPeer.length === 0) {
-                return ValidationResult.error(ConsumptionCoreErrors.requests.cannotShareRelationshipAttributeOfPendingRelationship());
-            }
-
-            if (!requestItem.thirdPartyAddress?.equals(foundAttribute.shareInfo.peer)) {
+            const sharedSuccessors = await this.consumptionController.attributes.getSuccessorsOfAttributeSharedWithPeer(foundAttribute, recipient);
+            if (sharedSuccessors.length > 0) {
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.invalidRequestItem(
-                        "When sharing a RelationshipAttribute with another Identity, the address of the peer of the Relationship in which the RelationshipAttribute exists must be specified as thirdPartyAddress."
+                        `The provided Attribute is outdated. Its successor '${sharedSuccessors[0].id}' is already shared with the peer.`
+                    )
+                );
+            }
+
+            const sharedPredecessors = await this.consumptionController.attributes.getPredecessorsOfAttributeSharedWithPeer(foundAttribute, recipient);
+            if (sharedPredecessors.length > 0) {
+                return ValidationResult.error(
+                    ConsumptionCoreErrors.requests.invalidRequestItem(
+                        `The predecessor '${sharedPredecessors[0].id}' of the Attribute is already shared with the peer. Instead of sharing it, you should notify the peer about the Attribute succession.`
                     )
                 );
             }
         }
 
         if (requestItem.attribute instanceof IdentityAttribute) {
-            return this.canCreateWithIdentityAttribute(requestItem);
+            if (!(foundAttribute instanceof OwnIdentityAttribute)) {
+                return ValidationResult.error(
+                    ConsumptionCoreErrors.requests.invalidRequestItem("The provided IdentityAttribute belongs to someone else. You can only share OwnIdentityAttributes.")
+                );
+            }
+
+            if (requestItem.thirdPartyAddress) {
+                return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("When sharing an OwnIdentityAttribute, no thirdPartyAddress may be specified."));
+            }
+
+            const tagValidationResult = await this.consumptionController.attributes.validateTagsOfAttribute(requestItem.attribute);
+            if (tagValidationResult.isError()) {
+                return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem(tagValidationResult.error.message));
+            }
+
+            return ValidationResult.success();
         }
 
-        return ShareAttributeRequestItemProcessor.canCreateWithRelationshipAttribute(requestItem.attribute, recipient);
-    }
+        if (!(foundAttribute instanceof OwnRelationshipAttribute || foundAttribute instanceof PeerRelationshipAttribute)) {
+            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("You cannot share ThirdPartyRelationshipAttributes."));
+        }
 
-    private canCreateWithIdentityAttribute(requestItem: ShareAttributeRequestItem) {
-        const ownerIsCurrentIdentity = requestItem.attribute.owner.equals(this.currentIdentityAddress);
-        if (!ownerIsCurrentIdentity) {
+        if (recipient && foundAttribute.peer.equals(recipient)) {
             return ValidationResult.error(
-                ConsumptionCoreErrors.requests.invalidRequestItem("The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes.")
+                ConsumptionCoreErrors.requests.invalidRequestItem("The provided RelationshipAttribute already exists in the context of the Relationship with the peer.")
+            );
+        }
+
+        const initialPeer = foundAttribute.peer;
+        const queryForNonPendingRelationships = {
+            "peer.address": initialPeer.toString(),
+            status: { $in: [RelationshipStatus.Active, RelationshipStatus.Terminated, RelationshipStatus.DeletionProposed] }
+        };
+
+        const nonPendingRelationshipsToPeer = await this.accountController.relationships.getRelationships(queryForNonPendingRelationships);
+        if (nonPendingRelationshipsToPeer.length === 0) {
+            return ValidationResult.error(ConsumptionCoreErrors.requests.cannotShareRelationshipAttributeOfPendingRelationship());
+        }
+
+        if (!requestItem.thirdPartyAddress?.equals(initialPeer)) {
+            return ValidationResult.error(
+                ConsumptionCoreErrors.requests.invalidRequestItem(
+                    "When sharing a RelationshipAttribute with another Identity, the address of the peer of the Relationship in which the RelationshipAttribute exists must be specified as thirdPartyAddress."
+                )
+            );
+        }
+
+        if (requestItem.attribute.owner.equals(recipient)) {
+            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("It doesn't make sense to share a RelationshipAttribute with its owner."));
+        }
+
+        if (requestItem.attribute.confidentiality === RelationshipAttributeConfidentiality.Private) {
+            return ValidationResult.error(
+                ConsumptionCoreErrors.requests.invalidRequestItem("The confidentiality of the given `attribute` is private. Therefore you are not allowed to share it.")
             );
         }
 
         return ValidationResult.success();
     }
 
-    private static canCreateWithRelationshipAttribute(attribute: RelationshipAttribute, recipient?: CoreAddress) {
-        if (attribute.owner.equals(recipient)) {
-            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("It doesn't make sense to share a RelationshipAttribute with its owner."));
+    public override async canAccept(requestItem: ShareAttributeRequestItem, _params: AcceptRequestItemParametersJSON, _requestInfo: LocalRequestInfo): Promise<ValidationResult> {
+        const tagValidationResult = await this.consumptionController.attributes.validateTagsOfAttribute(requestItem.attribute);
+        if (tagValidationResult.isError()) {
+            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem(tagValidationResult.error.message));
         }
 
-        if (attribute.confidentiality === RelationshipAttributeConfidentiality.Private) {
+        if (requestItem.thirdPartyAddress && requestItem.attribute instanceof IdentityAttribute) {
             return ValidationResult.error(
-                ConsumptionCoreErrors.requests.invalidRequestItem("The confidentiality of the given `attribute` is private. Therefore you are not allowed to share it.")
+                ConsumptionCoreErrors.requests.invalidRequestItem("The RequestItem is invalid, since it must contain a RelationshipAttribute if thirdPartyAddress is defined.")
+            );
+        }
+
+        if (!requestItem.thirdPartyAddress && requestItem.attribute instanceof RelationshipAttribute) {
+            return ValidationResult.error(
+                ConsumptionCoreErrors.requests.invalidRequestItem("The RequestItem is invalid, since it must contain an IdentityAttribute if thirdPartyAddress is undefined.")
             );
         }
 
@@ -181,46 +160,91 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
         requestItem: ShareAttributeRequestItem,
         _params: AcceptRequestItemParametersJSON,
         requestInfo: LocalRequestInfo
-    ): Promise<ShareAttributeAcceptResponseItem | AttributeAlreadySharedAcceptResponseItem> {
-        const existingPeerSharedIdentityAttribute = await this.consumptionController.attributes.getPeerSharedIdentityAttributeWithSameValue(
+    ): Promise<AcceptResponseItem | AttributeAlreadySharedAcceptResponseItem> {
+        const isThirdPartyRelationshipAttribute = !!requestItem.thirdPartyAddress;
+        if (isThirdPartyRelationshipAttribute) {
+            const attribute = requestItem.attribute as RelationshipAttribute;
+            const existingThirdPartyRelationshipAttribute = await this.consumptionController.attributes.getThirdPartyRelationshipAttributeWithSameValue(
+                (attribute.value as any).toJSON(),
+                requestInfo.peer.toString(),
+                attribute.owner.toString(),
+                attribute.key
+            );
+
+            if (existingThirdPartyRelationshipAttribute) {
+                if (existingThirdPartyRelationshipAttribute.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.ToBeDeleted) {
+                    await this.consumptionController.attributes.setPeerDeletionInfoOfReceivedAttribute(existingThirdPartyRelationshipAttribute, undefined, true);
+                }
+
+                return AttributeAlreadySharedAcceptResponseItem.from({
+                    result: ResponseItemResult.Accepted,
+                    attributeId: existingThirdPartyRelationshipAttribute.id
+                });
+            }
+
+            await this.consumptionController.attributes.createThirdPartyRelationshipAttribute({
+                id: requestItem.attributeId,
+                content: requestItem.attribute as RelationshipAttribute,
+                peer: requestInfo.peer,
+                sourceReference: requestInfo.id,
+                initialAttributePeer: requestItem.thirdPartyAddress!
+            });
+
+            return AcceptResponseItem.from({ result: ResponseItemResult.Accepted });
+        }
+
+        const existingPeerIdentityAttribute = await this.consumptionController.attributes.getPeerIdentityAttributeWithSameValue(
             (requestItem.attribute.value as any).toJSON(),
             requestInfo.peer.toString()
         );
 
-        if (existingPeerSharedIdentityAttribute && !existingPeerSharedIdentityAttribute.deletionInfo) {
+        if (existingPeerIdentityAttribute) {
+            if (existingPeerIdentityAttribute.deletionInfo?.deletionStatus === ReceivedAttributeDeletionStatus.ToBeDeleted) {
+                await this.consumptionController.attributes.setPeerDeletionInfoOfReceivedAttribute(existingPeerIdentityAttribute, undefined, true);
+            }
+
             return AttributeAlreadySharedAcceptResponseItem.from({
                 result: ResponseItemResult.Accepted,
-                attributeId: existingPeerSharedIdentityAttribute.id
+                attributeId: existingPeerIdentityAttribute.id
             });
         }
 
-        const localAttribute = await this.consumptionController.attributes.createSharedLocalAttribute({
-            content: requestItem.attribute,
+        await this.consumptionController.attributes.createPeerIdentityAttribute({
+            content: requestItem.attribute as IdentityAttribute,
             peer: requestInfo.peer,
-            requestReference: requestInfo.id,
-            thirdPartyAddress: requestItem.thirdPartyAddress
+            sourceReference: requestInfo.id,
+            id: requestItem.attributeId
         });
 
-        return ShareAttributeAcceptResponseItem.from({
-            attributeId: localAttribute.id,
-            result: ResponseItemResult.Accepted
-        });
+        return AcceptResponseItem.from({ result: ResponseItemResult.Accepted });
     }
 
     public override async applyIncomingResponseItem(
-        responseItem: ShareAttributeAcceptResponseItem | AttributeAlreadySharedAcceptResponseItem | RejectResponseItem,
+        responseItem: AcceptResponseItem | AttributeAlreadySharedAcceptResponseItem | RejectResponseItem,
         requestItem: ShareAttributeRequestItem,
         requestInfo: LocalRequestInfo
     ): Promise<void> {
-        if (!(responseItem instanceof ShareAttributeAcceptResponseItem)) {
+        if (responseItem instanceof RejectResponseItem) return;
+
+        const sharedAttribute = await this.consumptionController.attributes.getLocalAttribute(requestItem.attributeId);
+        if (
+            !sharedAttribute ||
+            !(sharedAttribute instanceof OwnIdentityAttribute || sharedAttribute instanceof OwnRelationshipAttribute || sharedAttribute instanceof PeerRelationshipAttribute)
+        ) {
             return;
         }
 
-        await this.consumptionController.attributes.createSharedLocalAttributeCopy({
-            attributeId: responseItem.attributeId,
-            sourceAttributeId: requestItem.sourceAttributeId,
-            peer: requestInfo.peer,
-            requestReference: requestInfo.id
-        });
+        if (!(responseItem instanceof AttributeAlreadySharedAcceptResponseItem)) {
+            await this.consumptionController.attributes.addForwardingDetailsToAttribute(sharedAttribute, requestInfo.peer, requestInfo.id);
+            return;
+        }
+
+        const forwardingDetails = await this.consumptionController.attributes.getForwardingDetailsForPeer(sharedAttribute, requestInfo.peer, true);
+        if (forwardingDetails) {
+            await this.consumptionController.attributes.setForwardedDeletionInfoOfAttribute(sharedAttribute, undefined, requestInfo.peer, true);
+            return;
+        }
+
+        await this.consumptionController.attributes.addForwardingDetailsToAttribute(sharedAttribute, requestInfo.peer, requestInfo.id);
     }
 }

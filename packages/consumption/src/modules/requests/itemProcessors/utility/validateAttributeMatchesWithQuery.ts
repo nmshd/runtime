@@ -37,22 +37,6 @@ export default function validateAttributeMatchesWithQuery(
         );
     }
 
-    if (query instanceof IdentityAttributeQuery || query instanceof RelationshipAttributeQuery || query instanceof ThirdPartyRelationshipAttributeQuery) {
-        if (
-            (query.validFrom === undefined && attribute.validFrom !== undefined) ||
-            (query.validFrom !== undefined && attribute.validFrom !== undefined && query.validFrom.isBefore(attribute.validFrom))
-        ) {
-            return ValidationResult.error(ConsumptionCoreErrors.requests.attributeQueryMismatch("The provided Attribute is not valid in the queried time frame."));
-        }
-
-        if (
-            (query.validTo === undefined && attribute.validTo !== undefined) ||
-            (query.validTo !== undefined && attribute.validTo !== undefined && query.validTo.isAfter(attribute.validTo))
-        ) {
-            return ValidationResult.error(ConsumptionCoreErrors.requests.attributeQueryMismatch("The provided Attribute is not valid in the queried time frame."));
-        }
-    }
-
     return ValidationResult.success();
 }
 
@@ -71,7 +55,7 @@ function validateAttributeMatchesWithIdentityAttributeQuery(
 
     if (!recipientIsAttributeOwner) {
         return ValidationResult.error(
-            ConsumptionCoreErrors.requests.attributeQueryMismatch("The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes.")
+            ConsumptionCoreErrors.requests.attributeQueryMismatch("The provided IdentityAttribute belongs to someone else. You can only share OwnIdentityAttributes.")
         );
     }
 
@@ -103,7 +87,7 @@ function validateAttributeMatchesWithIQLQuery(_: IQLQuery, attribute: IdentityAt
 
     if (!recipientIsAttributeOwner) {
         return ValidationResult.error(
-            ConsumptionCoreErrors.requests.attributeQueryMismatch("The provided IdentityAttribute belongs to someone else. You can only share own IdentityAttributes.")
+            ConsumptionCoreErrors.requests.attributeQueryMismatch("The provided IdentityAttribute belongs to someone else. You can only share OwnIdentityAttributes.")
         );
     }
 

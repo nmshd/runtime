@@ -194,7 +194,7 @@ describe("RelationshipTemplate Tests", () => {
             expect(createResult).toBeSuccessful();
 
             const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
-                reference: createResult.value.truncatedReference
+                reference: createResult.value.reference.truncated
             });
             expect(loadResult).toBeSuccessful();
             expect(loadResult.value.forIdentity).toBe(runtimeServices2.address);
@@ -209,7 +209,7 @@ describe("RelationshipTemplate Tests", () => {
             expect(createResult).toBeSuccessful();
 
             const loadResult = await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({
-                reference: createResult.value.truncatedReference
+                reference: createResult.value.reference.truncated
             });
             expect(loadResult).toBeAnError(
                 `You tried to access personalized content '${createResult.value.id}'. You are either not logged in or the content is not intended for you.`,
@@ -440,7 +440,7 @@ describe("RelationshipTemplates query", () => {
                 content: emptyRelationshipTemplateContent
             })
         ).value;
-        const peerTemplate = (await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: createdTemplate.truncatedReference })).value;
+        const peerTemplate = (await runtimeServices2.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: createdTemplate.reference.truncated })).value;
         const conditions = new QueryParamConditions<GetRelationshipTemplatesQuery>(peerTemplate, runtimeServices2.transport)
             .addDateSet("createdAt")
             .addDateSet("expiresAt")

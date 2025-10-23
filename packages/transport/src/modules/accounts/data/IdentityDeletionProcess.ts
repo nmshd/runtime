@@ -2,39 +2,68 @@ import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreDate, CoreId } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
 import { CoreSynchronizable } from "../../../core";
-import { CachedIdentityDeletionProcess, CachedIdentityDeletionProcessJSON } from "./CachedIdentityDeletionProcess";
+import { IdentityDeletionProcessStatus } from "./IdentityDeletionProcessStatus";
 
 export interface IdentityDeletionProcessJSON {
     id: string;
-    cache?: CachedIdentityDeletionProcessJSON;
-    cachedAt?: string;
+    status: IdentityDeletionProcessStatus;
+    createdAt?: string;
+    createdByDevice?: string;
+    gracePeriodEndsAt?: string;
+    cancelledAt?: string;
+    cancelledByDevice?: string;
 }
 
 export interface IIdentityDeletionProcess {
     id: CoreId;
-    cache?: CachedIdentityDeletionProcess;
-    cachedAt?: CoreDate;
+    status: IdentityDeletionProcessStatus;
+    createdAt?: CoreDate;
+    createdByDevice?: CoreId;
+    gracePeriodEndsAt?: CoreDate;
+    cancelledAt?: CoreDate;
+    cancelledByDevice?: CoreId;
 }
 
 @type("IdentityDeletionProcess")
 export class IdentityDeletionProcess extends CoreSynchronizable implements IIdentityDeletionProcess {
-    public override readonly technicalProperties = [nameof<IdentityDeletionProcess>((r) => r.id)];
+    public override readonly technicalProperties = [
+        nameof<IdentityDeletionProcess>((r) => r.id),
+        nameof<IdentityDeletionProcess>((r) => r.status),
+        nameof<IdentityDeletionProcess>((r) => r.createdAt),
+        nameof<IdentityDeletionProcess>((r) => r.createdByDevice)
+    ];
+
+    public override readonly contentProperties = [
+        nameof<IdentityDeletionProcess>((r) => r.gracePeriodEndsAt),
+        nameof<IdentityDeletionProcess>((r) => r.cancelledAt),
+        nameof<IdentityDeletionProcess>((r) => r.cancelledByDevice)
+    ];
+
+    @validate()
+    @serialize()
+    public status: IdentityDeletionProcessStatus;
 
     @validate({ nullable: true })
     @serialize()
-    public cache?: CachedIdentityDeletionProcess;
+    public createdAt?: CoreDate;
 
     @validate({ nullable: true })
     @serialize()
-    public cachedAt?: CoreDate;
+    public createdByDevice?: CoreId;
+
+    @validate({ nullable: true })
+    @serialize()
+    public gracePeriodEndsAt?: CoreDate;
+
+    @validate({ nullable: true })
+    @serialize()
+    public cancelledAt?: CoreDate;
+
+    @validate({ nullable: true })
+    @serialize()
+    public cancelledByDevice?: CoreId;
 
     public static from(value: IIdentityDeletionProcess | IdentityDeletionProcessJSON): IdentityDeletionProcess {
         return this.fromAny(value);
-    }
-
-    public setCache(cache: CachedIdentityDeletionProcess): this {
-        this.cache = cache;
-        this.cachedAt = CoreDate.utc();
-        return this;
     }
 }

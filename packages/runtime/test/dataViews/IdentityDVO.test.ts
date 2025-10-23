@@ -27,7 +27,7 @@ afterAll(() => serviceProvider.stop());
 
 describe("IdentityDVO after loading a relationship template sharing a DisplayName", () => {
     beforeAll(async () => {
-        const senderAttribute = await templator.consumption.attributes.createRepositoryAttribute({
+        const senderAttribute = await templator.consumption.attributes.createOwnIdentityAttribute({
             content: {
                 value: {
                     "@type": "DisplayName",
@@ -45,13 +45,13 @@ describe("IdentityDVO after loading a relationship template sharing a DisplayNam
                         "@type": "ShareAttributeRequestItem",
                         mustBeAccepted: true,
                         attribute: senderAttribute.value.content,
-                        sourceAttributeId: senderAttribute.value.id
+                        attributeId: senderAttribute.value.id
                     } as ShareAttributeRequestItemJSON
                 ]
             }
         };
         templatorTemplate = await createTemplate(templator.transport, templateContent);
-        requestorTemplate = (await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.truncatedReference })).value;
+        requestorTemplate = (await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.reference.truncated })).value;
         const requestEvent = await requestor.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
         request = requestEvent.data.request;
     });
@@ -80,7 +80,7 @@ describe("IdentityDVO after loading a relationship template sharing a DisplayNam
         await requestor.eventBus.waitForEvent(AttributeDeletedEvent);
 
         requestor.eventBus.reset();
-        requestorTemplate = (await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.truncatedReference })).value;
+        requestorTemplate = (await requestor.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templatorTemplate.reference.truncated })).value;
         await requestor.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
 
         const dvo = await requestor.expander.expandLocalRequestDTO(request);

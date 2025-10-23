@@ -1,5 +1,5 @@
 import { AbstractStringJSON, CommunicationLanguage, IQLQueryJSON, StreetAddress } from "@nmshd/content";
-import { ConsumptionServices, DataViewExpander, LocalAttributeDTO, RepositoryAttributeDVO } from "../../src";
+import { ConsumptionServices, DataViewExpander, LocalAttributeDTO, OwnIdentityAttributeDVO } from "../../src";
 import { RuntimeServiceProvider } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
@@ -20,20 +20,20 @@ describe("IQLQueryExpanded", () => {
     beforeAll(async () => {
         attributes.push(
             (
-                await consumptionServices1.attributes.createRepositoryAttribute({
+                await consumptionServices1.attributes.createOwnIdentityAttribute({
                     content: {
                         value: {
                             "@type": "GivenName",
-                            value: "Hugo"
+                            value: "aGivenName"
                         },
-                        tags: ["default"]
+                        tags: ["x:default"]
                     }
                 })
             ).value
         );
         attributes.push(
             (
-                await consumptionServices1.attributes.createRepositoryAttribute({
+                await consumptionServices1.attributes.createOwnIdentityAttribute({
                     content: {
                         value: {
                             "@type": "GivenName",
@@ -45,26 +45,26 @@ describe("IQLQueryExpanded", () => {
         );
         attributes.push(
             (
-                await consumptionServices1.attributes.createRepositoryAttribute({
+                await consumptionServices1.attributes.createOwnIdentityAttribute({
                     content: {
                         value: {
                             "@type": "GivenName",
                             value: "aFurtherGivenName"
                         },
-                        tags: ["fake"]
+                        tags: ["x:fake"]
                     }
                 })
             ).value
         );
         attributes.push(
             (
-                await consumptionServices1.attributes.createRepositoryAttribute({
+                await consumptionServices1.attributes.createOwnIdentityAttribute({
                     content: {
                         value: {
                             "@type": "Surname",
                             value: "aSurname"
                         },
-                        tags: ["fake"]
+                        tags: ["x:fake"]
                     }
                 })
             ).value
@@ -82,8 +82,6 @@ describe("IQLQueryExpanded", () => {
         expect(expandedQuery.name).toBe("i18n://dvo.attributeQuery.name.IQLQuery");
         expect(expandedQuery.description).toBe("i18n://dvo.attributeQuery.description.IQLQuery");
         expect(expandedQuery.valueType).toBe("GivenName");
-        expect(expandedQuery.validFrom).toBeUndefined();
-        expect(expandedQuery.validTo).toBeUndefined();
         expect(expandedQuery.renderHints!["@type"]).toBe("RenderHints");
         expect(expandedQuery.renderHints!.technicalType).toBe("String");
         expect(expandedQuery.renderHints!.editType).toBe("InputLike");
@@ -91,10 +89,10 @@ describe("IQLQueryExpanded", () => {
         expect(expandedQuery.valueHints!.max).toBe(100);
         expect(expandedQuery.results).toHaveLength(3);
 
-        let dvo: RepositoryAttributeDVO = expandedQuery.results[0];
+        let dvo: OwnIdentityAttributeDVO = expandedQuery.results[0];
         let attribute = attributes[0];
         expect(dvo).toBeDefined();
-        expect(dvo.type).toBe("RepositoryAttributeDVO");
+        expect(dvo.type).toBe("OwnIdentityAttributeDVO");
         expect(dvo.id).toStrictEqual(attribute.id);
         expect(dvo.name).toBe("i18n://dvo.attribute.name.GivenName");
         expect(dvo.description).toBe("i18n://dvo.attribute.description.GivenName");
@@ -102,12 +100,12 @@ describe("IQLQueryExpanded", () => {
         expect(dvo.content).toStrictEqual(attribute.content);
         const givenName = dvo.value as AbstractStringJSON;
         expect(givenName["@type"]).toBe("GivenName");
-        expect(givenName.value).toBe("Hugo");
-        expect(dvo.tags![0]).toBe("default");
+        expect(givenName.value).toBe("aGivenName");
+        expect(dvo.tags![0]).toBe("x:default");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.isValid).toBe(true);
-        expect(dvo.sharedWith).toStrictEqual([]);
+        expect(dvo.forwardingPeers).toBeUndefined();
+        expect(dvo.forwardingDetails).toBeUndefined();
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");
@@ -118,7 +116,7 @@ describe("IQLQueryExpanded", () => {
         dvo = expandedQuery.results[1];
         attribute = attributes[1];
         expect(dvo).toBeDefined();
-        expect(dvo.type).toBe("RepositoryAttributeDVO");
+        expect(dvo.type).toBe("OwnIdentityAttributeDVO");
         expect(dvo.id).toStrictEqual(attribute.id);
         expect(dvo.name).toBe("i18n://dvo.attribute.name.GivenName");
         expect(dvo.description).toBe("i18n://dvo.attribute.description.GivenName");
@@ -129,8 +127,8 @@ describe("IQLQueryExpanded", () => {
         expect(value.value).toBe("anotherGivenName");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.isValid).toBe(true);
-        expect(dvo.sharedWith).toStrictEqual([]);
+        expect(dvo.forwardingPeers).toBeUndefined();
+        expect(dvo.forwardingDetails).toBeUndefined();
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");
@@ -141,7 +139,7 @@ describe("IQLQueryExpanded", () => {
         dvo = expandedQuery.results[2];
         attribute = attributes[2];
         expect(dvo).toBeDefined();
-        expect(dvo.type).toBe("RepositoryAttributeDVO");
+        expect(dvo.type).toBe("OwnIdentityAttributeDVO");
         expect(dvo.id).toStrictEqual(attribute.id);
         expect(dvo.name).toBe("i18n://dvo.attribute.name.GivenName");
         expect(dvo.description).toBe("i18n://dvo.attribute.description.GivenName");
@@ -150,11 +148,11 @@ describe("IQLQueryExpanded", () => {
         const value3 = dvo.value as AbstractStringJSON;
         expect(value3["@type"]).toBe("GivenName");
         expect(value3.value).toBe("aFurtherGivenName");
-        expect(dvo.tags![0]).toBe("fake");
+        expect(dvo.tags![0]).toBe("x:fake");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.isValid).toBe(true);
-        expect(dvo.sharedWith).toStrictEqual([]);
+        expect(dvo.forwardingPeers).toBeUndefined();
+        expect(dvo.forwardingDetails).toBeUndefined();
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");
@@ -166,7 +164,7 @@ describe("IQLQueryExpanded", () => {
     test("check only default GivenName", async () => {
         const query: IQLQueryJSON = {
             "@type": "IQLQuery",
-            queryString: "GivenName && #default"
+            queryString: "GivenName && #x:default"
         };
         const expandedQuery = await expander1.processIQLQuery(query);
         expect(expandedQuery).toBeDefined();
@@ -174,8 +172,6 @@ describe("IQLQueryExpanded", () => {
         expect(expandedQuery.name).toBe("i18n://dvo.attributeQuery.name.IQLQuery");
         expect(expandedQuery.description).toBe("i18n://dvo.attributeQuery.description.IQLQuery");
         expect(expandedQuery.valueType).toBe("GivenName");
-        expect(expandedQuery.validFrom).toBeUndefined();
-        expect(expandedQuery.validTo).toBeUndefined();
         expect(expandedQuery.renderHints!["@type"]).toBe("RenderHints");
         expect(expandedQuery.renderHints!.technicalType).toBe("String");
         expect(expandedQuery.renderHints!.editType).toBe("InputLike");
@@ -183,10 +179,10 @@ describe("IQLQueryExpanded", () => {
         expect(expandedQuery.valueHints!.max).toBe(100);
         expect(expandedQuery.results).toHaveLength(1);
 
-        const dvo: RepositoryAttributeDVO = expandedQuery.results[0];
+        const dvo: OwnIdentityAttributeDVO = expandedQuery.results[0];
         const attribute = attributes[0];
         expect(dvo).toBeDefined();
-        expect(dvo.type).toBe("RepositoryAttributeDVO");
+        expect(dvo.type).toBe("OwnIdentityAttributeDVO");
         expect(dvo.id).toStrictEqual(attribute.id);
         expect(dvo.name).toBe("i18n://dvo.attribute.name.GivenName");
         expect(dvo.description).toBe("i18n://dvo.attribute.description.GivenName");
@@ -194,12 +190,12 @@ describe("IQLQueryExpanded", () => {
         expect(dvo.content).toStrictEqual(attribute.content);
         const givenName = dvo.value as AbstractStringJSON;
         expect(givenName["@type"]).toBe("GivenName");
-        expect(givenName.value).toBe("Hugo");
-        expect(dvo.tags![0]).toBe("default");
+        expect(givenName.value).toBe("aGivenName");
+        expect(dvo.tags![0]).toBe("x:default");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.isValid).toBe(true);
-        expect(dvo.sharedWith).toStrictEqual([]);
+        expect(dvo.forwardingPeers).toBeUndefined();
+        expect(dvo.forwardingDetails).toBeUndefined();
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");
@@ -211,7 +207,7 @@ describe("IQLQueryExpanded", () => {
     test("check only fake GivenName", async () => {
         const query: IQLQueryJSON = {
             "@type": "IQLQuery",
-            queryString: "GivenName && #fake"
+            queryString: "GivenName && #x:fake"
         };
         const expandedQuery = await expander1.processIQLQuery(query);
         expect(expandedQuery).toBeDefined();
@@ -219,8 +215,6 @@ describe("IQLQueryExpanded", () => {
         expect(expandedQuery.name).toBe("i18n://dvo.attributeQuery.name.IQLQuery");
         expect(expandedQuery.description).toBe("i18n://dvo.attributeQuery.description.IQLQuery");
         expect(expandedQuery.valueType).toBe("GivenName");
-        expect(expandedQuery.validFrom).toBeUndefined();
-        expect(expandedQuery.validTo).toBeUndefined();
         expect(expandedQuery.renderHints!["@type"]).toBe("RenderHints");
         expect(expandedQuery.renderHints!.technicalType).toBe("String");
         expect(expandedQuery.renderHints!.editType).toBe("InputLike");
@@ -228,10 +222,10 @@ describe("IQLQueryExpanded", () => {
         expect(expandedQuery.valueHints!.max).toBe(100);
         expect(expandedQuery.results).toHaveLength(1);
 
-        const dvo: RepositoryAttributeDVO = expandedQuery.results[0];
+        const dvo: OwnIdentityAttributeDVO = expandedQuery.results[0];
         const attribute = attributes[2];
         expect(dvo).toBeDefined();
-        expect(dvo.type).toBe("RepositoryAttributeDVO");
+        expect(dvo.type).toBe("OwnIdentityAttributeDVO");
         expect(dvo.id).toStrictEqual(attribute.id);
         expect(dvo.name).toBe("i18n://dvo.attribute.name.GivenName");
         expect(dvo.description).toBe("i18n://dvo.attribute.description.GivenName");
@@ -240,11 +234,11 @@ describe("IQLQueryExpanded", () => {
         const givenName = dvo.value as AbstractStringJSON;
         expect(givenName["@type"]).toBe("GivenName");
         expect(givenName.value).toBe("aFurtherGivenName");
-        expect(dvo.tags![0]).toBe("fake");
+        expect(dvo.tags![0]).toBe("x:fake");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.isValid).toBe(true);
-        expect(dvo.sharedWith).toStrictEqual([]);
+        expect(dvo.forwardingPeers).toBeUndefined();
+        expect(dvo.forwardingDetails).toBeUndefined();
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");
@@ -256,7 +250,7 @@ describe("IQLQueryExpanded", () => {
     test("check all fake attributes", async () => {
         const query: IQLQueryJSON = {
             "@type": "IQLQuery",
-            queryString: "#fake"
+            queryString: "#x:fake"
         };
         const expandedQuery = await expander1.processIQLQuery(query);
         expect(expandedQuery).toBeDefined();
@@ -264,16 +258,14 @@ describe("IQLQueryExpanded", () => {
         expect(expandedQuery.name).toBe("i18n://dvo.attributeQuery.name.IQLQuery");
         expect(expandedQuery.description).toBe("i18n://dvo.attributeQuery.description.IQLQuery");
         expect(expandedQuery.valueType).toBeUndefined();
-        expect(expandedQuery.validFrom).toBeUndefined();
-        expect(expandedQuery.validTo).toBeUndefined();
         expect(expandedQuery.renderHints).toBeUndefined();
         expect(expandedQuery.valueHints).toBeUndefined();
         expect(expandedQuery.results).toHaveLength(2);
 
-        let dvo: RepositoryAttributeDVO = expandedQuery.results[0];
+        let dvo: OwnIdentityAttributeDVO = expandedQuery.results[0];
         let attribute = attributes[2];
         expect(dvo).toBeDefined();
-        expect(dvo.type).toBe("RepositoryAttributeDVO");
+        expect(dvo.type).toBe("OwnIdentityAttributeDVO");
         expect(dvo.id).toStrictEqual(attribute.id);
         expect(dvo.name).toBe("i18n://dvo.attribute.name.GivenName");
         expect(dvo.description).toBe("i18n://dvo.attribute.description.GivenName");
@@ -282,11 +274,11 @@ describe("IQLQueryExpanded", () => {
         const givenName = dvo.value as AbstractStringJSON;
         expect(givenName["@type"]).toBe("GivenName");
         expect(givenName.value).toBe("aFurtherGivenName");
-        expect(dvo.tags![0]).toBe("fake");
+        expect(dvo.tags![0]).toBe("x:fake");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.isValid).toBe(true);
-        expect(dvo.sharedWith).toStrictEqual([]);
+        expect(dvo.forwardingPeers).toBeUndefined();
+        expect(dvo.forwardingDetails).toBeUndefined();
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");
@@ -297,7 +289,7 @@ describe("IQLQueryExpanded", () => {
         dvo = expandedQuery.results[1];
         attribute = attributes[3];
         expect(dvo).toBeDefined();
-        expect(dvo.type).toBe("RepositoryAttributeDVO");
+        expect(dvo.type).toBe("OwnIdentityAttributeDVO");
         expect(dvo.id).toStrictEqual(attribute.id);
         expect(dvo.name).toBe("i18n://dvo.attribute.name.Surname");
         expect(dvo.description).toBe("i18n://dvo.attribute.description.Surname");
@@ -306,11 +298,11 @@ describe("IQLQueryExpanded", () => {
         const value = dvo.value as AbstractStringJSON;
         expect(value["@type"]).toBe("Surname");
         expect(value.value).toBe("aSurname");
-        expect(dvo.tags![0]).toBe("fake");
+        expect(dvo.tags![0]).toBe("x:fake");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.isValid).toBe(true);
-        expect(dvo.sharedWith).toStrictEqual([]);
+        expect(dvo.forwardingPeers).toBeUndefined();
+        expect(dvo.forwardingDetails).toBeUndefined();
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");
@@ -330,8 +322,6 @@ describe("IQLQueryExpanded", () => {
         expect(expandedQuery.name).toBe("i18n://dvo.attributeQuery.name.IQLQuery");
         expect(expandedQuery.description).toBe("i18n://dvo.attributeQuery.description.IQLQuery");
         expect(expandedQuery.valueType).toBeUndefined();
-        expect(expandedQuery.validFrom).toBeUndefined();
-        expect(expandedQuery.validTo).toBeUndefined();
         expect(expandedQuery.renderHints).toBeUndefined();
         expect(expandedQuery.valueHints).toBeUndefined();
         expect(expandedQuery.results).toHaveLength(0);
@@ -351,8 +341,6 @@ describe("IQLQueryExpanded", () => {
         expect(expandedQuery.name).toBe("i18n://dvo.attributeQuery.name.IQLQuery");
         expect(expandedQuery.description).toBe("i18n://dvo.attributeQuery.description.IQLQuery");
         expect(expandedQuery.valueType).toBe("CommunicationLanguage");
-        expect(expandedQuery.validFrom).toBeUndefined();
-        expect(expandedQuery.validTo).toBeUndefined();
         expect(expandedQuery.renderHints).toStrictEqual(CommunicationLanguage.renderHints.toJSON());
         expect(expandedQuery.valueHints).toStrictEqual(CommunicationLanguage.valueHints.toJSON());
         expect(expandedQuery.results).toHaveLength(0);
@@ -364,7 +352,7 @@ describe("IQLQueryExpanded", () => {
             queryString: "StreetAddress && #delivery",
             attributeCreationHints: {
                 valueType: "StreetAddress",
-                tags: ["delivery"]
+                tags: ["x:delivery"]
             }
         };
         const expandedQuery = await expander1.processIQLQuery(query);
@@ -373,12 +361,10 @@ describe("IQLQueryExpanded", () => {
         expect(expandedQuery.name).toBe("i18n://dvo.attributeQuery.name.IQLQuery");
         expect(expandedQuery.description).toBe("i18n://dvo.attributeQuery.description.IQLQuery");
         expect(expandedQuery.valueType).toBe("StreetAddress");
-        expect(expandedQuery.validFrom).toBeUndefined();
-        expect(expandedQuery.validTo).toBeUndefined();
         expect(expandedQuery.renderHints).toStrictEqual(StreetAddress.renderHints.toJSON());
         expect(expandedQuery.valueHints).toStrictEqual(StreetAddress.valueHints.toJSON());
         expect(expandedQuery.results).toHaveLength(0);
         expect(expandedQuery.tags).toHaveLength(1);
-        expect(expandedQuery.tags![0]).toBe("delivery");
+        expect(expandedQuery.tags![0]).toBe("x:delivery");
     });
 });

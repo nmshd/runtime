@@ -21,9 +21,9 @@ describe("IdentityDeletionProcessSync", function () {
         const identityDeletionProcess = await account1.identityDeletionProcess.initiateIdentityDeletionProcess();
         await account1.syncDatawallet();
         await account2.syncDatawallet();
-        const result = await account2.identityDeletionProcess.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.Approved);
+        const result = await account2.identityDeletionProcess.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.Active);
         expect(result).toBeDefined();
-        expect(result).toStrictEqualExcluding(identityDeletionProcess, "cachedAt");
+        expect(result).toStrictEqual(identityDeletionProcess);
     });
 
     test("cancel IdentityDeletionProcess on first device: sync should receive cancelled IdentityDeletionProcess on second device", async function () {
@@ -37,6 +37,6 @@ describe("IdentityDeletionProcessSync", function () {
         await account2.syncDatawallet();
         const result = await account2.identityDeletionProcess.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.Cancelled);
         expect(result).toBeDefined();
-        expect(result).toStrictEqualExcluding(identityDeletionProcess, "cachedAt");
+        expect(result).toStrictEqual(identityDeletionProcess);
     });
 });

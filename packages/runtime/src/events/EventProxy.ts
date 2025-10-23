@@ -1,36 +1,22 @@
 import { EventBus, EventHandler, SubscriptionTarget } from "@js-soft/ts-utils";
 import * as consumption from "@nmshd/consumption";
 import * as transport from "@nmshd/transport";
-import {
-    AttributeListenerMapper,
-    AttributeMapper,
-    FileMapper,
-    IdentityDeletionProcessMapper,
-    MessageMapper,
-    RelationshipMapper,
-    RelationshipTemplateMapper,
-    RequestMapper
-} from "../useCases";
+import { AttributeMapper, FileMapper, IdentityDeletionProcessMapper, MessageMapper, RelationshipMapper, RelationshipTemplateMapper, RequestMapper } from "../useCases";
 import {
     AttributeCreatedEvent,
     AttributeDeletedEvent,
-    AttributeListenerCreatedEvent,
+    AttributeForwardingDetailsChangedEvent,
+    AttributeSucceededEvent,
     AttributeWasViewedAtChangedEvent,
+    ForwardedAttributeDeletedByPeerEvent,
     IncomingRequestReceivedEvent,
     IncomingRequestStatusChangedEvent,
     OutgoingRequestCreatedAndCompletedEvent,
     OutgoingRequestCreatedEvent,
     OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent,
     OutgoingRequestStatusChangedEvent,
-    OwnSharedAttributeDeletedByOwnerEvent,
-    OwnSharedAttributeSucceededEvent,
-    PeerSharedAttributeDeletedByPeerEvent,
-    PeerSharedAttributeSucceededEvent,
-    RepositoryAttributeSucceededEvent,
-    ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent,
-    ThirdPartyOwnedRelationshipAttributeSucceededEvent,
-    ThirdPartyRelationshipAttributeDeletedByPeerEvent,
-    ThirdPartyRelationshipAttributeSucceededEvent
+    OwnAttributeDeletedByOwnerEvent,
+    PeerRelationshipAttributeDeletedByPeerEvent
 } from "./consumption";
 import {
     DatawalletSynchronizedEvent,
@@ -154,59 +140,29 @@ export class EventProxy {
             this.targetEventBus.publish(new AttributeDeletedEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
         });
 
-        this.subscribeToSourceEvent(consumption.OwnSharedAttributeDeletedByOwnerEvent, (event) => {
-            this.targetEventBus.publish(new OwnSharedAttributeDeletedByOwnerEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
+        this.subscribeToSourceEvent(consumption.OwnAttributeDeletedByOwnerEvent, (event) => {
+            this.targetEventBus.publish(new OwnAttributeDeletedByOwnerEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
         });
 
-        this.subscribeToSourceEvent(consumption.PeerSharedAttributeDeletedByPeerEvent, (event) => {
-            this.targetEventBus.publish(new PeerSharedAttributeDeletedByPeerEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
+        this.subscribeToSourceEvent(consumption.PeerRelationshipAttributeDeletedByPeerEvent, (event) => {
+            this.targetEventBus.publish(new PeerRelationshipAttributeDeletedByPeerEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
         });
 
-        this.subscribeToSourceEvent(consumption.ThirdPartyRelationshipAttributeDeletedByPeerEvent, (event) => {
-            this.targetEventBus.publish(new ThirdPartyRelationshipAttributeDeletedByPeerEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
-            this.targetEventBus.publish(new ThirdPartyOwnedRelationshipAttributeDeletedByPeerEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
+        this.subscribeToSourceEvent(consumption.ForwardedAttributeDeletedByPeerEvent, (event) => {
+            this.targetEventBus.publish(new ForwardedAttributeDeletedByPeerEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
         });
 
-        this.subscribeToSourceEvent(consumption.OwnSharedAttributeSucceededEvent, (event) => {
+        this.subscribeToSourceEvent(consumption.AttributeSucceededEvent, (event) => {
             this.targetEventBus.publish(
-                new OwnSharedAttributeSucceededEvent(event.eventTargetAddress, {
+                new AttributeSucceededEvent(event.eventTargetAddress, {
                     predecessor: AttributeMapper.toAttributeDTO(event.data.predecessor),
                     successor: AttributeMapper.toAttributeDTO(event.data.successor)
                 })
             );
         });
 
-        this.subscribeToSourceEvent(consumption.PeerSharedAttributeSucceededEvent, (event) => {
-            this.targetEventBus.publish(
-                new PeerSharedAttributeSucceededEvent(event.eventTargetAddress, {
-                    predecessor: AttributeMapper.toAttributeDTO(event.data.predecessor),
-                    successor: AttributeMapper.toAttributeDTO(event.data.successor)
-                })
-            );
-        });
-
-        this.subscribeToSourceEvent(consumption.ThirdPartyRelationshipAttributeSucceededEvent, (event) => {
-            this.targetEventBus.publish(
-                new ThirdPartyRelationshipAttributeSucceededEvent(event.eventTargetAddress, {
-                    predecessor: AttributeMapper.toAttributeDTO(event.data.predecessor),
-                    successor: AttributeMapper.toAttributeDTO(event.data.successor)
-                })
-            );
-            this.targetEventBus.publish(
-                new ThirdPartyOwnedRelationshipAttributeSucceededEvent(event.eventTargetAddress, {
-                    predecessor: AttributeMapper.toAttributeDTO(event.data.predecessor),
-                    successor: AttributeMapper.toAttributeDTO(event.data.successor)
-                })
-            );
-        });
-
-        this.subscribeToSourceEvent(consumption.RepositoryAttributeSucceededEvent, (event) => {
-            this.targetEventBus.publish(
-                new RepositoryAttributeSucceededEvent(event.eventTargetAddress, {
-                    predecessor: AttributeMapper.toAttributeDTO(event.data.predecessor),
-                    successor: AttributeMapper.toAttributeDTO(event.data.successor)
-                })
-            );
+        this.subscribeToSourceEvent(consumption.AttributeForwardingDetailsChangedEvent, (event) => {
+            this.targetEventBus.publish(new AttributeForwardingDetailsChangedEvent(event.eventTargetAddress, AttributeMapper.toAttributeDTO(event.data)));
         });
 
         this.subscribeToSourceEvent(consumption.AttributeWasViewedAtChangedEvent, (event) => {
@@ -249,10 +205,6 @@ export class EventProxy {
                     newStatus: event.data.newStatus
                 })
             );
-        });
-
-        this.subscribeToSourceEvent(consumption.AttributeListenerCreatedEvent, (event) => {
-            this.targetEventBus.publish(new AttributeListenerCreatedEvent(event.eventTargetAddress, AttributeListenerMapper.toAttributeListenerDTO(event.data)));
         });
     }
 

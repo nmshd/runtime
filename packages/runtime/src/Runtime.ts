@@ -2,7 +2,6 @@ import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { ILogger, ILoggerFactory } from "@js-soft/logging-abstractions";
 import { EventBus, EventEmitter2EventBus } from "@js-soft/ts-utils";
 import {
-    AttributeListenersController,
     AttributesController,
     ConsumptionController,
     DraftsController,
@@ -42,7 +41,7 @@ import { DataViewExpander } from "./dataViews";
 import { ModulesInitializedEvent, ModulesLoadedEvent, ModulesStartedEvent, RuntimeInitializedEvent, RuntimeInitializingEvent } from "./events";
 import { EventProxy } from "./events/EventProxy";
 import { AnonymousServices, ConsumptionServices, ModuleConfiguration, RuntimeModuleRegistry, TransportServices } from "./extensibility";
-import { AttributeListenerModule, DeciderModule, MessageModule, NotificationModule, RequestModule } from "./modules";
+import { DeciderModule, MessageModule, NotificationModule, RequestModule } from "./modules";
 import { RuntimeConfig } from "./RuntimeConfig";
 import { RuntimeLoggerFactory } from "./RuntimeLoggerFactory";
 import { RuntimeErrors } from "./useCases";
@@ -291,10 +290,6 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
             .factory(() => this.getConsumptionController().attributes)
             .scope(Scope.Request);
 
-        Container.bind(AttributeListenersController)
-            .factory(() => this.getConsumptionController().attributeListeners)
-            .scope(Scope.Request);
-
         Container.bind(DraftsController)
             .factory(() => this.getConsumptionController().drafts)
             .scope(Scope.Request);
@@ -389,10 +384,6 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
             case "MessageModule":
                 const messageModule = new MessageModule(this, moduleConfiguration, this.loggerFactory.getLogger(MessageModule));
                 this.modules.add(messageModule);
-                break;
-            case "AttributeListenerModule":
-                const attributeListenerModule = new AttributeListenerModule(this, moduleConfiguration, this.loggerFactory.getLogger(AttributeListenerModule));
-                this.modules.add(attributeListenerModule);
                 break;
             case "NotificationModule":
                 const notificationModule = new NotificationModule(this, moduleConfiguration, this.loggerFactory.getLogger(NotificationModule));

@@ -11,7 +11,7 @@ import {
 } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { AttributeSuccessorParams, LocalAttributeShareInfo, PeerSharedAttributeSucceededEvent } from "../../../attributes";
+import { AttributeSucceededEvent, PeerIdentityAttribute, PeerIdentityAttributeSuccessorParams } from "../../../attributes";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
@@ -24,48 +24,57 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
         const senderIsAttributeOwner = requestItem.attribute.owner.equals(this.currentIdentityAddress);
         const ownerIsEmptyString = requestItem.attribute.owner.toString() === "";
 
-        if (requestItem.attribute instanceof IdentityAttribute) {
-            if (recipientIsAttributeOwner || ownerIsEmptyString) {
-                return ValidationResult.success();
-            }
+        if (!this.consumptionController.attributes.validateAttributeCharacters(requestItem.attribute)) {
+            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("The Attribute contains forbidden characters."));
+        }
 
+        if (requestItem.attribute instanceof IdentityAttribute) {
             if (senderIsAttributeOwner) {
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.invalidRequestItem(
-                        "Cannot create own IdentityAttributes with a CreateAttributeRequestItem. Use a ShareAttributeRequestItem instead."
+                        "Cannot create OwnIdentityAttributes with a CreateAttributeRequestItem. Use a ShareAttributeRequestItem instead."
                     )
                 );
             }
 
-            return ValidationResult.error(
-                ConsumptionCoreErrors.requests.invalidRequestItem(
-                    "The owner of the provided IdentityAttribute for the `attribute` property can only be the address of the recipient or an empty string. The latter will default to the address of the recipient."
-                )
-            );
-        }
-
-        if (!(recipientIsAttributeOwner || senderIsAttributeOwner || ownerIsEmptyString)) {
-            return ValidationResult.error(
-                ConsumptionCoreErrors.requests.invalidRequestItem(
-                    "The owner of the provided RelationshipAttribute for the `attribute` property can only be the address of the sender, the address of the recipient or an empty string. The latter will default to the address of the recipient."
-                )
-            );
-        }
-
-        if (recipient) {
-            const relationshipAttributesWithSameKey = await this.consumptionController.attributes.getRelationshipAttributesOfValueTypeToPeerWithGivenKeyAndOwner(
-                requestItem.attribute.key,
-                ownerIsEmptyString ? recipient : requestItem.attribute.owner,
-                requestItem.attribute.value.toJSON()["@type"],
-                recipient
-            );
-
-            if (relationshipAttributesWithSameKey.length !== 0) {
+            if (!(recipientIsAttributeOwner || ownerIsEmptyString)) {
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.invalidRequestItem(
-                        `The creation of the provided RelationshipAttribute cannot be requested because there is already a RelationshipAttribute in the context of this Relationship with the same key '${requestItem.attribute.key}', owner and value type.`
+                        "The owner of the provided IdentityAttribute for the `attribute` property can only be the address of the recipient or an empty string. The latter will default to the address of the recipient."
                     )
                 );
+            }
+
+            const tagValidationResult = await this.consumptionController.attributes.validateTagsOfAttribute(requestItem.attribute);
+            if (tagValidationResult.isError()) {
+                return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem(tagValidationResult.error.message));
+            }
+        }
+
+        if (requestItem.attribute instanceof RelationshipAttribute) {
+            if (!(recipientIsAttributeOwner || senderIsAttributeOwner || ownerIsEmptyString)) {
+                return ValidationResult.error(
+                    ConsumptionCoreErrors.requests.invalidRequestItem(
+                        "The owner of the provided RelationshipAttribute for the `attribute` property can only be the address of the sender, the address of the recipient or an empty string. The latter will default to the address of the recipient."
+                    )
+                );
+            }
+
+            if (typeof recipient !== "undefined") {
+                const relationshipAttributesWithSameKey = await this.consumptionController.attributes.getRelationshipAttributesOfValueTypeToPeerWithGivenKeyAndOwner(
+                    requestItem.attribute.key,
+                    ownerIsEmptyString ? recipient : requestItem.attribute.owner,
+                    requestItem.attribute.value.toJSON()["@type"],
+                    recipient
+                );
+
+                if (relationshipAttributesWithSameKey.length !== 0) {
+                    return ValidationResult.error(
+                        ConsumptionCoreErrors.requests.invalidRequestItem(
+                            `The creation of the provided RelationshipAttribute cannot be requested because there is already a RelationshipAttribute in the context of this Relationship with the same key '${requestItem.attribute.key}', owner and value type.`
+                        )
+                    );
+                }
             }
         }
 
@@ -73,6 +82,10 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
     }
 
     public override async canAccept(requestItem: CreateAttributeRequestItem, _params: AcceptRequestItemParametersJSON, requestInfo: LocalRequestInfo): Promise<ValidationResult> {
+        if (!this.consumptionController.attributes.validateAttributeCharacters(requestItem.attribute)) {
+            throw ConsumptionCoreErrors.attributes.forbiddenCharactersInAttribute("The Attribute contains forbidden characters.");
+        }
+
         if (requestItem.attribute instanceof RelationshipAttribute) {
             const ownerIsEmptyString = requestItem.attribute.owner.toString() === "";
 
@@ -98,6 +111,11 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
             }
         }
 
+        const tagValidationResult = await this.consumptionController.attributes.validateTagsOfAttribute(requestItem.attribute);
+        if (tagValidationResult.isError()) {
+            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem(tagValidationResult.error.message));
+        }
+
         return ValidationResult.success();
     }
 
@@ -111,15 +129,28 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
         }
 
         if (requestItem.attribute instanceof RelationshipAttribute) {
-            const sharedRelationshipAttribute = await this.consumptionController.attributes.createSharedLocalAttribute({
+            if (requestItem.attribute.owner.equals(this.currentIdentityAddress)) {
+                const ownRelationshipAttribute = await this.consumptionController.attributes.createOwnRelationshipAttribute({
+                    content: requestItem.attribute,
+                    peer: requestInfo.peer,
+                    sourceReference: requestInfo.id
+                });
+
+                return CreateAttributeAcceptResponseItem.from({
+                    result: ResponseItemResult.Accepted,
+                    attributeId: ownRelationshipAttribute.id
+                });
+            }
+
+            const peerRelationshipAttribute = await this.consumptionController.attributes.createPeerRelationshipAttribute({
                 content: requestItem.attribute,
                 peer: requestInfo.peer,
-                requestReference: requestInfo.id
+                sourceReference: requestInfo.id
             });
 
             return CreateAttributeAcceptResponseItem.from({
                 result: ResponseItemResult.Accepted,
-                attributeId: sharedRelationshipAttribute.id
+                attributeId: peerRelationshipAttribute.id
             });
         }
 
@@ -130,33 +161,57 @@ export class CreateAttributeRequestItemProcessor extends GenericRequestItemProce
         responseItem: CreateAttributeAcceptResponseItem | AttributeSuccessionAcceptResponseItem | AttributeAlreadySharedAcceptResponseItem | RejectResponseItem,
         requestItem: CreateAttributeRequestItem,
         requestInfo: LocalRequestInfo
-    ): Promise<PeerSharedAttributeSucceededEvent | void> {
+    ): Promise<AttributeSucceededEvent | void> {
+        if (responseItem instanceof AttributeAlreadySharedAcceptResponseItem) return;
+
+        if (requestItem.attribute.owner.toString() === "") requestItem.attribute.owner = requestInfo.peer;
+
+        const isOwnAttribute = requestItem.attribute.owner.toString() === this.currentIdentityAddress.toString();
+        const isPeerAttribute = requestItem.attribute.owner.toString() === requestInfo.peer.toString();
+
         if (responseItem instanceof CreateAttributeAcceptResponseItem) {
-            if (requestItem.attribute.owner.toString() === "") {
-                requestItem.attribute.owner = requestInfo.peer;
+            if (requestItem.attribute instanceof IdentityAttribute && isPeerAttribute) {
+                await this.consumptionController.attributes.createPeerIdentityAttribute({
+                    id: responseItem.attributeId,
+                    content: requestItem.attribute,
+                    peer: requestInfo.peer,
+                    sourceReference: requestInfo.id
+                });
+                return;
             }
 
-            await this.consumptionController.attributes.createSharedLocalAttribute({
-                id: responseItem.attributeId,
-                content: requestItem.attribute,
-                peer: requestInfo.peer,
-                requestReference: requestInfo.id
-            });
+            if (requestItem.attribute instanceof RelationshipAttribute && isPeerAttribute) {
+                await this.consumptionController.attributes.createPeerRelationshipAttribute({
+                    id: responseItem.attributeId,
+                    content: requestItem.attribute,
+                    peer: requestInfo.peer,
+                    sourceReference: requestInfo.id
+                });
+                return;
+            }
+
+            if (requestItem.attribute instanceof RelationshipAttribute && isOwnAttribute) {
+                await this.consumptionController.attributes.createOwnRelationshipAttribute({
+                    id: responseItem.attributeId,
+                    content: requestItem.attribute,
+                    peer: requestInfo.peer,
+                    sourceReference: requestInfo.id
+                });
+                return;
+            }
         }
 
         if (responseItem instanceof AttributeSuccessionAcceptResponseItem && responseItem.successorContent instanceof IdentityAttribute) {
-            const successorParams = AttributeSuccessorParams.from({
+            const predecessor = await this.consumptionController.attributes.getLocalAttribute(responseItem.predecessorId);
+            if (!predecessor || !(predecessor instanceof PeerIdentityAttribute)) return;
+
+            const successorParams = PeerIdentityAttributeSuccessorParams.from({
                 id: responseItem.successorId,
                 content: responseItem.successorContent,
-                shareInfo: LocalAttributeShareInfo.from({
-                    peer: requestInfo.peer,
-                    requestReference: requestInfo.id
-                })
+                sourceReference: requestInfo.id
             });
-            const { predecessor, successor } = await this.consumptionController.attributes.succeedPeerSharedIdentityAttribute(responseItem.predecessorId, successorParams);
-            return new PeerSharedAttributeSucceededEvent(this.currentIdentityAddress.toString(), predecessor, successor);
+            const { predecessor: updatedPredecessor, successor } = await this.consumptionController.attributes.succeedPeerIdentityAttribute(predecessor, successorParams);
+            return new AttributeSucceededEvent(this.currentIdentityAddress.toString(), updatedPredecessor, successor);
         }
-
-        return;
     }
 }

@@ -7,7 +7,6 @@ import {
     FileController,
     RelationshipTemplateController,
     RelationshipTemplateReference,
-    Token,
     TokenContentDeviceSharedSecret,
     TokenContentFile,
     TokenContentRelationshipTemplate,
@@ -18,7 +17,6 @@ import { Inject } from "@nmshd/typescript-ioc";
 import {
     FileReferenceString,
     RelationshipTemplateReferenceString,
-    RuntimeErrors,
     SchemaRepository,
     SchemaValidator,
     TokenReferenceString,
@@ -99,11 +97,7 @@ export class LoadItemFromReferenceUseCase extends UseCase<LoadItemFromReferenceR
     private async handleTokenReference(tokenReference: TokenReference, password?: string): Promise<Result<LoadItemFromReferenceResponse>> {
         const token = await this.tokenController.loadPeerTokenByReference(tokenReference, true, password);
 
-        if (!token.cache) {
-            throw RuntimeErrors.general.cacheEmpty(Token, token.id.toString());
-        }
-
-        const tokenContent = token.cache.content;
+        const tokenContent = token.content;
 
         if (tokenContent instanceof TokenContentRelationshipTemplate) {
             const template = await this.templateController.loadPeerRelationshipTemplateByTokenContent(tokenContent, password);

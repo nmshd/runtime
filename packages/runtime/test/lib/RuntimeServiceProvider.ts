@@ -18,9 +18,8 @@ export interface LaunchConfiguration {
     enableDeciderModule?: boolean;
     deciderModuleAutomations?: AutomationConfig[];
     enableRequestModule?: boolean;
-    enableAttributeListenerModule?: boolean;
     enableNotificationModule?: boolean;
-    enableDefaultRepositoryAttributes?: boolean;
+    enableDefaultOwnIdentityAttributes?: boolean;
     useCorrelator?: boolean;
 }
 
@@ -42,7 +41,6 @@ export class RuntimeServiceProvider {
         modules: {
             decider: { enabled: false, location: "@nmshd/runtime:DeciderModule" },
             request: { enabled: false, location: "@nmshd/runtime:RequestModule" },
-            attributeListener: { enabled: false, location: "@nmshd/runtime:AttributeListenerModule" },
             notification: { enabled: false, location: "@nmshd/runtime:NotificationModule" }
         }
     };
@@ -70,7 +68,6 @@ export class RuntimeServiceProvider {
 
             if (launchConfiguration.enableRequestModule) config.modules.request.enabled = true;
             if (launchConfiguration.enableDeciderModule) config.modules.decider.enabled = true;
-            if (launchConfiguration.enableAttributeListenerModule) config.modules.attributeListener.enabled = true;
             if (launchConfiguration.enableNotificationModule) config.modules.notification.enabled = true;
 
             config.modules.decider.automationConfig = launchConfiguration.deciderModuleAutomations;
@@ -78,7 +75,7 @@ export class RuntimeServiceProvider {
             const runtime = new TestRuntime(
                 config,
                 {
-                    setDefaultRepositoryAttributes: launchConfiguration.enableDefaultRepositoryAttributes ?? false
+                    setDefaultOwnIdentityAttributes: launchConfiguration.enableDefaultOwnIdentityAttributes ?? false
                 },
                 launchConfiguration.useCorrelator ? correlator : undefined
             );

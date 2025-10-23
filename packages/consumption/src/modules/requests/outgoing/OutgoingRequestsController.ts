@@ -8,7 +8,7 @@ import { ConsumptionControllerName } from "../../../consumption/ConsumptionContr
 import { ConsumptionCoreErrors } from "../../../consumption/ConsumptionCoreErrors";
 import { ConsumptionError } from "../../../consumption/ConsumptionError";
 import { ConsumptionIds } from "../../../consumption/ConsumptionIds";
-import { LocalAttributeDeletionInfo, LocalAttributeDeletionStatus } from "../../attributes";
+import { EmittedAttributeDeletionInfo, EmittedAttributeDeletionStatus, OwnIdentityAttribute, OwnRelationshipAttribute, PeerRelationshipAttribute } from "../../attributes";
 import { ValidationResult } from "../../common/ValidationResult";
 import { OutgoingRequestCreatedAndCompletedEvent, OutgoingRequestCreatedEvent, OutgoingRequestStatusChangedEvent } from "../events";
 import { RequestItemProcessorRegistry } from "../itemProcessors/RequestItemProcessorRegistry";
@@ -165,17 +165,17 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
     public async createAndCompleteFromRelationshipTemplateResponse(params: ICreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters): Promise<LocalRequest> {
         const parsedParams = CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters.from(params);
 
-        const peer = parsedParams.responseSource instanceof Relationship ? parsedParams.responseSource.peer.address : parsedParams.responseSource.cache!.createdBy;
+        const peer = parsedParams.responseSource instanceof Relationship ? parsedParams.responseSource.peer.address : parsedParams.responseSource.createdBy;
         const response = parsedParams.response;
         const requestId = response.requestId;
 
-        const templateContent = parsedParams.template.cache!.content;
+        const templateContent = parsedParams.template.content;
         if (!(templateContent instanceof RelationshipTemplateContent)) {
             throw new ConsumptionError("The content of the template is not of type RelationshipTemplateContent hence it's not possible to create a request from it.");
         }
 
         // checking for an active relationship is not secure as in the meantime the relationship could have been accepted
-        const isFromNewRelationship = parsedParams.responseSource instanceof Relationship && parsedParams.responseSource.cache!.auditLog.length === 1;
+        const isFromNewRelationship = parsedParams.responseSource instanceof Relationship && parsedParams.responseSource.auditLog.length === 1;
 
         const requestContent = isFromNewRelationship ? templateContent.onNewRelationship : templateContent.onExistingRelationship;
 
@@ -198,7 +198,8 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         const parsedParams = SentOutgoingRequestParameters.from(params);
         const request = await this._sent(parsedParams.requestId, parsedParams.requestSourceObject);
 
-        await this._setDeletionInfo(request.content);
+        const peer = parsedParams.requestSourceObject.recipients[0].address;
+        await this._setDeletionRequestSent(request.content, peer);
 
         this.eventBus.publish(
             new OutgoingRequestStatusChangedEvent(this.identity.address.toString(), {
@@ -234,7 +235,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         return request;
     }
 
-    private async _setDeletionInfo(request: Request) {
+    private async _setDeletionRequestSent(request: Request, peer: CoreAddress) {
         const requestItemsFromRequest = request.items.filter((item) => item instanceof RequestItem) as RequestItem[];
         const requestItemGroupsFromRequest = request.items.filter((item) => item instanceof RequestItemGroup);
         const requestItemsFromGroups = requestItemGroupsFromRequest.map((group) => group.items).flat();
@@ -242,28 +243,28 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
         const deleteAttributeRequestItems = requestItems.filter((item) => item instanceof DeleteAttributeRequestItem);
         if (deleteAttributeRequestItems.length === 0) return;
 
-        const ownSharedAttributeIds = deleteAttributeRequestItems.map((item) => item.attributeId);
-        for (const ownSharedAttributeId of ownSharedAttributeIds) {
-            const ownSharedAttribute = await this.parent.attributes.getLocalAttribute(ownSharedAttributeId);
-            if (!ownSharedAttribute) {
-                throw new ConsumptionError(`The own shared Attribute ${ownSharedAttributeId} of a created DeleteAttributeRequestItem was not found.`);
+        const forwardedAttributeIds = deleteAttributeRequestItems.map((item) => item.attributeId);
+        for (const forwardedAttributeId of forwardedAttributeIds) {
+            const attribute = await this.parent.attributes.getLocalAttribute(forwardedAttributeId);
+            if (!attribute) {
+                throw new ConsumptionError(`The forwarded Attribute ${forwardedAttributeId} of a created DeleteAttributeRequestItem was not found.`);
             }
 
-            const deletionInfo = LocalAttributeDeletionInfo.from({
-                deletionStatus: LocalAttributeDeletionStatus.DeletionRequestSent,
+            if (!(attribute instanceof OwnIdentityAttribute || attribute instanceof OwnRelationshipAttribute || attribute instanceof PeerRelationshipAttribute)) {
+                throw new ConsumptionError(
+                    `The attribute ${forwardedAttributeId} of a created DeleteAttributeRequestItem is not an OwnIdentityAttribute, an OwnRelationshipAttribute or a PeerRelationshipAttribute.`
+                );
+            }
+            const deletionInfo = EmittedAttributeDeletionInfo.from({
+                deletionStatus: EmittedAttributeDeletionStatus.DeletionRequestSent,
                 deletionDate: CoreDate.utc()
             });
 
-            const predecessors = await this.parent.attributes.getPredecessorsOfAttribute(ownSharedAttributeId);
-            for (const attr of [ownSharedAttribute, ...predecessors]) {
-                if (
-                    attr.deletionInfo?.deletionStatus !== LocalAttributeDeletionStatus.ToBeDeletedByPeer &&
-                    attr.deletionInfo?.deletionStatus !== LocalAttributeDeletionStatus.DeletedByPeer
-                ) {
-                    attr.setDeletionInfo(deletionInfo, this.identity.address);
-                    await this.parent.attributes.updateAttributeUnsafe(attr);
-                }
+            const deletionWasRequestedFromInitialPeer = attribute instanceof OwnRelationshipAttribute && attribute.peer.equals(peer);
+            if (deletionWasRequestedFromInitialPeer) {
+                await this.parent.attributes.setPeerDeletionInfoOfOwnRelationshipAttributeAndPredecessors(attribute, deletionInfo);
             }
+            await this.parent.attributes.setForwardedDeletionInfoOfAttributeAndPredecessors(attribute, deletionInfo, peer);
         }
     }
 
@@ -305,8 +306,7 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
 
         this.assertRequestStatus(request, LocalRequestStatus.Open, LocalRequestStatus.Expired);
 
-        const responseSourceObjectCreationDate =
-            responseSourceObject instanceof Message ? responseSourceObject.cache!.createdAt : responseSourceObject.cache!.auditLog[0].createdAt;
+        const responseSourceObjectCreationDate = responseSourceObject instanceof Message ? responseSourceObject.createdAt : responseSourceObject.auditLog[0].createdAt;
         if (request.status === LocalRequestStatus.Expired && request.isExpired(responseSourceObjectCreationDate)) {
             throw new ConsumptionError("Cannot complete an expired request with a response that was created before the expiration date");
         }

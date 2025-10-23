@@ -34,10 +34,10 @@ describe("Relationships Custom Content", function () {
         const template = await TestUtil.fetchRelationshipTemplateFromTokenReference(recipient, tokenReference);
         const customContent = Serializable.fromAny({ content: "TestToken" });
         const relRecipient = await TestUtil.sendRelationship(recipient, template, customContent);
-        const relRecipientContent = relRecipient.cache!.creationContent;
+        const relRecipientContent = relRecipient.creationContent;
 
         const relSender = await TestUtil.syncUntilHasRelationships(sender);
-        const relSenderRequest = relSender[0].cache!.creationContent;
+        const relSenderRequest = relSender[0].creationContent;
 
         expect(relRecipientContent).toBeInstanceOf(JSONWrapper);
         const recipientToken = relRecipientContent as JSONWrapper;

@@ -24,11 +24,11 @@ describe("IdentityDeletionProcessController", function () {
     });
 
     afterEach(async function () {
-        const activeIdentityDeletionProcess = await account.identityDeletionProcess.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.Approved);
+        const activeIdentityDeletionProcess = await account.identityDeletionProcess.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.Active);
         if (!activeIdentityDeletionProcess) {
             return;
         }
-        if (activeIdentityDeletionProcess.cache!.status === IdentityDeletionProcessStatus.Approved) {
+        if (activeIdentityDeletionProcess.status === IdentityDeletionProcessStatus.Active) {
             await account.identityDeletionProcess.cancelIdentityDeletionProcess(activeIdentityDeletionProcess.id.toString());
         }
     });
@@ -36,28 +36,28 @@ describe("IdentityDeletionProcessController", function () {
     test("should initiate an IdentityDeletionProcess", async function () {
         const result = await account.identityDeletionProcess.initiateIdentityDeletionProcess();
         expect(result).toBeDefined();
-        expect(result.cache!.status).toBe(IdentityDeletionProcessStatus.Approved);
+        expect(result.status).toBe(IdentityDeletionProcessStatus.Active);
     });
 
     test("should get an IdentityDeletionProcess", async function () {
         const identityDeletionProcess = await account.identityDeletionProcess.initiateIdentityDeletionProcess();
         const result = await account.identityDeletionProcess.getIdentityDeletionProcess(identityDeletionProcess.id.toString());
         expect(result).toBeDefined();
-        expect(result!.cache!.status).toBe(IdentityDeletionProcessStatus.Approved);
+        expect(result!.status).toBe(IdentityDeletionProcessStatus.Active);
     });
 
     test("should cancel an IdentityDeletionProcess", async function () {
         const identityDeletionProcess = await account.identityDeletionProcess.initiateIdentityDeletionProcess();
         const result = await account.identityDeletionProcess.cancelIdentityDeletionProcess(identityDeletionProcess.id.toString());
         expect(result).toBeDefined();
-        expect(result.cache!.status).toBe(IdentityDeletionProcessStatus.Cancelled);
+        expect(result.status).toBe(IdentityDeletionProcessStatus.Cancelled);
     });
 
     test("should get the active IdentityDeletionProcess", async function () {
         const cancelledIdentityDeletionProcess = await account.identityDeletionProcess.initiateIdentityDeletionProcess();
         await account.identityDeletionProcess.cancelIdentityDeletionProcess(cancelledIdentityDeletionProcess.id.toString());
         const activeIdentityDeletionProcess = await account.identityDeletionProcess.initiateIdentityDeletionProcess();
-        const result = await account.identityDeletionProcess.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.Approved);
+        const result = await account.identityDeletionProcess.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.Active);
         expect(activeIdentityDeletionProcess.toJSON()).toStrictEqual(result!.toJSON());
     });
 
@@ -83,8 +83,8 @@ describe("IdentityDeletionProcessController", function () {
         expect(result).toBeDefined();
         expect(result).toHaveLength(2);
         expect(result[0].id.toString()).toBe(cancelledIdentityDeletionProcess.id.toString());
-        expect(result[0].cache!.status).toBe(IdentityDeletionProcessStatus.Cancelled);
+        expect(result[0].status).toBe(IdentityDeletionProcessStatus.Cancelled);
         expect(result[1].id.toString()).toBe(activeIdentityDeletionProcess.id.toString());
-        expect(result[1].cache!.status).toBe(IdentityDeletionProcessStatus.Approved);
+        expect(result[1].status).toBe(IdentityDeletionProcessStatus.Active);
     });
 });

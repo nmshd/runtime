@@ -44,36 +44,36 @@ describe("IQL Query", () => {
         await establishRelationship(sTransportServices, rTransportServices);
 
         rLocalAttribute1 = (
-            await rConsumptionServices.attributes.createRepositoryAttribute({
+            await rConsumptionServices.attributes.createOwnIdentityAttribute({
                 content: {
                     value: {
                         "@type": "GivenName",
                         value: "aGivenName1"
                     },
-                    tags: ["language:de"]
+                    tags: ["x:language:de"]
                 }
             })
         ).value;
 
         rLocalAttribute2 = (
-            await rConsumptionServices.attributes.createRepositoryAttribute({
+            await rConsumptionServices.attributes.createOwnIdentityAttribute({
                 content: {
                     value: {
                         "@type": "GivenName",
                         value: "aGivenName2"
                     },
-                    tags: ["language:en"]
+                    tags: ["x:language:en"]
                 }
             })
         ).value;
 
-        await rConsumptionServices.attributes.createRepositoryAttribute({
+        await rConsumptionServices.attributes.createOwnIdentityAttribute({
             content: {
                 value: {
                     "@type": "GivenName",
                     value: "aGivenName3"
                 },
-                tags: ["content:someContent"]
+                tags: ["x:content:someContent"]
             }
         });
 
@@ -85,7 +85,7 @@ describe("IQL Query", () => {
                         mustBeAccepted: false,
                         query: {
                             "@type": "IQLQuery",
-                            queryString: "#language:de"
+                            queryString: "#x:language:de"
                         }
                     }
                 ],

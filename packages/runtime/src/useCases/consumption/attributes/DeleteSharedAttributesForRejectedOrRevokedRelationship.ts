@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController } from "@nmshd/consumption";
+import { AttributesController, OwnIdentityAttribute, OwnRelationshipAttribute, PeerRelationshipAttribute } from "@nmshd/consumption";
 import { CoreId } from "@nmshd/core-types";
 import { AccountController, Relationship, RelationshipsController, RelationshipStatus } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
@@ -35,15 +35,28 @@ export class DeleteSharedAttributesForRejectedOrRevokedRelationshipUseCase exten
             return Result.fail(RuntimeErrors.relationships.isNeitherRejectedNorRevoked());
         }
 
-        const sharedAttributes = await this.attributesController.getLocalAttributes({ "shareInfo.peer": relationship.peer.address.toString() });
+        const sharedAttributes = await this.attributesController.getLocalAttributes({
+            peer: relationship.peer.address.toString()
+        });
 
         for (const sharedAttribute of sharedAttributes) {
-            const validationResult = await this.attributesController.validateFullAttributeDeletionProcess(sharedAttribute);
+            const validationResult = await this.attributesController.validateFullAttributeDeletionProcess(sharedAttribute.id);
             if (validationResult.isError()) {
                 return Result.fail(validationResult.error);
             }
 
             await this.attributesController.executeFullAttributeDeletionProcess(sharedAttribute);
+        }
+
+        const forwardedAttributes = (await this.attributesController.getLocalAttributesExchangedWithPeer(
+            relationship.peer.address,
+            { "@type": { $in: ["OwnIdentityAttribute", "OwnRelationshipAttribute", "PeerRelationshipAttribute"] } },
+            undefined,
+            true
+        )) as (OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute)[];
+
+        for (const attribute of forwardedAttributes) {
+            await this.attributesController.removeForwardingDetailsFromAttribute(attribute, relationship.peer.address);
         }
 
         await this.accountController.syncDatawallet();

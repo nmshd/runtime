@@ -170,7 +170,7 @@ export class TestUtil {
         const accountController = new AccountController(transport, db, transport.config);
         await accountController.init();
 
-        const consumptionController = await new ConsumptionController(transport, accountController, customConsumptionConfig ?? { setDefaultRepositoryAttributes: false }).init(
+        const consumptionController = await new ConsumptionController(transport, accountController, customConsumptionConfig ?? { setDefaultOwnIdentityAttributes: false }).init(
             requestItemProcessors,
             notificationItemProcessors
         );
@@ -235,11 +235,11 @@ export class TestUtil {
 
         const receivedToken = await to.tokens.loadPeerTokenByReference(tokenRef, false);
 
-        if (!(receivedToken.cache!.content instanceof TokenContentRelationshipTemplate)) {
+        if (!(receivedToken.content instanceof TokenContentRelationshipTemplate)) {
             throw new Error("token content not instanceof TokenContentRelationshipTemplate");
         }
 
-        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByTokenContent(receivedToken.cache!.content);
+        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByTokenContent(receivedToken.content);
 
         const relRequest = await to.relationships.sendRelationship({
             template: templateTo,
@@ -436,11 +436,11 @@ export class TestUtil {
     public static async fetchRelationshipTemplateFromTokenReference(account: AccountController, tokenReference: string): Promise<RelationshipTemplate> {
         const receivedToken = await account.tokens.loadPeerTokenByReference(TokenReference.from(tokenReference), false);
 
-        if (!(receivedToken.cache!.content instanceof TokenContentRelationshipTemplate)) {
+        if (!(receivedToken.content instanceof TokenContentRelationshipTemplate)) {
             throw new Error("token content not instanceof TokenContentRelationshipTemplate");
         }
 
-        const template = await account.relationshipTemplates.loadPeerRelationshipTemplateByTokenContent(receivedToken.cache!.content);
+        const template = await account.relationshipTemplates.loadPeerRelationshipTemplateByTokenContent(receivedToken.content);
         return template;
     }
 

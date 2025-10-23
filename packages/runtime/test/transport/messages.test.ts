@@ -8,14 +8,12 @@ import {
     GetMessagesQuery,
     IdentityDeletionProcessStatus,
     IncomingRequestReceivedEvent,
-    LocalAttributeDeletionStatus,
     LocalRequestDTO,
     LocalRequestStatus,
     MessageReceivedEvent,
     MessageSentEvent,
     MessageWasReadAtChangedEvent,
     OutgoingRequestStatusChangedEvent,
-    OwnSharedAttributeSucceededEvent,
     PeerDeletionCancelledEvent,
     PeerToBeDeletedEvent,
     RelationshipStatus
@@ -28,7 +26,7 @@ import {
     exchangeMessage,
     exchangeMessageWithAttachment,
     exchangeTemplate,
-    executeFullCreateAndShareRepositoryAttributeFlow,
+    executeFullCreateAndShareOwnIdentityAttributeFlow,
     QueryParamConditions,
     reactivateTerminatedRelationship,
     RuntimeServiceProvider,
@@ -53,8 +51,7 @@ let client5: TestRuntimeServices;
 beforeAll(async () => {
     const runtimeServices = await serviceProvider.launch(5, {
         enableRequestModule: true,
-        enableDeciderModule: true,
-        enableNotificationModule: true
+        enableDeciderModule: true
     });
     client1 = runtimeServices[0];
     client2 = runtimeServices[1];
@@ -87,9 +84,9 @@ describe("Messaging", () => {
             recipients: [client2.address],
             content: {
                 "@type": "Mail",
-                body: "b",
+                body: "aBody",
                 cc: [],
-                subject: "a",
+                subject: "aSubject",
                 to: [client2.address]
             },
             attachments: [fileId]
@@ -107,8 +104,8 @@ describe("Messaging", () => {
         expect(message.id).toStrictEqual(messageId);
         expect(message.content).toStrictEqual({
             "@type": "Mail",
-            subject: "This is the mail subject",
-            body: "This is the mail body",
+            subject: "aSubject",
+            body: "aBody",
             cc: [],
             to: [client2.address]
         });
@@ -127,8 +124,8 @@ describe("Messaging", () => {
         expect(message.id).toStrictEqual(messageId);
         expect(message.content).toStrictEqual({
             "@type": "Mail",
-            subject: "This is the mail subject",
-            body: "This is the mail body",
+            subject: "aSubject",
+            body: "aBody",
             cc: [],
             to: [client2.address]
         });
@@ -148,9 +145,9 @@ describe("Messaging", () => {
             recipients: [client2.address, client3.address],
             content: {
                 "@type": "Mail",
-                body: "b",
+                body: "aBody",
                 cc: [client3.address],
-                subject: "a",
+                subject: "aSubject",
                 to: [client2.address]
             },
             attachments: [fileId]
@@ -215,8 +212,8 @@ describe("Message errors", () => {
             content: {
                 "@type": "Mail",
                 to: [],
-                subject: "A Subject",
-                body: "A Body"
+                subject: "aSubject",
+                body: "aBody"
             }
         });
         expect(result).toBeAnError("Mail.to:Array :: may not be empty", "error.runtime.requestDeserialization");
@@ -227,8 +224,8 @@ describe("Message errors", () => {
             recipients: [client2.address],
             content: {
                 "@type": "Mail",
-                subject: "A Subject",
-                body: "A Body"
+                subject: "aSubject",
+                body: "aBody"
             } as any
         });
         expect(result).toBeAnError("Mail.to :: Value is not defined", "error.runtime.requestDeserialization");
@@ -370,6 +367,7 @@ describe("Message errors", () => {
     test("should throw correct error for trying to send a Message with a Request content that doesn't match the content of the LocalRequest", async () => {
         const wrongRequestItem = {
             "@type": "AuthenticationRequestItem",
+            title: "aTitle",
             mustBeAccepted: true
         };
         const result = await client1.transport.messages.sendMessage({
@@ -483,9 +481,9 @@ describe("Message errors", () => {
                 recipients: [client4.address, client5.address],
                 content: {
                     "@type": "Mail",
-                    body: "b",
+                    body: "aBody",
                     cc: [client4.address],
-                    subject: "a",
+                    subject: "aSubject",
                     to: [client5.address]
                 }
             });
@@ -510,9 +508,9 @@ describe("Message errors", () => {
                 recipients: [client2.address, client4.address],
                 content: {
                     "@type": "Mail",
-                    body: "b",
+                    body: "aBody",
                     cc: [client2.address],
-                    subject: "a",
+                    subject: "aSubject",
                     to: [client4.address]
                 }
             });
@@ -534,9 +532,9 @@ describe("Message errors", () => {
                 recipients: [client3.address],
                 content: {
                     "@type": "Mail",
-                    body: "b",
+                    body: "aBody",
                     cc: [],
-                    subject: "a",
+                    subject: "aSubject",
                     to: [client3.address]
                 }
             });
@@ -575,7 +573,7 @@ describe("Message errors", () => {
                 return;
             }
             let abortResult;
-            if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Approved) {
+            if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Active) {
                 abortResult = await client2.transport.identityDeletionProcesses.cancelIdentityDeletionProcess();
             }
             await syncUntilHasEvent(client1, PeerDeletionCancelledEvent);
@@ -648,17 +646,17 @@ describe("Postponed Notifications via Messages", () => {
 
             const postponedMessages = await syncUntilHasMessages(client5.transport);
             expect(postponedMessages).toHaveLength(1);
-            await client5.eventBus.waitForRunningEventHandlers();
+            await client5.consumption.notifications.receivedNotification({ messageId: postponedMessages[0].id });
             const postponedNotification = await client5.consumption.notifications.getNotification({ id: notificationId.toString() });
             expect(postponedNotification).toBeSuccessful();
         });
 
         test("should be able to receive Notifications sent on a terminated Relationship in the right order after the Relationship was reactivated", async () => {
-            const ownSharedIdentityAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(client1, client5, {
+            const ownIdentityAttribute = await executeFullCreateAndShareOwnIdentityAttributeFlow(client1, client5, {
                 content: {
                     value: {
                         "@type": "GivenName",
-                        value: "A given name"
+                        value: "aGivenName"
                     }
                 }
             });
@@ -667,30 +665,29 @@ describe("Postponed Notifications via Messages", () => {
             const terminatedRelationship = (await syncUntilHasRelationships(client5.transport))[0];
             expect(terminatedRelationship.status).toBe(RelationshipStatus.Terminated);
 
-            const { successor: successorOfRepositoryAttribute } = (
-                await client1.consumption.attributes.succeedRepositoryAttribute({
-                    predecessorId: (await client1.consumption.attributes.getRepositoryAttributes({})).value[0].id,
+            const { successor: successorOfOwnIdentityAttribute } = (
+                await client1.consumption.attributes.succeedOwnIdentityAttribute({
+                    predecessorId: (await client1.consumption.attributes.getOwnIdentityAttributes({})).value[0].id,
                     successorContent: {
                         value: {
                             "@type": "GivenName",
-                            value: "A new given name"
+                            value: "aNewGivenName"
                         }
                     }
                 })
             ).value;
 
             const notifyAboutSuccessionResult = (
-                await client1.consumption.attributes.notifyPeerAboutRepositoryAttributeSuccession({ attributeId: successorOfRepositoryAttribute.id, peer: client5.address })
+                await client1.consumption.attributes.notifyPeerAboutOwnIdentityAttributeSuccession({ attributeId: successorOfOwnIdentityAttribute.id, peer: client5.address })
             ).value;
-            await client1.eventBus.waitForEvent(OwnSharedAttributeSucceededEvent);
             await client5.transport.account.syncEverything();
             const successionNotificationNotYetReceived = await client5.consumption.notifications.getNotification({ id: notifyAboutSuccessionResult.notificationId });
             expect(successionNotificationNotYetReceived).toBeAnError(/.*/, "error.transport.recordNotFound");
 
-            const notifyAboutDeletionResult = (await client1.consumption.attributes.deleteOwnSharedAttributeAndNotifyPeer({ attributeId: ownSharedIdentityAttribute.id })).value;
+            const notifyAboutDeletionResult = (await client1.consumption.attributes.deleteAttributeAndNotify({ attributeId: ownIdentityAttribute.id })).value;
             await client1.eventBus.waitForEvent(AttributeDeletedEvent);
             await client5.transport.account.syncEverything();
-            const deletionNotificationNotYetReceived = await client5.consumption.notifications.getNotification({ id: notifyAboutDeletionResult.notificationId! });
+            const deletionNotificationNotYetReceived = await client5.consumption.notifications.getNotification({ id: notifyAboutDeletionResult.notificationIds[0] });
             expect(deletionNotificationNotYetReceived).toBeAnError(/.*/, "error.transport.recordNotFound");
 
             await client1.transport.relationships.requestRelationshipReactivation({ relationshipId: relationshipId });
@@ -703,19 +700,22 @@ describe("Postponed Notifications via Messages", () => {
 
             const postponedMessages = await syncUntilHasMessages(client5.transport);
             expect(postponedMessages).toHaveLength(2);
-            await client5.eventBus.waitForRunningEventHandlers();
-            const postponedSuccessionNotification = await client5.consumption.notifications.getNotification({ id: notifyAboutSuccessionResult.notificationId });
-            expect(postponedSuccessionNotification).toBeSuccessful();
-            const postponedDeletionNotification = await client5.consumption.notifications.getNotification({ id: notifyAboutDeletionResult.notificationId! });
-            expect(postponedDeletionNotification).toBeSuccessful();
 
-            const peerSharedIdentityAttribute = (await client5.consumption.attributes.getAttribute({ id: ownSharedIdentityAttribute.id })).value;
-            assert(peerSharedIdentityAttribute.succeededBy);
-            assert(peerSharedIdentityAttribute.deletionInfo?.deletionDate);
-            assert(peerSharedIdentityAttribute.deletionInfo.deletionStatus, LocalAttributeDeletionStatus.DeletedByOwner);
+            const postponedSuccessionNotification = (await client5.consumption.notifications.receivedNotification({ messageId: postponedMessages[0].id })).value;
+            const processedSuccessionNotificationResult = await client5.consumption.notifications.processNotificationById({ notificationId: postponedSuccessionNotification.id });
+            expect(processedSuccessionNotificationResult).toBeSuccessful();
 
-            const timeOfSuccession = (await client5.consumption.attributes.getAttribute({ id: peerSharedIdentityAttribute.succeededBy })).value.createdAt;
-            const timeOfDeletionByOwner = peerSharedIdentityAttribute.deletionInfo.deletionDate;
+            const postponedDeletionNotification = (await client5.consumption.notifications.receivedNotification({ messageId: postponedMessages[1].id })).value;
+            const processedDeletionNotificationResult = await client5.consumption.notifications.processNotificationById({ notificationId: postponedDeletionNotification.id });
+            expect(processedDeletionNotificationResult).toBeSuccessful();
+
+            const peerIdentityAttribute = (await client5.consumption.attributes.getAttribute({ id: ownIdentityAttribute.id })).value;
+            assert(peerIdentityAttribute.succeededBy);
+            assert(peerIdentityAttribute.deletionInfo?.deletionDate);
+            assert(peerIdentityAttribute.deletionInfo.deletionStatus, "DeletedByEmitter");
+
+            const timeOfSuccession = (await client5.consumption.attributes.getAttribute({ id: peerIdentityAttribute.succeededBy })).value.createdAt;
+            const timeOfDeletionByOwner = peerIdentityAttribute.deletionInfo.deletionDate;
             expect(CoreDate.from(timeOfAcceptanceOfReactivation).isBefore(CoreDate.from(timeOfSuccession))).toBe(true);
             expect(CoreDate.from(timeOfSuccession).isBefore(CoreDate.from(timeOfDeletionByOwner))).toBe(true);
         });
@@ -734,7 +734,7 @@ describe("Postponed Notifications via Messages", () => {
                 return;
             }
             let abortResult;
-            if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Approved) {
+            if (activeIdentityDeletionProcess.value.status === IdentityDeletionProcessStatus.Active) {
                 abortResult = await client1.transport.identityDeletionProcesses.cancelIdentityDeletionProcess();
             }
             await syncUntilHasEvent(client5, PeerDeletionCancelledEvent, (e) => e.data.id === relationshipId);
@@ -787,9 +787,9 @@ describe("Mark Message as un-/read", () => {
             recipients: [client2.address],
             content: {
                 "@type": "Mail",
-                body: "A body",
+                body: "aBody",
                 cc: [],
-                subject: "A subject",
+                subject: "aSubject",
                 to: [client2.address]
             }
         });

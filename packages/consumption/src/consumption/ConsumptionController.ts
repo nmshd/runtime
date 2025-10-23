@@ -4,27 +4,24 @@ import {
     CreateAttributeRequestItem,
     DeleteAttributeRequestItem,
     FormFieldRequestItem,
-    FreeTextRequestItem,
-    OwnSharedAttributeDeletedByOwnerNotificationItem,
-    PeerSharedAttributeDeletedByPeerNotificationItem,
-    PeerSharedAttributeSucceededNotificationItem,
+    ForwardedAttributeDeletedByPeerNotificationItem,
+    OwnAttributeDeletedByOwnerNotificationItem,
+    PeerAttributeSucceededNotificationItem,
+    PeerRelationshipAttributeDeletedByPeerNotificationItem,
     ProposeAttributeRequestItem,
     ReadAttributeRequestItem,
-    RegisterAttributeListenerRequestItem,
     ShareAttributeRequestItem,
-    ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem,
     TransferFileOwnershipRequestItem
 } from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { AccountController, Transport } from "@nmshd/transport";
 import {
-    AttributeListenersController,
     AttributesController,
     CreateAttributeRequestItemProcessor,
     DeleteAttributeRequestItemProcessor,
     DraftsController,
     FormFieldRequestItemProcessor,
-    FreeTextRequestItemProcessor,
+    ForwardedAttributeDeletedByPeerNotificationItemProcessor,
     GenericRequestItemProcessor,
     IdentityMetadataController,
     IncomingRequestsController,
@@ -33,18 +30,16 @@ import {
     NotificationItemProcessorRegistry,
     NotificationsController,
     OutgoingRequestsController,
-    OwnSharedAttributeDeletedByOwnerNotificationItemProcessor,
-    PeerSharedAttributeDeletedByPeerNotificationItemProcessor,
-    PeerSharedAttributeSucceededNotificationItemProcessor,
+    OwnAttributeDeletedByOwnerNotificationItemProcessor,
+    PeerAttributeSucceededNotificationItemProcessor,
+    PeerRelationshipAttributeDeletedByPeerNotificationItemProcessor,
     ProposeAttributeRequestItemProcessor,
     ReadAttributeRequestItemProcessor,
-    RegisterAttributeListenerRequestItemProcessor,
     RequestItemConstructor,
     RequestItemProcessorConstructor,
     RequestItemProcessorRegistry,
     SettingsController,
     ShareAttributeRequestItemProcessor,
-    ThirdPartyRelationshipAttributeDeletedByPeerNotificationItemProcessor,
     TransferFileOwnershipRequestItemProcessor
 } from "../modules";
 import { ConsumptionConfig } from "./ConsumptionConfig";
@@ -81,11 +76,6 @@ export class ConsumptionController {
         return this._settings;
     }
 
-    private _attributeListeners: AttributeListenersController;
-    public get attributeListeners(): AttributeListenersController {
-        return this._attributeListeners;
-    }
-
     private _notifications: NotificationsController;
     public get notifications(): NotificationsController {
         return this._notifications;
@@ -104,7 +94,7 @@ export class ConsumptionController {
             this,
             this.transport.eventBus,
             this.accountController.identity,
-            this.consumptionConfig.setDefaultRepositoryAttributes
+            this.consumptionConfig.setDefaultOwnIdentityAttributes
         ).init();
         this._drafts = await new DraftsController(this).init();
 
@@ -148,7 +138,6 @@ export class ConsumptionController {
         this._identityMetadata = await new IdentityMetadataController(this).init();
 
         this._settings = await new SettingsController(this).init();
-        this._attributeListeners = await new AttributeListenersController(this, this.transport.eventBus, this.accountController.identity).init();
         return this;
     }
 
@@ -161,8 +150,6 @@ export class ConsumptionController {
             [ProposeAttributeRequestItem, ProposeAttributeRequestItemProcessor],
             [ConsentRequestItem, GenericRequestItemProcessor],
             [AuthenticationRequestItem, GenericRequestItemProcessor],
-            [RegisterAttributeListenerRequestItem, RegisterAttributeListenerRequestItemProcessor],
-            [FreeTextRequestItem, FreeTextRequestItemProcessor],
             [FormFieldRequestItem, FormFieldRequestItemProcessor],
             [TransferFileOwnershipRequestItem, TransferFileOwnershipRequestItemProcessor]
         ]);
@@ -170,10 +157,10 @@ export class ConsumptionController {
 
     private getDefaultNotificationItemProcessors() {
         return new Map<NotificationItemConstructor, NotificationItemProcessorConstructor>([
-            [PeerSharedAttributeSucceededNotificationItem, PeerSharedAttributeSucceededNotificationItemProcessor],
-            [OwnSharedAttributeDeletedByOwnerNotificationItem, OwnSharedAttributeDeletedByOwnerNotificationItemProcessor],
-            [PeerSharedAttributeDeletedByPeerNotificationItem, PeerSharedAttributeDeletedByPeerNotificationItemProcessor],
-            [ThirdPartyRelationshipAttributeDeletedByPeerNotificationItem, ThirdPartyRelationshipAttributeDeletedByPeerNotificationItemProcessor]
+            [PeerAttributeSucceededNotificationItem, PeerAttributeSucceededNotificationItemProcessor],
+            [OwnAttributeDeletedByOwnerNotificationItem, OwnAttributeDeletedByOwnerNotificationItemProcessor],
+            [PeerRelationshipAttributeDeletedByPeerNotificationItem, PeerRelationshipAttributeDeletedByPeerNotificationItemProcessor],
+            [ForwardedAttributeDeletedByPeerNotificationItem, ForwardedAttributeDeletedByPeerNotificationItemProcessor]
         ]);
     }
 
@@ -182,7 +169,6 @@ export class ConsumptionController {
         await this.outgoingRequests.deleteRequestsToPeer(peer);
         await this.incomingRequests.deleteRequestsFromPeer(peer);
         await this.settings.deleteSettingsForRelationship(relationshipId);
-        await this.attributeListeners.deletePeerAttributeListeners(peer);
         await this.notifications.deleteNotificationsExchangedWithPeer(peer);
         await this.identityMetadata.deleteIdentityMetadataReferencedWithPeer(peer);
     }

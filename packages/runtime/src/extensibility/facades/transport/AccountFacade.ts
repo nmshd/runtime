@@ -78,13 +78,6 @@ export class AccountFacade {
         return await this.loadItemFromReferenceUseCase.execute(request);
     }
 
-    /**
-     * @deprecated use {@link loadItemFromReference} instead
-     */
-    public async loadItemFromTruncatedReference(request: LoadItemFromReferenceRequest): Promise<Result<LoadItemFromReferenceResponse, ApplicationError>> {
-        return await this.loadItemFromReferenceUseCase.execute(request);
-    }
-
     public async checkIfIdentityIsDeleted(): Promise<Result<CheckIfIdentityIsDeletedResponse, ApplicationError>> {
         return await this.checkIfIdentityIsDeletedUseCase.execute();
     }

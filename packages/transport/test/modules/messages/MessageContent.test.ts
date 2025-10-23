@@ -46,7 +46,7 @@ describe("MessageContent", function () {
             const messages = await sender.messages.getMessagesByAddress(recipient1.identity.address);
             expect(messages).toHaveLength(1);
             const message = messages[0];
-            const content = message.cache!.content as any;
+            const content = message.content as any;
             expect(content).toBeInstanceOf(JSONWrapper);
             expect(content.value.any).toBe("content");
             expect(content.value.submitted).toBe(true);
@@ -57,9 +57,9 @@ describe("MessageContent", function () {
             expect(messages).toHaveLength(1);
             const message = messages[0];
             const object = message.toJSON() as any;
-            expect(object.cache.content).toBeDefined();
-            expect(object.cache.content.any).toBe("content");
-            expect(object.cache.content.submitted).toBe(true);
+            expect(object.content).toBeDefined();
+            expect(object.content.any).toBe("content");
+            expect(object.content.submitted).toBe(true);
         });
 
         test("should correctly store the message (recipient)", async function () {
@@ -68,7 +68,7 @@ describe("MessageContent", function () {
             const messages = await recipient1.messages.getMessagesByAddress(sender.identity.address);
             expect(messages).toHaveLength(1);
             const message = messages[0];
-            const content = message.cache!.content as any;
+            const content = message.content as any;
             expect(content).toBeInstanceOf(JSONWrapper);
             expect(content.value.any).toBe("content");
             expect(content.value.submitted).toBe(true);
@@ -79,17 +79,17 @@ describe("MessageContent", function () {
             expect(messages).toHaveLength(1);
             const message = messages[0];
             const object = message.toJSON() as any;
-            expect(object.cache.content).toBeDefined();
-            expect(object.cache.content.any).toBe("content");
-            expect(object.cache.content.submitted).toBe(true);
+            expect(object.content).toBeDefined();
+            expect(object.content.any).toBe("content");
+            expect(object.content.submitted).toBe(true);
         });
     });
 
     describe("Mail", function () {
         test("should send the message", async function () {
             const value = Mail.from({
-                body: "Test",
-                subject: "Test Subject",
+                body: "aBody",
+                subject: "aSubject",
                 to: [recipient1.identity.address]
             });
             const message = await TestUtil.sendMessage(sender, recipient1, value);
@@ -101,10 +101,10 @@ describe("MessageContent", function () {
             const messages = await sender.messages.getMessagesByAddress(recipient1.identity.address);
             expect(messages).toHaveLength(2);
             const message = messages[1];
-            expect(message.cache!.content).toBeInstanceOf(Mail);
-            const content = message.cache!.content as Mail;
-            expect(content.body).toBe("Test");
-            expect(content.subject).toBe("Test Subject");
+            expect(message.content).toBeInstanceOf(Mail);
+            const content = message.content as Mail;
+            expect(content.body).toBe("aBody");
+            expect(content.subject).toBe("aSubject");
             expect(content.to).toBeInstanceOf(Array);
             expect(content.to[0]).toBeInstanceOf(CoreAddress);
             expect(content.to[0].toString()).toBe(recipient1.identity.address.toString());
@@ -116,9 +116,9 @@ describe("MessageContent", function () {
             const messages = await recipient1.messages.getMessagesByAddress(sender.identity.address);
             expect(messages).toHaveLength(2);
             const message = messages[1];
-            const content = message.cache!.content as Mail;
-            expect(content.body).toBe("Test");
-            expect(content.subject).toBe("Test Subject");
+            const content = message.content as Mail;
+            expect(content.body).toBe("aBody");
+            expect(content.subject).toBe("aSubject");
             expect(content.to).toBeInstanceOf(Array);
             expect(content.to[0]).toBeInstanceOf(CoreAddress);
             expect(content.to[0].toString()).toBe(recipient1.identity.address.toString());

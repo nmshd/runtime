@@ -18,7 +18,7 @@ import {
     establishRelationship,
     exchangeAndAcceptRequestByMessage,
     exchangeMessageWithRequest,
-    executeFullCreateAndShareRepositoryAttributeFlow,
+    executeFullCreateAndShareOwnIdentityAttributeFlow,
     MockEventBus,
     RuntimeServiceProvider,
     sendMessageWithRequest,
@@ -61,7 +61,7 @@ beforeAll(async () => {
 
 beforeEach(async () => {
     await cleanupAttributes([sRuntimeServices, rRuntimeServices]);
-    const sOwnSharedIdentityAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(sRuntimeServices, rRuntimeServices, {
+    const sOwnIdentityAttribute = await executeFullCreateAndShareOwnIdentityAttributeFlow(sRuntimeServices, rRuntimeServices, {
         content: {
             value: {
                 "@type": "GivenName",
@@ -70,7 +70,7 @@ beforeEach(async () => {
         }
     });
 
-    attributeId = sOwnSharedIdentityAttribute.id;
+    attributeId = sOwnIdentityAttribute.id;
 
     requestContent = {
         content: {
@@ -116,7 +116,7 @@ describe("DeleteAttributeRequestItemDVO", () => {
         const requestItemDVO = dvo.request.content.items[0] as DeleteAttributeRequestItemDVO;
         expect(requestItemDVO.type).toBe("DeleteAttributeRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(false);
-        expect(requestItemDVO.attribute.type).toBe("SharedToPeerAttributeDVO");
+        expect(requestItemDVO.attribute.type).toBe("OwnIdentityAttributeDVO");
         const value = requestItemDVO.attribute.value as AbstractStringJSON;
         expect(value["@type"]).toBe("GivenName");
         expect(value.value).toBe("A given name");
@@ -149,7 +149,7 @@ describe("DeleteAttributeRequestItemDVO", () => {
         const requestItemDVO = dvo.request.content.items[0] as DeleteAttributeRequestItemDVO;
         expect(requestItemDVO.type).toBe("DeleteAttributeRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(true);
-        expect(requestItemDVO.attribute.type).toBe("PeerAttributeDVO");
+        expect(requestItemDVO.attribute.type).toBe("PeerIdentityAttributeDVO");
         const value = requestItemDVO.attribute.value as AbstractStringJSON;
         expect(value["@type"]).toBe("GivenName");
         expect(value.value).toBe("A given name");
@@ -224,7 +224,7 @@ describe("DeleteAttributeRequestItemDVO", () => {
         const requestItemDVO = dvo.request.content.items[0] as DeleteAttributeRequestItemDVO;
         expect(requestItemDVO.type).toBe("DeleteAttributeRequestItemDVO");
         expect(requestItemDVO.isDecidable).toBe(false);
-        expect(requestItemDVO.attribute.type).toBe("SharedToPeerAttributeDVO");
+        expect(requestItemDVO.attribute.type).toBe("OwnIdentityAttributeDVO");
         const value = requestItemDVO.attribute.value as AbstractStringJSON;
         expect(value["@type"]).toBe("GivenName");
         expect(value.value).toBe("A given name");

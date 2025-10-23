@@ -21,23 +21,19 @@ describe("MessageController", function () {
 
     function expectValidMessages(sentMessage: Message, receivedMessage: Message, nowMinusSeconds: CoreDate) {
         expect(sentMessage.id.toString()).toBe(receivedMessage.id.toString());
-        const sentRelIds = sentMessage.cache!.recipients.map((recipient) => recipient.relationshipId!.toString());
-        const receivedRelIds = receivedMessage.cache!.recipients.map((recipient) => recipient.relationshipId?.toString());
+        const sentRelIds = sentMessage.recipients.map((recipient) => recipient.relationshipId!.toString());
+        const receivedRelIds = receivedMessage.recipients.map((recipient) => recipient.relationshipId?.toString());
         expect(sentRelIds).toContainEqual(receivedRelIds[0]);
-        expect(sentMessage.cache).toBeDefined();
-        expect(sentMessage.cachedAt?.isSameOrAfter(nowMinusSeconds)).toBe(true);
-        expect(sentMessage.cache?.createdBy.toString()).toBe(sender.identity.address.toString());
-        expect(sentMessage.cache?.createdByDevice.toString()).toBe(sender.activeDevice.id.toString());
-        expect(sentMessage.cache?.createdAt.isSameOrAfter(nowMinusSeconds)).toBe(true);
-        expect(receivedMessage.cache).toBeDefined();
-        expect(receivedMessage.cachedAt?.isSameOrAfter(nowMinusSeconds)).toBe(true);
-        expect(receivedMessage.cache?.createdBy.toString()).toBe(sender.identity.address.toString());
-        expect(receivedMessage.cache?.createdByDevice.toString()).toBe(sender.activeDevice.id.toString());
-        expect(receivedMessage.cache?.createdAt.isSameOrAfter(nowMinusSeconds)).toBe(true);
-        expect(sentMessage.cache!.recipients.map((r) => r.toString())).toContainEqual(receivedMessage.cache!.recipients[0].toString());
-        expect(sentMessage.cache!.attachments.map((r) => r.toString())).toStrictEqual(receivedMessage.cache!.attachments.map((r) => r.toString()));
-        expect(sentMessage.cache!.receivedByEveryone).toBe(receivedMessage.cache!.receivedByEveryone);
-        expect(sentMessage.cache!.content.serialize()).toBe(receivedMessage.cache!.content.serialize());
+        expect(sentMessage.createdBy.toString()).toBe(sender.identity.address.toString());
+        expect(sentMessage.createdByDevice.toString()).toBe(sender.activeDevice.id.toString());
+        expect(sentMessage.createdAt.isSameOrAfter(nowMinusSeconds)).toBe(true);
+        expect(receivedMessage.createdBy.toString()).toBe(sender.identity.address.toString());
+        expect(receivedMessage.createdByDevice.toString()).toBe(sender.activeDevice.id.toString());
+        expect(receivedMessage.createdAt.isSameOrAfter(nowMinusSeconds)).toBe(true);
+        expect(sentMessage.recipients.map((r) => r.toString())).toContainEqual(receivedMessage.recipients[0].toString());
+        expect(sentMessage.attachments.map((r) => r.toString())).toStrictEqual(receivedMessage.attachments.map((r) => r.toString()));
+        expect(sentMessage.receivedByEveryone).toBe(receivedMessage.receivedByEveryone);
+        expect(sentMessage.content.serialize()).toBe(receivedMessage.content.serialize());
     }
 
     beforeAll(async function () {
@@ -124,7 +120,7 @@ describe("MessageController", function () {
             expectValidMessages(sentMessage, receivedMessage, tempDate);
         });
 
-        test("should get the cached Message", async function () {
+        test("should get the stored Message", async function () {
             const sentMessage = await sender.messages.getMessage(tempId1);
             const receivedMessage = await recipient.messages.getMessage(tempId1);
             expect(sentMessage).toBeDefined();
@@ -150,14 +146,14 @@ describe("MessageController", function () {
             const messages = await TestUtil.syncUntilHasMessages(recipient, 1);
             const receivedMessage = messages[0];
 
-            const relationship = await recipient.relationships.getRelationshipToIdentity(receivedMessage.cache!.createdBy);
+            const relationship = await recipient.relationships.getRelationshipToIdentity(receivedMessage.createdBy);
             expectValidMessages(sentMessage, receivedMessage, tempDate);
-            expect(receivedMessage.cache!.recipients[0].relationshipId!.toString()).toStrictEqual(relationship!.id.toString());
-            expect(sentMessage.cache!.recipients[0].relationshipId!.toString()).toStrictEqual(relationship!.id.toString());
-            expect(receivedMessage.cache!.recipients[0].receivedByDevice?.toString()).toBe(recipient.activeDevice.id.toString());
+            expect(receivedMessage.recipients[0].relationshipId!.toString()).toStrictEqual(relationship!.id.toString());
+            expect(sentMessage.recipients[0].relationshipId!.toString()).toStrictEqual(relationship!.id.toString());
+            expect(receivedMessage.recipients[0].receivedByDevice?.toString()).toBe(recipient.activeDevice.id.toString());
         });
 
-        test("should get the cached messages", async function () {
+        test("should get the stored messages", async function () {
             const sentMessages = await sender.messages.getMessages();
             const receivedMessages = await recipient.messages.getMessages();
             expect(sentMessages).toHaveLength(3);
@@ -262,7 +258,7 @@ describe("MessageController", function () {
             expect(await sender.messages.getMessage(message.id)).toBeUndefined();
             const pseudonymizedMessage = await sender.messages.getMessage(multipleRecipientsMessage.id);
             expect(pseudonymizedMessage).toBeDefined();
-            expect(pseudonymizedMessage!.cache!.recipients.map((r) => [r.address, r.relationshipId])).toStrictEqual(
+            expect(pseudonymizedMessage!.recipients.map((r) => [r.address, r.relationshipId])).toStrictEqual(
                 expect.arrayContaining([
                     [await TestUtil.generateAddressPseudonym(process.env.NMSHD_TEST_BASEURL!), undefined],
                     [recipient2.identity.address, relationship2.id]
@@ -287,14 +283,9 @@ describe("MessageController", function () {
         });
 
         test("should decrypt a Message on a terminated Relationship", async function () {
-            const messageId = messageExchangedBeforeTermination.id;
-
-            const result = await sender.messages.fetchCaches([messageId]);
-            // fetchCaches is just returning an empty array if the message is not found
-            expect(result).toHaveLength(1);
-
-            const recipientResult = await recipient.messages.fetchCaches([messageId]);
-            expect(recipientResult).toHaveLength(1);
+            const messageId = messageExchangedBeforeTermination.id.toString();
+            await expect(sender.messages.updateBackboneData([messageId])).resolves.not.toThrow();
+            await expect(recipient.messages.updateBackboneData([messageId])).resolves.not.toThrow();
         });
 
         test("should be able to receive a Message sent on a terminated Relationship after the Relationship was reactivated", async function () {
@@ -312,8 +303,8 @@ describe("MessageController", function () {
         let identityDeletionProcessOfRecipient: IdentityDeletionProcess;
 
         beforeEach(async function () {
-            const approvedIdentityDeletionProcess = await recipient.identityDeletionProcess.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.Approved);
-            if (!approvedIdentityDeletionProcess) {
+            const activeIdentityDeletionProcess = await recipient.identityDeletionProcess.getIdentityDeletionProcessByStatus(IdentityDeletionProcessStatus.Active);
+            if (!activeIdentityDeletionProcess) {
                 identityDeletionProcessOfRecipient = await recipient.identityDeletionProcess.initiateIdentityDeletionProcess();
                 await TestUtil.syncUntilHasRelationships(sender);
             }

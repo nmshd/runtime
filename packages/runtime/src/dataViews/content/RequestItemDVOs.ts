@@ -2,7 +2,7 @@ import { FormFieldSettingsJSONDerivations } from "@nmshd/content";
 import { LocalAttributeDVO } from "../consumption";
 import { DataViewObject } from "../DataViewObject";
 import { FileDVO } from "../transport";
-import { AttributeQueryDVO, DraftIdentityAttributeDVO, DraftRelationshipAttributeDVO, IdentityAttributeQueryDVO, ThirdPartyRelationshipAttributeQueryDVO } from "./AttributeDVOs";
+import { AttributeQueryDVO, DraftIdentityAttributeDVO, DraftRelationshipAttributeDVO } from "./AttributeDVOs";
 import { ResponseItemDVO, ResponseItemGroupDVO } from "./ResponseItemDVOs";
 
 export interface RequestItemGroupDVO {
@@ -16,7 +16,6 @@ export interface RequestItemGroupDVO {
 
 export interface RequestItemDVO extends DataViewObject {
     mustBeAccepted: boolean;
-    requireManualDecision?: boolean;
     isDecidable: boolean;
     response?: ResponseItemDVO;
 }
@@ -36,7 +35,6 @@ export interface ProposeAttributeRequestItemDVO extends RequestItemDVO {
 export interface CreateAttributeRequestItemDVO extends RequestItemDVO {
     type: "CreateAttributeRequestItemDVO";
     attribute: DraftIdentityAttributeDVO | DraftRelationshipAttributeDVO;
-    sourceAttributeId?: string;
 }
 
 export interface DeleteAttributeRequestItemDVO extends RequestItemDVO {
@@ -47,13 +45,14 @@ export interface DeleteAttributeRequestItemDVO extends RequestItemDVO {
 
 export interface ShareAttributeRequestItemDVO extends RequestItemDVO {
     type: "ShareAttributeRequestItemDVO";
-    sourceAttributeId: string;
+    attributeId: string;
     thirdPartyAddress?: string;
     attribute: DraftIdentityAttributeDVO;
 }
 
 export interface AuthenticationRequestItemDVO extends RequestItemDVO {
     type: "AuthenticationRequestItemDVO";
+    title: string;
 }
 
 export interface ConsentRequestItemDVO extends RequestItemDVO {
@@ -61,16 +60,7 @@ export interface ConsentRequestItemDVO extends RequestItemDVO {
     consent: string;
     link?: string;
     linkDisplayText?: string;
-}
-
-export interface RegisterAttributeListenerRequestItemDVO extends RequestItemDVO {
-    type: "RegisterAttributeListenerRequestItemDVO";
-    query: IdentityAttributeQueryDVO | ThirdPartyRelationshipAttributeQueryDVO;
-}
-
-export interface FreeTextRequestItemDVO extends RequestItemDVO {
-    type: "FreeTextRequestItemDVO";
-    freeText: string;
+    requiresInteraction?: boolean;
 }
 
 export interface FormFieldRequestItemDVO extends RequestItemDVO {
@@ -83,5 +73,5 @@ export interface TransferFileOwnershipRequestItemDVO extends RequestItemDVO {
     type: "TransferFileOwnershipRequestItemDVO";
     fileReference: string;
     file: FileDVO;
-    ownershipToken?: string;
+    ownershipToken: string;
 }

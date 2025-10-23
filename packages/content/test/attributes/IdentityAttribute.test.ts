@@ -1,4 +1,4 @@
-import { CoreAddress, CoreDate } from "@nmshd/core-types";
+import { CoreAddress } from "@nmshd/core-types";
 import {
     Affiliation,
     AffiliationOrganization,
@@ -101,7 +101,7 @@ describe("IdentityAttribute", function () {
             IdentityAttribute.from({
                 value: {
                     "@type": "Nationality",
-                    value: 27
+                    value: 27 as any
                 },
                 owner: CoreAddress.from("address")
             })
@@ -120,31 +120,37 @@ describe("IdentityAttribute", function () {
     });
 
     test("should allow to validate integer values", function () {
-        let age = IdentityAttribute.from<BirthMonth>({
+        let age = IdentityAttribute.from<BirthDate>({
             value: {
-                "@type": "BirthMonth",
-                value: 10
+                "@type": "BirthDate",
+                day: 1,
+                month: 10,
+                year: 2000
             },
             owner: CoreAddress.from("address")
         });
         expect(age).toBeInstanceOf(IdentityAttribute);
-        expect(age.value).toBeInstanceOf(BirthMonth);
+        expect(age.value).toBeInstanceOf(BirthDate);
 
         age = IdentityAttribute.from({
             value: {
-                "@type": "BirthMonth",
-                value: 10
+                "@type": "BirthDate",
+                day: 1,
+                month: 10,
+                year: 2000
             },
             owner: CoreAddress.from("address")
         });
         expect(age).toBeInstanceOf(IdentityAttribute);
-        expect(age.value).toBeInstanceOf(BirthMonth);
+        expect(age.value).toBeInstanceOf(BirthDate);
 
         expect(() =>
             IdentityAttribute.from({
                 value: {
-                    "@type": "BirthMonth",
-                    value: "10"
+                    "@type": "BirthDate",
+                    month: "10" as any,
+                    day: 1,
+                    year: 2000
                 },
                 owner: CoreAddress.from("address")
             })
@@ -164,12 +170,7 @@ describe("IdentityAttribute", function () {
             month: 2,
             year: 2022
         };
-        const birthDate = IdentityAttribute.from<BirthDate, IBirthDate, BirthDateJSON>({
-            value: birthDateContent,
-            validFrom: CoreDate.utc().subtract({ years: 1 }),
-            validTo: CoreDate.utc().add({ years: 1 }),
-            owner: CoreAddress.from("address")
-        });
+        const birthDate = IdentityAttribute.from<BirthDate, IBirthDate, BirthDateJSON>({ value: birthDateContent, owner: CoreAddress.from("address") });
 
         expect(birthDate).toBeInstanceOf(IdentityAttribute);
         expect(birthDate.value).toBeInstanceOf(BirthDate);
@@ -197,14 +198,7 @@ describe("IdentityAttribute", function () {
     test("should validate attribute values from JSON", function () {
         expect(() =>
             IdentityAttribute.from({
-                value: {
-                    "@type": "BirthDate",
-                    day: { value: 22 },
-                    month: { value: 13 },
-                    year: { value: 2022 }
-                },
-                validFrom: CoreDate.utc().subtract({ years: 1 }),
-                validTo: CoreDate.utc().add({ years: 1 }),
+                value: { "@type": "BirthDate", day: { value: 22 }, month: { value: 13 }, year: { value: 2022 } },
                 owner: CoreAddress.from("address")
             })
         ).toThrow("BirthMonth.value:Number :: must be an integer value between 1 and 12");
@@ -214,11 +208,11 @@ describe("IdentityAttribute", function () {
         expect(() =>
             IdentityAttribute.from({
                 value: {
-                    "@type": "BirthMonth",
-                    value: "13"
+                    "@type": "BirthDate",
+                    month: "12" as any,
+                    day: 1,
+                    year: 2000
                 },
-                validFrom: CoreDate.utc().subtract({ years: 1 }),
-                validTo: CoreDate.utc().add({ years: 1 }),
                 owner: CoreAddress.from("address")
             })
         ).toThrow("BirthMonth.value :: Value is not a number.");
@@ -226,11 +220,11 @@ describe("IdentityAttribute", function () {
         expect(() =>
             IdentityAttribute.from({
                 value: {
-                    "@type": "BirthMonth",
-                    value: 13
+                    "@type": "BirthDate",
+                    month: 13,
+                    day: 1,
+                    year: 2000
                 },
-                validFrom: CoreDate.utc().subtract({ years: 1 }),
-                validTo: CoreDate.utc().add({ years: 1 }),
                 owner: CoreAddress.from("address")
             })
         ).toThrow("BirthMonth.value:Number :: must be an integer value between 1 and 12");
@@ -246,12 +240,7 @@ describe("IdentityAttribute", function () {
         const affiliationInstance = Affiliation.fromAny(affiliation);
         expect(affiliationInstance).toBeInstanceOf(Affiliation);
 
-        const affiliationAttribute = IdentityAttribute.from<Affiliation>({
-            value: affiliation,
-            validFrom: CoreDate.utc().subtract({ years: 1 }),
-            validTo: CoreDate.utc().add({ years: 1 }),
-            owner: CoreAddress.from("address")
-        });
+        const affiliationAttribute = IdentityAttribute.from<Affiliation>({ value: affiliation, owner: CoreAddress.from("address") });
 
         expect(affiliationAttribute.value).toBeInstanceOf(Affiliation);
         expect(affiliationAttribute.value.organization).toBeInstanceOf(AffiliationOrganization);

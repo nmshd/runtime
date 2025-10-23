@@ -17,7 +17,7 @@ export interface ILocalRequestSource extends ISerializable {
 @type("LocalRequestSource")
 export class LocalRequestSource extends Serializable implements ILocalRequestSource {
     @serialize()
-    @validate()
+    @validate({ allowedValues: ["Message", "RelationshipTemplate"] })
     public type: "Message" | "RelationshipTemplate";
 
     @serialize()

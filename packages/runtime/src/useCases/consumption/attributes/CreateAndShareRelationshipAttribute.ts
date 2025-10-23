@@ -14,8 +14,6 @@ export interface CreateAndShareRelationshipAttributeRequest {
         key: string;
         confidentiality: RelationshipAttributeConfidentiality;
         isTechnical?: boolean;
-        validFrom?: ISO8601DateTimeString;
-        validTo?: ISO8601DateTimeString;
     };
     peer: AddressString;
     requestMetadata?: {
@@ -25,10 +23,8 @@ export interface CreateAndShareRelationshipAttributeRequest {
         expiresAt?: ISO8601DateTimeString;
     };
     requestItemMetadata?: {
-        title?: string;
         description?: string;
         metadata?: Record<string, any>;
-        requireManualDecision?: boolean;
     };
 }
 

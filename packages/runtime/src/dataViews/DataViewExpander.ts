@@ -1,5 +1,13 @@
 import { Serializable, SerializableBase } from "@js-soft/ts-serval";
-import { ConsumptionController, LocalRequestStatus } from "@nmshd/consumption";
+import {
+    ConsumptionController,
+    LocalRequestStatus,
+    OwnIdentityAttribute,
+    OwnRelationshipAttribute,
+    PeerIdentityAttribute,
+    PeerRelationshipAttribute,
+    ThirdPartyRelationshipAttribute
+} from "@nmshd/consumption";
 import {
     AttributeAlreadySharedAcceptResponseItemJSON,
     AttributeSuccessionAcceptResponseItemJSON,
@@ -13,8 +21,6 @@ import {
     ErrorResponseItemJSON,
     FormFieldAcceptResponseItemJSON,
     FormFieldRequestItemJSON,
-    FreeTextAcceptResponseItemJSON,
-    FreeTextRequestItemJSON,
     GivenNameJSON,
     IQLQueryJSON,
     IdentityAttribute,
@@ -25,8 +31,6 @@ import {
     ProposeAttributeRequestItemJSON,
     ReadAttributeAcceptResponseItemJSON,
     ReadAttributeRequestItemJSON,
-    RegisterAttributeListenerAcceptResponseItemJSON,
-    RegisterAttributeListenerRequestItemJSON,
     RejectResponseItemJSON,
     RelationshipAttribute,
     RelationshipAttributeJSON,
@@ -44,7 +48,6 @@ import {
     ResponseItemResult,
     ResponseJSON,
     SexJSON,
-    ShareAttributeAcceptResponseItemJSON,
     ShareAttributeRequestItemJSON,
     SurnameJSON,
     ThirdPartyRelationshipAttributeQueryJSON,
@@ -59,7 +62,7 @@ import {
     FileDTO,
     IdentityDTO,
     LocalAttributeDTO,
-    LocalAttributeListenerDTO,
+    LocalAttributeForwardingDetailsDTO,
     LocalRequestDTO,
     LocalResponseDTO,
     MessageDTO,
@@ -78,12 +81,13 @@ import { DataViewObject } from "./DataViewObject";
 import { DataViewTranslateable } from "./DataViewTranslateable";
 import { DVOError } from "./common";
 import {
+    ForwardingDetailsDVO,
     LocalAttributeDVO,
-    LocalAttributeListenerDVO,
     LocalRequestDVO,
     LocalResponseDVO,
+    OwnIdentityAttributeDVO,
     OwnRelationshipAttributeDVO,
-    PeerAttributeDVO,
+    PeerIdentityAttributeDVO,
     PeerRelationshipAttributeDVO,
     PeerRelationshipTemplateDVO,
     ProcessedAttributeQueryDVO,
@@ -92,8 +96,7 @@ import {
     ProcessedRelationshipAttributeQueryDVO,
     ProcessedThirdPartyRelationshipAttributeQueryDVO,
     RelationshipSettingDVO,
-    RepositoryAttributeDVO,
-    SharedToPeerAttributeDVO
+    ThirdPartyRelationshipAttributeDVO
 } from "./consumption";
 import {
     AttributeAlreadyDeletedAcceptResponseItemDVO,
@@ -111,8 +114,6 @@ import {
     ErrorResponseItemDVO,
     FormFieldAcceptResponseItemDVO,
     FormFieldRequestItemDVO,
-    FreeTextAcceptResponseItemDVO,
-    FreeTextRequestItemDVO,
     IQLQueryDVO,
     IdentityAttributeQueryDVO,
     MailDVO,
@@ -120,8 +121,6 @@ import {
     ProposeAttributeRequestItemDVO,
     ReadAttributeAcceptResponseItemDVO,
     ReadAttributeRequestItemDVO,
-    RegisterAttributeListenerAcceptResponseItemDVO,
-    RegisterAttributeListenerRequestItemDVO,
     RejectResponseItemDVO,
     RelationshipAttributeQueryDVO,
     RequestDVO,
@@ -132,7 +131,6 @@ import {
     ResponseDVO,
     ResponseItemDVO,
     ResponseItemGroupDVO,
-    ShareAttributeAcceptResponseItemDVO,
     ShareAttributeRequestItemDVO,
     ThirdPartyRelationshipAttributeQueryDVO,
     TransferFileOwnershipAcceptResponseItemDVO,
@@ -485,7 +483,7 @@ export class DataViewExpander {
                         ...readAttributeRequestItem,
                         type: "ReadAttributeRequestItemDVO",
                         id: "",
-                        name: requestItem.title ?? this.generateRequestItemName(requestItem["@type"], isDecidable),
+                        name: this.generateRequestItemName(requestItem["@type"], isDecidable),
                         query: processedQuery,
                         isDecidable,
                         error,
@@ -497,7 +495,7 @@ export class DataViewExpander {
                     ...readAttributeRequestItem,
                     type: "ReadAttributeRequestItemDVO",
                     id: "",
-                    name: requestItem.title ?? this.generateRequestItemName(requestItem["@type"], isDecidable),
+                    name: this.generateRequestItemName(requestItem["@type"], isDecidable),
                     query: await this.expandAttributeQuery(readAttributeRequestItem.query),
                     isDecidable,
                     response: responseItemDVO
@@ -511,7 +509,7 @@ export class DataViewExpander {
                     ...createAttributeRequestItem,
                     type: "CreateAttributeRequestItemDVO",
                     id: "",
-                    name: requestItem.title ?? this.generateRequestItemName(requestItem["@type"], isDecidable),
+                    name: this.generateRequestItemName(requestItem["@type"], isDecidable),
                     attribute,
                     isDecidable,
                     response: responseItemDVO
@@ -526,7 +524,7 @@ export class DataViewExpander {
                     ...deleteAttributeRequestItem,
                     type: "DeleteAttributeRequestItemDVO",
                     id: "",
-                    name: requestItem.title ?? this.generateRequestItemName(requestItem["@type"], isDecidable),
+                    name: this.generateRequestItemName(requestItem["@type"], isDecidable),
                     isDecidable,
                     response: responseItemDVO,
                     attribute: localAttributeDVOForDelete
@@ -556,7 +554,7 @@ export class DataViewExpander {
                     ...proposeAttributeRequestItem,
                     type: "ProposeAttributeRequestItemDVO",
                     id: "",
-                    name: requestItem.title ?? this.generateRequestItemName(requestItem["@type"], isDecidable),
+                    name: this.generateRequestItemName(requestItem["@type"], isDecidable),
                     attribute: await this.expandAttribute(proposeAttributeRequestItem.attribute),
                     query: isDecidable ? await this.processAttributeQuery(proposeAttributeRequestItem.query) : await this.expandAttributeQuery(proposeAttributeRequestItem.query),
                     isDecidable,
@@ -568,17 +566,14 @@ export class DataViewExpander {
                 const shareAttributeRequestItem = requestItem as ShareAttributeRequestItemJSON;
                 const attributeDVO = await this.expandAttribute(shareAttributeRequestItem.attribute);
 
-                if (responseItemDVO?.result === ResponseItemResult.Accepted) {
-                    // We have to manually copy the attribute id here, otherwise we could not link to the local attribute
-                    const shareAttributeResponseItem = responseItemDVO as ShareAttributeAcceptResponseItemDVO | undefined;
-                    if (shareAttributeResponseItem) attributeDVO.id = shareAttributeResponseItem.attributeId;
-                }
+                // We have to manually copy the attribute id here, otherwise we could not link to the local attribute
+                attributeDVO.id = shareAttributeRequestItem.attributeId;
 
                 return {
                     ...shareAttributeRequestItem,
                     type: "ShareAttributeRequestItemDVO",
                     id: "",
-                    name: requestItem.title ?? this.generateRequestItemName(requestItem["@type"], isDecidable),
+                    name: this.generateRequestItemName(requestItem["@type"], isDecidable),
                     attribute: attributeDVO,
                     isDecidable,
                     response: responseItemDVO
@@ -591,7 +586,7 @@ export class DataViewExpander {
                     ...authenticationRequestItem,
                     type: "AuthenticationRequestItemDVO",
                     id: "",
-                    name: requestItem.title ?? this.generateRequestItemName(requestItem["@type"], isDecidable),
+                    name: authenticationRequestItem.title,
                     isDecidable,
                     response: responseItemDVO
                 } as AuthenticationRequestItemDVO;
@@ -603,22 +598,10 @@ export class DataViewExpander {
                     ...consentRequestItem,
                     type: "ConsentRequestItemDVO",
                     id: "",
-                    name: requestItem.title ?? this.generateRequestItemName(requestItem["@type"], isDecidable),
+                    name: this.generateRequestItemName(requestItem["@type"], isDecidable),
                     isDecidable,
                     response: responseItemDVO
                 } as ConsentRequestItemDVO;
-
-            case "FreeTextRequestItem":
-                const freeTextRequestItem = requestItem as FreeTextRequestItemJSON;
-
-                return {
-                    ...freeTextRequestItem,
-                    type: "FreeTextRequestItemDVO",
-                    id: "",
-                    name: requestItem.title ?? this.generateRequestItemName(requestItem["@type"], isDecidable),
-                    isDecidable,
-                    response: responseItemDVO
-                } as FreeTextRequestItemDVO;
 
             case "FormFieldRequestItem":
                 const formFieldRequestItem = requestItem as FormFieldRequestItemJSON;
@@ -627,26 +610,10 @@ export class DataViewExpander {
                     ...formFieldRequestItem,
                     type: "FormFieldRequestItemDVO",
                     id: "",
-                    name: requestItem.title ?? this.generateRequestItemName(requestItem["@type"], isDecidable),
+                    name: formFieldRequestItem.title,
                     isDecidable,
                     response: responseItemDVO
                 } as FormFieldRequestItemDVO;
-
-            case "RegisterAttributeListenerRequestItem":
-                const registerAttributeListenerRequestItem = requestItem as RegisterAttributeListenerRequestItemJSON;
-                const queryDVO = (await this.expandAttributeQuery(registerAttributeListenerRequestItem.query)) as
-                    | IdentityAttributeQueryDVO
-                    | ThirdPartyRelationshipAttributeQueryDVO;
-
-                return {
-                    ...registerAttributeListenerRequestItem,
-                    type: "RegisterAttributeListenerRequestItemDVO",
-                    id: "",
-                    query: queryDVO,
-                    name: requestItem.title ?? this.generateRequestItemName(requestItem["@type"], isDecidable),
-                    isDecidable,
-                    response: responseItemDVO
-                } as RegisterAttributeListenerRequestItemDVO;
 
             case "TransferFileOwnershipRequestItem":
                 const transferFileOwnershipRequestItem = requestItem as TransferFileOwnershipRequestItemJSON;
@@ -658,7 +625,7 @@ export class DataViewExpander {
                     ...transferFileOwnershipRequestItem,
                     type: "TransferFileOwnershipRequestItemDVO",
                     id: "",
-                    name: requestItem.title ?? this.generateRequestItemName(requestItem["@type"], isDecidable),
+                    name: this.generateRequestItemName(requestItem["@type"], isDecidable),
                     isDecidable,
                     response: responseItemDVO,
                     file
@@ -669,7 +636,7 @@ export class DataViewExpander {
                     ...requestItem,
                     type: "RequestItemDVO",
                     id: "",
-                    name: requestItem.title ?? "i18n://dvo.requestItem.name",
+                    name: "i18n://dvo.requestItem.name",
                     isDecidable,
                     response: responseItemDVO
                 };
@@ -693,21 +660,22 @@ export class DataViewExpander {
                 isDecidable = true;
             }
 
-            const requestGroup = requestGroupOrItem as RequestItemGroupJSON;
-            const responseGroup = responseGroupOrItemDVO as ResponseItemGroupDVO | undefined;
+            const requestItemGroup = requestGroupOrItem as RequestItemGroupJSON;
+            const responseItemGroup = responseGroupOrItemDVO as ResponseItemGroupDVO | undefined;
             const itemDVOs = [];
-            for (let i = 0; i < requestGroup.items.length; i++) {
-                const requestItem = requestGroup.items[i];
-                const responseItem = responseGroup?.items[i];
+            for (let i = 0; i < requestItemGroup.items.length; i++) {
+                const requestItem = requestItemGroup.items[i];
+                const responseItem = responseItemGroup?.items[i];
                 itemDVOs.push(await this.expandRequestItem(requestItem, localRequestDTO, responseItem));
             }
+
             return {
                 type: "RequestItemGroupDVO",
                 items: itemDVOs,
                 isDecidable,
-                title: requestGroupOrItem.title,
-                description: requestGroupOrItem.description,
-                response: responseGroup
+                title: requestItemGroup.title,
+                description: requestItemGroup.description,
+                response: responseItemGroup
             };
         }
 
@@ -802,39 +770,6 @@ export class DataViewExpander {
                         attribute: localAttributeDVOForPropose
                     } as ProposeAttributeAcceptResponseItemDVO;
 
-                case "ShareAttributeAcceptResponseItem":
-                    const shareAttributeResponseItem = responseItem as ShareAttributeAcceptResponseItemJSON;
-
-                    const localAttributeResultForShare = await this.consumption.attributes.getAttribute({ id: shareAttributeResponseItem.attributeId });
-                    if (localAttributeResultForShare.isError) {
-                        if (!localAttributeResultForShare.error.equals(RuntimeErrors.general.recordNotFound())) throw localAttributeResultForShare.error;
-
-                        return {
-                            type: "AttributeAlreadyDeletedAcceptResponseItemDVO",
-                            id: shareAttributeResponseItem.attributeId,
-                            name: name
-                        } as AttributeAlreadyDeletedAcceptResponseItemDVO;
-                    }
-
-                    const localAttributeDVOForShare = await this.expandLocalAttributeDTO(localAttributeResultForShare.value);
-                    return {
-                        ...shareAttributeResponseItem,
-                        type: "ShareAttributeAcceptResponseItemDVO",
-                        id: shareAttributeResponseItem.attributeId,
-                        name: name,
-                        attribute: localAttributeDVOForShare
-                    } as ShareAttributeAcceptResponseItemDVO;
-
-                case "FreeTextAcceptResponseItem":
-                    const freeTextResponseItem = responseItem as FreeTextAcceptResponseItemJSON;
-
-                    return {
-                        ...freeTextResponseItem,
-                        type: "FreeTextAcceptResponseItemDVO",
-                        id: "",
-                        name: name
-                    } as FreeTextAcceptResponseItemDVO;
-
                 case "FormFieldAcceptResponseItem":
                     const formFieldResponseItem = responseItem as FormFieldAcceptResponseItemJSON;
 
@@ -845,32 +780,12 @@ export class DataViewExpander {
                         name: name
                     } as FormFieldAcceptResponseItemDVO;
 
-                case "RegisterAttributeListenerAcceptResponseItem":
-                    const registerAttributeListenerResponseItem = responseItem as RegisterAttributeListenerAcceptResponseItemJSON;
-
-                    const localAttributeListenerResult = await this.consumption.attributeListeners.getAttributeListener({ id: registerAttributeListenerResponseItem.listenerId });
-                    if (localAttributeListenerResult.isError && !localAttributeListenerResult.error.equals(RuntimeErrors.general.recordNotFound())) {
-                        throw localAttributeListenerResult.error;
-                    }
-
-                    const localAttributeListenerDVO = localAttributeListenerResult.isSuccess
-                        ? await this.expandLocalAttributeListenerDTO(localAttributeListenerResult.value)
-                        : undefined;
-
-                    return {
-                        ...registerAttributeListenerResponseItem,
-                        type: "RegisterAttributeListenerAcceptResponseItemDVO",
-                        id: registerAttributeListenerResponseItem.listenerId,
-                        name: name,
-                        listener: localAttributeListenerDVO
-                    } as RegisterAttributeListenerAcceptResponseItemDVO;
-
                 case "TransferFileOwnershipAcceptResponseItem":
                     const transferFileOwnershipResponseItem = responseItem as TransferFileOwnershipAcceptResponseItemJSON;
 
-                    const sharedAttributeResultForTransfer = await this.consumption.attributes.getAttribute({ id: transferFileOwnershipResponseItem.attributeId });
-                    if (sharedAttributeResultForTransfer.isError) {
-                        if (!sharedAttributeResultForTransfer.error.equals(RuntimeErrors.general.recordNotFound())) throw sharedAttributeResultForTransfer.error;
+                    const attributeResultForTransfer = await this.consumption.attributes.getAttribute({ id: transferFileOwnershipResponseItem.attributeId });
+                    if (attributeResultForTransfer.isError) {
+                        if (!attributeResultForTransfer.error.equals(RuntimeErrors.general.recordNotFound())) throw attributeResultForTransfer.error;
 
                         return {
                             type: "AttributeAlreadyDeletedAcceptResponseItemDVO",
@@ -879,32 +794,15 @@ export class DataViewExpander {
                         } as AttributeAlreadyDeletedAcceptResponseItemDVO;
                     }
 
-                    const sharedAttributeDVOForTransfer = (await this.expandLocalAttributeDTO(sharedAttributeResultForTransfer.value)) as SharedToPeerAttributeDVO;
-
-                    let repositoryAttributeDVOForTransfer;
-                    const repositoryAttributeIdForTransferExists = !!sharedAttributeDVOForTransfer.sourceAttribute;
-                    if (repositoryAttributeIdForTransferExists) {
-                        const repositoryAttributeResultForTransfer = await this.consumption.attributes.getAttribute({
-                            id: sharedAttributeDVOForTransfer.sourceAttribute!
-                        });
-
-                        if (repositoryAttributeResultForTransfer.isError && !repositoryAttributeResultForTransfer.error.equals(RuntimeErrors.general.recordNotFound())) {
-                            throw repositoryAttributeResultForTransfer.error;
-                        }
-
-                        if (repositoryAttributeResultForTransfer.isSuccess) {
-                            repositoryAttributeDVOForTransfer = await this.expandLocalAttributeDTO(repositoryAttributeResultForTransfer.value);
-                        }
-                    }
+                    const attributeDVOForTransfer = (await this.expandLocalAttributeDTO(attributeResultForTransfer.value)) as OwnIdentityAttributeDVO;
 
                     return {
                         ...transferFileOwnershipResponseItem,
                         type: "TransferFileOwnershipAcceptResponseItemDVO",
-                        id: repositoryAttributeDVOForTransfer?.id ?? transferFileOwnershipResponseItem.attributeId,
+                        id: transferFileOwnershipResponseItem.attributeId,
                         name: name,
-                        repositoryAttribute: repositoryAttributeDVOForTransfer,
-                        sharedAttributeId: transferFileOwnershipResponseItem.attributeId,
-                        sharedAttribute: sharedAttributeDVOForTransfer
+                        attributeId: transferFileOwnershipResponseItem.attributeId,
+                        attribute: attributeDVOForTransfer
                     } as TransferFileOwnershipAcceptResponseItemDVO;
 
                 case "AttributeSuccessionAcceptResponseItem":
@@ -985,19 +883,6 @@ export class DataViewExpander {
                 name: "i18n://dvo.responseItem.error"
             } as ErrorResponseItemDVO;
         }
-    }
-
-    public async expandLocalAttributeListenerDTO(attributeListener: LocalAttributeListenerDTO): Promise<LocalAttributeListenerDVO> {
-        const query = (await this.expandAttributeQuery(attributeListener.query)) as IdentityAttributeQueryDVO | ThirdPartyRelationshipAttributeQueryDVO;
-        const peer = await this.expandAddress(attributeListener.peer);
-        return {
-            type: "LocalAttributeListenerDVO",
-            name: "dvo.localAttributeListener.name",
-            description: "dvo.localAttributeListener.description",
-            ...attributeListener,
-            query,
-            peer
-        };
     }
 
     public async expandResponseGroupOrItem(responseGroupOrItem: ResponseItemGroupJSON | ResponseItemJSON): Promise<ResponseItemGroupDVO | ResponseItemDVO> {
@@ -1083,181 +968,213 @@ export class DataViewExpander {
 
     public async expandLocalAttributeDTO(
         attribute: LocalAttributeDTO
-    ): Promise<RepositoryAttributeDVO | SharedToPeerAttributeDVO | PeerAttributeDVO | PeerRelationshipAttributeDVO | OwnRelationshipAttributeDVO> {
+    ): Promise<OwnIdentityAttributeDVO | PeerIdentityAttributeDVO | OwnRelationshipAttributeDVO | PeerRelationshipAttributeDVO | ThirdPartyRelationshipAttributeDVO> {
         const valueType = attribute.content.value["@type"];
         const localAttribute = await this.consumptionController.attributes.getLocalAttribute(CoreId.from(attribute.id));
         if (!localAttribute) throw new Error("Attribute not found");
+        if (
+            !(
+                localAttribute instanceof OwnIdentityAttribute ||
+                localAttribute instanceof PeerIdentityAttribute ||
+                localAttribute instanceof OwnRelationshipAttribute ||
+                localAttribute instanceof PeerRelationshipAttribute ||
+                localAttribute instanceof ThirdPartyRelationshipAttribute
+            )
+        ) {
+            throw new Error("Attribute has unknown type");
+        }
 
         const owner = attribute.content.owner;
-
-        let name = `i18n://dvo.attribute.name.${valueType}`;
-        let description = `i18n://dvo.attribute.description.${valueType}`;
+        const name = `i18n://dvo.attribute.name.${valueType}`;
+        const description = `i18n://dvo.attribute.description.${valueType}`;
         const renderHints = localAttribute.content.value.renderHints.toJSON();
         const valueHints = localAttribute.content.value.valueHints.toJSON();
 
-        if (localAttribute.shareInfo) {
-            const peer = localAttribute.shareInfo.peer.toString();
-            if (localAttribute.content instanceof RelationshipAttribute) {
-                const relationshipAttribute = localAttribute.content;
-                const value = relationshipAttribute.value;
-                if ("title" in value) {
-                    name = value.title;
-                }
-                if ("description" in value && !!value.description) {
-                    description = value.description;
-                }
+        if (localAttribute instanceof OwnIdentityAttribute) {
+            const forwardingDetailsResult = await this.consumption.attributes.getForwardingDetailsForAttribute({ attributeId: localAttribute.id.toString() });
+            const forwardingDetails = forwardingDetailsResult.value;
 
-                // Peer shared RelationshipAttribute
-                if (relationshipAttribute.owner.toString() === peer) {
-                    return {
-                        type: "PeerRelationshipAttributeDVO",
-                        id: attribute.id,
-                        name,
-                        key: relationshipAttribute.key,
-                        confidentiality: relationshipAttribute.confidentiality,
-                        description,
-                        content: attribute.content,
-                        value: attribute.content.value,
-                        date: attribute.createdAt,
-                        owner,
-                        renderHints,
-                        valueHints,
-                        isValid: true,
-                        createdAt: attribute.createdAt,
-                        isOwn: false,
-                        peer: peer,
-                        isDraft: false,
-                        requestReference: localAttribute.shareInfo.requestReference?.toString(),
-                        notificationReference: localAttribute.shareInfo.notificationReference?.toString(),
-                        sourceAttribute: localAttribute.shareInfo.sourceAttribute?.toString(),
-                        thirdPartyAddress: localAttribute.shareInfo.thirdPartyAddress?.toString(),
-                        valueType,
-                        isTechnical: relationshipAttribute.isTechnical,
-                        deletionStatus: localAttribute.deletionInfo?.deletionStatus,
-                        deletionDate: localAttribute.deletionInfo?.deletionDate.toString(),
-                        wasViewedAt: attribute.wasViewedAt
-                    };
-                }
-                // Own shared RelationshipAttribute
-                return {
-                    type: "OwnRelationshipAttributeDVO",
-                    id: attribute.id,
-                    name,
-                    key: relationshipAttribute.key,
-                    confidentiality: relationshipAttribute.confidentiality,
-                    description,
-                    content: attribute.content,
-                    value: attribute.content.value,
-                    date: attribute.createdAt,
-                    owner,
-                    renderHints,
-                    valueHints,
-                    isValid: true,
-                    createdAt: attribute.createdAt,
-                    isOwn: true,
-                    peer: peer,
-                    isDraft: false,
-                    requestReference: localAttribute.shareInfo.requestReference?.toString(),
-                    notificationReference: localAttribute.shareInfo.notificationReference?.toString(),
-                    sourceAttribute: localAttribute.shareInfo.sourceAttribute?.toString(),
-                    thirdPartyAddress: localAttribute.shareInfo.thirdPartyAddress?.toString(),
-                    valueType,
-                    isTechnical: relationshipAttribute.isTechnical,
-                    deletionStatus: localAttribute.deletionInfo?.deletionStatus,
-                    deletionDate: localAttribute.deletionInfo?.deletionDate.toString(),
-                    wasViewedAt: attribute.wasViewedAt
-                };
-            }
-            const identityAttribute = localAttribute.content;
-
-            if (identityAttribute.owner.toString() === peer) {
-                // Peer shared IdentityAttribute
-                return {
-                    type: "PeerAttributeDVO",
-                    id: attribute.id,
-                    name,
-                    description,
-                    content: attribute.content,
-                    value: attribute.content.value,
-                    date: attribute.createdAt,
-                    owner: owner,
-                    renderHints,
-                    valueHints,
-                    isValid: true,
-                    createdAt: attribute.createdAt,
-                    isOwn: false,
-                    peer: peer,
-                    isDraft: false,
-                    requestReference: localAttribute.shareInfo.requestReference?.toString(),
-                    notificationReference: localAttribute.shareInfo.notificationReference?.toString(),
-                    tags: identityAttribute.tags,
-                    valueType,
-                    deletionStatus: localAttribute.deletionInfo?.deletionStatus,
-                    deletionDate: localAttribute.deletionInfo?.deletionDate.toString(),
-                    wasViewedAt: attribute.wasViewedAt
-                };
-            }
-            // Own Shared IdentityAttribute
             return {
-                type: "SharedToPeerAttributeDVO",
+                type: "OwnIdentityAttributeDVO",
                 id: attribute.id,
                 name,
                 description,
-                content: attribute.content,
-                value: attribute.content.value,
                 date: attribute.createdAt,
+                content: attribute.content,
                 owner: owner,
+                value: attribute.content.value,
+                valueType,
                 renderHints,
                 valueHints,
-                isValid: true,
-                createdAt: attribute.createdAt,
-                isOwn: true,
-                peer: peer,
                 isDraft: false,
-                requestReference: localAttribute.shareInfo.requestReference?.toString(),
-                notificationReference: localAttribute.shareInfo.notificationReference?.toString(),
-                sourceAttribute: localAttribute.shareInfo.sourceAttribute?.toString(),
-                tags: identityAttribute.tags,
-                valueType,
-                deletionStatus: localAttribute.deletionInfo?.deletionStatus,
-                deletionDate: localAttribute.deletionInfo?.deletionDate.toString(),
-                wasViewedAt: attribute.wasViewedAt
+                isOwn: true,
+                createdAt: attribute.createdAt,
+                wasViewedAt: attribute.wasViewedAt,
+                succeeds: attribute.succeeds,
+                succeededBy: attribute.succeededBy,
+                tags: localAttribute.content.tags,
+                isDefault: attribute.isDefault,
+                forwardingPeers: await this.expandForwardingPeers(forwardingDetails),
+                forwardingDetails: this.expandForwardingDetails(forwardingDetails)
             };
         }
-        const identityAttribute = localAttribute.content as IdentityAttribute;
 
-        const sharedToPeerAttributes = await this.consumption.attributes.getAttributes({ query: { "shareInfo.sourceAttribute": attribute.id } });
-        const sharedToPeerDVOs = await this.expandLocalAttributeDTOs(sharedToPeerAttributes.value);
+        if (localAttribute instanceof PeerIdentityAttribute) {
+            return {
+                type: "PeerIdentityAttributeDVO",
+                id: attribute.id,
+                name,
+                description,
+                date: attribute.createdAt,
+                content: attribute.content,
+                owner: owner,
+                value: attribute.content.value,
+                valueType,
+                renderHints,
+                valueHints,
+                isDraft: false,
+                isOwn: false,
+                createdAt: attribute.createdAt,
+                wasViewedAt: attribute.wasViewedAt,
+                succeeds: attribute.succeeds,
+                succeededBy: attribute.succeededBy,
+                tags: localAttribute.content.tags,
+                peer: localAttribute.peer.toString(),
+                sourceReference: localAttribute.sourceReference.toString(),
+                deletionDate: localAttribute.deletionInfo?.deletionDate.toString(),
+                deletionStatus: localAttribute.deletionInfo?.deletionStatus
+            };
+        }
 
-        // RepositoryAttribute
+        if (localAttribute instanceof OwnRelationshipAttribute) {
+            const forwardingDetailsResult = await this.consumption.attributes.getForwardingDetailsForAttribute({ attributeId: localAttribute.id.toString() });
+            const forwardingDetails = forwardingDetailsResult.value;
+
+            return {
+                type: "OwnRelationshipAttributeDVO",
+                id: attribute.id,
+                name: "title" in attribute.content.value ? attribute.content.value.title : name,
+                description: "description" in attribute.content.value ? attribute.content.value.description : description,
+                date: attribute.createdAt,
+                content: attribute.content,
+                owner,
+                value: attribute.content.value,
+                valueType,
+                renderHints,
+                valueHints,
+                isDraft: false,
+                isOwn: true,
+                createdAt: attribute.createdAt,
+                wasViewedAt: attribute.wasViewedAt,
+                succeeds: attribute.succeeds,
+                succeededBy: attribute.succeededBy,
+                key: localAttribute.content.key,
+                confidentiality: localAttribute.content.confidentiality,
+                isTechnical: localAttribute.content.isTechnical,
+                peer: localAttribute.peer.toString(),
+                sourceReference: localAttribute.sourceReference.toString(),
+                deletionStatus: localAttribute.deletionInfo?.deletionStatus,
+                deletionDate: localAttribute.deletionInfo?.deletionDate.toString(),
+                forwardingPeers: await this.expandForwardingPeers(forwardingDetails),
+                forwardingDetails: this.expandForwardingDetails(forwardingDetails)
+            };
+        }
+
+        if (localAttribute instanceof PeerRelationshipAttribute) {
+            const forwardingDetailsResult = await this.consumption.attributes.getForwardingDetailsForAttribute({ attributeId: localAttribute.id.toString() });
+            const forwardingDetails = forwardingDetailsResult.value;
+
+            return {
+                type: "PeerRelationshipAttributeDVO",
+                id: attribute.id,
+                name: "title" in attribute.content.value ? attribute.content.value.title : name,
+                description: "description" in attribute.content.value ? attribute.content.value.description : description,
+                date: attribute.createdAt,
+                content: attribute.content,
+                owner,
+                value: attribute.content.value,
+                valueType,
+                renderHints,
+                valueHints,
+                isDraft: false,
+                isOwn: false,
+                createdAt: attribute.createdAt,
+                wasViewedAt: attribute.wasViewedAt,
+                succeeds: attribute.succeeds,
+                succeededBy: attribute.succeededBy,
+                key: localAttribute.content.key,
+                confidentiality: localAttribute.content.confidentiality,
+                isTechnical: localAttribute.content.isTechnical,
+                peer: localAttribute.peer.toString(),
+                sourceReference: localAttribute.sourceReference.toString(),
+                deletionStatus: localAttribute.deletionInfo?.deletionStatus,
+                deletionDate: localAttribute.deletionInfo?.deletionDate.toString(),
+                forwardingPeers: await this.expandForwardingPeers(forwardingDetails),
+                forwardingDetails: this.expandForwardingDetails(forwardingDetails)
+            };
+        }
+
         return {
-            type: "RepositoryAttributeDVO",
+            type: "ThirdPartyRelationshipAttributeDVO",
             id: attribute.id,
-            name,
-            description,
-            content: attribute.content,
-            value: attribute.content.value,
+            name: "title" in attribute.content.value ? attribute.content.value.title : name,
+            description: "description" in attribute.content.value ? attribute.content.value.description : description,
             date: attribute.createdAt,
-            owner: owner,
+            content: attribute.content,
+            owner,
+            value: attribute.content.value,
+            valueType,
             renderHints,
             valueHints,
-            isValid: true,
-            createdAt: attribute.createdAt,
-            isOwn: true,
             isDraft: false,
-            sharedWith: sharedToPeerDVOs as SharedToPeerAttributeDVO[],
-            tags: identityAttribute.tags,
-            valueType,
-            isDefault: attribute.isDefault,
-            wasViewedAt: attribute.wasViewedAt
+            isOwn: false,
+            createdAt: attribute.createdAt,
+            wasViewedAt: attribute.wasViewedAt,
+            succeeds: attribute.succeeds,
+            succeededBy: attribute.succeededBy,
+            key: localAttribute.content.key,
+            confidentiality: localAttribute.content.confidentiality,
+            isTechnical: localAttribute.content.isTechnical,
+            peer: localAttribute.peer.toString(),
+            initialAttributePeer: localAttribute.initialAttributePeer.toString(),
+            sourceReference: localAttribute.sourceReference.toString(),
+            deletionStatus: localAttribute.deletionInfo?.deletionStatus,
+            deletionDate: localAttribute.deletionInfo?.deletionDate.toString()
         };
     }
 
     public async expandLocalAttributeDTOs(
         attributes: LocalAttributeDTO[]
-    ): Promise<(RepositoryAttributeDVO | SharedToPeerAttributeDVO | PeerAttributeDVO | PeerRelationshipAttributeDVO | OwnRelationshipAttributeDVO)[]> {
+    ): Promise<(OwnIdentityAttributeDVO | PeerIdentityAttributeDVO | OwnRelationshipAttributeDVO | PeerRelationshipAttributeDVO | ThirdPartyRelationshipAttributeDVO)[]> {
         const attributesPromise = attributes.map((attribute) => this.expandLocalAttributeDTO(attribute));
         return await Promise.all(attributesPromise);
+    }
+
+    private async expandForwardingPeers(forwardingDetails: LocalAttributeForwardingDetailsDTO[]): Promise<IdentityDVO[] | undefined> {
+        if (forwardingDetails.length === 0) return;
+
+        const addresses = [...new Set(forwardingDetails.map((detail) => detail.peer.toString()))];
+        const promises = addresses.map((address) => this.expandAddress(address));
+
+        return await Promise.all(promises);
+    }
+
+    private expandForwardingDetails(forwardingDetails: LocalAttributeForwardingDetailsDTO[]): ForwardingDetailsDVO[] | undefined {
+        if (forwardingDetails.length === 0) return;
+
+        return forwardingDetails.map((details) => {
+            const result: ForwardingDetailsDVO = {
+                peer: details.peer.toString(),
+                sourceReference: details.sourceReference.toString(),
+                sharedAt: details.sharedAt.toString()
+            };
+
+            if (details.deletionInfo) {
+                result.deletionDate = details.deletionInfo.deletionDate.toString();
+                result.deletionStatus = details.deletionInfo.deletionStatus;
+            }
+            return result;
+        });
     }
 
     public async expandAttributeQuery(
@@ -1290,8 +1207,6 @@ export class DataViewExpander {
             name,
             description,
             valueType,
-            validFrom: query.validFrom,
-            validTo: query.validTo,
             renderHints: hints.renderHints,
             valueHints: hints.valueHints,
             isProcessed: false
@@ -1319,8 +1234,6 @@ export class DataViewExpander {
             id: "",
             name,
             description,
-            validFrom: query.validFrom,
-            validTo: query.validTo,
             owner: await this.expandAddress(query.owner),
             key: query.key,
             attributeCreationHints: query.attributeCreationHints,
@@ -1341,8 +1254,6 @@ export class DataViewExpander {
             id: "",
             name,
             description,
-            validFrom: query.validFrom,
-            validTo: query.validTo,
             owner: await this.expandAddress(query.owner),
             thirdParty,
             key: query.key,
@@ -1442,7 +1353,7 @@ export class DataViewExpander {
         return {
             ...this.expandIdentityAttributeQuery(query),
             type: "ProcessedIdentityAttributeQueryDVO",
-            results: matchedAttributeDVOs as RepositoryAttributeDVO[],
+            results: matchedAttributeDVOs as OwnIdentityAttributeDVO[],
             isProcessed: true
         };
     }
@@ -1510,7 +1421,7 @@ export class DataViewExpander {
         return {
             ...this.expandIQLQuery(query),
             type: "ProcessedIQLQueryDVO",
-            results: matchedAttributeDVOs as RepositoryAttributeDVO[],
+            results: matchedAttributeDVOs as OwnIdentityAttributeDVO[],
             isProcessed: true,
             valueType,
             renderHints,
@@ -1730,7 +1641,7 @@ export class DataViewExpander {
         const relationshipSetting = await this.getRelationshipSettingDVO(relationship);
 
         const stringByType: Record<string, undefined | string> = {};
-        const relationshipAttributesResult = await this.consumption.attributes.getPeerSharedAttributes({ onlyValid: true, peer: relationship.peer });
+        const relationshipAttributesResult = await this.consumption.attributes.getPeerAttributes({ peer: relationship.peer });
         const expandedAttributes = await this.expandLocalAttributeDTOs(relationshipAttributesResult.value);
         const attributesByType: Record<string, undefined | LocalAttributeDVO[]> = {};
         for (const attribute of expandedAttributes) {
@@ -1754,16 +1665,13 @@ export class DataViewExpander {
             }
         }
 
-        const sendMailDisabledResult = await this.consumption.attributes.getPeerSharedAttributes({
+        const sendMailDisabledResult = await this.consumption.attributes.getPeerAttributes({
             peer: relationship.peer,
             query: { "content.value.@type": "Consent", "content.key": "__App_Contact_sendMailDisabled" }
         });
         const sendMailDisabled = sendMailDisabledResult.value.length > 0;
 
-        let direction = RelationshipDirection.Incoming;
-        if (!relationship.template.isOwn) {
-            direction = RelationshipDirection.Outgoing;
-        }
+        const direction = this.identityController.isMe(CoreAddress.from(relationship.auditLog[0].createdBy)) ? RelationshipDirection.Outgoing : RelationshipDirection.Incoming;
 
         let statusText = "";
         switch (relationship.status) {
@@ -1822,7 +1730,7 @@ export class DataViewExpander {
             attributeMap: attributesByType,
             items: expandedAttributes,
             nameMap: stringByType,
-            templateId: relationship.template.id,
+            templateId: relationship.templateId,
             auditLog: relationship.auditLog,
             creationContent: relationship.creationContent,
             sendMailDisabled
@@ -1909,9 +1817,10 @@ export class DataViewExpander {
     public async expandFileDTO(file: FileDTO): Promise<FileDVO> {
         return {
             ...file,
+            title: file.title ?? file.filename,
             type: "FileDVO",
             id: file.id,
-            name: file.title ? file.title : file.filename,
+            name: file.title ?? file.filename,
             date: file.createdAt,
             image: "",
             filename: file.filename,

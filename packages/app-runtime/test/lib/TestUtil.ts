@@ -182,7 +182,7 @@ export class TestUtil {
             })
         ).value;
 
-        const templateTo = await to.transportServices.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templateFrom.truncatedReference });
+        const templateTo = await to.transportServices.relationshipTemplates.loadPeerRelationshipTemplate({ reference: templateFrom.reference.truncated });
         return templateTo.value;
     }
 
