@@ -185,6 +185,7 @@ export class AttributesController extends ConsumptionBaseController {
 
         const attributes = await this.attributes.find(dbQuery);
         const attribute = attributes.length > 0 ? LocalAttribute.from(attributes[0]) : undefined;
+        if (attribute) await this.updateNumberOfForwards(attribute);
 
         return attribute;
     }
