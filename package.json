@@ -3,7 +3,7 @@
     "private": true,
     "description": "The enmeshed Monorepo.",
     "homepage": "https://enmeshed.eu",
-    "license": "MIT",
+    "license": "AGPL-3.0-or-later",
     "author": "j&s-soft AG",
     "workspaces": [
         "packages/core-types",
