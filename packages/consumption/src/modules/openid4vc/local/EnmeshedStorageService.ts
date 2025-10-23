@@ -18,8 +18,8 @@ import {
 import { IdentityAttribute } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
 import { AccountController } from "@nmshd/transport";
+import { OwnIdentityAttribute } from "../../attributes";
 import { AttributesController } from "../../attributes/AttributesController";
-import { LocalAttribute } from "../../attributes/local/LocalAttribute";
 
 @injectable()
 export class EnmeshedStorageService<T extends BaseRecord> implements StorageService<T> {
@@ -58,14 +58,14 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
             },
             owner: owner
         });
-        const result = await this.attributeController.createRepositoryAttribute({
+        const result = await this.attributeController.createOwnIdentityAttribute({
             content: identityAttribute
         });
         agentContext.config.logger.debug(`Saved record: ${JSON.stringify(result)}`);
         return await Promise.resolve();
     }
 
-    public async saveWithDisplay(agentContext: AgentContext, value: string, type: string, displayInformation: string, title: string): Promise<LocalAttribute> {
+    public async saveWithDisplay(agentContext: AgentContext, value: string, type: string, displayInformation: string, title: string): Promise<OwnIdentityAttribute> {
         const owner = this.accountController.identity.address;
         const identityAttribute = IdentityAttribute.from({
             value: {
@@ -77,7 +77,7 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
             },
             owner: owner
         });
-        const result = await this.attributeController.createRepositoryAttribute({
+        const result = await this.attributeController.createOwnIdentityAttribute({
             content: identityAttribute
         });
         agentContext.config.logger.debug(`Saved record: ${JSON.stringify(result)}`);
@@ -100,9 +100,9 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
             },
             owner: owner
         });
-        await this.attributeController.createRepositoryAttribute({
-            content: identityAttribute,
-            id: CoreId.from(record.id)
+        await this.attributeController.createOwnIdentityAttribute({
+            content: identityAttribute
+            // id: CoreId.from(record.id)
         });
         return await Promise.resolve();
     }
@@ -113,7 +113,7 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
         if (attribute === undefined) {
             throw new Error(`Attribute with id ${record.id} not found`);
         }
-        await this.attributeController.deleteAttribute(attribute);
+        await this.attributeController.deleteAttribute(attribute.id);
     }
 
     public async deleteById(agentContext: AgentContext, recordClass: BaseRecordConstructor<T>, id: string): Promise<void> {
@@ -122,7 +122,7 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
         if (attribute === undefined) {
             throw new Error(`Attribute with id ${id} not found`);
         }
-        await this.attributeController.deleteAttribute(attribute);
+        await this.attributeController.deleteAttribute(attribute.id);
     }
 
     public async getById(agentContext: AgentContext, recordClass: BaseRecordConstructor<T>, id: string): Promise<T> {

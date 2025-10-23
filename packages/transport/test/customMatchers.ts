@@ -13,9 +13,22 @@ expect.extend({
         const receivedClone = JSON.parse(JSON.stringify(received));
         const expectedClone = JSON.parse(JSON.stringify(expected));
 
-        excludes.forEach((exclud) => {
-            set(receivedClone, exclud, undefined);
-            set(expectedClone, exclud, undefined);
+        excludes.forEach((exclude) => {
+            if (Array.isArray(receivedClone)) {
+                for (const item of receivedClone) {
+                    set(item, exclude, undefined);
+                }
+            } else {
+                set(receivedClone, exclude, undefined);
+            }
+
+            if (Array.isArray(expectedClone)) {
+                for (const item of expectedClone) {
+                    set(item, exclude, undefined);
+                }
+            } else {
+                set(expectedClone, exclude, undefined);
+            }
         });
 
         const matcherName = "toStrictEqual";

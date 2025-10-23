@@ -22,7 +22,7 @@ import {
     type OpenId4VpResolvedAuthorizationRequest
 } from "@credo-ts/openid4vc";
 import { AccountController } from "@nmshd/transport";
-import { AttributesController, LocalAttribute } from "../../attributes";
+import { AttributesController, OwnIdentityAttribute } from "../../attributes";
 import { BaseAgent } from "./BaseAgent";
 import { EnmeshedStorageService } from "./EnmeshedStorageService";
 
@@ -109,7 +109,7 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
             redirectUri?: string;
             txCode?: string;
         }
-    ): Promise<LocalAttribute[]> {
+    ): Promise<OwnIdentityAttribute[]> {
         const tokenResponse = await this.agent.openid4vc.holder.requestToken(
             options.code && options.clientId
                 ? {
