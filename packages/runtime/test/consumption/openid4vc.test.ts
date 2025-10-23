@@ -50,6 +50,7 @@ describe("OpenID4VCI and OpenID4VCP", () => {
 
         const status = acceptanceResult.isSuccess;
         expect(status).toBe(true);
+        expect(typeof acceptanceResult.value.id).toBe("string");
     }, 10000000);
 
     test("should be able to process a given credential presentation", async () => {

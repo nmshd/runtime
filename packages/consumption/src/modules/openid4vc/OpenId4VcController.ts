@@ -1,3 +1,4 @@
+import { VerifiableCredential } from "@nmshd/content";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../consumption/ConsumptionController";
 import { ConsumptionControllerName } from "../../consumption/ConsumptionControllerName";
@@ -17,19 +18,23 @@ export class OpenId4VcController extends ConsumptionBaseController {
         };
     }
 
-    public async processFetchedCredentialOffer(fetchedCredentialOffer: string, requestedCredentialOffers: string[], pinCode?: string): Promise<any> {
+    public async processFetchedCredentialOffer(
+        fetchedCredentialOffer: string,
+        requestedCredentialOffers: string[],
+        pinCode?: string
+    ): Promise<{ data: string; id: string; type: string; displayInformation: string | undefined }> {
         const holder = new Holder(this.parent.accountController, this.parent.attributes);
         await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
         const credentialOffer = JSON.parse(fetchedCredentialOffer);
         const credentials = await holder.requestAndStoreCredentials(credentialOffer, { credentialsToRequest: requestedCredentialOffers, txCode: pinCode });
 
         // TODO: support multiple credentials
-        const credential = credentials[0].content.value;
+        const credential = credentials[0].content.value as VerifiableCredential;
 
         return {
             data: credential.value,
             // multi credentials not supported yet
-            id: credentials[0].id,
+            id: credentials[0].id.toString(),
             type: credential.type,
             displayInformation: credential.displayInformation
         };

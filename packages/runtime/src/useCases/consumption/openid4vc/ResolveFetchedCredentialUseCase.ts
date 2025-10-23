@@ -31,6 +31,6 @@ export class ResolveFetchedCredentialOfferUseCase extends UseCase<FetchedCredent
             id: result.id,
             type: result.type,
             displayInformation: result.displayInformation
-        } as VerifiableCredentialDTO);
+        });
     }
 }

@@ -19,6 +19,7 @@ import { IdentityAttribute } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
 import { AccountController } from "@nmshd/transport";
 import { AttributesController } from "../../attributes/AttributesController";
+import { LocalAttribute } from "../../attributes/local/LocalAttribute";
 
 @injectable()
 export class EnmeshedStorageService<T extends BaseRecord> implements StorageService<T> {
@@ -64,7 +65,7 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
         return await Promise.resolve();
     }
 
-    public async saveWithDisplay(agentContext: AgentContext, value: string, type: string, displayInformation: string, title: string): Promise<any> {
+    public async saveWithDisplay(agentContext: AgentContext, value: string, type: string, displayInformation: string, title: string): Promise<LocalAttribute> {
         const owner = this.accountController.identity.address;
         const identityAttribute = IdentityAttribute.from({
             value: {

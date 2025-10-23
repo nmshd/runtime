@@ -22,7 +22,7 @@ import {
     type OpenId4VpResolvedAuthorizationRequest
 } from "@credo-ts/openid4vc";
 import { AccountController } from "@nmshd/transport";
-import { AttributesController } from "../../attributes";
+import { AttributesController, LocalAttribute } from "../../attributes";
 import { BaseAgent } from "./BaseAgent";
 import { EnmeshedStorageService } from "./EnmeshedStorageService";
 
@@ -58,7 +58,7 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         return allCredentials.filter((vc) => ids.includes(vc.id.toString()));
     }
 
-    public async resolveCredentialOffer(credentialOffer: string): Promise<any> {
+    public async resolveCredentialOffer(credentialOffer: string): Promise<OpenId4VciResolvedCredentialOffer> {
         return await this.agent.openid4vc.holder.resolveCredentialOffer(credentialOffer);
     }
 
@@ -74,6 +74,7 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
                 preAuthorizedCode: grants[preAuthorizedCodeGrantIdentifier]["pre-authorized_code"]
             } as const;
         }
+
         if (resolvedCredentialOffer.credentialOfferPayload.grants?.[authorizationCodeGrantIdentifier]) {
             const resolvedAuthorizationRequest = await this.agent.openid4vc.holder.resolveOpenId4VciAuthorizationRequest(resolvedCredentialOffer, {
                 clientId: this.client.clientId,
@@ -108,7 +109,7 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
             redirectUri?: string;
             txCode?: string;
         }
-    ): Promise<any> {
+    ): Promise<LocalAttribute[]> {
         const tokenResponse = await this.agent.openid4vc.holder.requestToken(
             options.code && options.clientId
                 ? {
