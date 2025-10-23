@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
 import { AttributesController } from "@nmshd/consumption";
-import { CoreAddress, CoreId } from "@nmshd/core-types";
+import { CoreId } from "@nmshd/core-types";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { Relationship, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
@@ -42,11 +42,7 @@ export class GetAttributesForRelationshipUseCase extends UseCase<GetAttributesFo
         const query: any = {};
         if (request.onlyLatestVersions ?? true) query["succeededBy"] = { $exists: false };
 
-        const attributes = await this.attributesController.getLocalAttributesExchangedWithPeer(
-            relationship.peer.address,
-            query,
-            request.hideTechnical
-        );
+        const attributes = await this.attributesController.getLocalAttributesExchangedWithPeer(relationship.peer.address, query, request.hideTechnical);
 
         return Result.ok(AttributeMapper.toAttributeDTOList(attributes));
     }
