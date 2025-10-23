@@ -920,8 +920,6 @@ export class AttributesController extends ConsumptionBaseController {
             const predecessor = (await this.getLocalAttribute(attribute.succeeds)) as T | undefined;
             if (!predecessor) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.succeeds.toString());
 
-            await this.updateNumberOfForwards(predecessor);
-
             attribute = predecessor;
             predecessors.push(attribute);
         }
@@ -1521,19 +1519,16 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     public async getForwardingPeers(attribute: LocalAttribute, includeToBeDeleted = false): Promise<CoreAddress[]> {
-        const existingForwardingDetailsDocs = await this.forwardingDetails.find({
+        const excludedDeletionStatuses = includeToBeDeleted
+            ? [EmittedAttributeDeletionStatus.DeletedByRecipient]
+            : [EmittedAttributeDeletionStatus.DeletedByRecipient, EmittedAttributeDeletionStatus.ToBeDeletedByRecipient];
+
+        const forwardingDetailsDocs = await this.forwardingDetails.find({
             attributeId: attribute.id.toString(),
-            "deletionInfo.deletionStatus": { $ne: EmittedAttributeDeletionStatus.DeletedByRecipient }
+            "deletionInfo.deletionStatus": { $nin: excludedDeletionStatuses }
         });
-        const existingForwardingDetails = existingForwardingDetailsDocs.map((doc) => AttributeForwardingDetails.from(doc));
-
-        if (existingForwardingDetails.length === 0) return [];
-
-        const forwardingDetails = includeToBeDeleted
-            ? existingForwardingDetails
-            : existingForwardingDetails.filter((details) => {
-                  return details.deletionInfo?.deletionStatus !== EmittedAttributeDeletionStatus.ToBeDeletedByRecipient;
-              });
+        const forwardingDetails = forwardingDetailsDocs.map((doc) => AttributeForwardingDetails.from(doc));
+        if (forwardingDetails.length === 0) return [];
 
         const peers = forwardingDetails.map((details) => details.peer.toString());
         const uniquePeers = Array.from(new Set(peers)).map((address) => CoreAddress.from(address));
