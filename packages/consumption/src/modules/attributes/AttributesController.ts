@@ -167,6 +167,9 @@ export class AttributesController extends ConsumptionBaseController {
         /* Map matched indices back to their respective attributes and return. */
         const matchedAttributes = indices.map((ii) => envelopedAttributes[ii]);
         const result = this.parseArray(matchedAttributes, LocalAttribute);
+
+        for (const attribute of result) await this.updateNumberOfForwards(attribute);
+
         return result;
     }
 
@@ -182,6 +185,7 @@ export class AttributesController extends ConsumptionBaseController {
 
         const attributes = await this.attributes.find(dbQuery);
         const attribute = attributes.length > 0 ? LocalAttribute.from(attributes[0]) : undefined;
+        if (attribute) await this.updateNumberOfForwards(attribute);
 
         return attribute;
     }
@@ -214,9 +218,12 @@ export class AttributesController extends ConsumptionBaseController {
                 break;
         }
 
-        const attributes = await this.attributes.find(dbQuery);
+        const attributeDocs = await this.attributes.find(dbQuery);
+        const attributes = this.parseArray(attributeDocs, LocalAttribute);
 
-        return this.parseArray(attributes, LocalAttribute);
+        for (const attribute of attributes) await this.updateNumberOfForwards(attribute);
+
+        return attributes;
     }
 
     public async executeIdentityAttributeQuery(query: IIdentityAttributeQuery): Promise<LocalAttribute[]> {
@@ -224,9 +231,12 @@ export class AttributesController extends ConsumptionBaseController {
         const dbQuery = IdentityAttributeQueryTranslator.translate(parsedQuery);
         dbQuery["content.owner"] = this.identity.address.toString();
 
-        const attributes = await this.attributes.find(dbQuery);
+        const attributeDocs = await this.attributes.find(dbQuery);
+        const attributes = this.parseArray(attributeDocs, LocalAttribute);
 
-        return this.parseArray(attributes, LocalAttribute);
+        for (const attribute of attributes) await this.updateNumberOfForwards(attribute);
+
+        return attributes;
     }
 
     public async createOwnIdentityAttribute(params: { content: IdentityAttribute }): Promise<OwnIdentityAttribute> {
