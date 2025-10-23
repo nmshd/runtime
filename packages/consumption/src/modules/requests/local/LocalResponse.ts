@@ -10,7 +10,7 @@ export interface ILocalResponseSource extends ISerializable {
 @type("LocalResponseSource")
 export class LocalResponseSource extends Serializable implements ILocalResponseSource {
     @serialize()
-    @validate()
+    @validate({ allowedValues: ["Message", "Relationship"] })
     public type: "Message" | "Relationship";
 
     @serialize()

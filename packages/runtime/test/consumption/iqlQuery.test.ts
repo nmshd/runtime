@@ -44,7 +44,7 @@ describe("IQL Query", () => {
         await establishRelationship(sTransportServices, rTransportServices);
 
         rLocalAttribute1 = (
-            await rConsumptionServices.attributes.createRepositoryAttribute({
+            await rConsumptionServices.attributes.createOwnIdentityAttribute({
                 content: {
                     value: {
                         "@type": "GivenName",
@@ -56,7 +56,7 @@ describe("IQL Query", () => {
         ).value;
 
         rLocalAttribute2 = (
-            await rConsumptionServices.attributes.createRepositoryAttribute({
+            await rConsumptionServices.attributes.createOwnIdentityAttribute({
                 content: {
                     value: {
                         "@type": "GivenName",
@@ -67,7 +67,7 @@ describe("IQL Query", () => {
             })
         ).value;
 
-        await rConsumptionServices.attributes.createRepositoryAttribute({
+        await rConsumptionServices.attributes.createOwnIdentityAttribute({
             content: {
                 value: {
                     "@type": "GivenName",

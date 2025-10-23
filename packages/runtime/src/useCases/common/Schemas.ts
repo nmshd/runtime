@@ -35,11 +35,11 @@ export const LoadPeerTokenAnonymousRequest: any = {
     }
 }
 
-export const CanCreateRepositoryAttributeRequest: any = {
+export const CanCreateOwnIdentityAttributeRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CanCreateRepositoryAttributeRequest",
+    "$ref": "#/definitions/CanCreateOwnIdentityAttributeRequest",
     "definitions": {
-        "CanCreateRepositoryAttributeRequest": {
+        "CanCreateOwnIdentityAttributeRequest": {
             "type": "object",
             "additionalProperties": false,
             "properties": {
@@ -67,11 +67,11 @@ export const CanCreateRepositoryAttributeRequest: any = {
     }
 }
 
-export const ChangeDefaultRepositoryAttributeRequest: any = {
+export const ChangeDefaultOwnIdentityAttributeRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/ChangeDefaultRepositoryAttributeRequest",
+    "$ref": "#/definitions/ChangeDefaultOwnIdentityAttributeRequest",
     "definitions": {
-        "ChangeDefaultRepositoryAttributeRequest": {
+        "ChangeDefaultOwnIdentityAttributeRequest": {
             "type": "object",
             "properties": {
                 "attributeId": {
@@ -1132,16 +1132,25 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/FaxNumberJSON"
                 },
                 {
+                    "$ref": "#/definitions/GivenNameJSON"
+                },
+                {
+                    "$ref": "#/definitions/HonorificPrefixJSON"
+                },
+                {
+                    "$ref": "#/definitions/HonorificSuffixJSON"
+                },
+                {
                     "$ref": "#/definitions/IdentityFileReferenceJSON"
                 },
                 {
                     "$ref": "#/definitions/JobTitleJSON"
                 },
                 {
-                    "$ref": "#/definitions/NationalityJSON"
+                    "$ref": "#/definitions/MiddleNameJSON"
                 },
                 {
-                    "$ref": "#/definitions/PersonNameJSON"
+                    "$ref": "#/definitions/NationalityJSON"
                 },
                 {
                     "$ref": "#/definitions/PhoneNumberJSON"
@@ -1157,6 +1166,9 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 {
                     "$ref": "#/definitions/StreetAddressJSON"
+                },
+                {
+                    "$ref": "#/definitions/SurnameJSON"
                 },
                 {
                     "$ref": "#/definitions/WebsiteJSON"
@@ -1440,6 +1452,75 @@ export const CanCreateOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+        "GivenNameJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "GivenName"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "HonorificPrefixJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "HonorificPrefix"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "HonorificSuffixJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "HonorificSuffix"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
         "IdentityFileReferenceJSON": {
             "type": "object",
             "properties": {
@@ -1486,6 +1567,29 @@ export const CanCreateOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+        "MiddleNameJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "MiddleName"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
         "NationalityJSON": {
             "type": "object",
             "properties": {
@@ -1506,42 +1610,6 @@ export const CanCreateOutgoingRequestRequest: any = {
             "required": [
                 "@type",
                 "value"
-            ],
-            "additionalProperties": false
-        },
-        "PersonNameJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "PersonName"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "givenName": {
-                    "type": "string"
-                },
-                "middleName": {
-                    "type": "string"
-                },
-                "surname": {
-                    "type": "string"
-                },
-                "honorificSuffix": {
-                    "type": "string"
-                },
-                "honorificPrefix": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "givenName",
-                "surname"
             ],
             "additionalProperties": false
         },
@@ -1702,6 +1770,29 @@ export const CanCreateOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+        "SurnameJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "Surname"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
         "WebsiteJSON": {
             "type": "object",
             "properties": {
@@ -1726,454 +1817,7 @@ export const CanCreateOutgoingRequestRequest: any = {
             "additionalProperties": false
         },
         "AttributeValues.Identity.Uneditable.Json": {
-            "anyOf": [
-                {
-                    "$ref": "#/definitions/AffiliationOrganizationJSON"
-                },
-                {
-                    "$ref": "#/definitions/AffiliationRoleJSON"
-                },
-                {
-                    "$ref": "#/definitions/AffiliationUnitJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthCityJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthCountryJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthDayJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthMonthJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthStateJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthYearJSON"
-                },
-                {
-                    "$ref": "#/definitions/CityJSON"
-                },
-                {
-                    "$ref": "#/definitions/CountryJSON"
-                },
-                {
-                    "$ref": "#/definitions/GivenNameJSON"
-                },
-                {
-                    "$ref": "#/definitions/HonorificPrefixJSON"
-                },
-                {
-                    "$ref": "#/definitions/HonorificSuffixJSON"
-                },
-                {
-                    "$ref": "#/definitions/HouseNumberJSON"
-                },
-                {
-                    "$ref": "#/definitions/MiddleNameJSON"
-                },
-                {
-                    "$ref": "#/definitions/SchematizedXMLJSON"
-                },
-                {
-                    "$ref": "#/definitions/StateJSON"
-                },
-                {
-                    "$ref": "#/definitions/StreetJSON"
-                },
-                {
-                    "$ref": "#/definitions/SurnameJSON"
-                },
-                {
-                    "$ref": "#/definitions/ZipCodeJSON"
-                }
-            ]
-        },
-        "AffiliationOrganizationJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationOrganization"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "AffiliationRoleJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationRole"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "AffiliationUnitJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationUnit"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthCityJSON": {
-            "type": "object",
-            "properties": {
-                "value": {
-                    "type": "string"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthCity"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthCountryJSON": {
-            "type": "object",
-            "properties": {
-                "value": {
-                    "type": "string"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthCountry"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthDayJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthDay"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "number"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthMonthJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthMonth"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "number",
-                    "enum": [
-                        1,
-                        2,
-                        3,
-                        4,
-                        5,
-                        6,
-                        7,
-                        8,
-                        9,
-                        10,
-                        11,
-                        12
-                    ],
-                    "description": "Month values: 1 (january) - 12 (december)"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthStateJSON": {
-            "type": "object",
-            "properties": {
-                "value": {
-                    "type": "string"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthState"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthYearJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthYear"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "number"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "CityJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "City"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "CountryJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Country"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "GivenNameJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "GivenName"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "HonorificPrefixJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HonorificPrefix"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "HonorificSuffixJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HonorificSuffix"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "HouseNumberJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HouseNumber"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "MiddleNameJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "MiddleName"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
+            "$ref": "#/definitions/SchematizedXMLJSON"
         },
         "SchematizedXMLJSON": {
             "type": "object",
@@ -2192,98 +1836,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "schemaURL": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "StateJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "State"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "StreetJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Street"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "SurnameJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Surname"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "ZipCodeJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ZipCode"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
                     "type": "string"
                 }
             },
@@ -2364,7 +1916,7 @@ export const CanCreateOutgoingRequestRequest: any = {
                         }
                     ]
                 },
-                "sourceAttributeId": {
+                "attributeId": {
                     "type": "string"
                 },
                 "thirdPartyAddress": {
@@ -2374,8 +1926,8 @@ export const CanCreateOutgoingRequestRequest: any = {
             "required": [
                 "@type",
                 "attribute",
-                "mustBeAccepted",
-                "sourceAttributeId"
+                "attributeId",
+                "mustBeAccepted"
             ],
             "additionalProperties": false
         },
@@ -2488,43 +2040,26 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "DisplayName",
                 "EMailAddress",
                 "FaxNumber",
+                "GivenName",
+                "HonorificPrefix",
+                "HonorificSuffix",
                 "IdentityFileReference",
-                "SchematizedXML",
                 "JobTitle",
                 "Nationality",
-                "PersonName",
+                "MiddleName",
                 "PhoneNumber",
                 "PostOfficeBoxAddress",
                 "Pseudonym",
                 "Sex",
                 "StreetAddress",
+                "Surname",
                 "Website"
             ]
         },
         "AttributeValues.Identity.Uneditable.TypeName": {
             "type": "string",
             "enum": [
-                "AffiliationOrganization",
-                "AffiliationRole",
-                "AffiliationUnit",
-                "BirthCity",
-                "BirthCountry",
-                "BirthDay",
-                "BirthMonth",
-                "BirthState",
-                "BirthYear",
-                "City",
-                "Country",
-                "GivenName",
-                "HonorificPrefix",
-                "HonorificSuffix",
-                "HouseNumber",
-                "MiddleName",
-                "SchematizedXML",
-                "State",
-                "Street",
-                "Surname",
-                "ZipCode"
+                "SchematizedXML"
             ]
         },
         "RelationshipAttributeQueryJSON": {
@@ -3392,9 +2927,6 @@ export const CompleteOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/CreateAttributeAcceptResponseItemJSON"
                 },
                 {
-                    "$ref": "#/definitions/ShareAttributeAcceptResponseItemJSON"
-                },
-                {
                     "$ref": "#/definitions/ProposeAttributeAcceptResponseItemJSON"
                 },
                 {
@@ -3578,16 +3110,25 @@ export const CompleteOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/FaxNumberJSON"
                 },
                 {
+                    "$ref": "#/definitions/GivenNameJSON"
+                },
+                {
+                    "$ref": "#/definitions/HonorificPrefixJSON"
+                },
+                {
+                    "$ref": "#/definitions/HonorificSuffixJSON"
+                },
+                {
                     "$ref": "#/definitions/IdentityFileReferenceJSON"
                 },
                 {
                     "$ref": "#/definitions/JobTitleJSON"
                 },
                 {
-                    "$ref": "#/definitions/NationalityJSON"
+                    "$ref": "#/definitions/MiddleNameJSON"
                 },
                 {
-                    "$ref": "#/definitions/PersonNameJSON"
+                    "$ref": "#/definitions/NationalityJSON"
                 },
                 {
                     "$ref": "#/definitions/PhoneNumberJSON"
@@ -3603,6 +3144,9 @@ export const CompleteOutgoingRequestRequest: any = {
                 },
                 {
                     "$ref": "#/definitions/StreetAddressJSON"
+                },
+                {
+                    "$ref": "#/definitions/SurnameJSON"
                 },
                 {
                     "$ref": "#/definitions/WebsiteJSON"
@@ -3886,6 +3430,75 @@ export const CompleteOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+        "GivenNameJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "GivenName"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "HonorificPrefixJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "HonorificPrefix"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "HonorificSuffixJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "HonorificSuffix"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
         "IdentityFileReferenceJSON": {
             "type": "object",
             "properties": {
@@ -3932,6 +3545,29 @@ export const CompleteOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+        "MiddleNameJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "MiddleName"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
         "NationalityJSON": {
             "type": "object",
             "properties": {
@@ -3952,42 +3588,6 @@ export const CompleteOutgoingRequestRequest: any = {
             "required": [
                 "@type",
                 "value"
-            ],
-            "additionalProperties": false
-        },
-        "PersonNameJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "PersonName"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "givenName": {
-                    "type": "string"
-                },
-                "middleName": {
-                    "type": "string"
-                },
-                "surname": {
-                    "type": "string"
-                },
-                "honorificSuffix": {
-                    "type": "string"
-                },
-                "honorificPrefix": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "givenName",
-                "surname"
             ],
             "additionalProperties": false
         },
@@ -4148,6 +3748,29 @@ export const CompleteOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+        "SurnameJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "Surname"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
         "WebsiteJSON": {
             "type": "object",
             "properties": {
@@ -4172,454 +3795,7 @@ export const CompleteOutgoingRequestRequest: any = {
             "additionalProperties": false
         },
         "AttributeValues.Identity.Uneditable.Json": {
-            "anyOf": [
-                {
-                    "$ref": "#/definitions/AffiliationOrganizationJSON"
-                },
-                {
-                    "$ref": "#/definitions/AffiliationRoleJSON"
-                },
-                {
-                    "$ref": "#/definitions/AffiliationUnitJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthCityJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthCountryJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthDayJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthMonthJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthStateJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthYearJSON"
-                },
-                {
-                    "$ref": "#/definitions/CityJSON"
-                },
-                {
-                    "$ref": "#/definitions/CountryJSON"
-                },
-                {
-                    "$ref": "#/definitions/GivenNameJSON"
-                },
-                {
-                    "$ref": "#/definitions/HonorificPrefixJSON"
-                },
-                {
-                    "$ref": "#/definitions/HonorificSuffixJSON"
-                },
-                {
-                    "$ref": "#/definitions/HouseNumberJSON"
-                },
-                {
-                    "$ref": "#/definitions/MiddleNameJSON"
-                },
-                {
-                    "$ref": "#/definitions/SchematizedXMLJSON"
-                },
-                {
-                    "$ref": "#/definitions/StateJSON"
-                },
-                {
-                    "$ref": "#/definitions/StreetJSON"
-                },
-                {
-                    "$ref": "#/definitions/SurnameJSON"
-                },
-                {
-                    "$ref": "#/definitions/ZipCodeJSON"
-                }
-            ]
-        },
-        "AffiliationOrganizationJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationOrganization"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "AffiliationRoleJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationRole"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "AffiliationUnitJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationUnit"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthCityJSON": {
-            "type": "object",
-            "properties": {
-                "value": {
-                    "type": "string"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthCity"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthCountryJSON": {
-            "type": "object",
-            "properties": {
-                "value": {
-                    "type": "string"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthCountry"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthDayJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthDay"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "number"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthMonthJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthMonth"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "number",
-                    "enum": [
-                        1,
-                        2,
-                        3,
-                        4,
-                        5,
-                        6,
-                        7,
-                        8,
-                        9,
-                        10,
-                        11,
-                        12
-                    ],
-                    "description": "Month values: 1 (january) - 12 (december)"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthStateJSON": {
-            "type": "object",
-            "properties": {
-                "value": {
-                    "type": "string"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthState"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthYearJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthYear"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "number"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "CityJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "City"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "CountryJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Country"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "GivenNameJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "GivenName"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "HonorificPrefixJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HonorificPrefix"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "HonorificSuffixJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HonorificSuffix"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "HouseNumberJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HouseNumber"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "MiddleNameJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "MiddleName"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
+            "$ref": "#/definitions/SchematizedXMLJSON"
         },
         "SchematizedXMLJSON": {
             "type": "object",
@@ -4638,98 +3814,6 @@ export const CompleteOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "schemaURL": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "StateJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "State"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "StreetJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Street"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "SurnameJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Surname"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "ZipCodeJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ZipCode"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
                     "type": "string"
                 }
             },
@@ -5410,34 +4494,6 @@ export const CompleteOutgoingRequestRequest: any = {
                 "@type": {
                     "type": "string",
                     "const": "CreateAttributeAcceptResponseItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "result": {
-                    "type": "string",
-                    "const": "Accepted"
-                },
-                "attributeId": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "attributeId",
-                "result"
-            ],
-            "additionalProperties": false
-        },
-        "ShareAttributeAcceptResponseItemJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ShareAttributeAcceptResponseItem"
                 },
                 "@context": {
                     "type": "string"
@@ -5837,9 +4893,6 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "$ref": "#/definitions/CreateAttributeAcceptResponseItemJSON"
                 },
                 {
-                    "$ref": "#/definitions/ShareAttributeAcceptResponseItemJSON"
-                },
-                {
                     "$ref": "#/definitions/ProposeAttributeAcceptResponseItemJSON"
                 },
                 {
@@ -6023,16 +5076,25 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "$ref": "#/definitions/FaxNumberJSON"
                 },
                 {
+                    "$ref": "#/definitions/GivenNameJSON"
+                },
+                {
+                    "$ref": "#/definitions/HonorificPrefixJSON"
+                },
+                {
+                    "$ref": "#/definitions/HonorificSuffixJSON"
+                },
+                {
                     "$ref": "#/definitions/IdentityFileReferenceJSON"
                 },
                 {
                     "$ref": "#/definitions/JobTitleJSON"
                 },
                 {
-                    "$ref": "#/definitions/NationalityJSON"
+                    "$ref": "#/definitions/MiddleNameJSON"
                 },
                 {
-                    "$ref": "#/definitions/PersonNameJSON"
+                    "$ref": "#/definitions/NationalityJSON"
                 },
                 {
                     "$ref": "#/definitions/PhoneNumberJSON"
@@ -6048,6 +5110,9 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                 },
                 {
                     "$ref": "#/definitions/StreetAddressJSON"
+                },
+                {
+                    "$ref": "#/definitions/SurnameJSON"
                 },
                 {
                     "$ref": "#/definitions/WebsiteJSON"
@@ -6331,6 +5396,75 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
             ],
             "additionalProperties": false
         },
+        "GivenNameJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "GivenName"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "HonorificPrefixJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "HonorificPrefix"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "HonorificSuffixJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "HonorificSuffix"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
         "IdentityFileReferenceJSON": {
             "type": "object",
             "properties": {
@@ -6377,6 +5511,29 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
             ],
             "additionalProperties": false
         },
+        "MiddleNameJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "MiddleName"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
         "NationalityJSON": {
             "type": "object",
             "properties": {
@@ -6397,42 +5554,6 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
             "required": [
                 "@type",
                 "value"
-            ],
-            "additionalProperties": false
-        },
-        "PersonNameJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "PersonName"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "givenName": {
-                    "type": "string"
-                },
-                "middleName": {
-                    "type": "string"
-                },
-                "surname": {
-                    "type": "string"
-                },
-                "honorificSuffix": {
-                    "type": "string"
-                },
-                "honorificPrefix": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "givenName",
-                "surname"
             ],
             "additionalProperties": false
         },
@@ -6593,6 +5714,29 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
             ],
             "additionalProperties": false
         },
+        "SurnameJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "Surname"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
         "WebsiteJSON": {
             "type": "object",
             "properties": {
@@ -6617,454 +5761,7 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
             "additionalProperties": false
         },
         "AttributeValues.Identity.Uneditable.Json": {
-            "anyOf": [
-                {
-                    "$ref": "#/definitions/AffiliationOrganizationJSON"
-                },
-                {
-                    "$ref": "#/definitions/AffiliationRoleJSON"
-                },
-                {
-                    "$ref": "#/definitions/AffiliationUnitJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthCityJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthCountryJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthDayJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthMonthJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthStateJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthYearJSON"
-                },
-                {
-                    "$ref": "#/definitions/CityJSON"
-                },
-                {
-                    "$ref": "#/definitions/CountryJSON"
-                },
-                {
-                    "$ref": "#/definitions/GivenNameJSON"
-                },
-                {
-                    "$ref": "#/definitions/HonorificPrefixJSON"
-                },
-                {
-                    "$ref": "#/definitions/HonorificSuffixJSON"
-                },
-                {
-                    "$ref": "#/definitions/HouseNumberJSON"
-                },
-                {
-                    "$ref": "#/definitions/MiddleNameJSON"
-                },
-                {
-                    "$ref": "#/definitions/SchematizedXMLJSON"
-                },
-                {
-                    "$ref": "#/definitions/StateJSON"
-                },
-                {
-                    "$ref": "#/definitions/StreetJSON"
-                },
-                {
-                    "$ref": "#/definitions/SurnameJSON"
-                },
-                {
-                    "$ref": "#/definitions/ZipCodeJSON"
-                }
-            ]
-        },
-        "AffiliationOrganizationJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationOrganization"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "AffiliationRoleJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationRole"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "AffiliationUnitJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationUnit"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthCityJSON": {
-            "type": "object",
-            "properties": {
-                "value": {
-                    "type": "string"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthCity"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthCountryJSON": {
-            "type": "object",
-            "properties": {
-                "value": {
-                    "type": "string"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthCountry"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthDayJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthDay"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "number"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthMonthJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthMonth"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "number",
-                    "enum": [
-                        1,
-                        2,
-                        3,
-                        4,
-                        5,
-                        6,
-                        7,
-                        8,
-                        9,
-                        10,
-                        11,
-                        12
-                    ],
-                    "description": "Month values: 1 (january) - 12 (december)"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthStateJSON": {
-            "type": "object",
-            "properties": {
-                "value": {
-                    "type": "string"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthState"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthYearJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthYear"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "number"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "CityJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "City"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "CountryJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Country"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "GivenNameJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "GivenName"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "HonorificPrefixJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HonorificPrefix"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "HonorificSuffixJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HonorificSuffix"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "HouseNumberJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HouseNumber"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "MiddleNameJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "MiddleName"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
+            "$ref": "#/definitions/SchematizedXMLJSON"
         },
         "SchematizedXMLJSON": {
             "type": "object",
@@ -7083,98 +5780,6 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "type": "string"
                 },
                 "schemaURL": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "StateJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "State"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "StreetJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Street"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "SurnameJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Surname"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "ZipCodeJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ZipCode"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
                     "type": "string"
                 }
             },
@@ -7855,34 +6460,6 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                 "@type": {
                     "type": "string",
                     "const": "CreateAttributeAcceptResponseItem"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "result": {
-                    "type": "string",
-                    "const": "Accepted"
-                },
-                "attributeId": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "attributeId",
-                "result"
-            ],
-            "additionalProperties": false
-        },
-        "ShareAttributeAcceptResponseItemJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ShareAttributeAcceptResponseItem"
                 },
                 "@context": {
                     "type": "string"
@@ -9082,16 +7659,25 @@ export const CreateOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/FaxNumberJSON"
                 },
                 {
+                    "$ref": "#/definitions/GivenNameJSON"
+                },
+                {
+                    "$ref": "#/definitions/HonorificPrefixJSON"
+                },
+                {
+                    "$ref": "#/definitions/HonorificSuffixJSON"
+                },
+                {
                     "$ref": "#/definitions/IdentityFileReferenceJSON"
                 },
                 {
                     "$ref": "#/definitions/JobTitleJSON"
                 },
                 {
-                    "$ref": "#/definitions/NationalityJSON"
+                    "$ref": "#/definitions/MiddleNameJSON"
                 },
                 {
-                    "$ref": "#/definitions/PersonNameJSON"
+                    "$ref": "#/definitions/NationalityJSON"
                 },
                 {
                     "$ref": "#/definitions/PhoneNumberJSON"
@@ -9107,6 +7693,9 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 {
                     "$ref": "#/definitions/StreetAddressJSON"
+                },
+                {
+                    "$ref": "#/definitions/SurnameJSON"
                 },
                 {
                     "$ref": "#/definitions/WebsiteJSON"
@@ -9390,6 +7979,75 @@ export const CreateOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+        "GivenNameJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "GivenName"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "HonorificPrefixJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "HonorificPrefix"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "HonorificSuffixJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "HonorificSuffix"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
         "IdentityFileReferenceJSON": {
             "type": "object",
             "properties": {
@@ -9436,6 +8094,29 @@ export const CreateOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+        "MiddleNameJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "MiddleName"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
         "NationalityJSON": {
             "type": "object",
             "properties": {
@@ -9456,42 +8137,6 @@ export const CreateOutgoingRequestRequest: any = {
             "required": [
                 "@type",
                 "value"
-            ],
-            "additionalProperties": false
-        },
-        "PersonNameJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "PersonName"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "givenName": {
-                    "type": "string"
-                },
-                "middleName": {
-                    "type": "string"
-                },
-                "surname": {
-                    "type": "string"
-                },
-                "honorificSuffix": {
-                    "type": "string"
-                },
-                "honorificPrefix": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "givenName",
-                "surname"
             ],
             "additionalProperties": false
         },
@@ -9652,6 +8297,29 @@ export const CreateOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+        "SurnameJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "Surname"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
         "WebsiteJSON": {
             "type": "object",
             "properties": {
@@ -9676,454 +8344,7 @@ export const CreateOutgoingRequestRequest: any = {
             "additionalProperties": false
         },
         "AttributeValues.Identity.Uneditable.Json": {
-            "anyOf": [
-                {
-                    "$ref": "#/definitions/AffiliationOrganizationJSON"
-                },
-                {
-                    "$ref": "#/definitions/AffiliationRoleJSON"
-                },
-                {
-                    "$ref": "#/definitions/AffiliationUnitJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthCityJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthCountryJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthDayJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthMonthJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthStateJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthYearJSON"
-                },
-                {
-                    "$ref": "#/definitions/CityJSON"
-                },
-                {
-                    "$ref": "#/definitions/CountryJSON"
-                },
-                {
-                    "$ref": "#/definitions/GivenNameJSON"
-                },
-                {
-                    "$ref": "#/definitions/HonorificPrefixJSON"
-                },
-                {
-                    "$ref": "#/definitions/HonorificSuffixJSON"
-                },
-                {
-                    "$ref": "#/definitions/HouseNumberJSON"
-                },
-                {
-                    "$ref": "#/definitions/MiddleNameJSON"
-                },
-                {
-                    "$ref": "#/definitions/SchematizedXMLJSON"
-                },
-                {
-                    "$ref": "#/definitions/StateJSON"
-                },
-                {
-                    "$ref": "#/definitions/StreetJSON"
-                },
-                {
-                    "$ref": "#/definitions/SurnameJSON"
-                },
-                {
-                    "$ref": "#/definitions/ZipCodeJSON"
-                }
-            ]
-        },
-        "AffiliationOrganizationJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationOrganization"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "AffiliationRoleJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationRole"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "AffiliationUnitJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationUnit"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthCityJSON": {
-            "type": "object",
-            "properties": {
-                "value": {
-                    "type": "string"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthCity"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthCountryJSON": {
-            "type": "object",
-            "properties": {
-                "value": {
-                    "type": "string"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthCountry"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthDayJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthDay"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "number"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthMonthJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthMonth"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "number",
-                    "enum": [
-                        1,
-                        2,
-                        3,
-                        4,
-                        5,
-                        6,
-                        7,
-                        8,
-                        9,
-                        10,
-                        11,
-                        12
-                    ],
-                    "description": "Month values: 1 (january) - 12 (december)"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthStateJSON": {
-            "type": "object",
-            "properties": {
-                "value": {
-                    "type": "string"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthState"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthYearJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthYear"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "number"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "CityJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "City"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "CountryJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Country"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "GivenNameJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "GivenName"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "HonorificPrefixJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HonorificPrefix"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "HonorificSuffixJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HonorificSuffix"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "HouseNumberJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HouseNumber"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "MiddleNameJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "MiddleName"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
+            "$ref": "#/definitions/SchematizedXMLJSON"
         },
         "SchematizedXMLJSON": {
             "type": "object",
@@ -10142,98 +8363,6 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "schemaURL": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "StateJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "State"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "StreetJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Street"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "SurnameJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Surname"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "ZipCodeJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ZipCode"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
                     "type": "string"
                 }
             },
@@ -10314,7 +8443,7 @@ export const CreateOutgoingRequestRequest: any = {
                         }
                     ]
                 },
-                "sourceAttributeId": {
+                "attributeId": {
                     "type": "string"
                 },
                 "thirdPartyAddress": {
@@ -10324,8 +8453,8 @@ export const CreateOutgoingRequestRequest: any = {
             "required": [
                 "@type",
                 "attribute",
-                "mustBeAccepted",
-                "sourceAttributeId"
+                "attributeId",
+                "mustBeAccepted"
             ],
             "additionalProperties": false
         },
@@ -10438,43 +8567,26 @@ export const CreateOutgoingRequestRequest: any = {
                 "DisplayName",
                 "EMailAddress",
                 "FaxNumber",
+                "GivenName",
+                "HonorificPrefix",
+                "HonorificSuffix",
                 "IdentityFileReference",
-                "SchematizedXML",
                 "JobTitle",
                 "Nationality",
-                "PersonName",
+                "MiddleName",
                 "PhoneNumber",
                 "PostOfficeBoxAddress",
                 "Pseudonym",
                 "Sex",
                 "StreetAddress",
+                "Surname",
                 "Website"
             ]
         },
         "AttributeValues.Identity.Uneditable.TypeName": {
             "type": "string",
             "enum": [
-                "AffiliationOrganization",
-                "AffiliationRole",
-                "AffiliationUnit",
-                "BirthCity",
-                "BirthCountry",
-                "BirthDay",
-                "BirthMonth",
-                "BirthState",
-                "BirthYear",
-                "City",
-                "Country",
-                "GivenName",
-                "HonorificPrefix",
-                "HonorificSuffix",
-                "HouseNumber",
-                "MiddleName",
-                "SchematizedXML",
-                "State",
-                "Street",
-                "Surname",
-                "ZipCode"
+                "SchematizedXML"
             ]
         },
         "RelationshipAttributeQueryJSON": {
@@ -12531,16 +10643,25 @@ export const ReceivedIncomingRequestRequest: any = {
                     "$ref": "#/definitions/FaxNumberJSON"
                 },
                 {
+                    "$ref": "#/definitions/GivenNameJSON"
+                },
+                {
+                    "$ref": "#/definitions/HonorificPrefixJSON"
+                },
+                {
+                    "$ref": "#/definitions/HonorificSuffixJSON"
+                },
+                {
                     "$ref": "#/definitions/IdentityFileReferenceJSON"
                 },
                 {
                     "$ref": "#/definitions/JobTitleJSON"
                 },
                 {
-                    "$ref": "#/definitions/NationalityJSON"
+                    "$ref": "#/definitions/MiddleNameJSON"
                 },
                 {
-                    "$ref": "#/definitions/PersonNameJSON"
+                    "$ref": "#/definitions/NationalityJSON"
                 },
                 {
                     "$ref": "#/definitions/PhoneNumberJSON"
@@ -12556,6 +10677,9 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 {
                     "$ref": "#/definitions/StreetAddressJSON"
+                },
+                {
+                    "$ref": "#/definitions/SurnameJSON"
                 },
                 {
                     "$ref": "#/definitions/WebsiteJSON"
@@ -12839,6 +10963,75 @@ export const ReceivedIncomingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+        "GivenNameJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "GivenName"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "HonorificPrefixJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "HonorificPrefix"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "HonorificSuffixJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "HonorificSuffix"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
         "IdentityFileReferenceJSON": {
             "type": "object",
             "properties": {
@@ -12885,6 +11078,29 @@ export const ReceivedIncomingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+        "MiddleNameJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "MiddleName"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
         "NationalityJSON": {
             "type": "object",
             "properties": {
@@ -12905,42 +11121,6 @@ export const ReceivedIncomingRequestRequest: any = {
             "required": [
                 "@type",
                 "value"
-            ],
-            "additionalProperties": false
-        },
-        "PersonNameJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "PersonName"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "givenName": {
-                    "type": "string"
-                },
-                "middleName": {
-                    "type": "string"
-                },
-                "surname": {
-                    "type": "string"
-                },
-                "honorificSuffix": {
-                    "type": "string"
-                },
-                "honorificPrefix": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "givenName",
-                "surname"
             ],
             "additionalProperties": false
         },
@@ -13101,6 +11281,29 @@ export const ReceivedIncomingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+        "SurnameJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "Surname"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
         "WebsiteJSON": {
             "type": "object",
             "properties": {
@@ -13125,454 +11328,7 @@ export const ReceivedIncomingRequestRequest: any = {
             "additionalProperties": false
         },
         "AttributeValues.Identity.Uneditable.Json": {
-            "anyOf": [
-                {
-                    "$ref": "#/definitions/AffiliationOrganizationJSON"
-                },
-                {
-                    "$ref": "#/definitions/AffiliationRoleJSON"
-                },
-                {
-                    "$ref": "#/definitions/AffiliationUnitJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthCityJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthCountryJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthDayJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthMonthJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthStateJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthYearJSON"
-                },
-                {
-                    "$ref": "#/definitions/CityJSON"
-                },
-                {
-                    "$ref": "#/definitions/CountryJSON"
-                },
-                {
-                    "$ref": "#/definitions/GivenNameJSON"
-                },
-                {
-                    "$ref": "#/definitions/HonorificPrefixJSON"
-                },
-                {
-                    "$ref": "#/definitions/HonorificSuffixJSON"
-                },
-                {
-                    "$ref": "#/definitions/HouseNumberJSON"
-                },
-                {
-                    "$ref": "#/definitions/MiddleNameJSON"
-                },
-                {
-                    "$ref": "#/definitions/SchematizedXMLJSON"
-                },
-                {
-                    "$ref": "#/definitions/StateJSON"
-                },
-                {
-                    "$ref": "#/definitions/StreetJSON"
-                },
-                {
-                    "$ref": "#/definitions/SurnameJSON"
-                },
-                {
-                    "$ref": "#/definitions/ZipCodeJSON"
-                }
-            ]
-        },
-        "AffiliationOrganizationJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationOrganization"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "AffiliationRoleJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationRole"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "AffiliationUnitJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationUnit"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthCityJSON": {
-            "type": "object",
-            "properties": {
-                "value": {
-                    "type": "string"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthCity"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthCountryJSON": {
-            "type": "object",
-            "properties": {
-                "value": {
-                    "type": "string"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthCountry"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthDayJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthDay"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "number"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthMonthJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthMonth"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "number",
-                    "enum": [
-                        1,
-                        2,
-                        3,
-                        4,
-                        5,
-                        6,
-                        7,
-                        8,
-                        9,
-                        10,
-                        11,
-                        12
-                    ],
-                    "description": "Month values: 1 (january) - 12 (december)"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthStateJSON": {
-            "type": "object",
-            "properties": {
-                "value": {
-                    "type": "string"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthState"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthYearJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthYear"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "number"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "CityJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "City"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "CountryJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Country"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "GivenNameJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "GivenName"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "HonorificPrefixJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HonorificPrefix"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "HonorificSuffixJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HonorificSuffix"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "HouseNumberJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HouseNumber"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "MiddleNameJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "MiddleName"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
+            "$ref": "#/definitions/SchematizedXMLJSON"
         },
         "SchematizedXMLJSON": {
             "type": "object",
@@ -13591,98 +11347,6 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "string"
                 },
                 "schemaURL": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "StateJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "State"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "StreetJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Street"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "SurnameJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Surname"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "ZipCodeJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ZipCode"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
                     "type": "string"
                 }
             },
@@ -13763,7 +11427,7 @@ export const ReceivedIncomingRequestRequest: any = {
                         }
                     ]
                 },
-                "sourceAttributeId": {
+                "attributeId": {
                     "type": "string"
                 },
                 "thirdPartyAddress": {
@@ -13773,8 +11437,8 @@ export const ReceivedIncomingRequestRequest: any = {
             "required": [
                 "@type",
                 "attribute",
-                "mustBeAccepted",
-                "sourceAttributeId"
+                "attributeId",
+                "mustBeAccepted"
             ],
             "additionalProperties": false
         },
@@ -13887,43 +11551,26 @@ export const ReceivedIncomingRequestRequest: any = {
                 "DisplayName",
                 "EMailAddress",
                 "FaxNumber",
+                "GivenName",
+                "HonorificPrefix",
+                "HonorificSuffix",
                 "IdentityFileReference",
-                "SchematizedXML",
                 "JobTitle",
                 "Nationality",
-                "PersonName",
+                "MiddleName",
                 "PhoneNumber",
                 "PostOfficeBoxAddress",
                 "Pseudonym",
                 "Sex",
                 "StreetAddress",
+                "Surname",
                 "Website"
             ]
         },
         "AttributeValues.Identity.Uneditable.TypeName": {
             "type": "string",
             "enum": [
-                "AffiliationOrganization",
-                "AffiliationRole",
-                "AffiliationUnit",
-                "BirthCity",
-                "BirthCountry",
-                "BirthDay",
-                "BirthMonth",
-                "BirthState",
-                "BirthYear",
-                "City",
-                "Country",
-                "GivenName",
-                "HonorificPrefix",
-                "HonorificSuffix",
-                "HouseNumber",
-                "MiddleName",
-                "SchematizedXML",
-                "State",
-                "Street",
-                "Surname",
-                "ZipCode"
+                "SchematizedXML"
             ]
         },
         "RelationshipAttributeQueryJSON": {
@@ -15278,11 +12925,11 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
     }
 }
 
-export const CreateRepositoryAttributeRequest: any = {
+export const CreateOwnIdentityAttributeRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CreateRepositoryAttributeRequest",
+    "$ref": "#/definitions/CreateOwnIdentityAttributeRequest",
     "definitions": {
-        "CreateRepositoryAttributeRequest": {
+        "CreateOwnIdentityAttributeRequest": {
             "type": "object",
             "additionalProperties": false,
             "properties": {
@@ -15310,57 +12957,11 @@ export const CreateRepositoryAttributeRequest: any = {
     }
 }
 
-export const DeleteOwnSharedAttributeAndNotifyPeerRequest: any = {
+export const DeleteAttributeAndNotifyRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/DeleteOwnSharedAttributeAndNotifyPeerRequest",
+    "$ref": "#/definitions/DeleteAttributeAndNotifyRequest",
     "definitions": {
-        "DeleteOwnSharedAttributeAndNotifyPeerRequest": {
-            "type": "object",
-            "properties": {
-                "attributeId": {
-                    "$ref": "#/definitions/AttributeIdString"
-                }
-            },
-            "required": [
-                "attributeId"
-            ],
-            "additionalProperties": false
-        },
-        "AttributeIdString": {
-            "type": "string",
-            "pattern": "ATT[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const DeletePeerSharedAttributeAndNotifyOwnerRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/DeletePeerSharedAttributeAndNotifyOwnerRequest",
-    "definitions": {
-        "DeletePeerSharedAttributeAndNotifyOwnerRequest": {
-            "type": "object",
-            "properties": {
-                "attributeId": {
-                    "$ref": "#/definitions/AttributeIdString"
-                }
-            },
-            "required": [
-                "attributeId"
-            ],
-            "additionalProperties": false
-        },
-        "AttributeIdString": {
-            "type": "string",
-            "pattern": "ATT[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const DeleteRepositoryAttributeRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/DeleteRepositoryAttributeRequest",
-    "definitions": {
-        "DeleteRepositoryAttributeRequest": {
+        "DeleteAttributeAndNotifyRequest": {
             "type": "object",
             "properties": {
                 "attributeId": {
@@ -15398,29 +12999,6 @@ export const DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest: any 
         "RelationshipIdString": {
             "type": "string",
             "pattern": "REL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const DeleteThirdPartyRelationshipAttributeAndNotifyPeerRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/DeleteThirdPartyRelationshipAttributeAndNotifyPeerRequest",
-    "definitions": {
-        "DeleteThirdPartyRelationshipAttributeAndNotifyPeerRequest": {
-            "type": "object",
-            "properties": {
-                "attributeId": {
-                    "$ref": "#/definitions/AttributeIdString"
-                }
-            },
-            "required": [
-                "attributeId"
-            ],
-            "additionalProperties": false
-        },
-        "AttributeIdString": {
-            "type": "string",
-            "pattern": "ATT[A-Za-z0-9]{17}"
         }
     }
 }
@@ -15493,43 +13071,26 @@ export const ExecuteIdentityAttributeQueryRequest: any = {
                 "DisplayName",
                 "EMailAddress",
                 "FaxNumber",
+                "GivenName",
+                "HonorificPrefix",
+                "HonorificSuffix",
                 "IdentityFileReference",
-                "SchematizedXML",
                 "JobTitle",
                 "Nationality",
-                "PersonName",
+                "MiddleName",
                 "PhoneNumber",
                 "PostOfficeBoxAddress",
                 "Pseudonym",
                 "Sex",
                 "StreetAddress",
+                "Surname",
                 "Website"
             ]
         },
         "AttributeValues.Identity.Uneditable.TypeName": {
             "type": "string",
             "enum": [
-                "AffiliationOrganization",
-                "AffiliationRole",
-                "AffiliationUnit",
-                "BirthCity",
-                "BirthCountry",
-                "BirthDay",
-                "BirthMonth",
-                "BirthState",
-                "BirthYear",
-                "City",
-                "Country",
-                "GivenName",
-                "HonorificPrefix",
-                "HonorificSuffix",
-                "HouseNumber",
-                "MiddleName",
-                "SchematizedXML",
-                "State",
-                "Street",
-                "Surname",
-                "ZipCode"
+                "SchematizedXML"
             ]
         }
     }
@@ -15614,43 +13175,26 @@ export const ExecuteIQLQueryRequest: any = {
                 "DisplayName",
                 "EMailAddress",
                 "FaxNumber",
+                "GivenName",
+                "HonorificPrefix",
+                "HonorificSuffix",
                 "IdentityFileReference",
-                "SchematizedXML",
                 "JobTitle",
                 "Nationality",
-                "PersonName",
+                "MiddleName",
                 "PhoneNumber",
                 "PostOfficeBoxAddress",
                 "Pseudonym",
                 "Sex",
                 "StreetAddress",
+                "Surname",
                 "Website"
             ]
         },
         "AttributeValues.Identity.Uneditable.TypeName": {
             "type": "string",
             "enum": [
-                "AffiliationOrganization",
-                "AffiliationRole",
-                "AffiliationUnit",
-                "BirthCity",
-                "BirthCountry",
-                "BirthDay",
-                "BirthMonth",
-                "BirthState",
-                "BirthYear",
-                "City",
-                "Country",
-                "GivenName",
-                "HonorificPrefix",
-                "HonorificSuffix",
-                "HouseNumber",
-                "MiddleName",
-                "SchematizedXML",
-                "State",
-                "Street",
-                "Surname",
-                "ZipCode"
+                "SchematizedXML"
             ]
         }
     }
@@ -15929,10 +13473,7 @@ export const GetAttributesRequest: any = {
         "GetAttributesRequestQuery": {
             "type": "object",
             "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "parentId": {
+                "@type": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -15944,6 +13485,9 @@ export const GetAttributesRequest: any = {
                             }
                         }
                     ]
+                },
+                "createdAt": {
+                    "type": "string"
                 },
                 "succeeds": {
                     "anyOf": [
@@ -15971,9 +13515,6 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
-                "isDefault": {
-                    "type": "string"
-                },
                 "wasViewedAt": {
                     "anyOf": [
                         {
@@ -15986,6 +13527,9 @@ export const GetAttributesRequest: any = {
                             }
                         }
                     ]
+                },
+                "isDefault": {
+                    "type": "string"
                 },
                 "content.@type": {
                     "anyOf": [
@@ -16068,166 +13612,7 @@ export const GetAttributesRequest: any = {
                         }
                     ]
                 },
-                "shareInfo": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "shareInfo.requestReference": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "shareInfo.notificationReference": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "shareInfo.peer": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "shareInfo.sourceAttribute": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "shareInfo.thirdPartyAddress": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "deletionInfo": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "deletionInfo.deletionStatus": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "deletionInfo.deletionDate": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                }
-            },
-            "additionalProperties": false
-        }
-    }
-}
-
-export const GetOwnSharedAttributesRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetOwnSharedAttributesRequest",
-    "definitions": {
-        "GetOwnSharedAttributesRequest": {
-            "type": "object",
-            "properties": {
                 "peer": {
-                    "$ref": "#/definitions/AddressString"
-                },
-                "query": {
-                    "$ref": "#/definitions/GetOwnSharedAttributeRequestQuery"
-                },
-                "hideTechnical": {
-                    "type": "boolean"
-                },
-                "onlyLatestVersions": {
-                    "type": "boolean",
-                    "description": "default: true"
-                }
-            },
-            "required": [
-                "peer"
-            ],
-            "additionalProperties": false
-        },
-        "AddressString": {
-            "type": "string",
-            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
-        },
-        "GetOwnSharedAttributeRequestQuery": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "wasViewedAt": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -16240,7 +13625,7 @@ export const GetOwnSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "content.@type": {
+                "sourceReference": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -16253,114 +13638,7 @@ export const GetOwnSharedAttributesRequest: any = {
                         }
                     ]
                 },
-                "content.tags": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.key": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.isTechnical": {
-                    "type": "string"
-                },
-                "content.confidentiality": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.value.@type": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "shareInfo": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "shareInfo.requestReference": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "shareInfo.notificationReference": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "shareInfo.sourceAttribute": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "shareInfo.thirdPartyAddress": {
+                "initialAttributePeer": {
                     "anyOf": [
                         {
                             "type": "string"
@@ -16418,310 +13696,18 @@ export const GetOwnSharedAttributesRequest: any = {
     }
 }
 
-export const GetPeerSharedAttributesRequest: any = {
+export const GetForwardingDetailsForAttributeRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetPeerSharedAttributesRequest",
+    "$ref": "#/definitions/GetForwardingDetailsForAttributeRequest",
     "definitions": {
-        "GetPeerSharedAttributesRequest": {
-            "type": "object",
-            "properties": {
-                "peer": {
-                    "$ref": "#/definitions/AddressString"
-                },
-                "query": {
-                    "$ref": "#/definitions/GetPeerSharedAttributesRequestQuery"
-                },
-                "hideTechnical": {
-                    "type": "boolean"
-                },
-                "onlyLatestVersions": {
-                    "type": "boolean",
-                    "description": "default: true"
-                }
-            },
-            "required": [
-                "peer"
-            ],
-            "additionalProperties": false
-        },
-        "AddressString": {
-            "type": "string",
-            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
-        },
-        "GetPeerSharedAttributesRequestQuery": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "wasViewedAt": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.@type": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.tags": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.key": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.isTechnical": {
-                    "type": "string"
-                },
-                "content.confidentiality": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.value.@type": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "shareInfo": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "shareInfo.requestReference": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "shareInfo.notificationReference": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "shareInfo.thirdPartyAddress": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "deletionInfo": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "deletionInfo.deletionStatus": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "deletionInfo.deletionDate": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                }
-            },
-            "additionalProperties": false
-        }
-    }
-}
-
-export const GetRepositoryAttributesRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetRepositoryAttributesRequest",
-    "definitions": {
-        "GetRepositoryAttributesRequest": {
-            "type": "object",
-            "properties": {
-                "onlyLatestVersions": {
-                    "type": "boolean",
-                    "description": "default: true"
-                },
-                "query": {
-                    "$ref": "#/definitions/GetRepositoryAttributesRequestQuery"
-                }
-            },
-            "additionalProperties": false
-        },
-        "GetRepositoryAttributesRequestQuery": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "isDefault": {
-                    "type": "string"
-                },
-                "wasViewedAt": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.tags": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.value.@type": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                }
-            },
-            "additionalProperties": false
-        }
-    }
-}
-
-export const GetSharedVersionsOfAttributeRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetSharedVersionsOfAttributeRequest",
-    "definitions": {
-        "GetSharedVersionsOfAttributeRequest": {
+        "GetForwardingDetailsForAttributeRequest": {
             "type": "object",
             "properties": {
                 "attributeId": {
-                    "$ref": "#/definitions/AttributeIdString"
+                    "type": "string"
                 },
-                "peers": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/AddressString"
-                    }
-                },
-                "onlyLatestVersions": {
-                    "type": "boolean",
-                    "description": "default: true"
+                "query": {
+                    "$ref": "#/definitions/GetForwardingDetailsForAttributeRequestQuery"
                 }
             },
             "required": [
@@ -16729,13 +13715,552 @@ export const GetSharedVersionsOfAttributeRequest: any = {
             ],
             "additionalProperties": false
         },
-        "AttributeIdString": {
-            "type": "string",
-            "pattern": "ATT[A-Za-z0-9]{17}"
+        "GetForwardingDetailsForAttributeRequestQuery": {
+            "type": "object",
+            "properties": {
+                "peer": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "sourceReference": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "sharedAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo.deletionStatus": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo.deletionDate": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}
+
+export const GetOwnAttributesSharedWithPeerRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetOwnAttributesSharedWithPeerRequest",
+    "definitions": {
+        "GetOwnAttributesSharedWithPeerRequest": {
+            "type": "object",
+            "properties": {
+                "peer": {
+                    "$ref": "#/definitions/AddressString"
+                },
+                "query": {
+                    "$ref": "#/definitions/GetOwnAttributesSharedWithPeerRequestQuery"
+                },
+                "hideTechnical": {
+                    "type": "boolean"
+                },
+                "onlyLatestVersions": {
+                    "type": "boolean",
+                    "description": "default: true"
+                }
+            },
+            "required": [
+                "peer"
+            ],
+            "additionalProperties": false
         },
         "AddressString": {
             "type": "string",
             "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
+        },
+        "GetOwnAttributesSharedWithPeerRequestQuery": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "wasViewedAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "isDefault": {
+                    "type": "string"
+                },
+                "content.@type": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.tags": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.key": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.isTechnical": {
+                    "type": "string"
+                },
+                "content.confidentiality": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.value.@type": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "sourceReference": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo.deletionStatus": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo.deletionDate": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}
+
+export const GetOwnIdentityAttributesRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetOwnIdentityAttributesRequest",
+    "definitions": {
+        "GetOwnIdentityAttributesRequest": {
+            "type": "object",
+            "properties": {
+                "onlyLatestVersions": {
+                    "type": "boolean",
+                    "description": "default: true"
+                },
+                "query": {
+                    "$ref": "#/definitions/GetOwnIdentityAttributesRequestQuery"
+                }
+            },
+            "additionalProperties": false
+        },
+        "GetOwnIdentityAttributesRequestQuery": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "wasViewedAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "isDefault": {
+                    "type": "string"
+                },
+                "content.tags": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.value.@type": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}
+
+export const GetPeerAttributesRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetPeerAttributesRequest",
+    "definitions": {
+        "GetPeerAttributesRequest": {
+            "type": "object",
+            "properties": {
+                "peer": {
+                    "$ref": "#/definitions/AddressString"
+                },
+                "query": {
+                    "$ref": "#/definitions/GetPeerAttributesRequestQuery"
+                },
+                "hideTechnical": {
+                    "type": "boolean"
+                },
+                "onlyLatestVersions": {
+                    "type": "boolean",
+                    "description": "default: true"
+                }
+            },
+            "required": [
+                "peer"
+            ],
+            "additionalProperties": false
+        },
+        "AddressString": {
+            "type": "string",
+            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
+        },
+        "GetPeerAttributesRequestQuery": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "wasViewedAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.@type": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.tags": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.key": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.isTechnical": {
+                    "type": "string"
+                },
+                "content.confidentiality": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.value.@type": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "sourceReference": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "initialAttributePeer": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo.deletionStatus": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo.deletionDate": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": false
         }
     }
 }
@@ -16763,6 +14288,41 @@ export const GetVersionsOfAttributeRequest: any = {
     }
 }
 
+export const GetVersionsOfAttributeSharedWithPeerRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetVersionsOfAttributeSharedWithPeerRequest",
+    "definitions": {
+        "GetVersionsOfAttributeSharedWithPeerRequest": {
+            "type": "object",
+            "properties": {
+                "attributeId": {
+                    "$ref": "#/definitions/AttributeIdString"
+                },
+                "peer": {
+                    "$ref": "#/definitions/AddressString"
+                },
+                "onlyLatestVersions": {
+                    "type": "boolean",
+                    "description": "default: true"
+                }
+            },
+            "required": [
+                "attributeId",
+                "peer"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeIdString": {
+            "type": "string",
+            "pattern": "ATT[A-Za-z0-9]{17}"
+        },
+        "AddressString": {
+            "type": "string",
+            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
+        }
+    }
+}
+
 export const MarkAttributeAsViewedRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/MarkAttributeAsViewedRequest",
@@ -16786,11 +14346,11 @@ export const MarkAttributeAsViewedRequest: any = {
     }
 }
 
-export const NotifyPeerAboutRepositoryAttributeSuccessionRequest: any = {
+export const NotifyPeerAboutOwnIdentityAttributeSuccessionRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/NotifyPeerAboutRepositoryAttributeSuccessionRequest",
+    "$ref": "#/definitions/NotifyPeerAboutOwnIdentityAttributeSuccessionRequest",
     "definitions": {
-        "NotifyPeerAboutRepositoryAttributeSuccessionRequest": {
+        "NotifyPeerAboutOwnIdentityAttributeSuccessionRequest": {
             "type": "object",
             "properties": {
                 "attributeId": {
@@ -16840,11 +14400,11 @@ export const SetAttributeDeletionInfoOfDeletionProposedRelationshipRequest: any 
     }
 }
 
-export const ShareRepositoryAttributeRequest: any = {
+export const ShareOwnIdentityAttributeRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/ShareRepositoryAttributeRequest",
+    "$ref": "#/definitions/ShareOwnIdentityAttributeRequest",
     "definitions": {
-        "ShareRepositoryAttributeRequest": {
+        "ShareOwnIdentityAttributeRequest": {
             "type": "object",
             "properties": {
                 "attributeId": {
@@ -16902,6 +14462,800 @@ export const ShareRepositoryAttributeRequest: any = {
             "type": "string",
             "errorMessage": "must match ISO8601 datetime format",
             "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
+        }
+    }
+}
+
+export const SucceedOwnIdentityAttributeRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/SucceedOwnIdentityAttributeRequest",
+    "definitions": {
+        "SucceedOwnIdentityAttributeRequest": {
+            "type": "object",
+            "properties": {
+                "predecessorId": {
+                    "type": "string"
+                },
+                "successorContent": {
+                    "type": "object",
+                    "properties": {
+                        "value": {
+                            "$ref": "#/definitions/AttributeValues.Identity.Json"
+                        },
+                        "tags": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "required": [
+                        "value"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "predecessorId",
+                "successorContent"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeValues.Identity.Json": {
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/AttributeValues.Identity.Editable.Json"
+                },
+                {
+                    "$ref": "#/definitions/AttributeValues.Identity.Uneditable.Json"
+                }
+            ]
+        },
+        "AttributeValues.Identity.Editable.Json": {
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/AffiliationJSON"
+                },
+                {
+                    "$ref": "#/definitions/BirthDateJSON"
+                },
+                {
+                    "$ref": "#/definitions/BirthNameJSON"
+                },
+                {
+                    "$ref": "#/definitions/BirthPlaceJSON"
+                },
+                {
+                    "$ref": "#/definitions/CitizenshipJSON"
+                },
+                {
+                    "$ref": "#/definitions/CommunicationLanguageJSON"
+                },
+                {
+                    "$ref": "#/definitions/DeliveryBoxAddressJSON"
+                },
+                {
+                    "$ref": "#/definitions/DisplayNameJSON"
+                },
+                {
+                    "$ref": "#/definitions/EMailAddressJSON"
+                },
+                {
+                    "$ref": "#/definitions/FaxNumberJSON"
+                },
+                {
+                    "$ref": "#/definitions/GivenNameJSON"
+                },
+                {
+                    "$ref": "#/definitions/HonorificPrefixJSON"
+                },
+                {
+                    "$ref": "#/definitions/HonorificSuffixJSON"
+                },
+                {
+                    "$ref": "#/definitions/IdentityFileReferenceJSON"
+                },
+                {
+                    "$ref": "#/definitions/JobTitleJSON"
+                },
+                {
+                    "$ref": "#/definitions/MiddleNameJSON"
+                },
+                {
+                    "$ref": "#/definitions/NationalityJSON"
+                },
+                {
+                    "$ref": "#/definitions/PhoneNumberJSON"
+                },
+                {
+                    "$ref": "#/definitions/PostOfficeBoxAddressJSON"
+                },
+                {
+                    "$ref": "#/definitions/PseudonymJSON"
+                },
+                {
+                    "$ref": "#/definitions/SexJSON"
+                },
+                {
+                    "$ref": "#/definitions/StreetAddressJSON"
+                },
+                {
+                    "$ref": "#/definitions/SurnameJSON"
+                },
+                {
+                    "$ref": "#/definitions/WebsiteJSON"
+                }
+            ]
+        },
+        "AffiliationJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "Affiliation"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "organization": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "unit": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "organization"
+            ],
+            "additionalProperties": false
+        },
+        "BirthDateJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "BirthDate"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "day": {
+                    "type": "number"
+                },
+                "month": {
+                    "type": "number"
+                },
+                "year": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "@type",
+                "day",
+                "month",
+                "year"
+            ],
+            "additionalProperties": false
+        },
+        "BirthNameJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "BirthName"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "BirthPlaceJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "BirthPlace"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "country": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "city",
+                "country"
+            ],
+            "additionalProperties": false
+        },
+        "CitizenshipJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "Citizenship"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "CommunicationLanguageJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "CommunicationLanguage"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "DeliveryBoxAddressJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "DeliveryBoxAddress"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "recipient": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "string"
+                },
+                "deliveryBoxId": {
+                    "type": "string"
+                },
+                "zipCode": {
+                    "type": "string"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "country": {
+                    "type": "string"
+                },
+                "phoneNumber": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "city",
+                "country",
+                "deliveryBoxId",
+                "recipient",
+                "userId",
+                "zipCode"
+            ],
+            "additionalProperties": false
+        },
+        "DisplayNameJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "DisplayName"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "EMailAddressJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "EMailAddress"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "FaxNumberJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "FaxNumber"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "GivenNameJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "GivenName"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "HonorificPrefixJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "HonorificPrefix"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "HonorificSuffixJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "HonorificSuffix"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "IdentityFileReferenceJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "IdentityFileReference"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "JobTitleJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "JobTitle"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "MiddleNameJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "MiddleName"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "NationalityJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "Nationality"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "PhoneNumberJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "PhoneNumber"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "PostOfficeBoxAddressJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "PostOfficeBoxAddress"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "recipient": {
+                    "type": "string"
+                },
+                "boxId": {
+                    "type": "string"
+                },
+                "zipCode": {
+                    "type": "string"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "country": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "boxId",
+                "city",
+                "country",
+                "recipient",
+                "zipCode"
+            ],
+            "additionalProperties": false
+        },
+        "PseudonymJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "Pseudonym"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "SexJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "Sex"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "StreetAddressJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "StreetAddress"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "recipient": {
+                    "type": "string"
+                },
+                "street": {
+                    "type": "string"
+                },
+                "houseNo": {
+                    "type": "string"
+                },
+                "zipCode": {
+                    "type": "string"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "country": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "city",
+                "country",
+                "houseNo",
+                "recipient",
+                "street",
+                "zipCode"
+            ],
+            "additionalProperties": false
+        },
+        "SurnameJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "Surname"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "WebsiteJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "Website"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeValues.Identity.Uneditable.Json": {
+            "$ref": "#/definitions/SchematizedXMLJSON"
+        },
+        "SchematizedXMLJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "SchematizedXML"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "schemaURL": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
         }
     }
 }
@@ -17561,1248 +15915,6 @@ export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
     }
 }
 
-export const SucceedRepositoryAttributeRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/SucceedRepositoryAttributeRequest",
-    "definitions": {
-        "SucceedRepositoryAttributeRequest": {
-            "type": "object",
-            "properties": {
-                "predecessorId": {
-                    "type": "string"
-                },
-                "successorContent": {
-                    "type": "object",
-                    "properties": {
-                        "value": {
-                            "$ref": "#/definitions/AttributeValues.Identity.Json"
-                        },
-                        "tags": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "required": [
-                        "value"
-                    ],
-                    "additionalProperties": false
-                }
-            },
-            "required": [
-                "predecessorId",
-                "successorContent"
-            ],
-            "additionalProperties": false
-        },
-        "AttributeValues.Identity.Json": {
-            "anyOf": [
-                {
-                    "$ref": "#/definitions/AttributeValues.Identity.Editable.Json"
-                },
-                {
-                    "$ref": "#/definitions/AttributeValues.Identity.Uneditable.Json"
-                }
-            ]
-        },
-        "AttributeValues.Identity.Editable.Json": {
-            "anyOf": [
-                {
-                    "$ref": "#/definitions/AffiliationJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthDateJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthNameJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthPlaceJSON"
-                },
-                {
-                    "$ref": "#/definitions/CitizenshipJSON"
-                },
-                {
-                    "$ref": "#/definitions/CommunicationLanguageJSON"
-                },
-                {
-                    "$ref": "#/definitions/DeliveryBoxAddressJSON"
-                },
-                {
-                    "$ref": "#/definitions/DisplayNameJSON"
-                },
-                {
-                    "$ref": "#/definitions/EMailAddressJSON"
-                },
-                {
-                    "$ref": "#/definitions/FaxNumberJSON"
-                },
-                {
-                    "$ref": "#/definitions/IdentityFileReferenceJSON"
-                },
-                {
-                    "$ref": "#/definitions/JobTitleJSON"
-                },
-                {
-                    "$ref": "#/definitions/NationalityJSON"
-                },
-                {
-                    "$ref": "#/definitions/PersonNameJSON"
-                },
-                {
-                    "$ref": "#/definitions/PhoneNumberJSON"
-                },
-                {
-                    "$ref": "#/definitions/PostOfficeBoxAddressJSON"
-                },
-                {
-                    "$ref": "#/definitions/PseudonymJSON"
-                },
-                {
-                    "$ref": "#/definitions/SexJSON"
-                },
-                {
-                    "$ref": "#/definitions/StreetAddressJSON"
-                },
-                {
-                    "$ref": "#/definitions/WebsiteJSON"
-                }
-            ]
-        },
-        "AffiliationJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Affiliation"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "organization": {
-                    "type": "string"
-                },
-                "role": {
-                    "type": "string"
-                },
-                "unit": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "organization"
-            ],
-            "additionalProperties": false
-        },
-        "BirthDateJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthDate"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "day": {
-                    "type": "number"
-                },
-                "month": {
-                    "type": "number"
-                },
-                "year": {
-                    "type": "number"
-                }
-            },
-            "required": [
-                "@type",
-                "day",
-                "month",
-                "year"
-            ],
-            "additionalProperties": false
-        },
-        "BirthNameJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthName"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthPlaceJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthPlace"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "city": {
-                    "type": "string"
-                },
-                "country": {
-                    "type": "string"
-                },
-                "state": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "city",
-                "country"
-            ],
-            "additionalProperties": false
-        },
-        "CitizenshipJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Citizenship"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "CommunicationLanguageJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "CommunicationLanguage"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "DeliveryBoxAddressJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "DeliveryBoxAddress"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "recipient": {
-                    "type": "string"
-                },
-                "userId": {
-                    "type": "string"
-                },
-                "deliveryBoxId": {
-                    "type": "string"
-                },
-                "zipCode": {
-                    "type": "string"
-                },
-                "city": {
-                    "type": "string"
-                },
-                "country": {
-                    "type": "string"
-                },
-                "phoneNumber": {
-                    "type": "string"
-                },
-                "state": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "city",
-                "country",
-                "deliveryBoxId",
-                "recipient",
-                "userId",
-                "zipCode"
-            ],
-            "additionalProperties": false
-        },
-        "DisplayNameJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "DisplayName"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "EMailAddressJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "EMailAddress"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "FaxNumberJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "FaxNumber"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "IdentityFileReferenceJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "IdentityFileReference"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "JobTitleJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "JobTitle"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "NationalityJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Nationality"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "PersonNameJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "PersonName"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "givenName": {
-                    "type": "string"
-                },
-                "middleName": {
-                    "type": "string"
-                },
-                "surname": {
-                    "type": "string"
-                },
-                "honorificSuffix": {
-                    "type": "string"
-                },
-                "honorificPrefix": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "givenName",
-                "surname"
-            ],
-            "additionalProperties": false
-        },
-        "PhoneNumberJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "PhoneNumber"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "PostOfficeBoxAddressJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "PostOfficeBoxAddress"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "recipient": {
-                    "type": "string"
-                },
-                "boxId": {
-                    "type": "string"
-                },
-                "zipCode": {
-                    "type": "string"
-                },
-                "city": {
-                    "type": "string"
-                },
-                "country": {
-                    "type": "string"
-                },
-                "state": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "boxId",
-                "city",
-                "country",
-                "recipient",
-                "zipCode"
-            ],
-            "additionalProperties": false
-        },
-        "PseudonymJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Pseudonym"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "SexJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Sex"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "StreetAddressJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "StreetAddress"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "recipient": {
-                    "type": "string"
-                },
-                "street": {
-                    "type": "string"
-                },
-                "houseNo": {
-                    "type": "string"
-                },
-                "zipCode": {
-                    "type": "string"
-                },
-                "city": {
-                    "type": "string"
-                },
-                "country": {
-                    "type": "string"
-                },
-                "state": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "city",
-                "country",
-                "houseNo",
-                "recipient",
-                "street",
-                "zipCode"
-            ],
-            "additionalProperties": false
-        },
-        "WebsiteJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Website"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "AttributeValues.Identity.Uneditable.Json": {
-            "anyOf": [
-                {
-                    "$ref": "#/definitions/AffiliationOrganizationJSON"
-                },
-                {
-                    "$ref": "#/definitions/AffiliationRoleJSON"
-                },
-                {
-                    "$ref": "#/definitions/AffiliationUnitJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthCityJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthCountryJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthDayJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthMonthJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthStateJSON"
-                },
-                {
-                    "$ref": "#/definitions/BirthYearJSON"
-                },
-                {
-                    "$ref": "#/definitions/CityJSON"
-                },
-                {
-                    "$ref": "#/definitions/CountryJSON"
-                },
-                {
-                    "$ref": "#/definitions/GivenNameJSON"
-                },
-                {
-                    "$ref": "#/definitions/HonorificPrefixJSON"
-                },
-                {
-                    "$ref": "#/definitions/HonorificSuffixJSON"
-                },
-                {
-                    "$ref": "#/definitions/HouseNumberJSON"
-                },
-                {
-                    "$ref": "#/definitions/MiddleNameJSON"
-                },
-                {
-                    "$ref": "#/definitions/SchematizedXMLJSON"
-                },
-                {
-                    "$ref": "#/definitions/StateJSON"
-                },
-                {
-                    "$ref": "#/definitions/StreetJSON"
-                },
-                {
-                    "$ref": "#/definitions/SurnameJSON"
-                },
-                {
-                    "$ref": "#/definitions/ZipCodeJSON"
-                }
-            ]
-        },
-        "AffiliationOrganizationJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationOrganization"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "AffiliationRoleJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationRole"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "AffiliationUnitJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationUnit"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthCityJSON": {
-            "type": "object",
-            "properties": {
-                "value": {
-                    "type": "string"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthCity"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthCountryJSON": {
-            "type": "object",
-            "properties": {
-                "value": {
-                    "type": "string"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthCountry"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthDayJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthDay"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "number"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthMonthJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthMonth"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "number",
-                    "enum": [
-                        1,
-                        2,
-                        3,
-                        4,
-                        5,
-                        6,
-                        7,
-                        8,
-                        9,
-                        10,
-                        11,
-                        12
-                    ],
-                    "description": "Month values: 1 (january) - 12 (december)"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthStateJSON": {
-            "type": "object",
-            "properties": {
-                "value": {
-                    "type": "string"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthState"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "BirthYearJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthYear"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "number"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "CityJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "City"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "CountryJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Country"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "GivenNameJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "GivenName"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "HonorificPrefixJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HonorificPrefix"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "HonorificSuffixJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HonorificSuffix"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "HouseNumberJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HouseNumber"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "MiddleNameJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "MiddleName"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "SchematizedXMLJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "SchematizedXML"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                },
-                "schemaURL": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "StateJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "State"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "StreetJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Street"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "SurnameJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Surname"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "ZipCodeJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ZipCode"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
 export const ValidateIQLQueryRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/ValidateIQLQueryRequest",
@@ -18886,43 +15998,26 @@ export const ValidateIQLQueryRequest: any = {
                 "DisplayName",
                 "EMailAddress",
                 "FaxNumber",
+                "GivenName",
+                "HonorificPrefix",
+                "HonorificSuffix",
                 "IdentityFileReference",
-                "SchematizedXML",
                 "JobTitle",
                 "Nationality",
-                "PersonName",
+                "MiddleName",
                 "PhoneNumber",
                 "PostOfficeBoxAddress",
                 "Pseudonym",
                 "Sex",
                 "StreetAddress",
+                "Surname",
                 "Website"
             ]
         },
         "AttributeValues.Identity.Uneditable.TypeName": {
             "type": "string",
             "enum": [
-                "AffiliationOrganization",
-                "AffiliationRole",
-                "AffiliationUnit",
-                "BirthCity",
-                "BirthCountry",
-                "BirthDay",
-                "BirthMonth",
-                "BirthState",
-                "BirthYear",
-                "City",
-                "Country",
-                "GivenName",
-                "HonorificPrefix",
-                "HonorificSuffix",
-                "HouseNumber",
-                "MiddleName",
-                "SchematizedXML",
-                "State",
-                "Street",
-                "Surname",
-                "ZipCode"
+                "SchematizedXML"
             ]
         }
     }
@@ -22476,66 +19571,6 @@ export const LoadPeerTokenRequest: any = {
     }
 }
 
-export const City: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/City",
-    "definitions": {
-        "City": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "City"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
-export const Country: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/Country",
-    "definitions": {
-        "Country": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Country"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
 export const CommunicationLanguage: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/CommunicationLanguage",
@@ -22686,66 +19721,6 @@ export const Website: any = {
     }
 }
 
-export const State: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/State",
-    "definitions": {
-        "State": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "State"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
-export const ZipCode: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/ZipCode",
-    "definitions": {
-        "ZipCode": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "ZipCode"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
 export const DeliveryBoxAddress: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/DeliveryBoxAddress",
@@ -22802,36 +19777,6 @@ export const DeliveryBoxAddress: any = {
     }
 }
 
-export const HouseNumber: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/HouseNumber",
-    "definitions": {
-        "HouseNumber": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "HouseNumber"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
 export const PostOfficeBoxAddress: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/PostOfficeBoxAddress",
@@ -22875,36 +19820,6 @@ export const PostOfficeBoxAddress: any = {
                 "country",
                 "recipient",
                 "zipCode"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
-export const Street: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/Street",
-    "definitions": {
-        "Street": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Street"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
             ],
             "additionalProperties": false
         }
@@ -22964,96 +19879,6 @@ export const StreetAddress: any = {
     }
 }
 
-export const AffiliationOrganization: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/AffiliationOrganization",
-    "definitions": {
-        "AffiliationOrganization": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationOrganization"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
-export const AffiliationRole: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/AffiliationRole",
-    "definitions": {
-        "AffiliationRole": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationRole"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
-export const AffiliationUnit: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/AffiliationUnit",
-    "definitions": {
-        "AffiliationUnit": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "AffiliationUnit"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
 export const Affiliation: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/Affiliation",
@@ -23084,171 +19909,6 @@ export const Affiliation: any = {
             "required": [
                 "@type",
                 "organization"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
-export const BirthCity: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/BirthCity",
-    "definitions": {
-        "BirthCity": {
-            "type": "object",
-            "properties": {
-                "value": {
-                    "type": "string"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthCity"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
-export const BirthCountry: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/BirthCountry",
-    "definitions": {
-        "BirthCountry": {
-            "type": "object",
-            "properties": {
-                "value": {
-                    "type": "string"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthCountry"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
-export const BirthDay: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/BirthDay",
-    "definitions": {
-        "BirthDay": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthDay"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "number"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
-export const BirthMonth: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/BirthMonth",
-    "definitions": {
-        "BirthMonth": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthMonth"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "number",
-                    "enum": [
-                        1,
-                        2,
-                        3,
-                        4,
-                        5,
-                        6,
-                        7,
-                        8,
-                        9,
-                        10,
-                        11,
-                        12
-                    ],
-                    "description": "Month values: 1 (january) - 12 (december)"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
-export const BirthYear: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/BirthYear",
-    "definitions": {
-        "BirthYear": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BirthYear"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "number"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
             ],
             "additionalProperties": false
         }
@@ -23287,36 +19947,6 @@ export const BirthDate: any = {
                 "day",
                 "month",
                 "year"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
-export const BirthState: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/BirthState",
-    "definitions": {
-        "BirthState": {
-            "type": "object",
-            "properties": {
-                "value": {
-                    "type": "string"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "@type": {
-                    "type": "string",
-                    "const": "BirthState"
-                }
-            },
-            "required": [
-                "@type",
-                "value"
             ],
             "additionalProperties": false
         }
@@ -23603,16 +20233,16 @@ export const MiddleName: any = {
     }
 }
 
-export const Surname: any = {
+export const Pseudonym: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/Surname",
+    "$ref": "#/definitions/Pseudonym",
     "definitions": {
-        "Surname": {
+        "Pseudonym": {
             "type": "object",
             "properties": {
                 "@type": {
                     "type": "string",
-                    "const": "Surname"
+                    "const": "Pseudonym"
                 },
                 "@context": {
                     "type": "string"
@@ -23633,59 +20263,16 @@ export const Surname: any = {
     }
 }
 
-export const PersonName: any = {
+export const Surname: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/PersonName",
+    "$ref": "#/definitions/Surname",
     "definitions": {
-        "PersonName": {
+        "Surname": {
             "type": "object",
             "properties": {
                 "@type": {
                     "type": "string",
-                    "const": "PersonName"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "givenName": {
-                    "type": "string"
-                },
-                "middleName": {
-                    "type": "string"
-                },
-                "surname": {
-                    "type": "string"
-                },
-                "honorificSuffix": {
-                    "type": "string"
-                },
-                "honorificPrefix": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "givenName",
-                "surname"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
-export const Pseudonym: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/Pseudonym",
-    "definitions": {
-        "Pseudonym": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "Pseudonym"
+                    "const": "Surname"
                 },
                 "@context": {
                     "type": "string"

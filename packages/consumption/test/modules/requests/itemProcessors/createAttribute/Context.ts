@@ -10,17 +10,21 @@ import {
     RelationshipAttribute,
     ResponseItemResult
 } from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId, ICoreDate, ICoreId } from "@nmshd/core-types";
-import { AccountController, Transport } from "@nmshd/transport";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { AccountController, Transport, TransportCoreErrors } from "@nmshd/transport";
 import {
     ConsumptionController,
+    ConsumptionCoreErrors,
     ConsumptionIds,
     CreateAttributeRequestItemProcessor,
-    IAttributeSuccessorParams,
-    ILocalAttribute,
+    EmittedAttributeDeletionInfo,
+    EmittedAttributeDeletionStatus,
+    IOwnIdentityAttributeSuccessorParams,
     LocalAttribute,
-    LocalAttributeDeletionInfo,
-    LocalAttributeDeletionStatus,
+    OwnIdentityAttribute,
+    OwnRelationshipAttribute,
+    PeerIdentityAttribute,
+    PeerRelationshipAttribute,
     ValidationResult
 } from "../../../../../src";
 import { TestUtil } from "../../../../core/TestUtil";
@@ -145,7 +149,7 @@ export class GivenSteps {
         });
     }
 
-    public async aRepositoryAttribute(params: { attributeOwner: CoreAddress; tags?: string[]; value?: AttributeValues.Identity.Interface }): Promise<LocalAttribute> {
+    public async anOwnIdentityAttribute(params: { attributeOwner: CoreAddress; tags?: string[]; value?: AttributeValues.Identity.Interface }): Promise<OwnIdentityAttribute> {
         const attribute = TestObjectFactory.createIdentityAttribute({
             owner: this.context.translateTestIdentity(params.attributeOwner),
             tags: params.tags,
@@ -153,46 +157,105 @@ export class GivenSteps {
         });
         this.context.fillTestIdentitiesOfObject(attribute);
 
-        const createdRepositoryAttribute = await this.context.consumptionController.attributes.createRepositoryAttribute({ content: attribute });
-        return createdRepositoryAttribute;
+        const createdOwnIdentityAttribute = await this.context.consumptionController.attributes.createOwnIdentityAttribute({ content: attribute });
+        return createdOwnIdentityAttribute;
     }
 
-    public async aRepositoryAttributeSuccession(predecessorId: CoreId, params: { tags?: string[]; value?: AttributeValues.Identity.Interface }): Promise<LocalAttribute> {
+    public async anOwnIdentityAttributeSuccession(predecessorId: CoreId, params: { tags?: string[]; value?: AttributeValues.Identity.Interface }): Promise<OwnIdentityAttribute> {
         const predecessor = await this.context.consumptionController.attributes.getLocalAttribute(predecessorId);
 
-        const repositorySuccessorParams: IAttributeSuccessorParams = {
+        if (!predecessor) {
+            throw TransportCoreErrors.general.recordNotFound(LocalAttribute, predecessorId.toString());
+        }
+
+        if (!(predecessor instanceof OwnIdentityAttribute)) {
+            throw ConsumptionCoreErrors.attributes.wrongTypeOfAttribute(`The Attribute ${predecessorId} is not an OwnIdentityAttribute.`);
+        }
+
+        const ownIdentityAttributeSuccessorParams: IOwnIdentityAttributeSuccessorParams = {
             content: IdentityAttribute.from({
-                value: params.value ?? (predecessor!.content as IdentityAttribute).value,
+                value: params.value ?? predecessor.content.value,
                 owner: this.context.consumptionController.accountController.identity.address,
                 tags: params.tags
             })
         };
 
-        const repositoryAttributesAfterSuccession = await this.context.consumptionController.attributes.succeedRepositoryAttribute(predecessorId, repositorySuccessorParams);
-        return repositoryAttributesAfterSuccession.successor;
+        const ownIdentityAttributesAfterSuccession = await this.context.consumptionController.attributes.succeedOwnIdentityAttribute(
+            predecessor,
+            ownIdentityAttributeSuccessorParams
+        );
+        return ownIdentityAttributesAfterSuccession.successor;
     }
 
-    public async anOwnSharedIdentityAttribute(params: { sourceAttributeId: CoreId; peer: CoreAddress }): Promise<LocalAttribute> {
-        const createdOwnSharedIdentityAttribute = await this.context.consumptionController.attributes.createSharedLocalAttributeCopy({
-            sourceAttributeId: params.sourceAttributeId,
-            peer: this.context.translateTestIdentity(params.peer)!,
-            requestReference: CoreId.from("reqRef")
+    public async aForwardedOwnIdentityAttribute(params: {
+        attributeOwner: CoreAddress;
+        tags?: string[];
+        value?: AttributeValues.Identity.Interface;
+        peer: CoreAddress;
+    }): Promise<OwnIdentityAttribute> {
+        const attribute = TestObjectFactory.createIdentityAttribute({
+            owner: this.context.translateTestIdentity(params.attributeOwner),
+            tags: params.tags,
+            value: params.value
         });
-        return createdOwnSharedIdentityAttribute;
+        this.context.fillTestIdentitiesOfObject(attribute);
+
+        const createdOwnIdentityAttribute = await this.context.consumptionController.attributes.createOwnIdentityAttribute({ content: attribute });
+
+        const forwardedOwnIdentityAttribute = await this.context.consumptionController.attributes.addForwardingDetailsToAttribute(
+            createdOwnIdentityAttribute,
+            this.context.translateTestIdentity(params.peer)!,
+            CoreId.from("aSourceReferenceId")
+        );
+
+        return forwardedOwnIdentityAttribute;
     }
 
-    public async aPeerSharedIdentityAttribute(params: { peer: CoreAddress }): Promise<LocalAttribute> {
-        const createdPeerSharedIdentityAttribute = await this.context.consumptionController.attributes.createSharedLocalAttribute({
+    public async aPeerIdentityAttribute(params: { peer: CoreAddress }): Promise<PeerIdentityAttribute> {
+        const createdPeerIdentityAttribute = await this.context.consumptionController.attributes.createPeerIdentityAttribute({
+            content: TestObjectFactory.createIdentityAttribute({ owner: this.context.translateTestIdentity(params.peer) }),
             peer: this.context.translateTestIdentity(params.peer)!,
-            requestReference: CoreId.from("reqRef"),
-            content: TestObjectFactory.createIdentityAttribute({ owner: this.context.translateTestIdentity(params.peer) })
+            sourceReference: CoreId.from("aSourceReferenceId"),
+            id: CoreId.from("aPeerIdentityAttributeId")
         });
-        return createdPeerSharedIdentityAttribute;
+        return createdPeerIdentityAttribute;
     }
 
-    public async anAttribute(attributeData: Omit<ILocalAttribute, "id" | "createdAt"> & { id?: ICoreId; createdAt?: ICoreDate }): Promise<LocalAttribute> {
-        const createdAttribute = await this.context.consumptionController.attributes.createAttributeUnsafe(attributeData);
-        return createdAttribute;
+    public async aForwardedOwnIdentityAttributeWithDeletionInfo(params: {
+        attributeOwner: CoreAddress;
+        tags?: string[];
+        value?: AttributeValues.Identity.Interface;
+        peer: CoreAddress;
+        deletionStatus: EmittedAttributeDeletionStatus;
+    }): Promise<OwnIdentityAttribute> {
+        const attribute = TestObjectFactory.createIdentityAttribute({
+            owner: this.context.translateTestIdentity(params.attributeOwner),
+            tags: params.tags,
+            value: params.value
+        });
+        this.context.fillTestIdentitiesOfObject(attribute);
+
+        const createdOwnIdentityAttribute = await this.context.consumptionController.attributes.createOwnIdentityAttribute({ content: attribute });
+
+        const forwardedOwnIdentityAttribute = await this.context.consumptionController.attributes.addForwardingDetailsToAttribute(
+            createdOwnIdentityAttribute,
+            this.context.translateTestIdentity(params.peer)!,
+            CoreId.from("aSourceReferenceId")
+        );
+
+        await this.context.consumptionController.attributes.setForwardedDeletionInfoOfAttribute(
+            forwardedOwnIdentityAttribute,
+            EmittedAttributeDeletionInfo.from({
+                deletionStatus: params.deletionStatus,
+                deletionDate:
+                    params.deletionStatus === EmittedAttributeDeletionStatus.ToBeDeletedByRecipient ? CoreDate.utc().add({ days: 1 }) : CoreDate.utc().subtract({ days: 1 })
+            }),
+            CoreAddress.from("peer")
+        );
+
+        const forwardedOwnIdentityAttributeWithDeletionInfo = await this.context.consumptionController.attributes.getLocalAttribute(forwardedOwnIdentityAttribute.id);
+
+        return forwardedOwnIdentityAttributeWithDeletionInfo as OwnIdentityAttribute;
     }
 }
 
@@ -226,56 +289,83 @@ export class ThenSteps {
         return Promise.resolve();
     }
 
-    public async aRepositoryAttributeIsCreated(value?: AttributeValues.Identity.Json): Promise<void> {
+    public async aForwardedOwnIdentityAttributeIsCreated(value?: AttributeValues.Identity.Json): Promise<void> {
         expect((this.context.responseItemAfterAction as CreateAttributeAcceptResponseItem).attributeId).toBeDefined();
 
-        const createdSharedAttribute = await this.context.consumptionController.attributes.getLocalAttribute(
+        const createdForwardedOwnIdentityAttribute = await this.context.consumptionController.attributes.getLocalAttribute(
             (this.context.responseItemAfterAction as CreateAttributeAcceptResponseItem).attributeId
         );
 
-        const createdRepositoryAttribute = await this.context.consumptionController.attributes.getLocalAttribute(createdSharedAttribute!.shareInfo!.sourceAttribute!);
-
-        expect(createdRepositoryAttribute).toBeDefined();
-        expect(createdRepositoryAttribute!.shareInfo).toBeUndefined();
-        if (value) expect(createdRepositoryAttribute!.content.value.toJSON()).toStrictEqual(value);
-    }
-
-    public async anOwnSharedIdentityAttributeIsCreated(params?: { sourceAttribute?: CoreId; value?: AttributeValues.Identity.Json }): Promise<void> {
-        expect((this.context.responseItemAfterAction as CreateAttributeAcceptResponseItem).attributeId).toBeDefined();
-
-        const createdAttribute = await this.context.consumptionController.attributes.getLocalAttribute(
-            (this.context.responseItemAfterAction as CreateAttributeAcceptResponseItem).attributeId
-        );
-
-        expect(createdAttribute).toBeDefined();
-        expect(createdAttribute!.shareInfo).toBeDefined();
-        expect(createdAttribute!.shareInfo!.peer.toString()).toStrictEqual(this.context.peerAddress.toString());
-        expect(createdAttribute!.shareInfo!.sourceAttribute).toBeDefined();
-        if (params?.value) expect(createdAttribute!.content.value.toJSON()).toStrictEqual(params.value);
-
-        if (params?.sourceAttribute) {
-            expect(createdAttribute!.shareInfo!.sourceAttribute!.toString()).toStrictEqual(params.sourceAttribute.toString());
+        if (!createdForwardedOwnIdentityAttribute) {
+            throw TransportCoreErrors.general.recordNotFound(LocalAttribute, (this.context.responseItemAfterAction as CreateAttributeAcceptResponseItem).attributeId.toString());
         }
+
+        if (!(createdForwardedOwnIdentityAttribute instanceof OwnIdentityAttribute)) {
+            throw ConsumptionCoreErrors.attributes.wrongTypeOfAttribute(`The Attribute ${createdForwardedOwnIdentityAttribute.id} is not an OwnIdentityAttribute.`);
+        }
+
+        expect(createdForwardedOwnIdentityAttribute).toBeDefined();
+        expect(createdForwardedOwnIdentityAttribute instanceof OwnIdentityAttribute).toBe(true);
+        expect(createdForwardedOwnIdentityAttribute.numberOfForwards).toBe(1);
+
+        const isForwarded = await this.context.consumptionController.attributes.isAttributeForwardedToPeer(createdForwardedOwnIdentityAttribute, this.context.peerAddress);
+        expect(isForwarded).toBe(true);
+
+        if (value) expect(createdForwardedOwnIdentityAttribute.content.value.toJSON()).toStrictEqual(value);
     }
 
-    public async anOwnSharedRelationshipAttributeIsCreated(): Promise<void> {
+    public async theOwnIdentityAttributeIsForwarded(attribute: OwnIdentityAttribute): Promise<void> {
+        expect((this.context.responseItemAfterAction as CreateAttributeAcceptResponseItem).attributeId).toBeDefined();
+
+        const forwardedOwnIdentityAttribute = await this.context.consumptionController.attributes.getLocalAttribute(
+            (this.context.responseItemAfterAction as CreateAttributeAcceptResponseItem).attributeId
+        );
+
+        if (!forwardedOwnIdentityAttribute) {
+            throw TransportCoreErrors.general.recordNotFound(LocalAttribute, (this.context.responseItemAfterAction as CreateAttributeAcceptResponseItem).attributeId.toString());
+        }
+
+        if (!(forwardedOwnIdentityAttribute instanceof OwnIdentityAttribute)) {
+            throw ConsumptionCoreErrors.attributes.wrongTypeOfAttribute(`The Attribute ${forwardedOwnIdentityAttribute.id} is not an OwnIdentityAttribute.`);
+        }
+
+        expect(forwardedOwnIdentityAttribute).toBeDefined();
+        expect(forwardedOwnIdentityAttribute.id.toString()).toBe(attribute.id.toString());
+        expect(forwardedOwnIdentityAttribute.content.toJSON()).toStrictEqual(attribute.content.toJSON());
+        expect(forwardedOwnIdentityAttribute.numberOfForwards).toBeGreaterThanOrEqual(1);
+
+        const isForwarded = await this.context.consumptionController.attributes.isAttributeForwardedToPeer(forwardedOwnIdentityAttribute, this.context.peerAddress);
+        expect(isForwarded).toBe(true);
+    }
+
+    public async theOwnIdentityAttributeIsDeletedByRecipient(attribute: OwnIdentityAttribute, peer: CoreAddress): Promise<void> {
+        const attributesDeletedByRecipient = await this.context.consumptionController.attributes.getLocalAttributes({
+            id: attribute.id.toString(),
+            peer: peer.toString(),
+            "deletionInfo.deletionStatus": { $ne: EmittedAttributeDeletionStatus.DeletedByRecipient }
+        });
+
+        expect(attributesDeletedByRecipient).toBeDefined();
+    }
+
+    public async anOwnRelationshipAttributeIsCreated(): Promise<void> {
         expect((this.context.responseItemAfterAction as CreateAttributeAcceptResponseItem).attributeId).toBeDefined();
 
         const createdAttribute = await this.context.consumptionController.attributes.getLocalAttribute(
             (this.context.responseItemAfterAction as CreateAttributeAcceptResponseItem).attributeId
         );
 
-        expect(createdAttribute).toBeDefined();
-        expect(createdAttribute!.shareInfo).toBeDefined();
-        expect(createdAttribute!.shareInfo!.peer.toString()).toStrictEqual(this.context.peerAddress.toString());
-        expect(createdAttribute!.shareInfo!.sourceAttribute).toBeUndefined();
-    }
+        if (!createdAttribute) {
+            throw TransportCoreErrors.general.recordNotFound(LocalAttribute, (this.context.responseItemAfterAction as CreateAttributeAcceptResponseItem).attributeId.toString());
+        }
 
-    public async theSourceAttributeIdOfTheCreatedOwnSharedIdentityAttributeMatches(id: CoreId): Promise<void> {
-        const ownSharedIdentityAttribute = await this.context.consumptionController.attributes.getLocalAttribute(
-            (this.context.responseItemAfterAction as CreateAttributeAcceptResponseItem).attributeId
-        );
-        expect(ownSharedIdentityAttribute!.shareInfo!.sourceAttribute).toStrictEqual(id);
+        if (!(createdAttribute instanceof OwnRelationshipAttribute)) {
+            throw ConsumptionCoreErrors.attributes.wrongTypeOfAttribute(`The Attribute ${createdAttribute.id} is not an OwnRelationshipAttribute.`);
+        }
+
+        expect(createdAttribute).toBeDefined();
+        expect(createdAttribute.peer.toString()).toStrictEqual(this.context.peerAddress.toString());
+        expect(createdAttribute.numberOfForwards).toBe(0);
     }
 
     public theIdOfTheAlreadySharedAttributeMatches(id: CoreId): Promise<void> {
@@ -290,22 +380,20 @@ export class ThenSteps {
         return Promise.resolve();
     }
 
-    public async theTagsOfTheRepositoryAttributeMatch(tags: string[]): Promise<void> {
-        const ownSharedIdentityAttribute = await this.context.consumptionController.attributes.getLocalAttribute(
+    public async theTagsOfTheOwnIdentityAttributeMatch(tags: string[]): Promise<void> {
+        const ownIdentityAttribute = await this.context.consumptionController.attributes.getLocalAttribute(
             (this.context.responseItemAfterAction as CreateAttributeAcceptResponseItem).attributeId
         );
 
-        const repositoryAttribute = await this.context.consumptionController.attributes.getLocalAttribute(ownSharedIdentityAttribute!.shareInfo!.sourceAttribute!);
-        expect((repositoryAttribute!.content as IdentityAttribute).tags?.sort()).toStrictEqual(tags.sort());
+        expect((ownIdentityAttribute!.content as IdentityAttribute).tags?.sort()).toStrictEqual(tags.sort());
     }
 
-    public async theTagsOfTheSucceededRepositoryAttributeMatch(tags: string[]): Promise<void> {
-        const ownSharedIdentityAttribute = await this.context.consumptionController.attributes.getLocalAttribute(
+    public async theTagsOfTheSucceededOwnIdentityAttributeMatch(tags: string[]): Promise<void> {
+        const ownIdentityAttribute = await this.context.consumptionController.attributes.getLocalAttribute(
             (this.context.responseItemAfterAction as AttributeSuccessionAcceptResponseItem).successorId
         );
 
-        const repositoryAttribute = await this.context.consumptionController.attributes.getLocalAttribute(ownSharedIdentityAttribute!.shareInfo!.sourceAttribute!);
-        expect((repositoryAttribute!.content as IdentityAttribute).tags?.sort()).toStrictEqual(tags.sort());
+        expect((ownIdentityAttribute!.content as IdentityAttribute).tags?.sort()).toStrictEqual(tags.sort());
     }
 
     public async theSuccessorAttributeValueMatches(value: AttributeValues.Identity.Json): Promise<void> {
@@ -328,46 +416,63 @@ export class ThenSteps {
         return Promise.resolve();
     }
 
-    public async thePeerSharedIdentityAttributeWasSucceeded(params: { predecessorId: CoreId }): Promise<void> {
-        const peerSharedIdentityAttributePredecessor = await this.context.consumptionController.attributes.getLocalAttribute(params.predecessorId);
-        expect(peerSharedIdentityAttributePredecessor!.succeededBy).toBeDefined();
+    public async thePeerIdentityAttributeWasSucceeded(params: { predecessorId: CoreId }): Promise<void> {
+        const peerIdentityAttributePredecessor = await this.context.consumptionController.attributes.getLocalAttribute(params.predecessorId);
+        expect(peerIdentityAttributePredecessor!.succeededBy).toBeDefined();
     }
 }
 
 export class WhenSteps {
     public constructor(private readonly context: Context) {}
 
-    public async iCreateARelationshipAttribute(relationshipAttribute?: RelationshipAttribute): Promise<LocalAttribute> {
+    public async iCreateAnOwnRelationshipAttribute(relationshipAttribute?: RelationshipAttribute): Promise<OwnRelationshipAttribute> {
         relationshipAttribute ??= TestObjectFactory.createRelationshipAttribute({
             owner: this.context.accountController.identity.address
         });
         this.context.fillTestIdentitiesOfObject(relationshipAttribute);
 
-        return await this.context.consumptionController.attributes.createSharedLocalAttribute({
+        return await this.context.consumptionController.attributes.createOwnRelationshipAttribute({
             content: relationshipAttribute,
-            requestReference: CoreId.from("reqRef"),
+            sourceReference: CoreId.from("aSourceReferenceId"),
             peer: CoreAddress.from("peer")
+        });
+    }
+
+    public async iCreateAPeerRelationshipAttribute(relationshipAttribute?: RelationshipAttribute): Promise<PeerRelationshipAttribute> {
+        relationshipAttribute ??= TestObjectFactory.createRelationshipAttribute({
+            owner: this.context.accountController.identity.address
+        });
+        this.context.fillTestIdentitiesOfObject(relationshipAttribute);
+
+        return await this.context.consumptionController.attributes.createPeerRelationshipAttribute({
+            content: relationshipAttribute,
+            peer: CoreAddress.from("peer"),
+            sourceReference: CoreId.from("aSourceReferenceId")
         });
     }
 
     public async iCreateAThirdPartyRelationshipAttribute(relationshipAttribute?: RelationshipAttribute): Promise<void> {
         relationshipAttribute ??= TestObjectFactory.createRelationshipAttribute({
-            owner: this.context.accountController.identity.address
+            owner: CoreAddress.from("peer")
         });
         this.context.fillTestIdentitiesOfObject(relationshipAttribute);
 
-        await this.context.consumptionController.attributes.createSharedLocalAttribute({
+        await this.context.consumptionController.attributes.createThirdPartyRelationshipAttribute({
             content: relationshipAttribute,
-            requestReference: CoreId.from("reqRef"),
             peer: CoreAddress.from("peer"),
-            thirdPartyAddress: CoreAddress.from("AThirdParty")
+            sourceReference: CoreId.from("aSourceReferenceId"),
+            initialAttributePeer: CoreAddress.from("aThirdParty"),
+            id: CoreId.from("aThirdPartyRelationshipAttributeId")
         });
     }
 
-    public async iMarkMyAttributeAsToBeDeleted(attribute: LocalAttribute): Promise<void> {
+    public async iMarkMyOwnRelationshipAttributeAsDeletedByRecipient(attribute: OwnRelationshipAttribute): Promise<void> {
         this.context.fillTestIdentitiesOfObject(attribute);
 
-        attribute.deletionInfo = LocalAttributeDeletionInfo.from({ deletionStatus: LocalAttributeDeletionStatus.ToBeDeleted, deletionDate: CoreDate.utc().add({ minutes: 5 }) });
+        attribute.deletionInfo = EmittedAttributeDeletionInfo.from({
+            deletionStatus: EmittedAttributeDeletionStatus.DeletedByRecipient,
+            deletionDate: CoreDate.utc().subtract({ minutes: 5 })
+        });
 
         await this.context.consumptionController.attributes.updateAttributeUnsafe(attribute);
     }

@@ -1,4 +1,4 @@
-import { LocalAttributeDeletionStatus } from "@nmshd/consumption";
+import { ConsumptionIds, ReceivedAttributeDeletionStatus } from "@nmshd/consumption";
 import {
     CreateAttributeAcceptResponseItemJSON,
     DeleteAttributeAcceptResponseItemJSON,
@@ -17,7 +17,6 @@ import {
     Request,
     ResponseItemGroupJSON,
     ResponseResult,
-    ShareAttributeAcceptResponseItemJSON,
     TransferFileOwnershipAcceptResponseItemJSON
 } from "@nmshd/content";
 import { CoreAddress, CoreDate } from "@nmshd/core-types";
@@ -37,7 +36,7 @@ import {
     cleanupAttributes,
     establishRelationship,
     exchangeMessage,
-    executeFullCreateAndShareRepositoryAttributeFlow,
+    executeFullCreateAndShareOwnIdentityAttributeFlow,
     uploadFile
 } from "../lib";
 
@@ -212,7 +211,7 @@ describe("DeciderModule", () => {
                         },
                         {
                             "@type": "ShareAttributeRequestItem",
-                            sourceAttributeId: "sourceAttributeId",
+                            attributeId: "attributeId",
                             attribute: {
                                 "@type": "IdentityAttribute",
                                 owner: (await sender.transport.account.getIdentityInfo()).value.address,
@@ -243,7 +242,7 @@ describe("DeciderModule", () => {
             expect(responseContent.result).toBe(ResponseResult.Accepted);
             expect(responseContent.items).toHaveLength(2);
             expect(responseContent.items[0]["@type"]).toBe("CreateAttributeAcceptResponseItem");
-            expect(responseContent.items[1]["@type"]).toBe("ShareAttributeAcceptResponseItem");
+            expect(responseContent.items[1]["@type"]).toBe("AcceptResponseItem");
         });
 
         test("decides a Request given a GeneralRequestConfig with all fields set", async () => {
@@ -1397,7 +1396,7 @@ describe("DeciderModule", () => {
             const recipient = (await runtimeServiceProvider.launch(1, { enableDeciderModule: true, deciderModuleAutomations, enableRequestModule: true }))[0];
 
             await establishRelationship(sender.transport, recipient.transport);
-            const sharedAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(sender, recipient, {
+            const sharedAttribute = await executeFullCreateAndShareOwnIdentityAttributeFlow(sender, recipient, {
                 content: {
                     value: {
                         "@type": "GivenName",
@@ -1438,7 +1437,7 @@ describe("DeciderModule", () => {
             expect((responseContent.items[0] as DeleteAttributeAcceptResponseItemJSON).deletionDate).toBe(deletionDate);
 
             const updatedSharedAttribute = (await recipient.consumption.attributes.getAttribute({ id: sharedAttribute.id })).value;
-            expect(updatedSharedAttribute.deletionInfo!.deletionStatus).toBe(LocalAttributeDeletionStatus.ToBeDeleted);
+            expect(updatedSharedAttribute.deletionInfo!.deletionStatus).toBe(ReceivedAttributeDeletionStatus.ToBeDeleted);
             expect(updatedSharedAttribute.deletionInfo!.deletionDate).toBe(deletionDate);
         });
 
@@ -1863,13 +1862,14 @@ describe("DeciderModule", () => {
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
+            const attributeId = (await ConsumptionIds.attribute.generate()).toString();
             const receivedRequestResult = await recipient.consumption.incomingRequests.received({
                 receivedRequest: {
                     "@type": "Request",
                     items: [
                         {
                             "@type": "ShareAttributeRequestItem",
-                            sourceAttributeId: "sourceAttributeId",
+                            attributeId,
                             attribute: {
                                 "@type": "IdentityAttribute",
                                 owner: sender.address,
@@ -1899,10 +1899,9 @@ describe("DeciderModule", () => {
             const responseContent = requestAfterAction.response!.content;
             expect(responseContent.result).toBe(ResponseResult.Accepted);
             expect(responseContent.items).toHaveLength(1);
-            expect(responseContent.items[0]["@type"]).toBe("ShareAttributeAcceptResponseItem");
+            expect(responseContent.items[0]["@type"]).toBe("AcceptResponseItem");
 
-            const sharedAttributeId = (responseContent.items[0] as ShareAttributeAcceptResponseItemJSON).attributeId;
-            const sharedAttributeResult = await recipient.consumption.attributes.getAttribute({ id: sharedAttributeId });
+            const sharedAttributeResult = await recipient.consumption.attributes.getAttribute({ id: attributeId });
             expect(sharedAttributeResult).toBeSuccessful();
 
             const sharedAttribute = sharedAttributeResult.value;
@@ -1935,13 +1934,14 @@ describe("DeciderModule", () => {
             await establishRelationship(sender.transport, recipient.transport);
 
             const message = await exchangeMessage(sender.transport, recipient.transport);
+            const attributeId = (await ConsumptionIds.attribute.generate()).toString();
             const receivedRequestResult = await recipient.consumption.incomingRequests.received({
                 receivedRequest: {
                     "@type": "Request",
                     items: [
                         {
                             "@type": "ShareAttributeRequestItem",
-                            sourceAttributeId: "sourceAttributeId",
+                            attributeId,
                             attribute: {
                                 "@type": "RelationshipAttribute",
                                 owner: sender.address,
@@ -1955,6 +1955,7 @@ describe("DeciderModule", () => {
                                     description: "An Attribute's description"
                                 }
                             },
+                            thirdPartyAddress: "thirdParty",
                             mustBeAccepted: true
                         }
                     ]
@@ -1975,10 +1976,9 @@ describe("DeciderModule", () => {
             const responseContent = requestAfterAction.response!.content;
             expect(responseContent.result).toBe(ResponseResult.Accepted);
             expect(responseContent.items).toHaveLength(1);
-            expect(responseContent.items[0]["@type"]).toBe("ShareAttributeAcceptResponseItem");
+            expect(responseContent.items[0]["@type"]).toBe("AcceptResponseItem");
 
-            const sharedAttributeId = (responseContent.items[0] as ShareAttributeAcceptResponseItemJSON).attributeId;
-            const sharedAttributeResult = await recipient.consumption.attributes.getAttribute({ id: sharedAttributeId });
+            const sharedAttributeResult = await recipient.consumption.attributes.getAttribute({ id: attributeId });
             expect(sharedAttributeResult).toBeSuccessful();
 
             const sharedAttribute = sharedAttributeResult.value;
@@ -2036,10 +2036,8 @@ describe("DeciderModule", () => {
 
             const sharedAttributeId = (responseContent.items[0] as TransferFileOwnershipAcceptResponseItemJSON).attributeId;
             const sharedAttribute = (await recipient.consumption.attributes.getAttribute({ id: sharedAttributeId })).value;
-            expect(sharedAttribute.shareInfo).toBeDefined();
-
-            const repositoryAttribute = (await recipient.consumption.attributes.getAttribute({ id: sharedAttribute.shareInfo!.sourceAttribute! })).value;
-            expect(repositoryAttribute.content.value["@type"]).toBe("IdentityFileReference");
+            expect(sharedAttribute.content.value["@type"]).toBe("IdentityFileReference");
+            expect(sharedAttribute.numberOfForwards).toBe(1);
         });
     });
 
@@ -2946,7 +2944,7 @@ describe("DeciderModule", () => {
             ];
             const recipient = (await runtimeServiceProvider.launch(1, { enableRequestModule: true, enableDeciderModule: true, deciderModuleAutomations }))[0];
             await establishRelationship(sender.transport, recipient.transport);
-            const sharedAttribute = await executeFullCreateAndShareRepositoryAttributeFlow(sender, recipient, {
+            const sharedAttribute = await executeFullCreateAndShareOwnIdentityAttributeFlow(sender, recipient, {
                 content: {
                     value: {
                         "@type": "GivenName",
