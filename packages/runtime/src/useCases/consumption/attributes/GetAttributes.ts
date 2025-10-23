@@ -22,7 +22,6 @@ import { AttributeMapper } from "./AttributeMapper";
 export interface GetAttributesRequest {
     query?: GetAttributesRequestQuery;
     hideTechnical?: boolean;
-    minNumberOfForwards?: number;
 }
 
 export interface GetAttributesRequestQuery {
@@ -131,19 +130,6 @@ export class GetAttributesUseCase extends UseCase<GetAttributesRequest, LocalAtt
         const dbQuery = GetAttributesUseCase.queryTranslator.parse(flattenedQuery);
 
         const attributes = await this.attributeController.getLocalAttributes(dbQuery, request.hideTechnical);
-
-        if (request.minNumberOfForwards !== undefined) {
-            const minNumberOfForwards = request.minNumberOfForwards;
-            const filtered = attributes.filter((attr) => {
-                if (!(attr instanceof OwnIdentityAttribute || attr instanceof OwnRelationshipAttribute || attr instanceof PeerRelationshipAttribute)) return false;
-
-                const numberOfForwards = attr.numberOfForwards ?? 0;
-                return numberOfForwards >= minNumberOfForwards;
-            });
-
-            return Result.ok(AttributeMapper.toAttributeDTOList(filtered));
-        }
-
         return Result.ok(AttributeMapper.toAttributeDTOList(attributes));
     }
 }

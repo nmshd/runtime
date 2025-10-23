@@ -13466,9 +13466,6 @@ export const GetAttributesRequest: any = {
                 },
                 "hideTechnical": {
                     "type": "boolean"
-                },
-                "minNumberOfForwards": {
-                    "type": "number"
                 }
             },
             "additionalProperties": false
