@@ -933,8 +933,6 @@ export class AttributesController extends ConsumptionBaseController {
             const successor = (await this.getLocalAttribute(attribute.succeededBy)) as T | undefined;
             if (!successor) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attribute.succeededBy.toString());
 
-            await this.updateNumberOfForwards(successor);
-
             attribute = successor;
             successors.push(successor);
         }
