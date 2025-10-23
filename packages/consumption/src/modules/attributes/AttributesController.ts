@@ -218,7 +218,7 @@ export class AttributesController extends ConsumptionBaseController {
                 break;
         }
 
-        const attributes = await this.attributes.find(dbQuery);
+        const attributeDocs = await this.attributes.find(dbQuery);
 
         return this.parseArray(attributes, LocalAttribute);
     }
