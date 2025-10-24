@@ -1575,14 +1575,14 @@ export class AttributesController extends ConsumptionBaseController {
 
         const queryForSharedAttributes = { ...query, peer: peer.toString() };
         const docs = await this.attributes.find(this.addHideTechnicalToQuery(queryForSharedAttributes, hideTechnical));
-        const attributesSharedWithPeer = docs.map((doc) => LocalAttribute.from(doc));
+        const sharedAttributes = docs.map((doc) => LocalAttribute.from(doc));
 
-        for (const attribute of attributesSharedWithPeer) await this.updateNumberOfForwards(attribute);
+        for (const attribute of sharedAttributes) await this.updateNumberOfForwards(attribute);
 
-        if (!onlyLatestVersions) return [...attributesForwardedToPeer, ...attributesSharedWithPeer];
+        if (!onlyLatestVersions) return [...attributesForwardedToPeer, ...sharedAttributes];
 
         const latestVersions = [];
-        for (const attribute of attributesSharedWithPeer) {
+        for (const attribute of sharedAttributes) {
             const sharedSuccessors = await this.getSuccessorsOfAttribute(attribute);
 
             if (sharedSuccessors.length === 0) {
