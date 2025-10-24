@@ -1572,25 +1572,9 @@ export class AttributesController extends ConsumptionBaseController {
 
     public async getAttributesExchangedWithPeer(peer: CoreAddress, query: any, hideTechnical = false, onlyLatestVersions = true): Promise<LocalAttribute[]> {
         const attributesForwardedToPeer = await this.getAttributesForwardedToPeer(peer, query, hideTechnical, onlyLatestVersions);
+        const attributesWithPeer = await this.getAttributesWithPeer(peer, query, hideTechnical, onlyLatestVersions);
 
-        const queryForSharedAttributes = { ...query, peer: peer.toString() };
-        const docs = await this.attributes.find(this.addHideTechnicalToQuery(queryForSharedAttributes, hideTechnical));
-        const sharedAttributes = docs.map((doc) => LocalAttribute.from(doc));
-
-        for (const attribute of sharedAttributes) await this.updateNumberOfForwards(attribute);
-
-        if (!onlyLatestVersions) return [...attributesForwardedToPeer, ...sharedAttributes];
-
-        const latestVersions = [];
-        for (const attribute of sharedAttributes) {
-            const sharedSuccessors = await this.getSuccessorsOfAttribute(attribute);
-
-            if (sharedSuccessors.length === 0) {
-                latestVersions.push(attribute);
-            }
-        }
-
-        return [...attributesForwardedToPeer, ...latestVersions];
+        return [...attributesForwardedToPeer, ...attributesWithPeer];
     }
 
     public async getAttributesForwardedToPeer(peer: CoreAddress, query: any, hideTechnical = false, onlyLatestVersions = true): Promise<LocalAttribute[]> {
@@ -1613,6 +1597,27 @@ export class AttributesController extends ConsumptionBaseController {
                 attribute as OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute,
                 peer
             );
+
+            if (sharedSuccessors.length === 0) {
+                latestVersions.push(attribute);
+            }
+        }
+
+        return latestVersions;
+    }
+
+    private async getAttributesWithPeer(peer: CoreAddress, query: any, hideTechnical = false, onlyLatestVersions = true): Promise<LocalAttribute[]> {
+        const queryForSharedAttributes = { ...query, peer: peer.toString() };
+        const docs = await this.attributes.find(this.addHideTechnicalToQuery(queryForSharedAttributes, hideTechnical));
+        const attributesWithPeer = docs.map((doc) => LocalAttribute.from(doc));
+
+        for (const attribute of attributesWithPeer) await this.updateNumberOfForwards(attribute);
+
+        if (!onlyLatestVersions) return attributesWithPeer;
+
+        const latestVersions = [];
+        for (const attribute of attributesWithPeer) {
+            const sharedSuccessors = await this.getSuccessorsOfAttribute(attribute);
 
             if (sharedSuccessors.length === 0) {
                 latestVersions.push(attribute);
