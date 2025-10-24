@@ -39,10 +39,7 @@ export class GetAttributesForRelationshipUseCase extends UseCase<GetAttributesFo
             return Result.fail(RuntimeErrors.general.recordNotFound(Relationship));
         }
 
-        const query: any = {};
-        if (request.onlyLatestVersions ?? true) query["succeededBy"] = { $exists: false };
-
-        const attributes = await this.attributesController.getLocalAttributesExchangedWithPeer(relationship.peer.address, query, request.hideTechnical);
+        const attributes = await this.attributesController.getAttributesExchangedWithPeer(relationship.peer.address, {}, request.hideTechnical, request.onlyLatestVersions);
 
         return Result.ok(AttributeMapper.toAttributeDTOList(attributes));
     }
