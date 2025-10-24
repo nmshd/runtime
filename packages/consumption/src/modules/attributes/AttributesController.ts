@@ -1607,8 +1607,8 @@ export class AttributesController extends ConsumptionBaseController {
     }
 
     private async getAttributesWithPeer(peer: CoreAddress, query: any, hideTechnical = false, onlyLatestVersions = true): Promise<LocalAttribute[]> {
-        const queryForSharedAttributes = { ...query, peer: peer.toString() };
-        const docs = await this.attributes.find(this.addHideTechnicalToQuery(queryForSharedAttributes, hideTechnical));
+        const queryForAttributesWithPeer = { ...query, peer: peer.toString() };
+        const docs = await this.attributes.find(this.addHideTechnicalToQuery(queryForAttributesWithPeer, hideTechnical));
         const attributesWithPeer = docs.map((doc) => LocalAttribute.from(doc));
 
         for (const attribute of attributesWithPeer) await this.updateNumberOfForwards(attribute);
