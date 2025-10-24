@@ -584,6 +584,23 @@ describe("get OwnIdentityAttributes, own Attributes shared with peer and peer At
             const ownAttributesSharedWithPeer = result.value;
             expect(ownAttributesSharedWithPeer).toStrictEqual([services1OwnGivenNameV1, services1OwnRelationshipAttributeV1]);
         });
+
+        test("should return latest versions of own Attributes shared with peer if unshared successor exists", async function () {
+            await services1.consumption.attributes.succeedOwnIdentityAttribute({
+                predecessorId: services1OwnSurnameV1.id,
+                successorContent: {
+                    value: {
+                        "@type": "GivenName",
+                        value: "A given name not shared with peer"
+                    }
+                }
+            });
+
+            const result = await services1.consumption.attributes.getOwnAttributesSharedWithPeer({ peer: services2.address });
+            expect(result).toBeSuccessful();
+            const ownAttributesSharedWithPeer = result.value;
+            expect(ownAttributesSharedWithPeer).toStrictEqual([services1OwnGivenNameV1, services1OwnRelationshipAttributeV1, services1TechnicalOwnRelationshipAttribute]);
+        });
     });
 
     describe(GetPeerAttributesUseCase.name, () => {
