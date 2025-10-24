@@ -590,8 +590,8 @@ describe("get OwnIdentityAttributes, own Attributes shared with peer and peer At
                 predecessorId: services1OwnSurnameV1.id,
                 successorContent: {
                     value: {
-                        "@type": "GivenName",
-                        value: "A given name not shared with peer"
+                        "@type": "Surname",
+                        value: "A surname not shared with peer"
                     }
                 }
             });
