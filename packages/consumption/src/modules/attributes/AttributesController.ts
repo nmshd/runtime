@@ -1573,7 +1573,7 @@ export class AttributesController extends ConsumptionBaseController {
     public async getAttributesExchangedWithPeer(peer: CoreAddress, query: any, hideTechnical = false, onlyLatestVersions = true): Promise<LocalAttribute[]> {
         const attributesForwardedToPeer = await this.getAttributesForwardedToPeer(peer, query, hideTechnical, onlyLatestVersions);
 
-        const queryForSharedAttributes = { peer: peer.toString() };
+        const queryForSharedAttributes = { ...query, peer: peer.toString() };
         const docs = await this.attributes.find(this.addHideTechnicalToQuery(queryForSharedAttributes, hideTechnical));
         const attributesSharedWithPeer = docs.map((doc) => LocalAttribute.from(doc));
 
