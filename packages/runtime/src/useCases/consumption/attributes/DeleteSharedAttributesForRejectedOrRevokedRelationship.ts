@@ -48,11 +48,11 @@ export class DeleteSharedAttributesForRejectedOrRevokedRelationshipUseCase exten
             await this.attributesController.executeFullAttributeDeletionProcess(sharedAttribute);
         }
 
-        const forwardedAttributes = (await this.attributesController.getLocalAttributesExchangedWithPeer(
+        const forwardedAttributes = (await this.attributesController.getAttributesForwardedToPeer(
             relationship.peer.address,
             { "@type": { $in: ["OwnIdentityAttribute", "OwnRelationshipAttribute", "PeerRelationshipAttribute"] } },
             undefined,
-            true
+            false
         )) as (OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute)[];
 
         for (const attribute of forwardedAttributes) {

@@ -56,9 +56,13 @@ export class GetOwnAttributesSharedWithPeerUseCase extends UseCase<GetOwnAttribu
         const dbQuery = GetAttributesUseCase.queryTranslator.parse(flattenedQuery);
 
         dbQuery["@type"] = { $in: ["OwnIdentityAttribute", "OwnRelationshipAttribute"] };
-        if (request.onlyLatestVersions ?? true) dbQuery["succeededBy"] = { $exists: false };
 
-        const attributes = await this.attributeController.getLocalAttributesExchangedWithPeer(CoreAddress.from(request.peer), dbQuery, request.hideTechnical);
+        const attributes = await this.attributeController.getAttributesExchangedWithPeer(
+            CoreAddress.from(request.peer),
+            dbQuery,
+            request.hideTechnical,
+            request.onlyLatestVersions
+        );
 
         return Result.ok(AttributeMapper.toAttributeDTOList(attributes));
     }
