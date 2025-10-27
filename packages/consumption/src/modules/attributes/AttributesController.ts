@@ -822,14 +822,9 @@ export class AttributesController extends ConsumptionBaseController {
             await this.deleteAttributeUnsafe(attribute.id);
         }
 
-        const forwardedAttributes = (await this.getLocalAttributesExchangedWithPeer(
-            peer,
-            {
-                "@type": { $in: ["OwnIdentityAttribute", "OwnRelationshipAttribute", "PeerRelationshipAttribute"] }
-            },
-            undefined,
-            true
-        )) as (OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute)[];
+        const forwardedAttributes = (await this.getAttributesForwardedToPeer(peer, {
+            "@type": { $in: ["OwnIdentityAttribute", "OwnRelationshipAttribute", "PeerRelationshipAttribute"] }
+        })) as (OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute)[];
         for (const attribute of forwardedAttributes) {
             await this.removeForwardingDetailsFromAttribute(attribute, peer);
         }
@@ -1575,31 +1570,60 @@ export class AttributesController extends ConsumptionBaseController {
         return docs.map((doc) => AttributeForwardingDetails.from(doc));
     }
 
-    public async getLocalAttributesExchangedWithPeer(peer: CoreAddress, query: any, hideTechnical = false, onlyForwarded = false): Promise<LocalAttribute[]> {
+    public async getAttributesExchangedWithPeer(peer: CoreAddress, query: any, hideTechnical = false, onlyLatestVersions = true): Promise<LocalAttribute[]> {
+        const attributesForwardedToPeer = await this.getAttributesForwardedToPeer(peer, query, hideTechnical, onlyLatestVersions);
+        const attributesWithPeer = await this.getAttributesWithPeer(peer, query, hideTechnical, onlyLatestVersions);
+
+        return [...attributesForwardedToPeer, ...attributesWithPeer];
+    }
+
+    public async getAttributesForwardedToPeer(peer: CoreAddress, query: any, hideTechnical = false, onlyLatestVersions = true): Promise<LocalAttribute[]> {
         const forwardingDetailsDocs = await this.forwardingDetails.find({ peer: peer.toString() });
         const forwardingDetails = forwardingDetailsDocs.map((doc) => AttributeForwardingDetails.from(doc));
 
         const attributeIds = [...new Set(forwardingDetails.map((details) => details.attributeId.toString()))];
+        const queryForForwardedAttributes = { ...query, id: { $in: attributeIds.map((id) => id.toString()) } };
 
-        if (onlyForwarded) {
-            query.id = { $in: attributeIds.map((id) => id.toString()) };
-        } else {
-            query.$or = [
-                {
-                    id: { $in: attributeIds.map((id) => id.toString()) }
-                },
-                {
-                    peer: peer.toString()
-                }
-            ];
-        }
-
-        const docs = await this.attributes.find(this.addHideTechnicalToQuery(query, hideTechnical));
-
+        const docs = await this.attributes.find(this.addHideTechnicalToQuery(queryForForwardedAttributes, hideTechnical));
         const attributes = docs.map((doc) => LocalAttribute.from(doc));
 
         for (const attribute of attributes) await this.updateNumberOfForwards(attribute);
 
-        return attributes;
+        if (!onlyLatestVersions) return attributes;
+
+        const latestVersions = [];
+        for (const attribute of attributes) {
+            const sharedSuccessors = await this.getSuccessorsOfAttributeSharedWithPeer(
+                attribute as OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute,
+                peer
+            );
+
+            if (sharedSuccessors.length === 0) {
+                latestVersions.push(attribute);
+            }
+        }
+
+        return latestVersions;
+    }
+
+    private async getAttributesWithPeer(peer: CoreAddress, query: any, hideTechnical = false, onlyLatestVersions = true): Promise<LocalAttribute[]> {
+        const queryForAttributesWithPeer = { ...query, peer: peer.toString() };
+        const docs = await this.attributes.find(this.addHideTechnicalToQuery(queryForAttributesWithPeer, hideTechnical));
+        const attributesWithPeer = docs.map((doc) => LocalAttribute.from(doc));
+
+        for (const attribute of attributesWithPeer) await this.updateNumberOfForwards(attribute);
+
+        if (!onlyLatestVersions) return attributesWithPeer;
+
+        const latestVersions = [];
+        for (const attribute of attributesWithPeer) {
+            const sharedSuccessors = await this.getSuccessorsOfAttribute(attribute);
+
+            if (sharedSuccessors.length === 0) {
+                latestVersions.push(attribute);
+            }
+        }
+
+        return latestVersions;
     }
 }
