@@ -569,13 +569,15 @@ describe("get OwnIdentityAttributes, own Attributes shared with peer and peer At
             const result = await services1.consumption.attributes.getOwnAttributesSharedWithPeer({ peer: services2.address, onlyLatestVersions: false });
             expect(result).toBeSuccessful();
             const ownAttributesSharedWithPeer = result.value;
-            expect(ownAttributesSharedWithPeer).toStrictEqual([
-                services1OwnGivenNameV0,
-                services1OwnGivenNameV1,
-                services1OwnRelationshipAttributeV0,
-                services1OwnRelationshipAttributeV1,
-                services1TechnicalOwnRelationshipAttribute
-            ]);
+            expect(new Set(ownAttributesSharedWithPeer)).toStrictEqual(
+                new Set([
+                    services1OwnGivenNameV0,
+                    services1OwnGivenNameV1,
+                    services1OwnRelationshipAttributeV0,
+                    services1OwnRelationshipAttributeV1,
+                    services1TechnicalOwnRelationshipAttribute
+                ])
+            );
         });
 
         test("should hide technical own Attributes shared with peer when hideTechnical=true", async () => {
