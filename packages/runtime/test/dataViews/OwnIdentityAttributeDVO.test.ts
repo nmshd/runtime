@@ -197,7 +197,7 @@ describe("OwnIdentityAttributeDVO", () => {
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
         expect(dvo.isDefault).toBe(attribute.isDefault);
-        expect(dvo.forwardingPeers![0].id).toStrictEqual(services2.address);
+        expect(dvo.forwardingPeers[0].id).toStrictEqual(services2.address);
         expect(dvo.forwardingDetails).toStrictEqual([
             {
                 peer: services2.address,
