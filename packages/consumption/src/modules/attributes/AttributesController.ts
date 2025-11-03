@@ -809,7 +809,7 @@ export class AttributesController extends ConsumptionBaseController {
         if (!attribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attributeId.toString());
 
         await this.deleteAttributeUnsafe(attributeId);
-        await this.deleteForwardingDetailsUnsafe({ attributeId: attribute.id.toString() });
+        await this._deleteForwardingDetails({ attributeId: attribute.id.toString() });
 
         this.eventBus.publish(new AttributeDeletedEvent(this.identity.address.toString(), attribute));
     }
@@ -836,14 +836,14 @@ export class AttributesController extends ConsumptionBaseController {
         const query: any = { attributeId: attribute.id.toString() };
         if (peer) query["peer"] = peer.toString();
 
-        await this.deleteForwardingDetailsUnsafe(query);
+        await this._deleteForwardingDetails(query);
 
         await this.updateNumberOfForwards(attribute);
 
         this.eventBus.publish(new AttributeForwardingDetailsChangedEvent(this.identity.address.toString(), attribute));
     }
 
-    private async deleteForwardingDetailsUnsafe(query: any): Promise<void> {
+    private async _deleteForwardingDetails(query: any): Promise<void> {
         const existingForwardingDetailsDocs = await this.forwardingDetails.find(query);
         const existingForwardingDetails = existingForwardingDetailsDocs.map((obj) => AttributeForwardingDetails.from(obj));
 
