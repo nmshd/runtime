@@ -1150,8 +1150,8 @@ export class DataViewExpander {
         return await Promise.all(attributesPromise);
     }
 
-    private async expandForwardingPeers(forwardingDetails: LocalAttributeForwardingDetailsDTO[]): Promise<IdentityDVO[] | undefined> {
-        if (forwardingDetails.length === 0) return;
+    private async expandForwardingPeers(forwardingDetails: LocalAttributeForwardingDetailsDTO[]): Promise<IdentityDVO[]> {
+        if (forwardingDetails.length === 0) return [];
 
         const addresses = [...new Set(forwardingDetails.map((detail) => detail.peer.toString()))];
         const promises = addresses.map((address) => this.expandAddress(address));
@@ -1159,8 +1159,8 @@ export class DataViewExpander {
         return await Promise.all(promises);
     }
 
-    private expandForwardingDetails(forwardingDetails: LocalAttributeForwardingDetailsDTO[]): ForwardingDetailsDVO[] | undefined {
-        if (forwardingDetails.length === 0) return;
+    private expandForwardingDetails(forwardingDetails: LocalAttributeForwardingDetailsDTO[]): ForwardingDetailsDVO[] {
+        if (forwardingDetails.length === 0) return [];
 
         return forwardingDetails.map((details) => {
             const result: ForwardingDetailsDVO = {

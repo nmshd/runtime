@@ -31,8 +31,8 @@ export interface OwnIdentityAttributeDVO extends LocalAttributeDVO {
     isOwn: true;
     tags?: string[];
     isDefault?: true;
-    forwardingPeers?: IdentityDVO[];
-    forwardingDetails?: ForwardingDetailsDVO[];
+    forwardingPeers: IdentityDVO[];
+    forwardingDetails: ForwardingDetailsDVO[];
 }
 
 export interface PeerIdentityAttributeDVO extends LocalAttributeDVO {
@@ -55,8 +55,8 @@ export interface OwnRelationshipAttributeDVO extends LocalAttributeDVO {
     sourceReference?: string;
     deletionDate?: string;
     deletionStatus?: string;
-    forwardingPeers?: IdentityDVO[];
-    forwardingDetails?: ForwardingDetailsDVO[];
+    forwardingPeers: IdentityDVO[];
+    forwardingDetails: ForwardingDetailsDVO[];
 }
 
 export interface PeerRelationshipAttributeDVO extends LocalAttributeDVO {
@@ -69,8 +69,8 @@ export interface PeerRelationshipAttributeDVO extends LocalAttributeDVO {
     sourceReference?: string;
     deletionDate?: string;
     deletionStatus?: string;
-    forwardingPeers?: IdentityDVO[];
-    forwardingDetails?: ForwardingDetailsDVO[];
+    forwardingPeers: IdentityDVO[];
+    forwardingDetails: ForwardingDetailsDVO[];
 }
 
 export interface ThirdPartyRelationshipAttributeDVO extends LocalAttributeDVO {
