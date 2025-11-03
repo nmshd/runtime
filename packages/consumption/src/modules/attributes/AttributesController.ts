@@ -809,6 +809,8 @@ export class AttributesController extends ConsumptionBaseController {
         if (!attribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, attributeId.toString());
 
         await this.deleteAttributeUnsafe(attributeId);
+        await this.deleteForwardingDetailsUnsafe({ attributeId: attribute.id.toString() });
+
         this.eventBus.publish(new AttributeDeletedEvent(this.identity.address.toString(), attribute));
     }
 
@@ -826,25 +828,28 @@ export class AttributesController extends ConsumptionBaseController {
             "@type": { $in: ["OwnIdentityAttribute", "OwnRelationshipAttribute", "PeerRelationshipAttribute"] }
         })) as (OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute)[];
         for (const attribute of forwardedAttributes) {
-            await this.removeForwardingDetailsFromAttribute(attribute, peer);
+            await this.deleteForwardingDetailsForAttribute(attribute, peer);
         }
     }
 
-    public async removeForwardingDetailsFromAttribute<T extends OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute>(
-        attribute: T,
-        peer: CoreAddress
-    ): Promise<T> {
-        const existingForwardingDetailsDocs = await this.forwardingDetails.find({ attributeId: attribute.id.toString(), peer: peer.toString() });
+    public async deleteForwardingDetailsForAttribute(attribute: OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute, peer?: CoreAddress): Promise<void> {
+        const query: any = { attributeId: attribute.id.toString() };
+        if (peer) query["peer"] = peer.toString();
+
+        await this.deleteForwardingDetailsUnsafe(query);
+
+        await this.updateNumberOfForwards(attribute);
+
+        this.eventBus.publish(new AttributeForwardingDetailsChangedEvent(this.identity.address.toString(), attribute));
+    }
+
+    private async deleteForwardingDetailsUnsafe(query: any): Promise<void> {
+        const existingForwardingDetailsDocs = await this.forwardingDetails.find(query);
         const existingForwardingDetails = existingForwardingDetailsDocs.map((obj) => AttributeForwardingDetails.from(obj));
 
         for (const entry of existingForwardingDetails) {
             await this.forwardingDetails.delete(entry);
         }
-
-        await this.updateNumberOfForwards(attribute);
-
-        this.eventBus.publish(new AttributeForwardingDetailsChangedEvent(this.identity.address.toString(), attribute));
-        return attribute;
     }
 
     public async executeFullAttributeDeletionProcess(attribute: LocalAttribute): Promise<void> {
@@ -1566,7 +1571,6 @@ export class AttributesController extends ConsumptionBaseController {
 
     public async getForwardingDetailsForAttribute(attribute: LocalAttribute, query: any = {}): Promise<AttributeForwardingDetails[]> {
         const docs = await this.forwardingDetails.find({ ...query, attributeId: attribute.id.toString() });
-
         return docs.map((doc) => AttributeForwardingDetails.from(doc));
     }
 

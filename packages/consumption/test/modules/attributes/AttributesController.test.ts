@@ -498,7 +498,7 @@ describe("AttributesController", function () {
             expect(forwardingDetails[0].deletionInfo).toBeUndefined();
         });
 
-        test("should remove ForwardingDetails from an Attribute", async function () {
+        test("should delete ForwardingDetails for an Attribute", async function () {
             const attributeParams = {
                 content: IdentityAttribute.from({
                     value: {
@@ -516,8 +516,9 @@ describe("AttributesController", function () {
             const isForwarded = await consumptionController.attributes.isAttributeForwardedToPeer(forwardedAttribute, peer);
             expect(isForwarded).toBe(true);
 
-            const updatedAttribute = await consumptionController.attributes.removeForwardingDetailsFromAttribute(forwardedAttribute, peer);
-            const updatedIsForwarded = await consumptionController.attributes.isAttributeForwardedToPeer(updatedAttribute, peer);
+            await consumptionController.attributes.deleteForwardingDetailsForAttribute(forwardedAttribute, peer);
+            const updatedAttribute = await consumptionController.attributes.getLocalAttribute(forwardedAttribute.id);
+            const updatedIsForwarded = await consumptionController.attributes.isAttributeForwardedToPeer(updatedAttribute!, peer);
             expect(updatedIsForwarded).toBe(false);
         });
 
@@ -537,7 +538,8 @@ describe("AttributesController", function () {
             const forwardedAttribute = await consumptionController.attributes.addForwardingDetailsToAttribute(attribute, peer, CoreId.from("aSourceReferenceId"));
             mockEventBus.clearPublishedEvents();
 
-            const updatedAttribute = await consumptionController.attributes.removeForwardingDetailsFromAttribute(forwardedAttribute, peer);
+            await consumptionController.attributes.deleteForwardingDetailsForAttribute(forwardedAttribute, peer);
+            const updatedAttribute = (await consumptionController.attributes.getLocalAttribute(forwardedAttribute.id)) as OwnIdentityAttribute;
             mockEventBus.expectLastPublishedEvent(AttributeForwardingDetailsChangedEvent, updatedAttribute);
         });
 
@@ -554,7 +556,9 @@ describe("AttributesController", function () {
             const attributeWithoutForwardingDetails = await consumptionController.attributes.createOwnIdentityAttribute(attributeParams);
 
             const peer = CoreAddress.from("address");
-            const unchangedAttribute = await consumptionController.attributes.removeForwardingDetailsFromAttribute(attributeWithoutForwardingDetails, peer);
+            await consumptionController.attributes.deleteForwardingDetailsForAttribute(attributeWithoutForwardingDetails, peer);
+
+            const unchangedAttribute = await consumptionController.attributes.getLocalAttribute(attributeWithoutForwardingDetails.id);
             expect(unchangedAttribute).toStrictEqual(attributeWithoutForwardingDetails);
         });
     });
@@ -1042,6 +1046,26 @@ describe("AttributesController", function () {
             const peerAttribute = await consumptionController.attributes.getLocalAttribute(peerRelationshipAttribute.id);
             expect(ownAttribute).toBeUndefined();
             expect(peerAttribute).toBeUndefined();
+        });
+
+        test("should delete ForwardingDetails when deleting an Attribute", async function () {
+            const attribute = await consumptionController.attributes.createOwnIdentityAttribute({
+                content: IdentityAttribute.from({
+                    value: EMailAddress.from({
+                        value: "my@email.address"
+                    }),
+                    owner: consumptionController.accountController.identity.address
+                })
+            });
+            await consumptionController.attributes.addForwardingDetailsToAttribute(attribute, CoreAddress.from("aPeer"), CoreId.from("aSourceReference"));
+
+            const forwardingDetailsBeforeAttributeDeletion = await consumptionController.attributes.getForwardingDetailsForAttribute(attribute);
+            expect(forwardingDetailsBeforeAttributeDeletion).toHaveLength(1);
+
+            await consumptionController.attributes.deleteAttribute(attribute.id);
+
+            const forwardingDetailsAfterAttributeDeletion = await consumptionController.attributes.getForwardingDetailsForAttribute(attribute);
+            expect(forwardingDetailsAfterAttributeDeletion).toHaveLength(0);
         });
 
         describe("should validate and execute full Attribute deletion process", function () {
