@@ -73,8 +73,8 @@ describe("PeerRelationshipAttributeDVO", () => {
         expect(dvo.sourceReference).toBe(peerRelationshipAttribute.sourceReference);
         expect(dvo.deletionStatus).toBe(peerRelationshipAttribute.deletionInfo?.deletionStatus);
         expect(dvo.deletionDate).toBe(peerRelationshipAttribute.deletionInfo?.deletionDate);
-        expect(dvo.forwardingPeers).toBeUndefined();
-        expect(dvo.forwardingDetails).toBeUndefined();
+        expect(dvo.forwardingPeers).toStrictEqual([]);
+        expect(dvo.forwardingDetails).toStrictEqual([]);
         expect(dvo.valueType).toBe(peerRelationshipAttribute.content.value["@type"]);
         expect(dvo.wasViewedAt).toBeUndefined();
     });
@@ -136,7 +136,7 @@ describe("PeerRelationshipAttributeDVO", () => {
         expect(dvo.sourceReference).toBe(peerRelationshipAttribute.sourceReference);
         expect(dvo.deletionStatus).toBe(peerRelationshipAttribute.deletionInfo?.deletionStatus);
         expect(dvo.deletionDate).toBe(peerRelationshipAttribute.deletionInfo?.deletionDate);
-        expect(dvo.forwardingPeers![0].id).toStrictEqual(services3.address);
+        expect(dvo.forwardingPeers[0].id).toStrictEqual(services3.address);
         expect(dvo.forwardingDetails).toStrictEqual([
             {
                 peer: services3.address,
