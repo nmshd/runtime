@@ -104,8 +104,8 @@ describe("IQLQueryExpanded", () => {
         expect(dvo.tags![0]).toBe("x:default");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.forwardingPeers).toBeUndefined();
-        expect(dvo.forwardingDetails).toBeUndefined();
+        expect(dvo.forwardingPeers).toStrictEqual([]);
+        expect(dvo.forwardingDetails).toStrictEqual([]);
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");
@@ -127,8 +127,8 @@ describe("IQLQueryExpanded", () => {
         expect(value.value).toBe("anotherGivenName");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.forwardingPeers).toBeUndefined();
-        expect(dvo.forwardingDetails).toBeUndefined();
+        expect(dvo.forwardingPeers).toStrictEqual([]);
+        expect(dvo.forwardingDetails).toStrictEqual([]);
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");
@@ -151,8 +151,8 @@ describe("IQLQueryExpanded", () => {
         expect(dvo.tags![0]).toBe("x:fake");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.forwardingPeers).toBeUndefined();
-        expect(dvo.forwardingDetails).toBeUndefined();
+        expect(dvo.forwardingPeers).toStrictEqual([]);
+        expect(dvo.forwardingDetails).toStrictEqual([]);
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");
@@ -194,8 +194,8 @@ describe("IQLQueryExpanded", () => {
         expect(dvo.tags![0]).toBe("x:default");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.forwardingPeers).toBeUndefined();
-        expect(dvo.forwardingDetails).toBeUndefined();
+        expect(dvo.forwardingPeers).toStrictEqual([]);
+        expect(dvo.forwardingDetails).toStrictEqual([]);
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");
@@ -237,8 +237,8 @@ describe("IQLQueryExpanded", () => {
         expect(dvo.tags![0]).toBe("x:fake");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.forwardingPeers).toBeUndefined();
-        expect(dvo.forwardingDetails).toBeUndefined();
+        expect(dvo.forwardingPeers).toStrictEqual([]);
+        expect(dvo.forwardingDetails).toStrictEqual([]);
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");
@@ -277,8 +277,8 @@ describe("IQLQueryExpanded", () => {
         expect(dvo.tags![0]).toBe("x:fake");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.forwardingPeers).toBeUndefined();
-        expect(dvo.forwardingDetails).toBeUndefined();
+        expect(dvo.forwardingPeers).toStrictEqual([]);
+        expect(dvo.forwardingDetails).toStrictEqual([]);
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");
@@ -301,8 +301,8 @@ describe("IQLQueryExpanded", () => {
         expect(dvo.tags![0]).toBe("x:fake");
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.forwardingPeers).toBeUndefined();
-        expect(dvo.forwardingDetails).toBeUndefined();
+        expect(dvo.forwardingPeers).toStrictEqual([]);
+        expect(dvo.forwardingDetails).toStrictEqual([]);
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");

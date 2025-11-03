@@ -84,8 +84,8 @@ describe("IdentityAttributeQueryExpanded", () => {
         expect(dvo.isDefault).toBe(true);
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.forwardingPeers).toBeUndefined();
-        expect(dvo.forwardingDetails).toBeUndefined();
+        expect(dvo.forwardingPeers).toStrictEqual([]);
+        expect(dvo.forwardingDetails).toStrictEqual([]);
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");
@@ -109,8 +109,8 @@ describe("IdentityAttributeQueryExpanded", () => {
         expect(dvo.isDefault).toBeUndefined();
         expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
         expect(dvo.isOwn).toBe(true);
-        expect(dvo.forwardingPeers).toBeUndefined();
-        expect(dvo.forwardingDetails).toBeUndefined();
+        expect(dvo.forwardingPeers).toStrictEqual([]);
+        expect(dvo.forwardingDetails).toStrictEqual([]);
         expect(dvo.owner).toStrictEqual(attribute.content.owner);
         expect(dvo.renderHints["@type"]).toBe("RenderHints");
         expect(dvo.renderHints.technicalType).toBe("String");
