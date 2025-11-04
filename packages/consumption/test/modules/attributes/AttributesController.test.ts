@@ -327,8 +327,8 @@ describe("AttributesController", function () {
         });
     });
 
-    describe("change ForwardingDetails of Attributes", function () {
-        test("should allow to add ForwardingDetails to an OwnIdentityAttribute", async function () {
+    describe("change AttributeForwardingDetails of Attributes", function () {
+        test("should allow to add AttributeForwardingDetails to an OwnIdentityAttribute", async function () {
             const attributeParams = {
                 content: IdentityAttribute.from({
                     value: {
@@ -350,7 +350,7 @@ describe("AttributesController", function () {
             expect(isForwarded).toBe(true);
         });
 
-        test("should allow to add ForwardingDetails to an OwnRelationshipAttribute", async function () {
+        test("should allow to add AttributeForwardingDetails to an OwnRelationshipAttribute", async function () {
             const thirdPartyAddress = CoreAddress.from("thirdPartyAdress");
             const peerAddress = CoreAddress.from("peerAddress");
 
@@ -381,7 +381,7 @@ describe("AttributesController", function () {
             expect(isForwarded).toBe(true);
         });
 
-        test("should allow to add ForwardingDetails to a PeerRelationshipAttribute", async function () {
+        test("should allow to add AttributeForwardingDetails to a PeerRelationshipAttribute", async function () {
             const thirdPartyAddress = CoreAddress.from("thirdPartyAdress");
             const peerAddress = CoreAddress.from("peerAddress");
 
@@ -412,7 +412,7 @@ describe("AttributesController", function () {
             expect(isForwarded).toBe(true);
         });
 
-        test("should publish an event adding ForwardingDetails to an Attribute", async function () {
+        test("should publish an event adding AttributeForwardingDetails to an Attribute", async function () {
             const attributeParams = {
                 content: IdentityAttribute.from({
                     value: {
@@ -431,7 +431,7 @@ describe("AttributesController", function () {
             mockEventBus.expectLastPublishedEvent(AttributeForwardingDetailsChangedEvent, forwardedAttribute);
         });
 
-        test("should throw trying to add ForwardingDetails to an Attribute if it is already forwarded", async function () {
+        test("should throw trying to add AttributeForwardingDetails to an Attribute if it is already forwarded", async function () {
             const attributeParams = {
                 content: IdentityAttribute.from({
                     value: {
@@ -449,7 +449,7 @@ describe("AttributesController", function () {
             );
         });
 
-        test("should allow to add ForwardingDetails to an Attribute if it is already forwarded but DeletedByRecipient", async function () {
+        test("should allow to add AttributeForwardingDetails to an Attribute if it is already forwarded but DeletedByRecipient", async function () {
             const attributeParams = {
                 content: IdentityAttribute.from({
                     value: {
@@ -472,7 +472,7 @@ describe("AttributesController", function () {
             expect(updatedAttribute.numberOfForwards).toBe(2);
         });
 
-        test("should updated ForwardingDetails of an Attribute if it is already forwarded but ToBeDeletedByRecipient", async function () {
+        test("should updated AttributeForwardingDetails of an Attribute if it is already forwarded but ToBeDeletedByRecipient", async function () {
             const attributeParams = {
                 content: IdentityAttribute.from({
                     value: {
@@ -498,7 +498,7 @@ describe("AttributesController", function () {
             expect(forwardingDetails[0].deletionInfo).toBeUndefined();
         });
 
-        test("should remove ForwardingDetails from an Attribute", async function () {
+        test("should delete AttributeForwardingDetails for an Attribute", async function () {
             const attributeParams = {
                 content: IdentityAttribute.from({
                     value: {
@@ -516,12 +516,13 @@ describe("AttributesController", function () {
             const isForwarded = await consumptionController.attributes.isAttributeForwardedToPeer(forwardedAttribute, peer);
             expect(isForwarded).toBe(true);
 
-            const updatedAttribute = await consumptionController.attributes.removeForwardingDetailsFromAttribute(forwardedAttribute, peer);
-            const updatedIsForwarded = await consumptionController.attributes.isAttributeForwardedToPeer(updatedAttribute, peer);
+            await consumptionController.attributes.deleteForwardingDetailsForAttribute(forwardedAttribute, peer);
+            const updatedAttribute = await consumptionController.attributes.getLocalAttribute(forwardedAttribute.id);
+            const updatedIsForwarded = await consumptionController.attributes.isAttributeForwardedToPeer(updatedAttribute!, peer);
             expect(updatedIsForwarded).toBe(false);
         });
 
-        test("should publish an event when removing ForwardingDetails from an Attribute", async function () {
+        test("should publish an event when removing AttributeForwardingDetails from an Attribute", async function () {
             const attributeParams = {
                 content: IdentityAttribute.from({
                     value: {
@@ -537,11 +538,12 @@ describe("AttributesController", function () {
             const forwardedAttribute = await consumptionController.attributes.addForwardingDetailsToAttribute(attribute, peer, CoreId.from("aSourceReferenceId"));
             mockEventBus.clearPublishedEvents();
 
-            const updatedAttribute = await consumptionController.attributes.removeForwardingDetailsFromAttribute(forwardedAttribute, peer);
+            await consumptionController.attributes.deleteForwardingDetailsForAttribute(forwardedAttribute, peer);
+            const updatedAttribute = (await consumptionController.attributes.getLocalAttribute(forwardedAttribute.id)) as OwnIdentityAttribute;
             mockEventBus.expectLastPublishedEvent(AttributeForwardingDetailsChangedEvent, updatedAttribute);
         });
 
-        test("should not change Attribute trying to remove ForwardingDetails from an Attribute without ForwardingDetails", async function () {
+        test("should not change Attribute trying to remove AttributeForwardingDetails from an Attribute without AttributeForwardingDetails", async function () {
             const attributeParams = {
                 content: IdentityAttribute.from({
                     value: {
@@ -554,7 +556,9 @@ describe("AttributesController", function () {
             const attributeWithoutForwardingDetails = await consumptionController.attributes.createOwnIdentityAttribute(attributeParams);
 
             const peer = CoreAddress.from("address");
-            const unchangedAttribute = await consumptionController.attributes.removeForwardingDetailsFromAttribute(attributeWithoutForwardingDetails, peer);
+            await consumptionController.attributes.deleteForwardingDetailsForAttribute(attributeWithoutForwardingDetails, peer);
+
+            const unchangedAttribute = await consumptionController.attributes.getLocalAttribute(attributeWithoutForwardingDetails.id);
             expect(unchangedAttribute).toStrictEqual(attributeWithoutForwardingDetails);
         });
     });
@@ -1042,6 +1046,26 @@ describe("AttributesController", function () {
             const peerAttribute = await consumptionController.attributes.getLocalAttribute(peerRelationshipAttribute.id);
             expect(ownAttribute).toBeUndefined();
             expect(peerAttribute).toBeUndefined();
+        });
+
+        test("should delete AttributeForwardingDetails when deleting an Attribute", async function () {
+            const attribute = await consumptionController.attributes.createOwnIdentityAttribute({
+                content: IdentityAttribute.from({
+                    value: EMailAddress.from({
+                        value: "my@email.address"
+                    }),
+                    owner: consumptionController.accountController.identity.address
+                })
+            });
+            await consumptionController.attributes.addForwardingDetailsToAttribute(attribute, CoreAddress.from("aPeer"), CoreId.from("aSourceReference"));
+
+            const forwardingDetailsBeforeAttributeDeletion = await consumptionController.attributes.getForwardingDetailsForAttribute(attribute);
+            expect(forwardingDetailsBeforeAttributeDeletion).toHaveLength(1);
+
+            await consumptionController.attributes.deleteAttribute(attribute.id);
+
+            const forwardingDetailsAfterAttributeDeletion = await consumptionController.attributes.getForwardingDetailsForAttribute(attribute);
+            expect(forwardingDetailsAfterAttributeDeletion).toHaveLength(0);
         });
 
         describe("should validate and execute full Attribute deletion process", function () {
