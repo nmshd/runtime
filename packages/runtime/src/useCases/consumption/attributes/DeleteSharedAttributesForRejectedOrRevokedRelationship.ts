@@ -56,7 +56,7 @@ export class DeleteSharedAttributesForRejectedOrRevokedRelationshipUseCase exten
         )) as (OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute)[];
 
         for (const attribute of forwardedAttributes) {
-            await this.attributesController.removeForwardingDetailsFromAttribute(attribute, relationship.peer.address);
+            await this.attributesController.deleteForwardingDetailsForAttribute(attribute, relationship.peer.address);
         }
 
         await this.accountController.syncDatawallet();
