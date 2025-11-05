@@ -144,7 +144,7 @@ describe("OpenID4VCI and OpenID4VCP", () => {
         expect(acceptanceResult.isError).toBe(false);
         expect(acceptanceResult.value.length).toBeGreaterThan(0);
     }, 10000000);
-
+});
 
 describe.only("EUDIPLO", () => {
     const eudiploBaseUrl = "https://openid4vc-eudiplo-server.is.enmeshed.eu";
