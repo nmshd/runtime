@@ -143,7 +143,7 @@ describe("OpenID4VCI and OpenID4VCP", () => {
     }, 10000000);
 });
 
-describe.only("EUDIPLO", () => {
+describe("EUDIPLO", () => {
     const eudiploBaseUrl = "https://openid4vc-eudiplo-server.is.enmeshed.eu";
     const eudiploUser = "test-admin";
     const eudiploPassword = "a9622245324e3ef38db9264f434e2289f361e07edd8012d4a7815a11b9c79a97";
