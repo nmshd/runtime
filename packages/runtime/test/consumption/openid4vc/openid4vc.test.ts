@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/naming-convention */
+import axios from "axios";
 import { DockerComposeEnvironment, StartedDockerComposeEnvironment } from "testcontainers";
 import { ConsumptionServices } from "../../../src";
 import { RuntimeServiceProvider } from "../../lib";
