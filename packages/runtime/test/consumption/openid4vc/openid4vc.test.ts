@@ -31,7 +31,6 @@ describe("OpenID4VCI and OpenID4VCP", () => {
         const response = await fetch(`${oid4vcServiceBaseUrl}/issuance/credentialOffers`, {
             method: "POST",
             headers: {
-                // eslint-disable-next-line @typescript-eslint/naming-convention
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
@@ -73,21 +72,17 @@ describe("OpenID4VCI and OpenID4VCP", () => {
         const response = await fetch(`${oid4vcServiceBaseUrl}/presentation/presentationRequests`, {
             method: "POST",
             headers: {
-                // eslint-disable-next-line @typescript-eslint/naming-convention
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
                 pex: {
                     id: "anId",
                     purpose: "To prove you work here",
-                    // eslint-disable-next-line @typescript-eslint/naming-convention
                     input_descriptors: [
                         {
                             id: "EmployeeIdCard",
                             format: {
-                                // eslint-disable-next-line @typescript-eslint/naming-convention
                                 "vc+sd-jwt": {
-                                    // eslint-disable-next-line @typescript-eslint/naming-convention
                                     "sd-jwt_alg_values": [
                                         "RS256",
                                         "PS256",
