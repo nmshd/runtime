@@ -31,6 +31,7 @@ import {
     ForwardedAttributeDeletedByPeerEvent,
     GetAttributeUseCase,
     GetAttributesUseCase,
+    GetOwnAttributesSharedWithPeerRequest,
     GetOwnAttributesSharedWithPeerUseCase,
     GetOwnIdentityAttributesUseCase,
     GetPeerAttributesUseCase,
@@ -604,6 +605,31 @@ describe("get OwnIdentityAttributes, own Attributes shared with peer and peer At
             expect(result).toBeSuccessful();
             const ownAttributesSharedWithPeer = result.value;
             expect(ownAttributesSharedWithPeer).toStrictEqual([updatedServices1OwnGivenNameV1, services1OwnRelationshipAttributeV1, services1TechnicalOwnRelationshipAttribute]);
+        });
+
+        test("should return an attribute if it matches the (AttributeForwardingDetails)Query", async function () {
+            const forwardingDetails = (await services1.consumption.attributes.getForwardingDetailsForAttribute({ attributeId: services1OwnGivenNameV1.id })).value;
+            const sharedAt = forwardingDetails[0].sharedAt;
+
+            const request: GetOwnAttributesSharedWithPeerRequest = {
+                peer: services2.address,
+                query: { "@type": "OwnIdentityAttribute" },
+                attributeForwardingDetailsQuery: { sharedAt }
+            };
+
+            const matchingAttributes = (await services1.consumption.attributes.getOwnAttributesSharedWithPeer(request)).value;
+            expect(matchingAttributes).toStrictEqual([services1OwnGivenNameV1]);
+        });
+
+        test("should not return an attribute if it doesn't match the (AttributeForwardingDetails)Query", async function () {
+            const request: GetOwnAttributesSharedWithPeerRequest = {
+                peer: services2.address,
+                query: { "@type": "OwnIdentityAttribute" },
+                attributeForwardingDetailsQuery: { sharedAt: "anotherTime" }
+            };
+
+            const matchingAttributes = (await services1.consumption.attributes.getOwnAttributesSharedWithPeer(request)).value;
+            expect(matchingAttributes).toHaveLength(0);
         });
     });
 
