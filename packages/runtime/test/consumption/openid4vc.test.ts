@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import { GenericContainer } from "testcontainers";
 import { ConsumptionServices } from "../../src";
 import { RuntimeServiceProvider } from "../lib";
 
@@ -16,10 +15,8 @@ afterAll(async () => await runtimeServiceProvider.stop());
 describe("OpenID4VCI and OpenID4VCP", () => {
     let credentialOfferUrl: string;
 
-    test.only("should process a given credential offer", async () => {
-        var container = await startOid4VcService({ port: 9000 });
-
-        const response = await fetch(`http://localhost:9000/issuance/credentialOffers`, {
+    test("should process a given credential offer", async () => {
+        const response = await fetch(`https://openid4vc-service.is.enmeshed.eu/issuance/credentialOffers`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -146,10 +143,3 @@ describe("OpenID4VCI and OpenID4VCP", () => {
         expect(singleCredentialResult.value[0].id).toBe(firstCredentialId);
     }, 10000000);
 });
-
-async function startOid4VcService(parameters: { port: number }) {
-    return await new GenericContainer(`ghcr.io/js-soft/openid4vc-service:1.1.11`)
-        .withExposedPorts({ container: 8080, host: parameters.port })
-        .withCopyFilesToContainer([{ source: `${__dirname}/../../../.dev/oid4vc-config`, target: "/app/config.json" }])
-        .start();
-}
