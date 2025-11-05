@@ -1,24 +1,35 @@
-/* eslint-disable @typescript-eslint/naming-convention */
-import { ConsumptionServices } from "../../src";
-import { RuntimeServiceProvider } from "../lib";
+import { DockerComposeEnvironment, StartedDockerComposeEnvironment } from "testcontainers";
+import { ConsumptionServices } from "../../../src";
+import { RuntimeServiceProvider } from "../../lib";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
 let consumptionServices: ConsumptionServices;
+let oid4vcServiceComposeStack: StartedDockerComposeEnvironment;
+let oid4vcServiceBaseUrl: string;
 
 beforeAll(async () => {
     const runtimeServices = await runtimeServiceProvider.launch(1);
     consumptionServices = runtimeServices[0].consumption;
+
+    oid4vcServiceComposeStack = await startOid4VcComposeStack();
+
+    const oid4vcServicePort = oid4vcServiceComposeStack.getContainer("oid4vc-service-1").getMappedPort(8080);
+    oid4vcServiceBaseUrl = `http://localhost:${oid4vcServicePort}`;
 }, 30000);
 
-afterAll(async () => await runtimeServiceProvider.stop());
+afterAll(async () => {
+    await runtimeServiceProvider.stop();
+    await oid4vcServiceComposeStack.stop();
+});
 
 describe("OpenID4VCI and OpenID4VCP", () => {
     let credentialOfferUrl: string;
 
     test("should process a given credential offer", async () => {
-        const response = await fetch(`https://openid4vc-service.is.enmeshed.eu/issuance/credentialOffers`, {
+        const response = await fetch(`${oid4vcServiceBaseUrl}/issuance/credentialOffers`, {
             method: "POST",
             headers: {
+                // eslint-disable-next-line @typescript-eslint/naming-convention
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
@@ -57,20 +68,24 @@ describe("OpenID4VCI and OpenID4VCP", () => {
         // Ensure the first test has completed and credentialOfferUrl is set
         expect(credentialOfferUrl).toBeDefined();
 
-        const response = await fetch(`https://openid4vc-service.is.enmeshed.eu/presentation/presentationRequests`, {
+        const response = await fetch(`${oid4vcServiceBaseUrl}/presentation/presentationRequests`, {
             method: "POST",
             headers: {
+                // eslint-disable-next-line @typescript-eslint/naming-convention
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
                 pex: {
                     id: "anId",
                     purpose: "To prove you work here",
+                    // eslint-disable-next-line @typescript-eslint/naming-convention
                     input_descriptors: [
                         {
                             id: "EmployeeIdCard",
                             format: {
+                                // eslint-disable-next-line @typescript-eslint/naming-convention
                                 "vc+sd-jwt": {
+                                    // eslint-disable-next-line @typescript-eslint/naming-convention
                                     "sd-jwt_alg_values": [
                                         "RS256",
                                         "PS256",
@@ -143,3 +158,9 @@ describe("OpenID4VCI and OpenID4VCP", () => {
         expect(singleCredentialResult.value[0].id).toBe(firstCredentialId);
     }, 10000000);
 });
+
+async function startOid4VcComposeStack() {
+    const composeStack = await new DockerComposeEnvironment(__dirname, "compose.yml").up();
+
+    return composeStack;
+}
