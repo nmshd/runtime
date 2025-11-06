@@ -7,13 +7,13 @@ export interface ReadAttributeAcceptResponseItemJSON extends AcceptResponseItemJ
     "@type": "ReadAttributeAcceptResponseItem";
     attributeId: string;
     attribute: IdentityAttributeJSON | RelationshipAttributeJSON;
-    thirdPartyAddress?: string;
+    initialAttributePeer?: string;
 }
 
 export interface IReadAttributeAcceptResponseItem extends IAcceptResponseItem {
     attributeId: ICoreId;
     attribute: IIdentityAttribute | IRelationshipAttribute;
-    thirdPartyAddress?: CoreAddress;
+    initialAttributePeer?: CoreAddress;
 }
 
 @type("ReadAttributeAcceptResponseItem")
@@ -28,7 +28,7 @@ export class ReadAttributeAcceptResponseItem extends AcceptResponseItem implemen
 
     @serialize()
     @validate({ nullable: true })
-    public thirdPartyAddress?: CoreAddress;
+    public initialAttributePeer?: CoreAddress;
 
     public static override from(
         value: IReadAttributeAcceptResponseItem | Omit<ReadAttributeAcceptResponseItemJSON, "@type"> | ReadAttributeAcceptResponseItemJSON

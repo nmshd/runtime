@@ -298,7 +298,7 @@ describe("AttributesController", function () {
         });
 
         test("should allow to create a ThirdPartyRelationshipAttribute", async function () {
-            const thirdPartyAddress = CoreAddress.from("thirdPartyAdress");
+            const thirdPartyAddress = CoreAddress.from("thirdPartyAddress");
             const peerAddress = CoreAddress.from("peerAddress");
 
             const thirdPartyRelationshipAttribute = await consumptionController.attributes.createThirdPartyRelationshipAttribute({
@@ -351,7 +351,7 @@ describe("AttributesController", function () {
         });
 
         test("should allow to add AttributeForwardingDetails to an OwnRelationshipAttribute", async function () {
-            const thirdPartyAddress = CoreAddress.from("thirdPartyAdress");
+            const thirdPartyAddress = CoreAddress.from("thirdPartyAddress");
             const peerAddress = CoreAddress.from("peerAddress");
 
             const ownRelationshipAttribute = await consumptionController.attributes.createOwnRelationshipAttribute({
