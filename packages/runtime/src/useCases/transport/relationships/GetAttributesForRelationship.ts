@@ -39,7 +39,7 @@ export class GetAttributesForRelationshipUseCase extends UseCase<GetAttributesFo
             return Result.fail(RuntimeErrors.general.recordNotFound(Relationship));
         }
 
-        const attributes = await this.attributesController.getAttributesExchangedWithPeer(relationship.peer.address, {}, request.hideTechnical, request.onlyLatestVersions);
+        const attributes = await this.attributesController.getAttributesExchangedWithPeer(relationship.peer.address, {}, {}, request.hideTechnical, request.onlyLatestVersions);
 
         return Result.ok(AttributeMapper.toAttributeDTOList(attributes));
     }
