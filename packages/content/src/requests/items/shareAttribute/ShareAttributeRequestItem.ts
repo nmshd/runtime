@@ -8,13 +8,13 @@ export interface ShareAttributeRequestItemJSON extends RequestItemJSON {
     "@type": "ShareAttributeRequestItem";
     attribute: IdentityAttributeJSON | RelationshipAttributeJSON;
     attributeId: string;
-    thirdPartyAddress?: string;
+    initialAttributePeer?: string;
 }
 
 export interface IShareAttributeRequestItem extends IRequestItem {
     attribute: IIdentityAttribute | IRelationshipAttribute;
     attributeId: ICoreId;
-    thirdPartyAddress?: CoreAddress;
+    initialAttributePeer?: CoreAddress;
 }
 
 @type("ShareAttributeRequestItem")
@@ -29,7 +29,7 @@ export class ShareAttributeRequestItem extends RequestItem implements IShareAttr
 
     @serialize()
     @validate({ nullable: true })
-    public thirdPartyAddress?: CoreAddress;
+    public initialAttributePeer?: CoreAddress;
 
     public static from(value: IShareAttributeRequestItem | Omit<ShareAttributeRequestItemJSON, "@type"> | ShareAttributeRequestItemJSON): ShareAttributeRequestItem {
         return this.fromAny(value);

@@ -1919,7 +1919,7 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "attributeId": {
                     "type": "string"
                 },
-                "thirdPartyAddress": {
+                "initialAttributePeer": {
                     "type": "string"
                 }
             },
@@ -4585,7 +4585,7 @@ export const CompleteOutgoingRequestRequest: any = {
                         }
                     ]
                 },
-                "thirdPartyAddress": {
+                "initialAttributePeer": {
                     "type": "string"
                 }
             },
@@ -6551,7 +6551,7 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                         }
                     ]
                 },
-                "thirdPartyAddress": {
+                "initialAttributePeer": {
                     "type": "string"
                 }
             },
@@ -8446,7 +8446,7 @@ export const CreateOutgoingRequestRequest: any = {
                 "attributeId": {
                     "type": "string"
                 },
-                "thirdPartyAddress": {
+                "initialAttributePeer": {
                     "type": "string"
                 }
             },
@@ -11430,7 +11430,7 @@ export const ReceivedIncomingRequestRequest: any = {
                 "attributeId": {
                     "type": "string"
                 },
-                "thirdPartyAddress": {
+                "initialAttributePeer": {
                     "type": "string"
                 }
             },

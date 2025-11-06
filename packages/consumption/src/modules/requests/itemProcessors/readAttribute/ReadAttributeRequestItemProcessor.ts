@@ -322,14 +322,14 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
 
             const wasNotSharedBefore = latestSharedVersion.length === 0;
             if (wasNotSharedBefore) {
-                const thirdPartyAddress =
+                const initialAttributePeer =
                     existingAttribute instanceof OwnRelationshipAttribute || existingAttribute instanceof PeerRelationshipAttribute ? existingAttribute.peer : undefined;
 
                 return ReadAttributeAcceptResponseItem.from({
                     result: ResponseItemResult.Accepted,
                     attributeId: updatedAttribute.id,
                     attribute: updatedAttribute.content,
-                    thirdPartyAddress
+                    initialAttributePeer
                 });
             }
 
@@ -443,13 +443,13 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
             return;
         }
 
-        if (responseItem.thirdPartyAddress) {
+        if (responseItem.initialAttributePeer) {
             await this.consumptionController.attributes.createThirdPartyRelationshipAttribute({
                 id: responseItem.attributeId,
                 content: responseItem.attribute,
                 peer: requestInfo.peer,
                 sourceReference: requestInfo.id,
-                initialAttributePeer: responseItem.thirdPartyAddress
+                initialAttributePeer: responseItem.initialAttributePeer
             });
             return;
         }

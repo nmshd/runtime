@@ -43,7 +43,7 @@ export interface AcceptResponseItemDVO extends ResponseItemDVO {
 export interface ReadAttributeAcceptResponseItemDVO extends AcceptResponseItemDVO {
     type: "ReadAttributeAcceptResponseItemDVO";
     attributeId: string;
-    thirdPartyAddress?: string;
+    initialAttributePeer?: string;
     attribute: LocalAttributeDVO;
 }
 

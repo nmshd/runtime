@@ -3407,7 +3407,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                     mustBeAccepted: true,
                     attribute: peerRelationshipAttribute.content,
                     attributeId: peerRelationshipAttribute.id,
-                    thirdPartyAddress: services1.address
+                    initialAttributePeer: services1.address
                 };
 
                 const relationshipTemplateContent: CreateOwnRelationshipTemplateRequest["content"] = {
@@ -3461,7 +3461,7 @@ describe("ThirdPartyRelationshipAttributes", () => {
             ShareAttributeRequestItem.from({
                 attribute: ownRelationshipAttribute.content,
                 attributeId: ownRelationshipAttribute.id,
-                thirdPartyAddress: services2.address,
+                initialAttributePeer: services2.address,
                 mustBeAccepted: true
             })
         );
@@ -3480,7 +3480,7 @@ describe("ThirdPartyRelationshipAttributes", () => {
             ShareAttributeRequestItem.from({
                 attribute: ownRelationshipAttribute.content,
                 attributeId: ownRelationshipAttribute.id,
-                thirdPartyAddress: services1.address,
+                initialAttributePeer: services1.address,
                 mustBeAccepted: true
             })
         );
