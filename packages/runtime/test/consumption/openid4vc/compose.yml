@@ -1,0 +1,30 @@
+name: runtime-oid4vc-tests
+services:
+  oid4vc-service:
+    image: ghcr.io/js-soft/openid4vc-service:1.1.11@sha256:3ae8e779ca97cbd8045c090e3cf1a83714c5d0e067f2758860a8cd1fac396af5
+    ports:
+      - "9000:8080"
+    environment:
+      authServer__baseUrl: "https://kc-openid4vc.is.enmeshed.eu/realms/enmeshed-openid4vci"
+    volumes:
+      - ./service-config.json:/usr/app/config.json
+    depends_on:
+      - mongodb
+
+  connector:
+    image: ghcr.io/nmshd/connector:7.0.1@sha256:b8458560fa85b190485aa544d9db34ab7d0b6b7b88129eda487b723e201734f8
+    environment:
+      CUSTOM_CONFIG_LOCATION: "/config.json"
+      transportLibrary__baseUrl: ${NMSHD_TEST_BASEURL}
+      transportLibrary__clientId: ${NMSHD_TEST_CLIENTID}
+      transportLibrary__clientSecret: ${NMSHD_TEST_CLIENTSECRET}
+    volumes:
+      - ./connector-config.json:/config.json:ro
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo@sha256:c23684919810f0341e58744987e4b1c510fb8becdae850217d2d04b6fa7605e7
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
