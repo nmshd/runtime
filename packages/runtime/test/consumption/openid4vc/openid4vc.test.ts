@@ -22,8 +22,7 @@ afterAll(async () => {
     await oid4vcServiceComposeStack.stop();
 });
 
-// eslint-disable-next-line jest/no-focused-tests
-describe.only("OpenID4VCI and OpenID4VCP", () => {
+describe("OpenID4VCI and OpenID4VCP", () => {
     let credentialOfferUrl: string;
 
     test("should process a given credential offer", async () => {
