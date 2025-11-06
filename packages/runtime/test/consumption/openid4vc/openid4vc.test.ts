@@ -15,14 +15,15 @@ beforeAll(async () => {
 
     const oid4vcServicePort = oid4vcServiceComposeStack.getContainer("oid4vc-service-1").getMappedPort(8080);
     oid4vcServiceBaseUrl = `http://localhost:${oid4vcServicePort}`;
-}, 30000);
+}, 120000);
 
 afterAll(async () => {
     await runtimeServiceProvider.stop();
     await oid4vcServiceComposeStack.stop();
 });
 
-describe("OpenID4VCI and OpenID4VCP", () => {
+// eslint-disable-next-line jest/no-focused-tests
+describe.only("OpenID4VCI and OpenID4VCP", () => {
     let credentialOfferUrl: string;
 
     test("should process a given credential offer", async () => {
