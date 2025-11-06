@@ -1,26 +1,4 @@
-import { AgentContext } from "@credo-ts/core";
-import {
-    KeyManagementService,
-    KmsCreateKeyOptions,
-    KmsCreateKeyReturn,
-    KmsCreateKeyType,
-    KmsDecryptOptions,
-    KmsDecryptReturn,
-    KmsDeleteKeyOptions,
-    KmsEncryptOptions,
-    KmsEncryptReturn,
-    KmsImportKeyOptions,
-    KmsImportKeyReturn,
-    KmsJwkPrivate,
-    KmsJwkPublic,
-    KmsOperation,
-    KmsRandomBytesOptions,
-    KmsRandomBytesReturn,
-    KmsSignOptions,
-    KmsSignReturn,
-    KmsVerifyOptions,
-    KmsVerifyReturn
-} from "@credo-ts/core/build/modules/kms";
+import { AgentContext, Kms } from "@credo-ts/core";
 import { ec as EC } from "elliptic";
 import _sodium from "libsodium-wrappers";
 import sjcl from "sjcl";
@@ -31,7 +9,7 @@ export interface JwkKeyPair {
     keyType?: string;
 }
 
-export class EnmshedHolderKeyManagmentService implements KeyManagementService {
+export class EnmshedHolderKeyManagmentService implements Kms.KeyManagementService {
     public static readonly backend = "fakeKeyManagementService";
 
     public readonly backend = EnmshedHolderKeyManagmentService.backend;
@@ -70,7 +48,7 @@ export class EnmshedHolderKeyManagmentService implements KeyManagementService {
         // console.log(`FKM: global instance state ${JSON.stringify(Array.from((globalThis as any).fakeKeyStorage.entries()))}`);
     }
 
-    public isOperationSupported(agentContext: AgentContext, operation: KmsOperation): boolean {
+    public isOperationSupported(agentContext: AgentContext, operation: Kms.KmsOperation): boolean {
         agentContext.config.logger.debug(`EKM: Checking if operation is supported: ${JSON.stringify(operation)}`);
         if (operation.operation === "createKey") {
             if (operation.type.kty === "OKP") {
@@ -98,16 +76,16 @@ export class EnmshedHolderKeyManagmentService implements KeyManagementService {
         }
         return false;
     }
-    public getPublicKey(agentContext: AgentContext, keyId: string): Promise<KmsJwkPublic> {
+    public getPublicKey(agentContext: AgentContext, keyId: string): Promise<Kms.KmsJwkPublic> {
         const keyPair = this.keystore.get(keyId);
         if (!keyPair) {
             agentContext.config.logger.error(`EKM: Key with id ${keyId} not found`);
             throw new Error(`Key with id ${keyId} not found`);
         }
 
-        return Promise.resolve((JSON.parse(keyPair) as JwkKeyPair).publicKey as KmsJwkPublic);
+        return Promise.resolve((JSON.parse(keyPair) as JwkKeyPair).publicKey as Kms.KmsJwkPublic);
     }
-    public async createKey<Type extends KmsCreateKeyType>(agentContext: AgentContext, options: KmsCreateKeyOptions<Type>): Promise<KmsCreateKeyReturn<Type>> {
+    public async createKey<Type extends Kms.KmsCreateKeyType>(agentContext: AgentContext, options: Kms.KmsCreateKeyOptions<Type>): Promise<Kms.KmsCreateKeyReturn<Type>> {
         options.keyId ??= "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
             // Use libsodium's randombytes_uniform for secure random number generation
             const r = _sodium.randombytes_uniform(16);
@@ -149,8 +127,8 @@ export class EnmshedHolderKeyManagmentService implements KeyManagementService {
             this.updateGlobalInstance(this.keystore);
             return await Promise.resolve({
                 keyId: options.keyId,
-                publicJwk: publicJwk as KmsJwkPublic
-            } as KmsCreateKeyReturn<Type>);
+                publicJwk: publicJwk as Kms.KmsJwkPublic
+            } as Kms.KmsCreateKeyReturn<Type>);
         }
 
         await _sodium.ready;
@@ -184,14 +162,14 @@ export class EnmshedHolderKeyManagmentService implements KeyManagementService {
         this.updateGlobalInstance(this.keystore);
         return await Promise.resolve({
             keyId: options.keyId,
-            publicJwk: publicJwk as KmsJwkPublic
-        } as KmsCreateKeyReturn<Type>);
+            publicJwk: publicJwk as Kms.KmsJwkPublic
+        } as Kms.KmsCreateKeyReturn<Type>);
     }
-    public importKey<Jwk extends KmsJwkPrivate>(agentContext: AgentContext, options: KmsImportKeyOptions<Jwk>): Promise<KmsImportKeyReturn<Jwk>> {
+    public importKey<Jwk extends Kms.KmsJwkPrivate>(agentContext: AgentContext, options: Kms.KmsImportKeyOptions<Jwk>): Promise<Kms.KmsImportKeyReturn<Jwk>> {
         agentContext.config.logger.debug(`EKM: Importing key with  ${JSON.stringify(options)}`);
         throw new Error("Method not implemented.");
     }
-    public deleteKey(agentContext: AgentContext, options: KmsDeleteKeyOptions): Promise<boolean> {
+    public deleteKey(agentContext: AgentContext, options: Kms.KmsDeleteKeyOptions): Promise<boolean> {
         if (this.keystore.has(options.keyId)) {
             agentContext.config.logger.debug(`EKM: Deleting key with id ${options.keyId}`);
             this.keystore.delete(options.keyId);
@@ -200,7 +178,7 @@ export class EnmshedHolderKeyManagmentService implements KeyManagementService {
         }
         throw new Error(`key with id ${options.keyId} not found. and cannot be deleted`);
     }
-    public async sign(agentContext: AgentContext, options: KmsSignOptions): Promise<KmsSignReturn> {
+    public async sign(agentContext: AgentContext, options: Kms.KmsSignOptions): Promise<Kms.KmsSignReturn> {
         agentContext.config.logger.debug(`EKM: Signing data with key id ${options.keyId} using algorithm ${options.algorithm}`);
 
         const stringifiedKeyPair = this.keystore.get(options.keyId);
@@ -231,7 +209,7 @@ export class EnmshedHolderKeyManagmentService implements KeyManagementService {
 
             return await Promise.resolve({
                 signature: signatureBytes
-            } as KmsSignReturn);
+            } as Kms.KmsSignReturn);
         }
 
         await _sodium.ready;
@@ -262,7 +240,7 @@ export class EnmshedHolderKeyManagmentService implements KeyManagementService {
         };
     }
 
-    public verify(agentContext: AgentContext, options: KmsVerifyOptions): Promise<KmsVerifyReturn> {
+    public verify(agentContext: AgentContext, options: Kms.KmsVerifyOptions): Promise<Kms.KmsVerifyReturn> {
         agentContext.config.logger.debug(`EKM: Verifying signature with key id ${options.key.keyId} using algorithm ${options.algorithm}`);
         // Use P-256 (aka secp256r1)
         const ec = new EC("p256");
@@ -288,7 +266,7 @@ export class EnmshedHolderKeyManagmentService implements KeyManagementService {
         const dataHash = ec.hash().update(options.data).digest();
         try {
             const verified = key.verify(dataHash, signature);
-            return Promise.resolve({ verified: verified } as KmsVerifyReturn);
+            return Promise.resolve({ verified: verified } as Kms.KmsVerifyReturn);
         } catch (e) {
             agentContext.config.logger.error(`EKM: Error during signature verification: ${e}`);
             throw e;
@@ -382,7 +360,7 @@ export class EnmshedHolderKeyManagmentService implements KeyManagementService {
         return hashBuf.subarray(0, keyLength / 8);
     }
 
-    public encrypt(agentContext: AgentContext, options: KmsEncryptOptions): Promise<KmsEncryptReturn> {
+    public encrypt(agentContext: AgentContext, options: Kms.KmsEncryptOptions): Promise<Kms.KmsEncryptReturn> {
         try {
             // encryption via A-256-GCM
             // we will call the services side bob and the incoming side alice
@@ -432,11 +410,11 @@ export class EnmshedHolderKeyManagmentService implements KeyManagementService {
         }
     }
 
-    public decrypt(agentContext: AgentContext, options: KmsDecryptOptions): Promise<KmsDecryptReturn> {
+    public decrypt(agentContext: AgentContext, options: Kms.KmsDecryptOptions): Promise<Kms.KmsDecryptReturn> {
         agentContext.config.logger.debug(`EKM: Decrypting data with key id ${options.key.keyId} using options ${options}`);
         throw new Error("Method not implemented.");
     }
-    public randomBytes(agentContext: AgentContext, options: KmsRandomBytesOptions): KmsRandomBytesReturn {
+    public randomBytes(agentContext: AgentContext, options: Kms.KmsRandomBytesOptions): Kms.KmsRandomBytesReturn {
         agentContext.config.logger.debug(`EKM: Generating ${options.length} random bytes`);
         return _sodium.randombytes_buf(options.length); // Uint8Array
     }

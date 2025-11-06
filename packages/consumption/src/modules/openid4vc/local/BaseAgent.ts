@@ -4,13 +4,13 @@ import {
     DependencyManager,
     DidKey,
     InjectionSymbols,
+    Kms,
     LogLevel,
     type InitConfig,
     type KeyDidCreateOptions,
     type ModulesMap,
     type VerificationMethod
 } from "@credo-ts/core";
-import { KeyManagementModuleConfig } from "@credo-ts/core/build/modules/kms";
 import { AccountController } from "@nmshd/transport";
 import { AttributesController } from "../../attributes";
 import { EnmshedHolderKeyManagmentService } from "./EnmeshedHolderKeyManagmentService";
@@ -62,7 +62,7 @@ export class BaseAgent<AgentModules extends ModulesMap> {
         const versionRecord = { id: "STORAGE_VERSION_RECORD_ID", storageVersion: "0.5.0", value: "0.5.0" };
         await storrage.save(this.agent.context, versionRecord);
 
-        const kmsConfig = this.agent.dependencyManager.resolve(KeyManagementModuleConfig);
+        const kmsConfig = this.agent.dependencyManager.resolve(Kms.KeyManagementModuleConfig);
         kmsConfig.registerBackend(new EnmshedHolderKeyManagmentService());
 
         if (kmsConfig.backends.length === 0) throw new Error("No KMS backend registered");

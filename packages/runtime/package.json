@@ -56,8 +56,12 @@
                 {
                     "tsconfig": "test/tsconfig.json"
                 }
-            ]
-        }
+            ],
+            "^.+\\.js$": "babel-jest"
+        },
+        "transformIgnorePatterns": [
+            "/node_modules/(?!(@credo-ts)/)"
+        ]
     },
     "dependencies": {
         "@js-soft/docdb-querytranslator": "^1.1.6",
