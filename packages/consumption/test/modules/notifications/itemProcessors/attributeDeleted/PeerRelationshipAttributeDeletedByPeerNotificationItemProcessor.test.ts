@@ -112,12 +112,12 @@ describe("PeerRelationshipAttributeDeletedByPeerNotificationItemProcessor", func
                     value: "aValue",
                     title: "aTitle"
                 },
-                owner: CoreAddress.from("initialAttributePeer"),
+                owner: CoreAddress.from("thirdPartyAddress"),
                 confidentiality: RelationshipAttributeConfidentiality.Public
             }),
             peer: CoreAddress.from("peer"),
             sourceReference: CoreId.from("reqRef"),
-            initialAttributePeer: CoreAddress.from("initialAttributePeer"),
+            initialAttributePeer: CoreAddress.from("thirdPartyAddress"),
             id: CoreId.from("attributeId")
         });
 

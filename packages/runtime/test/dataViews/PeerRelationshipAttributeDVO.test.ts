@@ -99,7 +99,7 @@ describe("PeerRelationshipAttributeDVO", () => {
             ShareAttributeRequestItem.from({
                 attribute: ownRelationshipAttribute.content,
                 attributeId: ownRelationshipAttribute.id,
-                thirdPartyAddress: services2.address,
+                initialAttributePeer: services2.address,
                 mustBeAccepted: true
             })
         );
