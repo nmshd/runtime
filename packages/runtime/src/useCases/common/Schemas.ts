@@ -14020,6 +14020,9 @@ export const GetOwnAttributesSharedWithPeerRequest: any = {
                 "query": {
                     "$ref": "#/definitions/GetOwnAttributesSharedWithPeerRequestQuery"
                 },
+                "attributeForwardingDetailsQuery": {
+                    "$ref": "#/definitions/GetOwnAttributesSharedWithPeerRequestAttributeForwardingDetailsQuery"
+                },
                 "hideTechnical": {
                     "type": "boolean"
                 },
@@ -14141,6 +14144,77 @@ export const GetOwnAttributesSharedWithPeerRequest: any = {
                     ]
                 },
                 "sourceReference": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo.deletionStatus": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "deletionInfo.deletionDate": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": false
+        },
+        "GetOwnAttributesSharedWithPeerRequestAttributeForwardingDetailsQuery": {
+            "type": "object",
+            "properties": {
+                "sourceReference": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "sharedAt": {
                     "anyOf": [
                         {
                             "type": "string"

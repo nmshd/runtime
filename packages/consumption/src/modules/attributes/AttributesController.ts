@@ -1574,15 +1574,27 @@ export class AttributesController extends ConsumptionBaseController {
         return docs.map((doc) => AttributeForwardingDetails.from(doc));
     }
 
-    public async getAttributesExchangedWithPeer(peer: CoreAddress, query: any, hideTechnical = false, onlyLatestVersions = true): Promise<LocalAttribute[]> {
-        const attributesForwardedToPeer = await this.getAttributesForwardedToPeer(peer, query, hideTechnical, onlyLatestVersions);
+    public async getAttributesExchangedWithPeer(
+        peer: CoreAddress,
+        query: any,
+        attributeForwardingDetailsQuery?: any,
+        hideTechnical = false,
+        onlyLatestVersions = true
+    ): Promise<LocalAttribute[]> {
+        const attributesForwardedToPeer = await this.getAttributesForwardedToPeer(peer, query, attributeForwardingDetailsQuery, hideTechnical, onlyLatestVersions);
         const attributesWithPeer = await this.getAttributesWithPeer(peer, query, hideTechnical, onlyLatestVersions);
 
         return [...attributesForwardedToPeer, ...attributesWithPeer];
     }
 
-    public async getAttributesForwardedToPeer(peer: CoreAddress, query: any, hideTechnical = false, onlyLatestVersions = true): Promise<LocalAttribute[]> {
-        const forwardingDetailsDocs = await this.forwardingDetails.find({ peer: peer.toString() });
+    public async getAttributesForwardedToPeer(
+        peer: CoreAddress,
+        query: any,
+        attributeForwardingDetailsQuery?: any,
+        hideTechnical = false,
+        onlyLatestVersions = true
+    ): Promise<LocalAttribute[]> {
+        const forwardingDetailsDocs = await this.forwardingDetails.find({ ...attributeForwardingDetailsQuery, peer: peer.toString() });
         const forwardingDetails = forwardingDetailsDocs.map((doc) => AttributeForwardingDetails.from(doc));
 
         const attributeIds = [...new Set(forwardingDetails.map((details) => details.attributeId.toString()))];
