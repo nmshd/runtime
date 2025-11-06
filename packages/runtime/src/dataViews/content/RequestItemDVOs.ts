@@ -46,7 +46,7 @@ export interface DeleteAttributeRequestItemDVO extends RequestItemDVO {
 export interface ShareAttributeRequestItemDVO extends RequestItemDVO {
     type: "ShareAttributeRequestItemDVO";
     attributeId: string;
-    thirdPartyAddress?: string;
+    initialAttributePeer?: string;
     attribute: DraftIdentityAttributeDVO;
 }
 

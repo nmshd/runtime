@@ -172,7 +172,7 @@ describe("OwnAttributeDeletedByOwnerNotificationItemProcessor", function () {
             }),
             peer: CoreAddress.from("peer"),
             sourceReference: CoreId.from("reqRef"),
-            initialAttributePeer: CoreAddress.from("initialAttributePeer"),
+            initialAttributePeer: CoreAddress.from("thirdPartyAddress"),
             id: CoreId.from("attributeId")
         });
 

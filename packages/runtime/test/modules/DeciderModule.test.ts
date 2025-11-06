@@ -1955,7 +1955,7 @@ describe("DeciderModule", () => {
                                     description: "An Attribute's description"
                                 }
                             },
-                            thirdPartyAddress: "thirdParty",
+                            initialAttributePeer: "thirdParty",
                             mustBeAccepted: true
                         }
                     ]
