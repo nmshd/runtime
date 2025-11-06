@@ -140,6 +140,19 @@ describe("OpenID4VCI and OpenID4VCP", () => {
         expect(acceptanceResult.isError).toBe(false);
         expect(acceptanceResult.value.length).toBeGreaterThan(0);
     }, 10000000);
+
+    test("getting the eralier created verifiable credential by id should return exactly one credential", async () => {
+        // Ensure the first test has completed and credentialOfferUrl is set
+        expect(credentialOfferUrl).toBeDefined();
+        const allCredentialsResult = await consumptionServices.openId4Vc.getVerifiableCredentials(undefined);
+        expect(allCredentialsResult.isError).toBe(false);
+        expect(allCredentialsResult.value.length).toBeGreaterThan(0);
+        const firstCredentialId = allCredentialsResult.value[0].id;
+        const singleCredentialResult = await consumptionServices.openId4Vc.getVerifiableCredentials([firstCredentialId]);
+        expect(singleCredentialResult.isError).toBe(false);
+        expect(singleCredentialResult.value).toHaveLength(1);
+        expect(singleCredentialResult.value[0].id).toBe(firstCredentialId);
+    }, 10000000);
 });
 
 async function startOid4VcComposeStack() {
