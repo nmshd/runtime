@@ -81,8 +81,8 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                 );
             }
 
-            if (requestItem.thirdPartyAddress) {
-                return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("When sharing an OwnIdentityAttribute, no thirdPartyAddress may be specified."));
+            if (requestItem.initialAttributePeer) {
+                return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("When sharing an OwnIdentityAttribute, no initialAttributePeer may be specified."));
             }
 
             const tagValidationResult = await this.consumptionController.attributes.validateTagsOfAttribute(requestItem.attribute);
@@ -114,10 +114,10 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             return ValidationResult.error(ConsumptionCoreErrors.requests.cannotShareRelationshipAttributeOfPendingRelationship());
         }
 
-        if (!requestItem.thirdPartyAddress?.equals(initialPeer)) {
+        if (!requestItem.initialAttributePeer?.equals(initialPeer)) {
             return ValidationResult.error(
                 ConsumptionCoreErrors.requests.invalidRequestItem(
-                    "When sharing a RelationshipAttribute with another Identity, the address of the peer of the Relationship in which the RelationshipAttribute exists must be specified as thirdPartyAddress."
+                    "When sharing a RelationshipAttribute with another Identity, the address of the peer of the Relationship in which the RelationshipAttribute exists must be specified as initialAttributePeer."
                 )
             );
         }
@@ -141,15 +141,15 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
             return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem(tagValidationResult.error.message));
         }
 
-        if (requestItem.thirdPartyAddress && requestItem.attribute instanceof IdentityAttribute) {
+        if (requestItem.initialAttributePeer && requestItem.attribute instanceof IdentityAttribute) {
             return ValidationResult.error(
-                ConsumptionCoreErrors.requests.invalidRequestItem("The RequestItem is invalid, since it must contain a RelationshipAttribute if thirdPartyAddress is defined.")
+                ConsumptionCoreErrors.requests.invalidRequestItem("The RequestItem is invalid, since it must contain a RelationshipAttribute if initialAttributePeer is defined.")
             );
         }
 
-        if (!requestItem.thirdPartyAddress && requestItem.attribute instanceof RelationshipAttribute) {
+        if (!requestItem.initialAttributePeer && requestItem.attribute instanceof RelationshipAttribute) {
             return ValidationResult.error(
-                ConsumptionCoreErrors.requests.invalidRequestItem("The RequestItem is invalid, since it must contain an IdentityAttribute if thirdPartyAddress is undefined.")
+                ConsumptionCoreErrors.requests.invalidRequestItem("The RequestItem is invalid, since it must contain an IdentityAttribute if initialAttributePeer is undefined.")
             );
         }
 
@@ -161,7 +161,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
         _params: AcceptRequestItemParametersJSON,
         requestInfo: LocalRequestInfo
     ): Promise<AcceptResponseItem | AttributeAlreadySharedAcceptResponseItem> {
-        const isThirdPartyRelationshipAttribute = !!requestItem.thirdPartyAddress;
+        const isThirdPartyRelationshipAttribute = !!requestItem.initialAttributePeer;
         if (isThirdPartyRelationshipAttribute) {
             const attribute = requestItem.attribute as RelationshipAttribute;
             const existingThirdPartyRelationshipAttribute = await this.consumptionController.attributes.getThirdPartyRelationshipAttributeWithSameValue(
@@ -187,7 +187,7 @@ export class ShareAttributeRequestItemProcessor extends GenericRequestItemProces
                 content: requestItem.attribute as RelationshipAttribute,
                 peer: requestInfo.peer,
                 sourceReference: requestInfo.id,
-                initialAttributePeer: requestItem.thirdPartyAddress!
+                initialAttributePeer: requestItem.initialAttributePeer!
             });
 
             return AcceptResponseItem.from({ result: ResponseItemResult.Accepted });

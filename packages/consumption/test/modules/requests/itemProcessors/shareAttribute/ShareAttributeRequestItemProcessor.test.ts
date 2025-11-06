@@ -198,7 +198,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 mustBeAccepted: false,
                 attribute: attribute.content,
                 attributeId: attribute.id,
-                thirdPartyAddress: !(testParams.attribute instanceof IdentityAttribute)
+                initialAttributePeer: !(testParams.attribute instanceof IdentityAttribute)
                     ? testParams.attribute.owner.equals(sender)
                         ? aThirdParty
                         : testParams.attribute.owner
@@ -673,14 +673,14 @@ describe("ShareAttributeRequestItemProcessor", function () {
 
                 peer: aThirdParty,
                 sourceReference: CoreId.from("aSourceReferenceId"),
-                initialAttributePeer: CoreAddress.from("initialAttributePeer"),
+                initialAttributePeer: CoreAddress.from("thirdPartyAddress"),
                 id: CoreId.from("aThirdPartyRelationshipAttributeId")
             });
             const requestItem = ShareAttributeRequestItem.from({
                 mustBeAccepted: false,
                 attribute: relationshipAttribute.content,
                 attributeId: relationshipAttribute.id,
-                thirdPartyAddress: aThirdParty
+                initialAttributePeer: aThirdParty
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -710,7 +710,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 mustBeAccepted: false,
                 attribute: initialRelationshipAttribute.content,
                 attributeId: initialRelationshipAttribute.id,
-                thirdPartyAddress: aThirdParty
+                initialAttributePeer: aThirdParty
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -753,7 +753,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 mustBeAccepted: false,
                 attribute: initialRelationshipAttribute.content,
                 attributeId: initialRelationshipAttribute.id,
-                thirdPartyAddress: aThirdParty
+                initialAttributePeer: aThirdParty
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -793,7 +793,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 mustBeAccepted: false,
                 attribute: initialRelationshipAttribute.content,
                 attributeId: initialRelationshipAttribute.id,
-                thirdPartyAddress: aThirdParty
+                initialAttributePeer: aThirdParty
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -821,7 +821,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 mustBeAccepted: false,
                 attribute: relationshipAttribute.content,
                 attributeId: relationshipAttribute.id,
-                thirdPartyAddress: relationshipAttribute.peer
+                initialAttributePeer: relationshipAttribute.peer
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -865,7 +865,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 mustBeAccepted: true,
                 attribute: ownRelationshipAttribute.content,
                 attributeId: ownRelationshipAttribute.id,
-                thirdPartyAddress: ownRelationshipAttribute.peer
+                initialAttributePeer: ownRelationshipAttribute.peer
             });
             const request = Request.from({ items: [requestItem] });
 
@@ -1051,7 +1051,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 mustBeAccepted: true,
                 attributeId: CoreId.from("anAttributeId"),
                 attribute: TestObjectFactory.createRelationshipAttribute({ owner: sender }),
-                thirdPartyAddress: CoreAddress.from("aThirdParty")
+                initialAttributePeer: CoreAddress.from("aThirdParty")
             });
 
             const incomingRequest = LocalRequest.from({
@@ -1093,7 +1093,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 mustBeAccepted: true,
                 attributeId: CoreId.from("anotherAttributeId"),
                 attribute: TestObjectFactory.createRelationshipAttribute({ owner: sender }),
-                thirdPartyAddress: aThirdParty
+                initialAttributePeer: aThirdParty
             });
 
             const incomingRequest = LocalRequest.from({
@@ -1123,7 +1123,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 mustBeAccepted: true,
                 attributeId: CoreId.from("anotherAttributeId"),
                 attribute: TestObjectFactory.createRelationshipAttribute({ owner: sender }),
-                thirdPartyAddress: aThirdParty
+                initialAttributePeer: aThirdParty
             });
 
             const incomingRequest = LocalRequest.from({
@@ -1162,7 +1162,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
                 mustBeAccepted: true,
                 attributeId: CoreId.from("anotherAttributeId"),
                 attribute: TestObjectFactory.createRelationshipAttribute({ owner: sender }),
-                thirdPartyAddress: aThirdParty
+                initialAttributePeer: aThirdParty
             });
 
             const incomingRequest = LocalRequest.from({
@@ -1344,7 +1344,7 @@ describe("ShareAttributeRequestItemProcessor", function () {
             mustBeAccepted: true,
             attribute: sharedAttribute.content,
             attributeId: sharedAttribute.id,
-            thirdPartyAddress: sharedAttribute.content instanceof RelationshipAttribute ? (sharedAttribute as OwnRelationshipAttribute).peer : undefined
+            initialAttributePeer: sharedAttribute.content instanceof RelationshipAttribute ? (sharedAttribute as OwnRelationshipAttribute).peer : undefined
         });
 
         const requestId = await ConsumptionIds.request.generate();

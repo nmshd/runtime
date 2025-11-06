@@ -2069,7 +2069,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const result = await processor.accept(requestItem, acceptParams, incomingRequest);
 
                 expect(result).toBeInstanceOf(ReadAttributeAcceptResponseItem);
-                expect((result as ReadAttributeAcceptResponseItem).thirdPartyAddress).toStrictEqual(peerAddress);
+                expect((result as ReadAttributeAcceptResponseItem).initialAttributePeer).toStrictEqual(peerAddress);
                 expect((result as ReadAttributeAcceptResponseItem).attributeId).toStrictEqual(ownRelationshipAttribute.id);
 
                 const updatedOwnRelationshipAttribute = (await consumptionController.attributes.getLocalAttribute(ownRelationshipAttribute.id)) as OwnRelationshipAttribute;
@@ -2118,7 +2118,7 @@ describe("ReadAttributeRequestItemProcessor", function () {
                 const result = await processor.accept(requestItem, acceptParams, incomingRequest);
 
                 expect(result).toBeInstanceOf(ReadAttributeAcceptResponseItem);
-                expect((result as ReadAttributeAcceptResponseItem).thirdPartyAddress).toStrictEqual(peerAddress);
+                expect((result as ReadAttributeAcceptResponseItem).initialAttributePeer).toStrictEqual(peerAddress);
                 expect((result as ReadAttributeAcceptResponseItem).attributeId).toStrictEqual(peerRelationshipAttribute.id);
 
                 const updatedPeerRelationshipAttribute = (await consumptionController.attributes.getLocalAttribute(peerRelationshipAttribute.id)) as PeerRelationshipAttribute;
