@@ -1,3 +1,4 @@
+import axios, { AxiosInstance } from "axios";
 import { DockerComposeEnvironment, StartedDockerComposeEnvironment } from "testcontainers";
 import { ConsumptionServices } from "../../../src";
 import { RuntimeServiceProvider } from "../../lib";
@@ -6,6 +7,7 @@ const runtimeServiceProvider = new RuntimeServiceProvider();
 let consumptionServices: ConsumptionServices;
 let oid4vcServiceComposeStack: StartedDockerComposeEnvironment;
 let oid4vcServiceBaseUrl: string;
+let axiosInstance: AxiosInstance;
 
 beforeAll(async () => {
     const runtimeServices = await runtimeServiceProvider.launch(1);
@@ -15,6 +17,13 @@ beforeAll(async () => {
 
     const oid4vcServicePort = oid4vcServiceComposeStack.getContainer("oid4vc-service-1").getMappedPort(8080);
     oid4vcServiceBaseUrl = `http://localhost:${oid4vcServicePort}`;
+
+    axiosInstance = axios.create({
+        baseURL: oid4vcServiceBaseUrl,
+        headers: {
+            "Content-Type": "application/json" // eslint-disable-line @typescript-eslint/naming-convention
+        }
+    });
 }, 120000);
 
 afterAll(async () => {
@@ -26,17 +35,12 @@ describe("OpenID4VCI and OpenID4VCP", () => {
     let credentialOfferUrl: string;
 
     test("should process a given credential offer", async () => {
-        const response = await fetch(`${oid4vcServiceBaseUrl}/issuance/credentialOffers`, {
-            method: "POST",
-            headers: {
-                // eslint-disable-next-line @typescript-eslint/naming-convention
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
+        const response = await axiosInstance.post("/issuance/credentialOffers", {
+            data: {
                 credentialConfigurationIds: ["EmployeeIdCard-sdjwt"]
-            })
+            }
         });
-        const data = await response.json();
+        const data = await response.data;
         credentialOfferUrl = data.result.credentialOffer;
         const result = await consumptionServices.openId4Vc.fetchCredentialOffer({
             credentialOfferUrl
@@ -68,13 +72,8 @@ describe("OpenID4VCI and OpenID4VCP", () => {
         // Ensure the first test has completed and credentialOfferUrl is set
         expect(credentialOfferUrl).toBeDefined();
 
-        const response = await fetch(`${oid4vcServiceBaseUrl}/presentation/presentationRequests`, {
-            method: "POST",
-            headers: {
-                // eslint-disable-next-line @typescript-eslint/naming-convention
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
+        const response = await axios.post(`presentation/presentationRequests`, {
+            data: {
                 pex: {
                     id: "anId",
                     purpose: "To prove you work here",
@@ -119,9 +118,9 @@ describe("OpenID4VCI and OpenID4VCP", () => {
                     ]
                 },
                 version: "v1.draft21"
-            })
+            }
         });
-        const data = await response.json();
+        const data = await response.data;
         const result = await consumptionServices.openId4Vc.fetchProofRequest({
             proofRequestUrl: data.result.presentationRequest
         });
