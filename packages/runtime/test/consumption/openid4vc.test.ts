@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
+import axios from "axios";
 import { ConsumptionServices } from "../../src";
 import { RuntimeServiceProvider } from "../lib";
 
@@ -142,4 +143,77 @@ describe("OpenID4VCI and OpenID4VCP", () => {
         expect(singleCredentialResult.value).toHaveLength(1);
         expect(singleCredentialResult.value[0].id).toBe(firstCredentialId);
     }, 10000000);
+});
+
+describe("EUDIPLO", () => {
+    const eudiploBaseUrl = "https://openid4vc-eudiplo-server.is.enmeshed.eu";
+    const eudiploUser = "test-admin";
+    const eudiploPassword = "a9622245324e3ef38db9264f434e2289f361e07edd8012d4a7815a11b9c79a97";
+    const eudiploIssuanceConfigurationId = "Employee ID Card";
+    const eudiploPresentationConfigurationId = "Employee ID Card";
+    const eudiploCredentialIdInConfiguration = "EmployeeIdCard";
+
+    let accessToken: string;
+    beforeAll(async () => {
+        accessToken = (
+            await axios.post(
+                `${eudiploBaseUrl}/oauth2/token`,
+                {
+                    grant_type: "client_credentials"
+                },
+                {
+                    auth: {
+                        username: eudiploUser,
+                        password: eudiploPassword
+                    }
+                }
+            )
+        ).data.access_token;
+    });
+
+    test("issuance", async () => {
+        const credentialOfferUrl = (
+            await axios.post(
+                `${eudiploBaseUrl}/issuer-management/offer`,
+                {
+                    response_type: "uri",
+                    issuanceId: eudiploIssuanceConfigurationId
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`
+                    }
+                }
+            )
+        ).data.uri;
+
+        const loadResult = await consumptionServices.openId4Vc.fetchCredentialOffer({ credentialOfferUrl });
+        expect(loadResult).toBeSuccessful();
+
+        const resolveResult = await consumptionServices.openId4Vc.resolveFetchedCredentialOffer({
+            data: loadResult.value.jsonRepresentation,
+            requestedCredentials: [eudiploCredentialIdInConfiguration]
+        });
+        expect(resolveResult).toBeSuccessful();
+    });
+
+    test("presentation", async () => {
+        const proofRequestUrl = (
+            await axios.post(
+                `${eudiploBaseUrl}/presentation-management/request`,
+                {
+                    response_type: "uri",
+                    requestId: eudiploPresentationConfigurationId
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`
+                    }
+                }
+            )
+        ).data.uri;
+
+        const loadResult = await consumptionServices.openId4Vc.fetchProofRequest({ proofRequestUrl });
+        expect(loadResult).toBeSuccessful();
+    });
 });
