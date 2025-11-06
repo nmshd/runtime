@@ -7,10 +7,12 @@ import { AddressString, SchemaRepository, SchemaValidator, UseCase } from "../..
 import { flattenObject } from "../../common/flattenObject";
 import { AttributeMapper } from "./AttributeMapper";
 import { GetAttributesRequestQuery, GetAttributesUseCase } from "./GetAttributes";
+import { GetForwardingDetailsForAttributeUseCase } from "./GetForwardingDetailsForAttribute";
 
 export interface GetOwnAttributesSharedWithPeerRequest {
     peer: AddressString;
     query?: GetOwnAttributesSharedWithPeerRequestQuery;
+    attributeForwardingDetailsQuery?: GetOwnAttributesSharedWithPeerRequestAttributeForwardingDetailsQuery;
     hideTechnical?: boolean;
     /**
      * default: true
@@ -35,6 +37,14 @@ export interface GetOwnAttributesSharedWithPeerRequestQuery {
     "deletionInfo.deletionDate"?: string | string[];
 }
 
+export interface GetOwnAttributesSharedWithPeerRequestAttributeForwardingDetailsQuery {
+    sourceReference?: string | string[];
+    sharedAt?: string | string[];
+    deletionInfo?: string | string[];
+    "deletionInfo.deletionStatus"?: string | string[];
+    "deletionInfo.deletionDate"?: string | string[];
+}
+
 class Validator extends SchemaValidator<GetOwnAttributesSharedWithPeerRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
         super(schemaRepository.getSchema("GetOwnAttributesSharedWithPeerRequest"));
@@ -51,15 +61,18 @@ export class GetOwnAttributesSharedWithPeerUseCase extends UseCase<GetOwnAttribu
 
     protected async executeInternal(request: GetOwnAttributesSharedWithPeerRequest): Promise<Result<LocalAttributeDTO[]>> {
         const query: GetAttributesRequestQuery = request.query ?? {};
-
         const flattenedQuery = flattenObject(query);
         const dbQuery = GetAttributesUseCase.queryTranslator.parse(flattenedQuery);
+        dbQuery["@type"] = dbQuery["@type"] ?? { $in: ["OwnIdentityAttribute", "OwnRelationshipAttribute"] };
 
-        dbQuery["@type"] = { $in: ["OwnIdentityAttribute", "OwnRelationshipAttribute"] };
+        const attributeForwardingDetailsQuery = request.attributeForwardingDetailsQuery ?? {};
+        const flattenedAttributeForwardingDetailsQuery = flattenObject(attributeForwardingDetailsQuery);
+        const dbAttributeForwardingDetailsQuery = GetForwardingDetailsForAttributeUseCase.queryTranslator.parse(flattenedAttributeForwardingDetailsQuery);
 
         const attributes = await this.attributeController.getAttributesExchangedWithPeer(
             CoreAddress.from(request.peer),
             dbQuery,
+            dbAttributeForwardingDetailsQuery,
             request.hideTechnical,
             request.onlyLatestVersions
         );
