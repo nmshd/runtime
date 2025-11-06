@@ -120,7 +120,7 @@ jobs:
       - name: Start Backbone
         run: npm run start:backbone
       - name: Log in to GitHub Container Registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+        run: echo "${{ secrets.GHCR_PAT_FOR_OID4VC_SERVICE_PULL }}" | docker login ghcr.io -u tnotheis --password-stdin
       - uses: actions/setup-node@v6
         with:
           node-version: current
@@ -144,7 +144,7 @@ jobs:
       - name: Start Backbone
         run: npm run start:backbone
       - name: Log in to GitHub Container Registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+        run: echo "${{ secrets.GHCR_PAT_FOR_OID4VC_SERVICE_PULL }}" | docker login ghcr.io -u tnotheis --password-stdin
       - uses: actions/setup-node@v6
         with:
           node-version: current
