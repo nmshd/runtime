@@ -118,6 +118,7 @@ describe("OpenID4VCI and OpenID4VCP", () => {
         const presentationResult = await consumptionServices.openId4Vc.acceptProofRequest({
             jsonEncodedRequest: jsonRepresentation
         });
+        expect(presentationResult).toBeSuccessful();
         expect(presentationResult.value.status).toBe(200);
     }, 10000000);
 

@@ -13,7 +13,7 @@ services:
       - mongodb
 
   connector:
-    image: ghcr.io/nmshd/connector:7.1.1@sha256:b8458560fa85b190485aa544d9db34ab7d0b6b7b88129eda487b723e201734f8
+    image: ghcr.io/nmshd/connector:7.1.0-openid4vc.2@sha256:b8458560fa85b190485aa544d9db34ab7d0b6b7b88129eda487b723e201734f8
     environment:
       CUSTOM_CONFIG_LOCATION: "/config.json"
       transportLibrary__baseUrl: ${NMSHD_TEST_BASEURL}
