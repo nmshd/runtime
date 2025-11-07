@@ -149,23 +149,29 @@ describe("OpenID4VCI and OpenID4VCP", () => {
 });
 
 async function startOid4VcComposeStack() {
-    let baseUrl = process.env.NMSHD_TEST_BASEURL ?? "http://localhost:8080";
+    const environment: Record<string, string> = {};
+    fillBackboneConnectionEnvVarsForConnector(environment);
+
+    const composeStack = await new DockerComposeEnvironment(__dirname, "compose.yml").withEnvironment(environment).withStartupTimeout(60000).up();
+
+    return composeStack;
+}
+
+function fillBackboneConnectionEnvVarsForConnector(environment: Record<string, string>) {
+    let baseUrl = process.env.NMSHD_TEST_BASEURL;
+
+    if (!baseUrl) throw new Error("NMSHD_TEST_BASEURL environment variable is not set");
+
     let addressGenerationHostnameOverride: string | undefined;
 
     if (baseUrl.includes("localhost")) {
-        addressGenerationHostnameOverride = "localhost";
         baseUrl = baseUrl.replace("localhost", "host.docker.internal");
+        addressGenerationHostnameOverride = "localhost";
     }
 
-    const composeStack = await new DockerComposeEnvironment(__dirname, "compose.yml")
-        .withEnvironment({
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            NMSHD_TEST_BASEURL: baseUrl,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE: addressGenerationHostnameOverride
-        } as Record<string, string>)
-        .withStartupTimeout(60000)
-        .up();
+    environment.NMSHD_TEST_BASEURL = baseUrl;
 
-    return composeStack;
+    if (addressGenerationHostnameOverride) {
+        environment.NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE = addressGenerationHostnameOverride;
+    }
 }
