@@ -22,7 +22,8 @@ beforeAll(async () => {
         baseURL: oid4vcServiceBaseUrl,
         headers: {
             "Content-Type": "application/json" // eslint-disable-line @typescript-eslint/naming-convention
-        }
+        },
+        validateStatus: () => true // accept all status codes as valid
     });
 }, 120000);
 
@@ -36,12 +37,12 @@ describe("OpenID4VCI and OpenID4VCP", () => {
 
     test("should process a given credential offer", async () => {
         const response = await axiosInstance.post("/issuance/credentialOffers", {
-            data: {
-                credentialConfigurationIds: ["EmployeeIdCard-sdjwt"]
-            }
+            credentialConfigurationIds: ["EmployeeIdCard-sdjwt"]
         });
-        const data = await response.data;
-        credentialOfferUrl = data.result.credentialOffer;
+        const responseData = await response.data;
+
+        credentialOfferUrl = responseData.result.credentialOffer;
+
         const result = await consumptionServices.openId4Vc.fetchCredentialOffer({
             credentialOfferUrl
         });
@@ -69,60 +70,44 @@ describe("OpenID4VCI and OpenID4VCP", () => {
     }, 10000000);
 
     test("should be able to process a given credential presentation", async () => {
-        // Ensure the first test has completed and credentialOfferUrl is set
+        // Ensure the first test has completed
         expect(credentialOfferUrl).toBeDefined();
 
-        const response = await axios.post(`presentation/presentationRequests`, {
-            data: {
-                pex: {
-                    id: "anId",
-                    purpose: "To prove you work here",
-                    // eslint-disable-next-line @typescript-eslint/naming-convention
-                    input_descriptors: [
-                        {
-                            id: "EmployeeIdCard",
-                            format: {
+        const response = await axiosInstance.post("/presentation/presentationRequests", {
+            pex: {
+                id: "anId",
+                purpose: "To prove you work here",
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                input_descriptors: [
+                    {
+                        id: "EmployeeIdCard",
+                        format: {
+                            // eslint-disable-next-line @typescript-eslint/naming-convention
+                            "vc+sd-jwt": {
                                 // eslint-disable-next-line @typescript-eslint/naming-convention
-                                "vc+sd-jwt": {
-                                    // eslint-disable-next-line @typescript-eslint/naming-convention
-                                    "sd-jwt_alg_values": [
-                                        "RS256",
-                                        "PS256",
-                                        "HS256",
-                                        "ES256",
-                                        "ES256K",
-                                        "RS384",
-                                        "PS384",
-                                        "HS384",
-                                        "ES384",
-                                        "RS512",
-                                        "PS512",
-                                        "HS512",
-                                        "ES512",
-                                        "EdDSA"
-                                    ]
-                                }
-                            },
-                            constraints: {
-                                fields: [
-                                    {
-                                        path: ["$.vct"],
-                                        filter: {
-                                            type: "string",
-                                            pattern: "EmployeeIdCard"
-                                        }
-                                    }
-                                ]
+                                "sd-jwt_alg_values": ["RS256", "PS256", "HS256", "ES256", "ES256K", "RS384", "PS384", "HS384", "ES384", "RS512", "PS512", "HS512", "ES512", "EdDSA"]
                             }
+                        },
+                        constraints: {
+                            fields: [
+                                {
+                                    path: ["$.vct"],
+                                    filter: {
+                                        type: "string",
+                                        pattern: "EmployeeIdCard"
+                                    }
+                                }
+                            ]
                         }
-                    ]
-                },
-                version: "v1.draft21"
-            }
+                    }
+                ]
+            },
+            version: "v1.draft21"
         });
-        const data = await response.data;
+        const responseData = await response.data;
+
         const result = await consumptionServices.openId4Vc.fetchProofRequest({
-            proofRequestUrl: data.result.presentationRequest
+            proofRequestUrl: responseData.result.presentationRequest
         });
         const jsonRepresentation = result.value.jsonRepresentation;
 
