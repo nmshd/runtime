@@ -125,6 +125,8 @@ jobs:
           registry: ghcr.io
           username: tnotheis
           password: ${{ secrets.GHCR_PAT_FOR_OID4VC_SERVICE_PULL }}
+      - name: Start OpenID4VC Service
+        run: npm run start:openid4vc
       - uses: actions/setup-node@v6
         with:
           node-version: current
@@ -140,7 +142,7 @@ jobs:
           NMSHD_TEST_ADMIN_API_KEY: test
           NMSHD_TEST_CLIENTID: test
           NMSHD_TEST_CLIENTSECRET: test
-          DEBUG: testcontainers*
+          OPENID4VC_SERVICE_BASEURL: http://localhost:9000
 
   test-runtime-loki:
     runs-on: ubuntu-latest
@@ -154,6 +156,8 @@ jobs:
           registry: ghcr.io
           username: tnotheis
           password: ${{ secrets.GHCR_PAT_FOR_OID4VC_SERVICE_PULL }}
+      - name: Start OpenID4VC Service
+        run: npm run start:openid4vc
       - uses: actions/setup-node@v6
         with:
           node-version: current
@@ -169,7 +173,7 @@ jobs:
           NMSHD_TEST_ADMIN_API_KEY: test
           NMSHD_TEST_CLIENTID: test
           NMSHD_TEST_CLIENTSECRET: test
-          DEBUG: testcontainers*
+          OPENID4VC_SERVICE_BASEURL: http://localhost:9000
       - name: Upload coverage reports to Codecov with GitHub Action
         uses: codecov/codecov-action@v5
         env:

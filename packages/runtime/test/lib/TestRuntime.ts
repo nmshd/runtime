@@ -79,8 +79,6 @@ export class TestRuntime extends Runtime {
 
         if (process.env.USE_LOKIJS === "true") {
             this.dbConnection = LokiJsConnection.inMemory();
-            const dbConnection = new MongoDbConnection(process.env.CONNECTION_STRING!);
-            await dbConnection.connect();
         } else {
             this.dbConnection = new MongoDbConnection(process.env.CONNECTION_STRING!);
             await this.dbConnection.connect();

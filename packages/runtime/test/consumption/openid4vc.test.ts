@@ -1,11 +1,9 @@
 import axios, { AxiosInstance } from "axios";
-import { DockerComposeEnvironment, StartedDockerComposeEnvironment } from "testcontainers";
-import { ConsumptionServices } from "../../../src";
-import { RuntimeServiceProvider } from "../../lib";
+import { ConsumptionServices } from "../../src";
+import { RuntimeServiceProvider } from "../lib";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
 let consumptionServices: ConsumptionServices;
-let oid4vcServiceComposeStack: StartedDockerComposeEnvironment;
 let oid4vcServiceBaseUrl: string;
 let axiosInstance: AxiosInstance;
 
@@ -13,10 +11,10 @@ beforeAll(async () => {
     const runtimeServices = await runtimeServiceProvider.launch(1);
     consumptionServices = runtimeServices[0].consumption;
 
-    oid4vcServiceComposeStack = await startOid4VcComposeStack();
-
-    const oid4vcServicePort = oid4vcServiceComposeStack.getContainer("oid4vc-service-1").getMappedPort(9000);
-    oid4vcServiceBaseUrl = `http://localhost:${oid4vcServicePort}`;
+    oid4vcServiceBaseUrl = process.env.OPENID4VC_SERVICE_BASEURL!;
+    if (!oid4vcServiceBaseUrl) {
+        throw new Error("OPENID4VC_SERVICE_BASEURL environment variable is not set");
+    }
 
     axiosInstance = axios.create({
         baseURL: oid4vcServiceBaseUrl,
@@ -35,7 +33,6 @@ afterAll(async () => {
     const healthCheckResult = await axiosInstance.get("/health");
     console.log(healthCheckResult); // eslint-disable-line no-console
     await runtimeServiceProvider.stop();
-    await oid4vcServiceComposeStack.stop();
 });
 
 describe("OpenID4VCI and OpenID4VCP", () => {
@@ -154,31 +151,3 @@ describe("OpenID4VCI and OpenID4VCP", () => {
         expect(singleCredentialResult.value[0].id).toBe(firstCredentialId);
     }, 10000000);
 });
-
-async function startOid4VcComposeStack() {
-    const environment: Record<string, string> = {};
-    fillBackboneConnectionEnvVarsForConnector(environment);
-
-    const composeStack = await new DockerComposeEnvironment(__dirname, "compose.yml").withEnvironment(environment).withStartupTimeout(60000).up();
-
-    return composeStack;
-}
-
-function fillBackboneConnectionEnvVarsForConnector(environment: Record<string, string>) {
-    let baseUrl = process.env.NMSHD_TEST_BASEURL;
-
-    if (!baseUrl) throw new Error("NMSHD_TEST_BASEURL environment variable is not set");
-
-    let addressGenerationHostnameOverride: string | undefined;
-
-    if (baseUrl.includes("localhost")) {
-        baseUrl = baseUrl.replace("localhost", "host.docker.internal");
-        addressGenerationHostnameOverride = "localhost";
-    }
-
-    environment.NMSHD_TEST_BASEURL = baseUrl;
-
-    if (addressGenerationHostnameOverride) {
-        environment.NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE = addressGenerationHostnameOverride;
-    }
-}
