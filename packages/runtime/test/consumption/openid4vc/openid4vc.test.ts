@@ -39,6 +39,7 @@ describe("OpenID4VCI and OpenID4VCP", () => {
         const response = await axiosInstance.post("/issuance/credentialOffers", {
             credentialConfigurationIds: ["EmployeeIdCard-sdjwt"]
         });
+        expect(response.status).toBe(200);
         const responseData = await response.data;
 
         credentialOfferUrl = responseData.result.credentialOffer;
@@ -46,6 +47,8 @@ describe("OpenID4VCI and OpenID4VCP", () => {
         const result = await consumptionServices.openId4Vc.fetchCredentialOffer({
             credentialOfferUrl
         });
+
+        expect(result).toBeSuccessful();
 
         // analogously to the app code all presented credentials are accepted
         const jsonRepresentation = result.value.jsonRepresentation;
@@ -63,9 +66,7 @@ describe("OpenID4VCI and OpenID4VCP", () => {
             data: jsonRepresentation,
             requestedCredentials: requestedCredentials
         });
-
-        const status = acceptanceResult.isSuccess;
-        expect(status).toBe(true);
+        expect(acceptanceResult).toBeSuccessful();
         expect(typeof acceptanceResult.value.id).toBe("string");
     }, 10000000);
 
