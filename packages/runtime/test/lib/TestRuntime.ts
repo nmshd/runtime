@@ -72,19 +72,14 @@ export class TestRuntime extends Runtime {
         };
     }
 
-    protected async createDatabaseConnection(): Promise<IDatabaseConnection> {
+    protected createDatabaseConnection(): Promise<IDatabaseConnection> {
         if (this.dbConnection) {
             throw new Error("DbConnection already created");
         }
 
-        if (process.env.USE_LOKIJS === "true") {
-            this.dbConnection = LokiJsConnection.inMemory();
-        } else {
-            this.dbConnection = new MongoDbConnection(process.env.CONNECTION_STRING!);
-            await this.dbConnection.connect();
-        }
+        this.dbConnection = LokiJsConnection.inMemory();
 
-        return this.dbConnection;
+        return Promise.resolve(this.dbConnection);
     }
 
     protected async initAccount(): Promise<void> {
