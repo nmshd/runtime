@@ -32,6 +32,8 @@ beforeAll(async () => {
 }, 120000);
 
 afterAll(async () => {
+    const healthCheckResult = await axiosInstance.get("/health");
+    console.log(healthCheckResult); // eslint-disable-line no-console
     await runtimeServiceProvider.stop();
     await oid4vcServiceComposeStack.stop();
 });
