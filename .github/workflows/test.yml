@@ -157,11 +157,10 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: current
-      - uses: supercharge/mongodb-github-action@v1
       - run: npm ci
       - run: npm run build:node
       - run: npm run build:schemas --workspace=@nmshd/runtime
-      - run: npm run test:ci:mongodb --workspace=@nmshd/runtime openid4vc
+      - run: npm run test:ci:lokijs --workspace=@nmshd/runtime openid4vc
         env:
           CONNECTION_STRING: mongodb://127.0.0.1:27017
           NMSHD_TEST_BASEURL: http://localhost:8090
@@ -170,6 +169,11 @@ jobs:
           NMSHD_TEST_CLIENTID: test
           NMSHD_TEST_CLIENTSECRET: test
           DEBUG: testcontainers*
+      - name: Upload coverage reports to Codecov with GitHub Action
+        uses: codecov/codecov-action@v5
+        env:
+          fail_ci_if_error: true
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   test-transport-mongodb:
     runs-on: ubuntu-latest
