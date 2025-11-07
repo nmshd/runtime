@@ -23,7 +23,7 @@
         "cdep": "tsc && madge --circular dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
         "test:ci:lokijs": "USE_LOKIJS=true jest -i --coverage",
-        "test:ci:mongodb": "jest -i --coverage",
+        "test:ci:mongodb": "USE_LOKIJS=true jest -i --coverage",
         "test:local:ferretdb": "npm run test:local:start:ferretdb && CONNECTION_STRING='mongodb://root:example@localhost:27022' jest",
         "test:local:lokijs": "USE_LOKIJS=true jest",
         "test:local:mongodb": "npm run test:local:start:mongodb && CONNECTION_STRING='mongodb://root:example@localhost:27021' jest",
