@@ -14,20 +14,20 @@ services:
     depends_on:
       - mongodb
 
-  # connector:
-  #   image: ghcr.io/nmshd/connector:7.1.0-openid4vc.2@sha256:b8458560fa85b190485aa544d9db34ab7d0b6b7b88129eda487b723e201734f8
-  #   environment:
-  #     CUSTOM_CONFIG_LOCATION: "/config.json"
-  #     transportLibrary__baseUrl: ${NMSHD_TEST_BASEURL}
-  #     transportLibrary__platformClientId: ${NMSHD_TEST_CLIENTID}
-  #     transportLibrary__platformClientSecret: ${NMSHD_TEST_CLIENTSECRET}
-  #     transportLibrary__addressGenerationHostnameOverride: ${NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE}
-  #     database__connectionString: mongodb://root:example@mongodb:27017
-  #     infrastructure__httpServer__authentication__apiKey__keys__default__key: aVeryCoolApiKeyWith30CharactersOr+
-  #   extra_hosts:
-  #     - "host.docker.internal:host-gateway"
-  #   depends_on:
-  #     - mongodb
+  connector:
+    image: ghcr.io/nmshd/connector:7.1.0-openid4vc.2@sha256:b8458560fa85b190485aa544d9db34ab7d0b6b7b88129eda487b723e201734f8
+    environment:
+      CUSTOM_CONFIG_LOCATION: "/config.json"
+      transportLibrary__baseUrl: ${NMSHD_TEST_BASEURL}
+      transportLibrary__platformClientId: ${NMSHD_TEST_CLIENTID}
+      transportLibrary__platformClientSecret: ${NMSHD_TEST_CLIENTSECRET}
+      transportLibrary__addressGenerationHostnameOverride: ${NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE}
+      database__connectionString: mongodb://root:example@mongodb:27017
+      infrastructure__httpServer__authentication__apiKey__keys__default__key: aVeryCoolApiKeyWith30CharactersOr+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - mongodb
 
   mongodb:
     image: mongo@sha256:c23684919810f0341e58744987e4b1c510fb8becdae850217d2d04b6fa7605e7
