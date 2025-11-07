@@ -22,8 +22,7 @@ beforeAll(async () => {
         baseURL: oid4vcServiceBaseUrl,
         headers: {
             "Content-Type": "application/json" // eslint-disable-line @typescript-eslint/naming-convention
-        },
-        validateStatus: () => true // accept all status codes as valid
+        }
     });
 }, 120000);
 
@@ -105,6 +104,7 @@ describe("OpenID4VCI and OpenID4VCP", () => {
             },
             version: "v1.draft21"
         });
+        expect(response.status).toBe(200);
         const responseData = await response.data;
 
         const result = await consumptionServices.openId4Vc.fetchProofRequest({
@@ -127,7 +127,7 @@ describe("OpenID4VCI and OpenID4VCP", () => {
 
         const acceptanceResult = await consumptionServices.openId4Vc.getVerifiableCredentials(undefined);
 
-        expect(acceptanceResult.isError).toBe(false);
+        expect(acceptanceResult).toBeSuccessful();
         expect(acceptanceResult.value.length).toBeGreaterThan(0);
     }, 10000000);
 
@@ -136,12 +136,12 @@ describe("OpenID4VCI and OpenID4VCP", () => {
         expect(credentialOfferUrl).toBeDefined();
 
         const allCredentialsResult = await consumptionServices.openId4Vc.getVerifiableCredentials(undefined);
-        expect(allCredentialsResult.isError).toBe(false);
+        expect(allCredentialsResult).toBeSuccessful();
         expect(allCredentialsResult.value.length).toBeGreaterThan(0);
 
         const firstCredentialId = allCredentialsResult.value[0].id;
         const singleCredentialResult = await consumptionServices.openId4Vc.getVerifiableCredentials([firstCredentialId]);
-        expect(singleCredentialResult.isError).toBe(false);
+        expect(singleCredentialResult).toBeSuccessful();
         expect(singleCredentialResult.value).toHaveLength(1);
         expect(singleCredentialResult.value[0].id).toBe(firstCredentialId);
     }, 10000000);
