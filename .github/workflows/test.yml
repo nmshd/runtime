@@ -162,6 +162,7 @@ jobs:
       - run: npm run build:schemas --workspace=@nmshd/runtime
       - run: npm run test:ci:lokijs --workspace=@nmshd/runtime openid4vc
         env:
+          CONNECTION_STRING: mongodb://127.0.0.1:27017
           NMSHD_TEST_BASEURL: http://localhost:8090
           NMSHD_TEST_BASEURL_ADMIN_API: http://localhost:8091
           NMSHD_TEST_ADMIN_API_KEY: test
