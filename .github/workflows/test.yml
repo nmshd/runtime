@@ -157,7 +157,6 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: current
-      - uses: supercharge/mongodb-github-action@v1
       - run: npm ci
       - run: npm run build:node
       - run: npm run build:schemas --workspace=@nmshd/runtime
