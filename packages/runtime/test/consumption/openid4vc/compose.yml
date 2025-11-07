@@ -9,6 +9,8 @@ services:
       authServer__baseUrl: "https://kc-openid4vc.is.enmeshed.eu/realms/enmeshed-openid4vci"
     volumes:
       - ./service-config.json:/usr/app/config.json
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       - mongodb
 
@@ -22,6 +24,8 @@ services:
       transportLibrary__addressGenerationHostnameOverride: ${NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE}
       database__connectionString: mongodb://root:example@mongodb:27017
       infrastructure__httpServer__authentication__apiKey__keys__default__key: aVeryCoolApiKeyWith30CharactersOr+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       - mongodb
 
