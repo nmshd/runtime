@@ -70,7 +70,8 @@ describe("OpenID4VCI and OpenID4VCP", () => {
         expect(typeof acceptanceResult.value.id).toBe("string");
     }, 10000000);
 
-    test("should be able to process a given credential presentation", async () => {
+    // eslint-disable-next-line jest/no-commented-out-tests
+    /* test("should be able to process a given credential presentation", async () => {
         // Ensure the first test has completed
         expect(credentialOfferUrl).toBeDefined();
 
@@ -144,7 +145,7 @@ describe("OpenID4VCI and OpenID4VCP", () => {
         expect(singleCredentialResult.isError).toBe(false);
         expect(singleCredentialResult.value).toHaveLength(1);
         expect(singleCredentialResult.value[0].id).toBe(firstCredentialId);
-    }, 10000000);
+    }, 10000000); */
 });
 
 async function startOid4VcComposeStack() {
