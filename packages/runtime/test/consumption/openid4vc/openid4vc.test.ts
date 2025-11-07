@@ -42,7 +42,7 @@ describe("OpenID4VCI and OpenID4VCP", () => {
         expect(response.status).toBe(200);
         const responseData = await response.data;
 
-        credentialOfferUrl = responseData.result.credentialOffer;
+        credentialOfferUrl = responseData.result.credentialOffer.replace("host.docker.internal", "localhost");
 
         const result = await consumptionServices.openId4Vc.fetchCredentialOffer({
             credentialOfferUrl
