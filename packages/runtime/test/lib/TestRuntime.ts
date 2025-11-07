@@ -77,8 +77,12 @@ export class TestRuntime extends Runtime {
             throw new Error("DbConnection already created");
         }
 
-        this.dbConnection = new MongoDbConnection(process.env.CONNECTION_STRING!);
-        await this.dbConnection.connect();
+        if (process.env.USE_LOKIJS === "true") {
+            this.dbConnection = LokiJsConnection.inMemory();
+        } else {
+            this.dbConnection = new MongoDbConnection(process.env.CONNECTION_STRING!);
+            await this.dbConnection.connect();
+        }
 
         return this.dbConnection;
     }
