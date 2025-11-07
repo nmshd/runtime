@@ -3,7 +3,8 @@ services:
   oid4vc-service:
     image: ghcr.io/js-soft/openid4vc-service:1.1.11@sha256:3ae8e779ca97cbd8045c090e3cf1a83714c5d0e067f2758860a8cd1fac396af5
     ports:
-      - "9000:8080"
+      - "9000:9000"
+    platform: linux/amd64
     environment:
       authServer__baseUrl: "https://kc-openid4vc.is.enmeshed.eu/realms/enmeshed-openid4vci"
     volumes:
@@ -16,10 +17,11 @@ services:
     environment:
       CUSTOM_CONFIG_LOCATION: "/config.json"
       transportLibrary__baseUrl: ${NMSHD_TEST_BASEURL}
-      transportLibrary__clientId: ${NMSHD_TEST_CLIENTID}
-      transportLibrary__clientSecret: ${NMSHD_TEST_CLIENTSECRET}
-    volumes:
-      - ./connector-config.json:/config.json:ro
+      transportLibrary__platformClientId: ${NMSHD_TEST_CLIENTID}
+      transportLibrary__platformClientSecret: ${NMSHD_TEST_CLIENTSECRET}
+      transportLibrary__addressGenerationHostnameOverride: ${NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE}
+      database__connectionString: mongodb://root:example@mongodb:27017
+      infrastructure__httpServer__authentication__apiKey__keys__default__key: aVeryCoolApiKeyWith30CharactersOr+
     depends_on:
       - mongodb
 

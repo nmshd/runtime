@@ -15,7 +15,7 @@ beforeAll(async () => {
 
     oid4vcServiceComposeStack = await startOid4VcComposeStack();
 
-    const oid4vcServicePort = oid4vcServiceComposeStack.getContainer("oid4vc-service-1").getMappedPort(8080);
+    const oid4vcServicePort = oid4vcServiceComposeStack.getContainer("oid4vc-service-1").getMappedPort(9000);
     oid4vcServiceBaseUrl = `http://localhost:${oid4vcServicePort}`;
 
     axiosInstance = axios.create({
@@ -149,7 +149,23 @@ describe("OpenID4VCI and OpenID4VCP", () => {
 });
 
 async function startOid4VcComposeStack() {
-    const composeStack = await new DockerComposeEnvironment(__dirname, "compose.yml").up();
+    let baseUrl = process.env.NMSHD_TEST_BASEURL ?? "http://localhost:8080";
+    let addressGenerationHostnameOverride: string | undefined;
+
+    if (baseUrl.includes("localhost")) {
+        addressGenerationHostnameOverride = "localhost";
+        baseUrl = baseUrl.replace("localhost", "host.docker.internal");
+    }
+
+    const composeStack = await new DockerComposeEnvironment(__dirname, "compose.yml")
+        .withEnvironment({
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            NMSHD_TEST_BASEURL: baseUrl,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE: addressGenerationHostnameOverride
+        } as Record<string, string>)
+        .withStartupTimeout(60000)
+        .up();
 
     return composeStack;
 }

@@ -1,6 +1,6 @@
 {
-    "port": 8080,
-    "baseUrl": "http://host.docker.internal:9000",
+    "port": 9000,
+    "baseUrl": "http://localhost:9000",
     "mongodb": {
         "host": "mongodb",
         "port": 27017,
