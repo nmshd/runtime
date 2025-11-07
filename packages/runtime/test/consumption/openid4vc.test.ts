@@ -4,17 +4,16 @@ import { RuntimeServiceProvider } from "../lib";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
 let consumptionServices: ConsumptionServices;
-let oid4vcServiceBaseUrl: string;
 let axiosInstance: AxiosInstance;
 
 beforeAll(async () => {
     const runtimeServices = await runtimeServiceProvider.launch(1);
     consumptionServices = runtimeServices[0].consumption;
 
-    oid4vcServiceBaseUrl = process.env.OPENID4VC_SERVICE_BASEURL!;
-    if (!oid4vcServiceBaseUrl) {
-        throw new Error("OPENID4VC_SERVICE_BASEURL environment variable is not set");
-    }
+    const oid4vcServiceBaseUrl = "https://openid4vc-service.is.enmeshed.eu"; // ?? process.env.OPENID4VC_SERVICE_BASEURL!;
+    // if (!oid4vcServiceBaseUrl) {
+    //     throw new Error("OPENID4VC_SERVICE_BASEURL environment variable is not set");
+    // }
 
     axiosInstance = axios.create({
         baseURL: oid4vcServiceBaseUrl,
