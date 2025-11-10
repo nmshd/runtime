@@ -98,6 +98,7 @@ export class EnmshedHolderKeyManagmentService implements KeyManagementService {
         }
         return false;
     }
+
     public getPublicKey(agentContext: AgentContext, keyId: string): Promise<KmsJwkPublic> {
         const keyPair = this.keystore.get(keyId);
         if (!keyPair) {
@@ -107,6 +108,7 @@ export class EnmshedHolderKeyManagmentService implements KeyManagementService {
 
         return Promise.resolve((JSON.parse(keyPair) as JwkKeyPair).publicKey as KmsJwkPublic);
     }
+
     public async createKey<Type extends KmsCreateKeyType>(agentContext: AgentContext, options: KmsCreateKeyOptions<Type>): Promise<KmsCreateKeyReturn<Type>> {
         options.keyId ??= "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
             // Use libsodium's randombytes_uniform for secure random number generation
@@ -187,10 +189,12 @@ export class EnmshedHolderKeyManagmentService implements KeyManagementService {
             publicJwk: publicJwk as KmsJwkPublic
         } as KmsCreateKeyReturn<Type>);
     }
+
     public importKey<Jwk extends KmsJwkPrivate>(agentContext: AgentContext, options: KmsImportKeyOptions<Jwk>): Promise<KmsImportKeyReturn<Jwk>> {
         agentContext.config.logger.debug(`EKM: Importing key with  ${JSON.stringify(options)}`);
         throw new Error("Method not implemented.");
     }
+
     public deleteKey(agentContext: AgentContext, options: KmsDeleteKeyOptions): Promise<boolean> {
         if (this.keystore.has(options.keyId)) {
             agentContext.config.logger.debug(`EKM: Deleting key with id ${options.keyId}`);
@@ -200,6 +204,7 @@ export class EnmshedHolderKeyManagmentService implements KeyManagementService {
         }
         throw new Error(`key with id ${options.keyId} not found. and cannot be deleted`);
     }
+
     public async sign(agentContext: AgentContext, options: KmsSignOptions): Promise<KmsSignReturn> {
         agentContext.config.logger.debug(`EKM: Signing data with key id ${options.keyId} using algorithm ${options.algorithm}`);
 
@@ -436,6 +441,7 @@ export class EnmshedHolderKeyManagmentService implements KeyManagementService {
         agentContext.config.logger.debug(`EKM: Decrypting data with key id ${options.key.keyId} using options ${options}`);
         throw new Error("Method not implemented.");
     }
+
     public randomBytes(agentContext: AgentContext, options: KmsRandomBytesOptions): KmsRandomBytesReturn {
         agentContext.config.logger.debug(`EKM: Generating ${options.length} random bytes`);
         return _sodium.randombytes_buf(options.length); // Uint8Array
