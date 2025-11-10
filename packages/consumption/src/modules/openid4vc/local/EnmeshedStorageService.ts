@@ -144,7 +144,7 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
 
     public async getAll(agentContext: AgentContext, recordClass: BaseRecordConstructor<T>): Promise<T[]> {
         const records: T[] = [];
-        const attributes = await this.attributeController.getLocalAttributes({ "content.value.@type": "VerifiableCredential", shareInfo: { $exists: false } });
+        const attributes = await this.attributeController.getLocalAttributes({ "@type": "OwnIdentityAttribute", "content.value.@type": "VerifiableCredential" });
         for (const attribute of attributes) {
             // TODO: Correct casting
             const type = (attribute as any).content.value.type;
@@ -186,7 +186,7 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
     // should only be used for exporting data out of the credo environment
     public async getAllAsAttributes(agentContext: AgentContext, recordClass: BaseRecordConstructor<T>): Promise<any[]> {
         agentContext.config.logger.debug(`Getting all records of type ${recordClass.name}`);
-        const attributes = await this.attributeController.getLocalAttributes({ "content.value.@type": "VerifiableCredential", shareInfo: { $exists: false } });
+        const attributes = await this.attributeController.getLocalAttributes({ "@type": "OwnIdentityAttribute", "content.value.@type": "VerifiableCredential" });
         return attributes;
     }
 
