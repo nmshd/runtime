@@ -1,9 +1,22 @@
 diff --git a/node_modules/@openid4vc/utils/dist/index.js b/node_modules/@openid4vc/utils/dist/index.js
-index 2b6653e..236ec93 100644
+index 2b6653e..4a3ce24 100644
 --- a/node_modules/@openid4vc/utils/dist/index.js
 +++ b/node_modules/@openid4vc/utils/dist/index.js
-@@ -343,6 +343,9 @@ Cause: ${cause?.message}`);
- var defaultFetcher = fetch;
+@@ -340,9 +340,21 @@ Cause: ${cause?.message}`);
+ };
+ 
+ // src/fetcher.ts
+-var defaultFetcher = fetch;
++var defaultFetcher = async (
++        input,
++        init,
++    ) => {
++      const response = await fetch(input, init);
++      console.log("#############################", response.status);
++      console.log("#############################", JSON.stringify(response, null, 2));
++      return response;
++    };
++
  function createFetcher(fetcher = defaultFetcher) {
    return (input, init, ...args) => {
 +    console.log("############### input #################", input);
