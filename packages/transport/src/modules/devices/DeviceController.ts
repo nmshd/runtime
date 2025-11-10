@@ -46,6 +46,7 @@ export class DeviceController extends TransportController {
         if (!this._device) throw new TransportError("The Device controller is not initialized.");
         return this._device;
     }
+
     public get deviceOrUndefined(): Device | undefined {
         return this._device;
     }

@@ -233,6 +233,7 @@ ${new Error().stack}`);
     public async count(query?: any): Promise<number> {
         return await this.parent.count(query);
     }
+
     public async exists(query?: any): Promise<boolean> {
         return await this.parent.exists(query);
     }

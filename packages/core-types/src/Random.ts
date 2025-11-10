@@ -45,12 +45,14 @@ export class Random implements IRandom {
     public static async bytes(length: number): Promise<ICoreBuffer> {
         return await CryptoRandom.bytes(length);
     }
+
     public static async int(length: number): Promise<number> {
         if (length > 21 || length <= 0) {
             throw new Error("Length must be between 1 and 21.");
         }
         return parseInt(await this.string(length, RandomCharacterRange.Digit));
     }
+
     public static async array(length: number): Promise<any> {
         return (await CryptoRandom.bytes(length)).toArray();
     }

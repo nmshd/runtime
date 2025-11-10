@@ -90,6 +90,7 @@ export class AccountController {
         }
         return this._activeDevice;
     }
+
     public get activeDeviceOrUndefined(): DeviceController | undefined {
         return this._activeDevice;
     }
