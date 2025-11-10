@@ -1,5 +1,5 @@
 diff --git a/node_modules/@openid4vc/utils/dist/index.js b/node_modules/@openid4vc/utils/dist/index.js
-index 2b6653e..254548c 100644
+index 2b6653e..206f3f1 100644
 --- a/node_modules/@openid4vc/utils/dist/index.js
 +++ b/node_modules/@openid4vc/utils/dist/index.js
 @@ -341,9 +341,13 @@ Cause: ${cause?.message}`);
@@ -14,7 +14,7 @@ index 2b6653e..254548c 100644
 +    console.log("############### input #################", input);
 +    console.log("############### init #################", init);
 +    console.log("############### args #################", args);
-+    const response = await fetcher(
++    const response = await defaultFetcher(
        input,
        init ? {
          ...init,
