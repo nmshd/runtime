@@ -136,7 +136,7 @@ describe("OpenID4VCI and OpenID4VCP", () => {
         expect(acceptanceResult.value.length).toBeGreaterThan(0);
     }, 10000000);
 
-    test("getting the eralier created verifiable credential by id should return exactly one credential", async () => {
+    test("getting the earlier created verifiable credential by id should return exactly one credential", async () => {
         // Ensure the first test has completed
         expect(credentialOfferUrl).toBeDefined();
 
