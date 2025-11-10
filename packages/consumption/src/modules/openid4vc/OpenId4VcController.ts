@@ -77,8 +77,7 @@ export class OpenId4VcController extends ConsumptionBaseController {
     public async getVerifiableCredentials(ids: string[] | undefined): Promise<any[]> {
         const holder = new Holder(this.parent.accountController, this.parent.attributes);
         await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
-        // eslint-disable-next-line no-console
-        console.log("Fetching credentials with ids:", JSON.stringify(ids));
+
         const credentials = await holder.getVerifiableCredentials(ids);
         const result = [];
         for (const credential of credentials) {
