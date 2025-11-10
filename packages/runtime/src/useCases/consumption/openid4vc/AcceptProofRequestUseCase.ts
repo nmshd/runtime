@@ -24,6 +24,6 @@ export class AcceptProofRequestUseCase extends UseCase<AcceptProofRequestRequest
 
     protected override async executeInternal(request: AcceptProofRequestRequest): Promise<Result<AcceptProofRequestDTO>> {
         const result = await this.openId4VcContoller.acceptProofRequest(request.jsonEncodedRequest);
-        return Result.ok({ status: result.status, message: result.success } as AcceptProofRequestDTO);
+        return Result.ok({ status: result.status, message: JSON.stringify(result.message) } as AcceptProofRequestDTO);
     }
 }

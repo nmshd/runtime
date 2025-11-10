@@ -15,6 +15,7 @@ import {
 import {
     OpenId4VcModule,
     OpenId4VciAuthorizationFlow,
+    OpenId4VciDpopRequestOptions,
     authorizationCodeGrantIdentifier,
     preAuthorizedCodeGrantIdentifier,
     type OpenId4VciMetadata,
@@ -66,7 +67,29 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         return await this.agent.openid4vc.holder.resolveIssuerMetadata(credentialIssuer);
     }
 
-    public async initiateAuthorization(resolvedCredentialOffer: OpenId4VciResolvedCredentialOffer, credentialsToRequest: string[]): Promise<any> {
+    public async initiateAuthorization(
+        resolvedCredentialOffer: OpenId4VciResolvedCredentialOffer,
+        credentialsToRequest: string[]
+    ): Promise<
+        | {
+              readonly authorizationFlow: "PreAuthorized";
+              readonly preAuthorizedCode: string;
+          }
+        | {
+              readonly authorizationFlow: "PresentationDuringIssuance";
+              readonly openid4vpRequestUrl: string;
+              readonly authSession: string;
+              readonly dpop?: OpenId4VciDpopRequestOptions;
+              readonly preAuthorizedCode?: undefined;
+          }
+        | {
+              readonly authorizationFlow: "Oauth2Redirect";
+              readonly authorizationRequestUrl: string;
+              readonly codeVerifier?: string;
+              readonly dpop?: OpenId4VciDpopRequestOptions;
+              readonly preAuthorizedCode?: undefined;
+          }
+    > {
         const grants = resolvedCredentialOffer.credentialOfferPayload.grants;
         if (grants?.[preAuthorizedCodeGrantIdentifier]) {
             return {
@@ -232,13 +255,23 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         return storedCredentials;
     }
 
-    public async resolveProofRequest(proofRequest: string): Promise<any> {
+    public async resolveProofRequest(proofRequest: string): Promise<OpenId4VpResolvedAuthorizationRequest> {
         const resolvedProofRequest = await this.agent.openid4vc.holder.resolveOpenId4VpAuthorizationRequest(proofRequest);
 
         return resolvedProofRequest;
     }
 
-    public async acceptPresentationRequest(resolvedPresentationRequest: OpenId4VpResolvedAuthorizationRequest): Promise<any> {
+    public async acceptPresentationRequest(resolvedPresentationRequest: OpenId4VpResolvedAuthorizationRequest): Promise<
+        | {
+              readonly status: number;
+              readonly body: string | Record<string, unknown> | null;
+          }
+        | {
+              readonly status: number;
+              readonly body: Record<string, unknown>;
+          }
+        | undefined
+    > {
         if (!resolvedPresentationRequest.presentationExchange && !resolvedPresentationRequest.dcql) {
             throw new Error("Missing presentation exchange or dcql on resolved authorization request");
         }
@@ -293,12 +326,11 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         return submissionResult.serverResponse;
     }
 
-    public async exit(): Promise<any> {
+    public async exit(): Promise<void> {
         await this.shutdown();
-        process.exit(0);
     }
 
-    public async restart(): Promise<any> {
+    public async restart(): Promise<void> {
         await this.shutdown();
     }
 }
