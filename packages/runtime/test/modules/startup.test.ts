@@ -61,6 +61,7 @@ class CustomModuleAllowingMultipleInstances extends RuntimeModule {
     public override init(): void {
         // noop
     }
+
     public override start(): void {
         // noop
     }
