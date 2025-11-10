@@ -13,6 +13,7 @@ export abstract class ExternalEventProcessor {
         protected readonly eventBus: EventBus,
         protected readonly accountController: AccountController
     ) {}
+
     public abstract execute(externalEvent: ExternalEvent): Promise<Message | Relationship | IdentityDeletionProcess | File | undefined>;
     protected get ownAddress(): string {
         return this.accountController.identity.address.toString();

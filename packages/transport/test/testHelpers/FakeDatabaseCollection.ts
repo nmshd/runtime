@@ -75,6 +75,7 @@ export class FakeDatabaseCollection implements IDatabaseCollection {
     public count(_query: object): Promise<number> {
         throw new Error("Method not implemented.");
     }
+
     public exists(_query: object): Promise<boolean> {
         throw new Error("Method not implemented.");
     }
