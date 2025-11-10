@@ -23,7 +23,7 @@ import { AttributesController } from "../../attributes/AttributesController";
 
 @injectable()
 export class EnmeshedStorageService<T extends BaseRecord> implements StorageService<T> {
-    public storrage: Map<string, T> = new Map<string, T>();
+    public storage: Map<string, T> = new Map<string, T>();
 
     public constructor(
         public accountController: AccountController,
@@ -32,12 +32,12 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
 
     public async save(agentContext: AgentContext, record: T): Promise<void> {
         if (record.id === "STORAGE_VERSION_RECORD_ID") {
-            this.storrage.set(record.id, record);
+            this.storage.set(record.id, record);
             return;
         }
 
         if (record.type === "DidRecord") {
-            this.storrage.set(record.id, record);
+            this.storage.set(record.id, record);
             return;
         }
 
@@ -126,8 +126,8 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
     }
 
     public async getById(agentContext: AgentContext, recordClass: BaseRecordConstructor<T>, id: string): Promise<T> {
-        if (this.storrage.has(id)) {
-            const record = this.storrage.get(id);
+        if (this.storage.has(id)) {
+            const record = this.storage.get(id);
             if (!record) throw new Error(`Record with id ${id} not found`);
             return record;
         }
@@ -206,8 +206,8 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
             }
         }
         if (records.length === 0) {
-            // try to recover over local storrage - temporary fix
-            for (const record of this.storrage.values()) {
+            // try to recover over local storage - temporary fix
+            for (const record of this.storage.values()) {
                 let match = true;
                 // there may be keys labeled with an $or - solve them accordingly
                 // TODO: $or and other operators not yet supported

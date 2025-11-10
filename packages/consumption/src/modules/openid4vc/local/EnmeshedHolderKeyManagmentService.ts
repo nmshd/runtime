@@ -64,9 +64,9 @@ export class EnmshedHolderKeyManagmentService implements KeyManagementService {
         this.updateGlobalInstance(this.keystore);
     }
 
-    public updateGlobalInstance(storrage: Map<string, string>): void {
-        // console.log(`FKM: updating global instance ${JSON.stringify(Array.from(storrage.entries()))}`);
-        (globalThis as any).fakeKeyStorage = storrage;
+    public updateGlobalInstance(storage: Map<string, string>): void {
+        // console.log(`FKM: updating global instance ${JSON.stringify(Array.from(storage.entries()))}`);
+        (globalThis as any).fakeKeyStorage = storage;
         // console.log(`FKM: global instance state ${JSON.stringify(Array.from((globalThis as any).fakeKeyStorage.entries()))}`);
     }
 
