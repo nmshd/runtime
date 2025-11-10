@@ -46,8 +46,6 @@ export class OpenId4VcFacade {
     }
 
     public async getVerifiableCredentials(ids: string[] | undefined): Promise<Result<VerifiableCredentialDTO[], ApplicationError>> {
-        // eslint-disable-next-line no-console
-        console.log("OpenId4VcFacade: getVerifiableCredentials called with ids:", JSON.stringify(ids));
         return await this.getVerifiableCredentialsUseCase.execute({ ids });
     }
 }
