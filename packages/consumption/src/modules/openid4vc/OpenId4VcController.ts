@@ -9,7 +9,7 @@ export class OpenId4VcController extends ConsumptionBaseController {
         super(ConsumptionControllerName.OpenId4VcController, parent);
     }
 
-    public async fetchCredentialOffer(credentialOfferUrl: string): Promise<any> {
+    public async fetchCredentialOffer(credentialOfferUrl: string): Promise<{ data: string }> {
         const holder = new Holder(this.parent.accountController, this.parent.attributes);
         await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
         const res = await holder.resolveCredentialOffer(credentialOfferUrl);
@@ -58,7 +58,7 @@ export class OpenId4VcController extends ConsumptionBaseController {
         };
     }
 
-    public async fetchProofRequest(proofRequestUrl: string): Promise<any> {
+    public async fetchProofRequest(proofRequestUrl: string): Promise<{ data: string }> {
         const holder = new Holder(this.parent.accountController, this.parent.attributes);
         await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
         const res = await holder.resolveProofRequest(proofRequestUrl);
@@ -67,17 +67,16 @@ export class OpenId4VcController extends ConsumptionBaseController {
         };
     }
 
-    public async acceptProofRequest(jsonEncodedRequest: string): Promise<any> {
+    public async acceptProofRequest(jsonEncodedRequest: string): Promise<{ status: number; message: string | Record<string, unknown> | null }> {
         const holder = new Holder(this.parent.accountController, this.parent.attributes);
         await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
         const fetchedRequest = JSON.parse(jsonEncodedRequest);
         // parse the credential type to be sdjwt
 
         const serverResponse = await holder.acceptPresentationRequest(fetchedRequest);
-        return {
-            status: serverResponse.status,
-            message: serverResponse.body
-        };
+        if (!serverResponse) throw new Error("No response from server");
+
+        return { status: serverResponse.status, message: serverResponse.body };
     }
 
     public async getVerifiableCredentials(ids: string[] | undefined): Promise<any[]> {
