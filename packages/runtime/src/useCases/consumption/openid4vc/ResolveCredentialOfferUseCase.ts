@@ -24,6 +24,6 @@ export class ResolveCredentialOfferUseCase extends UseCase<ResolveCredentialOffe
 
     protected override async executeInternal(request: ResolveCredentialOfferRequest): Promise<Result<VerifiableCredentialDTO>> {
         const result = await this.openId4VcContoller.processCredentialOffer(request.credentialOfferUrl);
-        return Result.ok({ id: result.value.id, data: result.value.data } as VerifiableCredentialDTO);
+        return Result.ok(result);
     }
 }
