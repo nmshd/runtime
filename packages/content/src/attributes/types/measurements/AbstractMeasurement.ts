@@ -48,6 +48,7 @@ export abstract class AbstractMeasurement extends AbstractComplexValue implement
             }
         });
     }
+
     public override toString(): string {
         return `${this.value} ${this.unit}`;
     }
