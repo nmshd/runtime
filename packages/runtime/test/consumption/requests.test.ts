@@ -1,5 +1,4 @@
 import { EventBus, sleep } from "@js-soft/ts-utils";
-import { TestRequestItemJSON } from "@nmshd/consumption/test/modules/requests/testHelpers/TestRequestItem";
 import { RelationshipCreationContentJSON, RelationshipTemplateContentJSON } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
 import { DateTime } from "luxon";
@@ -19,6 +18,7 @@ import {
     RuntimeServiceProvider,
     sendMessageWithRequest,
     syncUntilHasRelationships,
+    TestRequestItemJSON,
     TestRuntimeServices
 } from "../lib";
 import {
