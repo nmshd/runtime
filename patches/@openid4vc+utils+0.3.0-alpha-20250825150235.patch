@@ -14,7 +14,7 @@ index 2b6653e..ee597aa 100644
 +    console.log("############### input #################", input);
 +    console.log("############### init #################", init);
 +    console.log("############### args #################", args);
-+    const response = await defaultFetcher(
++    const response = await fetcher(
        input,
        init ? {
          ...init,
