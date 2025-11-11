@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from "axios";
+import { Agent, setGlobalDispatcher } from "undici";
 import { ConsumptionServices } from "../../src";
 import { RuntimeServiceProvider } from "../lib";
 
@@ -28,6 +29,8 @@ beforeAll(async () => {
         await new Promise((resolve) => setTimeout(resolve, 1000));
         healthCheckResult = await axiosInstance.get("/health");
     }
+
+    setGlobalDispatcher(new Agent({ connections: 100 }));
 }, 120000);
 
 afterAll(async () => {
