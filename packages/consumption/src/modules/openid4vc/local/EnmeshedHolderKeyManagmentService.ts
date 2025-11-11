@@ -236,7 +236,7 @@ export class EnmshedHolderKeyManagmentService implements Kms.KeyManagementServic
         const signature = sodium.crypto_sign_detached(options.data, fullPrivateKeyBytes);
 
         return {
-            signature: signature
+            signature: signature as Uint8Array<ArrayBuffer> // I hope this cast doesn't paper over something
         };
     }
 
