@@ -1,19 +1,23 @@
 import axios, { AxiosInstance } from "axios";
+import path from "path";
+import { DockerComposeEnvironment, StartedDockerComposeEnvironment } from "testcontainers";
 import { ConsumptionServices } from "../../src";
 import { RuntimeServiceProvider } from "../lib";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
 let consumptionServices: ConsumptionServices;
-let oid4vcServiceBaseUrl: string;
 let axiosInstance: AxiosInstance;
+let dockerComposeStack: StartedDockerComposeEnvironment | undefined;
 
 beforeAll(async () => {
     const runtimeServices = await runtimeServiceProvider.launch(1);
     consumptionServices = runtimeServices[0].consumption;
 
-    oid4vcServiceBaseUrl = process.env.OPENID4VC_SERVICE_BASEURL!;
+    let oid4vcServiceBaseUrl = process.env.OPENID4VC_SERVICE_BASEURL!;
     if (!oid4vcServiceBaseUrl) {
-        throw new Error("OPENID4VC_SERVICE_BASEURL environment variable is not set");
+        dockerComposeStack = await startOid4VcComposeStack();
+        const mappedPort = dockerComposeStack.getContainer("oid4vc-service-1").getMappedPort(9000);
+        oid4vcServiceBaseUrl = `http://localhost:${mappedPort}`;
     }
 
     axiosInstance = axios.create({
@@ -26,6 +30,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
     await runtimeServiceProvider.stop();
+    if (dockerComposeStack) await dockerComposeStack.down();
 });
 
 describe("OpenID4VCI and OpenID4VCP", () => {
@@ -144,3 +149,27 @@ describe("OpenID4VCI and OpenID4VCP", () => {
         expect(singleCredentialResult.value[0].id).toBe(firstCredentialId);
     }, 10000000);
 });
+
+async function startOid4VcComposeStack() {
+    let baseUrl = process.env.NMSHD_TEST_BASEURL ?? "http://localhost:8080";
+    let addressGenerationHostnameOverride: string | undefined;
+
+    if (baseUrl.includes("localhost")) {
+        addressGenerationHostnameOverride = "localhost";
+        baseUrl = baseUrl.replace("localhost", "host.docker.internal");
+    }
+
+    const composeFolder = path.resolve(path.join(__dirname, "..", "..", "..", "..", ".dev"));
+    const composeStack = await new DockerComposeEnvironment(composeFolder, "compose.openid4vc.yml")
+        .withProjectName("runtime-oid4vc-tests")
+        .withEnvironment({
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            NMSHD_TEST_BASEURL: baseUrl,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE: addressGenerationHostnameOverride
+        } as Record<string, string>)
+        .withStartupTimeout(60000)
+        .up();
+
+    return composeStack;
+}
