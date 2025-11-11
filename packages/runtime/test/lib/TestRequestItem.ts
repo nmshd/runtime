@@ -1,5 +1,7 @@
 import { type } from "@js-soft/ts-serval";
-import { IRequestItem, RequestItem } from "@nmshd/content";
+import { IRequestItem, RequestItem, RequestItemJSON } from "@nmshd/content";
+
+export interface TestRequestItemJSON extends RequestItemJSON {}
 
 export interface ITestRequestItem extends IRequestItem {}
 
