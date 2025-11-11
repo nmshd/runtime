@@ -22,7 +22,7 @@ services:
       POSTGRES_DB: postgres
 
   runtime-ferret:
-    image: ghcr.io/ferretdb/ferretdb:2@sha256:7449f6ce1e75b187c328c9ce65ec4e8963767b34b4d604f9b9b6605c6d8d3ee7
+    image: ghcr.io/ferretdb/ferretdb:2@sha256:5706414241eb84f0515512c37b46db0f1b1eac9e5ceb7e4c2523211c184b1985
     container_name: runtime-ferretdb
     ports:
       - "27022:27017"
