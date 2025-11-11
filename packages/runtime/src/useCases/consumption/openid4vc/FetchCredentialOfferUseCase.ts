@@ -10,7 +10,7 @@ export interface FetchCredentialOfferRequest {
 
 class Validator extends SchemaValidator<FetchCredentialOfferRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
-        super(schemaRepository.getSchema("ResolveCredentialOfferRequest"));
+        super(schemaRepository.getSchema("FetchCredentialOfferRequest"));
     }
 }
 

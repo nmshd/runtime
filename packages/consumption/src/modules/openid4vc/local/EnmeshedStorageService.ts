@@ -23,7 +23,7 @@ import { AttributesController } from "../../attributes/AttributesController";
 
 @injectable()
 export class EnmeshedStorageService<T extends BaseRecord> implements StorageService<T> {
-    public storrage: Map<string, T> = new Map<string, T>();
+    public storage: Map<string, T> = new Map<string, T>();
 
     public constructor(
         public accountController: AccountController,
@@ -32,12 +32,12 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
 
     public async save(agentContext: AgentContext, record: T): Promise<void> {
         if (record.id === "STORAGE_VERSION_RECORD_ID") {
-            this.storrage.set(record.id, record);
+            this.storage.set(record.id, record);
             return;
         }
 
         if (record.type === "DidRecord") {
-            this.storrage.set(record.id, record);
+            this.storage.set(record.id, record);
             return;
         }
 
@@ -126,8 +126,8 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
     }
 
     public async getById(agentContext: AgentContext, recordClass: BaseRecordConstructor<T>, id: string): Promise<T> {
-        if (this.storrage.has(id)) {
-            const record = this.storrage.get(id);
+        if (this.storage.has(id)) {
+            const record = this.storage.get(id);
             if (!record) throw new Error(`Record with id ${id} not found`);
             return record;
         }
@@ -144,7 +144,7 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
 
     public async getAll(agentContext: AgentContext, recordClass: BaseRecordConstructor<T>): Promise<T[]> {
         const records: T[] = [];
-        const attributes = await this.attributeController.getLocalAttributes({ "content.value.@type": "VerifiableCredential", shareInfo: { $exists: false } });
+        const attributes = await this.attributeController.getLocalAttributes({ "@type": "OwnIdentityAttribute", "content.value.@type": "VerifiableCredential" });
         for (const attribute of attributes) {
             // TODO: Correct casting
             const type = (attribute as any).content.value.type;
@@ -186,7 +186,7 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
     // should only be used for exporting data out of the credo environment
     public async getAllAsAttributes(agentContext: AgentContext, recordClass: BaseRecordConstructor<T>): Promise<any[]> {
         agentContext.config.logger.debug(`Getting all records of type ${recordClass.name}`);
-        const attributes = await this.attributeController.getLocalAttributes({ "content.value.@type": "VerifiableCredential", shareInfo: { $exists: false } });
+        const attributes = await this.attributeController.getLocalAttributes({ "@type": "OwnIdentityAttribute", "content.value.@type": "VerifiableCredential" });
         return attributes;
     }
 
@@ -200,7 +200,7 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
         }
         if (records.length === 0) {
             // try to recover over local storrage - temporary fix
-            for (const record of this.storrage.values()) {
+            for (const record of this.storage.values()) {
                 if (this.matchesQuery(record, query)) {
                     records.push(record);
                 }
