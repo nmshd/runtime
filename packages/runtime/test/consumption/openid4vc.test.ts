@@ -22,16 +22,9 @@ beforeAll(async () => {
             "Content-Type": "application/json" // eslint-disable-line @typescript-eslint/naming-convention
         }
     });
-    let healthCheckResult = await axiosInstance.get("/health");
-    while (healthCheckResult.status !== 200) {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        healthCheckResult = await axiosInstance.get("/health");
-    }
 }, 120000);
 
 afterAll(async () => {
-    const healthCheckResult = await axiosInstance.get("/health");
-    console.log(healthCheckResult); // eslint-disable-line no-console
     await runtimeServiceProvider.stop();
 });
 
