@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from "axios";
 import path from "path";
-import { DockerComposeEnvironment, StartedDockerComposeEnvironment } from "testcontainers";
+import { DockerComposeEnvironment, StartedDockerComposeEnvironment, Wait } from "testcontainers";
 import { ConsumptionServices } from "../../src";
 import { RuntimeServiceProvider } from "../lib";
 
@@ -169,6 +169,7 @@ async function startOid4VcComposeStack() {
             NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE: addressGenerationHostnameOverride
         } as Record<string, string>)
         .withStartupTimeout(60000)
+        .withWaitStrategy("oid4vc-service", Wait.forHealthCheck())
         .up();
 
     return composeStack;
