@@ -151,7 +151,7 @@ describe("OpenID4VCI and OpenID4VCP", () => {
 });
 
 async function startOid4VcComposeStack() {
-    let baseUrl = process.env.NMSHD_TEST_BASEURL ?? "http://localhost:8080";
+    let baseUrl = process.env.NMSHD_TEST_BASEURL!;
     let addressGenerationHostnameOverride: string | undefined;
 
     if (baseUrl.includes("localhost")) {
