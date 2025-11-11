@@ -31,7 +31,6 @@
         "@js-soft/eslint-config-ts": "^2.0.4",
         "@js-soft/license-check": "^1.0.10",
         "@types/jest": "^30.0.0",
-        "@types/libsodium-wrappers": "^0.7.14",
         "@types/node": "^24.10.0",
         "enhanced-publish": "^1.1.6",
         "eslint": "^9.39.1",
