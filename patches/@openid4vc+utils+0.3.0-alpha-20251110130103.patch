@@ -1,7 +1,7 @@
-diff --git a/node_modules/@openid4vc/oauth2/package.json b/node_modules/@openid4vc/oauth2/package.json
-index ac34772..79816b0 100644
---- a/node_modules/@openid4vc/oauth2/package.json
-+++ b/node_modules/@openid4vc/oauth2/package.json
+diff --git a/node_modules/@openid4vc/utils/package.json b/node_modules/@openid4vc/utils/package.json
+index dcd161b..99a9e20 100644
+--- a/node_modules/@openid4vc/utils/package.json
++++ b/node_modules/@openid4vc/utils/package.json
 @@ -8,7 +8,7 @@
    "exports": {
      ".": {
@@ -11,7 +11,7 @@ index ac34772..79816b0 100644
        "types": "./dist/index.d.ts"
      },
      "./package.json": "./package.json"
-@@ -29,7 +29,7 @@
+@@ -26,7 +26,7 @@
    "scripts": {
      "build": "tsdown src/index.ts --format cjs,esm --dts --sourcemap"
    },
