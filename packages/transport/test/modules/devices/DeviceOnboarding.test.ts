@@ -167,8 +167,6 @@ describe("Device Onboarding", function () {
     });
 
     test("should have changed the password of the created device (Backbone)", async function () {
-        TestUtil.useFatalLoggerFactory();
-
         await expect(async () => {
             await deviceTest.onboardDevice(sharedSecret);
         }).rejects.toThrow("error.transport.request.noAuthGrant");

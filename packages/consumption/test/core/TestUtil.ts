@@ -2,9 +2,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { LokiJsConnection } from "@js-soft/docdb-access-loki";
 import { MongoDbConnection } from "@js-soft/docdb-access-mongo";
-import { ILoggerFactory } from "@js-soft/logging-abstractions";
 import { NodeLoggerFactory } from "@js-soft/node-logger";
-import { SimpleLoggerFactory } from "@js-soft/simple-logger";
 import { ISerializable, Serializable } from "@js-soft/ts-serval";
 import { EventBus, EventEmitter2EventBus, sleep } from "@js-soft/ts-utils";
 import {
@@ -29,10 +27,8 @@ import {
     RelationshipTemplate,
     TokenContentRelationshipTemplate,
     TokenReference,
-    Transport,
-    TransportLoggerFactory
+    Transport
 } from "@nmshd/transport";
-import { LogLevel } from "typescript-logging";
 
 export const loggerFactory = new NodeLoggerFactory({
     appenders: {
@@ -56,18 +52,6 @@ export const loggerFactory = new NodeLoggerFactory({
 });
 
 export class TestUtil {
-    private static readonly fatalLogger = new SimpleLoggerFactory(LogLevel.Fatal);
-    private static oldLogger: ILoggerFactory;
-
-    public static useFatalLoggerFactory(): void {
-        this.oldLogger = (TransportLoggerFactory as any).instance;
-        TransportLoggerFactory.init(this.fatalLogger);
-    }
-
-    public static useTestLoggerFactory(): void {
-        TransportLoggerFactory.init(this.oldLogger);
-    }
-
     public static expectThrows(method: Function, customExceptionMatcher?: (e: Error) => void): void;
     public static expectThrows(method: Function, errorMessagePatternOrRegexp: RegExp): void;
     /**
