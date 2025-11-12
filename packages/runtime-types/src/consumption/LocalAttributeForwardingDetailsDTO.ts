@@ -1,4 +1,4 @@
-import { LocalAttributeDeletionInfoDTO } from "./LocalAttributeDeletionInfoDTO";
+import { LocalAttributeDeletionInfoDTO } from "./LocalAttributeDeletionInfoDTO.js";
 
 export interface LocalAttributeForwardingDetailsDTO {
     peer: string;

@@ -1,4 +1,4 @@
-import { IdentityDTO } from "./IdentityDTO";
+import { IdentityDTO } from "./IdentityDTO.js";
 
 export interface DeviceOnboardingInfoDTO {
     id: string;

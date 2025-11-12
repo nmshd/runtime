@@ -1,5 +1,5 @@
 import { ArbitraryMessageContentJSON, MailJSON, NotificationJSON, RequestJSON, ResponseWrapperJSON } from "@nmshd/content";
-import { RecipientDTO } from "./RecipientDTO";
+import { RecipientDTO } from "./RecipientDTO.js";
 
 export type MessageContentDerivation = MailJSON | ResponseWrapperJSON | RequestJSON | NotificationJSON | ArbitraryMessageContentJSON;
 

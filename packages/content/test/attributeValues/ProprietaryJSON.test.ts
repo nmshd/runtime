@@ -1,4 +1,4 @@
-import { ProprietaryJSON } from "../../src";
+import { ProprietaryJSON } from "@nmshd/content";
 
 describe("ProprietaryJSON", function () {
     test.each([

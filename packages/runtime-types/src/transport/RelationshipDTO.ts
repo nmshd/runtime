@@ -1,5 +1,5 @@
 import { ArbitraryRelationshipCreationContentJSON, RelationshipCreationContentJSON } from "@nmshd/content";
-import { IdentityDTO } from "./IdentityDTO";
+import { IdentityDTO } from "./IdentityDTO.js";
 
 export enum RelationshipStatus {
     Pending = "Pending",

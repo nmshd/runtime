@@ -1,5 +1,5 @@
-import { CoreBuffer, CryptoEncryptionAlgorithm, CryptoSecretKey, SodiumWrapper } from "@nmshd/crypto";
-import { CoreId, Reference, SharedPasswordProtection } from "../../src";
+import { CoreId, Reference, SharedPasswordProtection } from "@nmshd/core-types";
+import { CoreBuffer, CryptoSecretKey, SodiumWrapper } from "@nmshd/crypto";
 
 describe("Reference", () => {
     beforeAll(async () => await SodiumWrapper.ready());
@@ -10,7 +10,7 @@ describe("Reference", () => {
             backboneBaseUrl: "https://backbone.example.com",
             key: CryptoSecretKey.from({
                 secretKey: CoreBuffer.from("lerJyX8ydJDEXowq2PMMntRXXA27wgHJYA_BjnFx55Y"),
-                algorithm: CryptoEncryptionAlgorithm.XCHACHA20_POLY1305
+                algorithm: 3
             })
         });
 
@@ -23,7 +23,7 @@ describe("Reference", () => {
             backboneBaseUrl: "https://backbone.example.com",
             key: CryptoSecretKey.from({
                 secretKey: CoreBuffer.from("lerJyX8ydJDEXowq2PMMntRXXA27wgHJYA_BjnFx55Y"),
-                algorithm: CryptoEncryptionAlgorithm.XCHACHA20_POLY1305
+                algorithm: 3
             })
         });
 
@@ -36,7 +36,7 @@ describe("Reference", () => {
             backboneBaseUrl: "https://backbone.example.com",
             key: CryptoSecretKey.from({
                 secretKey: CoreBuffer.from("lerJyX8ydJDEXowq2PMMntRXXA27wgHJYA_BjnFx55Y"),
-                algorithm: CryptoEncryptionAlgorithm.XCHACHA20_POLY1305
+                algorithm: 3
             }),
             forIdentityTruncated: "1234",
             passwordProtection: SharedPasswordProtection.from({
@@ -56,7 +56,7 @@ describe("Reference", () => {
             backboneBaseUrl: "https://backbone.example.com",
             key: CryptoSecretKey.from({
                 secretKey: CoreBuffer.from("lerJyX8ydJDEXowq2PMMntRXXA27wgHJYA_BjnFx55Y"),
-                algorithm: CryptoEncryptionAlgorithm.XCHACHA20_POLY1305
+                algorithm: 3
             }),
             passwordProtection: SharedPasswordProtection.from({
                 passwordType: "pw",
@@ -76,7 +76,7 @@ describe("Reference", () => {
             backboneBaseUrl: "https://backbone.example.com",
             key: CryptoSecretKey.from({
                 secretKey: CoreBuffer.from("lerJyX8ydJDEXowq2PMMntRXXA27wgHJYA_BjnFx55Y"),
-                algorithm: CryptoEncryptionAlgorithm.XCHACHA20_POLY1305
+                algorithm: 3
             }),
             passwordProtection: SharedPasswordProtection.from({
                 passwordType: "pw",
@@ -97,7 +97,7 @@ describe("Reference", () => {
 
         expect(reference.id.toString()).toBe("ANID1234");
         expect(reference.backboneBaseUrl).toBe("https://backbone.example.com");
-        expect(reference.key.algorithm).toBe(CryptoEncryptionAlgorithm.XCHACHA20_POLY1305);
+        expect(reference.key.algorithm).toBe(3);
         expect(reference.key.secretKey.toBase64URL()).toBe("lerJyX8ydJDEXowq2PMMntRXXA27wgHJYA_BjnFx55Y");
         expect(reference.forIdentityTruncated).toBeUndefined();
         expect(reference.passwordProtection).toBeUndefined();
@@ -112,7 +112,7 @@ describe("Reference", () => {
 
         expect(reference.id.toString()).toBe("ANID1234");
         expect(reference.backboneBaseUrl).toBe("https://backbone.example.com");
-        expect(reference.key.algorithm).toBe(CryptoEncryptionAlgorithm.XCHACHA20_POLY1305);
+        expect(reference.key.algorithm).toBe(3);
         expect(reference.key.secretKey.toBase64URL()).toBe("lerJyX8ydJDEXowq2PMMntRXXA27wgHJYA_BjnFx55Y");
         expect(reference.forIdentityTruncated).toBe("1234");
         expect(reference.passwordProtection).toBeInstanceOf(SharedPasswordProtection);

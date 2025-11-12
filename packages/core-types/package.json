@@ -20,34 +20,8 @@
         "build:ci": "tsc",
         "cdep": "tsc && madge --circular dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
-        "test": "jest -i",
-        "test:ci": "jest -i --coverage"
-    },
-    "jest": {
-        "collectCoverageFrom": [
-            "./src/**"
-        ],
-        "coverageProvider": "v8",
-        "coverageReporters": [
-            "text-summary",
-            "cobertura",
-            "lcov"
-        ],
-        "maxWorkers": 1,
-        "preset": "ts-jest",
-        "setupFilesAfterEnv": [
-            "jest-expect-message"
-        ],
-        "testEnvironment": "node",
-        "testTimeout": 60000,
-        "transform": {
-            "^.+\\.ts$": [
-                "ts-jest",
-                {
-                    "tsconfig": "test/tsconfig.json"
-                }
-            ]
-        }
+        "test": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js",
+        "test:ci": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js -i --coverage"
     },
     "dependencies": {
         "@js-soft/logging-abstractions": "^1.0.2",
