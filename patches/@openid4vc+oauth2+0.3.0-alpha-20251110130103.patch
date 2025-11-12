@@ -1,0 +1,12 @@
+diff --git a/node_modules/@openid4vc/oauth2/package.json b/node_modules/@openid4vc/oauth2/package.json
+index ac34772..fbc0471 100644
+--- a/node_modules/@openid4vc/oauth2/package.json
++++ b/node_modules/@openid4vc/oauth2/package.json
+@@ -31,5 +31,5 @@
+   },
+   "main": "./dist/index.js",
+   "module": "./dist/index.mjs",
+-  "types": "./dist/index.d.ts"
++  "types": "./dist/index.d.cts"
+ }
+\ No newline at end of file
