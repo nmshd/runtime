@@ -1,6 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { ILoggerFactory } from "@js-soft/logging-abstractions";
-import { IConfigOverwrite } from "../../src";
+import { IConfigOverwrite } from "@nmshd/transport";
 
 enum DeviceControllerType {
     MultiAccountController = "MultiAccountController",

@@ -1,6 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
+import { AccountController, ClientResult, PublicRelationshipTemplateReferenceClient, RequestError, Transport } from "@nmshd/transport";
 import { reset, spy, when } from "ts-mockito";
-import { AccountController, ClientResult, PublicRelationshipTemplateReferenceClient, RequestError, Transport } from "../../../src";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 let connection: IDatabaseConnection;

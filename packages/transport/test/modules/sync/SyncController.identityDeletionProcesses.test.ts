@@ -1,5 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { IdentityDeletionProcessStatus } from "../../../src";
+import { IdentityDeletionProcessStatus } from "@nmshd/transport";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("IdentityDeletionProcessSync", function () {

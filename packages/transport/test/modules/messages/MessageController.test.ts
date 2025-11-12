@@ -1,6 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { CoreDate, CoreId } from "@nmshd/core-types";
-import { AccountController, IdentityDeletionProcess, IdentityDeletionProcessStatus, Message, Relationship, RelationshipStatus, Transport } from "../../../src";
+import { AccountController, IdentityDeletionProcess, IdentityDeletionProcessStatus, Message, Relationship, RelationshipStatus, Transport } from "@nmshd/transport";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("MessageController", function () {

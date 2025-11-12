@@ -1,6 +1,6 @@
 import { LanguageISO639 } from "@nmshd/core-types";
+import { AnnouncementSeverity } from "@nmshd/transport";
 import axios, { Axios } from "axios";
-import { AnnouncementSeverity } from "../../src/modules/announcements/data/Announcement";
 
 export class AdminApiClient {
     private static adminClient: Axios | undefined;

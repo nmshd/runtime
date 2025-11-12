@@ -2,7 +2,7 @@ import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { JSONWrapper, Serializable } from "@js-soft/ts-serval";
 import { CoreAddress, CoreDate, CoreId, CoreIdHelper } from "@nmshd/core-types";
 import { CoreBuffer, CryptoEncryption, CryptoSecretKey } from "@nmshd/crypto";
-import { AccountController, CoreCrypto, DeviceSharedSecret, TokenContentDeviceSharedSecret, TokenContentFile, TokenContentRelationshipTemplate, Transport } from "../../../src";
+import { AccountController, CoreCrypto, DeviceSharedSecret, TokenContentDeviceSharedSecret, TokenContentFile, TokenContentRelationshipTemplate, Transport } from "@nmshd/transport";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("TokenContent", function () {

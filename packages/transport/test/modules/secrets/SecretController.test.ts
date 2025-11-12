@@ -1,6 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { CryptoExchangeKeypair, CryptoSecretKey, CryptoSignatureKeypair } from "@nmshd/crypto";
-import { AccountController, CoreCrypto, SecretContainerPlain, SecretController, Transport } from "../../../src";
+import { AccountController, CoreCrypto, SecretContainerPlain, SecretController, Transport } from "@nmshd/transport";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 let connection: IDatabaseConnection;

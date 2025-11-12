@@ -1,6 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { JSONWrapper, Serializable } from "@js-soft/ts-serval";
-import { AccountController, Transport } from "../../../src";
+import { AccountController, Transport } from "@nmshd/transport";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("Relationships Custom Content", function () {

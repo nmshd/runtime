@@ -1,5 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { AccountController, Relationship, Transport } from "../../src";
+import { AccountController, Relationship, Transport } from "@nmshd/transport";
 import { TestUtil } from "../testHelpers/TestUtil";
 
 describe("Performant Fetch of Open Requests", function () {

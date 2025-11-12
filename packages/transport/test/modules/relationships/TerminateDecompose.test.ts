@@ -1,6 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { CoreId } from "@nmshd/core-types";
-import { AccountController, RelationshipChangedEvent, Transport } from "../../../src";
+import { AccountController, RelationshipChangedEvent, Transport } from "@nmshd/transport";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("Terminate and Decompose simultaneously", function () {

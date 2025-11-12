@@ -16,7 +16,7 @@ import {
     StartSyncRunRequest,
     StartSyncRunResponse,
     StartSyncRunStatus
-} from "../../src";
+} from "@nmshd/transport";
 import { FakePaginationDataSource } from "./FakePaginationDataSource";
 
 export class FakeSyncClient implements ISyncClient {

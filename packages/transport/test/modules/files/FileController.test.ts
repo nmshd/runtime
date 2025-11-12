@@ -1,7 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
-import { AccountController, File, FileOwnershipLockedEvent, Transport } from "../../../src";
+import { AccountController, File, FileOwnershipLockedEvent, Transport } from "@nmshd/transport";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("FileController", function () {

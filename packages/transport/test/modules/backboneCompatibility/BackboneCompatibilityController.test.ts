@@ -1,5 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { BackboneCompatibilityController, Transport } from "../../../src";
+import { BackboneCompatibilityController, Transport } from "@nmshd/transport";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("BackboneCompatibility", function () {

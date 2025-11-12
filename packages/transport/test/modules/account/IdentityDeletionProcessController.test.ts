@@ -1,5 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { AccountController, IdentityDeletionProcessStatus, Transport } from "../../../src";
+import { AccountController, IdentityDeletionProcessStatus, Transport } from "@nmshd/transport";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("IdentityDeletionProcessController", function () {

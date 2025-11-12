@@ -1,7 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { ISerializable, JSONWrapper, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreAddress, ICoreAddress } from "@nmshd/core-types";
-import { AccountController, Transport } from "../../../src";
+import { AccountController, Transport } from "@nmshd/transport";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("MessageContent", function () {

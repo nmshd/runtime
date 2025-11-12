@@ -1,6 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
+import { AccountController } from "@nmshd/transport";
 import correlator from "correlation-id";
-import { AccountController } from "../../../src";
 import { RequestInterceptor } from "../../testHelpers/RequestInterceptor";
 import { TestUtil } from "../../testHelpers/TestUtil";
 

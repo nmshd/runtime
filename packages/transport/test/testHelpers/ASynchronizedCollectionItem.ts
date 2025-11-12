@@ -1,6 +1,6 @@
 import { serialize, validate } from "@js-soft/ts-serval";
+import { CoreSynchronizable, ICoreSynchronizable } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
-import { CoreSynchronizable, ICoreSynchronizable } from "../../src";
 
 interface IASynchronizedCollectionItem extends ICoreSynchronizable {
     someTechnicalStringProperty?: string;

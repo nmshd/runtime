@@ -1,5 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { AccountController } from "../../../src";
+import { AccountController } from "@nmshd/transport";
 import { AppDeviceTest } from "../../testHelpers/AppDeviceTest";
 import { DeviceTestParameters } from "../../testHelpers/DeviceTestParameters";
 import { TestUtil } from "../../testHelpers/TestUtil";

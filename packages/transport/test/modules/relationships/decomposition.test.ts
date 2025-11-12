@@ -1,7 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { Serializable } from "@js-soft/ts-serval";
 import { CoreDate, CoreId } from "@nmshd/core-types";
-import { AccountController, Relationship, RelationshipStatus, Transport } from "../../../src";
+import { AccountController, Relationship, RelationshipStatus, Transport } from "@nmshd/transport";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
 describe("Data cleanup after relationship decomposition", function () {

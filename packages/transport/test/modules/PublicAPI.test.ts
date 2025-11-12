@@ -1,5 +1,4 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { nameof } from "ts-simple-nameof";
 import {
     AccountController,
     AnonymousTokenController,
@@ -17,7 +16,8 @@ import {
     SyncController,
     TokenController,
     Transport
-} from "../../src";
+} from "@nmshd/transport";
+import { nameof } from "ts-simple-nameof";
 import { TestUtil } from "../testHelpers/TestUtil";
 
 const publicFunctions: any = {};

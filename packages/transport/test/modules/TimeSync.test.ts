@@ -1,6 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { CoreDate } from "@nmshd/core-types";
-import { AccountController, Transport } from "../../src";
+import { AccountController, Transport } from "@nmshd/transport";
 import { TestUtil } from "../testHelpers/TestUtil";
 
 describe("TimeSyncTest", function () {
