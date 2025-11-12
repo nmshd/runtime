@@ -50,30 +50,15 @@
         "testEnvironment": "node",
         "testTimeout": 60000,
         "transform": {
-            "^.+\\.ts$": [
+            "^.+\\.(t|j)s$": [
                 "ts-jest",
                 {
                     "tsconfig": "test/tsconfig.json"
                 }
-            ],
-            "^.+\\.js$": "babel-jest"
+            ]
         },
         "transformIgnorePatterns": [
-            "node_modules/(?!(@noble)/)"
-        ]
-    },
-    "babel": {
-        "presets": [
-            [
-                "@babel/preset-env",
-                {
-                    "targets": {
-                        "node": "current"
-                    }
-                }
-            ],
-            "@babel/preset-typescript",
-            "@babel/preset-react"
+            "<rootDir>/node_modules/(?!(@noble|@stablelib|@credo\\-ts/core/node_modules/uuid)/)"
         ]
     },
     "dependencies": {

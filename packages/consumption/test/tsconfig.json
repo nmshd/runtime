@@ -3,7 +3,8 @@
     "compilerOptions": {
         "baseUrl": "../",
         "noEmit": true,
-        "composite": false
+        "composite": false,
+        "allowJs": true
     },
     "files": ["../../../node_modules/jest-expect-message/types/index.d.ts"],
     "include": ["**/*.ts", "../src/**/*.ts"],
