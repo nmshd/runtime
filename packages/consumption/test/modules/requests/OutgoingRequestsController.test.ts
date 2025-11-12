@@ -1,6 +1,17 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { ApplicationError, sleep } from "@js-soft/ts-utils";
 import {
+    ConsumptionIds,
+    ErrorValidationResult,
+    ICreateOutgoingRequestParameters,
+    IRequestWithoutId,
+    LocalRequestStatus,
+    OutgoingRequestCreatedAndCompletedEvent,
+    OutgoingRequestCreatedEvent,
+    OutgoingRequestStatusChangedEvent,
+    ValidationResult
+} from "@nmshd/consumption";
+import {
     CreateAttributeRequestItem,
     IAcceptResponseItem,
     IRequest,
@@ -19,21 +30,10 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { TransportLoggerFactory } from "@nmshd/transport";
-import {
-    ConsumptionIds,
-    ErrorValidationResult,
-    ICreateOutgoingRequestParameters,
-    IRequestWithoutId,
-    LocalRequestStatus,
-    OutgoingRequestCreatedAndCompletedEvent,
-    OutgoingRequestCreatedEvent,
-    OutgoingRequestStatusChangedEvent,
-    ValidationResult
-} from "../../../src";
-import { TestUtil, loggerFactory } from "../../core/TestUtil";
-import { RequestsGiven, RequestsTestsContext, RequestsThen, RequestsWhen } from "./RequestsIntegrationTest";
-import { TestObjectFactory } from "./testHelpers/TestObjectFactory";
-import { ITestRequestItem, TestRequestItem } from "./testHelpers/TestRequestItem";
+import { TestUtil, loggerFactory } from "../../core/TestUtil.js";
+import { RequestsGiven, RequestsTestsContext, RequestsThen, RequestsWhen } from "./RequestsIntegrationTest.js";
+import { TestObjectFactory } from "./testHelpers/TestObjectFactory.js";
+import { ITestRequestItem, TestRequestItem } from "./testHelpers/TestRequestItem.js";
 
 let context: RequestsTestsContext;
 

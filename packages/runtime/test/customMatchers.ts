@@ -1,5 +1,5 @@
 import { ApplicationError, EventConstructor, Result } from "@js-soft/ts-utils";
-import { MockEventBus } from "./lib";
+import { MockEventBus } from "./lib/index.js";
 
 expect.extend({
     toBeSuccessful(actual: Result<unknown, ApplicationError>) {

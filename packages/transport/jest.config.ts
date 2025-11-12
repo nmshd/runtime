@@ -2,7 +2,7 @@ import type { Config } from "jest";
 import { createDefaultEsmPreset } from "ts-jest";
 
 const presetConfig = createDefaultEsmPreset({
-    tsconfig: "./test/tsconfig.json"
+    tsconfig: "test/tsconfig.json"
 });
 
 export default {
@@ -11,8 +11,12 @@ export default {
     coverageProvider: "v8",
     coverageReporters: ["text-summary", "cobertura", "lcov"],
     maxWorkers: 5,
-    setupFilesAfterEnv: ["jest-expect-message"],
+    preset: "ts-jest",
+    setupFilesAfterEnv: ["./test/customMatchers.ts", "jest-expect-message"],
     testEnvironment: "node",
     testPathIgnorePatterns: ["/test/performance/", "/node_modules/"],
-    testTimeout: 60000
+    testTimeout: 60000,
+    moduleNameMapper: {
+        "^(\\.{1,2}/.*)\\.js$": "$1"
+    }
 } satisfies Config;

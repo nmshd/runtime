@@ -1,8 +1,8 @@
 import { AccountController } from "@nmshd/transport";
 import { Container } from "@nmshd/typescript-ioc";
 import correlator from "correlation-id";
-import { RuntimeServiceProvider, TestRuntimeServices } from "../lib";
-import { RequestInterceptor } from "../lib/RequestInterceptor";
+import { RuntimeServiceProvider, TestRuntimeServices } from "../lib/index.js";
+import { RequestInterceptor } from "../lib/RequestInterceptor.js";
 
 const uuidRegex = new RegExp("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
 

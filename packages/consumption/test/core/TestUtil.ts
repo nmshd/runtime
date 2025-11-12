@@ -7,6 +7,14 @@ import { NodeLoggerFactory } from "@js-soft/node-logger";
 import { SimpleLoggerFactory } from "@js-soft/simple-logger";
 import { ISerializable, Serializable } from "@js-soft/ts-serval";
 import { EventBus, EventEmitter2EventBus, sleep } from "@js-soft/ts-utils";
+import {
+    ConsumptionConfig,
+    ConsumptionController,
+    NotificationItemConstructor,
+    NotificationItemProcessorConstructor,
+    RequestItemConstructor,
+    RequestItemProcessorConstructor
+} from "@nmshd/consumption";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
 import {
@@ -25,14 +33,6 @@ import {
     TransportLoggerFactory
 } from "@nmshd/transport";
 import { LogLevel } from "typescript-logging";
-import {
-    ConsumptionConfig,
-    ConsumptionController,
-    NotificationItemConstructor,
-    NotificationItemProcessorConstructor,
-    RequestItemConstructor,
-    RequestItemProcessorConstructor
-} from "../../src";
 
 export const loggerFactory = new NodeLoggerFactory({
     appenders: {

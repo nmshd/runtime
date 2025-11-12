@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
-        "target": "esnext",
-        "module": "NodeNext",
+        "target": "ESNext",
+        "module": "Node16",
         "sourceMap": true,
         "declaration": true,
         "declarationMap": true,
@@ -11,7 +11,7 @@
         "esModuleInterop": true,
         "experimentalDecorators": true,
         "resolveJsonModule": true,
-        "moduleResolution": "nodenext",
+        "moduleResolution": "Node16",
         "forceConsistentCasingInFileNames": true,
         "noImplicitReturns": true,
         "strictNullChecks": true,

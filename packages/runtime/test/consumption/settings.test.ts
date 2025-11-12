@@ -1,8 +1,8 @@
 import { ConsumptionIds } from "@nmshd/consumption";
 import { CoreDate } from "@nmshd/core-types";
+import { ConsumptionServices, GetSettingsQuery } from "@nmshd/runtime";
 import { TransportIds } from "@nmshd/transport";
-import { ConsumptionServices, GetSettingsQuery } from "../../src";
-import { QueryParamConditions, RuntimeServiceProvider } from "../lib";
+import { QueryParamConditions, RuntimeServiceProvider } from "../lib/index.js";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
 let consumptionServices: ConsumptionServices;

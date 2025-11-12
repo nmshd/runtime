@@ -1,5 +1,5 @@
-import { AppRuntime, LocalAccountDTO } from "../../src";
-import { TestUtil } from "../lib";
+import { AppRuntime, LocalAccountDTO } from "@nmshd/app-runtime";
+import { TestUtil } from "../lib/index.js";
 
 describe("Test setting the account name", function () {
     let runtime: AppRuntime;

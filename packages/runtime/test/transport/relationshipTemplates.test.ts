@@ -1,7 +1,7 @@
 import { RelationshipTemplateContent, RelationshipTemplateContentJSON } from "@nmshd/content";
+import { GetRelationshipTemplatesQuery, OwnerRestriction } from "@nmshd/runtime";
 import { DateTime } from "luxon";
-import { GetRelationshipTemplatesQuery, OwnerRestriction } from "../../src";
-import { emptyRelationshipTemplateContent, QueryParamConditions, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
+import { emptyRelationshipTemplateContent, QueryParamConditions, RuntimeServiceProvider, TestRuntimeServices } from "../lib/index.js";
 
 const serviceProvider = new RuntimeServiceProvider();
 let runtimeServices1: TestRuntimeServices;

@@ -1,5 +1,5 @@
 import { Serializable } from "@js-soft/ts-serval";
-import { Mail } from "../../src";
+import { Mail } from "@nmshd/content";
 
 describe("Mail", function () {
     test("should create a Mail from JSON", function () {

@@ -1,8 +1,8 @@
 import { IResponse, RelationshipCreationContent, RelationshipTemplateContentJSON, ResponseWrapperJSON } from "@nmshd/content";
+import { CreateOutgoingRequestRequest, LocalRequestDTO, MessageDTO, RelationshipDTO } from "@nmshd/runtime";
 import { DateTime } from "luxon";
-import { CreateOutgoingRequestRequest, LocalRequestDTO, MessageDTO, RelationshipDTO } from "../../src";
-import { TestRuntimeServices } from "./RuntimeServiceProvider";
-import { exchangeMessageWithRequest, exchangeTemplate, syncUntilHasMessageWithResponse } from "./testUtils";
+import { TestRuntimeServices } from "./RuntimeServiceProvider.js";
+import { exchangeMessageWithRequest, exchangeTemplate, syncUntilHasMessageWithResponse } from "./testUtils.js";
 
 export interface LocalRequestWithSource {
     request: LocalRequestDTO;

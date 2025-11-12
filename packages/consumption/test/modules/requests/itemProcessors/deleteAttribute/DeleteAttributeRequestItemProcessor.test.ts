@@ -1,18 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import {
-    AcceptResponseItem,
-    DeleteAttributeAcceptResponseItem,
-    DeleteAttributeRequestItem,
-    IdentityAttribute,
-    RejectResponseItem,
-    RelationshipAttribute,
-    RelationshipAttributeConfidentiality,
-    Request,
-    ResponseItemResult
-} from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId, CoreIdHelper } from "@nmshd/core-types";
-import { AccountController, Transport } from "@nmshd/transport";
-import {
     AcceptDeleteAttributeRequestItemParametersJSON,
     ConsumptionController,
     ConsumptionIds,
@@ -27,8 +14,21 @@ import {
     PeerIdentityAttribute,
     PeerRelationshipAttribute,
     ReceivedAttributeDeletionStatus
-} from "../../../../../src";
-import { TestUtil } from "../../../../core/TestUtil";
+} from "@nmshd/consumption";
+import {
+    AcceptResponseItem,
+    DeleteAttributeAcceptResponseItem,
+    DeleteAttributeRequestItem,
+    IdentityAttribute,
+    RejectResponseItem,
+    RelationshipAttribute,
+    RelationshipAttributeConfidentiality,
+    Request,
+    ResponseItemResult
+} from "@nmshd/content";
+import { CoreAddress, CoreDate, CoreId, CoreIdHelper } from "@nmshd/core-types";
+import { AccountController, Transport } from "@nmshd/transport";
+import { TestUtil } from "../../../../core/TestUtil.js";
 
 describe("DeleteAttributeRequestItemProcessor", function () {
     let connection: IDatabaseConnection;

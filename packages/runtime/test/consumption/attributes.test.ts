@@ -11,7 +11,6 @@ import {
     ThirdPartyRelationshipAttributeQueryOwner
 } from "@nmshd/content";
 import { CoreDate, CoreId, CoreIdHelper } from "@nmshd/core-types";
-import assert from "assert";
 import {
     AttributeCreatedEvent,
     AttributeSucceededEvent,
@@ -51,7 +50,8 @@ import {
     SucceedOwnIdentityAttributeRequest,
     SucceedOwnIdentityAttributeUseCase,
     SucceedRelationshipAttributeAndNotifyPeerUseCase
-} from "../../src";
+} from "@nmshd/runtime";
+import assert from "assert";
 import {
     RuntimeServiceProvider,
     TestRuntimeServices,
@@ -71,7 +71,7 @@ import {
     syncUntilHasMessageWithNotification,
     syncUntilHasRelationships,
     waitForRecipientToReceiveNotification
-} from "../lib";
+} from "../lib/index.js";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
 

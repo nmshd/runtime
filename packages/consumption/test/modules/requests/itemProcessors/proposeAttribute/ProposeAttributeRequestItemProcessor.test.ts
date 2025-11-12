@@ -1,5 +1,24 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import {
+    AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON,
+    AcceptProposeAttributeRequestItemParametersWithNewAttributeJSON,
+    AttributeSucceededEvent,
+    ConsumptionController,
+    ConsumptionIds,
+    EmittedAttributeDeletionInfo,
+    EmittedAttributeDeletionStatus,
+    LocalRequest,
+    LocalRequestStatus,
+    OwnIdentityAttribute,
+    OwnRelationshipAttribute,
+    PeerIdentityAttribute,
+    PeerRelationshipAttribute,
+    ProposeAttributeRequestItemProcessor,
+    ReceivedAttributeDeletionInfo,
+    ReceivedAttributeDeletionStatus,
+    ValidationResult
+} from "@nmshd/consumption";
+import {
     AttributeAlreadySharedAcceptResponseItem,
     AttributeSuccessionAcceptResponseItem,
     GivenName,
@@ -19,27 +38,8 @@ import {
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { AccountController, Transport } from "@nmshd/transport";
 import { anything, reset, spy, when } from "ts-mockito";
-import {
-    AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON,
-    AcceptProposeAttributeRequestItemParametersWithNewAttributeJSON,
-    AttributeSucceededEvent,
-    ConsumptionController,
-    ConsumptionIds,
-    EmittedAttributeDeletionInfo,
-    EmittedAttributeDeletionStatus,
-    LocalRequest,
-    LocalRequestStatus,
-    OwnIdentityAttribute,
-    OwnRelationshipAttribute,
-    PeerIdentityAttribute,
-    PeerRelationshipAttribute,
-    ProposeAttributeRequestItemProcessor,
-    ReceivedAttributeDeletionInfo,
-    ReceivedAttributeDeletionStatus,
-    ValidationResult
-} from "../../../../../src";
-import { TestUtil } from "../../../../core/TestUtil";
-import { TestObjectFactory } from "../../testHelpers/TestObjectFactory";
+import { TestUtil } from "../../../../core/TestUtil.js";
+import { TestObjectFactory } from "../../testHelpers/TestObjectFactory.js";
 
 type ForwardableAttribute = OwnIdentityAttribute | OwnRelationshipAttribute | PeerRelationshipAttribute;
 

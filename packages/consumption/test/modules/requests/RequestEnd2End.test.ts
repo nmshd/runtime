@@ -1,12 +1,12 @@
 /* eslint-disable jest/expect-expect */
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
+import { ConsumptionController, LocalRequest, LocalRequestStatus } from "@nmshd/consumption";
 import { AcceptResponseItem, RelationshipCreationContent, RelationshipTemplateContent, Request, Response, ResponseWrapper } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
 import { AccountController, Message, Relationship, RelationshipTemplate, Transport } from "@nmshd/transport";
-import { ConsumptionController, LocalRequest, LocalRequestStatus } from "../../../src";
-import { TestUtil } from "../../core/TestUtil";
-import { TestRequestItem } from "./testHelpers/TestRequestItem";
-import { TestRequestItemProcessor } from "./testHelpers/TestRequestItemProcessor";
+import { TestUtil } from "../../core/TestUtil.js";
+import { TestRequestItem } from "./testHelpers/TestRequestItem.js";
+import { TestRequestItemProcessor } from "./testHelpers/TestRequestItemProcessor.js";
 
 let connection: IDatabaseConnection;
 let transport: Transport;

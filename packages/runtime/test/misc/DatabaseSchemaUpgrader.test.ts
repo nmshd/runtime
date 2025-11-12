@@ -4,8 +4,8 @@ import { NodeLoggerFactory } from "@js-soft/node-logger";
 import { EventEmitter2EventBus } from "@js-soft/ts-utils";
 import { ConsumptionController } from "@nmshd/consumption";
 import { AccountController, Transport } from "@nmshd/transport";
-import { DatabaseSchemaUpgrader } from "../../src/DatabaseSchemaUpgrader";
-import { RuntimeServiceProvider } from "../lib";
+import { DatabaseSchemaUpgrader } from "../../src/DatabaseSchemaUpgrader.js";
+import { RuntimeServiceProvider } from "../lib/index.js";
 
 const loggerFactory = new NodeLoggerFactory({
     appenders: {

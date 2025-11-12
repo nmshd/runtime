@@ -1,6 +1,6 @@
-import { ProprietaryXML, SchematizedXML } from "../../src";
-import { GenericValueTest } from "./GenericValueTest";
-import hochschulabschlusszeugnisXMLData from "./hochschulabschlusszeugnis";
+import { ProprietaryXML, SchematizedXML } from "@nmshd/content";
+import { GenericValueTest } from "./GenericValueTest.js";
+import hochschulabschlusszeugnisXMLData from "./hochschulabschlusszeugnis.js";
 
 new GenericValueTest().runParametrized({
     testName: "ProprietaryXML Test",

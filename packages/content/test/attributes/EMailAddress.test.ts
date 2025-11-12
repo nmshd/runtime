@@ -1,5 +1,5 @@
 import { ParsingError } from "@js-soft/ts-serval";
-import { EMailAddress } from "../../src";
+import { EMailAddress } from "@nmshd/content";
 
 describe("Test valid EMailAddresses", () => {
     const validEMailAddresses = ["peter123@inwind.it", "peter123@inwänd.it"];

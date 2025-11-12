@@ -1,5 +1,5 @@
-import { ModuleConfiguration, RuntimeModule } from "../../src";
-import { RuntimeServiceProvider, TestRuntime } from "../lib";
+import { ModuleConfiguration, RuntimeModule } from "@nmshd/runtime";
+import { RuntimeServiceProvider, TestRuntime } from "../lib/index.js";
 
 describe("Runtime Module Startup", () => {
     const runtimes: TestRuntime[] = [];

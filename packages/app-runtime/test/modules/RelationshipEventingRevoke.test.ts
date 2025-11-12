@@ -1,6 +1,6 @@
+import { AppRuntime, LocalAccountSession, OnboardingChangeReceivedEvent } from "@nmshd/app-runtime";
 import { RelationshipChangedEvent, RelationshipStatus } from "@nmshd/runtime";
-import { AppRuntime, LocalAccountSession, OnboardingChangeReceivedEvent } from "../../src";
-import { EventListener, TestUtil } from "../lib";
+import { EventListener, TestUtil } from "../lib/index.js";
 
 describe("RelationshipEventingRevokeTest", function () {
     let runtime: AppRuntime;

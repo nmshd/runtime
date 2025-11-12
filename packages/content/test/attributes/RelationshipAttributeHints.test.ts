@@ -1,4 +1,4 @@
-import { RelationshipAttributeConfidentiality, RelationshipAttributeCreationHints, RelationshipAttributeCreationHintsJSON, ValueHints } from "../../src";
+import { RelationshipAttributeConfidentiality, RelationshipAttributeCreationHints, RelationshipAttributeCreationHintsJSON, ValueHints } from "@nmshd/content";
 
 describe("RelationshipAttributeHints", function () {
     test("create from interface", function () {

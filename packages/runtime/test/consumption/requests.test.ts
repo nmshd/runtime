@@ -1,7 +1,6 @@
 import { EventBus, sleep } from "@js-soft/ts-utils";
 import { RelationshipCreationContentJSON, RelationshipTemplateContentJSON } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
-import { DateTime } from "luxon";
 import {
     ConsumptionServices,
     CreateOutgoingRequestRequest,
@@ -9,8 +8,9 @@ import {
     OutgoingRequestCreatedEvent,
     OutgoingRequestStatusChangedEvent,
     TransportServices
-} from "../../src";
-import { IncomingRequestReceivedEvent, IncomingRequestStatusChangedEvent } from "../../src/events";
+} from "@nmshd/runtime";
+import { DateTime } from "luxon";
+import { IncomingRequestReceivedEvent, IncomingRequestStatusChangedEvent } from "../../src/events/index.js";
 import {
     establishRelationship,
     exchangeMessageWithRequest,
@@ -20,13 +20,13 @@ import {
     syncUntilHasRelationships,
     TestRequestItemJSON,
     TestRuntimeServices
-} from "../lib";
+} from "../lib/index.js";
 import {
     exchangeMessageWithRequestAndRequireManualDecision,
     exchangeMessageWithRequestAndSendResponse,
     exchangeTemplateAndRecipientRequiresManualDecision,
     exchangeTemplateAndRecipientSendsResponse
-} from "../lib/testUtilsWithInactiveModules";
+} from "../lib/testUtilsWithInactiveModules.js";
 
 describe("Requests", () => {
     describe.each([

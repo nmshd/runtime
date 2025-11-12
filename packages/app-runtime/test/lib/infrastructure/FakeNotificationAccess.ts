@@ -1,6 +1,6 @@
 import { ILogger } from "@js-soft/logging-abstractions";
 import { Result } from "@js-soft/ts-utils";
-import { INotificationAccess, INotificationScheduleOptions } from "../../../src";
+import { INotificationAccess, INotificationScheduleOptions } from "@nmshd/app-runtime";
 
 export class FakeNotificationAccess implements INotificationAccess {
     public constructor(private readonly logger: ILogger) {}

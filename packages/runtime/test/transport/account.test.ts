@@ -1,7 +1,7 @@
 import { CoreDate } from "@nmshd/core-types";
+import { DatawalletSynchronizedEvent, DeviceOnboardingInfoDTO, FileDTO, RelationshipTemplateDTO, TokenDTO } from "@nmshd/runtime";
 import { DateTime } from "luxon";
-import { DatawalletSynchronizedEvent, DeviceOnboardingInfoDTO, FileDTO, RelationshipTemplateDTO, TokenDTO } from "../../src";
-import { emptyRelationshipTemplateContent, MockEventBus, RuntimeServiceProvider, TestRuntimeServices, uploadFile } from "../lib";
+import { emptyRelationshipTemplateContent, MockEventBus, RuntimeServiceProvider, TestRuntimeServices, uploadFile } from "../lib/index.js";
 
 const serviceProvider = new RuntimeServiceProvider();
 let sServices: TestRuntimeServices;

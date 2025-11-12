@@ -1,5 +1,6 @@
 import { Serializable } from "@js-soft/ts-serval";
-import _ from "lodash";
+import * as _ from "lodash";
+// @ts-expect-error
 import { Matcher } from "ts-mockito/lib/matcher/type/Matcher";
 
 export function objectWith<T extends Serializable>(expected: Partial<T>): any {
@@ -11,7 +12,7 @@ class PartialObjectMatcher<T extends Serializable> extends Matcher {
         super();
     }
 
-    public override match(actual: T): boolean {
+    public match(actual: T): boolean {
         const actualAsJson = this.objectToJson(actual);
 
         const comparisonObject = { ...actualAsJson, ...this.expected };
@@ -27,7 +28,7 @@ class PartialObjectMatcher<T extends Serializable> extends Matcher {
         return JSON.parse(JSON.stringify(obj));
     }
 
-    public override toString(): string {
+    public toString(): string {
         return `${JSON.stringify(this.expected)}`;
     }
 }

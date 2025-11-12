@@ -1,5 +1,5 @@
-import { AppRuntime, AppRuntimeModule } from "../../src";
-import { TestUtil } from "../lib";
+import { AppRuntime, AppRuntimeModule } from "@nmshd/app-runtime";
+import { TestUtil } from "../lib/index.js";
 
 describe("RuntimeModuleLoading", function () {
     let runtime: AppRuntime;

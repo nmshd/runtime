@@ -11,7 +11,7 @@ import {
     TransferFileOwnershipAcceptResponseItemDVO,
     TransferFileOwnershipRequestItemDVO,
     TransportServices
-} from "../../../src";
+} from "@nmshd/runtime";
 import {
     cleanupAttributes,
     establishRelationship,
@@ -24,7 +24,7 @@ import {
     syncUntilHasMessageWithResponse,
     TestRuntimeServices,
     uploadFile
-} from "../../lib";
+} from "../../lib/index.js";
 
 const serviceProvider = new RuntimeServiceProvider();
 let sRuntimeServices: TestRuntimeServices;

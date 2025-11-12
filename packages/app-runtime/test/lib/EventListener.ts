@@ -1,6 +1,6 @@
 import { Event, SubscriptionTarget } from "@js-soft/ts-utils";
+import { LocalAccountSession } from "@nmshd/app-runtime";
 import { DataEvent, Runtime } from "@nmshd/runtime";
-import { LocalAccountSession } from "../../src";
 
 export class EventWrapper {
     public namespace: string;

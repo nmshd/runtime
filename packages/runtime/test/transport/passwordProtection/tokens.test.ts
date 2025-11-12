@@ -1,6 +1,6 @@
 import { CoreDate } from "@nmshd/core-types";
 import { TokenReference } from "@nmshd/transport";
-import { RuntimeServiceProvider, TestRuntimeServices, uploadOwnToken } from "../../lib";
+import { RuntimeServiceProvider, TestRuntimeServices, uploadOwnToken } from "../../lib/index.js";
 
 const serviceProvider = new RuntimeServiceProvider();
 let runtimeServices1: TestRuntimeServices;

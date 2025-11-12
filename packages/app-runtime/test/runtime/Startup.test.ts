@@ -1,5 +1,5 @@
-import { AppRuntime, LocalAccountDTO, LocalAccountSession } from "../../src";
-import { EventListener, TestUtil } from "../lib";
+import { AppRuntime, LocalAccountDTO, LocalAccountSession } from "@nmshd/app-runtime";
+import { EventListener, TestUtil } from "../lib/index.js";
 
 describe("Runtime Startup", function () {
     let runtime: AppRuntime;

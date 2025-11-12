@@ -1,5 +1,5 @@
 import { CoreDate, LanguageISO639 } from "@nmshd/core-types";
-import { RuntimeServiceProvider, TestRuntimeServices } from "../lib";
+import { RuntimeServiceProvider, TestRuntimeServices } from "../lib/index.js";
 
 const serviceProvider = new RuntimeServiceProvider();
 let runtimeServices: TestRuntimeServices;

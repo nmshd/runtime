@@ -1,7 +1,7 @@
 import { AbstractStringJSON, CommunicationLanguage, GivenName, IdentityAttribute, Nationality, Sex, StreetAddress } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
-import { DataViewExpander, TransportServices } from "../../src";
-import { RuntimeServiceProvider } from "../lib";
+import { DataViewExpander, TransportServices } from "@nmshd/runtime";
+import { RuntimeServiceProvider } from "../lib/index.js";
 
 const serviceProvider = new RuntimeServiceProvider();
 let transportServices1: TransportServices;

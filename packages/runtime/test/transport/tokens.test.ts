@@ -1,6 +1,6 @@
 import { CoreDate } from "@nmshd/core-types";
-import { GetTokensQuery, OwnerRestriction } from "../../src";
-import { exchangeToken, QueryParamConditions, RuntimeServiceProvider, TestRuntimeServices, uploadOwnToken } from "../lib";
+import { GetTokensQuery, OwnerRestriction } from "@nmshd/runtime";
+import { exchangeToken, QueryParamConditions, RuntimeServiceProvider, TestRuntimeServices, uploadOwnToken } from "../lib/index.js";
 
 const serviceProvider = new RuntimeServiceProvider();
 let runtimeServices1: TestRuntimeServices;

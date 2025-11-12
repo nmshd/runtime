@@ -1,5 +1,3 @@
-import { Request, RequestItemGroup } from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId, CoreIdHelper } from "@nmshd/core-types";
 import {
     DecideRequestItemGroupParametersJSON,
     DecideRequestItemParametersJSON,
@@ -7,9 +5,11 @@ import {
     ErrorValidationResult,
     LocalRequest,
     LocalRequestStatus
-} from "../../../src";
-import { TestObjectFactory } from "./testHelpers/TestObjectFactory";
-import { TestRequestItem } from "./testHelpers/TestRequestItem";
+} from "@nmshd/consumption";
+import { Request, RequestItemGroup } from "@nmshd/content";
+import { CoreAddress, CoreDate, CoreId, CoreIdHelper } from "@nmshd/core-types";
+import { TestObjectFactory } from "./testHelpers/TestObjectFactory.js";
+import { TestRequestItem } from "./testHelpers/TestRequestItem.js";
 
 interface TestParam {
     description: string;

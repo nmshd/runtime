@@ -1,6 +1,5 @@
 import { EventBus } from "@js-soft/ts-utils";
 import { IQLQueryJSON, ReadAttributeRequestItemJSON } from "@nmshd/content";
-import { DateTime } from "luxon";
 import {
     ConsumptionServices,
     CreateOutgoingRequestRequest,
@@ -9,10 +8,11 @@ import {
     OutgoingRequestCreatedEvent,
     OutgoingRequestStatusChangedEvent,
     TransportServices
-} from "../../src";
-import { IncomingRequestReceivedEvent, IncomingRequestStatusChangedEvent } from "../../src/events";
-import { RuntimeServiceProvider, TestRuntimeServices, establishRelationship, exchangeMessageWithRequest, sendMessageWithRequest } from "../lib";
-import { exchangeMessageWithRequestAndRequireManualDecision, exchangeMessageWithRequestAndSendResponse } from "../lib/testUtilsWithInactiveModules";
+} from "@nmshd/runtime";
+import { DateTime } from "luxon";
+import { IncomingRequestReceivedEvent, IncomingRequestStatusChangedEvent } from "../../src/events/index.js";
+import { RuntimeServiceProvider, TestRuntimeServices, establishRelationship, exchangeMessageWithRequest, sendMessageWithRequest } from "../lib/index.js";
+import { exchangeMessageWithRequestAndRequireManualDecision, exchangeMessageWithRequestAndSendResponse } from "../lib/testUtilsWithInactiveModules.js";
 
 describe("IQL Query", () => {
     const runtimeServiceProvider = new RuntimeServiceProvider();

@@ -1,5 +1,5 @@
 import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-serval";
-import { IThirdPartyRelationshipAttributeQuery, ThirdPartyRelationshipAttributeQuery, ThirdPartyRelationshipAttributeQueryJSON } from "../../src";
+import { IThirdPartyRelationshipAttributeQuery, ThirdPartyRelationshipAttributeQuery, ThirdPartyRelationshipAttributeQueryJSON } from "@nmshd/content";
 
 interface TestTypeContainingThirdPartyRelationshipAttributeQueryTestJSON {
     "@type": "TestTypeContainingThirdPartyRelationshipAttributeQueryTest";

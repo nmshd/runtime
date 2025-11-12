@@ -1,6 +1,6 @@
 import { ClientResult, TagClient } from "@nmshd/transport";
 import { anything, reset, spy, when } from "ts-mockito";
-import { RuntimeServiceProvider, TestRuntimeServices } from "../lib";
+import { RuntimeServiceProvider, TestRuntimeServices } from "../lib/index.js";
 
 const serviceProvider = new RuntimeServiceProvider();
 let runtimeService: TestRuntimeServices;

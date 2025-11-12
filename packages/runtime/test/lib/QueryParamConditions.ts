@@ -1,7 +1,7 @@
 /* eslint-disable jest/no-standalone-expect */
 import { Result } from "@js-soft/ts-utils";
+import { TransportServices } from "@nmshd/runtime";
 import { DateTime } from "luxon";
-import { TransportServices } from "../../src";
 
 export interface ICondition<TQuery> {
     key: string & keyof TQuery;

@@ -1,24 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { sleep } from "@js-soft/ts-utils";
 import {
-    BirthPlace,
-    DisplayName,
-    EMailAddress,
-    IdentityAttribute,
-    IIdentityAttributeQuery,
-    IIQLQuery,
-    IRelationshipAttributeQuery,
-    Nationality,
-    ProprietaryString,
-    RelationshipAttribute,
-    RelationshipAttributeConfidentiality,
-    ThirdPartyRelationshipAttributeQueryOwner
-} from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
-import { AccountController, ClientResult, TagClient, Transport } from "@nmshd/transport";
-import { IPeerRelationshipAttributeSuccessorParams } from "src/modules/attributes/local/successorParams/PeerRelationshipAttributeSuccessorParams";
-import { anything, reset, spy, verify, when } from "ts-mockito";
-import {
     AttributeCreatedEvent,
     AttributeDeletedEvent,
     AttributeForwardingDetailsChangedEvent,
@@ -39,9 +21,27 @@ import {
     ReceivedAttributeDeletionInfo,
     ReceivedAttributeDeletionStatus,
     ThirdPartyRelationshipAttribute
-} from "../../../src";
-import { TestUtil } from "../../core/TestUtil";
-import { MockEventBus } from "../MockEventBus";
+} from "@nmshd/consumption";
+import {
+    BirthPlace,
+    DisplayName,
+    EMailAddress,
+    IdentityAttribute,
+    IIdentityAttributeQuery,
+    IIQLQuery,
+    IRelationshipAttributeQuery,
+    Nationality,
+    ProprietaryString,
+    RelationshipAttribute,
+    RelationshipAttributeConfidentiality,
+    ThirdPartyRelationshipAttributeQueryOwner
+} from "@nmshd/content";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { AccountController, ClientResult, TagClient, Transport } from "@nmshd/transport";
+import { IPeerRelationshipAttributeSuccessorParams } from "src/modules/attributes/local/successorParams/PeerRelationshipAttributeSuccessorParams.js";
+import { anything, reset, spy, verify, when } from "ts-mockito";
+import { TestUtil } from "../../core/TestUtil.js";
+import { MockEventBus } from "../MockEventBus.js";
 
 const mockEventBus = new MockEventBus();
 

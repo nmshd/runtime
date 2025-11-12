@@ -1,8 +1,8 @@
+import { ConsumptionController, GenericRequestItemProcessor } from "@nmshd/consumption";
 import { AcceptResponseItem, RejectResponseItem, ResponseItemResult } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { AccountController, IdentityController } from "@nmshd/transport";
-import { ConsumptionController, GenericRequestItemProcessor } from "../../../src";
-import { TestRequestItem } from "./testHelpers/TestRequestItem";
+import { TestRequestItem } from "./testHelpers/TestRequestItem.js";
 
 describe("RequestItemProcessor", function () {
     /* ****** Incoming RequestItems ******* */

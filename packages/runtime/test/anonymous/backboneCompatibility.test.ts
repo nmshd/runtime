@@ -1,4 +1,4 @@
-import { NoLoginTestRuntime, RuntimeServiceProvider } from "../lib";
+import { NoLoginTestRuntime, RuntimeServiceProvider } from "../lib/index.js";
 
 describe("Backbone Compatibility Check", () => {
     const serviceProvider = new RuntimeServiceProvider();

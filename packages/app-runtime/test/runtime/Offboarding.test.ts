@@ -1,7 +1,7 @@
+import { AppRuntime } from "@nmshd/app-runtime";
 import { DeviceMapper, IdentityDeletionProcessStatus, RuntimeServices } from "@nmshd/runtime";
 import { TokenContentDeviceSharedSecret } from "@nmshd/transport";
-import { AppRuntime } from "../../src";
-import { TestUtil } from "../lib";
+import { TestUtil } from "../lib/index.js";
 
 describe("Offboarding", function () {
     let runtime: AppRuntime;

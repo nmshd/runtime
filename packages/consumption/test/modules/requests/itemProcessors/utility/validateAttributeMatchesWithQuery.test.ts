@@ -1,5 +1,14 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import {
+    AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON,
+    AcceptReadAttributeRequestItemParametersWithNewAttributeJSON,
+    ConsumptionController,
+    ConsumptionIds,
+    LocalRequest,
+    LocalRequestStatus,
+    ReadAttributeRequestItemProcessor
+} from "@nmshd/consumption";
+import {
     IdentityAttributeQuery,
     IQLQuery,
     ProprietaryString,
@@ -13,17 +22,8 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreDate } from "@nmshd/core-types";
 import { AccountController, Transport } from "@nmshd/transport";
-import {
-    AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON,
-    AcceptReadAttributeRequestItemParametersWithNewAttributeJSON,
-    ConsumptionController,
-    ConsumptionIds,
-    LocalRequest,
-    LocalRequestStatus,
-    ReadAttributeRequestItemProcessor
-} from "../../../../../src";
-import { TestUtil } from "../../../../core/TestUtil";
-import { TestObjectFactory } from "../../testHelpers/TestObjectFactory";
+import { TestUtil } from "../../../../core/TestUtil.js";
+import { TestObjectFactory } from "../../testHelpers/TestObjectFactory.js";
 
 describe("validateAttributeMatchesWithQuery", function () {
     let connection: IDatabaseConnection;

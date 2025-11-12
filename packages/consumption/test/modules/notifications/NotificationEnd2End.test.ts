@@ -1,10 +1,10 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
+import { ConsumptionController, ConsumptionIds, LocalNotification, LocalNotificationSource, LocalNotificationStatus } from "@nmshd/consumption";
 import { Notification } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { AccountController, Message, SynchronizedCollection, Transport } from "@nmshd/transport";
-import { ConsumptionController, ConsumptionIds, LocalNotification, LocalNotificationSource, LocalNotificationStatus } from "../../../src";
-import { TestUtil } from "../../core/TestUtil";
-import { TestNotificationItem, TestNotificationItemProcessor } from "./testHelpers/TestNotificationItem";
+import { TestUtil } from "../../core/TestUtil.js";
+import { TestNotificationItem, TestNotificationItemProcessor } from "./testHelpers/TestNotificationItem.js";
 
 describe("End2End Notification via Messages", function () {
     let connection: IDatabaseConnection;

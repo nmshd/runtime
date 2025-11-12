@@ -1,4 +1,4 @@
-import { FormFieldRequestItem, FormFieldSettings, IntegerFormFieldSettings, RatingFormFieldSettings, SelectionFormFieldSettings, StringFormFieldSettings } from "../../../src";
+import { FormFieldRequestItem, FormFieldSettings, IntegerFormFieldSettings, RatingFormFieldSettings, SelectionFormFieldSettings, StringFormFieldSettings } from "@nmshd/content";
 
 describe("creation of FormFieldRequestItem", () => {
     test("should create a FormFieldRequestItem with a StringFormFieldSettings JSON", () => {

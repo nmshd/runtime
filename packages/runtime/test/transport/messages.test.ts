@@ -2,7 +2,6 @@ import { sleep } from "@js-soft/ts-utils";
 import { ConsumptionIds } from "@nmshd/consumption";
 import { ConsentRequestItemJSON, Notification } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
-import assert from "assert";
 import {
     AttributeDeletedEvent,
     GetMessagesQuery,
@@ -17,7 +16,8 @@ import {
     PeerDeletionCancelledEvent,
     PeerToBeDeletedEvent,
     RelationshipStatus
-} from "../../src";
+} from "@nmshd/runtime";
+import assert from "assert";
 import {
     cleanupMessages,
     emptyRelationshipCreationContent,
@@ -39,7 +39,7 @@ import {
     TestNotificationItem,
     TestRuntimeServices,
     uploadFile
-} from "../lib";
+} from "../lib/index.js";
 
 const serviceProvider = new RuntimeServiceProvider();
 let client1: TestRuntimeServices;

@@ -1,4 +1,4 @@
-import { ErrorValidationResult, SuccessfulValidationResult, ValidationResult } from "../src";
+import { ErrorValidationResult, SuccessfulValidationResult, ValidationResult } from "@nmshd/consumption";
 
 expect.extend({
     successfulValidationResult(actual: ValidationResult) {

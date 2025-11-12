@@ -1,4 +1,4 @@
-import { AttributeValues, IQLQuery, IQLQueryCreationHintsJSON } from "../../src";
+import { AttributeValues, IQLQuery, IQLQueryCreationHintsJSON } from "@nmshd/content";
 
 describe("IQLQuery", function () {
     const validIqlQueries = ["#test", "LanguageCertificate && #language:de"];

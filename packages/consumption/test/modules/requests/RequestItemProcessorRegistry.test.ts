@@ -1,9 +1,9 @@
+import { ConsumptionController, GenericRequestItemProcessor, RequestItemProcessorRegistry } from "@nmshd/consumption";
 import { AcceptResponseItem, IRequestItem, RejectResponseItem, RequestItem } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { AccountController, IdentityController } from "@nmshd/transport";
-import { ConsumptionController, GenericRequestItemProcessor, RequestItemProcessorRegistry } from "../../../src";
-import { TestUtil } from "../../core/TestUtil";
-import { TestRequestItem } from "./testHelpers/TestRequestItem";
+import { TestUtil } from "../../core/TestUtil.js";
+import { TestRequestItem } from "./testHelpers/TestRequestItem.js";
 
 class TestRequestItemProcessor extends GenericRequestItemProcessor<TestRequestItem> {
     public override accept(): AcceptResponseItem {

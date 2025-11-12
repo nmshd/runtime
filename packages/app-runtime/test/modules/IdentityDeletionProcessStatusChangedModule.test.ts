@@ -1,8 +1,8 @@
+import { AppRuntime, LocalAccountDeletionDateChangedEvent, LocalAccountDTO, LocalAccountSession } from "@nmshd/app-runtime";
 import { CoreId } from "@nmshd/core-types";
 import { DeviceMapper, IdentityDeletionProcessStatus } from "@nmshd/runtime";
 import { TokenContentDeviceSharedSecret } from "@nmshd/transport";
-import { AppRuntime, LocalAccountDeletionDateChangedEvent, LocalAccountDTO, LocalAccountSession } from "../../src";
-import { MockEventBus, TestUtil } from "../lib";
+import { MockEventBus, TestUtil } from "../lib/index.js";
 
 describe("IdentityDeletionProcessStatusChanged", function () {
     const eventBusRuntime1 = new MockEventBus();

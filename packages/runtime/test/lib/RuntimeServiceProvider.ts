@@ -1,8 +1,8 @@
+import { AnonymousServices, AutomationConfig, ConsumptionServices, DataViewExpander, RuntimeConfig, TransportServices } from "@nmshd/runtime";
 import { IConfigOverwrite } from "@nmshd/transport";
 import correlator from "correlation-id";
-import { AnonymousServices, AutomationConfig, ConsumptionServices, DataViewExpander, RuntimeConfig, TransportServices } from "../../src";
-import { MockEventBus } from "./MockEventBus";
-import { TestRuntime } from "./TestRuntime";
+import { MockEventBus } from "./MockEventBus.js";
+import { TestRuntime } from "./TestRuntime.js";
 
 export interface TestRuntimeServices {
     transport: TransportServices;

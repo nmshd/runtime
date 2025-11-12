@@ -1,8 +1,8 @@
+import { LocalRequest, LocalRequestStatus, LocalRequestStatusLogEntry, LocalResponse } from "@nmshd/consumption";
 import { ResponseItem } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
-import { LocalRequest, LocalRequestStatus, LocalRequestStatusLogEntry, LocalResponse } from "../../../../src";
-import { TestObjectFactory } from "../testHelpers/TestObjectFactory";
-import { TestRequestItem } from "../testHelpers/TestRequestItem";
+import { TestObjectFactory } from "../testHelpers/TestObjectFactory.js";
+import { TestRequestItem } from "../testHelpers/TestRequestItem.js";
 
 describe("LocalRequest", function () {
     test("creates objects of all nested classes", function () {

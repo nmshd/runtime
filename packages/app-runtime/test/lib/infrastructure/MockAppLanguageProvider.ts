@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
+import { IAppLanguageProvider } from "@nmshd/app-runtime";
 import { LanguageISO639 } from "@nmshd/core-types";
-import { IAppLanguageProvider } from "../../../src";
 
 export class MockAppLanguageProvider implements IAppLanguageProvider {
     #appLanguage: LanguageISO639 = LanguageISO639.en;

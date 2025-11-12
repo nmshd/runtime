@@ -1,7 +1,4 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { Notification, PeerRelationshipAttributeDeletedByPeerNotificationItem, RelationshipAttribute, RelationshipAttributeConfidentiality } from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
-import { AccountController, Transport } from "@nmshd/transport";
 import {
     ConsumptionController,
     EmittedAttributeDeletionInfo,
@@ -14,9 +11,12 @@ import {
     PeerRelationshipAttributeDeletedByPeerNotificationItemProcessor,
     ReceivedAttributeDeletionStatus,
     ThirdPartyRelationshipAttribute
-} from "../../../../../src";
-import { TestUtil } from "../../../../core/TestUtil";
-import { MockEventBus } from "../../../MockEventBus";
+} from "@nmshd/consumption";
+import { Notification, PeerRelationshipAttributeDeletedByPeerNotificationItem, RelationshipAttribute, RelationshipAttributeConfidentiality } from "@nmshd/content";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { AccountController, Transport } from "@nmshd/transport";
+import { TestUtil } from "../../../../core/TestUtil.js";
+import { MockEventBus } from "../../../MockEventBus.js";
 
 const mockEventBus = new MockEventBus();
 

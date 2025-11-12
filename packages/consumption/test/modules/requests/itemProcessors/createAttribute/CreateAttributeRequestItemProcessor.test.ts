@@ -1,12 +1,12 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
+import { EmittedAttributeDeletionStatus } from "@nmshd/consumption";
 import { GivenName, ProprietaryInteger, ProprietaryString } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { Transport } from "@nmshd/transport";
-import { EmittedAttributeDeletionStatus } from "../../../../../src";
-import { TestUtil } from "../../../../core/TestUtil";
-import { TestObjectFactory } from "../../testHelpers/TestObjectFactory";
-import { Context, GivenSteps, ThenSteps, WhenSteps } from "./Context";
-import { TestIdentity } from "./TestIdentity";
+import { TestUtil } from "../../../../core/TestUtil.js";
+import { TestObjectFactory } from "../../testHelpers/TestObjectFactory.js";
+import { Context, GivenSteps, ThenSteps, WhenSteps } from "./Context.js";
+import { TestIdentity } from "./TestIdentity.js";
 
 describe("CreateAttributeRequestItemProcessor", function () {
     let connection: IDatabaseConnection;

@@ -1,4 +1,4 @@
-import { NoLoginTestRuntime, RuntimeServiceProvider, TestRuntime, TestRuntimeServices, uploadOwnToken } from "../lib";
+import { NoLoginTestRuntime, RuntimeServiceProvider, TestRuntime, TestRuntimeServices, uploadOwnToken } from "../lib/index.js";
 
 const serviceProvider = new RuntimeServiceProvider();
 let noLoginRuntime: TestRuntime;

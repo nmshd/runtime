@@ -1,6 +1,5 @@
 import { SerializableBase } from "@js-soft/ts-serval";
 import { set } from "lodash";
-import "vitest";
 
 expect.extend({
     toStrictEqualExcluding(received: unknown, expected: unknown, ...excludes: string[]) {
@@ -62,10 +61,12 @@ expect.extend({
     }
 });
 
-interface CustomMatchers<R = unknown> {
-    toStrictEqualExcluding(expected: unknown, ...ignoreProperties: string[]): R;
-}
+export {};
 
-declare module "vitest" {
-    interface Matchers<T = any> extends CustomMatchers<T> {}
+declare global {
+    namespace jest {
+        interface Matchers<R> {
+            toStrictEqualExcluding(expected: unknown, ...ignoreProperties: string[]): R;
+        }
+    }
 }
