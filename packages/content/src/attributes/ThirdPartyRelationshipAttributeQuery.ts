@@ -1,6 +1,6 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreAddress, ICoreAddress } from "@nmshd/core-types";
-import { AbstractAttributeQuery, AbstractAttributeQueryJSON, IAbstractAttributeQuery } from "./AbstractAttributeQuery";
+import { AbstractAttributeQuery, AbstractAttributeQueryJSON, IAbstractAttributeQuery } from "./AbstractAttributeQuery.js";
 export interface ThirdPartyRelationshipAttributeQueryJSON extends AbstractAttributeQueryJSON {
     "@type": "ThirdPartyRelationshipAttributeQuery";
     key: string;

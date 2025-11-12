@@ -1,10 +1,10 @@
 import { ISerializable, Serializable } from "@js-soft/ts-serval";
-import { ContentJSON } from "../ContentJSON";
-import { RenderHints, ValueHints } from "./hints";
-import { AbstractBoolean } from "./types/AbstractBoolean";
-import { AbstractFloat } from "./types/AbstractFloat";
-import { AbstractInteger } from "./types/AbstractInteger";
-import { AbstractString } from "./types/AbstractString";
+import { ContentJSON } from "../ContentJSON.js";
+import { RenderHints, ValueHints } from "./hints/index.js";
+import { AbstractBoolean } from "./types/AbstractBoolean.js";
+import { AbstractFloat } from "./types/AbstractFloat.js";
+import { AbstractInteger } from "./types/AbstractInteger.js";
+import { AbstractString } from "./types/AbstractString.js";
 
 export interface AbstractAttributeValueJSON extends ContentJSON {}
 

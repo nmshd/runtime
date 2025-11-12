@@ -1,12 +1,12 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { ValueHints, ValueHintsOverride } from "../../hints";
-import { AbstractFloat, AbstractFloatJSON, IAbstractFloat } from "../AbstractFloat";
+import { ValueHints, ValueHintsOverride } from "../../hints/index.js";
+import { AbstractFloat, AbstractFloatJSON, IAbstractFloat } from "../AbstractFloat.js";
 import {
     IProprietaryAttributeValue,
     PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH,
     PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH,
     ProprietaryAttributeValueJSON
-} from "./ProprietaryAttributeValue";
+} from "./ProprietaryAttributeValue.js";
 
 export interface ProprietaryFloatJSON extends ProprietaryAttributeValueJSON, AbstractFloatJSON {
     "@type": "ProprietaryFloat";

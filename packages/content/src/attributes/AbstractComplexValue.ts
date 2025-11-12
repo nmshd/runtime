@@ -1,5 +1,5 @@
-import { AbstractAttributeValue, AbstractAttributeValueJSON, IAbstractAttributeValue } from "./AbstractAttributeValue";
-import { RenderHints, RenderHintsEditType, RenderHintsTechnicalType } from "./hints";
+import { AbstractAttributeValue, AbstractAttributeValueJSON, IAbstractAttributeValue } from "./AbstractAttributeValue.js";
+import { RenderHints, RenderHintsEditType, RenderHintsTechnicalType } from "./hints/index.js";
 
 export interface AbstractComplexValueJSON extends AbstractAttributeValueJSON {}
 

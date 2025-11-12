@@ -1,6 +1,6 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { RenderHints, RenderHintsEditType, ValueHints, ValueHintsValue } from "../../../attributes/hints";
-import { AbstractString, AbstractStringJSON, IAbstractString } from "../AbstractString";
+import { RenderHints, RenderHintsEditType, ValueHints, ValueHintsValue } from "../../../attributes/hints/index.js";
+import { AbstractString, AbstractStringJSON, IAbstractString } from "../AbstractString.js";
 
 /**
  * Biologisches Geschlecht

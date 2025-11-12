@@ -1,8 +1,8 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import * as iql from "@nmshd/iql";
-import { AbstractAttributeQuery, AbstractAttributeQueryJSON, IAbstractAttributeQuery } from "./AbstractAttributeQuery";
-import { AttributeValues } from "./AttributeValueTypes";
-import { IdentityAttribute } from "./IdentityAttribute";
+import { AbstractAttributeQuery, AbstractAttributeQueryJSON, IAbstractAttributeQuery } from "./AbstractAttributeQuery.js";
+import { AttributeValues } from "./AttributeValueTypes.js";
+import { IdentityAttribute } from "./IdentityAttribute.js";
 
 export interface IQLQueryCreationHintsJSON {
     valueType: AttributeValues.Identity.TypeName;

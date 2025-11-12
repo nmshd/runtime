@@ -1,12 +1,12 @@
 import { Serializable, serialize, validate, ValidationError } from "@js-soft/ts-serval";
 import { nameof } from "ts-simple-nameof";
-import { AbstractComplexValue, AbstractComplexValueJSON, IAbstractComplexValue } from "../../AbstractComplexValue";
-import { RenderHints, ValueHints } from "../../hints";
-import { DigitalIdentityDescriptor, DigitalIdentityDescriptorJSON, IDigitalIdentityDescriptor } from "./DigitalIdentityDescriptor";
-import { IStatementIssuerConditions, StatementIssuerConditions, StatementIssuerConditionsJSON } from "./StatementIssuerConditions";
-import { IStatementObject, StatementObject, StatementObjectJSON } from "./StatementObject";
-import { IStatementPredicate, Predicates, StatementPredicate, StatementPredicateJSON } from "./StatementPredicate";
-import { IStatementSubject, StatementSubject, StatementSubjectJSON } from "./StatementSubject";
+import { AbstractComplexValue, AbstractComplexValueJSON, IAbstractComplexValue } from "../../AbstractComplexValue.js";
+import { RenderHints, ValueHints } from "../../hints/index.js";
+import { DigitalIdentityDescriptor, DigitalIdentityDescriptorJSON, IDigitalIdentityDescriptor } from "./DigitalIdentityDescriptor.js";
+import { IStatementIssuerConditions, StatementIssuerConditions, StatementIssuerConditionsJSON } from "./StatementIssuerConditions.js";
+import { IStatementObject, StatementObject, StatementObjectJSON } from "./StatementObject.js";
+import { IStatementPredicate, Predicates, StatementPredicate, StatementPredicateJSON } from "./StatementPredicate.js";
+import { IStatementSubject, StatementSubject, StatementSubjectJSON } from "./StatementSubject.js";
 
 export interface AbstractStatementJSON extends AbstractComplexValueJSON {
     subject: StatementSubjectJSON;

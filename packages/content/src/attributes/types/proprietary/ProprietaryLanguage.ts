@@ -1,13 +1,13 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { ValueHints, ValueHintsOverride } from "../../hints";
-import { AbstractStringJSON, IAbstractString } from "../AbstractString";
-import { AbstractLanguage } from "../strings/AbstractLanguage";
+import { ValueHints, ValueHintsOverride } from "../../hints/index.js";
+import { AbstractStringJSON, IAbstractString } from "../AbstractString.js";
+import { AbstractLanguage } from "../strings/AbstractLanguage.js";
 import {
     IProprietaryAttributeValue,
     PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH,
     PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH,
     ProprietaryAttributeValueJSON
-} from "./ProprietaryAttributeValue";
+} from "./ProprietaryAttributeValue.js";
 
 export interface ProprietaryLanguageJSON extends ProprietaryAttributeValueJSON, AbstractStringJSON {
     "@type": "ProprietaryLanguage";

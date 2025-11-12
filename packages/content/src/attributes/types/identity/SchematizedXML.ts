@@ -1,6 +1,6 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { AbstractStringJSON, IAbstractString } from "../AbstractString";
-import { AbstractXML } from "../strings/AbstractXML";
+import { AbstractStringJSON, IAbstractString } from "../AbstractString.js";
+import { AbstractXML } from "../strings/AbstractXML.js";
 
 export interface SchematizedXMLJSON extends AbstractStringJSON {
     "@type": "SchematizedXML";

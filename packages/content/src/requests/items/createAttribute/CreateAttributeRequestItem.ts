@@ -1,7 +1,13 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { RequestItemJSON } from "../..";
-import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute, IRelationshipAttribute, RelationshipAttribute, RelationshipAttributeJSON } from "../../../attributes";
-import { IRequestItem, RequestItem } from "../../RequestItem";
+import {
+    IdentityAttribute,
+    IdentityAttributeJSON,
+    IIdentityAttribute,
+    IRelationshipAttribute,
+    RelationshipAttribute,
+    RelationshipAttributeJSON
+} from "../../../attributes/index.js";
+import { IRequestItem, RequestItem, RequestItemJSON } from "../../RequestItem.js";
 
 export interface CreateAttributeRequestItemJSON extends RequestItemJSON {
     "@type": "CreateAttributeRequestItem";

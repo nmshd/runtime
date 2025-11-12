@@ -1,6 +1,6 @@
 import { type } from "@js-soft/ts-serval";
-import { AbstractStringJSON, IAbstractString } from "../AbstractString";
-import { AbstractLanguage } from "../strings/AbstractLanguage";
+import { AbstractStringJSON, IAbstractString } from "../AbstractString.js";
+import { AbstractLanguage } from "../strings/AbstractLanguage.js";
 
 export interface CommunicationLanguageJSON extends AbstractStringJSON {
     "@type": "CommunicationLanguage";

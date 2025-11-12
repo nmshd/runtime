@@ -1,6 +1,6 @@
 import { Serializable, serialize, type, validate, ValidationError } from "@js-soft/ts-serval";
 import { nameof } from "ts-simple-nameof";
-import { IRequestItem, RequestItem, RequestItemJSON } from "../../RequestItem";
+import { IRequestItem, RequestItem, RequestItemJSON } from "../../RequestItem.js";
 
 export interface ConsentRequestItemJSON extends RequestItemJSON {
     "@type": "ConsentRequestItem";

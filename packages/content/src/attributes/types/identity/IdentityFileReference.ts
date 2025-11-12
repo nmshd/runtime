@@ -1,6 +1,6 @@
 import { type } from "@js-soft/ts-serval";
-import { AbstractStringJSON, IAbstractString } from "../AbstractString";
-import { AbstractFileReference } from "../strings";
+import { AbstractStringJSON, IAbstractString } from "../AbstractString.js";
+import { AbstractFileReference } from "../strings/index.js";
 
 export interface IdentityFileReferenceJSON extends AbstractStringJSON {
     "@type": "IdentityFileReference";

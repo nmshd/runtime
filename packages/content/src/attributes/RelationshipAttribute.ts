@@ -1,7 +1,7 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { AbstractAttribute, AbstractAttributeJSON, IAbstractAttribute } from "./AbstractAttribute";
-import { AttributeValues } from "./AttributeValueTypes";
-import { RelationshipAttributeConfidentiality } from "./RelationshipAttributeConfidentiality";
+import { AbstractAttribute, AbstractAttributeJSON, IAbstractAttribute } from "./AbstractAttribute.js";
+import { AttributeValues } from "./AttributeValueTypes.js";
+import { RelationshipAttributeConfidentiality } from "./RelationshipAttributeConfidentiality.js";
 
 export interface RelationshipAttributeJSON<TValueJSONInterface extends AttributeValues.Relationship.Json = AttributeValues.Relationship.Json> extends AbstractAttributeJSON {
     "@type": "RelationshipAttribute";

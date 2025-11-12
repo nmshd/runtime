@@ -1,7 +1,7 @@
 import { serialize, validate } from "@js-soft/ts-serval";
 import { DateTime } from "luxon";
-import { RenderHints, RenderHintsDataType, RenderHintsEditType, ValueHints } from "../../../attributes/hints";
-import { AbstractString } from "../AbstractString";
+import { RenderHints, RenderHintsDataType, RenderHintsEditType, ValueHints } from "../../../attributes/hints/index.js";
+import { AbstractString } from "../AbstractString.js";
 
 export abstract class AbstractDateString extends AbstractString {
     private static readonly format = "yyyy-MM-dd";

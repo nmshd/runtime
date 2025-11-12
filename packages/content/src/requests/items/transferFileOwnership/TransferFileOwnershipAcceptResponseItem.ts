@@ -1,7 +1,7 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreId, ICoreId } from "@nmshd/core-types";
-import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute } from "../../../attributes";
-import { AcceptResponseItem, AcceptResponseItemJSON, IAcceptResponseItem } from "../../response";
+import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute } from "../../../attributes/index.js";
+import { AcceptResponseItem, AcceptResponseItemJSON, IAcceptResponseItem } from "../../response/index.js";
 
 export interface TransferFileOwnershipAcceptResponseItemJSON extends AcceptResponseItemJSON {
     "@type": "TransferFileOwnershipAcceptResponseItem";

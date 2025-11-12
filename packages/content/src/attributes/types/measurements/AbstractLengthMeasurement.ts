@@ -1,7 +1,7 @@
 import { serialize, validate } from "@js-soft/ts-serval";
 import { nameof } from "ts-simple-nameof";
-import { ValueHints, ValueHintsValue } from "../../hints";
-import { AbstractMeasurement } from "./AbstractMeasurement";
+import { ValueHints, ValueHintsValue } from "../../hints/index.js";
+import { AbstractMeasurement } from "./AbstractMeasurement.js";
 
 export enum LengthUnit {
     NM = "nm",

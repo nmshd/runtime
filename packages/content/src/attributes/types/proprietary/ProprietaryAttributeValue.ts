@@ -1,5 +1,5 @@
-import { AbstractAttributeValueJSON, IAbstractAttributeValue } from "../../AbstractAttributeValue";
-import { IValueHintsOverride, ValueHintsOverrideJSON } from "../../hints";
+import { AbstractAttributeValueJSON, IAbstractAttributeValue } from "../../AbstractAttributeValue.js";
+import { IValueHintsOverride, ValueHintsOverrideJSON } from "../../hints/index.js";
 
 export interface ProprietaryAttributeValueJSON extends AbstractAttributeValueJSON {
     title: string;

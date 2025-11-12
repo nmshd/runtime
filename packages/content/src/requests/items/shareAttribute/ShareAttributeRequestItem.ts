@@ -1,8 +1,14 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreAddress, CoreId, ICoreId } from "@nmshd/core-types";
-import { RequestItemJSON } from "../..";
-import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute, IRelationshipAttribute, RelationshipAttribute, RelationshipAttributeJSON } from "../../../attributes";
-import { IRequestItem, RequestItem } from "../../RequestItem";
+import {
+    IdentityAttribute,
+    IdentityAttributeJSON,
+    IIdentityAttribute,
+    IRelationshipAttribute,
+    RelationshipAttribute,
+    RelationshipAttributeJSON
+} from "../../../attributes/index.js";
+import { IRequestItem, RequestItem, RequestItemJSON } from "../../RequestItem.js";
 
 export interface ShareAttributeRequestItemJSON extends RequestItemJSON {
     "@type": "ShareAttributeRequestItem";

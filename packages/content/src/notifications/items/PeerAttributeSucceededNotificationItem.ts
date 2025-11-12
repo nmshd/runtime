@@ -1,7 +1,7 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreId, ICoreId } from "@nmshd/core-types";
-import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute, IRelationshipAttribute, RelationshipAttribute, RelationshipAttributeJSON } from "../../attributes";
-import { INotificationItem, NotificationItem, NotificationItemJSON } from "../NotificationItem";
+import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute, IRelationshipAttribute, RelationshipAttribute, RelationshipAttributeJSON } from "../../attributes/index.js";
+import { INotificationItem, NotificationItem, NotificationItemJSON } from "../NotificationItem.js";
 
 export interface PeerAttributeSucceededNotificationItemJSON extends NotificationItemJSON {
     "@type": "PeerAttributeSucceededNotificationItem";

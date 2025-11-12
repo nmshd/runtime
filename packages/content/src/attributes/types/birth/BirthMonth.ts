@@ -1,6 +1,6 @@
 import { type } from "@js-soft/ts-serval";
-import { ValueHints } from "../../hints/ValueHints";
-import { AbstractMonth, AbstractMonthJSON, IAbstractMonth } from "../dates/AbstractMonth";
+import { ValueHints } from "../../hints/ValueHints.js";
+import { AbstractMonth, AbstractMonthJSON, IAbstractMonth } from "../dates/AbstractMonth.js";
 
 export interface BirthMonthJSON extends AbstractMonthJSON {
     "@type": "BirthMonth";

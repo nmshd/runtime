@@ -1,6 +1,6 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { AbstractAttribute, AbstractAttributeJSON, IAbstractAttribute } from "./AbstractAttribute";
-import { AttributeValues } from "./AttributeValueTypes";
+import { AbstractAttribute, AbstractAttributeJSON, IAbstractAttribute } from "./AbstractAttribute.js";
+import { AttributeValues } from "./AttributeValueTypes.js";
 
 export interface IdentityAttributeJSON<TValueJSONInterface extends AttributeValues.Identity.Json = AttributeValues.Identity.Json> extends AbstractAttributeJSON {
     "@type": "IdentityAttribute";

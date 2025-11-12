@@ -1,14 +1,14 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { COUNTRIES_ALPHA2_TO_ENGLISH_NAME } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
-import { AbstractAttributeValue } from "../../AbstractAttributeValue";
-import { RenderHints, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../../hints";
-import { IPhoneNumber, PhoneNumber } from "../communication";
-import { AbstractAddress, AbstractAddressJSON, IAbstractAddress } from "./AbstractAddress";
-import { City, ICity } from "./City";
-import { Country, ICountry } from "./Country";
-import { IState, State } from "./State";
-import { IZipCode, ZipCode } from "./ZipCode";
+import { AbstractAttributeValue } from "../../AbstractAttributeValue.js";
+import { RenderHints, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../../hints/index.js";
+import { IPhoneNumber, PhoneNumber } from "../communication/index.js";
+import { AbstractAddress, AbstractAddressJSON, IAbstractAddress } from "./AbstractAddress.js";
+import { City, ICity } from "./City.js";
+import { Country, ICountry } from "./Country.js";
+import { IState, State } from "./State.js";
+import { IZipCode, ZipCode } from "./ZipCode.js";
 
 export interface DeliveryBoxAddressJSON extends AbstractAddressJSON {
     "@type": "DeliveryBoxAddress";

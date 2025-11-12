@@ -1,11 +1,11 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { nameof } from "ts-simple-nameof";
-import { AbstractAttributeValue } from "../../AbstractAttributeValue";
-import { AbstractComplexValue, AbstractComplexValueJSON, IAbstractComplexValue } from "../../AbstractComplexValue";
-import { RenderHints, ValueHints } from "../../hints";
-import { AffiliationOrganization } from "./AffiliationOrganization";
-import { AffiliationRole, IAffiliationRole } from "./AffiliationRole";
-import { AffiliationUnit, IAffiliationUnit } from "./AffiliationUnit";
+import { AbstractAttributeValue } from "../../AbstractAttributeValue.js";
+import { AbstractComplexValue, AbstractComplexValueJSON, IAbstractComplexValue } from "../../AbstractComplexValue.js";
+import { RenderHints, ValueHints } from "../../hints/index.js";
+import { AffiliationOrganization } from "./AffiliationOrganization.js";
+import { AffiliationRole, IAffiliationRole } from "./AffiliationRole.js";
+import { AffiliationUnit, IAffiliationUnit } from "./AffiliationUnit.js";
 
 export interface AffiliationJSON extends AbstractComplexValueJSON {
     "@type": "Affiliation";

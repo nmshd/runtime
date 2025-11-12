@@ -1,8 +1,8 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreDate, CoreId, ICoreDate } from "@nmshd/core-types";
-import { ContentJSON } from "../ContentJSON";
-import { IRequestItemDerivations, RequestItemDerivations, RequestItemJSONDerivations } from "./RequestItem";
-import { IRequestItemGroup, RequestItemGroup, RequestItemGroupJSON } from "./RequestItemGroup";
+import { ContentJSON } from "../ContentJSON.js";
+import { IRequestItemDerivations, RequestItemDerivations, RequestItemJSONDerivations } from "./RequestItem.js";
+import { IRequestItemGroup, RequestItemGroup, RequestItemGroupJSON } from "./RequestItemGroup.js";
 
 export interface RequestJSON extends ContentJSON {
     "@type": "Request";

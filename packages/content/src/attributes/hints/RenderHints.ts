@@ -1,8 +1,8 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { ContentJSON } from "../../ContentJSON";
-import { RenderHintsDataType } from "./RenderHintsDataType";
-import { RenderHintsEditType } from "./RenderHintsEditType";
-import { RenderHintsTechnicalType } from "./RenderHintsTechnicalType";
+import { ContentJSON } from "../../ContentJSON.js";
+import { RenderHintsDataType } from "./RenderHintsDataType.js";
+import { RenderHintsEditType } from "./RenderHintsEditType.js";
+import { RenderHintsTechnicalType } from "./RenderHintsTechnicalType.js";
 
 export interface RenderHintsJSON extends ContentJSON {
     "@type": "RenderHints";

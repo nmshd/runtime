@@ -1,11 +1,11 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { nameof } from "ts-simple-nameof";
-import { AbstractAttributeValue } from "../../AbstractAttributeValue";
-import { AbstractComplexValue, AbstractComplexValueJSON, IAbstractComplexValue } from "../../AbstractComplexValue";
-import { RenderHints, ValueHints } from "../../hints";
-import { BirthCity, IBirthCity } from "./BirthCity";
-import { BirthCountry, IBirthCountry } from "./BirthCountry";
-import { BirthState, IBirthState } from "./BirthState";
+import { AbstractAttributeValue } from "../../AbstractAttributeValue.js";
+import { AbstractComplexValue, AbstractComplexValueJSON, IAbstractComplexValue } from "../../AbstractComplexValue.js";
+import { RenderHints, ValueHints } from "../../hints/index.js";
+import { BirthCity, IBirthCity } from "./BirthCity.js";
+import { BirthCountry, IBirthCountry } from "./BirthCountry.js";
+import { BirthState, IBirthState } from "./BirthState.js";
 
 export interface BirthPlaceJSON extends AbstractComplexValueJSON {
     "@type": "BirthPlace";

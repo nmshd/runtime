@@ -1,6 +1,6 @@
 import { type } from "@js-soft/ts-serval";
-import { AbstractStringJSON, IAbstractString } from "../AbstractString";
-import { AbstractURL } from "../strings";
+import { AbstractStringJSON, IAbstractString } from "../AbstractString.js";
+import { AbstractURL } from "../strings/index.js";
 
 export interface WebsiteJSON extends AbstractStringJSON {
     "@type": "Website";

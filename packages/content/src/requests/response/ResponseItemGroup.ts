@@ -1,6 +1,6 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { ContentJSON } from "../../ContentJSON";
-import { IResponseItemDerivations, ResponseItemDerivations, ResponseItemJSONDerivations } from "./ResponseItem";
+import { ContentJSON } from "../../ContentJSON.js";
+import { IResponseItemDerivations, ResponseItemDerivations, ResponseItemJSONDerivations } from "./ResponseItem.js";
 
 export interface ResponseItemGroupJSON extends ContentJSON {
     "@type": "ResponseItemGroup";

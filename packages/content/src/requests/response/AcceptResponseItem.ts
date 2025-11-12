@@ -21,9 +21,9 @@ import {
     ReadAttributeAcceptResponseItemJSON,
     TransferFileOwnershipAcceptResponseItem,
     TransferFileOwnershipAcceptResponseItemJSON
-} from "../items";
-import { IResponseItem, ResponseItem, ResponseItemJSON } from "./ResponseItem";
-import { ResponseItemResult } from "./ResponseItemResult";
+} from "../items/index.js";
+import { IResponseItem, ResponseItem, ResponseItemJSON } from "./ResponseItem.js";
+import { ResponseItemResult } from "./ResponseItemResult.js";
 
 export interface AcceptResponseItemJSON extends ResponseItemJSON {
     result: ResponseItemResult.Accepted;

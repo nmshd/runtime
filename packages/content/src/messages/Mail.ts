@@ -1,6 +1,6 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreAddress, ICoreAddress } from "@nmshd/core-types";
-import { ContentJSON } from "../ContentJSON";
+import { ContentJSON } from "../ContentJSON.js";
 
 export interface MailJSON extends ContentJSON {
     "@type": "Mail";

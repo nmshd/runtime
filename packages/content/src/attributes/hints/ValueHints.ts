@@ -1,6 +1,6 @@
 import { ISerializable, PrimitiveType, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { ContentJSON } from "../../ContentJSON";
-import { IValueHintsValue, ValueHintsValue, ValueHintsValueJSON } from "./ValueHintsValue";
+import { ContentJSON } from "../../ContentJSON.js";
+import { IValueHintsValue, ValueHintsValue, ValueHintsValueJSON } from "./ValueHintsValue.js";
 
 export interface ValueHintsJSON extends ContentJSON {
     "@type": "ValueHints";

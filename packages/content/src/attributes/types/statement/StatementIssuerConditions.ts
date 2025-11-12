@@ -1,11 +1,11 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreDate, ICoreDate } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
-import { AbstractComplexValue, AbstractComplexValueJSON, IAbstractComplexValue } from "../../AbstractComplexValue";
-import { RenderHints, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../../hints";
-import { DigitalIdentityDescriptor } from "./DigitalIdentityDescriptor";
-import { StatementAuthorityType } from "./StatementAuthorityType";
-import { StatementEvidence } from "./StatementEvidence";
+import { AbstractComplexValue, AbstractComplexValueJSON, IAbstractComplexValue } from "../../AbstractComplexValue.js";
+import { RenderHints, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../../hints/index.js";
+import { DigitalIdentityDescriptor } from "./DigitalIdentityDescriptor.js";
+import { StatementAuthorityType } from "./StatementAuthorityType.js";
+import { StatementEvidence } from "./StatementEvidence.js";
 
 export interface StatementIssuerConditionsJSON extends AbstractComplexValueJSON {
     "@type": "StatementIssuerConditions";
