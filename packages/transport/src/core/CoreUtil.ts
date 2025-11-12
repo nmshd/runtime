@@ -1,6 +1,6 @@
 import { Serializable, SerializableAsync } from "@js-soft/ts-serval";
 import { CoreBuffer } from "@nmshd/crypto";
-import { TransportError } from "./TransportError";
+import { TransportError } from "./TransportError.js";
 
 export class CoreUtil {
     public static toBuffer(content: string | SerializableAsync | Serializable | CoreBuffer | ArrayBuffer | Uint8Array, verbose = false): CoreBuffer {

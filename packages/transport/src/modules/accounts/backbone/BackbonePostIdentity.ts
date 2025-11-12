@@ -1,4 +1,4 @@
-import { IChallengeSignedSerialized } from "../../challenges/data/ChallengeSigned";
+import { IChallengeSignedSerialized } from "../../challenges/data/ChallengeSigned.js";
 
 export interface BackbonePostIdentityRequest {
     identityPublicKey: string;

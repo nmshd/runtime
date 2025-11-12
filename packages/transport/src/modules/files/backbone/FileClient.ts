@@ -1,8 +1,8 @@
-import { ClientResult } from "../../../core/backbone/ClientResult";
-import { Paginator } from "../../../core/backbone/Paginator";
-import { RESTClientAuthenticate } from "../../../core/backbone/RESTClientAuthenticate";
-import { BackboneGetFilesRequest, BackboneGetFilesResponse } from "./BackboneGetFiles";
-import { BackbonePostFilesRequest, BackbonePostFilesResponse } from "./BackbonePostFiles";
+import { ClientResult } from "../../../core/backbone/ClientResult.js";
+import { Paginator } from "../../../core/backbone/Paginator.js";
+import { RESTClientAuthenticate } from "../../../core/backbone/RESTClientAuthenticate.js";
+import { BackboneGetFilesRequest, BackboneGetFilesResponse } from "./BackboneGetFiles.js";
+import { BackbonePostFilesRequest, BackbonePostFilesResponse } from "./BackbonePostFiles.js";
 
 export class FileClient extends RESTClientAuthenticate {
     public async createFile(input: BackbonePostFilesRequest): Promise<ClientResult<BackbonePostFilesResponse>> {

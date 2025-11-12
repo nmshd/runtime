@@ -1,11 +1,11 @@
 import { log } from "@js-soft/ts-utils";
 import { CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoSecretKey, CryptoSignature, CryptoSignaturePrivateKey, CryptoSignaturePublicKey } from "@nmshd/crypto";
-import { ControllerName, CoreCrypto, CredentialsBasic, TransportController, TransportCoreErrors, TransportError } from "../../core";
-import { AccountController } from "../accounts/AccountController";
-import { DeviceSecretController, DeviceSecretType } from "./DeviceSecretController";
-import { Device, DeviceType } from "./local/Device";
-import { DeviceSecretCredentials } from "./local/DeviceSecretCredentials";
+import { ControllerName, CoreCrypto, CredentialsBasic, TransportController, TransportCoreErrors, TransportError } from "../../core/index.js";
+import { AccountController } from "../accounts/AccountController.js";
+import { DeviceSecretController, DeviceSecretType } from "./DeviceSecretController.js";
+import { Device, DeviceType } from "./local/Device.js";
+import { DeviceSecretCredentials } from "./local/DeviceSecretCredentials.js";
 
 export class DeviceController extends TransportController {
     public get secrets(): DeviceSecretController {

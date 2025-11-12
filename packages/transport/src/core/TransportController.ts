@@ -2,10 +2,10 @@ import { IDatabaseCollectionProvider } from "@js-soft/docdb-access-abstractions"
 import { ILogger } from "@js-soft/logging-abstractions";
 import { Serializable } from "@js-soft/ts-serval";
 import { EventBus } from "@js-soft/ts-utils";
-import { AccountController } from "../modules/accounts/AccountController";
-import { IConfig, Transport } from "./Transport";
-import { TransportError } from "./TransportError";
-import { TransportLoggerFactory } from "./TransportLoggerFactory";
+import { AccountController } from "../modules/accounts/AccountController.js";
+import { IConfig, Transport } from "./Transport.js";
+import { TransportError } from "./TransportError.js";
+import { TransportLoggerFactory } from "./TransportLoggerFactory.js";
 
 export enum ControllerName {
     Account = "Account",

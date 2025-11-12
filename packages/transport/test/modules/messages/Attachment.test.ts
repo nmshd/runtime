@@ -1,7 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { CoreBuffer } from "@nmshd/crypto";
 import { AccountController, File, Message, Transport } from "@nmshd/transport";
-import { TestUtil } from "../../testHelpers/TestUtil";
+import { TestUtil } from "../../testHelpers/TestUtil.js";
 
 describe("AttachmentTest", function () {
     let connection: IDatabaseConnection;

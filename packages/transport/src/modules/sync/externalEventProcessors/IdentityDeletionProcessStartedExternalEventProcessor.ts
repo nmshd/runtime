@@ -1,7 +1,7 @@
 import { Serializable, serialize, validate } from "@js-soft/ts-serval";
-import { IdentityDeletionProcess } from "../../accounts/data/IdentityDeletionProcess";
-import { BackboneExternalEvent } from "../backbone/BackboneExternalEvent";
-import { ExternalEventProcessor } from "./ExternalEventProcessor";
+import { IdentityDeletionProcess } from "../../accounts/data/IdentityDeletionProcess.js";
+import { BackboneExternalEvent } from "../backbone/BackboneExternalEvent.js";
+import { ExternalEventProcessor } from "./ExternalEventProcessor.js";
 
 class IdentityDeletionProcessStartedEventData extends Serializable {
     @serialize()

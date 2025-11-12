@@ -21,9 +21,9 @@ import {
     CryptoSignatures,
     Encoding
 } from "@nmshd/crypto";
-import { PasswordGenerator } from "../util";
-import { TransportError } from "./TransportError";
-import { TransportVersion } from "./types/TransportVersion";
+import { PasswordGenerator } from "../util/index.js";
+import { TransportError } from "./TransportError.js";
+import { TransportVersion } from "./types/TransportVersion.js";
 
 export abstract class CoreCrypto {
     /**

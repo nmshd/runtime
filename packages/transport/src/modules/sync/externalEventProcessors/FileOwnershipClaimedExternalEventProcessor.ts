@@ -1,8 +1,8 @@
 import { Serializable, serialize, validate } from "@js-soft/ts-serval";
-import { FileOwnershipClaimedEvent } from "../../../events";
-import { File } from "../../files/local/File";
-import { ExternalEvent } from "../data/ExternalEvent";
-import { ExternalEventProcessor } from "./ExternalEventProcessor";
+import { FileOwnershipClaimedEvent } from "../../../events/index.js";
+import { File } from "../../files/local/File.js";
+import { ExternalEvent } from "../data/ExternalEvent.js";
+import { ExternalEventProcessor } from "./ExternalEventProcessor.js";
 
 class FileOwnershipClaimedExternalEventData extends Serializable {
     @serialize()

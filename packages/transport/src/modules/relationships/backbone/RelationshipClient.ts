@@ -1,10 +1,10 @@
-import { ClientResult } from "../../../core/backbone/ClientResult";
-import { Paginator } from "../../../core/backbone/Paginator";
-import { RESTClientAuthenticate } from "../../../core/backbone/RESTClientAuthenticate";
-import { BackboneCanCreateRelationshipResponse } from "./BackboneCanCreateRelationship";
-import { BackboneGetRelationshipResponse, BackboneGetRelationshipsRequest } from "./BackboneGetRelationships";
-import { BackbonePostRelationshipsRequest, BackbonePostRelationshipsResponse } from "./BackbonePostRelationship";
-import { BackboneAcceptRelationshipsRequest, BackbonePutRelationshipsResponse } from "./BackbonePutRelationship";
+import { ClientResult } from "../../../core/backbone/ClientResult.js";
+import { Paginator } from "../../../core/backbone/Paginator.js";
+import { RESTClientAuthenticate } from "../../../core/backbone/RESTClientAuthenticate.js";
+import { BackboneCanCreateRelationshipResponse } from "./BackboneCanCreateRelationship.js";
+import { BackboneGetRelationshipResponse, BackboneGetRelationshipsRequest } from "./BackboneGetRelationships.js";
+import { BackbonePostRelationshipsRequest, BackbonePostRelationshipsResponse } from "./BackbonePostRelationship.js";
+import { BackboneAcceptRelationshipsRequest, BackbonePutRelationshipsResponse } from "./BackbonePutRelationship.js";
 
 export class RelationshipClient extends RESTClientAuthenticate {
     public async canCreateRelationship(peerAddress: string): Promise<ClientResult<BackboneCanCreateRelationshipResponse>> {

@@ -2,9 +2,9 @@ import { IDatabaseCollection } from "@js-soft/docdb-access-abstractions";
 import { CoreIdHelper } from "@nmshd/core-types";
 import { DatawalletModification, DatawalletModificationCategory, DatawalletModificationType, SynchronizedCollection } from "@nmshd/transport";
 import { instance, mock, verify } from "ts-mockito";
-import { ASynchronizedCollectionItem } from "../../testHelpers/ASynchronizedCollectionItem";
-import { FakeDatabaseCollection } from "../../testHelpers/FakeDatabaseCollection";
-import { objectWith } from "../../testHelpers/PartialObjectMatcher";
+import { ASynchronizedCollectionItem } from "../../testHelpers/ASynchronizedCollectionItem.js";
+import { FakeDatabaseCollection } from "../../testHelpers/FakeDatabaseCollection.js";
+import { objectWith } from "../../testHelpers/PartialObjectMatcher.js";
 
 describe("SynchronizedCollection", function () {
     let datawalletModificationsCollectionMock: IDatabaseCollection;

@@ -1,15 +1,15 @@
 import { CoreDate, CoreId } from "@nmshd/core-types";
-import { TransportCoreErrors } from "../../core";
-import { DbCollectionName } from "../../core/DbCollectionName";
-import { ControllerName, TransportController } from "../../core/TransportController";
-import { PasswordGenerator } from "../../util";
-import { AccountController } from "../accounts/AccountController";
-import { ChallengeType } from "../challenges/data/Challenge";
-import { SynchronizedCollection } from "../sync/SynchronizedCollection";
-import { DeviceAuthClient } from "./backbone/DeviceAuthClient";
-import { Device, DeviceType } from "./local/Device";
-import { ISendDeviceParameters, SendDeviceParameters } from "./local/SendDeviceParameters";
-import { DeviceSharedSecret } from "./transmission/DeviceSharedSecret";
+import { DbCollectionName } from "../../core/DbCollectionName.js";
+import { TransportCoreErrors } from "../../core/index.js";
+import { ControllerName, TransportController } from "../../core/TransportController.js";
+import { PasswordGenerator } from "../../util/index.js";
+import { AccountController } from "../accounts/AccountController.js";
+import { ChallengeType } from "../challenges/data/Challenge.js";
+import { SynchronizedCollection } from "../sync/SynchronizedCollection.js";
+import { DeviceAuthClient } from "./backbone/DeviceAuthClient.js";
+import { Device, DeviceType } from "./local/Device.js";
+import { ISendDeviceParameters, SendDeviceParameters } from "./local/SendDeviceParameters.js";
+import { DeviceSharedSecret } from "./transmission/DeviceSharedSecret.js";
 
 export class DevicesController extends TransportController {
     private devices: SynchronizedCollection;

@@ -1,6 +1,6 @@
-import { RESTClient } from "../../../core";
-import { ClientResult } from "../../../core/backbone/ClientResult";
-import { ChallengeClientCreateChallengeResponse } from "./ChallengeAuthClient";
+import { ClientResult } from "../../../core/backbone/ClientResult.js";
+import { RESTClient } from "../../../core/index.js";
+import { ChallengeClientCreateChallengeResponse } from "./ChallengeAuthClient.js";
 
 export class ChallengeClient extends RESTClient {
     public async createChallenge(): Promise<ClientResult<ChallengeClientCreateChallengeResponse>> {

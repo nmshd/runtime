@@ -2,9 +2,9 @@ import { DatabaseType, IDatabaseCollection } from "@js-soft/docdb-access-abstrac
 import { Serializable } from "@js-soft/ts-serval";
 import jsonpatch from "fast-json-patch";
 import _ from "lodash";
-import { CoreSynchronizable, ICoreSynchronizable } from "../../core/CoreSynchronizable";
-import { TransportIds } from "../../core/TransportIds";
-import { DatawalletModification, DatawalletModificationCategory, DatawalletModificationType } from "../sync/local/DatawalletModification";
+import { CoreSynchronizable, ICoreSynchronizable } from "../../core/CoreSynchronizable.js";
+import { TransportIds } from "../../core/TransportIds.js";
+import { DatawalletModification, DatawalletModificationCategory, DatawalletModificationType } from "../sync/local/DatawalletModification.js";
 
 export class SynchronizedCollection implements IDatabaseCollection {
     public readonly name: string;

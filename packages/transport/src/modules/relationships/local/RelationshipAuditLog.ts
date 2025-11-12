@@ -1,7 +1,7 @@
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import _ from "lodash";
-import { BackboneRelationshipAuditLog as BackboneAuditLog } from "../transmission/RelationshipAuditLog";
-import { RelationshipAuditLogEntry } from "./RelationshipAuditLogEntry";
+import { BackboneRelationshipAuditLog as BackboneAuditLog } from "../transmission/RelationshipAuditLog.js";
+import { RelationshipAuditLogEntry } from "./RelationshipAuditLogEntry.js";
 
 export class RelationshipAuditLog {
     public static fromBackboneAuditLog(backboneAuditLog: BackboneAuditLog): RelationshipAuditLogEntry[] {

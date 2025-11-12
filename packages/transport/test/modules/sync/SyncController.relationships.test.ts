@@ -1,7 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { CoreDate } from "@nmshd/core-types";
 import { RelationshipStatus } from "@nmshd/transport";
-import { TestUtil } from "../../testHelpers/TestUtil";
+import { TestUtil } from "../../testHelpers/TestUtil.js";
 
 describe("RelationshipSync", function () {
     let connection: IDatabaseConnection;

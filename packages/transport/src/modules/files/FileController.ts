@@ -2,17 +2,17 @@ import { ISerializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId, FileReference } from "@nmshd/core-types";
 import { CoreBuffer, CryptoCipher, CryptoHash, CryptoHashAlgorithm, CryptoSecretKey, Encoding } from "@nmshd/crypto";
-import { CoreCrypto, CoreHash, TransportCoreErrors } from "../../core";
-import { DbCollectionName } from "../../core/DbCollectionName";
-import { ControllerName, TransportController } from "../../core/TransportController";
-import { AccountController } from "../accounts/AccountController";
-import { SynchronizedCollection } from "../sync/SynchronizedCollection";
-import { BackboneGetFilesResponse } from "./backbone/BackboneGetFiles";
-import { BackbonePostFilesResponse } from "./backbone/BackbonePostFiles";
-import { FileClient } from "./backbone/FileClient";
-import { File } from "./local/File";
-import { ISendFileParameters, SendFileParameters } from "./local/SendFileParameters";
-import { FileMetadata } from "./transmission/FileMetadata";
+import { DbCollectionName } from "../../core/DbCollectionName.js";
+import { CoreCrypto, CoreHash, TransportCoreErrors } from "../../core/index.js";
+import { ControllerName, TransportController } from "../../core/TransportController.js";
+import { AccountController } from "../accounts/AccountController.js";
+import { SynchronizedCollection } from "../sync/SynchronizedCollection.js";
+import { BackboneGetFilesResponse } from "./backbone/BackboneGetFiles.js";
+import { BackbonePostFilesResponse } from "./backbone/BackbonePostFiles.js";
+import { FileClient } from "./backbone/FileClient.js";
+import { File } from "./local/File.js";
+import { ISendFileParameters, SendFileParameters } from "./local/SendFileParameters.js";
+import { FileMetadata } from "./transmission/FileMetadata.js";
 
 export class FileController extends TransportController {
     private client: FileClient;

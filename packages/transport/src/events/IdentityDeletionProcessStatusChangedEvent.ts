@@ -1,5 +1,5 @@
-import { IdentityDeletionProcess } from "../modules";
-import { TransportDataEvent } from "./TransportDataEvent";
+import { IdentityDeletionProcess } from "../modules/index.js";
+import { TransportDataEvent } from "./TransportDataEvent.js";
 
 export class IdentityDeletionProcessStatusChangedEvent extends TransportDataEvent<IdentityDeletionProcess | undefined> {
     public static readonly namespace = "transport.identityDeletionProcessStatusChanged";

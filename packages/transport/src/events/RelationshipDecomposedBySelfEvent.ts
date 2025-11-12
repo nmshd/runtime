@@ -1,5 +1,5 @@
 import { CoreId } from "@nmshd/core-types";
-import { TransportDataEvent } from "./TransportDataEvent";
+import { TransportDataEvent } from "./TransportDataEvent.js";
 
 export interface RelationshipDecomposedBySelfEventData {
     relationshipId: CoreId;

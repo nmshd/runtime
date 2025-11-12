@@ -12,14 +12,14 @@ import {
     CryptoSignatureKeypair,
     CryptoSignaturePrivateKey
 } from "@nmshd/crypto";
-import { CoreCrypto, TransportCoreErrors, TransportIds } from "../../core";
-import { DbCollectionName } from "../../core/DbCollectionName";
-import { ControllerName, TransportController } from "../../core/TransportController";
-import { AccountController } from "../accounts/AccountController";
-import { DeviceSecretType } from "../devices/DeviceSecretController";
-import { SynchronizedCollection } from "../sync/SynchronizedCollection";
-import { SecretContainerCipher } from "./data/SecretContainerCipher";
-import { SecretContainerPlain } from "./data/SecretContainerPlain";
+import { DbCollectionName } from "../../core/DbCollectionName.js";
+import { CoreCrypto, TransportCoreErrors, TransportIds } from "../../core/index.js";
+import { ControllerName, TransportController } from "../../core/TransportController.js";
+import { AccountController } from "../accounts/AccountController.js";
+import { DeviceSecretType } from "../devices/DeviceSecretController.js";
+import { SynchronizedCollection } from "../sync/SynchronizedCollection.js";
+import { SecretContainerCipher } from "./data/SecretContainerCipher.js";
+import { SecretContainerPlain } from "./data/SecretContainerPlain.js";
 
 export enum SecretBaseKeyType {
     Random = "random",

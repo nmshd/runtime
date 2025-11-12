@@ -1,18 +1,18 @@
-import { ICorrelator, IRESTClientConfig, Paginator, PaginatorPercentageCallback, RESTClientAuthenticate } from "../../../core";
-import { AbstractAuthenticator } from "../../../core/backbone/Authenticator";
-import { ClientResult } from "../../../core/backbone/ClientResult";
-import { BackboneDatawalletModification } from "./BackboneDatawalletModification";
-import { BackboneExternalEvent } from "./BackboneExternalEvent";
-import { CreateDatawalletModificationsRequest, CreateDatawalletModificationsResponse } from "./CreateDatawalletModifications";
+import { AbstractAuthenticator } from "../../../core/backbone/Authenticator.js";
+import { ClientResult } from "../../../core/backbone/ClientResult.js";
+import { ICorrelator, IRESTClientConfig, Paginator, PaginatorPercentageCallback, RESTClientAuthenticate } from "../../../core/index.js";
+import { BackboneDatawalletModification } from "./BackboneDatawalletModification.js";
+import { BackboneExternalEvent } from "./BackboneExternalEvent.js";
+import { CreateDatawalletModificationsRequest, CreateDatawalletModificationsResponse } from "./CreateDatawalletModifications.js";
 import {
     FinalizeDatawalletVersionUpgradeRequest,
     FinalizeDatawalletVersionUpgradeResponse,
     FinalizeExternalEventSyncRequest,
     FinalizeExternalEventSyncResponse
-} from "./FinalizeSyncRun";
-import { GetDatawalletResponse } from "./GetDatawallet";
-import { GetDatawalletModificationsRequest } from "./GetDatawalletModifications";
-import { StartSyncRunRequest, StartSyncRunResponse } from "./StartSyncRun";
+} from "./FinalizeSyncRun.js";
+import { GetDatawalletResponse } from "./GetDatawallet.js";
+import { GetDatawalletModificationsRequest } from "./GetDatawalletModifications.js";
+import { StartSyncRunRequest, StartSyncRunResponse } from "./StartSyncRun.js";
 
 export interface ISyncClient {
     startSyncRun(request?: StartSyncRunRequest): Promise<ClientResult<StartSyncRunResponse>>;

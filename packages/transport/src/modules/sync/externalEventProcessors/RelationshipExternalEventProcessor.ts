@@ -1,6 +1,6 @@
-import { RelationshipChangedEvent } from "../../../events";
-import { Relationship } from "../../relationships/local/Relationship";
-import { ExternalEventProcessor } from "./ExternalEventProcessor";
+import { RelationshipChangedEvent } from "../../../events/index.js";
+import { Relationship } from "../../relationships/local/Relationship.js";
+import { ExternalEventProcessor } from "./ExternalEventProcessor.js";
 
 export abstract class RelationshipExternalEventProcessor extends ExternalEventProcessor {
     protected triggerRelationshipChangedEvent(changedRelationship: Relationship, oldRelationship?: Relationship): void {

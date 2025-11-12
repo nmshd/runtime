@@ -1,8 +1,8 @@
 import { CoreId } from "@nmshd/core-types";
-import { TransportError, TransportIds } from "../../core";
-import { BackboneDatawalletModification } from "./backbone/BackboneDatawalletModification";
-import { CreateDatawalletModificationsRequestItem } from "./backbone/CreateDatawalletModifications";
-import { DatawalletModification, DatawalletModificationCategory, DatawalletModificationType } from "./local/DatawalletModification";
+import { TransportError, TransportIds } from "../../core/index.js";
+import { BackboneDatawalletModification } from "./backbone/BackboneDatawalletModification.js";
+import { CreateDatawalletModificationsRequestItem } from "./backbone/CreateDatawalletModifications.js";
+import { DatawalletModification, DatawalletModificationCategory, DatawalletModificationType } from "./local/DatawalletModification.js";
 
 export class DatawalletModificationMapper {
     public static async fromBackboneDatawalletModification(

@@ -1,11 +1,11 @@
 import { AxiosRequestConfig } from "axios";
 import _ from "lodash";
-import { ICorrelator } from "../ICorrelator";
-import { AbstractAuthenticator } from "./Authenticator";
-import { ClientResult } from "./ClientResult";
-import { Paginator, PaginatorPercentageCallback } from "./Paginator";
-import { RequestError } from "./RequestError";
-import { IRESTClientConfig, RESTClient } from "./RESTClient";
+import { ICorrelator } from "../ICorrelator.js";
+import { AbstractAuthenticator } from "./Authenticator.js";
+import { ClientResult } from "./ClientResult.js";
+import { Paginator, PaginatorPercentageCallback } from "./Paginator.js";
+import { RequestError } from "./RequestError.js";
+import { IRESTClientConfig, RESTClient } from "./RESTClient.js";
 
 export interface CredentialsBasic {
     username: string;

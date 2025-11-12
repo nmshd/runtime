@@ -1,7 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { CoreDate } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
-import { TestUtil } from "../../testHelpers/TestUtil";
+import { TestUtil } from "../../testHelpers/TestUtil.js";
 
 describe("FileSync", function () {
     let connection: IDatabaseConnection;

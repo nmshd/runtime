@@ -1,7 +1,7 @@
 import { ApplicationError } from "@js-soft/ts-utils";
 import { CoreDate } from "@nmshd/core-types";
-import { TransportError } from "../TransportError";
-import { PlatformParameters } from "./PlatformParameters";
+import { TransportError } from "../TransportError.js";
+import { PlatformParameters } from "./PlatformParameters.js";
 
 export class ClientResult<T> {
     private readonly _isSuccess: boolean;

@@ -2,9 +2,9 @@ import { ISerializable, Serializable, serialize, type, validate } from "@js-soft
 import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreDate, ICoreId } from "@nmshd/core-types";
 import { CryptoSecretKey, ICryptoSecretKey } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
-import { CoreSynchronizable, ICoreSynchronizable } from "../../../core";
-import { IPasswordProtection, PasswordProtection } from "../../../core/types/PasswordProtection";
-import { TokenReference } from "../transmission/TokenReference";
+import { CoreSynchronizable, ICoreSynchronizable } from "../../../core/index.js";
+import { IPasswordProtection, PasswordProtection } from "../../../core/types/PasswordProtection.js";
+import { TokenReference } from "../transmission/TokenReference.js";
 
 export interface IToken extends ICoreSynchronizable {
     secretKey: ICryptoSecretKey;

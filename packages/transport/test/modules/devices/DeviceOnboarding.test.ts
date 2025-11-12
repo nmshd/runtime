@@ -2,9 +2,9 @@ import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoSecretKey, CryptoSignaturePrivateKey } from "@nmshd/crypto";
 import { AccountController, Device, DeviceSecretCredentials, DeviceSecretType, DeviceSharedSecret } from "@nmshd/transport";
-import { AppDeviceTest } from "../../testHelpers/AppDeviceTest";
-import { DeviceTestParameters } from "../../testHelpers/DeviceTestParameters";
-import { TestUtil } from "../../testHelpers/TestUtil";
+import { AppDeviceTest } from "../../testHelpers/AppDeviceTest.js";
+import { DeviceTestParameters } from "../../testHelpers/DeviceTestParameters.js";
+import { TestUtil } from "../../testHelpers/TestUtil.js";
 
 describe("Device Onboarding", function () {
     let connection: IDatabaseConnection;

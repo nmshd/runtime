@@ -1,7 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { sleep } from "@js-soft/ts-utils";
 import { AccountController, CreateDatawalletModificationsRequestItem, StartSyncRunStatus, SyncClient, SyncRunType } from "@nmshd/transport";
-import { TestUtil } from "../../testHelpers/TestUtil";
+import { TestUtil } from "../../testHelpers/TestUtil.js";
 
 describe("BackboneConcurrency", function () {
     let connection: IDatabaseConnection;

@@ -1,9 +1,9 @@
 import { Serializable, serialize, validate } from "@js-soft/ts-serval";
 import { CoreId } from "@nmshd/core-types";
-import { PeerDeletionCancelledEvent } from "../../../events";
-import { Relationship } from "../../relationships/local/Relationship";
-import { BackboneExternalEvent } from "../backbone/BackboneExternalEvent";
-import { ExternalEventProcessor } from "./ExternalEventProcessor";
+import { PeerDeletionCancelledEvent } from "../../../events/index.js";
+import { Relationship } from "../../relationships/local/Relationship.js";
+import { BackboneExternalEvent } from "../backbone/BackboneExternalEvent.js";
+import { ExternalEventProcessor } from "./ExternalEventProcessor.js";
 
 class PeerDeletionCancelledExternalEventData extends Serializable {
     @serialize()

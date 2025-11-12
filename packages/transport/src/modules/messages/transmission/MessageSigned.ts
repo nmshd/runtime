@@ -1,5 +1,5 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { IMessageSignature, MessageSignature } from "./MessageSignature";
+import { IMessageSignature, MessageSignature } from "./MessageSignature.js";
 
 export interface IMessageSigned extends ISerializable {
     signatures: IMessageSignature[];

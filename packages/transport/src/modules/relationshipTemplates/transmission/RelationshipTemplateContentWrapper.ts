@@ -1,6 +1,6 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { IIdentity, Identity } from "../../accounts/data/Identity";
-import { IRelationshipTemplatePublicKey, RelationshipTemplatePublicKey } from "./RelationshipTemplatePublicKey";
+import { IIdentity, Identity } from "../../accounts/data/Identity.js";
+import { IRelationshipTemplatePublicKey, RelationshipTemplatePublicKey } from "./RelationshipTemplatePublicKey.js";
 
 export interface IRelationshipTemplateContentWrapper extends ISerializable {
     identity: IIdentity;

@@ -2,7 +2,7 @@ import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { JSONWrapper, Serializable } from "@js-soft/ts-serval";
 import { CoreDate } from "@nmshd/core-types";
 import { AccountController, AnonymousTokenController, Token, Transport } from "@nmshd/transport";
-import { TestUtil } from "../../testHelpers/TestUtil";
+import { TestUtil } from "../../testHelpers/TestUtil.js";
 
 describe("AnonymousTokenController", function () {
     let connection: IDatabaseConnection;

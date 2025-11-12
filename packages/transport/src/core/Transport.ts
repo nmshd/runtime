@@ -5,10 +5,10 @@ import { SodiumWrapper } from "@nmshd/crypto";
 import { AgentOptions } from "http";
 import { AgentOptions as HTTPSAgentOptions } from "https";
 import _ from "lodash";
-import { ICorrelator } from "./ICorrelator";
-import { TransportCoreErrors } from "./TransportCoreErrors";
-import { TransportError } from "./TransportError";
-import { TransportLoggerFactory } from "./TransportLoggerFactory";
+import { ICorrelator } from "./ICorrelator.js";
+import { TransportCoreErrors } from "./TransportCoreErrors.js";
+import { TransportError } from "./TransportError.js";
+import { TransportLoggerFactory } from "./TransportLoggerFactory.js";
 
 let log: ILogger;
 

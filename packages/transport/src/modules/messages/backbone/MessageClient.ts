@@ -1,8 +1,8 @@
-import { ClientResult } from "../../../core/backbone/ClientResult";
-import { Paginator } from "../../../core/backbone/Paginator";
-import { RESTClientAuthenticate } from "../../../core/backbone/RESTClientAuthenticate";
-import { BackboneGetMessagesRequest, BackboneGetMessagesResponse } from "./BackboneGetMessages";
-import { BackbonePostMessagesRequest, BackbonePostMessagesResponse } from "./BackbonePostMessages";
+import { ClientResult } from "../../../core/backbone/ClientResult.js";
+import { Paginator } from "../../../core/backbone/Paginator.js";
+import { RESTClientAuthenticate } from "../../../core/backbone/RESTClientAuthenticate.js";
+import { BackboneGetMessagesRequest, BackboneGetMessagesResponse } from "./BackboneGetMessages.js";
+import { BackbonePostMessagesRequest, BackbonePostMessagesResponse } from "./BackbonePostMessages.js";
 
 export class MessageClient extends RESTClientAuthenticate {
     public async getMessages(request?: BackboneGetMessagesRequest): Promise<ClientResult<Paginator<BackboneGetMessagesResponse>>> {

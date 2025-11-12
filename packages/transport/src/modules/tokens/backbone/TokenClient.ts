@@ -1,8 +1,8 @@
-import { ClientResult } from "../../../core/backbone/ClientResult";
-import { Paginator } from "../../../core/backbone/Paginator";
-import { RESTClientAuthenticate } from "../../../core/backbone/RESTClientAuthenticate";
-import { BackboneGetTokensRequest, BackboneGetTokensResponse } from "./BackboneGetTokens";
-import { BackbonePostTokensRequest, BackbonePostTokensResponse, BackboneUpdateTokenContentRequest, BackboneUpdateTokenContentResponse } from "./BackbonePostTokens";
+import { ClientResult } from "../../../core/backbone/ClientResult.js";
+import { Paginator } from "../../../core/backbone/Paginator.js";
+import { RESTClientAuthenticate } from "../../../core/backbone/RESTClientAuthenticate.js";
+import { BackboneGetTokensRequest, BackboneGetTokensResponse } from "./BackboneGetTokens.js";
+import { BackbonePostTokensRequest, BackbonePostTokensResponse, BackboneUpdateTokenContentRequest, BackboneUpdateTokenContentResponse } from "./BackbonePostTokens.js";
 
 export class TokenClient extends RESTClientAuthenticate {
     public async createToken(token: BackbonePostTokensRequest): Promise<ClientResult<BackbonePostTokensResponse>> {

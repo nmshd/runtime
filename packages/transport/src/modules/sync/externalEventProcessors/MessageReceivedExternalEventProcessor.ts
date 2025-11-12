@@ -1,9 +1,9 @@
 import { Serializable, serialize, validate } from "@js-soft/ts-serval";
 import { CoreId } from "@nmshd/core-types";
-import { MessageReceivedEvent } from "../../../events";
-import { Message } from "../../messages/local/Message";
-import { ExternalEvent } from "../data/ExternalEvent";
-import { ExternalEventProcessor } from "./ExternalEventProcessor";
+import { MessageReceivedEvent } from "../../../events/index.js";
+import { Message } from "../../messages/local/Message.js";
+import { ExternalEvent } from "../data/ExternalEvent.js";
+import { ExternalEventProcessor } from "./ExternalEventProcessor.js";
 
 class MessageReceivedExternalEventData extends Serializable {
     @serialize()

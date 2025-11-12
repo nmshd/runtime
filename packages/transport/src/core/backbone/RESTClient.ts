@@ -6,13 +6,13 @@ import formDataLib from "form-data";
 import { AgentOptions as HTTPAgentOptions } from "http";
 import { AgentOptions as HTTPSAgentOptions } from "https";
 import _ from "lodash";
-import { ICorrelator } from "../ICorrelator";
-import { TransportLoggerFactory } from "../TransportLoggerFactory";
-import { ClientResult } from "./ClientResult";
-import { IPaginationDataSource, Paginator, PaginatorPercentageCallback } from "./Paginator";
-import { PlatformParameters } from "./PlatformParameters";
-import { PaginatedPlatformResponse, PlatformResponse } from "./PlatformResponse";
-import { RequestError } from "./RequestError";
+import { ICorrelator } from "../ICorrelator.js";
+import { TransportLoggerFactory } from "../TransportLoggerFactory.js";
+import { ClientResult } from "./ClientResult.js";
+import { IPaginationDataSource, Paginator, PaginatorPercentageCallback } from "./Paginator.js";
+import { PlatformParameters } from "./PlatformParameters.js";
+import { PaginatedPlatformResponse, PlatformResponse } from "./PlatformResponse.js";
+import { RequestError } from "./RequestError.js";
 
 export class RestPaginationDataSource<T> implements IPaginationDataSource<T> {
     public constructor(

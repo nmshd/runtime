@@ -1,5 +1,5 @@
-import { Relationship } from "../modules";
-import { TransportDataEvent } from "./TransportDataEvent";
+import { Relationship } from "../modules/index.js";
+import { TransportDataEvent } from "./TransportDataEvent.js";
 
 export class PeerDeletionCancelledEvent extends TransportDataEvent<Relationship> {
     public static readonly namespace = "transport.peerDeletionCancelled";

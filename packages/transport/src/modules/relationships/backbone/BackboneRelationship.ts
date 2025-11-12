@@ -1,5 +1,5 @@
-import { BackboneRelationshipAuditLog } from "../transmission/RelationshipAuditLog";
-import { RelationshipStatus } from "../transmission/RelationshipStatus";
+import { BackboneRelationshipAuditLog } from "../transmission/RelationshipAuditLog.js";
+import { RelationshipStatus } from "../transmission/RelationshipStatus.js";
 
 export interface BackboneRelationship {
     id: string;

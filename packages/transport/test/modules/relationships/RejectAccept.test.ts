@@ -1,6 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { AccountController, Transport } from "@nmshd/transport";
-import { TestUtil } from "../../testHelpers/TestUtil";
+import { TestUtil } from "../../testHelpers/TestUtil.js";
 
 describe("Reject and accept relationship / send message", function () {
     let connection: IDatabaseConnection;

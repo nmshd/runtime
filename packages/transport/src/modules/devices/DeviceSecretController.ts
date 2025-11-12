@@ -3,16 +3,16 @@ import { Serializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
 import { CoreDate } from "@nmshd/core-types";
 import { CoreBuffer, CryptoCipher, CryptoExchangeKeypair, CryptoExchangePrivateKey, CryptoSecretKey, CryptoSignatureKeypair, CryptoSignaturePrivateKey } from "@nmshd/crypto";
-import { CoreCrypto, TransportCoreErrors } from "../../core";
-import { ControllerName, TransportController } from "../../core/TransportController";
-import { TransportIds } from "../../core/TransportIds";
-import { AccountController } from "../accounts/AccountController";
-import { SecretContainerCipher } from "../secrets/data/SecretContainerCipher";
-import { SecretContainerPlain } from "../secrets/data/SecretContainerPlain";
-import { DatawalletModification } from "../sync/local/DatawalletModification";
-import { Device } from "./local/Device";
-import { DeviceSecretCredentials } from "./local/DeviceSecretCredentials";
-import { DeviceSharedSecret } from "./transmission/DeviceSharedSecret";
+import { CoreCrypto, TransportCoreErrors } from "../../core/index.js";
+import { ControllerName, TransportController } from "../../core/TransportController.js";
+import { TransportIds } from "../../core/TransportIds.js";
+import { AccountController } from "../accounts/AccountController.js";
+import { SecretContainerCipher } from "../secrets/data/SecretContainerCipher.js";
+import { SecretContainerPlain } from "../secrets/data/SecretContainerPlain.js";
+import { DatawalletModification } from "../sync/local/DatawalletModification.js";
+import { Device } from "./local/Device.js";
+import { DeviceSecretCredentials } from "./local/DeviceSecretCredentials.js";
+import { DeviceSharedSecret } from "./transmission/DeviceSharedSecret.js";
 
 export enum DeviceSecretType {
     IdentitySynchronizationMaster = "identity_synchronization_master",

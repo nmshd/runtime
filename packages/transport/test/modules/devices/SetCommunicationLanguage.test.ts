@@ -1,8 +1,8 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { AccountController } from "@nmshd/transport";
-import { AppDeviceTest } from "../../testHelpers/AppDeviceTest";
-import { DeviceTestParameters } from "../../testHelpers/DeviceTestParameters";
-import { TestUtil } from "../../testHelpers/TestUtil";
+import { AppDeviceTest } from "../../testHelpers/AppDeviceTest.js";
+import { DeviceTestParameters } from "../../testHelpers/DeviceTestParameters.js";
+import { TestUtil } from "../../testHelpers/TestUtil.js";
 
 describe("set the communication language", function () {
     let connection: IDatabaseConnection;

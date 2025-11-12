@@ -1,8 +1,8 @@
 import { Serializable, serialize, validate } from "@js-soft/ts-serval";
-import { MessageDeliveredEvent } from "../../../events";
-import { Message } from "../../messages/local/Message";
-import { ExternalEvent } from "../data/ExternalEvent";
-import { ExternalEventProcessor } from "./ExternalEventProcessor";
+import { MessageDeliveredEvent } from "../../../events/index.js";
+import { Message } from "../../messages/local/Message.js";
+import { ExternalEvent } from "../data/ExternalEvent.js";
+import { ExternalEventProcessor } from "./ExternalEventProcessor.js";
 
 class MessageDeliveredExternalEventData extends Serializable {
     @serialize()

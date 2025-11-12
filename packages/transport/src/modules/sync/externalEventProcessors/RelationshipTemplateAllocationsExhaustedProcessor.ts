@@ -1,8 +1,8 @@
 import { Serializable, serialize, validate } from "@js-soft/ts-serval";
 import { CoreId } from "@nmshd/core-types";
-import { RelationshipTemplateAllocationsExhaustedEvent } from "../../../events";
-import { ExternalEvent } from "../data/ExternalEvent";
-import { ExternalEventProcessor } from "./ExternalEventProcessor";
+import { RelationshipTemplateAllocationsExhaustedEvent } from "../../../events/index.js";
+import { ExternalEvent } from "../data/ExternalEvent.js";
+import { ExternalEventProcessor } from "./ExternalEventProcessor.js";
 
 class RelationshipTemplateAllocationsExhaustedExternalEventData extends Serializable {
     @serialize()

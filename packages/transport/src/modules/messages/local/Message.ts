@@ -2,8 +2,8 @@ import { ISerializable, Serializable, serialize, type, validate } from "@js-soft
 import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreDate, ICoreId } from "@nmshd/core-types";
 import { CryptoSecretKey, ICryptoSecretKey } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
-import { CoreSynchronizable, ICoreSynchronizable } from "../../../core";
-import { IMessageRecipient, MessageRecipient } from "./MessageRecipient";
+import { CoreSynchronizable, ICoreSynchronizable } from "../../../core/index.js";
+import { IMessageRecipient, MessageRecipient } from "./MessageRecipient.js";
 
 export interface IBackboneMessageContents {
     createdBy: CoreAddress;

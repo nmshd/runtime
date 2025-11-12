@@ -1,8 +1,8 @@
 import { ILogger } from "@js-soft/logging-abstractions";
 import { EventEmitter2EventBus } from "@js-soft/ts-utils";
 import { AccountController, DeviceSharedSecret, Transport } from "@nmshd/transport";
-import { DeviceTestParameters } from "./DeviceTestParameters";
-import { TestUtil } from "./TestUtil";
+import { DeviceTestParameters } from "./DeviceTestParameters.js";
+import { TestUtil } from "./TestUtil.js";
 
 export class AppDeviceTest {
     protected parameters: DeviceTestParameters;

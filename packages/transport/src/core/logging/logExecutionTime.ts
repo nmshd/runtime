@@ -1,4 +1,4 @@
-import { TransportLoggerFactory } from "../TransportLoggerFactory";
+import { TransportLoggerFactory } from "../TransportLoggerFactory.js";
 
 /**
  * Measures the time needed to execute the given action and logs it using the given logger.

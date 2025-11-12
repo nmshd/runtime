@@ -1,7 +1,7 @@
-import { RESTClient, RESTClientLogDirective } from "../../../core";
-import { ClientResult } from "../../../core/backbone/ClientResult";
-import { BackboneCheckIfIdentityIsDeletedResponse } from "./BackboneCheckIfIdentityIsDeleted";
-import { BackbonePostIdentityRequest, BackbonePostIdentityResponse } from "./BackbonePostIdentity";
+import { ClientResult } from "../../../core/backbone/ClientResult.js";
+import { RESTClient, RESTClientLogDirective } from "../../../core/index.js";
+import { BackboneCheckIfIdentityIsDeletedResponse } from "./BackboneCheckIfIdentityIsDeleted.js";
+import { BackbonePostIdentityRequest, BackbonePostIdentityResponse } from "./BackbonePostIdentity.js";
 
 export class IdentityClient extends RESTClient {
     protected override _logDirective = RESTClientLogDirective.LogResponse;

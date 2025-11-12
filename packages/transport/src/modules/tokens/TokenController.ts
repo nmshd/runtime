@@ -2,18 +2,18 @@ import { ISerializable, Serializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
-import { CoreCrypto, TransportCoreErrors } from "../../core";
-import { DbCollectionName } from "../../core/DbCollectionName";
-import { ControllerName, TransportController } from "../../core/TransportController";
-import { PasswordProtection } from "../../core/types/PasswordProtection";
-import { AccountController } from "../accounts/AccountController";
-import { SynchronizedCollection } from "../sync/SynchronizedCollection";
-import { BackboneGetTokensResponse } from "./backbone/BackboneGetTokens";
-import { TokenClient } from "./backbone/TokenClient";
-import { ISendTokenParameters, SendTokenParameters } from "./local/SendTokenParameters";
-import { Token } from "./local/Token";
-import { IUpdateTokenContentParameters, UpdateTokenContentParameters } from "./local/UpdateTokenContentParameters";
-import { TokenReference } from "./transmission/TokenReference";
+import { DbCollectionName } from "../../core/DbCollectionName.js";
+import { CoreCrypto, TransportCoreErrors } from "../../core/index.js";
+import { ControllerName, TransportController } from "../../core/TransportController.js";
+import { PasswordProtection } from "../../core/types/PasswordProtection.js";
+import { AccountController } from "../accounts/AccountController.js";
+import { SynchronizedCollection } from "../sync/SynchronizedCollection.js";
+import { BackboneGetTokensResponse } from "./backbone/BackboneGetTokens.js";
+import { TokenClient } from "./backbone/TokenClient.js";
+import { ISendTokenParameters, SendTokenParameters } from "./local/SendTokenParameters.js";
+import { Token } from "./local/Token.js";
+import { IUpdateTokenContentParameters, UpdateTokenContentParameters } from "./local/UpdateTokenContentParameters.js";
+import { TokenReference } from "./transmission/TokenReference.js";
 
 export class TokenController extends TransportController {
     private client: TokenClient;
@@ -47,7 +47,7 @@ export class TokenController extends TransportController {
 
         const password = parameters.passwordProtection?.password;
         const salt = password ? await CoreCrypto.random(16) : undefined;
-        const hashedPassword = password ? (await CoreCrypto.deriveHashOutOfPassword(password, salt!)).toBase64() : undefined;
+        const hashedPassword = password && salt ? (await CoreCrypto.deriveHashOutOfPassword(password, salt)).toBase64() : undefined;
 
         const response = (
             await this.client.createToken({

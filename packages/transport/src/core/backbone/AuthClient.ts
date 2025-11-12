@@ -1,10 +1,10 @@
 import { CoreDate } from "@nmshd/core-types";
 import { AxiosResponse } from "axios";
 import qs from "qs";
-import { ClientResult } from "./ClientResult";
-import { PlatformParameters } from "./PlatformParameters";
-import { RequestError } from "./RequestError";
-import { RESTClient } from "./RESTClient";
+import { ClientResult } from "./ClientResult.js";
+import { PlatformParameters } from "./PlatformParameters.js";
+import { RequestError } from "./RequestError.js";
+import { RESTClient } from "./RESTClient.js";
 
 export interface IAuthenticationRequest {
     grantType: string;

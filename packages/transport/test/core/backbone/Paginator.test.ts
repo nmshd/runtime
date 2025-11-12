@@ -1,8 +1,8 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { CoreBuffer } from "@nmshd/crypto";
 import { AccountController, FileClient, Paginator, PaginatorPercentageCallback, Transport } from "@nmshd/transport";
-import { FakePaginationDataSource } from "../../testHelpers/FakePaginationDataSource";
-import { TestUtil } from "../../testHelpers/TestUtil";
+import { FakePaginationDataSource } from "../../testHelpers/FakePaginationDataSource.js";
+import { TestUtil } from "../../testHelpers/TestUtil.js";
 
 async function itereateThroughAllItemsAsynchronously<T>(paginator: Paginator<T>) {
     for await (const _ of paginator) {

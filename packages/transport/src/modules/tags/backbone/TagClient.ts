@@ -1,7 +1,7 @@
 import { AxiosRequestConfig } from "axios";
-import { ClientResult } from "../../../core/backbone/ClientResult";
-import { RESTClientAuthenticate } from "../../../core/backbone/RESTClientAuthenticate";
-import { BackboneGetTagCollection } from "./BackboneGetTagCollection";
+import { ClientResult } from "../../../core/backbone/ClientResult.js";
+import { RESTClientAuthenticate } from "../../../core/backbone/RESTClientAuthenticate.js";
+import { BackboneGetTagCollection } from "./BackboneGetTagCollection.js";
 
 export class TagClient extends RESTClientAuthenticate {
     public async getTagCollection(etag?: string): Promise<ClientResult<BackboneGetTagCollection> | undefined> {

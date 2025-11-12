@@ -18,7 +18,7 @@ import {
     Transport
 } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
-import { TestUtil } from "../testHelpers/TestUtil";
+import { TestUtil } from "../testHelpers/TestUtil.js";
 
 const publicFunctions: any = {};
 

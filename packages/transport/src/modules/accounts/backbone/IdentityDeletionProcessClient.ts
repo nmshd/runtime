@@ -1,7 +1,7 @@
-import { RESTClientAuthenticate, RESTClientLogDirective } from "../../../core";
-import { ClientResult } from "../../../core/backbone/ClientResult";
-import { BackboneIdentityDeletionProcess } from "./BackboneIdentityDeletionProcess";
-import { BackbonePostIdentityDeletionProcessRequest } from "./BackbonePostIdentityDeletionProcess";
+import { ClientResult } from "../../../core/backbone/ClientResult.js";
+import { RESTClientAuthenticate, RESTClientLogDirective } from "../../../core/index.js";
+import { BackboneIdentityDeletionProcess } from "./BackboneIdentityDeletionProcess.js";
+import { BackbonePostIdentityDeletionProcessRequest } from "./BackbonePostIdentityDeletionProcess.js";
 
 export class IdentityDeletionProcessClient extends RESTClientAuthenticate {
     protected override _logDirective = RESTClientLogDirective.LogResponse;

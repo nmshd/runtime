@@ -1,8 +1,8 @@
-import { RequestError } from "../../core/backbone/RequestError";
-import { ControllerName, TransportController } from "../../core/TransportController";
-import { AccountController } from "../accounts/AccountController";
-import { PublicRelationshipTemplateReferenceClient } from "./backbone/PublicRelationshipTemplateReferenceClient";
-import { PublicRelationshipTemplateReference } from "./data/PublicRelationshipTemplateReference";
+import { RequestError } from "../../core/backbone/RequestError.js";
+import { ControllerName, TransportController } from "../../core/TransportController.js";
+import { AccountController } from "../accounts/AccountController.js";
+import { PublicRelationshipTemplateReferenceClient } from "./backbone/PublicRelationshipTemplateReferenceClient.js";
+import { PublicRelationshipTemplateReference } from "./data/PublicRelationshipTemplateReference.js";
 
 export class PublicRelationshipTemplateReferencesController extends TransportController {
     public constructor(parent: AccountController) {

@@ -1,8 +1,8 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { AccountController } from "@nmshd/transport";
 import correlator from "correlation-id";
-import { RequestInterceptor } from "../../testHelpers/RequestInterceptor";
-import { TestUtil } from "../../testHelpers/TestUtil";
+import { RequestInterceptor } from "../../testHelpers/RequestInterceptor.js";
+import { TestUtil } from "../../testHelpers/TestUtil.js";
 
 describe("CorrelationId", function () {
     let connection: IDatabaseConnection;

@@ -1,4 +1,4 @@
-import { PlatformError } from "./PlatformError";
+import { PlatformError } from "./PlatformError.js";
 
 export interface PlatformResponse<T> {
     result?: T;

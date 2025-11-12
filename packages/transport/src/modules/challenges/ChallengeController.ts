@@ -1,15 +1,15 @@
 import { log } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoSignatureKeypair } from "@nmshd/crypto";
-import { CoreCrypto, TransportCoreErrors } from "../../core";
-import { ControllerName, TransportController } from "../../core/TransportController";
-import { AccountController } from "../accounts/AccountController";
-import { Relationship } from "../relationships/local/Relationship";
-import { RelationshipStatus } from "../relationships/transmission/RelationshipStatus";
-import { ChallengeAuthClient } from "./backbone/ChallengeAuthClient";
-import { ChallengeClient } from "./backbone/ChallengeClient";
-import { Challenge, ChallengeType } from "./data/Challenge";
-import { ChallengeSigned } from "./data/ChallengeSigned";
+import { CoreCrypto, TransportCoreErrors } from "../../core/index.js";
+import { ControllerName, TransportController } from "../../core/TransportController.js";
+import { AccountController } from "../accounts/AccountController.js";
+import { Relationship } from "../relationships/local/Relationship.js";
+import { RelationshipStatus } from "../relationships/transmission/RelationshipStatus.js";
+import { ChallengeAuthClient } from "./backbone/ChallengeAuthClient.js";
+import { ChallengeClient } from "./backbone/ChallengeClient.js";
+import { Challenge, ChallengeType } from "./data/Challenge.js";
+import { ChallengeSigned } from "./data/ChallengeSigned.js";
 
 export class ChallengeController extends TransportController {
     private client: ChallengeClient;

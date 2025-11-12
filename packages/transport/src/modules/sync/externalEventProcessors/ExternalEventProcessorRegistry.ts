@@ -1,18 +1,18 @@
-import { TransportError } from "../../../core";
-import { ExternalEventProcessorConstructor } from "./ExternalEventProcessor";
-import { FileOwnershipClaimedExternalEventProcessor } from "./FileOwnershipClaimedExternalEventProcessor";
-import { FileOwnershipLockedExternalEventProcessor } from "./FileOwnershipLockedExternalEventProcessor";
-import { IdentityDeletionProcessStartedExternalEventProcessor } from "./IdentityDeletionProcessStartedExternalEventProcessor";
-import { IdentityDeletionProcessStatusChangedExternalEventProcessor } from "./IdentityDeletionProcessStatusChangedExternalEventProcessor";
-import { MessageDeliveredExternalEventProcessor } from "./MessageDeliveredExternalEventProcessor";
-import { MessageReceivedExternalEventProcessor } from "./MessageReceivedExternalEventProcessor";
-import { PeerDeletedExternalEventProcessor } from "./PeerDeletedExternalEventProcessor";
-import { PeerDeletionCancelledExternalEventProcessor } from "./PeerDeletionCancelledExternalEventProcessor";
-import { PeerToBeDeletedExternalEventProcessor } from "./PeerToBeDeletedExternalEventProcessor";
-import { RelationshipReactivationCompletedExternalEventProcessor } from "./RelationshipReactivationCompletedExternalEventProcessor";
-import { RelationshipReactivationRequestedExternalEventProcessor } from "./RelationshipReactivationRequestedExternalEventProcessor";
-import { RelationshipStatusChangedExternalEventProcessor } from "./RelationshipStatusChangedExternalEventProcessor";
-import { RelationshipTemplateAllocationsExhaustedExternalEventProcessor } from "./RelationshipTemplateAllocationsExhaustedProcessor";
+import { TransportError } from "../../../core/index.js";
+import { ExternalEventProcessorConstructor } from "./ExternalEventProcessor.js";
+import { FileOwnershipClaimedExternalEventProcessor } from "./FileOwnershipClaimedExternalEventProcessor.js";
+import { FileOwnershipLockedExternalEventProcessor } from "./FileOwnershipLockedExternalEventProcessor.js";
+import { IdentityDeletionProcessStartedExternalEventProcessor } from "./IdentityDeletionProcessStartedExternalEventProcessor.js";
+import { IdentityDeletionProcessStatusChangedExternalEventProcessor } from "./IdentityDeletionProcessStatusChangedExternalEventProcessor.js";
+import { MessageDeliveredExternalEventProcessor } from "./MessageDeliveredExternalEventProcessor.js";
+import { MessageReceivedExternalEventProcessor } from "./MessageReceivedExternalEventProcessor.js";
+import { PeerDeletedExternalEventProcessor } from "./PeerDeletedExternalEventProcessor.js";
+import { PeerDeletionCancelledExternalEventProcessor } from "./PeerDeletionCancelledExternalEventProcessor.js";
+import { PeerToBeDeletedExternalEventProcessor } from "./PeerToBeDeletedExternalEventProcessor.js";
+import { RelationshipReactivationCompletedExternalEventProcessor } from "./RelationshipReactivationCompletedExternalEventProcessor.js";
+import { RelationshipReactivationRequestedExternalEventProcessor } from "./RelationshipReactivationRequestedExternalEventProcessor.js";
+import { RelationshipStatusChangedExternalEventProcessor } from "./RelationshipStatusChangedExternalEventProcessor.js";
+import { RelationshipTemplateAllocationsExhaustedExternalEventProcessor } from "./RelationshipTemplateAllocationsExhaustedProcessor.js";
 
 export class ExternalEventProcessorRegistry {
     private readonly processors = new Map<string, ExternalEventProcessorConstructor>();

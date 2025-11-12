@@ -2,8 +2,8 @@ import { ApplicationError } from "@js-soft/ts-utils";
 import { CoreDate } from "@nmshd/core-types";
 import { AxiosError } from "axios";
 import stringify from "json-stringify-safe";
-import { PlatformError } from "./PlatformError";
-import { PlatformParameters } from "./PlatformParameters";
+import { PlatformError } from "./PlatformError.js";
+import { PlatformParameters } from "./PlatformParameters.js";
 
 export class RequestError extends ApplicationError {
     public platformError: PlatformError;

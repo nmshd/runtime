@@ -3,7 +3,7 @@ import { JSONWrapper, Serializable } from "@js-soft/ts-serval";
 import { CoreDate, CoreId, FileReference } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
 import { AccountController, RelationshipAuditLogEntryReason, RelationshipStatus, TokenContentRelationshipTemplate, Transport } from "@nmshd/transport";
-import { TestUtil } from "../testHelpers/TestUtil";
+import { TestUtil } from "../testHelpers/TestUtil.js";
 
 describe("AccountTest", function () {
     let connection: IDatabaseConnection;

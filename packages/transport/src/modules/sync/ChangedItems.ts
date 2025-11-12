@@ -1,7 +1,7 @@
-import { IdentityDeletionProcess } from "../accounts/data/IdentityDeletionProcess";
-import { File } from "../files/local/File";
-import { Message } from "../messages/local/Message";
-import { Relationship } from "../relationships/local/Relationship";
+import { IdentityDeletionProcess } from "../accounts/data/IdentityDeletionProcess.js";
+import { File } from "../files/local/File.js";
+import { Message } from "../messages/local/Message.js";
+import { Relationship } from "../relationships/local/Relationship.js";
 
 export interface IChangedItems {
     relationships: Relationship[];

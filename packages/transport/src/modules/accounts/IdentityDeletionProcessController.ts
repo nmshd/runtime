@@ -1,12 +1,12 @@
 import { log } from "@js-soft/ts-utils";
-import { ClientResult, ControllerName, DbCollectionName, TransportController } from "../../core";
-import { IdentityDeletionProcessStatusChangedEvent } from "../../events";
-import { AccountController } from "../accounts/AccountController";
-import { SynchronizedCollection } from "../sync/SynchronizedCollection";
-import { BackboneIdentityDeletionProcess } from "./backbone/BackboneIdentityDeletionProcess";
-import { IdentityDeletionProcessClient } from "./backbone/IdentityDeletionProcessClient";
-import { IdentityDeletionProcess } from "./data/IdentityDeletionProcess";
-import { IdentityDeletionProcessStatus } from "./data/IdentityDeletionProcessStatus";
+import { ClientResult, ControllerName, DbCollectionName, TransportController } from "../../core/index.js";
+import { IdentityDeletionProcessStatusChangedEvent } from "../../events/index.js";
+import { AccountController } from "../accounts/AccountController.js";
+import { SynchronizedCollection } from "../sync/SynchronizedCollection.js";
+import { BackboneIdentityDeletionProcess } from "./backbone/BackboneIdentityDeletionProcess.js";
+import { IdentityDeletionProcessClient } from "./backbone/IdentityDeletionProcessClient.js";
+import { IdentityDeletionProcess } from "./data/IdentityDeletionProcess.js";
+import { IdentityDeletionProcessStatus } from "./data/IdentityDeletionProcessStatus.js";
 
 export class IdentityDeletionProcessController extends TransportController {
     public identityDeletionProcessClient: IdentityDeletionProcessClient;
