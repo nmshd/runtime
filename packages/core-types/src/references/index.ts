@@ -1,2 +1,2 @@
-export * from "./FileReference";
-export * from "./Reference";
+export * from "./FileReference.js";
+export * from "./Reference.js";
