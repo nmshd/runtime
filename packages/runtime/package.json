@@ -51,16 +51,15 @@
         "testEnvironment": "node",
         "testTimeout": 60000,
         "transform": {
-            "^.+\\.ts$": [
+            "^.+\\.(t|j)s$": [
                 "ts-jest",
                 {
                     "tsconfig": "test/tsconfig.json"
                 }
-            ],
-            "^.+\\.js$": "babel-jest"
+            ]
         },
         "transformIgnorePatterns": [
-            "/node_modules/(?!(@credo-ts)/)"
+            "<rootDir>/node_modules/(?!(@noble|@stablelib|@credo\\-ts/core/node_modules/uuid)/)"
         ]
     },
     "dependencies": {
