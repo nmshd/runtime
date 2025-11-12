@@ -2,8 +2,8 @@ import { ILogger } from "@js-soft/logging-abstractions";
 import { OwnAttributeDeletedByOwnerNotificationItem } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
 import { TransportLoggerFactory } from "@nmshd/transport";
-import { ConsumptionController } from "../../../../consumption/ConsumptionController";
-import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
+import { ConsumptionController } from "../../../../consumption/ConsumptionController.js";
+import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors.js";
 import {
     OwnAttributeDeletedByOwnerEvent,
     PeerIdentityAttribute,
@@ -11,10 +11,10 @@ import {
     ReceivedAttributeDeletionInfo,
     ReceivedAttributeDeletionStatus,
     ThirdPartyRelationshipAttribute
-} from "../../../attributes";
-import { ValidationResult } from "../../../common";
-import { LocalNotification } from "../../local/LocalNotification";
-import { AbstractNotificationItemProcessor } from "../AbstractNotificationItemProcessor";
+} from "../../../attributes/index.js";
+import { ValidationResult } from "../../../common/index.js";
+import { LocalNotification } from "../../local/LocalNotification.js";
+import { AbstractNotificationItemProcessor } from "../AbstractNotificationItemProcessor.js";
 
 export class OwnAttributeDeletedByOwnerNotificationItemProcessor extends AbstractNotificationItemProcessor<OwnAttributeDeletedByOwnerNotificationItem> {
     private readonly _logger: ILogger;

@@ -1,5 +1,5 @@
-import { AppRuntimeErrors } from "./AppRuntimeErrors";
-import { LocalAccountSession } from "./multiAccount";
+import { AppRuntimeErrors } from "./AppRuntimeErrors.js";
+import { LocalAccountSession } from "./multiAccount/index.js";
 
 export class SessionStorage {
     private readonly _availableSessions: LocalAccountSession[] = [];

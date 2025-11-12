@@ -2,8 +2,8 @@ import { Result } from "@js-soft/ts-utils";
 import { TokenDTO } from "@nmshd/runtime-types";
 import { AccountController, TokenController, TokenReference } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { SchemaRepository, SchemaValidator, TokenReferenceString, URLTokenReferenceString, UseCase } from "../../common";
-import { TokenMapper } from "./TokenMapper";
+import { SchemaRepository, SchemaValidator, TokenReferenceString, URLTokenReferenceString, UseCase } from "../../common/index.js";
+import { TokenMapper } from "./TokenMapper.js";
 
 /**
  * @errorMessage token reference invalid

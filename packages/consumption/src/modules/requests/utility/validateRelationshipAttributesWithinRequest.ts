@@ -8,10 +8,10 @@ import {
     RequestItemGroup
 } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
-import { ConsumptionCoreErrors } from "../../../consumption/ConsumptionCoreErrors";
-import { ValidationResult } from "../../common";
-import { DecideRequestItemGroupParametersJSON } from "../incoming/decide/DecideRequestItemGroupParameters";
-import { DecideRequestItemParametersJSON } from "../incoming/decide/DecideRequestItemParameters";
+import { ConsumptionCoreErrors } from "../../../consumption/ConsumptionCoreErrors.js";
+import { ValidationResult } from "../../common/index.js";
+import { DecideRequestItemGroupParametersJSON } from "../incoming/decide/DecideRequestItemGroupParameters.js";
+import { DecideRequestItemParametersJSON } from "../incoming/decide/DecideRequestItemParameters.js";
 
 interface RelationshipAttributeFragment {
     owner: string;

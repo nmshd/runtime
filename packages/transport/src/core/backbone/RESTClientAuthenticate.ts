@@ -1,5 +1,5 @@
 import { AxiosRequestConfig } from "axios";
-import _ from "lodash";
+import * as _ from "lodash";
 import { ICorrelator } from "../ICorrelator.js";
 import { AbstractAuthenticator } from "./Authenticator.js";
 import { ClientResult } from "./ClientResult.js";

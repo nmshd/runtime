@@ -3,8 +3,8 @@ import { IncomingRequestsController } from "@nmshd/consumption";
 import { CoreId } from "@nmshd/core-types";
 import { RelationshipsController, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { validateCreationContentOfRelationship } from "./utility/validateCreationContentOfRelationship";
+import { RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
+import { validateCreationContentOfRelationship } from "./utility/validateCreationContentOfRelationship.js";
 
 export interface CanCreateRelationshipRequest {
     templateId: RelationshipTemplateIdString;

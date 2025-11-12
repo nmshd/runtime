@@ -1,7 +1,7 @@
 import { LocalRequestStatus } from "@nmshd/consumption";
-import { RequestDVO, RequestItemDVO, RequestItemGroupDVO, ResponseDVO } from "../content";
-import { DataViewObject } from "../DataViewObject";
-import { IdentityDVO } from "../transport";
+import { RequestDVO, RequestItemDVO, RequestItemGroupDVO, ResponseDVO } from "../content/index.js";
+import { DataViewObject } from "../DataViewObject.js";
+import { IdentityDVO } from "../transport/index.js";
 
 export interface LocalRequestDVO extends DataViewObject {
     isOwn: boolean;

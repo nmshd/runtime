@@ -1,4 +1,4 @@
-import { ISerializable } from "@js-soft/ts-serval";
+import { type ISerializable } from "@js-soft/ts-serval";
 import { log, Result } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreError, CoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoSignature } from "@nmshd/crypto";

@@ -1,6 +1,6 @@
 import { IConfigOverwrite } from "@nmshd/transport";
-import { ModuleConfiguration } from "./extensibility/modules/RuntimeModule";
-import { DeciderModuleConfiguration } from "./modules";
+import { ModuleConfiguration } from "./extensibility/modules/RuntimeModule.js";
+import { DeciderModuleConfiguration } from "./modules/index.js";
 
 export interface RuntimeConfig {
     transportLibrary: Omit<IConfigOverwrite, "supportedIdentityVersion">;

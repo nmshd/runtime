@@ -2,12 +2,12 @@ import { Event, EventBus } from "@js-soft/ts-utils";
 import { Notification, NotificationItem } from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { Message, SynchronizedCollection, TransportCoreErrors } from "@nmshd/transport";
-import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
-import { ConsumptionController } from "../../consumption/ConsumptionController";
-import { ConsumptionControllerName } from "../../consumption/ConsumptionControllerName";
-import { NotificationItemProcessorRegistry } from "./itemProcessors/NotificationItemProcessorRegistry";
-import { LocalNotification, LocalNotificationStatus } from "./local/LocalNotification";
-import { LocalNotificationSource } from "./local/LocalNotificationSource";
+import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController.js";
+import { ConsumptionController } from "../../consumption/ConsumptionController.js";
+import { ConsumptionControllerName } from "../../consumption/ConsumptionControllerName.js";
+import { NotificationItemProcessorRegistry } from "./itemProcessors/NotificationItemProcessorRegistry.js";
+import { LocalNotification, LocalNotificationStatus } from "./local/LocalNotification.js";
+import { LocalNotificationSource } from "./local/LocalNotificationSource.js";
 
 export class NotificationsController extends ConsumptionBaseController {
     public constructor(

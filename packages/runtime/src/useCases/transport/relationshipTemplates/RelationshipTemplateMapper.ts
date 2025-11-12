@@ -3,8 +3,8 @@ import { ArbitraryRelationshipTemplateContent, RelationshipTemplateContent } fro
 import { RelationshipTemplateDTO } from "@nmshd/runtime-types";
 import { RelationshipTemplate } from "@nmshd/transport";
 import { Container } from "@nmshd/typescript-ioc";
-import { ConfigHolder } from "../../../ConfigHolder";
-import { PasswordProtectionMapper } from "../../common";
+import { ConfigHolder } from "../../../ConfigHolder.js";
+import { PasswordProtectionMapper } from "../../common/index.js";
 
 export class RelationshipTemplateMapper {
     public static toRelationshipTemplateDTO(template: RelationshipTemplate): RelationshipTemplateDTO {

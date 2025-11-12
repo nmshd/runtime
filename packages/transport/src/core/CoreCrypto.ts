@@ -2,19 +2,15 @@ import {
     CoreBuffer,
     CryptoCipher,
     CryptoDerivation,
-    CryptoDerivationAlgorithm,
     CryptoEncryption,
     CryptoEncryptionAlgorithm,
     CryptoExchange,
-    CryptoExchangeAlgorithm,
     CryptoExchangeKeypair,
     CryptoExchangePublicKey,
     CryptoExchangeSecrets,
-    CryptoHashAlgorithm,
     CryptoRandom,
     CryptoSecretKey,
     CryptoSignature,
-    CryptoSignatureAlgorithm,
     CryptoSignatureKeypair,
     CryptoSignaturePrivateKey,
     CryptoSignaturePublicKey,
@@ -38,7 +34,7 @@ export abstract class CoreCrypto {
         switch (version) {
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             case TransportVersion.V1:
-                return await CryptoSignatures.generateKeypair(CryptoSignatureAlgorithm.ECDSA_ED25519);
+                return await CryptoSignatures.generateKeypair(3);
             default:
                 throw this.invalidVersion(version);
         }
@@ -57,7 +53,7 @@ export abstract class CoreCrypto {
         switch (version) {
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             case TransportVersion.V1:
-                return await CryptoExchange.generateKeypair(CryptoExchangeAlgorithm.ECDH_X25519);
+                return await CryptoExchange.generateKeypair(3);
             default:
                 throw this.invalidVersion(version);
         }
@@ -75,7 +71,7 @@ export abstract class CoreCrypto {
         switch (version) {
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             case TransportVersion.V1:
-                return await CryptoEncryption.generateKey(CryptoEncryptionAlgorithm.XCHACHA20_POLY1305);
+                return await CryptoEncryption.generateKey(3);
             default:
                 throw this.invalidVersion(version);
         }
@@ -96,7 +92,7 @@ export abstract class CoreCrypto {
     public static async deriveKeyFromPassword(
         password: string,
         salt: CoreBuffer,
-        algorithm: CryptoEncryptionAlgorithm = CryptoEncryptionAlgorithm.XCHACHA20_POLY1305,
+        algorithm: CryptoEncryptionAlgorithm = 3,
         version: TransportVersion = TransportVersion.Latest
     ): Promise<CryptoSecretKey> {
         const passwordBuffer = CoreBuffer.fromString(password, Encoding.Utf8);
@@ -109,7 +105,8 @@ export abstract class CoreCrypto {
                 // environments like Connectors. Thus, we cannot expect high end pcs to make the pw derivation.
                 const opslimit = 3;
                 const memlimit = 20 * 1024 * 1024; // 20MB
-                return await CryptoDerivation.deriveKeyFromPassword(passwordBuffer, salt, algorithm, CryptoDerivationAlgorithm.ARGON2ID, opslimit, memlimit);
+                // @ts-expect-error
+                return await CryptoDerivation.deriveKeyFromPassword(passwordBuffer, salt, algorithm, "argon2id", opslimit, memlimit);
             default:
                 throw this.invalidVersion(version);
         }
@@ -132,7 +129,7 @@ export abstract class CoreCrypto {
         secret: CryptoSecretKey | CoreBuffer,
         keyId: number,
         context: string,
-        keyAlgorithm: CryptoEncryptionAlgorithm = CryptoEncryptionAlgorithm.XCHACHA20_POLY1305
+        keyAlgorithm: CryptoEncryptionAlgorithm = 3
     ): Promise<CryptoSecretKey> {
         let buffer;
         if (secret instanceof CryptoSecretKey) {
@@ -148,7 +145,7 @@ export abstract class CoreCrypto {
     public static async deriveClient(
         client: CryptoExchangeKeypair,
         serverPublicKey: CryptoExchangePublicKey,
-        keyAlgorithm: CryptoEncryptionAlgorithm = CryptoEncryptionAlgorithm.XCHACHA20_POLY1305,
+        keyAlgorithm: CryptoEncryptionAlgorithm = 3,
         version: TransportVersion = TransportVersion.Latest
     ): Promise<CryptoExchangeSecrets> {
         switch (version) {
@@ -164,7 +161,7 @@ export abstract class CoreCrypto {
     public static async deriveServer(
         server: CryptoExchangeKeypair,
         clientPublicKey: CryptoExchangePublicKey,
-        keyAlgorithm: CryptoEncryptionAlgorithm = CryptoEncryptionAlgorithm.XCHACHA20_POLY1305,
+        keyAlgorithm: CryptoEncryptionAlgorithm = 3,
         version: TransportVersion = TransportVersion.Latest
     ): Promise<CryptoExchangeSecrets> {
         switch (version) {
@@ -191,7 +188,7 @@ export abstract class CoreCrypto {
         switch (version) {
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             case TransportVersion.V1:
-                return await CryptoSignatures.sign(content, privateKey, CryptoHashAlgorithm.SHA512);
+                return await CryptoSignatures.sign(content, privateKey, 2);
             default:
                 throw this.invalidVersion(version);
         }

@@ -2,7 +2,7 @@ import { Result } from "@js-soft/ts-utils";
 import { CoreId } from "@nmshd/core-types";
 import { AccountController, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
 
 export interface DeleteRelationshipTemplateRequest {
     templateId: RelationshipTemplateIdString;

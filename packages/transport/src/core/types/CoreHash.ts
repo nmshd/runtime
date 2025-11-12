@@ -25,7 +25,7 @@ export class CoreHash extends Serializable {
      * @param algorithm The CryptoHashAlgorithm, defaults to SHA512
      * @returns A Promise resolving to the Hash object
      */
-    public static async hash(content: string, algorithm: CryptoHashAlgorithm = CryptoHashAlgorithm.SHA512): Promise<CoreHash> {
+    public static async hash(content: string, algorithm: CryptoHashAlgorithm = 2): Promise<CoreHash> {
         const hash = await CryptoHash.hash(CoreBuffer.fromString(content, Encoding.Base64_UrlSafe_NoPadding), algorithm);
         return CoreHash.from(hash.toBase64());
     }
@@ -38,7 +38,7 @@ export class CoreHash extends Serializable {
      * @param algorithm The CryptoHashAlgorithm, defaults to SHA512
      * @returns A Promise resolving to true if the content equals to the hash, or false otherwise
      */
-    public async verify(content: ICoreBuffer, algorithm: CryptoHashAlgorithm = CryptoHashAlgorithm.SHA512): Promise<boolean> {
+    public async verify(content: ICoreBuffer, algorithm: CryptoHashAlgorithm = 2): Promise<boolean> {
         return await CryptoHash.verify(content, CoreBuffer.fromString(this.hash, Encoding.Base64_UrlSafe_NoPadding), algorithm);
     }
 

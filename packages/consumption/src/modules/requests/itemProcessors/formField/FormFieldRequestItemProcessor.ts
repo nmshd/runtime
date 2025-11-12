@@ -1,9 +1,9 @@
 import { FormFieldAcceptResponseItem, FormFieldRequestItem, Request, ResponseItemResult } from "@nmshd/content";
-import { ValidationResult } from "../../../common/ValidationResult";
-import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
+import { ValidationResult } from "../../../common/ValidationResult.js";
+import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor.js";
 
-import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { AcceptFormFieldRequestItemParameters, AcceptFormFieldRequestItemParametersJSON } from "./AcceptFormFieldRequestItemParameters";
+import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors.js";
+import { AcceptFormFieldRequestItemParameters, AcceptFormFieldRequestItemParametersJSON } from "./AcceptFormFieldRequestItemParameters.js";
 
 export class FormFieldRequestItemProcessor extends GenericRequestItemProcessor<FormFieldRequestItem, AcceptFormFieldRequestItemParametersJSON> {
     public override canCreateOutgoingRequestItem(requestItem: FormFieldRequestItem, _request: Request): ValidationResult {

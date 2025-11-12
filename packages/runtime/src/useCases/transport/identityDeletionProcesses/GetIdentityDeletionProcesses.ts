@@ -2,8 +2,8 @@ import { Result } from "@js-soft/ts-utils";
 import { IdentityDeletionProcessDTO } from "@nmshd/runtime-types";
 import { IdentityDeletionProcessController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { UseCase } from "../../common";
-import { IdentityDeletionProcessMapper } from "./IdentityDeletionProcessMapper";
+import { UseCase } from "../../common/index.js";
+import { IdentityDeletionProcessMapper } from "./IdentityDeletionProcessMapper.js";
 
 export class GetIdentityDeletionProcessesUseCase extends UseCase<void, IdentityDeletionProcessDTO[]> {
     public constructor(@Inject private readonly identityDeletionProcessController: IdentityDeletionProcessController) {

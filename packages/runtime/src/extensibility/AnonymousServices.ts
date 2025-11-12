@@ -1,5 +1,5 @@
 import { Inject } from "@nmshd/typescript-ioc";
-import { AnonymousTokensFacade, BackboneCompatibilityFacade } from "./facades/anonymous";
+import { AnonymousTokensFacade, BackboneCompatibilityFacade } from "./facades/anonymous/index.js";
 
 export class AnonymousServices {
     public constructor(

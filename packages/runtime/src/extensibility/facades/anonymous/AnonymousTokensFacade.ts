@@ -1,7 +1,7 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { EmptyTokenDTO, TokenDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { CreateEmptyTokenUseCase, LoadPeerTokenAnonymousRequest, LoadPeerTokenAnonymousUseCase } from "../../../useCases";
+import { CreateEmptyTokenUseCase, LoadPeerTokenAnonymousRequest, LoadPeerTokenAnonymousUseCase } from "../../../useCases/index.js";
 
 export class AnonymousTokensFacade {
     public constructor(

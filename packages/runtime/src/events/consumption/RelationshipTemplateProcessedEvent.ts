@@ -1,5 +1,5 @@
 import { RelationshipTemplateDTO } from "@nmshd/runtime-types";
-import { DataEvent } from "../DataEvent";
+import { DataEvent } from "../DataEvent.js";
 
 export class RelationshipTemplateProcessedEvent extends DataEvent<RelationshipTemplateProcessedEventData> {
     public static readonly namespace = "consumption.relationshipTemplateProcessed";

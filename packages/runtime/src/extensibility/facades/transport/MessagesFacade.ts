@@ -17,7 +17,7 @@ import {
     MarkMessageAsUnreadUseCase,
     SendMessageRequest,
     SendMessageUseCase
-} from "../../../useCases";
+} from "../../../useCases/index.js";
 
 export class MessagesFacade {
     public constructor(

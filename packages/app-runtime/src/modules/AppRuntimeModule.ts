@@ -1,6 +1,6 @@
 import { ILogger } from "@js-soft/logging-abstractions";
 import { ModuleConfiguration, RuntimeModule } from "@nmshd/runtime";
-import { AppRuntime } from "../AppRuntime";
+import { AppRuntime } from "../AppRuntime.js";
 
 export interface IAppRuntimeModuleConstructor {
     new (runtime: AppRuntime, configuration: any, logger: ILogger): AppRuntimeModule;

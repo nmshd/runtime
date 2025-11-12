@@ -2,8 +2,8 @@ import { Result } from "@js-soft/ts-utils";
 import { EmptyTokenDTO } from "@nmshd/runtime-types";
 import { AnonymousTokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { UseCase } from "../../common";
-import { TokenMapper } from "../../transport/tokens/TokenMapper";
+import { UseCase } from "../../common/index.js";
+import { TokenMapper } from "../../transport/tokens/TokenMapper.js";
 
 export class CreateEmptyTokenUseCase extends UseCase<void, EmptyTokenDTO> {
     public constructor(@Inject private readonly anonymousTokenController: AnonymousTokenController) {

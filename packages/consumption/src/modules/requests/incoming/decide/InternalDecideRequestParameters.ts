@@ -1,7 +1,7 @@
 import { Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreId } from "@nmshd/core-types";
-import { DecideRequestItemGroupParametersJSON } from "./DecideRequestItemGroupParameters";
-import { DecideRequestItemParametersJSON } from "./DecideRequestItemParameters";
+import { DecideRequestItemGroupParametersJSON } from "./DecideRequestItemGroupParameters.js";
+import { DecideRequestItemParametersJSON } from "./DecideRequestItemParameters.js";
 
 export interface InternalDecideRequestParametersJSON {
     requestId: string;

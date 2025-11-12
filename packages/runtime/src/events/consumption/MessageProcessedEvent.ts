@@ -1,5 +1,5 @@
 import { MessageDTO } from "@nmshd/runtime-types";
-import { DataEvent } from "../DataEvent";
+import { DataEvent } from "../DataEvent.js";
 
 export class MessageProcessedEvent extends DataEvent<MessageProcessedEventData> {
     public static readonly namespace = "consumption.messageProcessed";

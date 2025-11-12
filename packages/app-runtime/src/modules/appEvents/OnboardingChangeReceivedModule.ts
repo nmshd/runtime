@@ -1,6 +1,6 @@
 import { RelationshipAuditLogEntryReason } from "@nmshd/runtime";
-import { OnboardingChangeReceivedEvent } from "../../events";
-import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "../AppRuntimeModule";
+import { OnboardingChangeReceivedEvent } from "../../events/index.js";
+import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "../AppRuntimeModule.js";
 
 export interface OnboardingChangeReceivedModuleConfig extends AppRuntimeModuleConfiguration {}
 

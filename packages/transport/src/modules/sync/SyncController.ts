@@ -8,7 +8,7 @@ import { AccountController } from "../accounts/AccountController.js";
 import { ChangedItems } from "./ChangedItems.js";
 import { DatawalletModificationMapper } from "./DatawalletModificationMapper.js";
 import { DatawalletModificationsProcessor } from "./DatawalletModificationsProcessor.js";
-import { WhatToSync } from "./WhatToSync.js";
+import { type WhatToSync } from "./WhatToSync.js";
 import { BackboneDatawalletModification } from "./backbone/BackboneDatawalletModification.js";
 import { BackboneSyncRun } from "./backbone/BackboneSyncRun.js";
 import { CreateDatawalletModificationsRequestItem } from "./backbone/CreateDatawalletModifications.js";

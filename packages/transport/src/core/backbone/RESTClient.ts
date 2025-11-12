@@ -5,7 +5,7 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import formDataLib from "form-data";
 import { AgentOptions as HTTPAgentOptions } from "http";
 import { AgentOptions as HTTPSAgentOptions } from "https";
-import _ from "lodash";
+import * as _ from "lodash";
 import { ICorrelator } from "../ICorrelator.js";
 import { TransportLoggerFactory } from "../TransportLoggerFactory.js";
 import { ClientResult } from "./ClientResult.js";

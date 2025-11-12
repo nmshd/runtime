@@ -1,10 +1,10 @@
 // @ts-check
 
 import { configs } from "@js-soft/eslint-config-ts";
-import { globalIgnores } from "eslint/config";
+import { globalIgnores } from "eslint/config.js";
 import tseslint from "typescript-eslint";
 
-export default tseslint.config(globalIgnores(["**/Schemas.ts", "**/dist", "**/scripts", "**/coverage", "**/node_modules", "eslint.config.mjs", "**/vitest.config.ts"]), {
+export default tseslint.config(globalIgnores(["**/Schemas.ts", "**/dist", "**/scripts", "**/coverage", "**/node_modules", "eslint.config.mjs", "**/jest.config.ts"]), {
     extends: [configs.base, configs.jest],
     languageOptions: {
         parserOptions: {

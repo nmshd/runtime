@@ -4,8 +4,8 @@ import { TokenDTO } from "@nmshd/runtime-types";
 import { PasswordProtection, Token, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { nameof } from "ts-simple-nameof";
-import { OwnerRestriction, PasswordProtectionMapper, SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { TokenMapper } from "./TokenMapper";
+import { OwnerRestriction, PasswordProtectionMapper, SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
+import { TokenMapper } from "./TokenMapper.js";
 
 export interface GetTokensQuery {
     isOwn?: string | string[];

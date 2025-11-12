@@ -1,13 +1,13 @@
 import { ILogger } from "@js-soft/logging-abstractions";
 import { IdentityAttribute, PeerAttributeSucceededNotificationItem, RelationshipAttribute } from "@nmshd/content";
 import { TransportLoggerFactory } from "@nmshd/transport";
-import { ConsumptionController } from "../../../../consumption/ConsumptionController";
-import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { AttributeSucceededEvent, LocalAttribute, PeerIdentityAttribute, PeerIdentityAttributeSuccessorParams, PeerRelationshipAttribute } from "../../../attributes";
-import { PeerRelationshipAttributeSuccessorParams } from "../../../attributes/local/successorParams/PeerRelationshipAttributeSuccessorParams";
-import { ValidationResult } from "../../../common";
-import { LocalNotification } from "../../local/LocalNotification";
-import { AbstractNotificationItemProcessor } from "../AbstractNotificationItemProcessor";
+import { ConsumptionController } from "../../../../consumption/ConsumptionController.js";
+import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors.js";
+import { AttributeSucceededEvent, LocalAttribute, PeerIdentityAttribute, PeerIdentityAttributeSuccessorParams, PeerRelationshipAttribute } from "../../../attributes/index.js";
+import { PeerRelationshipAttributeSuccessorParams } from "../../../attributes/local/successorParams/PeerRelationshipAttributeSuccessorParams.js";
+import { ValidationResult } from "../../../common/index.js";
+import { LocalNotification } from "../../local/LocalNotification.js";
+import { AbstractNotificationItemProcessor } from "../AbstractNotificationItemProcessor.js";
 
 export class PeerAttributeSucceededNotificationItemProcessor extends AbstractNotificationItemProcessor<PeerAttributeSucceededNotificationItem> {
     private readonly _logger: ILogger;

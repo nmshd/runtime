@@ -1,6 +1,6 @@
 import { Mail } from "@nmshd/content";
 import { MessageDTO } from "@nmshd/runtime-types";
-import { DataEvent } from "../DataEvent";
+import { DataEvent } from "../DataEvent.js";
 
 export class MailReceivedEvent extends DataEvent<MessageDTO> {
     public static readonly namespace = "consumption.mailReceived";

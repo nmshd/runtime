@@ -6,7 +6,7 @@ import {
     CheckForExistingIdentityRecoveryKitUseCase,
     CreateIdentityRecoveryKitRequest,
     CreateIdentityRecoveryKitUseCase
-} from "../../../useCases";
+} from "../../../useCases/index.js";
 
 export class IdentityRecoveryKitsFacade {
     public constructor(

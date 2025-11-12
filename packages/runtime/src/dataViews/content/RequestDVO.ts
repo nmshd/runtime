@@ -1,6 +1,6 @@
-import { DataViewObject } from "../DataViewObject";
-import { RequestItemDVO, RequestItemGroupDVO } from "./RequestItemDVOs";
-import { ResponseDVO } from "./ResponseDVO";
+import { DataViewObject } from "../DataViewObject.js";
+import { RequestItemDVO, RequestItemGroupDVO } from "./RequestItemDVOs.js";
+import { ResponseDVO } from "./ResponseDVO.js";
 
 export interface RequestDVO extends DataViewObject {
     type: "RequestDVO";

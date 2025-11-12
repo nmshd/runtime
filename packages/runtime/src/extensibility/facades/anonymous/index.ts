@@ -1,2 +1,2 @@
-export * from "./AnonymousTokensFacade";
-export * from "./BackboneCompatibilityFacade";
+export * from "./AnonymousTokensFacade.js";
+export * from "./BackboneCompatibilityFacade.js";

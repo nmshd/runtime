@@ -1,9 +1,9 @@
 import { FormFieldSettingsJSONDerivations } from "@nmshd/content";
-import { LocalAttributeDVO } from "../consumption";
-import { DataViewObject } from "../DataViewObject";
-import { FileDVO } from "../transport";
-import { AttributeQueryDVO, DraftIdentityAttributeDVO, DraftRelationshipAttributeDVO } from "./AttributeDVOs";
-import { ResponseItemDVO, ResponseItemGroupDVO } from "./ResponseItemDVOs";
+import { LocalAttributeDVO } from "../consumption/index.js";
+import { DataViewObject } from "../DataViewObject.js";
+import { FileDVO } from "../transport/index.js";
+import { AttributeQueryDVO, DraftIdentityAttributeDVO, DraftRelationshipAttributeDVO } from "./AttributeDVOs.js";
+import { ResponseItemDVO, ResponseItemGroupDVO } from "./ResponseItemDVOs.js";
 
 export interface RequestItemGroupDVO {
     type: "RequestItemGroupDVO";

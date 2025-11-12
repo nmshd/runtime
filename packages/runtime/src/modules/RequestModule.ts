@@ -2,6 +2,7 @@ import { LocalRequestStatus } from "@nmshd/consumption";
 import { RelationshipCreationContent, RequestJSON, ResponseJSON, ResponseResult, ResponseWrapper } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
 import { LocalRequestDTO, RelationshipStatus } from "@nmshd/runtime-types";
+import { RelationshipTemplateProcessedEvent, RelationshipTemplateProcessedResult } from "../events/consumption/RelationshipTemplateProcessedEvent.js";
 import {
     IncomingRequestStatusChangedEvent,
     MessageProcessedEvent,
@@ -10,10 +11,9 @@ import {
     MessageSentEvent,
     PeerRelationshipTemplateLoadedEvent,
     RelationshipChangedEvent
-} from "../events";
-import { RelationshipTemplateProcessedEvent, RelationshipTemplateProcessedResult } from "../events/consumption/RelationshipTemplateProcessedEvent";
-import { RuntimeModule } from "../extensibility/modules/RuntimeModule";
-import { RuntimeServices } from "../Runtime";
+} from "../events/index.js";
+import { RuntimeModule } from "../extensibility/modules/RuntimeModule.js";
+import { RuntimeServices } from "../Runtime.js";
 
 export class RequestModule extends RuntimeModule {
     public init(): void {

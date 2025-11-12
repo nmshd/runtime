@@ -1,5 +1,5 @@
-import { MessageReceivedEvent, MessageSentEvent } from "../events";
-import { RuntimeModule } from "../extensibility/modules/RuntimeModule";
+import { MessageReceivedEvent, MessageSentEvent } from "../events/index.js";
+import { RuntimeModule } from "../extensibility/modules/RuntimeModule.js";
 
 export class NotificationModule extends RuntimeModule {
     public init(): void {

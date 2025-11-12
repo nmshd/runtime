@@ -18,8 +18,8 @@ import { MessageDTO } from "@nmshd/runtime-types";
 import { AccountController, File, FileController, MessageController, PeerDeletionStatus, RelationshipsController, RelationshipStatus, TransportCoreErrors } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import _ from "lodash";
-import { AddressString, FileIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { MessageMapper } from "./MessageMapper";
+import { AddressString, FileIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
+import { MessageMapper } from "./MessageMapper.js";
 
 interface AbstractSendMessageRequest<T> {
     /**

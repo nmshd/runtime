@@ -4,10 +4,10 @@ import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreDate, ICoreId } from 
 
 import { CoreSynchronizable, ICoreSynchronizable } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
-import { ConsumptionError } from "../../../consumption/ConsumptionError";
-import { LocalRequestStatus } from "./LocalRequestStatus";
-import { ILocalRequestStatusLogEntry, LocalRequestStatusLogEntry } from "./LocalRequestStatusLogEntry";
-import { ILocalResponse, LocalResponse } from "./LocalResponse";
+import { ConsumptionError } from "../../../consumption/ConsumptionError.js";
+import { LocalRequestStatus } from "./LocalRequestStatus.js";
+import { ILocalRequestStatusLogEntry, LocalRequestStatusLogEntry } from "./LocalRequestStatusLogEntry.js";
+import { ILocalResponse, LocalResponse } from "./LocalResponse.js";
 
 export interface ILocalRequestSource extends ISerializable {
     type: "Message" | "RelationshipTemplate";

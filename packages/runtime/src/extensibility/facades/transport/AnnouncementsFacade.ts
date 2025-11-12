@@ -1,7 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
 import { AnnouncementDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { GetAnnouncementsRequest, GetAnnouncementsUseCase } from "../../../useCases";
+import { GetAnnouncementsRequest, GetAnnouncementsUseCase } from "../../../useCases/index.js";
 
 export class AnnouncementsFacade {
     public constructor(@Inject private readonly getAnnouncementsUseCase: GetAnnouncementsUseCase) {}

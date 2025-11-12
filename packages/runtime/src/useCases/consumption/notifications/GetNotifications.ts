@@ -3,8 +3,8 @@ import { Result } from "@js-soft/ts-utils";
 import { NotificationsController } from "@nmshd/consumption";
 import { LocalNotificationDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { UseCase } from "../../common";
-import { NotificationMapper } from "./NotificationMapper";
+import { UseCase } from "../../common/index.js";
+import { NotificationMapper } from "./NotificationMapper.js";
 
 export interface GetNotificationsRequest {
     query?: GetNotificationsRequestQuery;

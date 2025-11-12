@@ -3,7 +3,7 @@ import { AttributesController, OwnIdentityAttribute, OwnRelationshipAttribute, P
 import { CoreId } from "@nmshd/core-types";
 import { AccountController, Relationship, RelationshipsController, RelationshipStatus } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { RelationshipIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { RelationshipIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
 
 export interface DeleteSharedAttributesForRejectedOrRevokedRelationshipRequest {
     relationshipId: RelationshipIdString;

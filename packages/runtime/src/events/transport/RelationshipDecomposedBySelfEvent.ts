@@ -1,4 +1,4 @@
-import { DataEvent } from "../DataEvent";
+import { DataEvent } from "../DataEvent.js";
 
 export interface RelationshipDecomposedBySelfEventData {
     relationshipId: string;

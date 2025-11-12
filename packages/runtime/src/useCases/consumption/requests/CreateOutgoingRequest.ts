@@ -4,8 +4,8 @@ import { RequestJSON } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { LocalRequestDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { AddressString, UseCase } from "../../common";
-import { RequestMapper } from "./RequestMapper";
+import { AddressString, UseCase } from "../../common/index.js";
+import { RequestMapper } from "./RequestMapper.js";
 
 export interface CreateOutgoingRequestRequest {
     content: Omit<RequestJSON, "id" | "@type" | "@version">;

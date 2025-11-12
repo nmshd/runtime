@@ -1,4 +1,4 @@
-import { RuntimeModule } from "./RuntimeModule";
+import { RuntimeModule } from "./RuntimeModule.js";
 
 export class RuntimeModuleRegistry implements Iterable<RuntimeModule> {
     private readonly modules: RuntimeModule[] = [];

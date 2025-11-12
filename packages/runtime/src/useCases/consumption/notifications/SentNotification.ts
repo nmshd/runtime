@@ -5,8 +5,8 @@ import { CoreId } from "@nmshd/core-types";
 import { LocalNotificationDTO } from "@nmshd/runtime-types";
 import { Message, MessageController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { MessageIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { NotificationMapper } from "./NotificationMapper";
+import { MessageIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
+import { NotificationMapper } from "./NotificationMapper.js";
 
 export interface SentNotificationRequest {
     messageId: MessageIdString;

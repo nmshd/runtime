@@ -1,1 +1,1 @@
-export * from "./CheckBackboneCompatibilityUseCase";
+export * from "./CheckBackboneCompatibilityUseCase.js";

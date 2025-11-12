@@ -1,7 +1,7 @@
 import { IdentityAttributeJSON, RelationshipAttributeCreationHintsJSON, RelationshipAttributeJSON, RenderHintsJSON, ValueHintsJSON } from "@nmshd/content";
-import { DataViewObject } from "../DataViewObject";
-import { AttributeQueryDVO } from "../content/AttributeDVOs";
-import { IdentityDVO } from "../transport";
+import { DataViewObject } from "../DataViewObject.js";
+import { AttributeQueryDVO } from "../content/AttributeDVOs.js";
+import { IdentityDVO } from "../transport/index.js";
 
 /**
  * The DataViewObject representation of a LocalAttribute

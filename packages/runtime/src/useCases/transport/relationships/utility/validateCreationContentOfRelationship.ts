@@ -3,7 +3,7 @@ import { ApplicationError } from "@js-soft/ts-utils";
 import { IncomingRequestsController, LocalRequestStatus } from "@nmshd/consumption";
 import { ArbitraryRelationshipCreationContent, ArbitraryRelationshipTemplateContent, RelationshipCreationContent, RelationshipTemplateContent } from "@nmshd/content";
 import { RelationshipTemplate } from "@nmshd/transport";
-import { RelationshipTemplateIdString, RuntimeErrors } from "../../../common";
+import { RelationshipTemplateIdString, RuntimeErrors } from "../../../common/index.js";
 
 export async function validateCreationContentOfRelationship(
     incomingRequestsController: IncomingRequestsController,

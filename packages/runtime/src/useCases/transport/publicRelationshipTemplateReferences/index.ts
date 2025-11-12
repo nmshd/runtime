@@ -1,1 +1,1 @@
-export * from "./GetPublicRelationshipTemplateReferences";
+export * from "./GetPublicRelationshipTemplateReferences.js";

@@ -2,11 +2,11 @@ import { Event } from "@js-soft/ts-utils";
 import { AcceptResponseItem, RejectResponseItem, Request, RequestItem, ResponseItem } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { AccountController } from "@nmshd/transport";
-import { ConsumptionController } from "../../../consumption/ConsumptionController";
-import { ValidationResult } from "../../common/ValidationResult";
-import { AcceptRequestItemParametersJSON } from "../incoming/decide/AcceptRequestItemParameters";
-import { RejectRequestItemParametersJSON } from "../incoming/decide/RejectRequestItemParameters";
-import { IRequestItemProcessor, LocalRequestInfo } from "./IRequestItemProcessor";
+import { ConsumptionController } from "../../../consumption/ConsumptionController.js";
+import { ValidationResult } from "../../common/ValidationResult.js";
+import { AcceptRequestItemParametersJSON } from "../incoming/decide/AcceptRequestItemParameters.js";
+import { RejectRequestItemParametersJSON } from "../incoming/decide/RejectRequestItemParameters.js";
+import { IRequestItemProcessor, LocalRequestInfo } from "./IRequestItemProcessor.js";
 
 export abstract class AbstractRequestItemProcessor<
     TRequestItem extends RequestItem = RequestItem,

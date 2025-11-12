@@ -4,8 +4,8 @@ import { CoreId } from "@nmshd/core-types";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { Relationship, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { RelationshipIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { AttributeMapper } from "../../consumption";
+import { RelationshipIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
+import { AttributeMapper } from "../../consumption/index.js";
 
 export interface GetAttributesForRelationshipRequest {
     id: RelationshipIdString;

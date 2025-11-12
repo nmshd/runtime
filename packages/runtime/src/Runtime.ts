@@ -34,19 +34,19 @@ import {
     Transport
 } from "@nmshd/transport";
 import { Container, Scope } from "@nmshd/typescript-ioc";
-import { buildInformation } from "./buildInformation";
-import { ConfigHolder } from "./ConfigHolder";
-import { DatabaseSchemaUpgrader } from "./DatabaseSchemaUpgrader";
-import { DataViewExpander } from "./dataViews";
-import { ModulesInitializedEvent, ModulesLoadedEvent, ModulesStartedEvent, RuntimeInitializedEvent, RuntimeInitializingEvent } from "./events";
-import { EventProxy } from "./events/EventProxy";
-import { AnonymousServices, ConsumptionServices, ModuleConfiguration, RuntimeModuleRegistry, TransportServices } from "./extensibility";
-import { DeciderModule, MessageModule, NotificationModule, RequestModule } from "./modules";
-import { RuntimeConfig } from "./RuntimeConfig";
-import { RuntimeLoggerFactory } from "./RuntimeLoggerFactory";
-import { RuntimeErrors } from "./useCases";
-import { AbstractCorrelator } from "./useCases/common/AbstractCorrelator";
-import { SchemaRepository } from "./useCases/common/SchemaRepository";
+import { buildInformation } from "./buildInformation.js";
+import { ConfigHolder } from "./ConfigHolder.js";
+import { DatabaseSchemaUpgrader } from "./DatabaseSchemaUpgrader.js";
+import { DataViewExpander } from "./dataViews/index.js";
+import { EventProxy } from "./events/EventProxy.js";
+import { ModulesInitializedEvent, ModulesLoadedEvent, ModulesStartedEvent, RuntimeInitializedEvent, RuntimeInitializingEvent } from "./events/index.js";
+import { AnonymousServices, ConsumptionServices, ModuleConfiguration, RuntimeModuleRegistry, TransportServices } from "./extensibility/index.js";
+import { DeciderModule, MessageModule, NotificationModule, RequestModule } from "./modules/index.js";
+import { RuntimeConfig } from "./RuntimeConfig.js";
+import { RuntimeLoggerFactory } from "./RuntimeLoggerFactory.js";
+import { AbstractCorrelator } from "./useCases/common/AbstractCorrelator.js";
+import { SchemaRepository } from "./useCases/common/SchemaRepository.js";
+import { RuntimeErrors } from "./useCases/index.js";
 
 export interface RuntimeServices {
     transportServices: TransportServices;

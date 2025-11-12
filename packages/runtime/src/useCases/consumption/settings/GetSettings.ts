@@ -4,8 +4,8 @@ import { SettingsController } from "@nmshd/consumption";
 import { SettingDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
 import { nameof } from "ts-simple-nameof";
-import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { SettingMapper } from "./SettingMapper";
+import { SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
+import { SettingMapper } from "./SettingMapper.js";
 
 export interface GetSettingsQuery {
     key?: string | string[];

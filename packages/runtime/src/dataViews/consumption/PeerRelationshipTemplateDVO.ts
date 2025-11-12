@@ -1,8 +1,8 @@
 import { PasswordProtectionDTO } from "@nmshd/runtime-types";
-import { RequestDVO } from "../content";
-import { DataViewObject } from "../DataViewObject";
-import { IdentityDVO } from "../transport";
-import { LocalRequestDVO } from "./LocalRequestDVO";
+import { RequestDVO } from "../content/index.js";
+import { DataViewObject } from "../DataViewObject.js";
+import { IdentityDVO } from "../transport/index.js";
+import { LocalRequestDVO } from "./LocalRequestDVO.js";
 
 export interface PeerRelationshipTemplateDVO extends DataViewObject {
     type: "PeerRelationshipTemplateDVO";

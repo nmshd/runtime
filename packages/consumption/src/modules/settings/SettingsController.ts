@@ -1,12 +1,12 @@
 import { log } from "@js-soft/ts-utils";
 import { CoreDate, CoreId } from "@nmshd/core-types";
 import { SynchronizedCollection, TransportCoreErrors } from "@nmshd/transport";
-import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
-import { ConsumptionController } from "../../consumption/ConsumptionController";
-import { ConsumptionControllerName } from "../../consumption/ConsumptionControllerName";
-import { ConsumptionIds } from "../../consumption/ConsumptionIds";
-import { ICreateSettingParameters } from "./local/CreateSettingParameter";
-import { Setting, SettingScope } from "./local/Setting";
+import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController.js";
+import { ConsumptionController } from "../../consumption/ConsumptionController.js";
+import { ConsumptionControllerName } from "../../consumption/ConsumptionControllerName.js";
+import { ConsumptionIds } from "../../consumption/ConsumptionIds.js";
+import { ICreateSettingParameters } from "./local/CreateSettingParameter.js";
+import { Setting, SettingScope } from "./local/Setting.js";
 export class SettingsController extends ConsumptionBaseController {
     private settings: SynchronizedCollection;
 

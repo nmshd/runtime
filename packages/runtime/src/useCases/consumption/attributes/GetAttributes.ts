@@ -15,9 +15,9 @@ import { AbstractAttributeJSON, IdentityAttribute, IdentityAttributeJSON, Relati
 import { LocalAttributeDeletionInfoDTO, LocalAttributeDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
 import { nameof } from "ts-simple-nameof";
-import { UseCase } from "../../common";
-import { flattenObject } from "../../common/flattenObject";
-import { AttributeMapper } from "./AttributeMapper";
+import { flattenObject } from "../../common/flattenObject.js";
+import { UseCase } from "../../common/index.js";
+import { AttributeMapper } from "./AttributeMapper.js";
 
 export interface GetAttributesRequest {
     query?: GetAttributesRequestQuery;

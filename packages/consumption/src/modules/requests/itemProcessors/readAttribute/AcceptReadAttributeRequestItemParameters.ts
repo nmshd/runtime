@@ -2,8 +2,8 @@ import { Serializable, serialize, type, validate, ValidationError } from "@js-so
 import { IdentityAttribute, IdentityAttributeJSON, RelationshipAttribute, RelationshipAttributeJSON } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
-import { ConsumptionError } from "../../../../consumption/ConsumptionError";
-import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
+import { ConsumptionError } from "../../../../consumption/ConsumptionError.js";
+import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters.js";
 
 export interface AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON extends AcceptRequestItemParametersJSON {
     existingAttributeId: string;

@@ -2,9 +2,9 @@ import { serialize, type, validate } from "@js-soft/ts-serval";
 import { IRelationshipAttribute, RelationshipAttribute, RelationshipAttributeJSON } from "@nmshd/content";
 import { CoreAddress, CoreId, ICoreAddress, ICoreId } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
-import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { EmittedAttributeDeletionInfo, EmittedAttributeDeletionInfoJSON, EmittedAttributeDeletionStatus, IEmittedAttributeDeletionInfo } from "../deletionInfos";
-import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./LocalAttribute";
+import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors.js";
+import { EmittedAttributeDeletionInfo, EmittedAttributeDeletionInfoJSON, EmittedAttributeDeletionStatus, IEmittedAttributeDeletionInfo } from "../deletionInfos/index.js";
+import { ILocalAttribute, LocalAttribute, LocalAttributeJSON } from "./LocalAttribute.js";
 
 export interface OwnRelationshipAttributeJSON extends LocalAttributeJSON {
     "@type": "OwnRelationshipAttribute";

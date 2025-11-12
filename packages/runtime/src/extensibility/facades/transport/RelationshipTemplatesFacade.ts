@@ -14,7 +14,7 @@ import {
     GetRelationshipTemplatesUseCase,
     LoadPeerRelationshipTemplateRequest,
     LoadPeerRelationshipTemplateUseCase
-} from "../../../useCases";
+} from "../../../useCases/index.js";
 
 export class RelationshipTemplatesFacade {
     public constructor(

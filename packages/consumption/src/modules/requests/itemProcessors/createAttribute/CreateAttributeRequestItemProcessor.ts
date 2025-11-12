@@ -10,13 +10,13 @@ import {
     ResponseItemResult
 } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
-import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { AttributeSucceededEvent, PeerIdentityAttribute, PeerIdentityAttributeSuccessorParams } from "../../../attributes";
-import { ValidationResult } from "../../../common/ValidationResult";
-import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
-import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
-import { LocalRequestInfo } from "../IRequestItemProcessor";
-import createAppropriateResponseItem from "../utility/createAppropriateResponseItem";
+import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors.js";
+import { AttributeSucceededEvent, PeerIdentityAttribute, PeerIdentityAttributeSuccessorParams } from "../../../attributes/index.js";
+import { ValidationResult } from "../../../common/ValidationResult.js";
+import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters.js";
+import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor.js";
+import { LocalRequestInfo } from "../IRequestItemProcessor.js";
+import createAppropriateResponseItem from "../utility/createAppropriateResponseItem.js";
 
 export class CreateAttributeRequestItemProcessor extends GenericRequestItemProcessor<CreateAttributeRequestItem> {
     public override async canCreateOutgoingRequestItem(requestItem: CreateAttributeRequestItem, _request?: Request, recipient?: CoreAddress): Promise<ValidationResult> {

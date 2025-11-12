@@ -1,6 +1,6 @@
 import { TransportDataEvent } from "@nmshd/transport";
-import { ConsumptionError } from "../../../consumption/ConsumptionError";
-import { LocalRequest } from "../local/LocalRequest";
+import { ConsumptionError } from "../../../consumption/ConsumptionError.js";
+import { LocalRequest } from "../local/LocalRequest.js";
 
 export class OutgoingRequestCreatedEvent extends TransportDataEvent<LocalRequest> {
     public static readonly namespace = "consumption.outgoingRequestCreated";

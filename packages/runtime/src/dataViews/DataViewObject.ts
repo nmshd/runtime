@@ -1,5 +1,5 @@
-import { DVOError } from "./common/DVOError";
-import { DVOWarning } from "./common/DVOWarning";
+import { DVOError } from "./common/DVOError.js";
+import { DVOWarning } from "./common/DVOWarning.js";
 
 export interface DataViewObject {
     id: string;

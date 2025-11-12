@@ -1,5 +1,5 @@
-import { LocalRequestDVO } from "../consumption";
-import { MessageDVO, RecipientDVO } from "../transport/MessageDVO";
+import { LocalRequestDVO } from "../consumption/index.js";
+import { MessageDVO, RecipientDVO } from "../transport/MessageDVO.js";
 
 export interface RequestMessageDVO extends Omit<MessageDVO, "type"> {
     type: "RequestMessageDVO";

@@ -1,11 +1,11 @@
 import { RequestItem, RequestItemGroup } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
-import { ConsumptionCoreErrors } from "../../../consumption/ConsumptionCoreErrors";
-import { ValidationResult } from "../../common/ValidationResult";
-import { LocalRequest } from "../local/LocalRequest";
-import { DecideRequestItemGroupParametersJSON, isDecideRequestItemGroupParametersJSON } from "./decide/DecideRequestItemGroupParameters";
-import { DecideRequestItemParametersJSON, isDecideRequestItemParametersJSON } from "./decide/DecideRequestItemParameters";
-import { InternalDecideRequestParametersJSON } from "./decide/InternalDecideRequestParameters";
+import { ConsumptionCoreErrors } from "../../../consumption/ConsumptionCoreErrors.js";
+import { ValidationResult } from "../../common/ValidationResult.js";
+import { LocalRequest } from "../local/LocalRequest.js";
+import { DecideRequestItemGroupParametersJSON, isDecideRequestItemGroupParametersJSON } from "./decide/DecideRequestItemGroupParameters.js";
+import { DecideRequestItemParametersJSON, isDecideRequestItemParametersJSON } from "./decide/DecideRequestItemParameters.js";
+import { InternalDecideRequestParametersJSON } from "./decide/InternalDecideRequestParameters.js";
 
 export class DecideRequestParametersValidator {
     public validateRequest(params: InternalDecideRequestParametersJSON, request: LocalRequest): ValidationResult {

@@ -1,4 +1,4 @@
-import { RuntimeConfig } from "./RuntimeConfig";
+import { RuntimeConfig } from "./RuntimeConfig.js";
 
 export class ConfigHolder {
     readonly #config: RuntimeConfig;

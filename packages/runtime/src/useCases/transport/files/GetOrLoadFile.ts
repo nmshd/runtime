@@ -13,8 +13,8 @@ import {
     URLFileReferenceString,
     URLTokenReferenceString,
     UseCase
-} from "../../common";
-import { FileMapper } from "./FileMapper";
+} from "../../common/index.js";
+import { FileMapper } from "./FileMapper.js";
 
 /**
  * @errorMessage token / file reference invalid

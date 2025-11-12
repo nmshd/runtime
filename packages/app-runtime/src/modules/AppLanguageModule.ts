@@ -1,6 +1,6 @@
 import { LanguageISO639 } from "@nmshd/core-types";
-import { AccountSelectedEvent, AppLanguageChangedEvent } from "../events";
-import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "./AppRuntimeModule";
+import { AccountSelectedEvent, AppLanguageChangedEvent } from "../events/index.js";
+import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "./AppRuntimeModule.js";
 
 export interface AppLanguageModuleConfig extends AppRuntimeModuleConfiguration {}
 

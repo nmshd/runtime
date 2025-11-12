@@ -1,8 +1,8 @@
 import { EmptyTokenDTO, TokenDTO } from "@nmshd/runtime-types";
 import { EmptyToken, Token } from "@nmshd/transport";
 import { Container } from "@nmshd/typescript-ioc";
-import { ConfigHolder } from "../../../ConfigHolder";
-import { PasswordProtectionMapper } from "../../common";
+import { ConfigHolder } from "../../../ConfigHolder.js";
+import { PasswordProtectionMapper } from "../../common/index.js";
 
 export class TokenMapper {
     public static toTokenDTO(token: Token, ephemeral: boolean): TokenDTO {

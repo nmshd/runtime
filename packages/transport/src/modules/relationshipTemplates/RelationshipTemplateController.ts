@@ -1,4 +1,4 @@
-import { ISerializable } from "@js-soft/ts-serval";
+import { type ISerializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
@@ -11,7 +11,7 @@ import { Relationship } from "../relationships/local/Relationship.js";
 import { RelationshipSecretController } from "../relationships/RelationshipSecretController.js";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection.js";
 import { TokenContentRelationshipTemplate } from "../tokens/transmission/TokenContentRelationshipTemplate.js";
-import { BackboneGetRelationshipTemplatesResponse } from "./backbone/BackboneGetRelationshipTemplates.js";
+import { type BackboneGetRelationshipTemplatesResponse } from "./backbone/BackboneGetRelationshipTemplates.js";
 import { RelationshipTemplateClient } from "./backbone/RelationshipTemplateClient.js";
 import { RelationshipTemplate } from "./local/RelationshipTemplate.js";
 import { ISendRelationshipTemplateParameters, SendRelationshipTemplateParameters } from "./local/SendRelationshipTemplateParameters.js";

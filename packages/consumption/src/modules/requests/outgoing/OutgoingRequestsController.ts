@@ -2,28 +2,28 @@ import { EventBus } from "@js-soft/ts-utils";
 import { DeleteAttributeRequestItem, RelationshipTemplateContent, Request, RequestItem, RequestItemGroup, Response, ResponseItem, ResponseItemGroup } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId, ICoreId } from "@nmshd/core-types";
 import { Message, PeerDeletionStatus, Relationship, RelationshipStatus, RelationshipTemplate, SynchronizedCollection, TransportCoreErrors } from "@nmshd/transport";
-import { ConsumptionBaseController } from "../../../consumption/ConsumptionBaseController";
-import { ConsumptionController } from "../../../consumption/ConsumptionController";
-import { ConsumptionControllerName } from "../../../consumption/ConsumptionControllerName";
-import { ConsumptionCoreErrors } from "../../../consumption/ConsumptionCoreErrors";
-import { ConsumptionError } from "../../../consumption/ConsumptionError";
-import { ConsumptionIds } from "../../../consumption/ConsumptionIds";
-import { EmittedAttributeDeletionInfo, EmittedAttributeDeletionStatus, OwnIdentityAttribute, OwnRelationshipAttribute, PeerRelationshipAttribute } from "../../attributes";
-import { ValidationResult } from "../../common/ValidationResult";
-import { OutgoingRequestCreatedAndCompletedEvent, OutgoingRequestCreatedEvent, OutgoingRequestStatusChangedEvent } from "../events";
-import { RequestItemProcessorRegistry } from "../itemProcessors/RequestItemProcessorRegistry";
-import { LocalRequest, LocalRequestSource } from "../local/LocalRequest";
-import { LocalRequestStatus } from "../local/LocalRequestStatus";
-import { LocalResponse } from "../local/LocalResponse";
-import { validateKeyUniquenessOfRelationshipAttributesWithinOutgoingRequest } from "../utility/validateRelationshipAttributesWithinRequest";
-import { CompleteOutgoingRequestParameters, ICompleteOutgoingRequestParameters } from "./completeOutgoingRequest/CompleteOutgoingRequestParameters";
+import { ConsumptionBaseController } from "../../../consumption/ConsumptionBaseController.js";
+import { ConsumptionController } from "../../../consumption/ConsumptionController.js";
+import { ConsumptionControllerName } from "../../../consumption/ConsumptionControllerName.js";
+import { ConsumptionCoreErrors } from "../../../consumption/ConsumptionCoreErrors.js";
+import { ConsumptionError } from "../../../consumption/ConsumptionError.js";
+import { ConsumptionIds } from "../../../consumption/ConsumptionIds.js";
+import { EmittedAttributeDeletionInfo, EmittedAttributeDeletionStatus, OwnIdentityAttribute, OwnRelationshipAttribute, PeerRelationshipAttribute } from "../../attributes/index.js";
+import { ValidationResult } from "../../common/ValidationResult.js";
+import { OutgoingRequestCreatedAndCompletedEvent, OutgoingRequestCreatedEvent, OutgoingRequestStatusChangedEvent } from "../events/index.js";
+import { RequestItemProcessorRegistry } from "../itemProcessors/RequestItemProcessorRegistry.js";
+import { LocalRequest, LocalRequestSource } from "../local/LocalRequest.js";
+import { LocalRequestStatus } from "../local/LocalRequestStatus.js";
+import { LocalResponse } from "../local/LocalResponse.js";
+import { validateKeyUniquenessOfRelationshipAttributesWithinOutgoingRequest } from "../utility/validateRelationshipAttributesWithinRequest.js";
+import { CompleteOutgoingRequestParameters, ICompleteOutgoingRequestParameters } from "./completeOutgoingRequest/CompleteOutgoingRequestParameters.js";
 import {
     CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters,
     ICreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters
-} from "./createAndCompleteFromRelationshipTemplateResponse/CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters";
-import { CanCreateOutgoingRequestParameters, ICanCreateOutgoingRequestParameters } from "./createOutgoingRequest/CanCreateOutgoingRequestParameters";
-import { CreateOutgoingRequestParameters, ICreateOutgoingRequestParameters } from "./createOutgoingRequest/CreateOutgoingRequestParameters";
-import { ISentOutgoingRequestParameters, SentOutgoingRequestParameters } from "./sentOutgoingRequest/SentOutgoingRequestParameters";
+} from "./createAndCompleteFromRelationshipTemplateResponse/CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseParameters.js";
+import { CanCreateOutgoingRequestParameters, ICanCreateOutgoingRequestParameters } from "./createOutgoingRequest/CanCreateOutgoingRequestParameters.js";
+import { CreateOutgoingRequestParameters, ICreateOutgoingRequestParameters } from "./createOutgoingRequest/CreateOutgoingRequestParameters.js";
+import { ISentOutgoingRequestParameters, SentOutgoingRequestParameters } from "./sentOutgoingRequest/SentOutgoingRequestParameters.js";
 
 export class OutgoingRequestsController extends ConsumptionBaseController {
     public constructor(

@@ -1,5 +1,5 @@
 import { ApplicationError } from "@js-soft/ts-utils";
-import { ConsumptionCoreErrors } from "../../consumption/ConsumptionCoreErrors";
+import { ConsumptionCoreErrors } from "../../consumption/ConsumptionCoreErrors.js";
 
 export abstract class ValidationResult {
     protected constructor(public readonly items: ValidationResult[]) {}

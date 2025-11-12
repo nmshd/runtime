@@ -3,32 +3,35 @@ import { EventBus } from "@js-soft/ts-utils";
 import { RequestItem, RequestItemGroup, Response, ResponseItemDerivations, ResponseItemGroup, ResponseResult } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreId } from "@nmshd/core-types";
 import { Message, PeerDeletionStatus, Relationship, RelationshipStatus, RelationshipTemplate, SynchronizedCollection, TransportCoreErrors } from "@nmshd/transport";
-import { ConsumptionBaseController } from "../../../consumption/ConsumptionBaseController";
-import { ConsumptionController } from "../../../consumption/ConsumptionController";
-import { ConsumptionControllerName } from "../../../consumption/ConsumptionControllerName";
-import { ConsumptionCoreErrors } from "../../../consumption/ConsumptionCoreErrors";
-import { ConsumptionError } from "../../../consumption/ConsumptionError";
-import { ConsumptionIds } from "../../../consumption/ConsumptionIds";
-import { mergeResults } from "../../common";
-import { ValidationResult } from "../../common/ValidationResult";
-import { IncomingRequestReceivedEvent, IncomingRequestStatusChangedEvent } from "../events";
-import { RequestItemProcessorRegistry } from "../itemProcessors/RequestItemProcessorRegistry";
-import { ILocalRequestSource, LocalRequest } from "../local/LocalRequest";
-import { LocalRequestStatus } from "../local/LocalRequestStatus";
-import { LocalResponse, LocalResponseSource } from "../local/LocalResponse";
-import { validateKeyUniquenessOfRelationshipAttributesWithinIncomingRequest } from "../utility/validateRelationshipAttributesWithinRequest";
-import { DecideRequestParametersValidator } from "./DecideRequestParametersValidator";
-import { CheckPrerequisitesOfIncomingRequestParameters, ICheckPrerequisitesOfIncomingRequestParameters } from "./checkPrerequisites/CheckPrerequisitesOfIncomingRequestParameters";
-import { CompleteIncomingRequestParameters, ICompleteIncomingRequestParameters } from "./complete/CompleteIncomingRequestParameters";
-import { DecideRequestItemGroupParametersJSON } from "./decide/DecideRequestItemGroupParameters";
-import { DecideRequestItemParametersJSON } from "./decide/DecideRequestItemParameters";
-import { DecideRequestParametersJSON } from "./decide/DecideRequestParameters";
-import { InternalDecideRequestParameters, InternalDecideRequestParametersJSON } from "./decide/InternalDecideRequestParameters";
-import { IReceivedIncomingRequestParameters, ReceivedIncomingRequestParameters } from "./received/ReceivedIncomingRequestParameters";
+import { ConsumptionBaseController } from "../../../consumption/ConsumptionBaseController.js";
+import { ConsumptionController } from "../../../consumption/ConsumptionController.js";
+import { ConsumptionControllerName } from "../../../consumption/ConsumptionControllerName.js";
+import { ConsumptionCoreErrors } from "../../../consumption/ConsumptionCoreErrors.js";
+import { ConsumptionError } from "../../../consumption/ConsumptionError.js";
+import { ConsumptionIds } from "../../../consumption/ConsumptionIds.js";
+import { mergeResults } from "../../common/index.js";
+import { ValidationResult } from "../../common/ValidationResult.js";
+import { IncomingRequestReceivedEvent, IncomingRequestStatusChangedEvent } from "../events/index.js";
+import { RequestItemProcessorRegistry } from "../itemProcessors/RequestItemProcessorRegistry.js";
+import { ILocalRequestSource, LocalRequest } from "../local/LocalRequest.js";
+import { LocalRequestStatus } from "../local/LocalRequestStatus.js";
+import { LocalResponse, LocalResponseSource } from "../local/LocalResponse.js";
+import { validateKeyUniquenessOfRelationshipAttributesWithinIncomingRequest } from "../utility/validateRelationshipAttributesWithinRequest.js";
+import {
+    CheckPrerequisitesOfIncomingRequestParameters,
+    ICheckPrerequisitesOfIncomingRequestParameters
+} from "./checkPrerequisites/CheckPrerequisitesOfIncomingRequestParameters.js";
+import { CompleteIncomingRequestParameters, ICompleteIncomingRequestParameters } from "./complete/CompleteIncomingRequestParameters.js";
+import { DecideRequestItemGroupParametersJSON } from "./decide/DecideRequestItemGroupParameters.js";
+import { DecideRequestItemParametersJSON } from "./decide/DecideRequestItemParameters.js";
+import { DecideRequestParametersJSON } from "./decide/DecideRequestParameters.js";
+import { InternalDecideRequestParameters, InternalDecideRequestParametersJSON } from "./decide/InternalDecideRequestParameters.js";
+import { DecideRequestParametersValidator } from "./DecideRequestParametersValidator.js";
+import { IReceivedIncomingRequestParameters, ReceivedIncomingRequestParameters } from "./received/ReceivedIncomingRequestParameters.js";
 import {
     IRequireManualDecisionOfIncomingRequestParameters,
     RequireManualDecisionOfIncomingRequestParameters
-} from "./requireManualDecision/RequireManualDecisionOfIncomingRequestParameters";
+} from "./requireManualDecision/RequireManualDecisionOfIncomingRequestParameters.js";
 
 export class IncomingRequestsController extends ConsumptionBaseController {
     private readonly decideRequestParamsValidator: DecideRequestParametersValidator = new DecideRequestParametersValidator();

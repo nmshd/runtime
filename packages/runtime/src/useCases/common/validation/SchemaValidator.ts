@@ -1,9 +1,9 @@
 import { ErrorObject } from "ajv";
-import { RuntimeErrors } from "../RuntimeErrors";
-import { JsonSchema, JsonSchemaValidationResult } from "../SchemaRepository";
-import { IValidator } from "./IValidator";
-import { ValidationFailure } from "./ValidationFailure";
-import { ValidationResult } from "./ValidationResult";
+import { RuntimeErrors } from "../RuntimeErrors.js";
+import { JsonSchema, JsonSchemaValidationResult } from "../SchemaRepository.js";
+import { IValidator } from "./IValidator.js";
+import { ValidationFailure } from "./ValidationFailure.js";
+import { ValidationResult } from "./ValidationResult.js";
 
 export class SchemaValidator<T> implements IValidator<T> {
     public constructor(protected readonly schema: JsonSchema) {}

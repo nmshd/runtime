@@ -1,3 +1,3 @@
-export * from "./AbstractAttributeDeletionInfo";
-export * from "./EmittedAttributeDeletionInfo";
-export * from "./ReceivedAttributeDeletionInfo";
+export * from "./AbstractAttributeDeletionInfo.js";
+export * from "./EmittedAttributeDeletionInfo.js";
+export * from "./ReceivedAttributeDeletionInfo.js";

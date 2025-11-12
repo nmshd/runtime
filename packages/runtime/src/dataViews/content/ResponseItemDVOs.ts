@@ -1,6 +1,6 @@
 import { ResponseItemResult } from "@nmshd/content";
-import { LocalAttributeDVO, OwnIdentityAttributeDVO } from "../consumption";
-import { DataViewObject } from "../DataViewObject";
+import { LocalAttributeDVO, OwnIdentityAttributeDVO } from "../consumption/index.js";
+import { DataViewObject } from "../DataViewObject.js";
 
 export interface ResponseItemGroupDVO {
     type: "ResponseItemGroupDVO";

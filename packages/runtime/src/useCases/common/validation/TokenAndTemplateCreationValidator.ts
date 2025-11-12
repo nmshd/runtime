@@ -1,10 +1,10 @@
 import { CoreDate, PasswordLocationIndicatorOptions } from "@nmshd/core-types";
-import { RuntimeErrors } from "../RuntimeErrors";
-import { JsonSchema } from "../SchemaRepository";
-import { SchemaValidator } from "./SchemaValidator";
-import { ISO8601DateTimeString } from "./ValidatableStrings";
-import { ValidationFailure } from "./ValidationFailure";
-import { ValidationResult } from "./ValidationResult";
+import { RuntimeErrors } from "../RuntimeErrors.js";
+import { JsonSchema } from "../SchemaRepository.js";
+import { SchemaValidator } from "./SchemaValidator.js";
+import { ISO8601DateTimeString } from "./ValidatableStrings.js";
+import { ValidationFailure } from "./ValidationFailure.js";
+import { ValidationResult } from "./ValidationResult.js";
 
 export class TokenAndTemplateCreationValidator<
     T extends {

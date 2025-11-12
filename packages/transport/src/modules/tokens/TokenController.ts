@@ -1,4 +1,4 @@
-import { ISerializable, Serializable } from "@js-soft/ts-serval";
+import { type ISerializable, Serializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
@@ -8,7 +8,7 @@ import { ControllerName, TransportController } from "../../core/TransportControl
 import { PasswordProtection } from "../../core/types/PasswordProtection.js";
 import { AccountController } from "../accounts/AccountController.js";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection.js";
-import { BackboneGetTokensResponse } from "./backbone/BackboneGetTokens.js";
+import { type BackboneGetTokensResponse } from "./backbone/BackboneGetTokens.js";
 import { TokenClient } from "./backbone/TokenClient.js";
 import { ISendTokenParameters, SendTokenParameters } from "./local/SendTokenParameters.js";
 import { Token } from "./local/Token.js";

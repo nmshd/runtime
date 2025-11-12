@@ -12,7 +12,7 @@ import {
     GetDraftUseCase,
     UpdateDraftRequest,
     UpdateDraftUseCase
-} from "../../../useCases";
+} from "../../../useCases/index.js";
 
 export class DraftsFacade {
     public constructor(

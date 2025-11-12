@@ -2,8 +2,8 @@ import { CoreBuffer } from "@nmshd/crypto";
 import { FileDTO } from "@nmshd/runtime-types";
 import { File } from "@nmshd/transport";
 import { Container } from "@nmshd/typescript-ioc";
-import { ConfigHolder } from "../../../ConfigHolder";
-import { DownloadFileResponse } from "./DownloadFile";
+import { ConfigHolder } from "../../../ConfigHolder.js";
+import { DownloadFileResponse } from "./DownloadFile.js";
 
 export class FileMapper {
     public static toDownloadFileResponse(buffer: CoreBuffer, file: File): DownloadFileResponse {

@@ -7,8 +7,8 @@ import {
     RenderHintsJSON,
     ValueHintsJSON
 } from "@nmshd/content";
-import { DataViewObject } from "../DataViewObject";
-import { IdentityDVO } from "../transport";
+import { DataViewObject } from "../DataViewObject.js";
+import { IdentityDVO } from "../transport/index.js";
 
 export interface DraftIdentityAttributeDVO extends DataViewObject {
     type: "DraftIdentityAttributeDVO";

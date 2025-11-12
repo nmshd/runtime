@@ -1,5 +1,13 @@
 import { Inject } from "@nmshd/typescript-ioc";
-import { AttributesFacade, DraftsFacade, IdentityMetadataFacade, IncomingRequestsFacade, NotificationsFacade, OutgoingRequestsFacade, SettingsFacade } from "./facades/consumption";
+import {
+    AttributesFacade,
+    DraftsFacade,
+    IdentityMetadataFacade,
+    IncomingRequestsFacade,
+    NotificationsFacade,
+    OutgoingRequestsFacade,
+    SettingsFacade
+} from "./facades/consumption/index.js";
 
 export class ConsumptionServices {
     public constructor(

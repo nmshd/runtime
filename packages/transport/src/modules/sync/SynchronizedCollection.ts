@@ -1,7 +1,7 @@
 import { DatabaseType, IDatabaseCollection } from "@js-soft/docdb-access-abstractions";
 import { Serializable } from "@js-soft/ts-serval";
 import jsonpatch from "fast-json-patch";
-import _ from "lodash";
+import * as _ from "lodash";
 import { CoreSynchronizable, ICoreSynchronizable } from "../../core/CoreSynchronizable.js";
 import { TransportIds } from "../../core/TransportIds.js";
 import { DatawalletModification, DatawalletModificationCategory, DatawalletModificationType } from "../sync/local/DatawalletModification.js";

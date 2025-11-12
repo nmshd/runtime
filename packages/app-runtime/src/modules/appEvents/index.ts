@@ -1,3 +1,3 @@
-export * from "./MailReceivedModule";
-export * from "./OnboardingChangeReceivedModule";
-export * from "./RelationshipTemplateProcessedModule";
+export * from "./MailReceivedModule.js";
+export * from "./OnboardingChangeReceivedModule.js";
+export * from "./RelationshipTemplateProcessedModule.js";

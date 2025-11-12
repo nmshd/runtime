@@ -1,7 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
 import { BackboneNotificationsController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { AddressString, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { AddressString, SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
 
 export interface SendBackboneNotificationRequest {
     recipients: AddressString[];

@@ -1,5 +1,5 @@
-import { MailReceivedEvent } from "../../events";
-import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "../AppRuntimeModule";
+import { MailReceivedEvent } from "../../events/index.js";
+import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "../AppRuntimeModule.js";
 
 export interface MailReceivedModuleConfig extends AppRuntimeModuleConfiguration {}
 

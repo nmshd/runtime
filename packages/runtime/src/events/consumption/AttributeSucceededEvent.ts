@@ -1,5 +1,5 @@
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
-import { DataEvent } from "../DataEvent";
+import { DataEvent } from "../DataEvent.js";
 
 export interface AttributeSucceededEventData {
     predecessor: LocalAttributeDTO;

@@ -1,6 +1,6 @@
 import { ApplicationError } from "@js-soft/ts-utils";
 import { RelationshipTemplateProcessedEvent, RelationshipTemplateProcessedResult } from "@nmshd/runtime";
-import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "../AppRuntimeModule";
+import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "../AppRuntimeModule.js";
 
 export interface RelationshipTemplateProcessedModuleConfig extends AppRuntimeModuleConfiguration {}
 

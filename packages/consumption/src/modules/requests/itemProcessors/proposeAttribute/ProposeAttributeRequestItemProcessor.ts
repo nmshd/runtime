@@ -13,7 +13,7 @@ import {
 import { CoreAddress } from "@nmshd/core-types";
 import { TransportCoreErrors } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
-import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
+import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors.js";
 import {
     AttributeSucceededEvent,
     LocalAttribute,
@@ -22,14 +22,14 @@ import {
     PeerIdentityAttribute,
     PeerIdentityAttributeSuccessorParams,
     ReceivedAttributeDeletionStatus
-} from "../../../attributes";
-import { ValidationResult } from "../../../common/ValidationResult";
-import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
-import { LocalRequestInfo } from "../IRequestItemProcessor";
-import createAppropriateResponseItem from "../utility/createAppropriateResponseItem";
-import validateAttributeMatchesWithQuery from "../utility/validateAttributeMatchesWithQuery";
-import validateQuery from "../utility/validateQuery";
-import { AcceptProposeAttributeRequestItemParameters, AcceptProposeAttributeRequestItemParametersJSON } from "./AcceptProposeAttributeRequestItemParameters";
+} from "../../../attributes/index.js";
+import { ValidationResult } from "../../../common/ValidationResult.js";
+import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor.js";
+import { LocalRequestInfo } from "../IRequestItemProcessor.js";
+import createAppropriateResponseItem from "../utility/createAppropriateResponseItem.js";
+import validateAttributeMatchesWithQuery from "../utility/validateAttributeMatchesWithQuery.js";
+import validateQuery from "../utility/validateQuery.js";
+import { AcceptProposeAttributeRequestItemParameters, AcceptProposeAttributeRequestItemParametersJSON } from "./AcceptProposeAttributeRequestItemParameters.js";
 
 export class ProposeAttributeRequestItemProcessor extends GenericRequestItemProcessor<ProposeAttributeRequestItem, AcceptProposeAttributeRequestItemParametersJSON> {
     public override async canCreateOutgoingRequestItem(requestItem: ProposeAttributeRequestItem, _request: Request, recipient?: CoreAddress): Promise<ValidationResult> {

@@ -1,8 +1,8 @@
 import { PasswordProtectionDTO, RelationshipTemplateContentDerivation } from "@nmshd/runtime-types";
-import { DataViewObject } from "../DataViewObject";
-import { LocalRequestDVO } from "../consumption/LocalRequestDVO";
-import { RequestDVO } from "../content";
-import { IdentityDVO } from "./IdentityDVO";
+import { DataViewObject } from "../DataViewObject.js";
+import { LocalRequestDVO } from "../consumption/LocalRequestDVO.js";
+import { RequestDVO } from "../content/index.js";
+import { IdentityDVO } from "./IdentityDVO.js";
 
 export interface RelationshipTemplateDVO extends DataViewObject {
     type: "RelationshipTemplateDVO";

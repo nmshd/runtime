@@ -3,9 +3,9 @@ import { LokiJsConnection } from "@js-soft/docdb-access-loki";
 import { ILogger } from "@js-soft/logging-abstractions";
 import { CoreAddress, CoreDate, CoreError, CoreId, CoreIdHelper } from "@nmshd/core-types";
 import { AccountController, DeviceSharedSecret, Transport, TransportCoreErrors, TransportLoggerFactory } from "@nmshd/transport";
-import { AppConfig } from "../AppConfig";
-import { SessionStorage } from "../SessionStorage";
-import { LocalAccount } from "./data/LocalAccount";
+import { AppConfig } from "../AppConfig.js";
+import { SessionStorage } from "../SessionStorage.js";
+import { LocalAccount } from "./data/LocalAccount.js";
 
 export class MultiAccountController {
     private readonly _log: ILogger;

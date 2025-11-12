@@ -9,7 +9,7 @@ import {
     GetIdentityDeletionProcessUseCase,
     InitiateIdentityDeletionProcessRequest,
     InitiateIdentityDeletionProcessUseCase
-} from "../../../useCases";
+} from "../../../useCases/index.js";
 
 export class IdentityDeletionProcessesFacade {
     public constructor(

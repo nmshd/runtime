@@ -4,9 +4,9 @@ import { AttributesController } from "@nmshd/consumption";
 import { AttributeValues, IdentityAttribute } from "@nmshd/content";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationResult } from "../../common";
-import { IValidator } from "../../common/validation/IValidator";
-import { IdentityAttributeValueValidator } from "./IdentityAttributeValueValidator";
+import { RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationResult } from "../../common/index.js";
+import { IValidator } from "../../common/validation/IValidator.js";
+import { IdentityAttributeValueValidator } from "./IdentityAttributeValueValidator.js";
 
 interface AbstractCanCreateOwnIdentityAttributeRequest<T> {
     content: {

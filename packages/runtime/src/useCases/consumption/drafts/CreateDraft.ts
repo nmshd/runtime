@@ -3,8 +3,8 @@ import { DraftsController } from "@nmshd/consumption";
 import { DraftDTO } from "@nmshd/runtime-types";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { DraftMapper } from "./DraftMapper";
+import { SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
+import { DraftMapper } from "./DraftMapper.js";
 
 export interface CreateDraftRequest {
     content: any;

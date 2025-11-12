@@ -19,7 +19,7 @@ import {
     RegenerateFileOwnershipTokenUseCase,
     UploadOwnFileRequest,
     UploadOwnFileUseCase
-} from "../../../useCases";
+} from "../../../useCases/index.js";
 
 export class FilesFacade {
     public constructor(

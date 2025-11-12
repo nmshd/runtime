@@ -8,7 +8,7 @@ import {
     GetIdentityMetadataUseCase,
     UpsertIdentityMetadataRequest,
     UpsertIdentityMetadataUseCase
-} from "../../../useCases";
+} from "../../../useCases/index.js";
 
 export class IdentityMetadataFacade {
     public constructor(

@@ -13,7 +13,7 @@ import {
     ReceivedNotificationUseCase,
     SentNotificationRequest,
     SentNotificationUseCase
-} from "../../../useCases";
+} from "../../../useCases/index.js";
 
 export class NotificationsFacade {
     public constructor(

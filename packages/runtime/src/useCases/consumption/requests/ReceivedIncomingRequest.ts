@@ -5,8 +5,8 @@ import { CoreId } from "@nmshd/core-types";
 import { LocalRequestDTO } from "@nmshd/runtime-types";
 import { Message, MessageController, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { MessageIdString, RelationshipTemplateIdString, RuntimeErrors, UseCase } from "../../common";
-import { RequestMapper } from "./RequestMapper";
+import { MessageIdString, RelationshipTemplateIdString, RuntimeErrors, UseCase } from "../../common/index.js";
+import { RequestMapper } from "./RequestMapper.js";
 
 export interface ReceivedIncomingRequestRequest {
     receivedRequest: RequestJSON;

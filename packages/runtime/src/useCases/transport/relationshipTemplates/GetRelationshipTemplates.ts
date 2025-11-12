@@ -4,8 +4,8 @@ import { RelationshipTemplateDTO } from "@nmshd/runtime-types";
 import { PasswordProtection, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { nameof } from "ts-simple-nameof";
-import { OwnerRestriction, PasswordProtectionMapper, SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { RelationshipTemplateMapper } from "./RelationshipTemplateMapper";
+import { OwnerRestriction, PasswordProtectionMapper, SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
+import { RelationshipTemplateMapper } from "./RelationshipTemplateMapper.js";
 
 export interface GetRelationshipTemplatesQuery {
     isOwn?: string | string[];

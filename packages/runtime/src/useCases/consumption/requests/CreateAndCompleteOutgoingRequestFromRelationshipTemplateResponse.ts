@@ -5,8 +5,8 @@ import { CoreId } from "@nmshd/core-types";
 import { LocalRequestDTO } from "@nmshd/runtime-types";
 import { MessageController, Relationship, RelationshipsController, RelationshipTemplate, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { MessageIdString, RelationshipIdString, RelationshipTemplateIdString, RuntimeErrors, UseCase } from "../../common";
-import { RequestMapper } from "./RequestMapper";
+import { MessageIdString, RelationshipIdString, RelationshipTemplateIdString, RuntimeErrors, UseCase } from "../../common/index.js";
+import { RequestMapper } from "./RequestMapper.js";
 
 export interface CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseRequest {
     templateId: RelationshipTemplateIdString;

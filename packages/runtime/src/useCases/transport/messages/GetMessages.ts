@@ -4,8 +4,8 @@ import { MessageDTO, RecipientDTO } from "@nmshd/runtime-types";
 import { Message, MessageController, MessageEnvelopeRecipient, MessageRecipient } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { nameof } from "ts-simple-nameof";
-import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { MessageMapper } from "./MessageMapper";
+import { SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
+import { MessageMapper } from "./MessageMapper.js";
 
 export interface GetMessagesQuery {
     isOwn?: string;

@@ -4,9 +4,9 @@ import { EventBus, Result } from "@js-soft/ts-utils";
 import { ICoreAddress, Reference, SharedPasswordProtection } from "@nmshd/core-types";
 import { AnonymousServices, DeviceMapper, RuntimeServices } from "@nmshd/runtime";
 import { BackboneIds, TokenContentDeviceSharedSecret } from "@nmshd/transport";
-import { AppRuntimeErrors } from "./AppRuntimeErrors";
-import { IUIBridge } from "./extensibility";
-import { AccountServices, LocalAccountDTO, LocalAccountSession } from "./multiAccount";
+import { AppRuntimeErrors } from "./AppRuntimeErrors.js";
+import { IUIBridge } from "./extensibility/index.js";
+import { AccountServices, LocalAccountDTO, LocalAccountSession } from "./multiAccount/index.js";
 
 export class AppStringProcessor {
     private readonly logger: ILogger;

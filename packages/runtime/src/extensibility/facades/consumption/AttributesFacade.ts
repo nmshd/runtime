@@ -59,7 +59,7 @@ import {
     ValidateIQLQueryRequest,
     ValidateIQLQueryResponse,
     ValidateIQLQueryUseCase
-} from "../../../useCases";
+} from "../../../useCases/index.js";
 
 export class AttributesFacade {
     public constructor(

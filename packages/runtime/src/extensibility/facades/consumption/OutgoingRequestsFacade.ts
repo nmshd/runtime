@@ -18,7 +18,7 @@ import {
     GetOutgoingRequestsUseCase,
     SentOutgoingRequestRequest,
     SentOutgoingRequestUseCase
-} from "../../../useCases";
+} from "../../../useCases/index.js";
 
 export class OutgoingRequestsFacade {
     public constructor(

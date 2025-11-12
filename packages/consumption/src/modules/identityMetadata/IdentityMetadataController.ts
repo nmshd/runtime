@@ -1,11 +1,11 @@
 import { CoreAddress } from "@nmshd/core-types";
 import { SynchronizedCollection } from "@nmshd/transport";
-import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
-import { ConsumptionController } from "../../consumption/ConsumptionController";
-import { ConsumptionControllerName } from "../../consumption/ConsumptionControllerName";
-import { ConsumptionIds } from "../../consumption/ConsumptionIds";
-import { IdentityMetadata } from "./local/IdentityMetadata";
-import { IUpsertIdentityMetadataParams, UpsertIdentityMetadataParams } from "./local/UpsertIdentityMetadataParams";
+import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController.js";
+import { ConsumptionController } from "../../consumption/ConsumptionController.js";
+import { ConsumptionControllerName } from "../../consumption/ConsumptionControllerName.js";
+import { ConsumptionIds } from "../../consumption/ConsumptionIds.js";
+import { IdentityMetadata } from "./local/IdentityMetadata.js";
+import { IUpsertIdentityMetadataParams, UpsertIdentityMetadataParams } from "./local/UpsertIdentityMetadataParams.js";
 
 export class IdentityMetadataController extends ConsumptionBaseController {
     private identityMetadata: SynchronizedCollection;

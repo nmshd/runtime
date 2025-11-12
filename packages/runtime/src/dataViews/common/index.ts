@@ -1,2 +1,2 @@
-export * from "./DVOError";
-export * from "./DVOWarning";
+export * from "./DVOError.js";
+export * from "./DVOWarning.js";

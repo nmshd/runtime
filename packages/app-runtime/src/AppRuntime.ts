@@ -5,12 +5,12 @@ import { EventBus, Result } from "@js-soft/ts-utils";
 import { ConsumptionController } from "@nmshd/consumption";
 import { CoreId, ICoreAddress } from "@nmshd/core-types";
 import { ModuleConfiguration, Runtime, RuntimeHealth, RuntimeServices } from "@nmshd/runtime";
-import { AppConfig, AppConfigOverwrite, createAppConfig } from "./AppConfig";
-import { AppRuntimeErrors } from "./AppRuntimeErrors";
-import { AppStringProcessor } from "./AppStringProcessor";
-import { AccountSelectedEvent } from "./events";
-import { IUIBridge } from "./extensibility";
-import { IAppLanguageProvider, INotificationAccess } from "./infrastructure";
+import { AppConfig, AppConfigOverwrite, createAppConfig } from "./AppConfig.js";
+import { AppRuntimeErrors } from "./AppRuntimeErrors.js";
+import { AppStringProcessor } from "./AppStringProcessor.js";
+import { AccountSelectedEvent } from "./events/index.js";
+import { IUIBridge } from "./extensibility/index.js";
+import { IAppLanguageProvider, INotificationAccess } from "./infrastructure/index.js";
 import {
     AppLanguageModule,
     AppRuntimeModuleConfiguration,
@@ -24,9 +24,9 @@ import {
     RelationshipChangedModule,
     RelationshipTemplateProcessedModule,
     SSEModule
-} from "./modules";
-import { AccountServices, LocalAccountMapper, LocalAccountSession, MultiAccountController } from "./multiAccount";
-import { SessionStorage } from "./SessionStorage";
+} from "./modules/index.js";
+import { AccountServices, LocalAccountMapper, LocalAccountSession, MultiAccountController } from "./multiAccount/index.js";
+import { SessionStorage } from "./SessionStorage.js";
 
 export class AppRuntime extends Runtime<AppConfig> {
     public constructor(

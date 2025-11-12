@@ -3,8 +3,8 @@ import { CoreId } from "@nmshd/core-types";
 import { MessageWithAttachmentsDTO } from "@nmshd/runtime-types";
 import { File, FileController, Message, MessageController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { MessageIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { MessageMapper } from "./MessageMapper";
+import { MessageIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
+import { MessageMapper } from "./MessageMapper.js";
 
 export interface GetMessageRequest {
     id: MessageIdString;

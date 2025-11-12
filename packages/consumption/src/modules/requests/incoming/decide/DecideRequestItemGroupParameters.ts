@@ -1,4 +1,4 @@
-import { DecideRequestItemParametersJSON } from "./DecideRequestItemParameters";
+import { DecideRequestItemParametersJSON } from "./DecideRequestItemParameters.js";
 
 export interface DecideRequestItemGroupParametersJSON {
     items: DecideRequestItemParametersJSON[];

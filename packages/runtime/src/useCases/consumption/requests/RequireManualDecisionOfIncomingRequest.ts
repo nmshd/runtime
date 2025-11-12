@@ -3,8 +3,8 @@ import { IncomingRequestsController } from "@nmshd/consumption";
 import { CoreId } from "@nmshd/core-types";
 import { LocalRequestDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { RequestIdString, UseCase } from "../../common";
-import { RequestMapper } from "./RequestMapper";
+import { RequestIdString, UseCase } from "../../common/index.js";
+import { RequestMapper } from "./RequestMapper.js";
 
 export interface RequireManualDecisionOfIncomingRequestRequest {
     requestId: RequestIdString;

@@ -41,8 +41,8 @@ import {
     SettingsController,
     ShareAttributeRequestItemProcessor,
     TransferFileOwnershipRequestItemProcessor
-} from "../modules";
-import { ConsumptionConfig } from "./ConsumptionConfig";
+} from "../modules/index.js";
+import { ConsumptionConfig } from "./ConsumptionConfig.js";
 
 export class ConsumptionController {
     public constructor(

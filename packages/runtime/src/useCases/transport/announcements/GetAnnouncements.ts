@@ -3,8 +3,8 @@ import { LanguageISO639 } from "@nmshd/core-types";
 import { AnnouncementDTO } from "@nmshd/runtime-types";
 import { AnnouncementController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { AnnouncementMapper } from "./AnnouncementMapper";
+import { SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
+import { AnnouncementMapper } from "./AnnouncementMapper.js";
 
 export interface GetAnnouncementsRequest {
     language: LanguageISO639;

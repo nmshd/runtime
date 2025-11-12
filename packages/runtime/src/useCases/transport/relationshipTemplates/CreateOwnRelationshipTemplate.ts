@@ -6,8 +6,8 @@ import { CoreAddress, CoreDate, PasswordLocationIndicator } from "@nmshd/core-ty
 import { RelationshipTemplateDTO } from "@nmshd/runtime-types";
 import { AccountController, RelationshipTemplateController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { AddressString, ISO8601DateTimeString, PasswordProtectionMapper, RuntimeErrors, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common";
-import { RelationshipTemplateMapper } from "./RelationshipTemplateMapper";
+import { AddressString, ISO8601DateTimeString, PasswordProtectionMapper, RuntimeErrors, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common/index.js";
+import { RelationshipTemplateMapper } from "./RelationshipTemplateMapper.js";
 
 export interface SchemaValidatableCreateOwnRelationshipTemplateRequest {
     expiresAt: ISO8601DateTimeString;

@@ -2,8 +2,8 @@ import { Result } from "@js-soft/ts-utils";
 import { IdentityDeletionProcessDTO } from "@nmshd/runtime-types";
 import { AccountController, IdentityDeletionProcessController, IdentityDeletionProcessStatus } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { IdentityDeletionProcessMapper } from "./IdentityDeletionProcessMapper";
+import { RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
+import { IdentityDeletionProcessMapper } from "./IdentityDeletionProcessMapper.js";
 
 export interface InitiateIdentityDeletionProcessRequest {
     lengthOfGracePeriodInDays?: number;

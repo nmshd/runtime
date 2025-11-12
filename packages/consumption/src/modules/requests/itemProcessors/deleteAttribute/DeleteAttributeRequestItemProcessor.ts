@@ -1,6 +1,6 @@
 import { AcceptResponseItem, DeleteAttributeAcceptResponseItem, DeleteAttributeRequestItem, RejectResponseItem, Request, ResponseItemResult } from "@nmshd/content";
 import { CoreAddress, CoreDate } from "@nmshd/core-types";
-import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
+import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors.js";
 import {
     EmittedAttributeDeletionInfo,
     EmittedAttributeDeletionStatus,
@@ -11,11 +11,11 @@ import {
     ReceivedAttributeDeletionInfo,
     ReceivedAttributeDeletionStatus,
     ThirdPartyRelationshipAttribute
-} from "../../../attributes";
-import { ValidationResult } from "../../../common/ValidationResult";
-import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
-import { LocalRequestInfo } from "../IRequestItemProcessor";
-import { AcceptDeleteAttributeRequestItemParameters, AcceptDeleteAttributeRequestItemParametersJSON } from "./AcceptDeleteAttributeRequestItemParameters";
+} from "../../../attributes/index.js";
+import { ValidationResult } from "../../../common/ValidationResult.js";
+import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor.js";
+import { LocalRequestInfo } from "../IRequestItemProcessor.js";
+import { AcceptDeleteAttributeRequestItemParameters, AcceptDeleteAttributeRequestItemParametersJSON } from "./AcceptDeleteAttributeRequestItemParameters.js";
 
 export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProcessor<DeleteAttributeRequestItem> {
     public override async canCreateOutgoingRequestItem(requestItem: DeleteAttributeRequestItem, _request: Request, recipient?: CoreAddress): Promise<ValidationResult> {

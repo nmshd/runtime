@@ -1,5 +1,5 @@
 import { LocalRequestDTO } from "@nmshd/runtime-types";
-import { DataEvent } from "../DataEvent";
+import { DataEvent } from "../DataEvent.js";
 
 export class OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent extends DataEvent<LocalRequestDTO> {
     public static readonly namespace = "consumption.outgoingRequestFromRelationshipCreationCreatedAndCompleted";

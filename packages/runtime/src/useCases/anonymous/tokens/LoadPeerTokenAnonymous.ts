@@ -2,8 +2,8 @@ import { Result } from "@js-soft/ts-utils";
 import { TokenDTO } from "@nmshd/runtime-types";
 import { AnonymousTokenController, TokenReference } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { SchemaRepository, SchemaValidator, TokenReferenceString, URLTokenReferenceString, UseCase } from "../../common";
-import { TokenMapper } from "../../transport/tokens/TokenMapper";
+import { SchemaRepository, SchemaValidator, TokenReferenceString, URLTokenReferenceString, UseCase } from "../../common/index.js";
+import { TokenMapper } from "../../transport/tokens/TokenMapper.js";
 
 export interface LoadPeerTokenAnonymousRequest {
     reference: TokenReferenceString | URLTokenReferenceString;

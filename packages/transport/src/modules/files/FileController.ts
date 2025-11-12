@@ -1,13 +1,13 @@
-import { ISerializable } from "@js-soft/ts-serval";
+import { type ISerializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId, FileReference } from "@nmshd/core-types";
-import { CoreBuffer, CryptoCipher, CryptoHash, CryptoHashAlgorithm, CryptoSecretKey, Encoding } from "@nmshd/crypto";
+import { CoreBuffer, CryptoCipher, CryptoHash, CryptoSecretKey, Encoding } from "@nmshd/crypto";
 import { DbCollectionName } from "../../core/DbCollectionName.js";
 import { CoreCrypto, CoreHash, TransportCoreErrors } from "../../core/index.js";
 import { ControllerName, TransportController } from "../../core/TransportController.js";
 import { AccountController } from "../accounts/AccountController.js";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection.js";
-import { BackboneGetFilesResponse } from "./backbone/BackboneGetFiles.js";
+import { type BackboneGetFilesResponse } from "./backbone/BackboneGetFiles.js";
 import { BackbonePostFilesResponse } from "./backbone/BackbonePostFiles.js";
 import { FileClient } from "./backbone/FileClient.js";
 import { File } from "./local/File.js";
@@ -138,7 +138,7 @@ export class FileController extends TransportController {
             throw TransportCoreErrors.files.maxFileSizeExceeded(fileSize, this.config.platformMaxUnencryptedFileSize);
         }
 
-        const plaintextHashBuffer = await CryptoHash.hash(content, CryptoHashAlgorithm.SHA512);
+        const plaintextHashBuffer = await CryptoHash.hash(content, 2);
         const plaintextHash = CoreHash.from(plaintextHashBuffer.toBase64URL());
 
         const signature = await this.parent.activeDevice.sign(plaintextHashBuffer);
@@ -147,7 +147,7 @@ export class FileController extends TransportController {
         const fileDownloadSecretKey = await CoreCrypto.generateSecretKey();
         const cipher = await CoreCrypto.encrypt(content, fileDownloadSecretKey);
         const cipherBuffer = CoreBuffer.fromBase64URL(cipher.toBase64());
-        const cipherHash = await CryptoHash.hash(cipherBuffer, CryptoHashAlgorithm.SHA512);
+        const cipherHash = await CryptoHash.hash(cipherBuffer, 2);
         const cipherCoreHash = CoreHash.from(cipherHash.toBase64URL());
 
         const metadata = FileMetadata.from({
@@ -219,7 +219,7 @@ export class FileController extends TransportController {
         const downloadResponse = (await this.client.downloadFile(file.id.toString())).value;
         const buffer = CoreBuffer.fromObject(downloadResponse);
 
-        const hash = await CryptoHash.hash(buffer, CryptoHashAlgorithm.SHA512);
+        const hash = await CryptoHash.hash(buffer, 2);
         const hashb64 = hash.toBase64URL();
 
         if (hashb64 !== file.cipherHash.hash) {
@@ -228,7 +228,7 @@ export class FileController extends TransportController {
 
         const cipher = CryptoCipher.fromBase64(buffer.toBase64URL());
         const decrypt = await CoreCrypto.decrypt(cipher, file.cipherKey);
-        const plaintextHashesMatch = await file.plaintextHash.verify(decrypt, CryptoHashAlgorithm.SHA512);
+        const plaintextHashesMatch = await file.plaintextHash.verify(decrypt, 2);
 
         if (!plaintextHashesMatch) {
             throw TransportCoreErrors.files.plaintextHashMismatch();

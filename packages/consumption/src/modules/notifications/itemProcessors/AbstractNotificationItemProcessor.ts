@@ -2,9 +2,9 @@ import { Event } from "@js-soft/ts-utils";
 import { NotificationItem } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { AccountController } from "@nmshd/transport";
-import { ConsumptionController } from "../../../consumption/ConsumptionController";
-import { ValidationResult } from "../../common";
-import { LocalNotification } from "../local/LocalNotification";
+import { ConsumptionController } from "../../../consumption/ConsumptionController.js";
+import { ValidationResult } from "../../common/index.js";
+import { LocalNotification } from "../local/LocalNotification.js";
 
 export interface INotificationItemProcessor<TNotificationItem extends NotificationItem = NotificationItem> {
     checkPrerequisitesOfIncomingNotificationItem(notificationItem: TNotificationItem, notification: LocalNotification): ValidationResult | Promise<ValidationResult>;

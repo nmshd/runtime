@@ -16,7 +16,7 @@ import {
     UpdateSettingUseCase,
     UpsertSettingByKeyRequest,
     UpsertSettingByKeyUseCase
-} from "../../../useCases";
+} from "../../../useCases/index.js";
 
 export class SettingsFacade {
     public constructor(
