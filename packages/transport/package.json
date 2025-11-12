@@ -10,6 +10,7 @@
     "license": "AGPL-3.0-or-later",
     "author": "j&s-soft AG",
     "main": "dist/index.js",
+    "type": "module",
     "types": "dist/index.d.ts",
     "files": [
         "dist"
@@ -22,48 +23,16 @@
         "cdep": "tsc && madge --circular dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
         "test:ci": "npm run test:ci:lokijs && npm run test:ci:mongodb",
-        "test:ci:lokijs": "USE_LOKIJS=true jest -i --coverage",
-        "test:ci:mongodb": "jest -i",
-        "test:local:ferretdb": "npm run test:local:start:ferretdb && CONNECTION_STRING='mongodb://root:example@localhost:27022' jest",
-        "test:local:lokijs": "USE_LOKIJS=true jest",
-        "test:local:mongodb": "npm run test:local:start:mongodb && CONNECTION_STRING='mongodb://root:example@localhost:27021' jest",
+        "test:ci:lokijs": "USE_LOKIJS=true vitest -i --coverage",
+        "test:ci:mongodb": "vitest -i",
+        "test:local:ferretdb": "npm run test:local:start:ferretdb && CONNECTION_STRING='mongodb://root:example@localhost:27022' vitest",
+        "test:local:lokijs": "USE_LOKIJS=true vitest",
+        "test:local:mongodb": "npm run test:local:start:mongodb && CONNECTION_STRING='mongodb://root:example@localhost:27021' vitest",
         "test:local:start:ferretdb": "docker compose -f ../../.dev/compose.yml up -d runtime-ferret",
         "test:local:start:mongodb": "docker compose -f ../../.dev/compose.yml up -d runtime-mongo",
         "test:local:teardown": "docker compose -f ../../.dev/compose.yml rm -fsv",
-        "test:mongodb": "jest",
         "test:performance:kube:start": "kubectl apply -f ./test/performance/k8s.yaml",
         "test:performance:kube:stop": "kubectl delete -f ./test/performance/k8s.yaml"
-    },
-    "jest": {
-        "collectCoverageFrom": [
-            "./src/**"
-        ],
-        "coverageProvider": "v8",
-        "coverageReporters": [
-            "text-summary",
-            "cobertura",
-            "lcov"
-        ],
-        "maxWorkers": 5,
-        "preset": "ts-jest",
-        "setupFilesAfterEnv": [
-            "./test/customMatchers.ts",
-            "jest-expect-message"
-        ],
-        "testEnvironment": "node",
-        "testPathIgnorePatterns": [
-            "/test/performance/",
-            "/node_modules/"
-        ],
-        "testTimeout": 60000,
-        "transform": {
-            "^.+\\.ts$": [
-                "ts-jest",
-                {
-                    "tsconfig": "test/tsconfig.json"
-                }
-            ]
-        }
     },
     "dependencies": {
         "@js-soft/docdb-access-abstractions": "1.2.1",
@@ -93,7 +62,7 @@
         "@types/qs": "^6.14.0",
         "correlation-id": "^5.2.0",
         "expect": "^30.2.0",
-        "testcontainers": "^11.8.0",
+        "testcontainers": "^11.8.1",
         "ts-mockito": "^2.6.1"
     },
     "publishConfig": {

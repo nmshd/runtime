@@ -29,18 +29,15 @@
     "devDependencies": {
         "@js-soft/eslint-config-ts": "^2.0.4",
         "@js-soft/license-check": "^1.0.10",
-        "@types/jest": "^30.0.0",
-        "@types/node": "^24.10.0",
+        "@types/node": "^24.10.1",
         "enhanced-publish": "^1.1.6",
         "eslint": "^9.39.1",
-        "jest": "^30.2.0",
-        "jest-expect-message": "^1.1.3",
         "madge": "^8.0.0",
         "npm-check-updates": "^19.1.2",
         "prettier": "^3.6.2",
-        "ts-jest": "^29.4.5",
         "ts-node": "^10.9.2",
         "tsconfig-paths": "^4.2.0",
-        "typescript": "^5.9.3"
+        "typescript": "^5.9.3",
+        "vitest": "^4.0.8"
     }
 }

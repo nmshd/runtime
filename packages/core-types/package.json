@@ -10,6 +10,7 @@
     "license": "AGPL-3.0-or-later",
     "author": "j&s-soft AG",
     "main": "dist/index.js",
+    "type": "module",
     "types": "dist/index.d.ts",
     "files": [
         "dist"
@@ -54,7 +55,7 @@
         "@nmshd/crypto": "^2.1.3",
         "json-stringify-safe": "^5.0.1",
         "luxon": "^3.7.2",
-        "uuid": "^11.1.0"
+        "uuid": "^13.0.0"
     },
     "devDependencies": {
         "@types/luxon": "^3.7.1",

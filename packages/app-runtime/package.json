@@ -10,6 +10,7 @@
     "license": "AGPL-3.0-or-later",
     "author": "j&s-soft AG",
     "main": "dist/index.js",
+    "type": "module",
     "types": "dist/index.d.ts",
     "files": [
         "dist"
