@@ -1,8 +1,6 @@
 /* eslint-disable jest/no-standalone-expect */
 import { ILokiJsDatabaseFactory } from "@js-soft/docdb-access-loki";
-import { ILoggerFactory } from "@js-soft/logging-abstractions";
 import { NodeLoggerFactory } from "@js-soft/node-logger";
-import { SimpleLoggerFactory } from "@js-soft/simple-logger";
 import { EventBus, Result, sleep } from "@js-soft/ts-utils";
 import { ArbitraryMessageContent, ArbitraryRelationshipCreationContent, ArbitraryRelationshipTemplateContent } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
@@ -16,13 +14,12 @@ import {
     RelationshipTemplateDTO,
     SyncEverythingResponse
 } from "@nmshd/runtime";
-import { IConfigOverwrite, TransportLoggerFactory } from "@nmshd/transport";
+import { IConfigOverwrite } from "@nmshd/transport";
 import fs from "fs";
 import { defaultsDeep } from "lodash";
 import loki from "lokijs";
 import path from "path";
 import { GenericContainer, Wait } from "testcontainers";
-import { LogLevel } from "typescript-logging";
 import {
     AppConfig,
     AppConfigOverwrite,
@@ -130,18 +127,6 @@ export class TestUtil {
     public static async createSession(runtime: AppRuntime): Promise<LocalAccountSession> {
         const localAccount1 = await runtime.accountServices.createAccount("Profil 1");
         return await runtime.selectAccount(localAccount1.id);
-    }
-
-    private static readonly fatalLogger = new SimpleLoggerFactory(LogLevel.Fatal);
-    private static oldLogger: ILoggerFactory;
-
-    public static useFatalLoggerFactory(): void {
-        this.oldLogger = (TransportLoggerFactory as any).instance;
-        TransportLoggerFactory.init(this.fatalLogger);
-    }
-
-    public static useTestLoggerFactory(): void {
-        TransportLoggerFactory.init(this.oldLogger);
     }
 
     public static expectThrows(method: Function | Promise<any>, errorMessageRegexp: RegExp | string): void {
