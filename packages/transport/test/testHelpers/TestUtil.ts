@@ -2,9 +2,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { LokiJsConnection } from "@js-soft/docdb-access-loki";
 import { MongoDbConnection } from "@js-soft/docdb-access-mongo";
-import { ILoggerFactory } from "@js-soft/logging-abstractions";
 import { NodeLoggerFactory } from "@js-soft/node-logger";
-import { SimpleLoggerFactory } from "@js-soft/simple-logger";
 import { ISerializable, Serializable } from "@js-soft/ts-serval";
 import { EventEmitter2EventBus, sleep } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
@@ -13,7 +11,6 @@ import fs from "fs";
 import { DurationLike } from "luxon";
 import path from "path";
 import { GenericContainer, Wait } from "testcontainers";
-import { LogLevel } from "typescript-logging";
 import {
     AccountController,
     ChangedItems,
@@ -33,13 +30,10 @@ import {
     RequestError,
     TokenContentRelationshipTemplate,
     TokenReference,
-    Transport,
-    TransportLoggerFactory
+    Transport
 } from "../../src";
 
 export class TestUtil {
-    private static readonly fatalLogger = new SimpleLoggerFactory(LogLevel.Fatal);
-    private static oldLogger: ILoggerFactory;
     public static loggerFactory = new NodeLoggerFactory({
         appenders: {
             consoleAppender: {
@@ -62,15 +56,6 @@ export class TestUtil {
     });
 
     public static tempDateThreshold: DurationLike = { seconds: 30 };
-
-    public static useFatalLoggerFactory(): void {
-        this.oldLogger = (TransportLoggerFactory as any).instance;
-        TransportLoggerFactory.init(this.fatalLogger);
-    }
-
-    public static useTestLoggerFactory(): void {
-        TransportLoggerFactory.init(this.oldLogger);
-    }
 
     public static expectThrows(method: Function | Promise<any>, errorMessageRegexp: RegExp | string): void {
         let error: Error | undefined;
