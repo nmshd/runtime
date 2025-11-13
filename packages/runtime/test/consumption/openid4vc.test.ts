@@ -219,6 +219,14 @@ describe("EUDIPLO", () => {
 
         const loadResult = await consumptionServices.openId4Vc.fetchProofRequest({ proofRequestUrl });
         expect(loadResult).toBeSuccessful();
+
+        const parsedResult = JSON.parse(loadResult.value.jsonRepresentation);
+        expect(parsedResult.dcql.queryResult.can_be_satisfied).toBe(true);
+
+        const credentialMatches = parsedResult.dcql.queryResult.credential_matches["EmployeeIdCard-vc-sd-jwt"];
+        expect(credentialMatches.valid_credentials).toHaveLength(1);
+
+        // TODO: send the presentation with a manually selected credential
     });
 });
 
