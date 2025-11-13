@@ -16,7 +16,7 @@ afterAll(async () => {
     await runtimeServiceProvider.stop();
 });
 
-describe("OpenID4VCI and OpenID4VCP", () => {
+describe("custom openid4vc service", () => {
     let axiosInstance: AxiosInstance;
     let dockerComposeStack: StartedDockerComposeEnvironment | undefined;
 
