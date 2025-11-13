@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 import axios, { AxiosInstance } from "axios";
 import path from "path";
 import { DockerComposeEnvironment, StartedDockerComposeEnvironment, Wait } from "testcontainers";
@@ -24,6 +23,7 @@ beforeAll(async () => {
     axiosInstance = axios.create({
         baseURL: oid4vcServiceBaseUrl,
         headers: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             "Content-Type": "application/json"
         }
     });
@@ -81,11 +81,14 @@ describe("OpenID4VCI and OpenID4VCP", () => {
                 id: "anId",
                 purpose: "To prove you work here",
 
+                // eslint-disable-next-line @typescript-eslint/naming-convention
                 input_descriptors: [
                     {
                         id: "EmployeeIdCard",
                         format: {
+                            // eslint-disable-next-line @typescript-eslint/naming-convention
                             "vc+sd-jwt": {
+                                // eslint-disable-next-line @typescript-eslint/naming-convention
                                 "sd-jwt_alg_values": ["RS256", "PS256", "HS256", "ES256", "ES256K", "RS384", "PS384", "HS384", "ES384", "RS512", "PS512", "HS512", "ES512", "EdDSA"]
                             }
                         },
@@ -163,6 +166,7 @@ describe("EUDIPLO", () => {
             await axios.post(
                 `${eudiploBaseUrl}/oauth2/token`,
                 {
+                    // eslint-disable-next-line @typescript-eslint/naming-convention
                     grant_type: "client_credentials"
                 },
                 {
@@ -180,11 +184,13 @@ describe("EUDIPLO", () => {
             await axios.post(
                 `${eudiploBaseUrl}/issuer-management/offer`,
                 {
+                    // eslint-disable-next-line @typescript-eslint/naming-convention
                     response_type: "uri",
                     issuanceId: eudiploIssuanceConfigurationId
                 },
                 {
                     headers: {
+                        // eslint-disable-next-line @typescript-eslint/naming-convention
                         Authorization: `Bearer ${accessToken}`
                     }
                 }
@@ -206,11 +212,13 @@ describe("EUDIPLO", () => {
             await axios.post(
                 `${eudiploBaseUrl}/presentation-management/request`,
                 {
+                    // eslint-disable-next-line @typescript-eslint/naming-convention
                     response_type: "uri",
                     requestId: eudiploPresentationConfigurationId
                 },
                 {
                     headers: {
+                        // eslint-disable-next-line @typescript-eslint/naming-convention
                         Authorization: `Bearer ${accessToken}`
                     }
                 }
@@ -243,8 +251,10 @@ async function startOid4VcComposeStack() {
     const composeStack = await new DockerComposeEnvironment(composeFolder, "compose.openid4vc.yml")
         .withProjectName("runtime-oid4vc-tests")
         .withEnvironment({
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             NMSHD_TEST_BASEURL: baseUrl,
 
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE: addressGenerationHostnameOverride
         } as Record<string, string>)
         .withStartupTimeout(60000)
