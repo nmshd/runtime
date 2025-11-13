@@ -6,35 +6,45 @@ import { RuntimeServiceProvider } from "../lib";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
 let consumptionServices: ConsumptionServices;
-let axiosInstance: AxiosInstance;
-let dockerComposeStack: StartedDockerComposeEnvironment | undefined;
 
 beforeAll(async () => {
     const runtimeServices = await runtimeServiceProvider.launch(1);
     consumptionServices = runtimeServices[0].consumption;
-
-    let oid4vcServiceBaseUrl = process.env.OPENID4VC_SERVICE_BASEURL!;
-    if (!oid4vcServiceBaseUrl) {
-        dockerComposeStack = await startOid4VcComposeStack();
-        const mappedPort = dockerComposeStack.getContainer("oid4vc-service-1").getMappedPort(9000);
-        oid4vcServiceBaseUrl = `http://localhost:${mappedPort}`;
-    }
-
-    axiosInstance = axios.create({
-        baseURL: oid4vcServiceBaseUrl,
-        headers: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            "Content-Type": "application/json"
-        }
-    });
 }, 120000);
 
 afterAll(async () => {
     await runtimeServiceProvider.stop();
-    if (dockerComposeStack) await dockerComposeStack.down();
 });
 
 describe("OpenID4VCI and OpenID4VCP", () => {
+    let axiosInstance: AxiosInstance;
+    let dockerComposeStack: StartedDockerComposeEnvironment | undefined;
+
+    beforeAll(async () => {
+        const runtimeServices = await runtimeServiceProvider.launch(1);
+        consumptionServices = runtimeServices[0].consumption;
+
+        let oid4vcServiceBaseUrl = process.env.OPENID4VC_SERVICE_BASEURL!;
+        if (!oid4vcServiceBaseUrl) {
+            dockerComposeStack = await startOid4VcComposeStack();
+            const mappedPort = dockerComposeStack.getContainer("oid4vc-service-1").getMappedPort(9000);
+            oid4vcServiceBaseUrl = `http://localhost:${mappedPort}`;
+        }
+
+        axiosInstance = axios.create({
+            baseURL: oid4vcServiceBaseUrl,
+            headers: {
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                "Content-Type": "application/json"
+            }
+        });
+    }, 120000);
+
+    afterAll(async () => {
+        await runtimeServiceProvider.stop();
+        if (dockerComposeStack) await dockerComposeStack.down();
+    });
+
     let credentialOfferUrl: string;
 
     test("should process a given credential offer", async () => {
