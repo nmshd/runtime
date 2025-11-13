@@ -199,7 +199,7 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
             }
         }
         if (records.length === 0) {
-            // try to recover over local storrage - temporary fix
+            // try to recover over local storage - temporary fix
             for (const record of this.storage.values()) {
                 if (this.matchesQuery(record, query)) {
                     records.push(record);
