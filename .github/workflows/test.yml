@@ -9,6 +9,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
+env:
+  NODE_OPTIONS: "--localstorage-file=/tmp/localstorage"
+
 jobs:
   run-checks:
     runs-on: ubuntu-latest
