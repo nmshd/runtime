@@ -1,5 +1,5 @@
 import { ProprietaryStringJSON, RelationshipAttributeConfidentiality, RelationshipAttributeJSON, ShareAttributeRequestItem } from "@nmshd/content";
-import { OwnRelationshipAttributeDVO } from "../../src";
+import { OwnRelationshipAttributeDVO } from "@nmshd/runtime";
 import {
     cleanupAttributes,
     ensureActiveRelationship,
@@ -7,7 +7,7 @@ import {
     executeFullShareAndAcceptAttributeRequestFlow,
     RuntimeServiceProvider,
     TestRuntimeServices
-} from "../lib";
+} from "../lib/index.js";
 
 const serviceProvider = new RuntimeServiceProvider();
 let services1: TestRuntimeServices;

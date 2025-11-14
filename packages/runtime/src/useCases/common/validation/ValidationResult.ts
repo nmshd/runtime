@@ -1,4 +1,4 @@
-import { ValidationFailure } from "./ValidationFailure";
+import { ValidationFailure } from "./ValidationFailure.js";
 
 export class ValidationResult {
     private readonly failures: ValidationFailure[] = [];

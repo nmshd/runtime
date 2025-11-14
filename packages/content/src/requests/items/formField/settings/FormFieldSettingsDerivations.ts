@@ -1,10 +1,10 @@
-import { BooleanFormFieldSettings, BooleanFormFieldSettingsJSON } from "./BooleanFormFieldSettings";
-import { DateFormFieldSettings, DateFormFieldSettingsJSON } from "./DateFormFieldSettings";
-import { DoubleFormFieldSettings, DoubleFormFieldSettingsJSON } from "./DoubleFormFieldSettings";
-import { IntegerFormFieldSettings, IntegerFormFieldSettingsJSON } from "./IntegerFormFieldSettings";
-import { RatingFormFieldSettings, RatingFormFieldSettingsJSON } from "./RatingFormFieldSettings";
-import { SelectionFormFieldSettings, SelectionFormFieldSettingsJSON } from "./SelectionFormFieldSettings";
-import { StringFormFieldSettings, StringFormFieldSettingsJSON } from "./StringFormFieldSettings";
+import { BooleanFormFieldSettings, BooleanFormFieldSettingsJSON } from "./BooleanFormFieldSettings.js";
+import { DateFormFieldSettings, DateFormFieldSettingsJSON } from "./DateFormFieldSettings.js";
+import { DoubleFormFieldSettings, DoubleFormFieldSettingsJSON } from "./DoubleFormFieldSettings.js";
+import { IntegerFormFieldSettings, IntegerFormFieldSettingsJSON } from "./IntegerFormFieldSettings.js";
+import { RatingFormFieldSettings, RatingFormFieldSettingsJSON } from "./RatingFormFieldSettings.js";
+import { SelectionFormFieldSettings, SelectionFormFieldSettingsJSON } from "./SelectionFormFieldSettings.js";
+import { StringFormFieldSettings, StringFormFieldSettingsJSON } from "./StringFormFieldSettings.js";
 
 export type FormFieldSettingsJSONDerivations =
     | StringFormFieldSettingsJSON

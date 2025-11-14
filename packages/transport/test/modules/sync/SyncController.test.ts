@@ -1,9 +1,9 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { sleep } from "@js-soft/ts-utils";
 import { CoreDate } from "@nmshd/core-types";
-import { AccountController, Transport } from "../../../src";
-import { FakeSyncClient } from "../../testHelpers/FakeSyncClient";
-import { TestUtil } from "../../testHelpers/TestUtil";
+import { AccountController, Transport } from "@nmshd/transport";
+import { FakeSyncClient } from "../../testHelpers/FakeSyncClient.js";
+import { TestUtil } from "../../testHelpers/TestUtil.js";
 
 describe("SyncController", function () {
     let connection: IDatabaseConnection;

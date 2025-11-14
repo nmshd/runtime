@@ -1,3 +1,3 @@
-export * from "./Notification";
-export * from "./NotificationItem";
-export * from "./items";
+export * from "./items/index.js";
+export * from "./Notification.js";
+export * from "./NotificationItem.js";

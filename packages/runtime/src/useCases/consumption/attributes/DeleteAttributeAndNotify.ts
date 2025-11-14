@@ -19,7 +19,7 @@ import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { RelationshipStatus } from "@nmshd/runtime-types";
 import { AccountController, MessageController, PeerDeletionStatus, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { AttributeIdString, NotificationIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { AttributeIdString, NotificationIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
 
 export interface DeleteAttributeAndNotifyRequest {
     attributeId: AttributeIdString;

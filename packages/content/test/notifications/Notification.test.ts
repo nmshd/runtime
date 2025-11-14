@@ -1,6 +1,6 @@
 import { Serializable } from "@js-soft/ts-serval";
+import { IdentityAttribute, Notification, PeerAttributeSucceededNotificationItem, Surname } from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
-import { IdentityAttribute, Notification, PeerAttributeSucceededNotificationItem, Surname } from "../../src";
 
 describe("Notification", function () {
     test("should create a Notification from JSON", function () {

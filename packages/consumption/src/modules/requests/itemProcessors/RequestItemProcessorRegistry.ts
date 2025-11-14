@@ -1,9 +1,9 @@
 import { RequestItem } from "@nmshd/content";
-import { ConsumptionController } from "../../../consumption/ConsumptionController";
-import { ConsumptionError } from "../../../consumption/ConsumptionError";
-import { IRequestItemProcessor } from "./IRequestItemProcessor";
-import { RequestItemConstructor } from "./RequestItemConstructor";
-import { RequestItemProcessorConstructor } from "./RequestItemProcessorConstructor";
+import { ConsumptionController } from "../../../consumption/ConsumptionController.js";
+import { ConsumptionError } from "../../../consumption/ConsumptionError.js";
+import { IRequestItemProcessor } from "./IRequestItemProcessor.js";
+import { RequestItemConstructor } from "./RequestItemConstructor.js";
+import { RequestItemProcessorConstructor } from "./RequestItemProcessorConstructor.js";
 
 export class RequestItemProcessorRegistry {
     public constructor(

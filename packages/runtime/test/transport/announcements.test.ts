@@ -1,7 +1,7 @@
 import { CoreDate, LanguageISO639 } from "@nmshd/core-types";
 import { AnnouncementSeverity } from "@nmshd/transport";
-import { RuntimeServiceProvider, TestRuntimeServices } from "../lib";
-import { createAnnouncement } from "../lib/AdminApiClient";
+import { createAnnouncement } from "../lib/AdminApiClient.js";
+import { RuntimeServiceProvider, TestRuntimeServices } from "../lib/index.js";
 
 const serviceProvider = new RuntimeServiceProvider();
 let client: TestRuntimeServices;

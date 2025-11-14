@@ -1,6 +1,6 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import _ from "lodash";
-import { FormFieldSettings, FormFieldSettingsJSON, IFormFieldSettings } from "./FormFieldSettings";
+import { FormFieldSettings, FormFieldSettingsJSON, IFormFieldSettings } from "./FormFieldSettings.js";
 
 export interface SelectionFormFieldSettingsJSON extends FormFieldSettingsJSON {
     "@type": "SelectionFormFieldSettings";

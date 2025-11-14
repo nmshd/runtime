@@ -1,10 +1,10 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreAddress, ICoreAddress } from "@nmshd/core-types";
-import { AbstractAttributeQuery, AbstractAttributeQueryJSON, IAbstractAttributeQuery } from "./AbstractAttributeQuery";
-import { AttributeValues } from "./AttributeValueTypes";
-import { IValueHints, ValueHints, ValueHintsJSON } from "./hints";
-import { RelationshipAttributeConfidentiality } from "./RelationshipAttributeConfidentiality";
-import { PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH, PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH } from "./types/proprietary/ProprietaryAttributeValue";
+import { AbstractAttributeQuery, AbstractAttributeQueryJSON, IAbstractAttributeQuery } from "./AbstractAttributeQuery.js";
+import { AttributeValues } from "./AttributeValueTypes.js";
+import { IValueHints, ValueHints, ValueHintsJSON } from "./hints/index.js";
+import { RelationshipAttributeConfidentiality } from "./RelationshipAttributeConfidentiality.js";
+import { PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH, PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH } from "./types/proprietary/ProprietaryAttributeValue.js";
 
 export interface RelationshipAttributeCreationHintsJSON {
     title: string;

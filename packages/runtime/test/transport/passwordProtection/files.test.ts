@@ -1,4 +1,4 @@
-import { RuntimeServiceProvider, TestRuntimeServices, uploadFile } from "../../lib";
+import { RuntimeServiceProvider, TestRuntimeServices, uploadFile } from "../../lib/index.js";
 
 const serviceProvider = new RuntimeServiceProvider();
 let runtimeServices1: TestRuntimeServices;

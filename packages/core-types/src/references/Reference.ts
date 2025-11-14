@@ -1,9 +1,9 @@
 import { ISerializable, Serializable, serialize, type, validate, ValidationError } from "@js-soft/ts-serval";
 import { CoreBuffer, CryptoSecretKey, ICryptoSecretKey } from "@nmshd/crypto";
-import { CoreError } from "../CoreError";
-import { CoreId, ICoreId } from "../CoreId";
-import { CoreIdHelper } from "../CoreIdHelper";
-import { ISharedPasswordProtection, SharedPasswordProtection } from "../SharedPasswordProtection";
+import { CoreError } from "../CoreError.js";
+import { CoreId, ICoreId } from "../CoreId.js";
+import { CoreIdHelper } from "../CoreIdHelper.js";
+import { ISharedPasswordProtection, SharedPasswordProtection } from "../SharedPasswordProtection.js";
 
 export interface IReference extends ISerializable {
     id: ICoreId;

@@ -1,5 +1,5 @@
 import { type } from "@js-soft/ts-serval";
-import { FormFieldSettings, FormFieldSettingsJSON, IFormFieldSettings } from "./FormFieldSettings";
+import { FormFieldSettings, FormFieldSettingsJSON, IFormFieldSettings } from "./FormFieldSettings.js";
 
 export interface BooleanFormFieldSettingsJSON extends FormFieldSettingsJSON {
     "@type": "BooleanFormFieldSettings";

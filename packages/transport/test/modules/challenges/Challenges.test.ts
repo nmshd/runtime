@@ -2,8 +2,8 @@ import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { Serializable } from "@js-soft/ts-serval";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CryptoSignature } from "@nmshd/crypto";
-import { AccountController, Challenge, ChallengeSigned, ChallengeType, Transport } from "../../../src";
-import { TestUtil } from "../../testHelpers/TestUtil";
+import { AccountController, Challenge, ChallengeSigned, ChallengeType, Transport } from "@nmshd/transport";
+import { TestUtil } from "../../testHelpers/TestUtil.js";
 
 describe("ChallengeTest", function () {
     let connection: IDatabaseConnection;

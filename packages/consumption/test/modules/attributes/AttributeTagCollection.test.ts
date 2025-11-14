@@ -1,8 +1,8 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
+import { AttributeTagCollection, ConsumptionController } from "@nmshd/consumption";
 import { AccountController, ClientResult, TagClient, Transport } from "@nmshd/transport";
 import { anything, spy, when } from "ts-mockito";
-import { AttributeTagCollection, ConsumptionController } from "../../../src";
-import { TestUtil } from "../../core/TestUtil";
+import { TestUtil } from "../../core/TestUtil.js";
 
 describe("AttributeTagCollection", function () {
     let connection: IDatabaseConnection;

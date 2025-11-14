@@ -1,6 +1,6 @@
 import { type } from "@js-soft/ts-serval";
-import { AbstractStringJSON, IAbstractString } from "../AbstractString";
-import { AbstractPhoneNumber } from "../strings";
+import { AbstractStringJSON, IAbstractString } from "../AbstractString.js";
+import { AbstractPhoneNumber } from "../strings/index.js";
 
 export interface FaxNumberJSON extends AbstractStringJSON {
     "@type": "FaxNumber";

@@ -1,1 +1,1 @@
-export * from "./Consent";
+export * from "./Consent.js";

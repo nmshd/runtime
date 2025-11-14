@@ -1,4 +1,4 @@
-import { CoreDate } from "../src";
+import { CoreDate } from "@nmshd/core-types";
 
 describe("CoreDate", function () {
     describe("Constructor", function () {

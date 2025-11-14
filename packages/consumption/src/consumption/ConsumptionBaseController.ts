@@ -1,8 +1,8 @@
 import { ILogger } from "@js-soft/logging-abstractions";
 import { Serializable } from "@js-soft/ts-serval";
 import { TransportLoggerFactory } from "@nmshd/transport";
-import { ConsumptionController } from "./ConsumptionController";
-import { ConsumptionControllerName } from "./ConsumptionControllerName";
+import { ConsumptionController } from "./ConsumptionController.js";
+import { ConsumptionControllerName } from "./ConsumptionControllerName.js";
 
 export class ConsumptionBaseController {
     protected _log: ILogger;

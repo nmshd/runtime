@@ -1,4 +1,4 @@
-import { RenderHints, StreetAddress } from "../../src";
+import { RenderHints, StreetAddress } from "@nmshd/content";
 
 describe("RenderHints", function () {
     test("returns propertyHints in case of complex attributes", function () {

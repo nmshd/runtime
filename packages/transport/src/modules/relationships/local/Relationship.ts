@@ -1,13 +1,13 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreDate, CoreId, ICoreDate, ICoreId } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
-import { CoreSynchronizable, ICoreSynchronizable } from "../../../core";
-import { Identity, IIdentity } from "../../accounts/data/Identity";
-import { BackboneGetRelationshipResponse } from "../backbone/BackboneGetRelationships";
-import { RelationshipStatus } from "../transmission/RelationshipStatus";
-import { IPeerDeletionInfo, PeerDeletionInfo } from "./PeerDeletionInfo";
-import { RelationshipAuditLog } from "./RelationshipAuditLog";
-import { IRelationshipAuditLogEntry, RelationshipAuditLogEntry } from "./RelationshipAuditLogEntry";
+import { CoreSynchronizable, ICoreSynchronizable } from "../../../core/index.js";
+import { Identity, IIdentity } from "../../accounts/data/Identity.js";
+import { BackboneGetRelationshipResponse } from "../backbone/BackboneGetRelationships.js";
+import { RelationshipStatus } from "../transmission/RelationshipStatus.js";
+import { IPeerDeletionInfo, PeerDeletionInfo } from "./PeerDeletionInfo.js";
+import { RelationshipAuditLog } from "./RelationshipAuditLog.js";
+import { IRelationshipAuditLogEntry, RelationshipAuditLogEntry } from "./RelationshipAuditLogEntry.js";
 
 export interface IRelationship extends ICoreSynchronizable {
     relationshipSecretId: ICoreId;

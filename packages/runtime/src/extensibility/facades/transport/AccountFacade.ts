@@ -21,7 +21,7 @@ import {
     SyncEverythingUseCase,
     SyncInfo,
     UnregisterPushNotificationTokenUseCase
-} from "../../../useCases";
+} from "../../../useCases/index.js";
 
 export class AccountFacade {
     public constructor(

@@ -2,10 +2,10 @@ import { ISerializable, Serializable, serialize, type, validate } from "@js-soft
 import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreDate, ICoreId } from "@nmshd/core-types";
 import { CryptoSecretKey, ICryptoExchangePublicKey, ICryptoSecretKey } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
-import { CoreSynchronizable, ICoreSynchronizable, IPasswordProtection, PasswordProtection } from "../../../core";
-import { Identity, IIdentity } from "../../accounts/data/Identity";
-import { RelationshipTemplatePublicKey } from "../transmission/RelationshipTemplatePublicKey";
-import { RelationshipTemplateReference } from "../transmission/RelationshipTemplateReference";
+import { CoreSynchronizable, ICoreSynchronizable, IPasswordProtection, PasswordProtection } from "../../../core/index.js";
+import { Identity, IIdentity } from "../../accounts/data/Identity.js";
+import { RelationshipTemplatePublicKey } from "../transmission/RelationshipTemplatePublicKey.js";
+import { RelationshipTemplateReference } from "../transmission/RelationshipTemplateReference.js";
 
 export interface IRelationshipTemplate extends ICoreSynchronizable {
     secretKey: ICryptoSecretKey;

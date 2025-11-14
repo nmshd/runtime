@@ -3,8 +3,8 @@ import { CoreId } from "@nmshd/core-types";
 import { TokenDTO } from "@nmshd/runtime-types";
 import { TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { RuntimeErrors, SchemaRepository, SchemaValidator, TokenIdString, UseCase } from "../../common";
-import { TokenMapper } from "./TokenMapper";
+import { RuntimeErrors, SchemaRepository, SchemaValidator, TokenIdString, UseCase } from "../../common/index.js";
+import { TokenMapper } from "./TokenMapper.js";
 
 export interface GetTokenRequest {
     id: TokenIdString;

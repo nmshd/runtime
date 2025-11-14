@@ -1,8 +1,8 @@
-import { RESTClientAuthenticate } from "../../../core";
-import { ClientResult } from "../../../core/backbone/ClientResult";
-import { Paginator } from "../../../core/backbone/Paginator";
-import { BackboneGetRelationshipTemplatesRequest, BackboneGetRelationshipTemplatesResponse } from "./BackboneGetRelationshipTemplates";
-import { BackbonePostRelationshipTemplatesRequest, BackbonePostRelationshipTemplatesResponse } from "./BackbonePostRelationshipTemplates";
+import { ClientResult } from "../../../core/backbone/ClientResult.js";
+import { Paginator } from "../../../core/backbone/Paginator.js";
+import { RESTClientAuthenticate } from "../../../core/index.js";
+import { BackboneGetRelationshipTemplatesRequest, BackboneGetRelationshipTemplatesResponse } from "./BackboneGetRelationshipTemplates.js";
+import { BackbonePostRelationshipTemplatesRequest, BackbonePostRelationshipTemplatesResponse } from "./BackbonePostRelationshipTemplates.js";
 
 export class RelationshipTemplateClient extends RESTClientAuthenticate {
     public async getRelationshipTemplates(request: BackboneGetRelationshipTemplatesRequest): Promise<ClientResult<Paginator<BackboneGetRelationshipTemplatesResponse>>> {

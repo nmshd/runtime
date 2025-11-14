@@ -1,5 +1,5 @@
 import { type } from "@js-soft/ts-serval";
-import { AbstractString, AbstractStringJSON, IAbstractString } from "../AbstractString";
+import { AbstractString, AbstractStringJSON, IAbstractString } from "../AbstractString.js";
 
 export interface AffiliationUnitJSON extends AbstractStringJSON {
     "@type": "AffiliationUnit";

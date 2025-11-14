@@ -1,6 +1,6 @@
 import { ResponseResult } from "@nmshd/content";
-import { DataViewObject } from "../DataViewObject";
-import { ResponseItemDVO, ResponseItemGroupDVO } from "./ResponseItemDVOs";
+import { DataViewObject } from "../DataViewObject.js";
+import { ResponseItemDVO, ResponseItemGroupDVO } from "./ResponseItemDVOs.js";
 
 export interface ResponseDVO extends DataViewObject {
     type: "ResponseDVO";

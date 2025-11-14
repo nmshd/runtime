@@ -1,10 +1,10 @@
 import { ILogger } from "@js-soft/logging-abstractions";
 import { CoreDate } from "@nmshd/core-types";
-import { AccountController } from "../../modules";
-import { ICorrelator } from "../ICorrelator";
-import { AuthClient } from "./AuthClient";
-import { IRESTClientConfig } from "./RESTClient";
-import { CredentialsBasic } from "./RESTClientAuthenticate";
+import { AccountController } from "../../modules/index.js";
+import { ICorrelator } from "../ICorrelator.js";
+import { AuthClient } from "./AuthClient.js";
+import { IRESTClientConfig } from "./RESTClient.js";
+import { CredentialsBasic } from "./RESTClientAuthenticate.js";
 
 export abstract class AbstractAuthenticator {
     private request?: Promise<void>;

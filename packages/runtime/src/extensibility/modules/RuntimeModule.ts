@@ -1,6 +1,6 @@
 import { ILogger } from "@js-soft/logging-abstractions";
 import { EventHandler, SubscriptionTarget } from "@js-soft/ts-utils";
-import { Runtime } from "../../Runtime";
+import { Runtime } from "../../Runtime.js";
 
 export interface ModuleConfiguration {
     enabled: boolean;

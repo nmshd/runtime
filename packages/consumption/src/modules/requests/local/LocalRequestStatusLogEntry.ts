@@ -1,6 +1,6 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreDate, ICoreDate } from "@nmshd/core-types";
-import { LocalRequestStatus } from "./LocalRequestStatus";
+import { LocalRequestStatus } from "./LocalRequestStatus.js";
 
 export interface ILocalRequestStatusLogEntry extends ISerializable {
     createdAt: ICoreDate;

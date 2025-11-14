@@ -1,13 +1,13 @@
 import { Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { DateTime } from "luxon";
 import { nameof } from "ts-simple-nameof";
-import { ValidationErrorWithoutProperty } from "../../../ValidationErrorWithoutProperty";
-import { AbstractAttributeValue } from "../../AbstractAttributeValue";
-import { AbstractComplexValue, AbstractComplexValueJSON, IAbstractComplexValue } from "../../AbstractComplexValue";
-import { RenderHints, ValueHints } from "../../hints";
-import { BirthDay, IBirthDay } from "./BirthDay";
-import { BirthMonth, IBirthMonth } from "./BirthMonth";
-import { BirthYear, IBirthYear } from "./BirthYear";
+import { ValidationErrorWithoutProperty } from "../../../ValidationErrorWithoutProperty.js";
+import { AbstractAttributeValue } from "../../AbstractAttributeValue.js";
+import { AbstractComplexValue, AbstractComplexValueJSON, IAbstractComplexValue } from "../../AbstractComplexValue.js";
+import { RenderHints, ValueHints } from "../../hints/index.js";
+import { BirthDay, IBirthDay } from "./BirthDay.js";
+import { BirthMonth, IBirthMonth } from "./BirthMonth.js";
+import { BirthYear, IBirthYear } from "./BirthYear.js";
 
 export interface BirthDateJSON extends AbstractComplexValueJSON {
     "@type": "BirthDate";

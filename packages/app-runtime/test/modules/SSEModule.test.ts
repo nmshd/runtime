@@ -1,6 +1,6 @@
+import { AppRuntime, LocalAccountSession } from "@nmshd/app-runtime";
 import { MessageReceivedEvent } from "@nmshd/runtime";
-import { AppRuntime, LocalAccountSession } from "../../src";
-import { MockEventBus, TestUtil } from "../lib";
+import { MockEventBus, TestUtil } from "../lib/index.js";
 
 // eslint-disable-next-line jest/no-disabled-tests -- disabled because the Backbone currently isn't performant enough in the CI
 describe.skip("SSEModuleTest", function () {

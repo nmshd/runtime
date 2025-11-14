@@ -1,8 +1,8 @@
 import { serialize, validate } from "@js-soft/ts-serval";
 import { nameof } from "ts-simple-nameof";
-import { AbstractComplexValue, AbstractComplexValueJSON, IAbstractComplexValue } from "../../../attributes/AbstractComplexValue";
-import { RenderHints, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../../../attributes/hints";
-import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute } from "../../IdentityAttribute";
+import { AbstractComplexValue, AbstractComplexValueJSON, IAbstractComplexValue } from "../../../attributes/AbstractComplexValue.js";
+import { RenderHints, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../../../attributes/hints/index.js";
+import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute } from "../../IdentityAttribute.js";
 
 export interface AbstractIdentityDescriptorJSON extends AbstractComplexValueJSON {
     attributes?: IdentityAttributeJSON[];

@@ -1,2 +1,2 @@
-export * from "./CheckForExistingIdentityRecoveryKit";
-export * from "./CreateIdentityRecoveryKit";
+export * from "./CheckForExistingIdentityRecoveryKit.js";
+export * from "./CreateIdentityRecoveryKit.js";

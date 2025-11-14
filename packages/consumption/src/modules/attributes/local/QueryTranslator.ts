@@ -11,10 +11,10 @@ import {
     ThirdPartyRelationshipAttributeQuery
 } from "@nmshd/content";
 import { nameof } from "ts-simple-nameof";
-import { ConsumptionError } from "../../../consumption/ConsumptionError";
-import { LocalAttribute } from "./attributeTypes/LocalAttribute";
-import { OwnRelationshipAttribute } from "./attributeTypes/OwnRelationshipAttribute";
-import { PeerRelationshipAttribute } from "./attributeTypes/PeerRelationshipAttribute";
+import { ConsumptionError } from "../../../consumption/ConsumptionError.js";
+import { LocalAttribute } from "./attributeTypes/LocalAttribute.js";
+import { OwnRelationshipAttribute } from "./attributeTypes/OwnRelationshipAttribute.js";
+import { PeerRelationshipAttribute } from "./attributeTypes/PeerRelationshipAttribute.js";
 
 export class IdentityAttributeQueryTranslator {
     public static translate(query: IdentityAttributeQuery): any {

@@ -1,5 +1,5 @@
 import { Event, EventEmitter2EventBus, getEventNamespaceFromObject, SubscriptionTarget } from "@js-soft/ts-utils";
-import { waitForEvent } from "./testUtils";
+import { waitForEvent } from "./testUtils.js";
 
 export class MockEventBus extends EventEmitter2EventBus {
     public publishedEvents: Event[] = [];

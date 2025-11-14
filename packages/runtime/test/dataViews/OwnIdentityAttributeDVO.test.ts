@@ -1,6 +1,6 @@
 import { AbstractStringJSON, BiologicalSex } from "@nmshd/content";
-import { CreateOwnIdentityAttributeRequest, OwnIdentityAttributeDVO } from "../../src";
-import { ensureActiveRelationship, executeFullCreateAndShareOwnIdentityAttributeFlow, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
+import { CreateOwnIdentityAttributeRequest, OwnIdentityAttributeDVO } from "@nmshd/runtime";
+import { ensureActiveRelationship, executeFullCreateAndShareOwnIdentityAttributeFlow, RuntimeServiceProvider, TestRuntimeServices } from "../lib/index.js";
 
 const serviceProvider = new RuntimeServiceProvider();
 let services1: TestRuntimeServices;

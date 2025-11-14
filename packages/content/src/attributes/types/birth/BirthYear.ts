@@ -1,5 +1,5 @@
 import { type } from "@js-soft/ts-serval";
-import { AbstractYear, AbstractYearJSON, IAbstractYear } from "../dates";
+import { AbstractYear, AbstractYearJSON, IAbstractYear } from "../dates/index.js";
 
 export interface BirthYearJSON extends AbstractYearJSON {
     "@type": "BirthYear";

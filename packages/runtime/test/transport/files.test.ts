@@ -1,8 +1,8 @@
 import { CoreDate } from "@nmshd/core-types";
+import { GetFilesQuery, OwnerRestriction, TransportServices } from "@nmshd/runtime";
 import fs from "fs";
 import { DateTime } from "luxon";
-import { GetFilesQuery, OwnerRestriction, TransportServices } from "../../src";
-import { cleanupFiles, exchangeFile, makeUploadRequest, QueryParamConditions, RuntimeServiceProvider, TestRuntimeServices, uploadFile } from "../lib";
+import { cleanupFiles, exchangeFile, makeUploadRequest, QueryParamConditions, RuntimeServiceProvider, TestRuntimeServices, uploadFile } from "../lib/index.js";
 
 const serviceProvider = new RuntimeServiceProvider();
 

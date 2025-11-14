@@ -1,4 +1,4 @@
-import { IPaginationDataSource } from "../../src";
+import { IPaginationDataSource } from "@nmshd/transport";
 
 export class FakePaginationDataSource<T> implements IPaginationDataSource<T> {
     public constructor(private readonly pages: T[][]) {}

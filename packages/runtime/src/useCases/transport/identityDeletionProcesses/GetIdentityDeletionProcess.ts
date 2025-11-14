@@ -2,8 +2,8 @@ import { Result } from "@js-soft/ts-utils";
 import { IdentityDeletionProcessDTO } from "@nmshd/runtime-types";
 import { IdentityDeletionProcess, IdentityDeletionProcessController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { IdentityDeletionProcessIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { IdentityDeletionProcessMapper } from "./IdentityDeletionProcessMapper";
+import { IdentityDeletionProcessIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
+import { IdentityDeletionProcessMapper } from "./IdentityDeletionProcessMapper.js";
 
 export interface GetIdentityDeletionProcessRequest {
     id: IdentityDeletionProcessIdString;

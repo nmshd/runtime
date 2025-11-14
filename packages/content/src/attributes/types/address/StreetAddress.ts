@@ -1,15 +1,15 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { COUNTRIES_ALPHA2_TO_ENGLISH_NAME } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
-import { AbstractAttributeValue } from "../../AbstractAttributeValue";
-import { RenderHints, ValueHints } from "../../hints";
-import { AbstractAddress, AbstractAddressJSON, IAbstractAddress } from "./AbstractAddress";
-import { City, ICity } from "./City";
-import { Country, ICountry } from "./Country";
-import { HouseNumber, IHouseNumber } from "./HouseNumber";
-import { IState, State } from "./State";
-import { IStreet, Street } from "./Street";
-import { IZipCode, ZipCode } from "./ZipCode";
+import { AbstractAttributeValue } from "../../AbstractAttributeValue.js";
+import { RenderHints, ValueHints } from "../../hints/index.js";
+import { AbstractAddress, AbstractAddressJSON, IAbstractAddress } from "./AbstractAddress.js";
+import { City, ICity } from "./City.js";
+import { Country, ICountry } from "./Country.js";
+import { HouseNumber, IHouseNumber } from "./HouseNumber.js";
+import { IState, State } from "./State.js";
+import { IStreet, Street } from "./Street.js";
+import { IZipCode, ZipCode } from "./ZipCode.js";
 
 export interface StreetAddressJSON extends AbstractAddressJSON {
     "@type": "StreetAddress";

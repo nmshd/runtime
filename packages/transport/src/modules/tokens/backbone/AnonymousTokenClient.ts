@@ -1,7 +1,7 @@
-import { RESTClient } from "../../../core";
-import { ClientResult } from "../../../core/backbone/ClientResult";
-import { BackboneGetTokensResponse } from "./BackboneGetTokens";
-import { BackbonePostTokensRequest, BackbonePostTokensResponse } from "./BackbonePostTokens";
+import { ClientResult } from "../../../core/backbone/ClientResult.js";
+import { RESTClient } from "../../../core/index.js";
+import { BackboneGetTokensResponse } from "./BackboneGetTokens.js";
+import { BackbonePostTokensRequest, BackbonePostTokensResponse } from "./BackbonePostTokens.js";
 
 export class AnonymousTokenClient extends RESTClient {
     public async createToken(request: Omit<BackbonePostTokensRequest, "content">): Promise<ClientResult<BackbonePostTokensResponse>> {

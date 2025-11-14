@@ -1,6 +1,6 @@
 import { AbstractStringJSON, IdentityAttributeJSON } from "@nmshd/content";
-import { PeerIdentityAttributeDVO } from "src";
-import { ensureActiveRelationship, executeFullCreateAndShareOwnIdentityAttributeFlow, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
+import { PeerIdentityAttributeDVO } from "@nmshd/runtime";
+import { ensureActiveRelationship, executeFullCreateAndShareOwnIdentityAttributeFlow, RuntimeServiceProvider, TestRuntimeServices } from "../lib/index.js";
 
 const serviceProvider = new RuntimeServiceProvider();
 let services1: TestRuntimeServices;

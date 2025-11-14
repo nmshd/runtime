@@ -1,13 +1,13 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { ValueHints, ValueHintsOverride } from "../../hints";
-import { AbstractStringJSON, IAbstractString } from "../AbstractString";
-import { AbstractHEXColor } from "../strings/AbstractHEXColor";
+import { ValueHints, ValueHintsOverride } from "../../hints/index.js";
+import { AbstractStringJSON, IAbstractString } from "../AbstractString.js";
+import { AbstractHEXColor } from "../strings/AbstractHEXColor.js";
 import {
     IProprietaryAttributeValue,
     PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH,
     PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH,
     ProprietaryAttributeValueJSON
-} from "./ProprietaryAttributeValue";
+} from "./ProprietaryAttributeValue.js";
 
 export interface ProprietaryHEXColorJSON extends ProprietaryAttributeValueJSON, AbstractStringJSON {
     "@type": "ProprietaryHEXColor";

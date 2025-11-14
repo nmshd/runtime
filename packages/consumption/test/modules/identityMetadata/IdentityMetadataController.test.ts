@@ -1,11 +1,11 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { JSONWrapper } from "@js-soft/ts-serval";
+import { ConsumptionController } from "@nmshd/consumption";
 import { CoreAddress } from "@nmshd/core-types";
 import { AccountController, Transport } from "@nmshd/transport";
 import assert from "assert";
-import { ConsumptionController } from "../../../src";
-import { TestUtil } from "../../core/TestUtil";
-import { MockEventBus } from "../MockEventBus";
+import { TestUtil } from "../../core/TestUtil.js";
+import { MockEventBus } from "../MockEventBus.js";
 
 const mockEventBus = new MockEventBus();
 

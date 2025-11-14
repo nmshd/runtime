@@ -20,24 +20,24 @@ import * as iql from "@nmshd/iql";
 import { Relationship, RelationshipStatus, SynchronizedCollection, TagClient, TransportCoreErrors } from "@nmshd/transport";
 import _ from "lodash";
 import { nameof } from "ts-simple-nameof";
-import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
-import { ConsumptionController } from "../../consumption/ConsumptionController";
-import { ConsumptionControllerName } from "../../consumption/ConsumptionControllerName";
-import { ConsumptionCoreErrors } from "../../consumption/ConsumptionCoreErrors";
-import { ConsumptionError } from "../../consumption/ConsumptionError";
-import { ConsumptionIds } from "../../consumption/ConsumptionIds";
-import { flattenObject, ValidationResult } from "../common";
-import { AttributeCreatedEvent, AttributeDeletedEvent, AttributeForwardingDetailsChangedEvent, AttributeSucceededEvent, AttributeWasViewedAtChangedEvent } from "./events";
-import { AttributeForwardingDetails } from "./local/AttributeForwardingDetails";
-import { AttributeTagCollection, IAttributeTag } from "./local/AttributeTagCollection";
-import { LocalAttribute, LocalAttributeJSON } from "./local/attributeTypes/LocalAttribute";
-import { OwnIdentityAttribute } from "./local/attributeTypes/OwnIdentityAttribute";
-import { OwnRelationshipAttribute } from "./local/attributeTypes/OwnRelationshipAttribute";
-import { PeerIdentityAttribute } from "./local/attributeTypes/PeerIdentityAttribute";
-import { PeerRelationshipAttribute } from "./local/attributeTypes/PeerRelationshipAttribute";
-import { ThirdPartyRelationshipAttribute } from "./local/attributeTypes/ThirdPartyRelationshipAttribute";
-import { EmittedAttributeDeletionInfo, EmittedAttributeDeletionStatus, ReceivedAttributeDeletionInfo, ReceivedAttributeDeletionStatus } from "./local/deletionInfos";
-import { IdentityAttributeQueryTranslator, RelationshipAttributeQueryTranslator, ThirdPartyRelationshipAttributeQueryTranslator } from "./local/QueryTranslator";
+import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController.js";
+import { ConsumptionController } from "../../consumption/ConsumptionController.js";
+import { ConsumptionControllerName } from "../../consumption/ConsumptionControllerName.js";
+import { ConsumptionCoreErrors } from "../../consumption/ConsumptionCoreErrors.js";
+import { ConsumptionError } from "../../consumption/ConsumptionError.js";
+import { ConsumptionIds } from "../../consumption/ConsumptionIds.js";
+import { flattenObject, ValidationResult } from "../common/index.js";
+import { AttributeCreatedEvent, AttributeDeletedEvent, AttributeForwardingDetailsChangedEvent, AttributeSucceededEvent, AttributeWasViewedAtChangedEvent } from "./events/index.js";
+import { AttributeForwardingDetails } from "./local/AttributeForwardingDetails.js";
+import { AttributeTagCollection, IAttributeTag } from "./local/AttributeTagCollection.js";
+import { LocalAttribute, LocalAttributeJSON } from "./local/attributeTypes/LocalAttribute.js";
+import { OwnIdentityAttribute } from "./local/attributeTypes/OwnIdentityAttribute.js";
+import { OwnRelationshipAttribute } from "./local/attributeTypes/OwnRelationshipAttribute.js";
+import { PeerIdentityAttribute } from "./local/attributeTypes/PeerIdentityAttribute.js";
+import { PeerRelationshipAttribute } from "./local/attributeTypes/PeerRelationshipAttribute.js";
+import { ThirdPartyRelationshipAttribute } from "./local/attributeTypes/ThirdPartyRelationshipAttribute.js";
+import { EmittedAttributeDeletionInfo, EmittedAttributeDeletionStatus, ReceivedAttributeDeletionInfo, ReceivedAttributeDeletionStatus } from "./local/deletionInfos/index.js";
+import { IdentityAttributeQueryTranslator, RelationshipAttributeQueryTranslator, ThirdPartyRelationshipAttributeQueryTranslator } from "./local/QueryTranslator.js";
 import {
     IOwnIdentityAttributeSuccessorParams,
     IOwnRelationshipAttributeSuccessorParams,
@@ -51,12 +51,12 @@ import {
     PeerIdentityAttributeSuccessorParamsJSON,
     ThirdPartyRelationshipAttributeSuccessorParams,
     ThirdPartyRelationshipAttributeSuccessorParamsJSON
-} from "./local/successorParams";
+} from "./local/successorParams/index.js";
 import {
     IPeerRelationshipAttributeSuccessorParams,
     PeerRelationshipAttributeSuccessorParams,
     PeerRelationshipAttributeSuccessorParamsJSON
-} from "./local/successorParams/PeerRelationshipAttributeSuccessorParams";
+} from "./local/successorParams/PeerRelationshipAttributeSuccessorParams.js";
 
 export class AttributesController extends ConsumptionBaseController {
     private attributes: SynchronizedCollection;

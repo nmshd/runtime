@@ -1,4 +1,4 @@
-import { IdentityDeletionProcessStatus } from "../data/IdentityDeletionProcessStatus";
+import { IdentityDeletionProcessStatus } from "../data/IdentityDeletionProcessStatus.js";
 
 export interface BackboneIdentityDeletionProcess {
     id: string;

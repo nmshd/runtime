@@ -1,5 +1,5 @@
 import { DeviceOnboardingInfoDTO } from "@nmshd/runtime";
-import { MockUIBridge } from "./MockUIBridge";
+import { MockUIBridge } from "./MockUIBridge.js";
 
 expect.extend({
     showDeviceOnboardingCalled(mockUIBridge: unknown, predicate: (deviceOnboardingInfo: DeviceOnboardingInfoDTO) => boolean) {

@@ -14,7 +14,6 @@ import {
     Surname
 } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
-import { DateTime } from "luxon";
 import {
     IncomingRequestStatusChangedEvent,
     LocalRequestStatus,
@@ -22,8 +21,9 @@ import {
     PeerRelationshipTemplateDVO,
     RelationshipTemplateDTO,
     RequestItemGroupDVO
-} from "../../src";
-import { RuntimeServiceProvider, TestRuntimeServices, syncUntilHasRelationships } from "../lib";
+} from "@nmshd/runtime";
+import { DateTime } from "luxon";
+import { RuntimeServiceProvider, TestRuntimeServices, syncUntilHasRelationships } from "../lib/index.js";
 
 const serviceProvider = new RuntimeServiceProvider();
 let templator: TestRuntimeServices;

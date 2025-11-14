@@ -16,8 +16,8 @@ import {
     UseCase,
     ValidationFailure,
     ValidationResult
-} from "../../common";
-import { TokenMapper } from "./TokenMapper";
+} from "../../common/index.js";
+import { TokenMapper } from "./TokenMapper.js";
 
 export interface SchemaValidatableCreateOwnTokenRequest {
     content: any;

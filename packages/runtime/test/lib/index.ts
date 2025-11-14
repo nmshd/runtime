@@ -1,9 +1,9 @@
 import "../customMatchers";
 
-export * from "./MockEventBus";
-export * from "./QueryParamConditions";
-export * from "./RuntimeServiceProvider";
-export * from "./TestNotificationItem";
-export * from "./TestRequestItem";
-export * from "./TestRuntime";
-export * from "./testUtils";
+export * from "./MockEventBus.js";
+export * from "./QueryParamConditions.js";
+export * from "./RuntimeServiceProvider.js";
+export * from "./TestNotificationItem.js";
+export * from "./TestRequestItem.js";
+export * from "./TestRuntime.js";
+export * from "./testUtils.js";

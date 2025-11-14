@@ -1,5 +1,5 @@
-import { DataViewObject } from "../DataViewObject";
-import { RelationshipDVO } from "./RelationshipDVO";
+import { DataViewObject } from "../DataViewObject.js";
+import { RelationshipDVO } from "./RelationshipDVO.js";
 
 export interface IdentityDVO extends DataViewObject {
     type: "IdentityDVO";

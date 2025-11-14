@@ -1,21 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import {
-    AcceptResponseItem,
-    AttributeAlreadySharedAcceptResponseItem,
-    GivenName,
-    IdentityAttribute,
-    ProprietaryString,
-    RelationshipAttribute,
-    RelationshipAttributeConfidentiality,
-    Request,
-    ResponseItemResult,
-    ShareAttributeRequestItem,
-    Surname
-} from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
-import { AccountController, Transport } from "@nmshd/transport";
-import { anything, reset, spy, when } from "ts-mockito";
-import {
     ConsumptionController,
     ConsumptionIds,
     EmittedAttributeDeletionInfo,
@@ -32,9 +16,25 @@ import {
     ShareAttributeRequestItemProcessor,
     ThirdPartyRelationshipAttribute,
     ValidationResult
-} from "../../../../../src";
-import { TestUtil } from "../../../../core/TestUtil";
-import { TestObjectFactory } from "../../testHelpers/TestObjectFactory";
+} from "@nmshd/consumption";
+import {
+    AcceptResponseItem,
+    AttributeAlreadySharedAcceptResponseItem,
+    GivenName,
+    IdentityAttribute,
+    ProprietaryString,
+    RelationshipAttribute,
+    RelationshipAttributeConfidentiality,
+    Request,
+    ResponseItemResult,
+    ShareAttributeRequestItem,
+    Surname
+} from "@nmshd/content";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { AccountController, Transport } from "@nmshd/transport";
+import { anything, reset, spy, when } from "ts-mockito";
+import { TestUtil } from "../../../../core/TestUtil.js";
+import { TestObjectFactory } from "../../testHelpers/TestObjectFactory.js";
 
 describe("ShareAttributeRequestItemProcessor", function () {
     let connection: IDatabaseConnection;

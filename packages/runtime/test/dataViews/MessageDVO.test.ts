@@ -1,6 +1,6 @@
 import { DecideRequestItemParametersJSON } from "@nmshd/consumption";
 import { ArbitraryMessageContent, ConsentRequestItemJSON, MailJSON } from "@nmshd/content";
-import { CreateOutgoingRequestRequest, MailDVO, RequestMessageDVO, SendMessageRequest } from "../../src";
+import { CreateOutgoingRequestRequest, MailDVO, RequestMessageDVO, SendMessageRequest } from "@nmshd/runtime";
 import {
     establishRelationship,
     exchangeMessageWithRequest,
@@ -12,7 +12,7 @@ import {
     syncUntilHasMessageWithResponse,
     TestRuntimeServices,
     uploadFile
-} from "../lib";
+} from "../lib/index.js";
 
 const serviceProvider = new RuntimeServiceProvider();
 let services1: TestRuntimeServices;

@@ -6,8 +6,8 @@ import { FileDTO } from "@nmshd/runtime-types";
 import { AccountController, FileController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { nameof } from "ts-simple-nameof";
-import { ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationFailure, ValidationResult } from "../../common";
-import { FileMapper } from "./FileMapper";
+import { ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationFailure, ValidationResult } from "../../common/index.js";
+import { FileMapper } from "./FileMapper.js";
 
 export interface UploadOwnFileRequest {
     content: Uint8Array;

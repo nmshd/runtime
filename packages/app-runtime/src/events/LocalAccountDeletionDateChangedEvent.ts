@@ -1,5 +1,5 @@
 import { DataEvent } from "@nmshd/runtime";
-import { LocalAccountDTO } from "../multiAccount";
+import { LocalAccountDTO } from "../multiAccount/index.js";
 
 export class LocalAccountDeletionDateChangedEvent extends DataEvent<LocalAccountDTO> {
     public static readonly namespace: string = "app.localAccountDeletionDateChanged";

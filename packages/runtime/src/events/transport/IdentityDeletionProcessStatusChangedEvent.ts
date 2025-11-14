@@ -1,5 +1,5 @@
 import { IdentityDeletionProcessDTO } from "@nmshd/runtime-types";
-import { DataEvent } from "../DataEvent";
+import { DataEvent } from "../DataEvent.js";
 
 export class IdentityDeletionProcessStatusChangedEvent extends DataEvent<IdentityDeletionProcessDTO | undefined> {
     public static readonly namespace = "transport.identityDeletionProcessStatusChanged";

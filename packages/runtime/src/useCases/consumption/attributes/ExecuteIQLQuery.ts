@@ -3,8 +3,8 @@ import { AttributesController } from "@nmshd/consumption";
 import { IQLQuery, IQLQueryJSON } from "@nmshd/content";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { AttributeMapper } from "./AttributeMapper";
+import { SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
+import { AttributeMapper } from "./AttributeMapper.js";
 
 export interface ExecuteIQLQueryRequest {
     query: Omit<IQLQueryJSON, "@type"> & { "@type"?: "IQLQuery" };

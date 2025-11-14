@@ -3,8 +3,8 @@ import { CoreDate, PasswordLocationIndicatorOptions } from "@nmshd/core-types";
 import { TokenDTO } from "@nmshd/runtime-types";
 import { AccountController, Device, DevicesController, PasswordProtectionCreationParameters, TokenContentDeviceSharedSecret, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { RuntimeErrors, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common";
-import { TokenMapper } from "../tokens/TokenMapper";
+import { RuntimeErrors, SchemaRepository, TokenAndTemplateCreationValidator, UseCase } from "../../common/index.js";
+import { TokenMapper } from "../tokens/TokenMapper.js";
 
 export interface CreateIdentityRecoveryKitRequest {
     profileName: string;

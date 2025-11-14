@@ -1,5 +1,5 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { IRequestItem, RequestItem, RequestItemJSON } from "../../RequestItem";
+import { IRequestItem, RequestItem, RequestItemJSON } from "../../RequestItem.js";
 
 export interface AuthenticationRequestItemJSON extends RequestItemJSON {
     "@type": "AuthenticationRequestItem";

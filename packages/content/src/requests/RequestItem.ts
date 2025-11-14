@@ -1,5 +1,5 @@
 import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-serval";
-import { ContentJSON } from "../ContentJSON";
+import { ContentJSON } from "../ContentJSON.js";
 import {
     AuthenticationRequestItem,
     AuthenticationRequestItemJSON,
@@ -28,7 +28,7 @@ import {
     ShareAttributeRequestItemJSON,
     TransferFileOwnershipRequestItem,
     TransferFileOwnershipRequestItemJSON
-} from "./items";
+} from "./items/index.js";
 
 export interface RequestItemJSON extends ContentJSON {
     /**

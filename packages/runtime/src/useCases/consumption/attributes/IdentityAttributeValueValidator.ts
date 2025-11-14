@@ -1,8 +1,8 @@
 import { ApplicationError } from "@js-soft/ts-utils";
 import { AttributeValues } from "@nmshd/content";
 import { Inject } from "@nmshd/typescript-ioc";
-import { RuntimeErrors, SchemaRepository, SchemaValidator, ValidationFailure, ValidationResult } from "../../common";
-import { IValidator } from "../../common/validation/IValidator";
+import { RuntimeErrors, SchemaRepository, SchemaValidator, ValidationFailure, ValidationResult } from "../../common/index.js";
+import { IValidator } from "../../common/validation/IValidator.js";
 
 export class IdentityAttributeValueValidator implements IValidator<AttributeValues.Identity.Json> {
     public constructor(@Inject private readonly schemaRepository: SchemaRepository) {}

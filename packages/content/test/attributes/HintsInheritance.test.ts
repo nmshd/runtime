@@ -1,4 +1,4 @@
-import { BirthMonth, ProprietaryInteger, RenderHintsEditType, RenderHintsTechnicalType } from "../../src";
+import { BirthMonth, ProprietaryInteger, RenderHintsEditType, RenderHintsTechnicalType } from "@nmshd/content";
 
 describe("ValueHints Inheritance", function () {
     describe("Identity Attributes", function () {

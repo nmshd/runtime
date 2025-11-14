@@ -1,6 +1,4 @@
 import { ValidationError } from "@js-soft/ts-serval";
-import { CoreAddress } from "@nmshd/core-types";
-import { nameof } from "ts-simple-nameof";
 import {
     GivenName,
     IdentityAttribute,
@@ -13,7 +11,9 @@ import {
     RelationshipAttribute,
     RelationshipAttributeConfidentiality,
     RelationshipAttributeQuery
-} from "../../../src";
+} from "@nmshd/content";
+import { CoreAddress } from "@nmshd/core-types";
+import { nameof } from "ts-simple-nameof";
 
 describe("creation of ProposeAttributeRequestItem", () => {
     describe("creation of ProposeAttributeRequestItem with IdentityAttributeQuery", () => {

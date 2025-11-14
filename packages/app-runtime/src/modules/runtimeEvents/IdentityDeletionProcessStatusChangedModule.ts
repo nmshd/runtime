@@ -1,8 +1,8 @@
 import { CoreDate } from "@nmshd/core-types";
 import { IdentityDeletionProcessStatus, IdentityDeletionProcessStatusChangedEvent } from "@nmshd/runtime";
-import { LocalAccountDeletionDateChangedEvent } from "../../events";
-import { LocalAccountMapper } from "../../multiAccount/data/LocalAccountMapper";
-import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "../AppRuntimeModule";
+import { LocalAccountDeletionDateChangedEvent } from "../../events/index.js";
+import { LocalAccountMapper } from "../../multiAccount/data/LocalAccountMapper.js";
+import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "../AppRuntimeModule.js";
 
 export interface IdentityDeletionProcessStatusChangedModuleConfig extends AppRuntimeModuleConfiguration {}
 

@@ -22,7 +22,7 @@ import {
     RejectIncomingRequestUseCase,
     RequireManualDecisionOfIncomingRequestRequest,
     RequireManualDecisionOfIncomingRequestUseCase
-} from "../../../useCases";
+} from "../../../useCases/index.js";
 
 export class IncomingRequestsFacade {
     public constructor(

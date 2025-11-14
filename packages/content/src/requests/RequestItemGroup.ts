@@ -1,6 +1,6 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { ContentJSON } from "../ContentJSON";
-import { IRequestItemDerivations, RequestItemDerivations, RequestItemJSONDerivations } from "./RequestItem";
+import { ContentJSON } from "../ContentJSON.js";
+import { IRequestItemDerivations, RequestItemDerivations, RequestItemJSONDerivations } from "./RequestItem.js";
 
 /**
  * A RequestItemGroup can be used to group one or more RequestItems. This is useful

@@ -2,8 +2,8 @@ import { Result } from "@js-soft/ts-utils";
 import { DeviceDTO } from "@nmshd/runtime-types";
 import { DeviceController, DevicesController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { UseCase } from "../../common";
-import { DeviceMapper } from "./DeviceMapper";
+import { UseCase } from "../../common/index.js";
+import { DeviceMapper } from "./DeviceMapper.js";
 
 export class GetDevicesUseCase extends UseCase<void, DeviceDTO[]> {
     public constructor(

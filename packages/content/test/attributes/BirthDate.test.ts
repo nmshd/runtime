@@ -1,5 +1,5 @@
+import { BirthDate, ValidationErrorWithoutProperty } from "@nmshd/content";
 import { DateTime } from "luxon";
-import { BirthDate, ValidationErrorWithoutProperty } from "../../src";
 
 describe("creation of IdentityAttributes with value type BirthDate", () => {
     test("can create an IdentityAttribute with value type BirthDate", function () {

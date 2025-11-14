@@ -3,8 +3,8 @@ import { AttributesController } from "@nmshd/consumption";
 import { ThirdPartyRelationshipAttributeQuery, ThirdPartyRelationshipAttributeQueryJSON } from "@nmshd/content";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { UseCase } from "../../common";
-import { AttributeMapper } from "./AttributeMapper";
+import { UseCase } from "../../common/index.js";
+import { AttributeMapper } from "./AttributeMapper.js";
 
 export interface ExecuteThirdPartyRelationshipAttributeQueryRequest {
     query: ThirdPartyRelationshipAttributeQueryJSON;

@@ -5,8 +5,8 @@ import { RelationshipDTO } from "@nmshd/runtime-types";
 import { Challenge, ChallengeController, ChallengeSigned } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { nameof } from "ts-simple-nameof";
-import { RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationFailure, ValidationResult } from "../../common";
-import { RelationshipMapper } from "../relationships/RelationshipMapper";
+import { RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationFailure, ValidationResult } from "../../common/index.js";
+import { RelationshipMapper } from "../relationships/RelationshipMapper.js";
 
 export interface ValidateChallengeRequest {
     challengeString: string;

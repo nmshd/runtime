@@ -1,5 +1,5 @@
-import { AppRuntime } from "../../src";
-import { FakeUIBridge, TestUtil } from "../lib";
+import { AppRuntime } from "@nmshd/app-runtime";
+import { FakeUIBridge, TestUtil } from "../lib/index.js";
 
 let runtime: AppRuntime;
 

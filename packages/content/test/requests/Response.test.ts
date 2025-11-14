@@ -1,5 +1,4 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreId } from "@nmshd/core-types";
 import {
     AcceptResponseItem,
     AcceptResponseItemJSON,
@@ -17,7 +16,8 @@ import {
     ResponseItemResult,
     ResponseJSON,
     ResponseResult
-} from "../../src";
+} from "@nmshd/content";
+import { CoreId } from "@nmshd/core-types";
 
 interface ITestAcceptResponseItem extends IAcceptResponseItem {
     test: string;

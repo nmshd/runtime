@@ -1,2 +1,2 @@
-export * from "./CreateEmptyToken";
-export * from "./LoadPeerTokenAnonymous";
+export * from "./CreateEmptyToken.js";
+export * from "./LoadPeerTokenAnonymous.js";

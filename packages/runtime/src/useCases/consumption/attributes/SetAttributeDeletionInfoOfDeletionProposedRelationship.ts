@@ -3,7 +3,7 @@ import { AttributesController } from "@nmshd/consumption";
 import { CoreId } from "@nmshd/core-types";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { RelationshipIdString, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { RelationshipIdString, SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
 
 export interface SetAttributeDeletionInfoOfDeletionProposedRelationshipRequest {
     relationshipId: RelationshipIdString;

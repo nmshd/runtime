@@ -1,8 +1,8 @@
+import { AppLanguageChangedEvent, AppRuntime, LocalAccountSession } from "@nmshd/app-runtime";
 import { LanguageISO639 } from "@nmshd/core-types";
 import { DeviceAuthClient } from "@nmshd/transport";
-import { AppLanguageChangedEvent, AppRuntime, LocalAccountSession } from "../../src";
-import { MockEventBus, TestUtil } from "../lib";
-import { MockAppLanguageProvider } from "../lib/infrastructure/MockAppLanguageProvider";
+import { MockEventBus, TestUtil } from "../lib/index.js";
+import { MockAppLanguageProvider } from "../lib/infrastructure/MockAppLanguageProvider.js";
 
 describe("AppLanguageModuleTest", function () {
     const eventBus = new MockEventBus();

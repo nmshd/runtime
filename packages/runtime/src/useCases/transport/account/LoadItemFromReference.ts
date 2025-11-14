@@ -24,11 +24,11 @@ import {
     URLRelationshipTemplateReferenceString,
     URLTokenReferenceString,
     UseCase
-} from "../../common";
-import { DeviceMapper } from "../devices/DeviceMapper";
-import { FileMapper } from "../files/FileMapper";
-import { RelationshipTemplateMapper } from "../relationshipTemplates/RelationshipTemplateMapper";
-import { TokenMapper } from "../tokens/TokenMapper";
+} from "../../common/index.js";
+import { DeviceMapper } from "../devices/DeviceMapper.js";
+import { FileMapper } from "../files/FileMapper.js";
+import { RelationshipTemplateMapper } from "../relationshipTemplates/RelationshipTemplateMapper.js";
+import { TokenMapper } from "../tokens/TokenMapper.js";
 
 export interface LoadItemFromReferenceRequest {
     reference:

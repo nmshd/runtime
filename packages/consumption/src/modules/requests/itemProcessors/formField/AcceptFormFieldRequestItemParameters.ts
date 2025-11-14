@@ -1,5 +1,5 @@
 import { PrimitiveType, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
+import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters.js";
 
 export interface AcceptFormFieldRequestItemParametersJSON extends AcceptRequestItemParametersJSON {
     response: string | number | boolean | string[];

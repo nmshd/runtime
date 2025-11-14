@@ -1,3 +1,3 @@
-export * from "./consumption";
-export * from "./RuntimeHealth";
-export * from "./transport";
+export * from "./consumption/index.js";
+export * from "./RuntimeHealth.js";
+export * from "./transport/index.js";

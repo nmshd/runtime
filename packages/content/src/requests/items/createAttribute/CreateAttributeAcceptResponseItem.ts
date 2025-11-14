@@ -1,6 +1,6 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreId, ICoreId } from "@nmshd/core-types";
-import { AcceptResponseItem, AcceptResponseItemJSON, IAcceptResponseItem } from "../../response";
+import { AcceptResponseItem, AcceptResponseItemJSON, IAcceptResponseItem } from "../../response/index.js";
 
 export interface CreateAttributeAcceptResponseItemJSON extends AcceptResponseItemJSON {
     "@type": "CreateAttributeAcceptResponseItem";

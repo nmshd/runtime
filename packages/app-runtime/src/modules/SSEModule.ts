@@ -1,10 +1,10 @@
 import { ILogger } from "@js-soft/logging-abstractions";
 import { ModuleConfiguration } from "@nmshd/runtime";
 import { EventSource } from "eventsource";
-import { AppRuntime } from "../AppRuntime";
-import { AccountSelectedEvent } from "../events";
-import { LocalAccountSession } from "../multiAccount";
-import { AppRuntimeModule } from "./AppRuntimeModule";
+import { AppRuntime } from "../AppRuntime.js";
+import { AccountSelectedEvent } from "../events/index.js";
+import { LocalAccountSession } from "../multiAccount/index.js";
+import { AppRuntimeModule } from "./AppRuntimeModule.js";
 
 export interface SSEModuleConfiguration extends ModuleConfiguration {
     baseUrlOverride?: string;

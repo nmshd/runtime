@@ -34,7 +34,7 @@ import {
     ProposeAttributeRequestItemDVO,
     RequestMessageDVO,
     TransportServices
-} from "../../../src";
+} from "@nmshd/runtime";
 import {
     establishRelationship,
     exchangeAndAcceptRequestByMessage,
@@ -46,7 +46,7 @@ import {
     syncUntilHasMessageWithRequest,
     syncUntilHasMessageWithResponse,
     TestRuntimeServices
-} from "../../lib";
+} from "../../lib/index.js";
 
 const serviceProvider = new RuntimeServiceProvider();
 let runtimeServices1: TestRuntimeServices;

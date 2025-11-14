@@ -34,7 +34,7 @@ import {
     RevokeRelationshipUseCase,
     TerminateRelationshipRequest,
     TerminateRelationshipUseCase
-} from "../../../useCases";
+} from "../../../useCases/index.js";
 
 export class RelationshipsFacade {
     public constructor(

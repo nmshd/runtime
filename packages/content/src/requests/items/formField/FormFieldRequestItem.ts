@@ -1,6 +1,6 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { IRequestItem, RequestItem, RequestItemJSON } from "../../RequestItem";
-import { FORM_FIELD_SETTINGS_CLASSES, FormFieldSettingsDerivations, FormFieldSettingsJSONDerivations } from "./settings";
+import { IRequestItem, RequestItem, RequestItemJSON } from "../../RequestItem.js";
+import { FORM_FIELD_SETTINGS_CLASSES, FormFieldSettingsDerivations, FormFieldSettingsJSONDerivations } from "./settings/index.js";
 
 export interface FormFieldRequestItemJSON extends RequestItemJSON {
     "@type": "FormFieldRequestItem";

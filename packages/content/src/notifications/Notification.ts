@@ -1,6 +1,6 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreId, ICoreId } from "@nmshd/core-types";
-import { INotificationItem, NotificationItem, NotificationItemJSON } from "./NotificationItem";
+import { INotificationItem, NotificationItem, NotificationItemJSON } from "./NotificationItem.js";
 
 export interface NotificationJSON {
     "@type": "Notification";

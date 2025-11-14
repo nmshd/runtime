@@ -13,15 +13,15 @@ import {
     CryptoSignature,
     CryptoSignaturePublicKey
 } from "@nmshd/crypto";
-import { ControllerName, CoreCrypto } from "../../core";
-import { CoreUtil } from "../../core/CoreUtil";
-import { TransportCoreErrors } from "../../core/TransportCoreErrors";
-import { TransportIds } from "../../core/TransportIds";
-import { AccountController } from "../accounts/AccountController";
-import { RelationshipTemplate } from "../relationshipTemplates/local/RelationshipTemplate";
-import { RelationshipTemplatePublicKey } from "../relationshipTemplates/transmission/RelationshipTemplatePublicKey";
-import { SecretContainerCipher } from "../secrets/data/SecretContainerCipher";
-import { SecretController } from "../secrets/SecretController";
+import { CoreUtil } from "../../core/CoreUtil.js";
+import { ControllerName, CoreCrypto } from "../../core/index.js";
+import { TransportCoreErrors } from "../../core/TransportCoreErrors.js";
+import { TransportIds } from "../../core/TransportIds.js";
+import { AccountController } from "../accounts/AccountController.js";
+import { RelationshipTemplate } from "../relationshipTemplates/local/RelationshipTemplate.js";
+import { RelationshipTemplatePublicKey } from "../relationshipTemplates/transmission/RelationshipTemplatePublicKey.js";
+import { SecretContainerCipher } from "../secrets/data/SecretContainerCipher.js";
+import { SecretController } from "../secrets/SecretController.js";
 
 export class RelationshipSecretController extends SecretController {
     private readonly cache: Map<CoreId, CryptoRelationshipRequestSecrets | CryptoRelationshipSecrets> = new Map<

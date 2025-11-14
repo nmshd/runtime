@@ -1,3 +1,3 @@
-export * from "./local/CreateSettingParameter";
-export * from "./local/Setting";
-export * from "./SettingsController";
+export * from "./local/CreateSettingParameter.js";
+export * from "./local/Setting.js";
+export * from "./SettingsController.js";

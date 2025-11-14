@@ -2,9 +2,9 @@ import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreAddress, CoreDate, CoreId, FileReference, ICoreAddress, ICoreDate, ICoreId } from "@nmshd/core-types";
 import { CryptoSecretKey, CryptoSignature, ICryptoSecretKey, ICryptoSignature } from "@nmshd/crypto";
 import { nameof } from "ts-simple-nameof";
-import { CoreHash, CoreSynchronizable, ICoreHash, ICoreSynchronizable } from "../../../core";
-import { BackboneGetFilesResponse } from "../backbone/BackboneGetFiles";
-import { FileMetadata } from "../transmission/FileMetadata";
+import { CoreHash, CoreSynchronizable, ICoreHash, ICoreSynchronizable } from "../../../core/index.js";
+import { BackboneGetFilesResponse } from "../backbone/BackboneGetFiles.js";
+import { FileMetadata } from "../transmission/FileMetadata.js";
 
 export interface IFile extends ICoreSynchronizable {
     secretKey: ICryptoSecretKey;

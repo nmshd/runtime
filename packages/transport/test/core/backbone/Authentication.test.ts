@@ -1,10 +1,10 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { ILogger } from "@js-soft/logging-abstractions";
 import { CoreDate } from "@nmshd/core-types";
+import { AccountController, Transport, TransportController } from "@nmshd/transport";
 import { mock } from "ts-mockito";
-import { AccountController, Transport, TransportController } from "../../../src";
-import { RequestInterceptor } from "../../testHelpers/RequestInterceptor";
-import { TestUtil } from "../../testHelpers/TestUtil";
+import { RequestInterceptor } from "../../testHelpers/RequestInterceptor.js";
+import { TestUtil } from "../../testHelpers/TestUtil.js";
 
 describe("AuthenticationTest", function () {
     let connection: IDatabaseConnection;

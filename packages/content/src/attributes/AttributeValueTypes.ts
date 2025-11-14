@@ -116,7 +116,7 @@ import {
     SurnameJSON,
     Website,
     WebsiteJSON
-} from "./types";
+} from "./types/index.js";
 
 // ################################################ Editable IdentityAttribute Value Types ###################################################################
 

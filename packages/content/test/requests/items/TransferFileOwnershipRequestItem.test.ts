@@ -1,6 +1,6 @@
+import { TransferFileOwnershipRequestItem } from "@nmshd/content";
 import { CoreId, FileReference } from "@nmshd/core-types";
 import { CoreBuffer, CryptoEncryptionAlgorithm, CryptoSecretKey, SodiumWrapper } from "@nmshd/crypto";
-import { TransferFileOwnershipRequestItem } from "../../../src";
 
 describe("TransferFileOwnershipRequestItem", () => {
     let fileReference: FileReference;

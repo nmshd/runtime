@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
 import { Inject } from "@nmshd/typescript-ioc";
-import { SendBackboneNotificationRequest, SendBackboneNotificationUseCase } from "../../../useCases";
+import { SendBackboneNotificationRequest, SendBackboneNotificationUseCase } from "../../../useCases/index.js";
 
 export class BackboneNotificationsFacade {
     public constructor(@Inject private readonly sendBackboneNotificationUseCase: SendBackboneNotificationUseCase) {}

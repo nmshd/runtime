@@ -1,7 +1,7 @@
+import { LocalNotification, LocalNotificationSource, LocalNotificationStatus } from "@nmshd/consumption";
 import { Notification } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
-import { LocalNotification, LocalNotificationSource, LocalNotificationStatus } from "../../../../src";
-import { TestNotificationItem } from "../testHelpers/TestNotificationItem";
+import { TestNotificationItem } from "../testHelpers/TestNotificationItem.js";
 
 describe("LocalNotification", function () {
     test("creates objects of all nested classes", function () {

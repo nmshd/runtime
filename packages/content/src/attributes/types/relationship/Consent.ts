@@ -1,7 +1,7 @@
 import { Serializable, serialize, type, validate, ValidationError } from "@js-soft/ts-serval";
 import { nameof } from "ts-simple-nameof";
-import { AbstractAttributeValue, AbstractAttributeValueJSON, IAbstractAttributeValue } from "../../AbstractAttributeValue";
-import { RenderHints, RenderHintsDataType, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../../hints";
+import { AbstractAttributeValue, AbstractAttributeValueJSON, IAbstractAttributeValue } from "../../AbstractAttributeValue.js";
+import { RenderHints, RenderHintsDataType, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../../hints/index.js";
 
 export interface ConsentJSON extends AbstractAttributeValueJSON {
     "@type": "Consent";

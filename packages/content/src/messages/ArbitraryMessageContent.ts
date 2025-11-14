@@ -1,5 +1,5 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { ContentJSON } from "../ContentJSON";
+import { ContentJSON } from "../ContentJSON.js";
 
 export interface ArbitraryMessageContentJSON extends ContentJSON {
     "@type": "ArbitraryMessageContent";

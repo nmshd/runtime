@@ -8,8 +8,8 @@ import {
     ThirdPartyRelationshipAttributeQuery
 } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
-import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { ValidationResult } from "../../../common/ValidationResult";
+import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors.js";
+import { ValidationResult } from "../../../common/ValidationResult.js";
 
 export default function validateAttributeMatchesWithQuery(
     query: IdentityAttributeQuery | IQLQuery | RelationshipAttributeQuery | ThirdPartyRelationshipAttributeQuery,

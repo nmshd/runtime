@@ -3,11 +3,11 @@ import { AttributesController } from "@nmshd/consumption";
 import { CoreAddress } from "@nmshd/core-types";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { AddressString, SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { flattenObject } from "../../common/flattenObject";
-import { AttributeMapper } from "./AttributeMapper";
-import { GetAttributesRequestQuery, GetAttributesUseCase } from "./GetAttributes";
-import { GetForwardingDetailsForAttributeUseCase } from "./GetForwardingDetailsForAttribute";
+import { flattenObject } from "../../common/flattenObject.js";
+import { AddressString, SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
+import { AttributeMapper } from "./AttributeMapper.js";
+import { GetAttributesRequestQuery, GetAttributesUseCase } from "./GetAttributes.js";
+import { GetForwardingDetailsForAttributeUseCase } from "./GetForwardingDetailsForAttribute.js";
 
 export interface GetOwnAttributesSharedWithPeerRequest {
     peer: AddressString;

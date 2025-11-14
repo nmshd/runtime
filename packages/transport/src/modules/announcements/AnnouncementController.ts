@@ -1,8 +1,8 @@
 import { LanguageISO639 } from "@nmshd/core-types";
-import { ControllerName, TransportController } from "../../core";
-import { AccountController } from "../accounts/AccountController";
-import { AnnouncementClient } from "./backbone/AnnouncementClient";
-import { Announcement } from "./data/Announcement";
+import { ControllerName, TransportController } from "../../core/index.js";
+import { AccountController } from "../accounts/AccountController.js";
+import { AnnouncementClient } from "./backbone/AnnouncementClient.js";
+import { Announcement } from "./data/Announcement.js";
 
 export class AnnouncementController extends TransportController {
     private client: AnnouncementClient;

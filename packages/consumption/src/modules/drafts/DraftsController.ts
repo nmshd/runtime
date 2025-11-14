@@ -1,12 +1,12 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { CoreDate, CoreId } from "@nmshd/core-types";
 import { SynchronizedCollection } from "@nmshd/transport";
-import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
-import { ConsumptionController } from "../../consumption/ConsumptionController";
-import { ConsumptionControllerName } from "../../consumption/ConsumptionControllerName";
-import { ConsumptionError } from "../../consumption/ConsumptionError";
-import { ConsumptionIds } from "../../consumption/ConsumptionIds";
-import { Draft } from "./local/Draft";
+import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController.js";
+import { ConsumptionController } from "../../consumption/ConsumptionController.js";
+import { ConsumptionControllerName } from "../../consumption/ConsumptionControllerName.js";
+import { ConsumptionError } from "../../consumption/ConsumptionError.js";
+import { ConsumptionIds } from "../../consumption/ConsumptionIds.js";
+import { Draft } from "./local/Draft.js";
 
 export class DraftsController extends ConsumptionBaseController {
     private drafts: SynchronizedCollection;

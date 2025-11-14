@@ -1,5 +1,5 @@
-import { LocalAccountDTO } from "..";
-import { LocalAccount } from "./LocalAccount";
+import { LocalAccount } from "./LocalAccount.js";
+import { LocalAccountDTO } from "./LocalAccountDTO.js";
 
 export class LocalAccountMapper {
     public static toLocalAccountDTO(localAccount: LocalAccount): LocalAccountDTO {

@@ -3,7 +3,7 @@ import { IncomingRequestsController, LocalRequest } from "@nmshd/consumption";
 import { CoreId } from "@nmshd/core-types";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
 
 export interface DeleteIncomingRequestRequest {
     requestId: string;

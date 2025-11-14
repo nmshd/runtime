@@ -4,8 +4,8 @@ import { RelationshipDTO } from "@nmshd/runtime-types";
 import { Identity, Relationship, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import { nameof } from "ts-simple-nameof";
-import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { RelationshipMapper } from "./RelationshipMapper";
+import { SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
+import { RelationshipMapper } from "./RelationshipMapper.js";
 
 export interface GetRelationshipsQuery {
     peer?: string | string[];

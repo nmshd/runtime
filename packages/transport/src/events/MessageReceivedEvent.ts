@@ -1,5 +1,5 @@
-import { Message } from "../modules";
-import { TransportDataEvent } from "./TransportDataEvent";
+import { Message } from "../modules/index.js";
+import { TransportDataEvent } from "./TransportDataEvent.js";
 
 export class MessageReceivedEvent extends TransportDataEvent<Message> {
     public static readonly namespace = "transport.messageReceived";

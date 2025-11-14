@@ -4,11 +4,11 @@ import { CoreError } from "@nmshd/core-types";
 import { RequestError } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import stringifySafe from "json-stringify-safe";
-import { AbstractCorrelator } from "./AbstractCorrelator";
-import { PlatformErrorCodes } from "./PlatformErrorCodes";
-import { RuntimeErrors } from "./RuntimeErrors";
-import { IValidator } from "./validation/IValidator";
-import { ValidationResult } from "./validation/ValidationResult";
+import { AbstractCorrelator } from "./AbstractCorrelator.js";
+import { PlatformErrorCodes } from "./PlatformErrorCodes.js";
+import { RuntimeErrors } from "./RuntimeErrors.js";
+import { IValidator } from "./validation/IValidator.js";
+import { ValidationResult } from "./validation/ValidationResult.js";
 
 export abstract class UseCase<IRequest, IResponse> {
     @Inject private readonly correlator?: AbstractCorrelator;

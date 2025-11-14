@@ -1,5 +1,5 @@
 import { type } from "@js-soft/ts-serval";
-import { AbstractStatement, AbstractStatementJSON, IAbstractStatement } from "./AbstractStatement";
+import { AbstractStatement, AbstractStatementJSON, IAbstractStatement } from "./AbstractStatement.js";
 
 export interface StatementJSON extends AbstractStatementJSON {
     "@type": "Statement";

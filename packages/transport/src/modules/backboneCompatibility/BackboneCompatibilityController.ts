@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
-import { IConfig, ICorrelator } from "../../core";
-import { VersionClient } from "./backbone/VersionClient";
+import { IConfig, ICorrelator } from "../../core/index.js";
+import { VersionClient } from "./backbone/VersionClient.js";
 
 export interface BackboneCompatibility {
     isCompatible: boolean;

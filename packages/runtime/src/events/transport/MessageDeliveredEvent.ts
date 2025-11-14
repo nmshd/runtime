@@ -1,5 +1,5 @@
 import { MessageDTO } from "@nmshd/runtime-types";
-import { DataEvent } from "../DataEvent";
+import { DataEvent } from "../DataEvent.js";
 
 // This event is currently not triggered because it is disabled in the Backbone. (JSSNMSHDD-2372)
 export class MessageDeliveredEvent extends DataEvent<MessageDTO> {

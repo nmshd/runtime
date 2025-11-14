@@ -1,6 +1,6 @@
 import { NodeLoggerFactory } from "@js-soft/node-logger";
 import { IdentityAttribute } from "@nmshd/content";
-import { DeciderModule } from "../../src";
+import { DeciderModule } from "@nmshd/runtime";
 import {
     AcceptResponseConfig,
     CreateAttributeRequestItemConfig,
@@ -13,8 +13,8 @@ import {
     ReadAttributeWithNewAttributeAcceptResponseConfig,
     RejectResponseConfig,
     ShareAttributeRequestItemConfig
-} from "../../src/modules/decide";
-import { RuntimeServiceProvider } from "../lib";
+} from "../../src/modules/decide/index.js";
+import { RuntimeServiceProvider } from "../lib/index.js";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
 

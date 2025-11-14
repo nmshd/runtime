@@ -1,7 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { CoreDate } from "@nmshd/core-types";
-import { AccountController, RelationshipTemplate, Transport } from "../../src";
-import { TestUtil } from "../testHelpers/TestUtil";
+import { AccountController, RelationshipTemplate, Transport } from "@nmshd/transport";
+import { TestUtil } from "../testHelpers/TestUtil.js";
 
 async function createTemplate(from: AccountController) {
     const templateFrom = await from.relationshipTemplates.sendRelationshipTemplate({

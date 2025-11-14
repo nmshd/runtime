@@ -3,8 +3,8 @@ import { NotificationsController } from "@nmshd/consumption";
 import { CoreId } from "@nmshd/core-types";
 import { LocalNotificationDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { NotificationIdString, SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { NotificationMapper } from "./NotificationMapper";
+import { NotificationIdString, SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
+import { NotificationMapper } from "./NotificationMapper.js";
 
 export interface ProcessNotificationByIdRequest {
     notificationId: NotificationIdString;

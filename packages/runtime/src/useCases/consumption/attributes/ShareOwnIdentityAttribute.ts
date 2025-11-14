@@ -5,8 +5,8 @@ import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { LocalRequestDTO } from "@nmshd/runtime-types";
 import { AccountController, MessageController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { AddressString, AttributeIdString, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { RequestMapper } from "../requests";
+import { AddressString, AttributeIdString, ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
+import { RequestMapper } from "../requests/index.js";
 
 export interface ShareOwnIdentityAttributeRequest {
     attributeId: AttributeIdString;

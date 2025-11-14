@@ -1,3 +1,3 @@
-export * from "./IdentityDeletionProcessStatusChangedModule";
-export * from "./MessageReceivedModule";
-export * from "./RelationshipChangedModule";
+export * from "./IdentityDeletionProcessStatusChangedModule.js";
+export * from "./MessageReceivedModule.js";
+export * from "./RelationshipChangedModule.js";

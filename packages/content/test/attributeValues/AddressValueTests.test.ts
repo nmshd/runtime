@@ -1,6 +1,6 @@
+import { City, Country, DeliveryBoxAddress, HouseNumber, PhoneNumber, PostOfficeBoxAddress, State, Street, StreetAddress, ZipCode } from "@nmshd/content";
 import { CountryAlpha2 } from "@nmshd/core-types";
-import { City, Country, DeliveryBoxAddress, HouseNumber, PhoneNumber, PostOfficeBoxAddress, State, Street, StreetAddress, ZipCode } from "../../src";
-import { GenericValueTest } from "./GenericValueTest";
+import { GenericValueTest } from "./GenericValueTest.js";
 
 new GenericValueTest().runParametrized({
     testName: "Address Test",

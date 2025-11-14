@@ -4,10 +4,10 @@ import { AttributeValues, IdentityAttribute } from "@nmshd/content";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationResult } from "../../common";
-import { IValidator } from "../../common/validation/IValidator";
-import { AttributeMapper } from "./AttributeMapper";
-import { IdentityAttributeValueValidator } from "./IdentityAttributeValueValidator";
+import { RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationResult } from "../../common/index.js";
+import { IValidator } from "../../common/validation/IValidator.js";
+import { AttributeMapper } from "./AttributeMapper.js";
+import { IdentityAttributeValueValidator } from "./IdentityAttributeValueValidator.js";
 
 interface AbstractCreateOwnIdentityAttributeRequest<T> {
     content: {

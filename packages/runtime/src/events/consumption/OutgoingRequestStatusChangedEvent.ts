@@ -1,6 +1,6 @@
 import { LocalRequestStatus } from "@nmshd/consumption";
 import { LocalRequestDTO } from "@nmshd/runtime-types";
-import { DataEvent } from "../DataEvent";
+import { DataEvent } from "../DataEvent.js";
 
 export interface OutgoingRequestStatusChangedEventData {
     request: LocalRequestDTO;

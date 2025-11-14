@@ -3,8 +3,8 @@ import { DecideRequestParametersJSON, IncomingRequestsController, LocalRequest }
 import { CoreId } from "@nmshd/core-types";
 import { LocalRequestDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { RuntimeErrors, UseCase } from "../../common";
-import { RequestMapper } from "./RequestMapper";
+import { RuntimeErrors, UseCase } from "../../common/index.js";
+import { RequestMapper } from "./RequestMapper.js";
 
 export interface RejectIncomingRequestRequest extends DecideRequestParametersJSON {}
 

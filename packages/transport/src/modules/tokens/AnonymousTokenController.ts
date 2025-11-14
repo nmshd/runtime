@@ -1,12 +1,12 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { CoreAddress, CoreDate, CoreId, Random, RandomCharacterRange } from "@nmshd/core-types";
 import { CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
-import { CoreCrypto, IConfig, ICorrelator, TransportCoreErrors } from "../../core";
-import { PasswordProtection } from "../../core/types/PasswordProtection";
-import { AnonymousTokenClient } from "./backbone/AnonymousTokenClient";
-import { EmptyToken } from "./local/EmptyToken";
-import { Token } from "./local/Token";
-import { TokenReference } from "./transmission/TokenReference";
+import { CoreCrypto, IConfig, ICorrelator, TransportCoreErrors } from "../../core/index.js";
+import { PasswordProtection } from "../../core/types/PasswordProtection.js";
+import { AnonymousTokenClient } from "./backbone/AnonymousTokenClient.js";
+import { EmptyToken } from "./local/EmptyToken.js";
+import { Token } from "./local/Token.js";
+import { TokenReference } from "./transmission/TokenReference.js";
 
 export class AnonymousTokenController {
     private readonly client: AnonymousTokenClient;

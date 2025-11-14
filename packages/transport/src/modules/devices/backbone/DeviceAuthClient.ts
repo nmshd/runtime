@@ -1,8 +1,8 @@
-import { RESTClientAuthenticate, RESTClientLogDirective } from "../../../core";
-import { ClientResult } from "../../../core/backbone/ClientResult";
-import { BackboneGetDevicesResponse } from "./BackboneGetDevices";
-import { BackbonePostDevicesRequest, BackbonePostDevicesResponse } from "./BackbonePostDevices";
-import { BackboneUpdateDeviceRequest } from "./BackboneUpdateDevice";
+import { ClientResult } from "../../../core/backbone/ClientResult.js";
+import { RESTClientAuthenticate, RESTClientLogDirective } from "../../../core/index.js";
+import { BackboneGetDevicesResponse } from "./BackboneGetDevices.js";
+import { BackbonePostDevicesRequest, BackbonePostDevicesResponse } from "./BackbonePostDevices.js";
+import { BackboneUpdateDeviceRequest } from "./BackboneUpdateDevice.js";
 
 export interface BackbonePutDevicesPasswordRequest {
     oldPassword: string;

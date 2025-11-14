@@ -1,5 +1,5 @@
-import { AcceptRequestItemParametersJSON } from "./AcceptRequestItemParameters";
-import { RejectRequestItemParametersJSON } from "./RejectRequestItemParameters";
+import { AcceptRequestItemParametersJSON } from "./AcceptRequestItemParameters.js";
+import { RejectRequestItemParametersJSON } from "./RejectRequestItemParameters.js";
 
 export type DecideRequestItemParametersJSON = AcceptRequestItemParametersJSON | RejectRequestItemParametersJSON;
 

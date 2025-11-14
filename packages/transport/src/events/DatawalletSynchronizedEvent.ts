@@ -1,4 +1,4 @@
-import { TransportDataEvent } from "./TransportDataEvent";
+import { TransportDataEvent } from "./TransportDataEvent.js";
 
 export class DatawalletSynchronizedEvent extends TransportDataEvent<undefined> {
     public static readonly namespace: string = "transport.datawalletSynchronized";

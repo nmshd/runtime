@@ -12,8 +12,8 @@ import {
     SchemaRepository,
     TokenAndTemplateCreationValidator,
     UseCase
-} from "../../common";
-import { TokenMapper } from "../tokens/TokenMapper";
+} from "../../common/index.js";
+import { TokenMapper } from "../tokens/TokenMapper.js";
 
 export interface SchemaValidatableCreateTokenForOwnRelationshipTemplateRequest {
     templateId: RelationshipTemplateIdString;

@@ -2,11 +2,11 @@ import { Result } from "@js-soft/ts-utils";
 import { FileDTO, IdentityDeletionProcessDTO, MessageDTO, RelationshipDTO } from "@nmshd/runtime-types";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { UseCase } from "../../common";
-import { FileMapper } from "../files";
-import { IdentityDeletionProcessMapper } from "../identityDeletionProcesses";
-import { MessageMapper } from "../messages/MessageMapper";
-import { RelationshipMapper } from "../relationships/RelationshipMapper";
+import { UseCase } from "../../common/index.js";
+import { FileMapper } from "../files/index.js";
+import { IdentityDeletionProcessMapper } from "../identityDeletionProcesses/index.js";
+import { MessageMapper } from "../messages/MessageMapper.js";
+import { RelationshipMapper } from "../relationships/RelationshipMapper.js";
 
 export interface SyncEverythingResponse {
     relationships: RelationshipDTO[];

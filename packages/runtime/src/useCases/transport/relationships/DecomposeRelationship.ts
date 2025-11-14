@@ -3,7 +3,7 @@ import { ConsumptionController } from "@nmshd/consumption";
 import { CoreId } from "@nmshd/core-types";
 import { AccountController, Relationship, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { RelationshipIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { RelationshipIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
 
 export interface DecomposeRelationshipRequest {
     relationshipId: RelationshipIdString;

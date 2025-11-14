@@ -12,8 +12,8 @@ import {
     RelationshipAttributeQueryJSON,
     ThirdPartyRelationshipAttributeQuery,
     ThirdPartyRelationshipAttributeQueryJSON
-} from "../../../attributes";
-import { IRequestItem, RequestItem, RequestItemJSON } from "../../RequestItem";
+} from "../../../attributes/index.js";
+import { IRequestItem, RequestItem, RequestItemJSON } from "../../RequestItem.js";
 
 export interface ReadAttributeRequestItemJSON extends RequestItemJSON {
     "@type": "ReadAttributeRequestItem";

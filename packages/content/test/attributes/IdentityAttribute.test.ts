@@ -1,4 +1,3 @@
-import { CoreAddress } from "@nmshd/core-types";
 import {
     Affiliation,
     AffiliationOrganization,
@@ -13,7 +12,8 @@ import {
     IBirthDate,
     IdentityAttribute,
     Nationality
-} from "../../src";
+} from "@nmshd/content";
+import { CoreAddress } from "@nmshd/core-types";
 
 describe("IdentityAttribute", function () {
     test("should allow to create new attributes from objects (nested values)", function () {

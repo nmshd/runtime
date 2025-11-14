@@ -1,5 +1,5 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
-import { IUIBridge, LocalAccountDTO } from "../../src";
+import { IUIBridge, LocalAccountDTO } from "@nmshd/app-runtime";
 
 export class FakeUIBridge implements IUIBridge {
     public showMessage(): Promise<Result<void, ApplicationError>> {

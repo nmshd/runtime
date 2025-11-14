@@ -1,6 +1,6 @@
 import { PeerDeletionStatus, RelationshipAuditLogDTO, RelationshipCreationContentDerivation } from "@nmshd/runtime-types";
-import { DataViewObject } from "../DataViewObject";
-import { LocalAttributeDVO } from "../consumption";
+import { DataViewObject } from "../DataViewObject.js";
+import { LocalAttributeDVO } from "../consumption/index.js";
 
 export enum RelationshipDirection {
     Outgoing = "Outgoing",
