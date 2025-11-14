@@ -164,14 +164,21 @@ describe("custom openid4vc service", () => {
 
 describe("EUDIPLO", () => {
     const eudiploBaseUrl = "https://openid4vc-eudiplo-server.is.enmeshed.eu";
-    const eudiploUser = "test-admin";
-    const eudiploPassword = "a9622245324e3ef38db9264f434e2289f361e07edd8012d4a7815a11b9c79a97";
+    const eudiploUser = process.env.EUDIPLO_USERNAME;
+    const eudiploPassword = process.env.EUDIPLO_PASSWORD;
     const eudiploIssuanceConfigurationId = "Employee ID Card";
     const eudiploPresentationConfigurationId = "Employee ID Card";
     const eudiploCredentialIdInConfiguration = "EmployeeIdCard";
 
     let accessToken: string;
     beforeAll(async () => {
+        if (!eudiploUser) {
+            throw new Error("Environment variable EUDIPLO_USERNAME not set.");
+        }
+        if (!eudiploPassword) {
+            throw new Error("Environment variable EUDIPLO_PASSWORD not set.");
+        }
+
         accessToken = (
             await axios.post(
                 `${eudiploBaseUrl}/oauth2/token`,

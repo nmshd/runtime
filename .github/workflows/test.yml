@@ -140,6 +140,8 @@ jobs:
           NMSHD_TEST_ADMIN_API_KEY: test
           NMSHD_TEST_CLIENTID: test
           NMSHD_TEST_CLIENTSECRET: test
+          EUDIPLO_USERNAME: ${{ secrets.EUDIPLO_USERNAME }}
+          EUDIPLO_PASSWORD: ${{ secrets.EUDIPLO_PASSWORD }}
 
   test-runtime-loki:
     runs-on: ubuntu-latest
