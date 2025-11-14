@@ -274,7 +274,7 @@ describe("EUDIPLO", () => {
     });
 });
 
-describe.only("EUDIPLO", () => {
+describe("EUDIPLO", () => {
     const eudiploUser = "test-admin";
     const eudiploPassword = "test";
     const eudiploIssuanceConfigurationId = "Employee ID Card";
