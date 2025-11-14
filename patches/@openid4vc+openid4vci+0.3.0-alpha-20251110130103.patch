@@ -1,0 +1,24 @@
+diff --git a/node_modules/@openid4vc/openid4vci/package.json b/node_modules/@openid4vc/openid4vci/package.json
+index 9c7c62d..6f85994 100644
+--- a/node_modules/@openid4vc/openid4vci/package.json
++++ b/node_modules/@openid4vc/openid4vci/package.json
+@@ -8,7 +8,7 @@
+   "exports": {
+     ".": {
+       "import": "./dist/index.mjs",
+-      "require": "./dist/index.js",
++      "require": "./dist/index.cjs",
+       "types": "./dist/index.d.ts"
+     },
+     "./package.json": "./package.json"
+@@ -30,7 +30,7 @@
+   "scripts": {
+     "build": "tsdown src/index.ts --format cjs,esm --dts --sourcemap"
+   },
+-  "main": "./dist/index.js",
++  "main": "./dist/index.cjs",
+   "module": "./dist/index.mjs",
+-  "types": "./dist/index.d.ts"
++  "types": "./dist/index.d.cts"
+ }
+\ No newline at end of file
