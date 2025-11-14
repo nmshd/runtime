@@ -4,7 +4,7 @@
         "baseUrl": "../",
         "noEmit": true,
         "composite": false,
-        "allowJs": true
+        "allowJs": true // we want to use the ts compiler to compile ESM node modules into CJS which is understood by jest. This is required since those node modules are javascript.
     },
     "files": ["../../../node_modules/jest-expect-message/types/index.d.ts"],
     "include": ["**/*.ts", "../src/**/*.ts"],
