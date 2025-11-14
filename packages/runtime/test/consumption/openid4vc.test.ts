@@ -160,6 +160,32 @@ describe("custom openid4vc service", () => {
         expect(singleCredentialResult.value).toHaveLength(1);
         expect(singleCredentialResult.value[0].id).toBe(firstCredentialId);
     }, 10000000);
+
+    async function startOid4VcComposeStack() {
+        let baseUrl = process.env.NMSHD_TEST_BASEURL!;
+        let addressGenerationHostnameOverride: string | undefined;
+
+        if (baseUrl.includes("localhost")) {
+            addressGenerationHostnameOverride = "localhost";
+            baseUrl = baseUrl.replace("localhost", "host.docker.internal");
+        }
+
+        const composeFolder = path.resolve(path.join(__dirname, "..", "..", "..", "..", ".dev"));
+        const composeStack = await new DockerComposeEnvironment(composeFolder, "compose.openid4vc.yml")
+            .withProjectName("runtime-oid4vc-tests")
+            .withEnvironment({
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                NMSHD_TEST_BASEURL: baseUrl,
+
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE: addressGenerationHostnameOverride
+            } as Record<string, string>)
+            .withStartupTimeout(60000)
+            .withWaitStrategy("oid4vc-service", Wait.forHealthCheck())
+            .up();
+
+        return composeStack;
+    }
 });
 
 describe("EUDIPLO", () => {
@@ -246,33 +272,6 @@ describe("EUDIPLO", () => {
 
         // TODO: send the presentation with a manually selected credential
     });
-});
-
-    async function startOid4VcComposeStack() {
-        let baseUrl = process.env.NMSHD_TEST_BASEURL!;
-        let addressGenerationHostnameOverride: string | undefined;
-
-        if (baseUrl.includes("localhost")) {
-            addressGenerationHostnameOverride = "localhost";
-            baseUrl = baseUrl.replace("localhost", "host.docker.internal");
-        }
-
-        const composeFolder = path.resolve(path.join(__dirname, "..", "..", "..", "..", ".dev"));
-        const composeStack = await new DockerComposeEnvironment(composeFolder, "compose.openid4vc.yml")
-            .withProjectName("runtime-oid4vc-tests")
-            .withEnvironment({
-                // eslint-disable-next-line @typescript-eslint/naming-convention
-                NMSHD_TEST_BASEURL: baseUrl,
-
-                // eslint-disable-next-line @typescript-eslint/naming-convention
-                NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE: addressGenerationHostnameOverride
-            } as Record<string, string>)
-            .withStartupTimeout(60000)
-            .withWaitStrategy("oid4vc-service", Wait.forHealthCheck())
-            .up();
-
-        return composeStack;
-    }
 });
 
 describe.only("EUDIPLO", () => {
