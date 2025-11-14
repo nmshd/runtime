@@ -6,6 +6,7 @@ import {
     InjectionSymbols,
     Kms,
     LogLevel,
+    StorageVersionRecord,
     type InitConfig,
     type KeyDidCreateOptions,
     type ModulesMap,
@@ -59,8 +60,7 @@ export class BaseAgent<AgentModules extends ModulesMap> {
     public async initializeAgent(privateKey: string): Promise<void> {
         // as we are not using askar we need to set the storage version
         const storage = this.agent.dependencyManager.resolve<EnmeshedStorageService<any>>(InjectionSymbols.StorageService);
-        const versionRecord = { id: "STORAGE_VERSION_RECORD_ID", storageVersion: "0.5.0", value: "0.5.0" };
-        await storage.save(this.agent.context, versionRecord);
+        await storage.save(this.agent.context, new StorageVersionRecord({ storageVersion: "0.5.0" }));
 
         const kmsConfig = this.agent.dependencyManager.resolve(Kms.KeyManagementModuleConfig);
         kmsConfig.registerBackend(new EnmshedHolderKeyManagmentService());
