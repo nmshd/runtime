@@ -1,3 +1,4 @@
+import { OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
 import axios, { AxiosInstance } from "axios";
 import path from "path";
 import { DockerComposeEnvironment, StartedDockerComposeEnvironment, Wait } from "testcontainers";
@@ -109,15 +110,17 @@ describe("OpenID4VCI and OpenID4VCP", () => {
         expect(response.status).toBe(200);
         const responseData = await response.data;
 
-        const result = await consumptionServices.openId4Vc.fetchProofRequest({
+        const result = await consumptionServices.openId4Vc.resolveAuthorizationRequest({
             proofRequestUrl: responseData.result.presentationRequest
         });
+        expect(result.value.usedCredentials).toHaveLength(1);
+
         const jsonRepresentation = result.value.jsonRepresentation;
 
-        const proofRequest = JSON.parse(jsonRepresentation);
-        expect(proofRequest.presentationExchange.credentialsForRequest.areRequirementsSatisfied).toBe(true);
+        const proofRequest = JSON.parse(jsonRepresentation) as OpenId4VpResolvedAuthorizationRequest;
+        expect(proofRequest.presentationExchange!.credentialsForRequest.areRequirementsSatisfied).toBe(true);
 
-        const presentationResult = await consumptionServices.openId4Vc.acceptProofRequest({
+        const presentationResult = await consumptionServices.openId4Vc.acceptAuthorizationRequest({
             jsonEncodedRequest: jsonRepresentation
         });
         expect(presentationResult).toBeSuccessful();
@@ -128,7 +131,7 @@ describe("OpenID4VCI and OpenID4VCP", () => {
         // Ensure the first test has completed
         expect(credentialOfferUrl).toBeDefined();
 
-        const acceptanceResult = await consumptionServices.openId4Vc.getVerifiableCredentials(undefined);
+        const acceptanceResult = await consumptionServices.openId4Vc.getVerifiableCredentials();
 
         expect(acceptanceResult).toBeSuccessful();
         expect(acceptanceResult.value.length).toBeGreaterThan(0);
@@ -138,7 +141,7 @@ describe("OpenID4VCI and OpenID4VCP", () => {
         // Ensure the first test has completed
         expect(credentialOfferUrl).toBeDefined();
 
-        const allCredentialsResult = await consumptionServices.openId4Vc.getVerifiableCredentials(undefined);
+        const allCredentialsResult = await consumptionServices.openId4Vc.getVerifiableCredentials();
         expect(allCredentialsResult).toBeSuccessful();
         expect(allCredentialsResult.value.length).toBeGreaterThan(0);
 
