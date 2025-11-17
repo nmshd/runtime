@@ -184,10 +184,10 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
     }
 
     // should only be used for exporting data out of the credo environment
-    public async getAllAsAttributes(agentContext: AgentContext, recordClass: BaseRecordConstructor<T>): Promise<any[]> {
+    public async getAllAsAttributes(agentContext: AgentContext, recordClass: BaseRecordConstructor<T>): Promise<OwnIdentityAttribute[]> {
         agentContext.config.logger.debug(`Getting all records of type ${recordClass.name}`);
         const attributes = await this.attributeController.getLocalAttributes({ "@type": "OwnIdentityAttribute", "content.value.@type": "VerifiableCredential" });
-        return attributes;
+        return attributes as OwnIdentityAttribute[];
     }
 
     public async findByQuery(agentContext: AgentContext, recordClass: BaseRecordConstructor<T>, query: Query<T>, queryOptions?: QueryOptions): Promise<T[]> {

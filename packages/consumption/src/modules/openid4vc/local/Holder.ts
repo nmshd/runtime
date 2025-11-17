@@ -50,7 +50,7 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         super(3000, `OpenId4VcHolder ${Math.random().toString()}`, getOpenIdHolderModules(), accountController, attributeController);
     }
 
-    public async getVerifiableCredentials(ids: string[] | undefined): Promise<any[]> {
+    public async getVerifiableCredentials(ids: string[] | undefined): Promise<OwnIdentityAttribute[]> {
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         const storageService = this.agent.dependencyManager.resolve(InjectionSymbols.StorageService) as EnmeshedStorageService<BaseRecord>;
         const allCredentials = await storageService.getAllAsAttributes(this.agent.context, SdJwtVcRecord);
@@ -255,13 +255,12 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         return storedCredentials;
     }
 
-    public async resolveProofRequest(proofRequest: string): Promise<OpenId4VpResolvedAuthorizationRequest> {
-        const resolvedProofRequest = await this.agent.openid4vc.holder.resolveOpenId4VpAuthorizationRequest(proofRequest);
-
-        return resolvedProofRequest;
+    public async resolveAuthorizationRequest(request: string): Promise<OpenId4VpResolvedAuthorizationRequest> {
+        const resolvedRequest = await this.agent.openid4vc.holder.resolveOpenId4VpAuthorizationRequest(request);
+        return resolvedRequest;
     }
 
-    public async acceptPresentationRequest(resolvedPresentationRequest: OpenId4VpResolvedAuthorizationRequest): Promise<
+    public async acceptAuthorizationRequest(resolvedAuthenticationRequest: OpenId4VpResolvedAuthorizationRequest): Promise<
         | {
               readonly status: number;
               readonly body: string | Record<string, unknown> | null;
@@ -272,15 +271,15 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
           }
         | undefined
     > {
-        if (!resolvedPresentationRequest.presentationExchange && !resolvedPresentationRequest.dcql) {
+        if (!resolvedAuthenticationRequest.presentationExchange && !resolvedAuthenticationRequest.dcql) {
             throw new Error("Missing presentation exchange or dcql on resolved authorization request");
         }
 
         // This fix ensures that the credential records which have been loaded here actually do provide the encoded() method
         // this issue arises as the records are loaded and then communicated to the app as a json object, losing the class prototype
-        if (resolvedPresentationRequest.presentationExchange) {
-            for (const requirementKey in resolvedPresentationRequest.presentationExchange.credentialsForRequest.requirements) {
-                const requirement = resolvedPresentationRequest.presentationExchange.credentialsForRequest.requirements[requirementKey];
+        if (resolvedAuthenticationRequest.presentationExchange) {
+            for (const requirementKey in resolvedAuthenticationRequest.presentationExchange.credentialsForRequest.requirements) {
+                const requirement = resolvedAuthenticationRequest.presentationExchange.credentialsForRequest.requirements[requirementKey];
                 for (const submissionEntry of requirement.submissionEntry) {
                     for (const vc of submissionEntry.verifiableCredentials) {
                         if (vc.claimFormat === ClaimFormat.SdJwtDc) {
@@ -309,17 +308,17 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         }
 
         const submissionResult = await this.agent.openid4vc.holder.acceptOpenId4VpAuthorizationRequest({
-            authorizationRequestPayload: resolvedPresentationRequest.authorizationRequestPayload,
-            presentationExchange: resolvedPresentationRequest.presentationExchange
+            authorizationRequestPayload: resolvedAuthenticationRequest.authorizationRequestPayload,
+            presentationExchange: resolvedAuthenticationRequest.presentationExchange
                 ? {
                       credentials: this.agent.openid4vc.holder.selectCredentialsForPresentationExchangeRequest(
-                          resolvedPresentationRequest.presentationExchange.credentialsForRequest
+                          resolvedAuthenticationRequest.presentationExchange.credentialsForRequest
                       )
                   }
                 : undefined,
-            dcql: resolvedPresentationRequest.dcql
+            dcql: resolvedAuthenticationRequest.dcql
                 ? {
-                      credentials: this.agent.openid4vc.holder.selectCredentialsForDcqlRequest(resolvedPresentationRequest.dcql.queryResult)
+                      credentials: this.agent.openid4vc.holder.selectCredentialsForDcqlRequest(resolvedAuthenticationRequest.dcql.queryResult)
                   }
                 : undefined
         });
