@@ -1,6 +1,6 @@
 import { type } from "@js-soft/ts-serval";
-import { AbstractStringJSON, IAbstractString } from "../AbstractString";
-import { AbstractCountry } from "../strings";
+import { AbstractStringJSON, IAbstractString } from "../AbstractString.js";
+import { AbstractCountry } from "../strings/index.js";
 
 export interface CountryJSON extends AbstractStringJSON {
     "@type": "Country";

@@ -1,4 +1,4 @@
-import { CreateDatawalletModificationsRequestItem } from "./CreateDatawalletModifications";
+import { CreateDatawalletModificationsRequestItem } from "./CreateDatawalletModifications.js";
 
 export interface FinalizeExternalEventSyncRequest {
     externalEventResults: FinalizeSyncRunRequestExternalEventResult[];

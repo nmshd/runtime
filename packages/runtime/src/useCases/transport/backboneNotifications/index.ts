@@ -1,1 +1,1 @@
-export * from "./SendBackboneNotification";
+export * from "./SendBackboneNotification.js";

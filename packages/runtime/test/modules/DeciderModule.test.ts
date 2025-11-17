@@ -28,7 +28,7 @@ import {
     MessageProcessedResult,
     RelationshipTemplateProcessedEvent,
     RelationshipTemplateProcessedResult
-} from "../../src";
+} from "@nmshd/runtime";
 import {
     RuntimeServiceProvider,
     TestRequestItem,
@@ -38,7 +38,7 @@ import {
     exchangeMessage,
     executeFullCreateAndShareOwnIdentityAttributeFlow,
     uploadFile
-} from "../lib";
+} from "../lib/index.js";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
 

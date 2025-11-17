@@ -1,1 +1,1 @@
-export * from "./PasswordGenerator";
+export * from "./PasswordGenerator.js";

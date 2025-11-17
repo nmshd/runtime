@@ -1,5 +1,5 @@
-import { TransportServices } from "../../src";
-import { establishRelationship, getRelationship, RuntimeServiceProvider } from "../lib";
+import { TransportServices } from "@nmshd/runtime";
+import { establishRelationship, getRelationship, RuntimeServiceProvider } from "../lib/index.js";
 
 const serviceProvider = new RuntimeServiceProvider();
 let transportServices1: TransportServices;

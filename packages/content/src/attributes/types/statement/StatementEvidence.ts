@@ -1,6 +1,6 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { RenderHints, RenderHintsEditType, ValueHints, ValueHintsValue } from "../../hints";
-import { AbstractString, AbstractStringJSON, IAbstractString } from "../AbstractString";
+import { RenderHints, RenderHintsEditType, ValueHints, ValueHintsValue } from "../../hints/index.js";
+import { AbstractString, AbstractStringJSON, IAbstractString } from "../AbstractString.js";
 
 /**
  * Supported Evidence

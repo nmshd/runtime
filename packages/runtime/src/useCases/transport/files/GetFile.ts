@@ -3,8 +3,8 @@ import { CoreId } from "@nmshd/core-types";
 import { FileDTO } from "@nmshd/runtime-types";
 import { File, FileController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { FileIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { FileMapper } from "./FileMapper";
+import { FileIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
+import { FileMapper } from "./FileMapper.js";
 
 export interface GetFileRequest {
     id: FileIdString;

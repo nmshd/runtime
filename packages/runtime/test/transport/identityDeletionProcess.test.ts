@@ -1,5 +1,4 @@
 import { CoreIdHelper } from "@nmshd/core-types";
-import { IdentityDeletionProcessStatus } from "@nmshd/transport";
 import {
     CancelIdentityDeletionProcessUseCase,
     GetActiveIdentityDeletionProcessUseCase,
@@ -8,8 +7,9 @@ import {
     IdentityDeletionProcessStatusChangedEvent,
     InitiateIdentityDeletionProcessUseCase,
     TransportServices
-} from "../../src";
-import { MockEventBus, RuntimeServiceProvider } from "../lib";
+} from "@nmshd/runtime";
+import { IdentityDeletionProcessStatus } from "@nmshd/transport";
+import { MockEventBus, RuntimeServiceProvider } from "../lib/index.js";
 
 const serviceProvider = new RuntimeServiceProvider();
 let transportService: TransportServices;

@@ -1,5 +1,5 @@
-import { ClientResult, RESTClientAuthenticate } from "../../../core";
-import { BackboneGetAnnouncementsRequest, BackboneGetAnnouncementsResponse } from "./BackboneGetAnnouncements";
+import { ClientResult, RESTClientAuthenticate } from "../../../core/index.js";
+import { BackboneGetAnnouncementsRequest, BackboneGetAnnouncementsResponse } from "./BackboneGetAnnouncements.js";
 
 export class AnnouncementClient extends RESTClientAuthenticate {
     public async getAnnouncements(request: BackboneGetAnnouncementsRequest): Promise<ClientResult<BackboneGetAnnouncementsResponse[]>> {

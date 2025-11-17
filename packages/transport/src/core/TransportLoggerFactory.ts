@@ -1,5 +1,5 @@
 import { ILogger, ILoggerFactory } from "@js-soft/logging-abstractions";
-import { TransportError } from "./TransportError";
+import { TransportError } from "./TransportError.js";
 
 export class TransportLoggerFactory {
     private static instance: ILoggerFactory;

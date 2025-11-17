@@ -1,9 +1,9 @@
 import { sleep } from "@js-soft/ts-utils";
+import { AppRuntime, LocalAccountSession } from "@nmshd/app-runtime";
 import { AuthenticationRequestItem, RelationshipTemplateContent } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
 import assert from "assert";
-import { AppRuntime, LocalAccountSession } from "../../../src";
-import { MockEventBus, MockUIBridge, TestUtil } from "../../lib";
+import { MockEventBus, MockUIBridge, TestUtil } from "../../lib/index.js";
 
 describe("RelationshipTemplateProcessedModule", function () {
     const uiBridge = new MockUIBridge();

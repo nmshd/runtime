@@ -2,7 +2,7 @@ import { Result } from "@js-soft/ts-utils";
 import { CoreId } from "@nmshd/core-types";
 import { AccountController, Token, TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { RuntimeErrors, SchemaRepository, SchemaValidator, TokenIdString, UseCase } from "../../common";
+import { RuntimeErrors, SchemaRepository, SchemaValidator, TokenIdString, UseCase } from "../../common/index.js";
 
 export interface DeleteTokenRequest {
     tokenId: TokenIdString;

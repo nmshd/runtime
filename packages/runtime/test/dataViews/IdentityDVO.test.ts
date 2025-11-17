@@ -7,8 +7,8 @@ import {
     PeerRelationshipTemplateDVO,
     RelationshipChangedEvent,
     RelationshipTemplateDTO
-} from "../../src";
-import { createTemplate, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
+} from "@nmshd/runtime";
+import { createTemplate, RuntimeServiceProvider, TestRuntimeServices } from "../lib/index.js";
 
 const serviceProvider = new RuntimeServiceProvider();
 let templator: TestRuntimeServices;

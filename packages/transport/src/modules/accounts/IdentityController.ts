@@ -1,11 +1,11 @@
 import { log, Result } from "@js-soft/ts-utils";
 import { CoreAddress } from "@nmshd/core-types";
 import { CoreBuffer, CryptoSignature, CryptoSignaturePrivateKey, CryptoSignaturePublicKey } from "@nmshd/crypto";
-import { ControllerName, CoreCrypto, TransportController, TransportCoreErrors } from "../../core";
-import { AccountController } from "../accounts/AccountController";
-import { DeviceSecretType } from "../devices/DeviceSecretController";
-import { IdentityClient } from "./backbone/IdentityClient";
-import { Identity } from "./data/Identity";
+import { ControllerName, CoreCrypto, TransportController, TransportCoreErrors } from "../../core/index.js";
+import { AccountController } from "../accounts/AccountController.js";
+import { DeviceSecretType } from "../devices/DeviceSecretController.js";
+import { IdentityClient } from "./backbone/IdentityClient.js";
+import { Identity } from "./data/Identity.js";
 
 export class IdentityController extends TransportController {
     public identityClient: IdentityClient;

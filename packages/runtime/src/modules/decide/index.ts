@@ -1,2 +1,2 @@
-export * from "./RequestConfig";
-export * from "./ResponseConfig";
+export * from "./RequestConfig.js";
+export * from "./ResponseConfig.js";

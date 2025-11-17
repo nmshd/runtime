@@ -1,6 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { AccountController, Transport } from "../../src";
-import { TestUtil } from "../testHelpers/TestUtil";
+import { AccountController, Transport } from "@nmshd/transport";
+import { TestUtil } from "../testHelpers/TestUtil.js";
 
 describe("List Relationship Messages", function () {
     let connection: IDatabaseConnection;

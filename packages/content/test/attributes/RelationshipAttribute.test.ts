@@ -1,5 +1,5 @@
+import { ProprietaryURL, RelationshipAttribute, RelationshipAttributeConfidentiality } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
-import { ProprietaryURL, RelationshipAttribute, RelationshipAttributeConfidentiality } from "../../src";
 
 describe("RelationshipAttribute", function () {
     const attributeValue = ProprietaryURL.from({

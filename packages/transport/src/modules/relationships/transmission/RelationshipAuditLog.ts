@@ -1,4 +1,4 @@
-import { RelationshipStatus } from "./RelationshipStatus";
+import { RelationshipStatus } from "./RelationshipStatus.js";
 
 export interface BackboneRelationshipAuditLog extends Array<BackboneRelationshipAuditLogEntry> {}
 

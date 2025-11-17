@@ -1,7 +1,14 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreAddress, CoreId, ICoreId } from "@nmshd/core-types";
-import { IdentityAttribute, IdentityAttributeJSON, IIdentityAttribute, IRelationshipAttribute, RelationshipAttribute, RelationshipAttributeJSON } from "../../../attributes";
-import { AcceptResponseItem, AcceptResponseItemJSON, IAcceptResponseItem } from "../../response";
+import {
+    IdentityAttribute,
+    IdentityAttributeJSON,
+    IIdentityAttribute,
+    IRelationshipAttribute,
+    RelationshipAttribute,
+    RelationshipAttributeJSON
+} from "../../../attributes/index.js";
+import { AcceptResponseItem, AcceptResponseItemJSON, IAcceptResponseItem } from "../../response/index.js";
 
 export interface ReadAttributeAcceptResponseItemJSON extends AcceptResponseItemJSON {
     "@type": "ReadAttributeAcceptResponseItem";

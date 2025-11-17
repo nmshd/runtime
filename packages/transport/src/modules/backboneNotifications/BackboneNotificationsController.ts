@@ -1,8 +1,8 @@
 import { CoreAddress } from "@nmshd/core-types";
-import { TransportCoreErrors } from "../../core";
-import { ControllerName, TransportController } from "../../core/TransportController";
-import { AccountController } from "../accounts/AccountController";
-import { BackboneNotificationsClient } from "./backbone/BackboneNotificationsClient";
+import { TransportCoreErrors } from "../../core/index.js";
+import { ControllerName, TransportController } from "../../core/TransportController.js";
+import { AccountController } from "../accounts/AccountController.js";
+import { BackboneNotificationsClient } from "./backbone/BackboneNotificationsClient.js";
 
 export class BackboneNotificationsController extends TransportController {
     private client: BackboneNotificationsClient;

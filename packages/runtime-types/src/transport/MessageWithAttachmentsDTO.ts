@@ -1,6 +1,6 @@
-import { FileDTO } from "./FileDTO";
-import { MessageContentDerivation } from "./MessageDTO";
-import { RecipientDTO } from "./RecipientDTO";
+import { FileDTO } from "./FileDTO.js";
+import { MessageContentDerivation } from "./MessageDTO.js";
+import { RecipientDTO } from "./RecipientDTO.js";
 
 export interface MessageWithAttachmentsDTO {
     id: string;

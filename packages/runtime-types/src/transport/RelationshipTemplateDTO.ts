@@ -1,5 +1,5 @@
 import { ArbitraryRelationshipTemplateContentJSON, RelationshipTemplateContentJSON } from "@nmshd/content";
-import { PasswordProtectionDTO } from "./PasswordProtectionDTO";
+import { PasswordProtectionDTO } from "./PasswordProtectionDTO.js";
 
 export type RelationshipTemplateContentDerivation = RelationshipTemplateContentJSON | ArbitraryRelationshipTemplateContentJSON;
 

@@ -1,4 +1,4 @@
-import { AccountController } from "../../accounts/AccountController";
+import { AccountController } from "../../accounts/AccountController.js";
 
 export class DeviceMigrations {
     public constructor(private readonly _accountController: AccountController) {}

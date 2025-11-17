@@ -1,4 +1,4 @@
-import { FormFieldAcceptResponseItem, ResponseItemResult } from "../../../src";
+import { FormFieldAcceptResponseItem, ResponseItemResult } from "@nmshd/content";
 
 describe("creation of FormFieldAcceptResponseItem", () => {
     test("should create a FormFieldAcceptResponseItem with a string", () => {

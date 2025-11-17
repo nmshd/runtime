@@ -1,4 +1,4 @@
-import { ValidationResult } from "./ValidationResult";
+import { ValidationResult } from "./ValidationResult.js";
 
 export function mergeResults(result1: ValidationResult, result2: ValidationResult): ValidationResult {
     if (result1.items.length !== result2.items.length) throw new Error("The dimensions of the ValidationResults do not match.");

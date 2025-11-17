@@ -1,2 +1,2 @@
-export * from "./ArbitraryMessageContent";
-export * from "./Mail";
+export * from "./ArbitraryMessageContent.js";
+export * from "./Mail.js";

@@ -41,7 +41,7 @@ import {
     RelationshipTemplateSigned,
     Token,
     TokenContentRelationshipTemplate
-} from "../../src";
+} from "@nmshd/transport";
 
 const cryptoClassNames: string[] = [
     `${CryptoCipher.name}@1`,

@@ -1,6 +1,6 @@
 import { serialize, validate } from "@js-soft/ts-serval";
-import { RenderHints, RenderHintsDataType, RenderHintsEditType, ValueHints } from "../../../attributes/hints";
-import { AbstractString } from "../AbstractString";
+import { RenderHints, RenderHintsDataType, RenderHintsEditType, ValueHints } from "../../../attributes/hints/index.js";
+import { AbstractString } from "../AbstractString.js";
 
 export abstract class AbstractHEXColor extends AbstractString {
     @serialize()

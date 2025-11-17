@@ -1,6 +1,6 @@
 /* eslint-disable jest/no-export */
 import { SerializableBase } from "@js-soft/ts-serval";
-import { AbstractAttributeValue } from "../../src";
+import { AbstractAttributeValue } from "@nmshd/content";
 
 export interface GenericValueTestParameters {
     testName: string;

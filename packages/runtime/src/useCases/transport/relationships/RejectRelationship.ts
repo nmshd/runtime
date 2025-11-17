@@ -3,8 +3,8 @@ import { CoreId } from "@nmshd/core-types";
 import { RelationshipDTO } from "@nmshd/runtime-types";
 import { AccountController, Relationship, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { RelationshipIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { RelationshipMapper } from "./RelationshipMapper";
+import { RelationshipIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
+import { RelationshipMapper } from "./RelationshipMapper.js";
 
 export interface RejectRelationshipRequest {
     relationshipId: RelationshipIdString;

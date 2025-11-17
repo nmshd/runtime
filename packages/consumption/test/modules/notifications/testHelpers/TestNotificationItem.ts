@@ -1,6 +1,6 @@
 import { type } from "@js-soft/ts-serval";
+import { AbstractNotificationItemProcessor, ValidationResult } from "@nmshd/consumption";
 import { INotificationItem, NotificationItem } from "@nmshd/content";
-import { AbstractNotificationItemProcessor, ValidationResult } from "../../../../src";
 
 @type("TestNotificationItem")
 export class TestNotificationItem extends NotificationItem {

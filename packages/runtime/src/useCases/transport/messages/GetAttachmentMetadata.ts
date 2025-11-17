@@ -3,8 +3,8 @@ import { CoreId } from "@nmshd/core-types";
 import { FileDTO } from "@nmshd/runtime-types";
 import { File, FileController, Message, MessageController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { FileIdString, MessageIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { FileMapper } from "../files/FileMapper";
+import { FileIdString, MessageIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
+import { FileMapper } from "../files/FileMapper.js";
 
 export interface GetAttachmentMetadataRequest {
     id: MessageIdString;

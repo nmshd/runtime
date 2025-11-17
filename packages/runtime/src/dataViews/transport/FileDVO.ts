@@ -1,5 +1,5 @@
-import { DataViewObject } from "../DataViewObject";
-import { IdentityDVO } from "./IdentityDVO";
+import { DataViewObject } from "../DataViewObject.js";
+import { IdentityDVO } from "./IdentityDVO.js";
 
 export interface FileDVO extends DataViewObject {
     type: "FileDVO";

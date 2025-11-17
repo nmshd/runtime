@@ -1,5 +1,5 @@
-import { ClientResult } from "../../../core/backbone/ClientResult";
-import { RESTClientAuthenticate } from "../../../core/backbone/RESTClientAuthenticate";
+import { ClientResult } from "../../../core/backbone/ClientResult.js";
+import { RESTClientAuthenticate } from "../../../core/backbone/RESTClientAuthenticate.js";
 
 export interface ChallengeClientGetChallengeResponse {
     id: string;

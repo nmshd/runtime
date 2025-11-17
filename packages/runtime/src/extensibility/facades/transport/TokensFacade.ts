@@ -12,7 +12,7 @@ import {
     GetTokenUseCase,
     LoadPeerTokenRequest,
     LoadPeerTokenUseCase
-} from "../../../useCases";
+} from "../../../useCases/index.js";
 
 export class TokensFacade {
     public constructor(

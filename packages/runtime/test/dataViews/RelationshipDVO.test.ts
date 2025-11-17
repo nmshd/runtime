@@ -1,7 +1,7 @@
 import { AcceptReadAttributeRequestItemParametersJSON } from "@nmshd/consumption";
 import { GivenName, IdentityAttribute, ReadAttributeRequestItem, RelationshipAttributeConfidentiality, RelationshipTemplateContent } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
-import { establishRelationshipWithContents, executeFullCreateAndShareRelationshipAttributeFlow, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
+import { establishRelationshipWithContents, executeFullCreateAndShareRelationshipAttributeFlow, RuntimeServiceProvider, TestRuntimeServices } from "../lib/index.js";
 
 const serviceProvider = new RuntimeServiceProvider();
 

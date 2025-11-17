@@ -1,4 +1,4 @@
-import { IdentityAttributeQuery } from "../../src";
+import { IdentityAttributeQuery } from "@nmshd/content";
 
 describe("IdentityAttributeQuery", function () {
     test("should allow to create a new query", function () {

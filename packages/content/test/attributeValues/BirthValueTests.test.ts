@@ -1,5 +1,5 @@
-import { BirthCity, BirthCountry, BirthDate, BirthDay, BirthMonth, BirthPlace, BirthState, BirthYear } from "../../src";
-import { GenericValueTest } from "./GenericValueTest";
+import { BirthCity, BirthCountry, BirthDate, BirthDay, BirthMonth, BirthPlace, BirthState, BirthYear } from "@nmshd/content";
+import { GenericValueTest } from "./GenericValueTest.js";
 
 new GenericValueTest().runParametrized({
     testName: "BirthDate Test",

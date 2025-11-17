@@ -29,10 +29,6 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId, PasswordLocationIndicator } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
-import { IdentityUtil, SynchronizedCollection } from "@nmshd/transport";
-import fs from "fs";
-import _ from "lodash";
-import { DateTime } from "luxon";
 import {
     AttributeSucceededEvent,
     ConsumptionServices,
@@ -63,9 +59,13 @@ import {
     TokenDTO,
     TransportServices,
     UploadOwnFileRequest
-} from "../../src";
-import { TestRuntimeServices } from "./RuntimeServiceProvider";
-import { TestNotificationItem } from "./TestNotificationItem";
+} from "@nmshd/runtime";
+import { IdentityUtil, SynchronizedCollection } from "@nmshd/transport";
+import fs from "fs";
+import _ from "lodash";
+import { DateTime } from "luxon";
+import { TestRuntimeServices } from "./RuntimeServiceProvider.js";
+import { TestNotificationItem } from "./TestNotificationItem.js";
 
 export async function syncUntil(transportServices: TransportServices, until: (syncResult: SyncEverythingResponse) => boolean): Promise<SyncEverythingResponse> {
     const finalSyncResult: SyncEverythingResponse = { messages: [], relationships: [], identityDeletionProcesses: [], files: [] };

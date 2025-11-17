@@ -1,5 +1,6 @@
-import { OwnerRestriction } from "../../src";
-import { RuntimeServiceProvider, TestRuntimeServices } from "../lib";
+import { OwnerRestriction } from "@nmshd/runtime";
+import { Device } from "@nmshd/transport";
+import { RuntimeServiceProvider, TestRuntimeServices } from "../lib/index.js";
 
 const serviceProvider = new RuntimeServiceProvider();
 
@@ -22,7 +23,7 @@ afterEach(async () => {
 
     const devices = await devicesController.list();
 
-    const backupDevices = devices.filter((device) => device.isBackupDevice);
+    const backupDevices = devices.filter((device: Device) => device.isBackupDevice);
     for (const backupDevice of backupDevices) {
         const matchingTokens = await tokenController.getTokens({
             "content.@type": "TokenContentDeviceSharedSecret",

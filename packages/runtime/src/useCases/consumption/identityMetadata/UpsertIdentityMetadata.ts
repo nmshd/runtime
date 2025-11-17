@@ -5,9 +5,9 @@ import { CoreAddress } from "@nmshd/core-types";
 import { IdentityMetadataDTO } from "@nmshd/runtime-types";
 import { AccountController, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { AddressString, RuntimeErrors, SchemaRepository, SchemaValidator } from "../../common";
-import { UseCase } from "../../common/UseCase";
-import { IdentityMetadataMapper } from "./IdentityMetadataMapper";
+import { AddressString, RuntimeErrors, SchemaRepository, SchemaValidator } from "../../common/index.js";
+import { UseCase } from "../../common/UseCase.js";
+import { IdentityMetadataMapper } from "./IdentityMetadataMapper.js";
 
 export interface UpsertIdentityMetadataRequest {
     reference: AddressString;

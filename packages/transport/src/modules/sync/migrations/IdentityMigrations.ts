@@ -1,4 +1,4 @@
-import { AccountController } from "../../accounts/AccountController";
+import { AccountController } from "../../accounts/AccountController.js";
 
 export class IdentityMigrations {
     public constructor(private readonly accountController: AccountController) {}

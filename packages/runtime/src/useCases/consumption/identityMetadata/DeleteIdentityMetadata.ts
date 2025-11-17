@@ -3,8 +3,8 @@ import { IdentityMetadataController } from "@nmshd/consumption";
 import { CoreAddress } from "@nmshd/core-types";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { AddressString, RuntimeErrors, SchemaRepository, SchemaValidator } from "../../common";
-import { UseCase } from "../../common/UseCase";
+import { AddressString, RuntimeErrors, SchemaRepository, SchemaValidator } from "../../common/index.js";
+import { UseCase } from "../../common/UseCase.js";
 
 export interface DeleteIdentityMetadataRequest {
     reference: AddressString;

@@ -12,7 +12,7 @@ import {
     OutgoingRequestStatusChangedEvent,
     RequestMessageDVO,
     TransportServices
-} from "../../../src";
+} from "@nmshd/runtime";
 import {
     cleanupAttributes,
     establishRelationship,
@@ -25,7 +25,7 @@ import {
     syncUntilHasMessageWithRequest,
     syncUntilHasMessageWithResponse,
     TestRuntimeServices
-} from "../../lib";
+} from "../../lib/index.js";
 
 const serviceProvider = new RuntimeServiceProvider();
 let sRuntimeServices: TestRuntimeServices;

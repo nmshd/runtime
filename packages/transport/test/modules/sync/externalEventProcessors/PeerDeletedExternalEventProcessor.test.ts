@@ -1,8 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { CoreDate, CoreId } from "@nmshd/core-types";
-import { AccountController, PeerDeletionStatus, Transport } from "../../../../src";
-import { PeerDeletedExternalEventProcessor } from "../../../../src/modules/sync/externalEventProcessors/PeerDeletedExternalEventProcessor";
-import { TestUtil } from "../../../testHelpers/TestUtil";
+import { AccountController, PeerDeletedExternalEventProcessor, PeerDeletionStatus, Transport } from "@nmshd/transport";
+import { TestUtil } from "../../../testHelpers/TestUtil.js";
 
 describe("PeerDeletedExternalEventProcessor", function () {
     let connection: IDatabaseConnection;

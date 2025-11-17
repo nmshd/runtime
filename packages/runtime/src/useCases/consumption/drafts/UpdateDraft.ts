@@ -5,8 +5,8 @@ import { CoreId } from "@nmshd/core-types";
 import { DraftDTO } from "@nmshd/runtime-types";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { LocalDraftIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { DraftMapper } from "./DraftMapper";
+import { LocalDraftIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
+import { DraftMapper } from "./DraftMapper.js";
 
 export interface UpdateDraftRequest {
     id: LocalDraftIdString;

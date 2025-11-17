@@ -2,9 +2,9 @@ import { Result } from "@js-soft/ts-utils";
 import { AttributesController } from "@nmshd/consumption";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { SchemaRepository, SchemaValidator, UseCase, flattenObject } from "../../common";
-import { AttributeMapper } from "./AttributeMapper";
-import { GetAttributesRequestQuery, GetAttributesUseCase } from "./GetAttributes";
+import { SchemaRepository, SchemaValidator, UseCase, flattenObject } from "../../common/index.js";
+import { AttributeMapper } from "./AttributeMapper.js";
+import { GetAttributesRequestQuery, GetAttributesUseCase } from "./GetAttributes.js";
 
 export interface GetOwnIdentityAttributesRequest {
     /**

@@ -1,3 +1,3 @@
-export * from "./IdentityMetadataController";
-export * from "./local/IdentityMetadata";
-export * from "./local/UpsertIdentityMetadataParams";
+export * from "./IdentityMetadataController.js";
+export * from "./local/IdentityMetadata.js";
+export * from "./local/UpsertIdentityMetadataParams.js";

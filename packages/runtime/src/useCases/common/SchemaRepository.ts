@@ -4,18 +4,18 @@ import addFormats from "ajv-formats";
 import { Definition } from "ts-json-schema-generator";
 
 export class SchemaRepository {
-    private readonly compiler: ajv;
+    private readonly compiler: ajv.default;
     private schemaDefinitions: Record<string, Definition | undefined>;
     private readonly jsonSchemas = new Map<string, JsonSchema>();
 
     public constructor() {
-        this.compiler = new ajv({ allErrors: true, allowUnionTypes: true });
-        addFormats(this.compiler);
-        addErrors(this.compiler);
+        this.compiler = new ajv.default({ allErrors: true, allowUnionTypes: true });
+        addFormats.default(this.compiler);
+        addErrors.default(this.compiler);
     }
 
     public async loadSchemas(): Promise<void> {
-        this.schemaDefinitions = (await import("./Schemas")) as Record<string, Definition>;
+        this.schemaDefinitions = (await import("./Schemas.js")) as Record<string, Definition>;
     }
 
     public getSchema(schemaName: string): JsonSchema {

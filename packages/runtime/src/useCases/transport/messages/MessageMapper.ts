@@ -3,8 +3,8 @@ import { ArbitraryMessageContent, Mail, Notification, Request, ResponseWrapper }
 import { CoreBuffer } from "@nmshd/crypto";
 import { MessageDTO, MessageWithAttachmentsDTO } from "@nmshd/runtime-types";
 import { File, Message, MessageRecipient } from "@nmshd/transport";
-import { FileMapper } from "../files/FileMapper";
-import { DownloadAttachmentResponse } from "./DownloadAttachment";
+import { FileMapper } from "../files/FileMapper.js";
+import { DownloadAttachmentResponse } from "./DownloadAttachment.js";
 
 export class MessageMapper {
     public static toDownloadAttachmentResponse(buffer: CoreBuffer, file: File): DownloadAttachmentResponse {

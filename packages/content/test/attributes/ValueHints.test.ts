@@ -1,6 +1,6 @@
 import { type } from "@js-soft/ts-serval";
-import { AbstractLengthMeasurement, CommunicationLanguage, Nationality, StreetAddress, ValueHints, ValueHintsJSON, ValueHintsValue } from "../../src";
-import { expectThrows } from "../testUtils";
+import { AbstractLengthMeasurement, CommunicationLanguage, Nationality, StreetAddress, ValueHints, ValueHintsJSON, ValueHintsValue } from "@nmshd/content";
+import { expectThrows } from "../testUtils.js";
 
 @type("TestLengthMeasurement")
 class TestLenghtMeasurement extends AbstractLengthMeasurement {}

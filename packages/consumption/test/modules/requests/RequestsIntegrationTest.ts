@@ -2,24 +2,6 @@
 import { IDatabaseCollection, IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { DataEvent, EventEmitter2EventBus } from "@js-soft/ts-utils";
 import {
-    AcceptResponseItem,
-    CreateAttributeRequestItem,
-    DeleteAttributeRequestItem,
-    IRequest,
-    IResponse,
-    IdentityAttribute,
-    ProposeAttributeRequestItem,
-    ReadAttributeRequestItem,
-    RelationshipTemplateContent,
-    Request,
-    RequestItemGroup,
-    Response,
-    ResponseItemResult,
-    ResponseResult
-} from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId, CoreIdHelper, ICoreId } from "@nmshd/core-types";
-import { IConfigOverwrite, IMessage, IRelationshipTemplate, Relationship, SynchronizedCollection, Transport } from "@nmshd/transport";
-import {
     ConsumptionController,
     ConsumptionIds,
     CreateAttributeRequestItemProcessor,
@@ -48,13 +30,31 @@ import {
     RequestItemProcessorConstructor,
     RequestItemProcessorRegistry,
     ValidationResult
-} from "../../../src";
+} from "@nmshd/consumption";
+import {
+    AcceptResponseItem,
+    CreateAttributeRequestItem,
+    DeleteAttributeRequestItem,
+    IRequest,
+    IResponse,
+    IdentityAttribute,
+    ProposeAttributeRequestItem,
+    ReadAttributeRequestItem,
+    RelationshipTemplateContent,
+    Request,
+    RequestItemGroup,
+    Response,
+    ResponseItemResult,
+    ResponseResult
+} from "@nmshd/content";
+import { CoreAddress, CoreDate, CoreId, CoreIdHelper, ICoreId } from "@nmshd/core-types";
+import { IConfigOverwrite, IMessage, IRelationshipTemplate, Relationship, SynchronizedCollection, Transport } from "@nmshd/transport";
 
-import { TestUtil } from "../../core/TestUtil";
-import { MockEventBus } from "../MockEventBus";
-import { TestObjectFactory } from "./testHelpers/TestObjectFactory";
-import { TestRequestItem } from "./testHelpers/TestRequestItem";
-import { TestRequestItemProcessor } from "./testHelpers/TestRequestItemProcessor";
+import { TestUtil } from "../../core/TestUtil.js";
+import { MockEventBus } from "../MockEventBus.js";
+import { TestObjectFactory } from "./testHelpers/TestObjectFactory.js";
+import { TestRequestItem } from "./testHelpers/TestRequestItem.js";
+import { TestRequestItemProcessor } from "./testHelpers/TestRequestItemProcessor.js";
 
 export class RequestsTestsContext {
     public requestsCollection: IDatabaseCollection;

@@ -1,6 +1,6 @@
 import { LanguageISO639 } from "@nmshd/core-types";
+import { AnnouncementSeverity } from "@nmshd/runtime";
 import axios, { Axios } from "axios";
-import { AnnouncementSeverity } from "../../src";
 
 let adminClient: Axios | undefined;
 

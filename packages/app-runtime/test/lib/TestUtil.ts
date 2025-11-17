@@ -2,6 +2,16 @@
 import { ILokiJsDatabaseFactory } from "@js-soft/docdb-access-loki";
 import { NodeLoggerFactory } from "@js-soft/node-logger";
 import { EventBus, Result, sleep } from "@js-soft/ts-utils";
+import {
+    AppConfig,
+    AppConfigOverwrite,
+    AppRuntime,
+    IAppLanguageProvider,
+    IUIBridge,
+    LocalAccountDTO,
+    LocalAccountSession,
+    createAppConfig as runtime_createAppConfig
+} from "@nmshd/app-runtime";
 import { ArbitraryMessageContent, ArbitraryRelationshipCreationContent, ArbitraryRelationshipTemplateContent } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
 import {
@@ -20,19 +30,9 @@ import { defaultsDeep } from "lodash";
 import loki from "lokijs";
 import path from "path";
 import { GenericContainer, Wait } from "testcontainers";
-import {
-    AppConfig,
-    AppConfigOverwrite,
-    AppRuntime,
-    IAppLanguageProvider,
-    IUIBridge,
-    LocalAccountDTO,
-    LocalAccountSession,
-    createAppConfig as runtime_createAppConfig
-} from "../../src";
-import { FakeUIBridge } from "./FakeUIBridge";
-import { FakeAppLanguageProvider } from "./infrastructure/FakeAppLanguageProvider";
-import { FakeNotificationAccess } from "./infrastructure/FakeNotificationAccess";
+import { FakeUIBridge } from "./FakeUIBridge.js";
+import { FakeAppLanguageProvider } from "./infrastructure/FakeAppLanguageProvider.js";
+import { FakeNotificationAccess } from "./infrastructure/FakeNotificationAccess.js";
 
 export class TestDatabaseFactory implements ILokiJsDatabaseFactory {
     public create(name: string, options?: Partial<LokiConstructorOptions> & Partial<LokiConfigOptions> & Partial<ThrottledSaveDrainOptions>): Loki {

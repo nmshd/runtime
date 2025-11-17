@@ -1,6 +1,6 @@
 import { serialize, validate } from "@js-soft/ts-serval";
-import { AbstractAttributeValue, AbstractAttributeValueJSON, IAbstractAttributeValue } from "../AbstractAttributeValue";
-import { RenderHints, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../hints";
+import { AbstractAttributeValue, AbstractAttributeValueJSON, IAbstractAttributeValue } from "../AbstractAttributeValue.js";
+import { RenderHints, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../hints/index.js";
 
 export interface AbstractBooleanJSON extends AbstractAttributeValueJSON {
     value: boolean;

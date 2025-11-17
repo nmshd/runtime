@@ -1,9 +1,8 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { CoreAddress, CoreDate, CoreId, LanguageISO639 } from "@nmshd/core-types";
-import { AccountController, Transport } from "../../../src";
-import { AnnouncementSeverity } from "../../../src/modules/announcements/data/Announcement";
-import { AdminApiClient } from "../../testHelpers/AdminApiClient";
-import { TestUtil } from "../../testHelpers/TestUtil";
+import { AccountController, AnnouncementSeverity, Transport } from "@nmshd/transport";
+import { AdminApiClient } from "../../testHelpers/AdminApiClient.js";
+import { TestUtil } from "../../testHelpers/TestUtil.js";
 
 describe("AnnouncementController", function () {
     let connection: IDatabaseConnection;

@@ -1,7 +1,7 @@
 import { Serializable } from "@js-soft/ts-serval";
 import { CoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoEncryption, CryptoSecretKey } from "@nmshd/crypto";
-import { BackboneIds, CoreCrypto, TokenReference } from "../../../src";
+import { BackboneIds, CoreCrypto, TokenReference } from "@nmshd/transport";
 
 describe("TokenReference", function () {
     test("should serialize and deserialize correctly (verbose)", async function () {

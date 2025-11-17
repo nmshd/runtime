@@ -3,8 +3,8 @@ import { CoreId } from "@nmshd/core-types";
 import { DeviceDTO } from "@nmshd/runtime-types";
 import { Device, DeviceController, DevicesController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { DeviceIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { DeviceMapper } from "./DeviceMapper";
+import { DeviceIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
+import { DeviceMapper } from "./DeviceMapper.js";
 
 export interface GetDeviceRequest {
     id: DeviceIdString;

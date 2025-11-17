@@ -1,6 +1,6 @@
 import { AbstractStringJSON, IdentityAttributeQueryJSON } from "@nmshd/content";
-import { ConsumptionServices, DataViewExpander, LocalAttributeDTO, OwnIdentityAttributeDVO } from "../../src";
-import { RuntimeServiceProvider } from "../lib";
+import { ConsumptionServices, DataViewExpander, LocalAttributeDTO, OwnIdentityAttributeDVO } from "@nmshd/runtime";
+import { RuntimeServiceProvider } from "../lib/index.js";
 
 const serviceProvider = new RuntimeServiceProvider();
 let consumptionServices1: ConsumptionServices;

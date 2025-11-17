@@ -15,9 +15,6 @@ import {
     ResponseResult
 } from "@nmshd/content";
 import { CoreAddress, CoreId, Random } from "@nmshd/core-types";
-import { IdentityDeletionProcessStatus } from "@nmshd/transport";
-import assert from "assert";
-import { DateTime } from "luxon";
 import {
     AttributeSucceededEvent,
     GetRelationshipsQuery,
@@ -32,7 +29,10 @@ import {
     RelationshipReactivationCompletedEvent,
     RelationshipReactivationRequestedEvent,
     RelationshipStatus
-} from "../../src";
+} from "@nmshd/runtime";
+import { IdentityDeletionProcessStatus } from "@nmshd/transport";
+import assert from "assert";
+import { DateTime } from "luxon";
 import {
     QueryParamConditions,
     RuntimeServiceProvider,
@@ -53,7 +53,7 @@ import {
     syncUntilHasMessageWithNotification,
     syncUntilHasRelationship,
     syncUntilHasRelationships
-} from "../lib";
+} from "../lib/index.js";
 
 const serviceProvider = new RuntimeServiceProvider();
 let services1: TestRuntimeServices;

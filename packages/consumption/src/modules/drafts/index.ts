@@ -1,2 +1,2 @@
-export * from "./DraftsController";
-export * from "./local/Draft";
+export * from "./DraftsController.js";
+export * from "./local/Draft.js";

@@ -15,7 +15,7 @@ import {
     UpdateCurrentDeviceUseCase,
     UpdateDeviceRequest,
     UpdateDeviceUseCase
-} from "../../../useCases";
+} from "../../../useCases/index.js";
 
 export class DevicesFacade {
     public constructor(

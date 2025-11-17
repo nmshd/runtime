@@ -1,7 +1,7 @@
 import { ApplicationError } from "@js-soft/ts-utils";
+import { AcceptRequestItemParametersJSON, GenericRequestItemProcessor, LocalRequestInfo, RejectRequestItemParametersJSON, ValidationResult } from "@nmshd/consumption";
 import { AcceptResponseItem, RejectResponseItem, ResponseItem } from "@nmshd/content";
-import { AcceptRequestItemParametersJSON, GenericRequestItemProcessor, LocalRequestInfo, RejectRequestItemParametersJSON, ValidationResult } from "../../../../src";
-import { TestRequestItem } from "./TestRequestItem";
+import { TestRequestItem } from "./TestRequestItem.js";
 
 export class TestRequestItemProcessor extends GenericRequestItemProcessor<TestRequestItem> {
     public static numberOfApplyIncomingResponseItemCalls = 0;

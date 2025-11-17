@@ -2,8 +2,8 @@ import { Result } from "@js-soft/ts-utils";
 import { DeviceDTO } from "@nmshd/runtime-types";
 import { AccountController, DeviceController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { DeviceMapper } from "./DeviceMapper";
+import { SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
+import { DeviceMapper } from "./DeviceMapper.js";
 
 export interface UpdateCurrentDeviceRequest {
     name?: string;

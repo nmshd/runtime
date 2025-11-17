@@ -1,9 +1,9 @@
+import { AppRuntime, LocalAccountSession } from "@nmshd/app-runtime";
 import { ArbitraryRelationshipTemplateContentJSON, AuthenticationRequestItem, RelationshipTemplateContent } from "@nmshd/content";
 import { CoreDate, PasswordLocationIndicatorOptions } from "@nmshd/core-types";
 import { DeviceOnboardingInfoDTO, PeerRelationshipTemplateLoadedEvent } from "@nmshd/runtime";
 import assert from "assert";
-import { AppRuntime, LocalAccountSession } from "../../src";
-import { MockEventBus, MockUIBridge, TestUtil } from "../lib";
+import { MockEventBus, MockUIBridge, TestUtil } from "../lib/index.js";
 
 describe("AppStringProcessor", function () {
     const mockUiBridge = new MockUIBridge();

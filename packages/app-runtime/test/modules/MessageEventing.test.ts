@@ -1,7 +1,7 @@
+import { AppRuntime, LocalAccountSession, MailReceivedEvent } from "@nmshd/app-runtime";
 import { MailJSON } from "@nmshd/content";
 import { MessageReceivedEvent } from "@nmshd/runtime";
-import { AppRuntime, LocalAccountSession, MailReceivedEvent } from "../../src";
-import { EventListener, TestUtil } from "../lib";
+import { EventListener, TestUtil } from "../lib/index.js";
 
 describe("MessageEventingTest", function () {
     let runtime: AppRuntime;

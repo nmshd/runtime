@@ -5,6 +5,14 @@ import { MongoDbConnection } from "@js-soft/docdb-access-mongo";
 import { NodeLoggerFactory } from "@js-soft/node-logger";
 import { ISerializable, Serializable } from "@js-soft/ts-serval";
 import { EventBus, EventEmitter2EventBus, sleep } from "@js-soft/ts-utils";
+import {
+    ConsumptionConfig,
+    ConsumptionController,
+    NotificationItemConstructor,
+    NotificationItemProcessorConstructor,
+    RequestItemConstructor,
+    RequestItemProcessorConstructor
+} from "@nmshd/consumption";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
 import {
@@ -21,14 +29,6 @@ import {
     TokenReference,
     Transport
 } from "@nmshd/transport";
-import {
-    ConsumptionConfig,
-    ConsumptionController,
-    NotificationItemConstructor,
-    NotificationItemProcessorConstructor,
-    RequestItemConstructor,
-    RequestItemProcessorConstructor
-} from "../../src";
 
 export const loggerFactory = new NodeLoggerFactory({
     appenders: {

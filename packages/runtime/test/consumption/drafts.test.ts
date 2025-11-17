@@ -1,5 +1,5 @@
-import { ConsumptionServices, GetDraftsQuery } from "../../src";
-import { QueryParamConditions, RuntimeServiceProvider } from "../lib";
+import { ConsumptionServices, GetDraftsQuery } from "@nmshd/runtime";
+import { QueryParamConditions, RuntimeServiceProvider } from "../lib/index.js";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
 let consumptionServices: ConsumptionServices;

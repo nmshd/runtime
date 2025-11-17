@@ -1,5 +1,5 @@
-import { CoreId } from "./CoreId";
-import { Random, RandomCharacterRange } from "./Random";
+import { CoreId } from "./CoreId.js";
+import { Random, RandomCharacterRange } from "./Random.js";
 
 export class CoreIdHelper {
     public static notPrefixed = new CoreIdHelper("");

@@ -1,1 +1,1 @@
-export * from "./ui/IUIBridge";
+export * from "./ui/IUIBridge.js";

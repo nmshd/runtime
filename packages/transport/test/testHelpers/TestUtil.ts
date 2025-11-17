@@ -7,10 +7,6 @@ import { ISerializable, Serializable } from "@js-soft/ts-serval";
 import { EventEmitter2EventBus, sleep } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
-import fs from "fs";
-import { DurationLike } from "luxon";
-import path from "path";
-import { GenericContainer, Wait } from "testcontainers";
 import {
     AccountController,
     ChangedItems,
@@ -31,7 +27,11 @@ import {
     TokenContentRelationshipTemplate,
     TokenReference,
     Transport
-} from "../../src";
+} from "@nmshd/transport";
+import fs from "fs";
+import { DurationLike } from "luxon";
+import path from "path";
+import { GenericContainer, Wait } from "testcontainers";
 
 export class TestUtil {
     public static loggerFactory = new NodeLoggerFactory({

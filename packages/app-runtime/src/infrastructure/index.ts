@@ -1,2 +1,2 @@
-export * from "./IAppLanguageProvider";
-export * from "./INotificationAccess";
+export * from "./IAppLanguageProvider.js";
+export * from "./INotificationAccess.js";

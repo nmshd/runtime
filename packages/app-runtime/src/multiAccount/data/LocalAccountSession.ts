@@ -1,7 +1,7 @@
 import { ConsumptionController } from "@nmshd/consumption";
 import { ConsumptionServices, DataViewExpander, IdentityDVO, TransportServices } from "@nmshd/runtime";
 import { AccountController } from "@nmshd/transport";
-import { LocalAccountDTO } from "./LocalAccountDTO";
+import { LocalAccountDTO } from "./LocalAccountDTO.js";
 
 export interface LocalAccountSession {
     address: string;

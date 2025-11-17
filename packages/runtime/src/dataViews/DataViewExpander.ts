@@ -75,11 +75,11 @@ import {
 import { IdentityController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
 import _ from "lodash";
-import { ConsumptionServices, TransportServices } from "../extensibility";
-import { RuntimeErrors } from "../useCases";
-import { DataViewObject } from "./DataViewObject";
-import { DataViewTranslateable } from "./DataViewTranslateable";
-import { DVOError } from "./common";
+import { ConsumptionServices, TransportServices } from "../extensibility/index.js";
+import { RuntimeErrors } from "../useCases/index.js";
+import { DataViewObject } from "./DataViewObject.js";
+import { DataViewTranslateable } from "./DataViewTranslateable.js";
+import { DVOError } from "./common/index.js";
 import {
     ForwardingDetailsDVO,
     LocalAttributeDVO,
@@ -97,7 +97,7 @@ import {
     ProcessedThirdPartyRelationshipAttributeQueryDVO,
     RelationshipSettingDVO,
     ThirdPartyRelationshipAttributeDVO
-} from "./consumption";
+} from "./consumption/index.js";
 import {
     AttributeAlreadyDeletedAcceptResponseItemDVO,
     AttributeAlreadySharedAcceptResponseItemDVO,
@@ -135,8 +135,8 @@ import {
     ThirdPartyRelationshipAttributeQueryDVO,
     TransferFileOwnershipAcceptResponseItemDVO,
     TransferFileOwnershipRequestItemDVO
-} from "./content";
-import { FileDVO, IdentityDVO, MessageDVO, MessageStatus, RecipientDVO, RelationshipDVO, RelationshipDirection, RelationshipTemplateDVO } from "./transport";
+} from "./content/index.js";
+import { FileDVO, IdentityDVO, MessageDVO, MessageStatus, RecipientDVO, RelationshipDVO, RelationshipDirection, RelationshipTemplateDVO } from "./transport/index.js";
 
 export class DataViewExpander {
     public constructor(

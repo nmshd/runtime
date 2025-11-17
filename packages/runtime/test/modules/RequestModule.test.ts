@@ -30,7 +30,7 @@ import {
     RelationshipTemplateDTO,
     RelationshipTemplateProcessedEvent,
     RelationshipTemplateProcessedResult
-} from "../../src";
+} from "@nmshd/runtime";
 import {
     MockEventBus,
     RuntimeServiceProvider,
@@ -47,7 +47,7 @@ import {
     syncUntilHasMessageWithResponse,
     syncUntilHasMessages,
     syncUntilHasRelationships
-} from "../lib";
+} from "../lib/index.js";
 
 describe("RequestModule", () => {
     const runtimeServiceProvider = new RuntimeServiceProvider();

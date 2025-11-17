@@ -1,7 +1,7 @@
 import { MessageContentDerivation } from "@nmshd/runtime-types";
-import { DataViewObject } from "../DataViewObject";
-import { FileDVO } from "./FileDVO";
-import { IdentityDVO } from "./IdentityDVO";
+import { DataViewObject } from "../DataViewObject.js";
+import { FileDVO } from "./FileDVO.js";
+import { IdentityDVO } from "./IdentityDVO.js";
 
 export enum MessageStatus {
     /**

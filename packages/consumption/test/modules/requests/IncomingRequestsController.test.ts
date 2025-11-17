@@ -1,5 +1,14 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import {
+    AcceptReadAttributeRequestItemParametersWithNewAttributeJSON,
+    ConsumptionIds,
+    DecideRequestItemGroupParametersJSON,
+    DecideRequestParametersJSON,
+    IncomingRequestReceivedEvent,
+    IncomingRequestStatusChangedEvent,
+    LocalRequestStatus
+} from "@nmshd/consumption";
+import {
     CreateAttributeRequestItem,
     IRequest,
     IRequestItemGroup,
@@ -17,19 +26,10 @@ import {
 } from "@nmshd/content";
 import { CoreDate, CoreId, CoreIdHelper } from "@nmshd/core-types";
 import { TransportLoggerFactory } from "@nmshd/transport";
-import {
-    AcceptReadAttributeRequestItemParametersWithNewAttributeJSON,
-    ConsumptionIds,
-    DecideRequestItemGroupParametersJSON,
-    DecideRequestParametersJSON,
-    IncomingRequestReceivedEvent,
-    IncomingRequestStatusChangedEvent,
-    LocalRequestStatus
-} from "../../../src";
-import { loggerFactory, TestUtil } from "../../core/TestUtil";
-import { RequestsGiven, RequestsTestsContext, RequestsThen, RequestsWhen } from "./RequestsIntegrationTest";
-import { TestObjectFactory } from "./testHelpers/TestObjectFactory";
-import { ITestRequestItem, TestRequestItem } from "./testHelpers/TestRequestItem";
+import { loggerFactory, TestUtil } from "../../core/TestUtil.js";
+import { RequestsGiven, RequestsTestsContext, RequestsThen, RequestsWhen } from "./RequestsIntegrationTest.js";
+import { TestObjectFactory } from "./testHelpers/TestObjectFactory.js";
+import { ITestRequestItem, TestRequestItem } from "./testHelpers/TestRequestItem.js";
 
 let context: RequestsTestsContext;
 

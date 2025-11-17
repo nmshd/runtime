@@ -1,5 +1,5 @@
-import { CoreBuffer, CryptoSignatureAlgorithm, CryptoSignatureKeypair, CryptoSignaturePublicKey } from "@nmshd/crypto";
-import { CoreCrypto, IdentityUtil } from "../../src";
+import { CoreBuffer, CryptoSignatureKeypair, CryptoSignaturePublicKey } from "@nmshd/crypto";
+import { CoreCrypto, IdentityUtil } from "@nmshd/transport";
 
 describe("IdentityGeneratorTest", function () {
     describe("From", function () {
@@ -18,10 +18,7 @@ describe("IdentityGeneratorTest", function () {
         test("should create a correct address object (test 0)", async function () {
             const key = "tB9KFp/YqHrom3m5qUuZsd6l30DkaNjN14SxRw7YZuI=";
             const buf = CoreBuffer.fromBase64(key);
-            const pk = CryptoSignaturePublicKey.from({
-                publicKey: buf,
-                algorithm: CryptoSignatureAlgorithm.ECDSA_ED25519
-            });
+            const pk = CryptoSignaturePublicKey.from({ publicKey: buf, algorithm: 3 });
             const address = await IdentityUtil.createAddress(pk, "example.com");
             expect(address).toBeDefined();
             expect(address.address).toBeDefined();
@@ -85,10 +82,7 @@ describe("IdentityGeneratorTest", function () {
             for (let i = 0; i < 10; i++) {
                 const testcase = addresses[i];
                 const buf = CoreBuffer.fromBase64(testcase.publicKey);
-                const pk = CryptoSignaturePublicKey.from({
-                    publicKey: buf,
-                    algorithm: CryptoSignatureAlgorithm.ECDSA_ED25519
-                });
+                const pk = CryptoSignaturePublicKey.from({ publicKey: buf, algorithm: 3 });
                 const address = await IdentityUtil.createAddress(pk, testcase.backboneHostname);
                 expect(address.toString()).toStrictEqual(testcase.address);
             }

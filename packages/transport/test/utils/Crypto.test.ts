@@ -1,5 +1,5 @@
 import { CoreBuffer, CryptoSignatureKeypair } from "@nmshd/crypto";
-import { CoreCrypto } from "../../src";
+import { CoreCrypto } from "@nmshd/transport";
 
 describe("Crypto", function () {
     test("generates a Keypair", async function () {

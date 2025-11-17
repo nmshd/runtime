@@ -6,6 +6,6 @@
         "composite": false
     },
     "files": ["../../../node_modules/jest-expect-message/types/index.d.ts"],
-    "include": ["**/*.ts", "../src/**/*.ts"],
+    "include": ["**/*.ts", "@nmshd/transport/**/*.ts"],
     "exclude": []
 }

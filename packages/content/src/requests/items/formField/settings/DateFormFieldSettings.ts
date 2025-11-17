@@ -1,6 +1,6 @@
 import { type } from "@js-soft/ts-serval";
 import { CoreDate } from "@nmshd/core-types";
-import { FormFieldSettings, FormFieldSettingsJSON, IFormFieldSettings } from "./FormFieldSettings";
+import { FormFieldSettings, FormFieldSettingsJSON, IFormFieldSettings } from "./FormFieldSettings.js";
 
 export interface DateFormFieldSettingsJSON extends FormFieldSettingsJSON {
     "@type": "DateFormFieldSettings";

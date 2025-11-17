@@ -3,8 +3,8 @@ import { Setting, SettingsController } from "@nmshd/consumption";
 import { CoreId } from "@nmshd/core-types";
 import { SettingDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { LocalSettingIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { SettingMapper } from "./SettingMapper";
+import { LocalSettingIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
+import { SettingMapper } from "./SettingMapper.js";
 
 export interface GetSettingRequest {
     id: LocalSettingIdString;

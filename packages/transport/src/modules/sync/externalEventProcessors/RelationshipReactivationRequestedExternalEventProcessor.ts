@@ -1,8 +1,8 @@
 import { Serializable, serialize, validate } from "@js-soft/ts-serval";
-import { RelationshipReactivationRequestedEvent } from "../../../events";
-import { Relationship } from "../../relationships/local/Relationship";
-import { ExternalEvent } from "../data/ExternalEvent";
-import { RelationshipExternalEventProcessor } from "./RelationshipExternalEventProcessor";
+import { RelationshipReactivationRequestedEvent } from "../../../events/index.js";
+import { Relationship } from "../../relationships/local/Relationship.js";
+import { ExternalEvent } from "../data/ExternalEvent.js";
+import { RelationshipExternalEventProcessor } from "./RelationshipExternalEventProcessor.js";
 
 class RelationshipReactivationRequestedExternalEventData extends Serializable {
     @serialize()

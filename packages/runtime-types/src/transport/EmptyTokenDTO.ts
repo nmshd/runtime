@@ -1,4 +1,4 @@
-import { PasswordProtectionDTO } from "./PasswordProtectionDTO";
+import { PasswordProtectionDTO } from "./PasswordProtectionDTO.js";
 
 export interface EmptyTokenDTO {
     id: string;

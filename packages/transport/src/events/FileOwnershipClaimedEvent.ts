@@ -1,5 +1,5 @@
-import { File } from "../modules";
-import { TransportDataEvent } from "./TransportDataEvent";
+import { File } from "../modules/index.js";
+import { TransportDataEvent } from "./TransportDataEvent.js";
 
 export class FileOwnershipClaimedEvent extends TransportDataEvent<File> {
     public static readonly namespace = "transport.fileOwnershipClaimed";

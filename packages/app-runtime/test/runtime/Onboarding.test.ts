@@ -1,7 +1,7 @@
+import { AppRuntime } from "@nmshd/app-runtime";
 import { DeviceMapper, RuntimeServices } from "@nmshd/runtime";
 import { DeviceSharedSecret, ITokenContentDeviceSharedSecret, TokenContentDeviceSharedSecret } from "@nmshd/transport";
-import { AppRuntime } from "../../src";
-import { TestUtil } from "../lib";
+import { TestUtil } from "../lib/index.js";
 
 describe("Onboarding", function () {
     let runtimeWithExistingAccount: AppRuntime;

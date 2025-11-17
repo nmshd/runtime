@@ -1,6 +1,6 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { AccountController, Relationship, Transport } from "../../src";
-import { TestUtil } from "../testHelpers/TestUtil";
+import { AccountController, Relationship, Transport } from "@nmshd/transport";
+import { TestUtil } from "../testHelpers/TestUtil.js";
 
 describe("Performant Fetch of Open Requests", function () {
     let connection: IDatabaseConnection;

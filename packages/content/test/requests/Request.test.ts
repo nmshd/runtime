@@ -1,6 +1,6 @@
 import { Serializable, type } from "@js-soft/ts-serval";
+import { IRequest, IRequestItem, IRequestItemGroup, Request, RequestItem, RequestItemGroup, RequestItemGroupJSON, RequestItemJSON, RequestJSON } from "@nmshd/content";
 import { CoreDate, CoreId } from "@nmshd/core-types";
-import { IRequest, IRequestItem, IRequestItemGroup, Request, RequestItem, RequestItemGroup, RequestItemGroupJSON, RequestItemJSON, RequestJSON } from "../../src";
 
 interface TestRequestItemJSON extends RequestItemJSON {
     "@type": "TestRequestItem";

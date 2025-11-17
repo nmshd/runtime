@@ -1,5 +1,5 @@
-import { DigitalIdentityDescriptor, Statement, StatementIssuerConditions, StatementObject, StatementPredicate, StatementSubject } from "../../src";
-import { GenericValueTest } from "./GenericValueTest";
+import { DigitalIdentityDescriptor, Statement, StatementIssuerConditions, StatementObject, StatementPredicate, StatementSubject } from "@nmshd/content";
+import { GenericValueTest } from "./GenericValueTest.js";
 
 new GenericValueTest().runParametrized({
     testName: "Statement Test",

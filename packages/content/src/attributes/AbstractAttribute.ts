@@ -1,6 +1,6 @@
 import { ISerializable, Serializable, serialize, validate } from "@js-soft/ts-serval";
 import { CoreAddress, ICoreAddress } from "@nmshd/core-types";
-import { ContentJSON } from "../ContentJSON";
+import { ContentJSON } from "../ContentJSON.js";
 
 export interface AbstractAttributeJSON extends ContentJSON {
     owner: string;

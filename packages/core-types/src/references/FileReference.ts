@@ -1,6 +1,6 @@
 import { type } from "@js-soft/ts-serval";
-import { CoreIdHelper } from "../CoreIdHelper";
-import { IReference, Reference } from "./Reference";
+import { CoreIdHelper } from "../CoreIdHelper.js";
+import { IReference, Reference } from "./Reference.js";
 
 export interface IFileReference extends IReference {}
 

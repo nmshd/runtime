@@ -1,6 +1,6 @@
 import { serialize, validate } from "@js-soft/ts-serval";
-import { RenderHints, RenderHintsDataType, RenderHintsEditType, ValueHints } from "../../../attributes/hints";
-import { AbstractInteger, AbstractIntegerJSON, IAbstractInteger } from "../AbstractInteger";
+import { RenderHints, RenderHintsDataType, RenderHintsEditType, ValueHints } from "../../../attributes/hints/index.js";
+import { AbstractInteger, AbstractIntegerJSON, IAbstractInteger } from "../AbstractInteger.js";
 
 export interface AbstractDayJSON extends AbstractIntegerJSON {
     value: number;

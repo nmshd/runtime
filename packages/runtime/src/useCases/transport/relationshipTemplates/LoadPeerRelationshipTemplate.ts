@@ -20,8 +20,8 @@ import {
     URLRelationshipTemplateReferenceString,
     URLTokenReferenceString,
     UseCase
-} from "../../common";
-import { RelationshipTemplateMapper } from "./RelationshipTemplateMapper";
+} from "../../common/index.js";
+import { RelationshipTemplateMapper } from "./RelationshipTemplateMapper.js";
 
 /**
  * @errorMessage token / relationship template reference invalid

@@ -1,5 +1,5 @@
 import { CoreError } from "@nmshd/core-types";
-import { RelationshipStatus } from "../modules";
+import { RelationshipStatus } from "../modules/index.js";
 
 class Relationships {
     public operationOnlyAllowedForPeer(message: string) {

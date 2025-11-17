@@ -1,6 +1,6 @@
+import { AppRuntime, ExternalEventReceivedEvent, LocalAccountSession, RemoteNotificationEvent, RemoteNotificationRegistrationEvent } from "@nmshd/app-runtime";
 import { DatawalletSynchronizedEvent } from "@nmshd/runtime";
-import { AppRuntime, ExternalEventReceivedEvent, LocalAccountSession, RemoteNotificationEvent, RemoteNotificationRegistrationEvent } from "../../src";
-import { MockEventBus, TestUtil } from "../lib";
+import { MockEventBus, TestUtil } from "../lib/index.js";
 
 describe("PushNotificationModuleTest", function () {
     const eventBus = new MockEventBus();

@@ -3,8 +3,8 @@ import { AttributesController } from "@nmshd/consumption";
 import { RelationshipAttributeQuery, RelationshipAttributeQueryJSON } from "@nmshd/content";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { RuntimeErrors, UseCase } from "../../common";
-import { AttributeMapper } from "./AttributeMapper";
+import { RuntimeErrors, UseCase } from "../../common/index.js";
+import { AttributeMapper } from "./AttributeMapper.js";
 
 export interface ExecuteRelationshipAttributeQueryRequest {
     query: RelationshipAttributeQueryJSON;

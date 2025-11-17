@@ -1,5 +1,14 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import {
+    AcceptFormFieldRequestItemParametersJSON,
+    ConsumptionController,
+    ConsumptionIds,
+    ErrorValidationResult,
+    FormFieldRequestItemProcessor,
+    LocalRequest,
+    LocalRequestStatus
+} from "@nmshd/consumption";
+import {
     BooleanFormFieldSettings,
     DateFormFieldSettings,
     DoubleFormFieldSettings,
@@ -14,16 +23,7 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreDate } from "@nmshd/core-types";
 import { Transport } from "@nmshd/transport";
-import {
-    AcceptFormFieldRequestItemParametersJSON,
-    ConsumptionController,
-    ConsumptionIds,
-    ErrorValidationResult,
-    FormFieldRequestItemProcessor,
-    LocalRequest,
-    LocalRequestStatus
-} from "../../../../../src";
-import { TestUtil } from "../../../../core/TestUtil";
+import { TestUtil } from "../../../../core/TestUtil.js";
 
 describe("FormFieldRequestItemProcessor", function () {
     let connection: IDatabaseConnection;

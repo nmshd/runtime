@@ -1,6 +1,6 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreAddress, CoreDate, CoreId, ICoreId } from "@nmshd/core-types";
-import { AnnouncementAction, IAnnouncementAction } from "./AnnouncementAction";
+import { AnnouncementAction, IAnnouncementAction } from "./AnnouncementAction.js";
 
 export interface IAnnouncement extends ISerializable {
     id: ICoreId;

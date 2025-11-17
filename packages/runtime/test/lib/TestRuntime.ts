@@ -4,13 +4,13 @@ import { MongoDbConnection } from "@js-soft/docdb-access-mongo";
 import { NodeLoggerFactory } from "@js-soft/node-logger";
 import { ConsumptionConfig, ConsumptionController, GenericRequestItemProcessor } from "@nmshd/consumption";
 import { ICoreAddress } from "@nmshd/core-types";
+import { ConsumptionServices, DataViewExpander, ModuleConfiguration, Runtime, RuntimeConfig, RuntimeHealth, RuntimeServices, TransportServices } from "@nmshd/runtime";
 import { AccountController } from "@nmshd/transport";
 import assert from "assert";
-import { ConsumptionServices, DataViewExpander, ModuleConfiguration, Runtime, RuntimeConfig, RuntimeHealth, RuntimeServices, TransportServices } from "../../src";
-import { AbstractCorrelator } from "../../src/useCases/common/AbstractCorrelator";
-import { MockEventBus } from "./MockEventBus";
-import { TestNotificationItem, TestNotificationItemProcessor } from "./TestNotificationItem";
-import { TestRequestItem } from "./TestRequestItem";
+import { AbstractCorrelator } from "../../src/useCases/common/AbstractCorrelator.js";
+import { MockEventBus } from "./MockEventBus.js";
+import { TestNotificationItem, TestNotificationItemProcessor } from "./TestNotificationItem.js";
+import { TestRequestItem } from "./TestRequestItem.js";
 
 export class TestRuntime extends Runtime {
     private dbConnection?: MongoDbConnection | LokiJsConnection;

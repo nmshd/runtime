@@ -1,18 +1,6 @@
 /* eslint-disable jest/no-standalone-expect */
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import {
-    AttributeAlreadySharedAcceptResponseItem,
-    AttributeSuccessionAcceptResponseItem,
-    AttributeValues,
-    CreateAttributeAcceptResponseItem,
-    CreateAttributeRequestItem,
-    IdentityAttribute,
-    RelationshipAttribute,
-    ResponseItemResult
-} from "@nmshd/content";
-import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
-import { AccountController, Transport, TransportCoreErrors } from "@nmshd/transport";
-import {
     ConsumptionController,
     ConsumptionCoreErrors,
     ConsumptionIds,
@@ -26,10 +14,22 @@ import {
     PeerIdentityAttribute,
     PeerRelationshipAttribute,
     ValidationResult
-} from "../../../../../src";
-import { TestUtil } from "../../../../core/TestUtil";
-import { TestObjectFactory } from "../../testHelpers/TestObjectFactory";
-import { TestIdentity } from "./TestIdentity";
+} from "@nmshd/consumption";
+import {
+    AttributeAlreadySharedAcceptResponseItem,
+    AttributeSuccessionAcceptResponseItem,
+    AttributeValues,
+    CreateAttributeAcceptResponseItem,
+    CreateAttributeRequestItem,
+    IdentityAttribute,
+    RelationshipAttribute,
+    ResponseItemResult
+} from "@nmshd/content";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { AccountController, Transport, TransportCoreErrors } from "@nmshd/transport";
+import { TestUtil } from "../../../../core/TestUtil.js";
+import { TestObjectFactory } from "../../testHelpers/TestObjectFactory.js";
+import { TestIdentity } from "./TestIdentity.js";
 
 export class Context {
     public accountController: AccountController;

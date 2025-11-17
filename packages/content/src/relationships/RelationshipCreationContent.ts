@@ -1,6 +1,6 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { ContentJSON } from "../ContentJSON";
-import { IResponse, Response, ResponseJSON } from "../requests/response/Response";
+import { ContentJSON } from "../ContentJSON.js";
+import { IResponse, Response, ResponseJSON } from "../requests/response/Response.js";
 
 export interface RelationshipCreationContentJSON extends ContentJSON {
     "@type": "RelationshipCreationContent";

@@ -1,8 +1,8 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreDate, CoreId } from "@nmshd/core-types";
 import { nameof } from "ts-simple-nameof";
-import { CoreSynchronizable } from "../../../core";
-import { IdentityDeletionProcessStatus } from "./IdentityDeletionProcessStatus";
+import { CoreSynchronizable } from "../../../core/index.js";
+import { IdentityDeletionProcessStatus } from "./IdentityDeletionProcessStatus.js";
 
 export interface IdentityDeletionProcessJSON {
     id: string;

@@ -1,6 +1,6 @@
+import { AppRuntime, LocalAccountDTO, LocalAccountSession } from "@nmshd/app-runtime";
 import { IdentityDeletionProcessStatus } from "@nmshd/runtime";
-import { AppRuntime, LocalAccountDTO, LocalAccountSession } from "../../src";
-import { TestUtil } from "../lib";
+import { TestUtil } from "../lib/index.js";
 
 describe("MultiAccountController", function () {
     let runtime: AppRuntime;

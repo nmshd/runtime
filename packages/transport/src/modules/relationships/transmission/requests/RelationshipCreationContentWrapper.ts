@@ -1,6 +1,6 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreId, ICoreId } from "@nmshd/core-types";
-import { Identity, IIdentity } from "../../../accounts/data/Identity";
+import { Identity, IIdentity } from "../../../accounts/data/Identity.js";
 
 export interface IRelationshipCreationContentWrapper extends ISerializable {
     identity: IIdentity;

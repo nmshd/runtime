@@ -1,6 +1,6 @@
+import { PeerDeletionCancelledEvent, PeerDeletionStatus, PeerToBeDeletedEvent } from "@nmshd/runtime";
 import { IdentityDeletionProcessStatus } from "@nmshd/transport";
-import { PeerDeletionCancelledEvent, PeerDeletionStatus, PeerToBeDeletedEvent } from "../../src";
-import { establishRelationship, RuntimeServiceProvider, syncUntilHasEvent, TestRuntimeServices } from "../lib";
+import { establishRelationship, RuntimeServiceProvider, syncUntilHasEvent, TestRuntimeServices } from "../lib/index.js";
 
 const serviceProvider = new RuntimeServiceProvider();
 let services1: TestRuntimeServices;

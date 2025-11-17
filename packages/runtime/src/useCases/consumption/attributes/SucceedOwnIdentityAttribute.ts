@@ -5,8 +5,8 @@ import { CoreId } from "@nmshd/core-types";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { AttributeMapper } from "./AttributeMapper";
+import { RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
+import { AttributeMapper } from "./AttributeMapper.js";
 
 export interface SucceedOwnIdentityAttributeResponse {
     predecessor: LocalAttributeDTO;

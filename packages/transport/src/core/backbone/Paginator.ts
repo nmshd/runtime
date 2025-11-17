@@ -1,4 +1,4 @@
-import { PaginationProperties } from "./PlatformResponse";
+import { PaginationProperties } from "./PlatformResponse.js";
 
 export interface IPaginationDataSource<T> {
     getPage(pageNumber: number): Promise<T[]>;

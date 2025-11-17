@@ -16,8 +16,8 @@ import {
     RelationshipAttributeJSON,
     RelationshipAttributeQuery,
     RelationshipAttributeQueryJSON
-} from "../../../attributes";
-import { IRequestItem, RequestItem, RequestItemJSON } from "../../RequestItem";
+} from "../../../attributes/index.js";
+import { IRequestItem, RequestItem, RequestItemJSON } from "../../RequestItem.js";
 
 export interface ProposeAttributeRequestItemJSON extends RequestItemJSON {
     "@type": "ProposeAttributeRequestItem";

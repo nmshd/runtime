@@ -1,1 +1,1 @@
-export * from "./AttributeValueTypeQueryMapping";
+export * from "./AttributeValueTypeQueryMapping.js";

@@ -1,7 +1,7 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { AbstractAttributeQuery, AbstractAttributeQueryJSON, IAbstractAttributeQuery } from "./AbstractAttributeQuery";
-import { AttributeValues } from "./AttributeValueTypes";
-import { IdentityAttribute } from "./IdentityAttribute";
+import { AbstractAttributeQuery, AbstractAttributeQueryJSON, IAbstractAttributeQuery } from "./AbstractAttributeQuery.js";
+import { AttributeValues } from "./AttributeValueTypes.js";
+import { IdentityAttribute } from "./IdentityAttribute.js";
 
 export interface IdentityAttributeQueryJSON extends AbstractAttributeQueryJSON {
     "@type": "IdentityAttributeQuery";

@@ -1,9 +1,9 @@
 import { Serializable, serialize, validate } from "@js-soft/ts-serval";
 import { CoreId } from "@nmshd/core-types";
-import { FileOwnershipLockedEvent } from "../../../events";
-import { File } from "../../files/local/File";
-import { ExternalEvent } from "../data/ExternalEvent";
-import { ExternalEventProcessor } from "./ExternalEventProcessor";
+import { FileOwnershipLockedEvent } from "../../../events/index.js";
+import { File } from "../../files/local/File.js";
+import { ExternalEvent } from "../data/ExternalEvent.js";
+import { ExternalEventProcessor } from "./ExternalEventProcessor.js";
 
 class FileOwnershipLockedExternalEventData extends Serializable {
     @serialize()

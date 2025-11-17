@@ -9,10 +9,10 @@ import {
     MessageProcessedResult,
     RelationshipTemplateProcessedEvent,
     RelationshipTemplateProcessedResult
-} from "../events";
-import { ModuleConfiguration, RuntimeModule } from "../extensibility";
-import { RuntimeServices } from "../Runtime";
-import { RuntimeErrors } from "../useCases/common/RuntimeErrors";
+} from "../events/index.js";
+import { ModuleConfiguration, RuntimeModule } from "../extensibility/index.js";
+import { RuntimeServices } from "../Runtime.js";
+import { RuntimeErrors } from "../useCases/common/RuntimeErrors.js";
 import {
     isAcceptResponseConfig,
     isDeleteAttributeAcceptResponseConfig,
@@ -25,7 +25,7 @@ import {
     RequestConfig,
     RequestItemDerivationConfig,
     ResponseConfig
-} from "./decide";
+} from "./decide/index.js";
 
 export interface DeciderModuleConfiguration extends ModuleConfiguration {
     automationConfig?: AutomationConfig[];

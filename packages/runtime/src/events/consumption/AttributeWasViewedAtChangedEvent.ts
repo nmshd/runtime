@@ -1,5 +1,5 @@
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
-import { DataEvent } from "../DataEvent";
+import { DataEvent } from "../DataEvent.js";
 
 export class AttributeWasViewedAtChangedEvent extends DataEvent<LocalAttributeDTO> {
     public static readonly namespace = "consumption.attributeWasViewedAtChanged";

@@ -1,7 +1,7 @@
 import { TransportDataEvent } from "@nmshd/transport";
-import { ConsumptionError } from "../../../consumption/ConsumptionError";
-import { LocalRequest } from "../local/LocalRequest";
-import { LocalRequestStatus } from "../local/LocalRequestStatus";
+import { ConsumptionError } from "../../../consumption/ConsumptionError.js";
+import { LocalRequest } from "../local/LocalRequest.js";
+import { LocalRequestStatus } from "../local/LocalRequestStatus.js";
 
 export interface IncomingRequestStatusChangedEventData {
     request: LocalRequest;

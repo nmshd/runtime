@@ -1,7 +1,7 @@
 import { IdentityMetadata } from "@nmshd/consumption";
 import { Random, RandomCharacterRange } from "@nmshd/core-types";
-import { ConsumptionServices, TransportServices } from "../../src";
-import { establishRelationship, RuntimeServiceProvider } from "../lib";
+import { ConsumptionServices, TransportServices } from "@nmshd/runtime";
+import { establishRelationship, RuntimeServiceProvider } from "../lib/index.js";
 
 const runtimeServiceProvider = new RuntimeServiceProvider();
 let consumptionServices: ConsumptionServices;

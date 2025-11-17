@@ -1,7 +1,7 @@
 import { EventBus, EventHandler, SubscriptionTarget } from "@js-soft/ts-utils";
 import * as consumption from "@nmshd/consumption";
 import * as transport from "@nmshd/transport";
-import { AttributeMapper, FileMapper, IdentityDeletionProcessMapper, MessageMapper, RelationshipMapper, RelationshipTemplateMapper, RequestMapper } from "../useCases";
+import { AttributeMapper, FileMapper, IdentityDeletionProcessMapper, MessageMapper, RelationshipMapper, RelationshipTemplateMapper, RequestMapper } from "../useCases/index.js";
 import {
     AttributeCreatedEvent,
     AttributeDeletedEvent,
@@ -17,7 +17,7 @@ import {
     OutgoingRequestStatusChangedEvent,
     OwnAttributeDeletedByOwnerEvent,
     PeerRelationshipAttributeDeletedByPeerEvent
-} from "./consumption";
+} from "./consumption/index.js";
 import {
     DatawalletSynchronizedEvent,
     FileOwnershipClaimedEvent,
@@ -36,7 +36,7 @@ import {
     RelationshipReactivationCompletedEvent,
     RelationshipReactivationRequestedEvent,
     RelationshipTemplateAllocationsExhaustedEvent
-} from "./transport";
+} from "./transport/index.js";
 
 export class EventProxy {
     private readonly subscriptionIds: number[] = [];

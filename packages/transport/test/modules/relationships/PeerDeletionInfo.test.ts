@@ -1,5 +1,5 @@
 import { CoreDate } from "@nmshd/core-types";
-import { PeerDeletionInfo, PeerDeletionStatus } from "../../../src";
+import { PeerDeletionInfo, PeerDeletionStatus } from "@nmshd/transport";
 
 describe("PeerDeletionInfo", () => {
     test("PeerDeletionInfo in status ToBeDeleted should have a default deletionDate in the Future", () => {

@@ -1,8 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { sleep } from "@js-soft/ts-utils";
-import { IdentityAttribute, IdentityFileReference, Request, ResponseItemResult, TransferFileOwnershipAcceptResponseItem, TransferFileOwnershipRequestItem } from "@nmshd/content";
-import { CoreAddress, CoreDate } from "@nmshd/core-types";
-import { AccountController, FileOwnershipClaimedEvent } from "@nmshd/transport";
 import {
     ConsumptionController,
     ConsumptionIds,
@@ -11,8 +8,11 @@ import {
     OwnIdentityAttribute,
     PeerIdentityAttribute,
     TransferFileOwnershipRequestItemProcessor
-} from "../../../../../src";
-import { TestUtil } from "../../../../core/TestUtil";
+} from "@nmshd/consumption";
+import { IdentityAttribute, IdentityFileReference, Request, ResponseItemResult, TransferFileOwnershipAcceptResponseItem, TransferFileOwnershipRequestItem } from "@nmshd/content";
+import { CoreAddress, CoreDate } from "@nmshd/core-types";
+import { AccountController, FileOwnershipClaimedEvent } from "@nmshd/transport";
+import { TestUtil } from "../../../../core/TestUtil.js";
 
 describe("TransferFileOwnershipRequestItemProcessor", function () {
     let connection: IDatabaseConnection;

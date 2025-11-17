@@ -1,5 +1,5 @@
 import { PrimitiveType, serialize, type, validate } from "@js-soft/ts-serval";
-import { AcceptResponseItem, AcceptResponseItemJSON, IAcceptResponseItem } from "../../response";
+import { AcceptResponseItem, AcceptResponseItemJSON, IAcceptResponseItem } from "../../response/index.js";
 
 export interface FormFieldAcceptResponseItemJSON extends AcceptResponseItemJSON {
     "@type": "FormFieldAcceptResponseItem";

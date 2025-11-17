@@ -1,4 +1,4 @@
-import { BackboneRelationship } from "./BackboneRelationship";
+import { BackboneRelationship } from "./BackboneRelationship.js";
 
 export interface BackboneGetRelationshipsRequest {
     ids: string[];

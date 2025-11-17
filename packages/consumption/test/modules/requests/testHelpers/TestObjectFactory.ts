@@ -1,4 +1,5 @@
 import { ISerializable } from "@js-soft/ts-serval";
+import { ILocalRequest, LocalRequest, LocalRequestStatus, LocalRequestStatusLogEntry } from "@nmshd/consumption";
 import {
     AcceptResponseItem,
     GivenName,
@@ -35,8 +36,7 @@ import {
     RelationshipTemplate,
     RelationshipTemplatePublicKey
 } from "@nmshd/transport";
-import { ILocalRequest, LocalRequest, LocalRequestStatus, LocalRequestStatusLogEntry } from "../../../../src";
-import { TestRequestItem } from "./TestRequestItem";
+import { TestRequestItem } from "./TestRequestItem.js";
 
 export class TestObjectFactory {
     public static createPendingRelationship(properties?: Partial<IRelationship>): Relationship {

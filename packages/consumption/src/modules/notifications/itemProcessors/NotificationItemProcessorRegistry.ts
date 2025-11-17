@@ -1,9 +1,9 @@
 import { NotificationItem } from "@nmshd/content";
-import { ConsumptionController } from "../../../consumption/ConsumptionController";
-import { ConsumptionError } from "../../../consumption/ConsumptionError";
-import { INotificationItemProcessor } from "./AbstractNotificationItemProcessor";
-import { NotificationItemConstructor } from "./NotificationItemConstructor";
-import { NotificationItemProcessorConstructor } from "./NotificationItemProcessorConstructor";
+import { ConsumptionController } from "../../../consumption/ConsumptionController.js";
+import { ConsumptionError } from "../../../consumption/ConsumptionError.js";
+import { INotificationItemProcessor } from "./AbstractNotificationItemProcessor.js";
+import { NotificationItemConstructor } from "./NotificationItemConstructor.js";
+import { NotificationItemProcessorConstructor } from "./NotificationItemProcessorConstructor.js";
 
 export class NotificationItemProcessorRegistry {
     public constructor(

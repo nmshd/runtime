@@ -4,8 +4,8 @@ import { CoreId } from "@nmshd/core-types";
 import { LocalRequestDTO } from "@nmshd/runtime-types";
 import { IMessage, IRelationship, Message, MessageController, Relationship, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { MessageIdString, RelationshipIdString, RequestIdString, RuntimeErrors, UseCase } from "../../common";
-import { RequestMapper } from "./RequestMapper";
+import { MessageIdString, RelationshipIdString, RequestIdString, RuntimeErrors, UseCase } from "../../common/index.js";
+import { RequestMapper } from "./RequestMapper.js";
 
 export interface CompleteIncomingRequestRequest {
     requestId: RequestIdString;

@@ -12,12 +12,12 @@ import {
 import { CoreAddress } from "@nmshd/core-types";
 import { RelationshipStatus } from "@nmshd/transport";
 import _ from "lodash";
-import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { OwnIdentityAttribute, OwnRelationshipAttribute, PeerRelationshipAttribute, ReceivedAttributeDeletionStatus } from "../../../attributes";
-import { ValidationResult } from "../../../common/ValidationResult";
-import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
-import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
-import { LocalRequestInfo } from "../IRequestItemProcessor";
+import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors.js";
+import { OwnIdentityAttribute, OwnRelationshipAttribute, PeerRelationshipAttribute, ReceivedAttributeDeletionStatus } from "../../../attributes/index.js";
+import { ValidationResult } from "../../../common/ValidationResult.js";
+import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters.js";
+import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor.js";
+import { LocalRequestInfo } from "../IRequestItemProcessor.js";
 
 export class ShareAttributeRequestItemProcessor extends GenericRequestItemProcessor<ShareAttributeRequestItem> {
     public override async canCreateOutgoingRequestItem(requestItem: ShareAttributeRequestItem, _request: Request, recipient?: CoreAddress): Promise<ValidationResult> {

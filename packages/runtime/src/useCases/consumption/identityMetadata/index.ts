@@ -1,3 +1,3 @@
-export * from "./DeleteIdentityMetadata";
-export * from "./GetIdentityMetadata";
-export * from "./UpsertIdentityMetadata";
+export * from "./DeleteIdentityMetadata.js";
+export * from "./GetIdentityMetadata.js";
+export * from "./UpsertIdentityMetadata.js";

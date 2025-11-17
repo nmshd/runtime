@@ -2,7 +2,7 @@ import { Result } from "@js-soft/ts-utils";
 import { LanguageISO639 } from "@nmshd/core-types";
 import { DeviceController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
 
 export interface SetCommunicationLanguageRequest {
     communicationLanguage: keyof typeof LanguageISO639;

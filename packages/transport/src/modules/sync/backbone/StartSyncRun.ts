@@ -1,4 +1,4 @@
-import { BackboneSyncRun } from "./BackboneSyncRun";
+import { BackboneSyncRun } from "./BackboneSyncRun.js";
 
 export interface StartSyncRunResponse {
     status: StartSyncRunStatus;

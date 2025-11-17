@@ -1,5 +1,5 @@
 import { ParsingError } from "@js-soft/ts-serval";
-import { Website } from "../../src";
+import { Website } from "@nmshd/content";
 
 describe("Test valid URLs", () => {
     const validUrls = [

@@ -1,7 +1,7 @@
 import { Result } from "@js-soft/ts-utils";
 import { IdentityController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { UseCase } from "../../common";
+import { UseCase } from "../../common/index.js";
 
 export interface GetIdentityInfoResponse {
     address: string;

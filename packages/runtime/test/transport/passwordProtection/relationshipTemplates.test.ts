@@ -1,6 +1,6 @@
 import { RelationshipTemplateReference, TokenReference } from "@nmshd/transport";
 import { DateTime } from "luxon";
-import { createTemplate, emptyRelationshipTemplateContent, RuntimeServiceProvider, TestRuntimeServices } from "../../lib";
+import { createTemplate, emptyRelationshipTemplateContent, RuntimeServiceProvider, TestRuntimeServices } from "../../lib/index.js";
 
 const serviceProvider = new RuntimeServiceProvider();
 let runtimeServices1: TestRuntimeServices;

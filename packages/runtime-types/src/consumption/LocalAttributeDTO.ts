@@ -1,5 +1,5 @@
 import { IdentityAttributeJSON, RelationshipAttributeJSON } from "@nmshd/content";
-import { LocalAttributeDeletionInfoDTO } from "./LocalAttributeDeletionInfoDTO";
+import { LocalAttributeDeletionInfoDTO } from "./LocalAttributeDeletionInfoDTO.js";
 
 export interface LocalAttributeDTO {
     "@type": "OwnIdentityAttribute" | "PeerIdentityAttribute" | "OwnRelationshipAttribute" | "PeerRelationshipAttribute" | "ThirdPartyRelationshipAttribute";

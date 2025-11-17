@@ -1,7 +1,7 @@
 import { serialize, validate } from "@js-soft/ts-serval";
 import { LanguageISO639 } from "@nmshd/core-types";
-import { RenderHints, RenderHintsDataType, RenderHintsEditType, ValueHints, ValueHintsValue } from "../../../attributes/hints";
-import { AbstractString } from "../AbstractString";
+import { RenderHints, RenderHintsDataType, RenderHintsEditType, ValueHints, ValueHintsValue } from "../../../attributes/hints/index.js";
+import { AbstractString } from "../AbstractString.js";
 
 export abstract class AbstractLanguage extends AbstractString {
     @serialize()

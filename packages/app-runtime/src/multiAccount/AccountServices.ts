@@ -1,8 +1,8 @@
 import { CoreId } from "@nmshd/core-types";
 import { DeviceMapper, DeviceOnboardingInfoDTO } from "@nmshd/runtime";
-import { MultiAccountController } from "./MultiAccountController";
-import { LocalAccountDTO } from "./data/LocalAccountDTO";
-import { LocalAccountMapper } from "./data/LocalAccountMapper";
+import { MultiAccountController } from "./MultiAccountController.js";
+import { LocalAccountDTO } from "./data/LocalAccountDTO.js";
+import { LocalAccountMapper } from "./data/LocalAccountMapper.js";
 
 export class AccountServices {
     public constructor(protected readonly multiAccountController: MultiAccountController) {}

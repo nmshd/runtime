@@ -1,5 +1,5 @@
+import { RESTClient } from "@nmshd/transport";
 import { AxiosRequestConfig, AxiosResponse, Method } from "axios";
-import { RESTClient } from "../../src";
 
 export class RequestInterceptor {
     protected _measuringRequests = true;

@@ -9,11 +9,11 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
 import { File } from "@nmshd/transport";
-import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { ValidationResult } from "../../../common/ValidationResult";
-import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
-import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
-import { LocalRequestInfo } from "../IRequestItemProcessor";
+import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors.js";
+import { ValidationResult } from "../../../common/ValidationResult.js";
+import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters.js";
+import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor.js";
+import { LocalRequestInfo } from "../IRequestItemProcessor.js";
 
 export class TransferFileOwnershipRequestItemProcessor extends GenericRequestItemProcessor<TransferFileOwnershipRequestItem> {
     public override async canCreateOutgoingRequestItem(requestItem: TransferFileOwnershipRequestItem, _request: Request, _recipient?: CoreAddress): Promise<ValidationResult> {

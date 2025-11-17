@@ -13,7 +13,7 @@ import {
     RelationshipsFacade,
     RelationshipTemplatesFacade,
     TokensFacade
-} from "./facades/transport";
+} from "./facades/transport/index.js";
 
 export class TransportServices {
     public constructor(

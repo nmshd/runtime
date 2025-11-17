@@ -1,9 +1,9 @@
 import { IDatabaseCollectionProvider } from "@js-soft/docdb-access-abstractions";
 import { ILogger } from "@js-soft/logging-abstractions";
 import { Serializable } from "@js-soft/ts-serval";
-import _ from "lodash";
-import { TransportError } from "../../core";
-import { DatawalletModification, DatawalletModificationType } from "./local/DatawalletModification";
+import * as _ from "lodash";
+import { TransportError } from "../../core/index.js";
+import { DatawalletModification, DatawalletModificationType } from "./local/DatawalletModification.js";
 
 export class DatawalletModificationsProcessor {
     private readonly deletedObjectIdentifiers: string[] = [];

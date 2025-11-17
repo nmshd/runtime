@@ -1,5 +1,5 @@
 import { type } from "@js-soft/ts-serval";
-import { Country, CountryJSON, ICountry } from "../address";
+import { Country, CountryJSON, ICountry } from "../address/index.js";
 
 export interface BirthCountryJSON extends Omit<CountryJSON, "@type"> {
     "@type": "BirthCountry";

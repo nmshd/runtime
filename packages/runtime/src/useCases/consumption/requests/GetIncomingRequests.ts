@@ -5,9 +5,9 @@ import { RequestItemGroupJSON, RequestJSON, ResponseItemGroupJSON, ResponseJSON 
 import { LocalRequestDTO, LocalRequestSourceDTO, LocalResponseDTO, LocalResponseSourceDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
 import { nameof } from "ts-simple-nameof";
-import { UseCase } from "../../common";
-import { flattenObject } from "../../common/flattenObject";
-import { RequestMapper } from "./RequestMapper";
+import { flattenObject } from "../../common/flattenObject.js";
+import { UseCase } from "../../common/index.js";
+import { RequestMapper } from "./RequestMapper.js";
 
 export interface GetIncomingRequestsRequest {
     query?: GetIncomingRequestsRequestQuery;

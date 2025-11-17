@@ -1,7 +1,7 @@
 import { Event } from "@js-soft/ts-utils";
 import { Mail, MailJSON } from "@nmshd/content";
-import { MailReceivedEvent, MessageReceivedEvent, RelationshipEvent } from "../events";
-import { ModuleConfiguration, RuntimeModule } from "../extensibility/modules/RuntimeModule";
+import { MailReceivedEvent, MessageReceivedEvent, RelationshipEvent } from "../events/index.js";
+import { ModuleConfiguration, RuntimeModule } from "../extensibility/modules/RuntimeModule.js";
 
 export interface MessageModuleConfiguration extends ModuleConfiguration {}
 

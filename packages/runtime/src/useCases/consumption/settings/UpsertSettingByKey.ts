@@ -5,8 +5,8 @@ import { CoreId } from "@nmshd/core-types";
 import { SettingDTO } from "@nmshd/runtime-types";
 import { AccountController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { GenericIdString, SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { SettingMapper } from "./SettingMapper";
+import { GenericIdString, SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
+import { SettingMapper } from "./SettingMapper.js";
 
 export interface UpsertSettingByKeyRequest {
     key: string;

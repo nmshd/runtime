@@ -1,8 +1,8 @@
 import { sleep } from "@js-soft/ts-utils";
 import { RuntimeServices, SyncEverythingResponse } from "@nmshd/runtime";
-import { AppRuntimeErrors } from "../AppRuntimeErrors";
-import { AccountSelectedEvent, ExternalEventReceivedEvent, RemoteNotificationEvent, RemoteNotificationRegistrationEvent } from "../events";
-import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "./AppRuntimeModule";
+import { AppRuntimeErrors } from "../AppRuntimeErrors.js";
+import { AccountSelectedEvent, ExternalEventReceivedEvent, RemoteNotificationEvent, RemoteNotificationRegistrationEvent } from "../events/index.js";
+import { AppRuntimeModule, AppRuntimeModuleConfiguration } from "./AppRuntimeModule.js";
 
 enum BackboneEventName {
     DatawalletModificationsCreated = "DatawalletModificationsCreated",

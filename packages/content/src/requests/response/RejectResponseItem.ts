@@ -1,6 +1,6 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { IResponseItem, ResponseItem, ResponseItemJSON } from "./ResponseItem";
-import { ResponseItemResult } from "./ResponseItemResult";
+import { IResponseItem, ResponseItem, ResponseItemJSON } from "./ResponseItem.js";
+import { ResponseItemResult } from "./ResponseItemResult.js";
 
 export interface RejectResponseItemJSON extends ResponseItemJSON {
     "@type": "RejectResponseItem";

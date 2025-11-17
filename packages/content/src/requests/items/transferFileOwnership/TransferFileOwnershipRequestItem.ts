@@ -1,7 +1,6 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { FileReference, IFileReference } from "@nmshd/core-types";
-import { RequestItemJSON } from "../..";
-import { IRequestItem, RequestItem } from "../../RequestItem";
+import { IRequestItem, RequestItem, RequestItemJSON } from "../../RequestItem.js";
 
 export interface TransferFileOwnershipRequestItemJSON extends RequestItemJSON {
     "@type": "TransferFileOwnershipRequestItem";

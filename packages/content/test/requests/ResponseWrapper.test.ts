@@ -1,5 +1,5 @@
+import { Response, ResponseItemJSON, ResponseItemResult, ResponseJSON, ResponseResult, ResponseWrapper } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
-import { Response, ResponseItemJSON, ResponseItemResult, ResponseJSON, ResponseResult, ResponseWrapper } from "../../src";
 
 describe("ResponseWrapper", function () {
     const response = Response.from({

@@ -16,8 +16,8 @@ import {
     StartSyncRunRequest,
     StartSyncRunResponse,
     StartSyncRunStatus
-} from "../../src";
-import { FakePaginationDataSource } from "./FakePaginationDataSource";
+} from "@nmshd/transport";
+import { FakePaginationDataSource } from "./FakePaginationDataSource.js";
 
 export class FakeSyncClient implements ISyncClient {
     public createDatawalletModificationsRequest?: CreateDatawalletModificationsRequest;

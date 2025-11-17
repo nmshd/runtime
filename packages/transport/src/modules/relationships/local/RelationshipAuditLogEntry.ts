@@ -1,7 +1,7 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreAddress, CoreDate, CoreId, ICoreAddress, ICoreDate, ICoreId } from "@nmshd/core-types";
-import { RelationshipAuditLogEntryReason } from "../transmission/RelationshipAuditLog";
-import { RelationshipStatus } from "../transmission/RelationshipStatus";
+import { RelationshipAuditLogEntryReason } from "../transmission/RelationshipAuditLog.js";
+import { RelationshipStatus } from "../transmission/RelationshipStatus.js";
 
 export interface IRelationshipAuditLogEntry extends ISerializable {
     createdAt: ICoreDate;

@@ -2,10 +2,10 @@ import { Result } from "@js-soft/ts-utils";
 import { AttributesController } from "@nmshd/consumption";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { AddressString, SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { flattenObject } from "../../common/flattenObject";
-import { AttributeMapper } from "./AttributeMapper";
-import { GetAttributesRequestQuery, GetAttributesUseCase } from "./GetAttributes";
+import { flattenObject } from "../../common/flattenObject.js";
+import { AddressString, SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
+import { AttributeMapper } from "./AttributeMapper.js";
+import { GetAttributesRequestQuery, GetAttributesUseCase } from "./GetAttributes.js";
 
 export interface GetPeerAttributesRequest {
     peer: AddressString;

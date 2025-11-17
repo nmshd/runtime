@@ -1,6 +1,6 @@
 import { type } from "@js-soft/ts-serval";
-import { AbstractStringJSON, IAbstractString } from "../AbstractString";
-import { AbstractEMailAddress } from "../strings/AbstractEMailAddress";
+import { AbstractStringJSON, IAbstractString } from "../AbstractString.js";
+import { AbstractEMailAddress } from "../strings/AbstractEMailAddress.js";
 
 export interface EMailAddressJSON extends AbstractStringJSON {
     "@type": "EMailAddress";

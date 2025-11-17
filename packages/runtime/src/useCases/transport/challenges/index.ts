@@ -1,2 +1,2 @@
-export * from "./CreateChallenge";
-export * from "./ValidateChallenge";
+export * from "./CreateChallenge.js";
+export * from "./ValidateChallenge.js";

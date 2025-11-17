@@ -5,8 +5,8 @@ import { CoreAddress } from "@nmshd/core-types";
 import { LocalRequestDTO } from "@nmshd/runtime-types";
 import { AccountController, MessageController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { AddressString, ISO8601DateTimeString, SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { RequestMapper } from "../requests";
+import { AddressString, ISO8601DateTimeString, SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
+import { RequestMapper } from "../requests/index.js";
 
 export interface CreateAndShareRelationshipAttributeRequest {
     content: {

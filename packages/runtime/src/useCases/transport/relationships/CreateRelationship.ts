@@ -5,9 +5,9 @@ import { CoreId } from "@nmshd/core-types";
 import { RelationshipDTO } from "@nmshd/runtime-types";
 import { AccountController, RelationshipTemplate, RelationshipTemplateController, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
-import { RelationshipMapper } from "./RelationshipMapper";
-import { validateCreationContentOfRelationship } from "./utility/validateCreationContentOfRelationship";
+import { RelationshipTemplateIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common/index.js";
+import { RelationshipMapper } from "./RelationshipMapper.js";
+import { validateCreationContentOfRelationship } from "./utility/validateCreationContentOfRelationship.js";
 
 export interface CreateRelationshipRequest {
     templateId: RelationshipTemplateIdString;
