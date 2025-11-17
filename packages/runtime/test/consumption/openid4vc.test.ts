@@ -4,19 +4,10 @@ import { DockerComposeEnvironment, GenericContainer, StartedDockerComposeEnviron
 import { ConsumptionServices } from "../../src";
 import { RuntimeServiceProvider } from "../lib";
 
-const runtimeServiceProvider = new RuntimeServiceProvider();
-let consumptionServices: ConsumptionServices;
-
-beforeAll(async () => {
-    const runtimeServices = await runtimeServiceProvider.launch(1);
-    consumptionServices = runtimeServices[0].consumption;
-}, 120000);
-
-afterAll(async () => {
-    await runtimeServiceProvider.stop();
-});
-
 describe("custom openid4vc service", () => {
+    const runtimeServiceProvider = new RuntimeServiceProvider();
+    let consumptionServices: ConsumptionServices;
+
     let axiosInstance: AxiosInstance;
     let dockerComposeStack: StartedDockerComposeEnvironment | undefined;
 
@@ -196,6 +187,9 @@ describe("EUDIPLO", () => {
     const eudiploCredentialIdInConfiguration = "EmployeeIdCard";
     const eudiploPort = 3000; // CAUTION: don't change this. The DCQL query has this port hardcoded in its configuration. The presentation test will fail if we change this.
 
+    const runtimeServiceProvider = new RuntimeServiceProvider();
+    let consumptionServices: ConsumptionServices;
+
     let eudiploContainer: StartedTestContainer | undefined;
     let axiosInstance: AxiosInstance;
 
@@ -229,10 +223,15 @@ describe("EUDIPLO", () => {
                 Authorization: `Bearer ${accessToken}` // eslint-disable-line @typescript-eslint/naming-convention
             }
         });
+
+        const runtimeServices = await runtimeServiceProvider.launch(1);
+        consumptionServices = runtimeServices[0].consumption;
     });
 
     afterAll(async () => {
         await eudiploContainer?.stop();
+
+        await runtimeServiceProvider.stop();
     });
 
     test("issuance", async () => {
