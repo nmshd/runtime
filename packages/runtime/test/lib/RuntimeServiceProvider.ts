@@ -24,6 +24,8 @@ export interface LaunchConfiguration {
 }
 
 export class RuntimeServiceProvider {
+    public constructor(private readonly fetchInstance?: typeof fetch) {}
+
     private readonly runtimes: TestRuntime[] = [];
 
     public static get transportConfig(): Omit<IConfigOverwrite, "supportedIdentityVersion"> {
@@ -75,7 +77,8 @@ export class RuntimeServiceProvider {
             const runtime = new TestRuntime(
                 config,
                 {
-                    setDefaultOwnIdentityAttributes: launchConfiguration.enableDefaultOwnIdentityAttributes ?? false
+                    setDefaultOwnIdentityAttributes: launchConfiguration.enableDefaultOwnIdentityAttributes ?? false,
+                    fetchInstance: this.fetchInstance
                 },
                 launchConfiguration.useCorrelator ? correlator : undefined
             );

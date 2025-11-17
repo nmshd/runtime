@@ -24,6 +24,6 @@ export class GetVerifiableCredentialsUseCase extends UseCase<GetVerifiableCreden
 
     protected override async executeInternal(request: GetVerifiableCredentialsRequest): Promise<Result<VerifiableCredentialDTO[]>> {
         const credentials = await this.openId4VcContoller.getVerifiableCredentials(request.ids);
-        return Result.ok(credentials as VerifiableCredentialDTO[]);
+        return Result.ok(credentials);
     }
 }
