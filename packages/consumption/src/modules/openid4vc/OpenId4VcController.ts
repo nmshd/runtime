@@ -1,4 +1,5 @@
 import { ClaimFormat } from "@credo-ts/core";
+import { OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
 import { VerifiableCredential } from "@nmshd/content";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../consumption/ConsumptionController";
@@ -60,15 +61,15 @@ export class OpenId4VcController extends ConsumptionBaseController {
     }
 
     public async resolveAuthorizationRequest(
-        proofRequestUrl: string
-    ): Promise<{ data: string; usedCredentials: { id: string; data: string; type: string; displayInformation?: string }[] }> {
+        requestUrl: string
+    ): Promise<{ authorizationRequest: OpenId4VpResolvedAuthorizationRequest; usedCredentials: { id: string; data: string; type: string; displayInformation?: string }[] }> {
         const holder = new Holder(this.parent.accountController, this.parent.attributes);
         await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
-        const res = await holder.resolveAuthorizationRequest(proofRequestUrl);
+        const authorizationRequest = await holder.resolveAuthorizationRequest(requestUrl);
 
         // TODO: extract DTOs
 
-        const matchedCredentialsSdJwtVc = res.presentationExchange?.credentialsForRequest.requirements
+        const matchedCredentialsSdJwtVc = authorizationRequest.presentationExchange?.credentialsForRequest.requirements
             .map((entry) =>
                 entry.submissionEntry
                     .map((subEntry) => subEntry.verifiableCredentials.filter((vc) => vc.claimFormat === ClaimFormat.SdJwtDc).map((vc) => vc.credentialRecord.compactSdJwtVc))
@@ -81,18 +82,19 @@ export class OpenId4VcController extends ConsumptionBaseController {
         const usedCredentials = allCredentials.filter((credential) => matchedCredentialsSdJwtVc?.includes(credential.data));
 
         return {
-            data: JSON.stringify(res),
+            authorizationRequest,
             usedCredentials
         };
     }
 
-    public async acceptAuthorizationRequest(jsonEncodedRequest: string): Promise<{ status: number; message: string | Record<string, unknown> | null }> {
+    public async acceptAuthorizationRequest(
+        authorizationRequest: OpenId4VpResolvedAuthorizationRequest
+    ): Promise<{ status: number; message: string | Record<string, unknown> | null }> {
         const holder = new Holder(this.parent.accountController, this.parent.attributes);
         await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
-        const fetchedRequest = JSON.parse(jsonEncodedRequest);
         // parse the credential type to be sdjwt
 
-        const serverResponse = await holder.acceptAuthorizationRequest(fetchedRequest);
+        const serverResponse = await holder.acceptAuthorizationRequest(authorizationRequest);
         if (!serverResponse) throw new Error("No response from server");
 
         return { status: serverResponse.status, message: serverResponse.body };

@@ -5,7 +5,7 @@ import { Inject } from "@nmshd/typescript-ioc";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
 export interface ResolveAuthorizationRequestRequest {
-    proofRequestUrl: string;
+    requestUrl: string;
 }
 
 class Validator extends SchemaValidator<ResolveAuthorizationRequestRequest> {
@@ -23,11 +23,8 @@ export class ResolveAuthorizationRequestUseCase extends UseCase<ResolveAuthoriza
     }
 
     protected override async executeInternal(request: ResolveAuthorizationRequestRequest): Promise<Result<FetchedAuthorizationRequestDTO>> {
-        const result = await this.openId4VcContoller.resolveAuthorizationRequest(request.proofRequestUrl);
+        const result = await this.openId4VcContoller.resolveAuthorizationRequest(request.requestUrl);
 
-        return Result.ok({
-            jsonRepresentation: result.data,
-            usedCredentials: result.usedCredentials
-        });
+        return Result.ok({ authorizationRequest: result.authorizationRequest, usedCredentials: result.usedCredentials });
     }
 }

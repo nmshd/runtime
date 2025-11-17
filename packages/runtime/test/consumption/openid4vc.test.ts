@@ -70,7 +70,7 @@ describe("OpenID4VCI and OpenID4VCP", () => {
         });
         expect(acceptanceResult).toBeSuccessful();
         expect(typeof acceptanceResult.value.id).toBe("string");
-    }, 10000000);
+    });
 
     test("should be able to process a given credential presentation", async () => {
         // Ensure the first test has completed
@@ -110,24 +110,18 @@ describe("OpenID4VCI and OpenID4VCP", () => {
         expect(response.status).toBe(200);
         const responseData = await response.data;
 
-        const result = await consumptionServices.openId4Vc.resolveAuthorizationRequest({
-            proofRequestUrl: responseData.result.presentationRequest
-        });
+        const result = await consumptionServices.openId4Vc.resolveAuthorizationRequest({ requestUrl: responseData.result.presentationRequest });
         expect(result.value.usedCredentials).toHaveLength(1);
 
-        const jsonRepresentation = result.value.jsonRepresentation;
+        const request = result.value.authorizationRequest as OpenId4VpResolvedAuthorizationRequest;
+        expect(request.presentationExchange!.credentialsForRequest.areRequirementsSatisfied).toBe(true);
 
-        const proofRequest = JSON.parse(jsonRepresentation) as OpenId4VpResolvedAuthorizationRequest;
-        expect(proofRequest.presentationExchange!.credentialsForRequest.areRequirementsSatisfied).toBe(true);
-
-        const presentationResult = await consumptionServices.openId4Vc.acceptAuthorizationRequest({
-            jsonEncodedRequest: jsonRepresentation
-        });
+        const presentationResult = await consumptionServices.openId4Vc.acceptAuthorizationRequest({ authorizationRequest: result.value.authorizationRequest });
         expect(presentationResult).toBeSuccessful();
         expect(presentationResult.value.status).toBe(200);
-    }, 10000000);
+    });
 
-    test("getting all verifiable credentials should not return an empy list", async () => {
+    test("getting all verifiable credentials should not return an empty list", async () => {
         // Ensure the first test has completed
         expect(credentialOfferUrl).toBeDefined();
 
@@ -135,7 +129,7 @@ describe("OpenID4VCI and OpenID4VCP", () => {
 
         expect(acceptanceResult).toBeSuccessful();
         expect(acceptanceResult.value.length).toBeGreaterThan(0);
-    }, 10000000);
+    });
 
     test("getting the earlier created verifiable credential by id should return exactly one credential", async () => {
         // Ensure the first test has completed
@@ -150,7 +144,7 @@ describe("OpenID4VCI and OpenID4VCP", () => {
         expect(singleCredentialResult).toBeSuccessful();
         expect(singleCredentialResult.value).toHaveLength(1);
         expect(singleCredentialResult.value[0].id).toBe(firstCredentialId);
-    }, 10000000);
+    });
 });
 
 async function startOid4VcComposeStack() {

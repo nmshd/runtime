@@ -16706,12 +16706,12 @@ export const AcceptAuthorizationRequestRequest: any = {
         "AcceptAuthorizationRequestRequest": {
             "type": "object",
             "properties": {
-                "jsonEncodedRequest": {
-                    "type": "string"
+                "authorizationRequest": {
+                    "type": "object"
                 }
             },
             "required": [
-                "jsonEncodedRequest"
+                "authorizationRequest"
             ],
             "additionalProperties": false
         }
@@ -16763,12 +16763,12 @@ export const ResolveAuthorizationRequestRequest: any = {
         "ResolveAuthorizationRequestRequest": {
             "type": "object",
             "properties": {
-                "proofRequestUrl": {
+                "requestUrl": {
                     "type": "string"
                 }
             },
             "required": [
-                "proofRequestUrl"
+                "requestUrl"
             ],
             "additionalProperties": false
         }
