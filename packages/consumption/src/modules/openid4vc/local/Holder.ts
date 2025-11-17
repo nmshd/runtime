@@ -46,8 +46,8 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         redirectUri: "http://localhost:3000/redirect"
     };
 
-    public constructor(accountController: AccountController, attributeController: AttributesController) {
-        super(3000, `OpenId4VcHolder ${Math.random().toString()}`, getOpenIdHolderModules(), accountController, attributeController);
+    public constructor(accountController: AccountController, attributeController: AttributesController, fetchInstance: typeof fetch) {
+        super(3000, `OpenId4VcHolder ${Math.random().toString()}`, getOpenIdHolderModules(), accountController, attributeController, fetchInstance);
     }
 
     public async getVerifiableCredentials(ids: string[] | undefined): Promise<OwnIdentityAttribute[]> {
