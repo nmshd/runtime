@@ -1,6 +1,6 @@
 export interface VerifiableCredentialDTO {
-    data: string;
     id: string;
+    data: string;
     type: string;
     displayInformation?: string;
     key?: string;
