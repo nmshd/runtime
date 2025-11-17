@@ -17,8 +17,7 @@ let axiosInstance: AxiosInstance;
 let dockerComposeStack: StartedDockerComposeEnvironment | undefined;
 
 beforeAll(async () => {
-    const runtimeServices = await runtimeServiceProvider.launch(1, undefined);
-
+    const runtimeServices = await runtimeServiceProvider.launch(1);
     consumptionServices = runtimeServices[0].consumption;
 
     let oid4vcServiceBaseUrl = process.env.OPENID4VC_SERVICE_BASEURL!;
