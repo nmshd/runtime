@@ -12,10 +12,12 @@ import {
 } from "@credo-ts/core";
 import { KeyManagementModuleConfig } from "@credo-ts/core/build/modules/kms";
 import { AccountController } from "@nmshd/transport";
+import { EventEmitter } from "events";
+import webSocket from "ws";
 import { AttributesController } from "../../attributes";
+import { EnmeshedHolderFileSystem } from "./EnmeshedHolderFileSystem";
 import { EnmshedHolderKeyManagmentService } from "./EnmeshedHolderKeyManagmentService";
 import { EnmeshedStorageService } from "./EnmeshedStorageService";
-import { agentDependencies } from "./LocalAgentDependencies";
 
 export class BaseAgent<AgentModules extends ModulesMap> {
     public config: InitConfig;
@@ -30,7 +32,8 @@ export class BaseAgent<AgentModules extends ModulesMap> {
         public readonly name: string,
         public readonly modules: AgentModules,
         public readonly accountController: AccountController,
-        public readonly attributeController: AttributesController
+        public readonly attributeController: AttributesController,
+        fetchInstance: typeof fetch
     ) {
         this.name = name;
         this.port = port;
@@ -49,7 +52,15 @@ export class BaseAgent<AgentModules extends ModulesMap> {
         this.agent = new Agent(
             {
                 config,
-                dependencies: agentDependencies,
+                dependencies: {
+                    // eslint-disable-next-line @typescript-eslint/naming-convention
+                    FileSystem: EnmeshedHolderFileSystem,
+                    // eslint-disable-next-line @typescript-eslint/naming-convention
+                    EventEmitterClass: EventEmitter,
+                    fetch: fetchInstance,
+                    // eslint-disable-next-line @typescript-eslint/naming-convention
+                    WebSocketClass: webSocket
+                },
                 modules
             },
             dependencyManager

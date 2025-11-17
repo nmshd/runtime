@@ -11,8 +11,12 @@ export class OpenId4VcController extends ConsumptionBaseController {
         super(ConsumptionControllerName.OpenId4VcController, parent);
     }
 
+    private get fetchInstance(): typeof fetch {
+        return this.parent.consumptionConfig.fetchInstance ?? fetch;
+    }
+
     public async fetchCredentialOffer(credentialOfferUrl: string): Promise<{ data: string }> {
-        const holder = new Holder(this.parent.accountController, this.parent.attributes);
+        const holder = new Holder(this.parent.accountController, this.parent.attributes, this.fetchInstance);
         await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
         const res = await holder.resolveCredentialOffer(credentialOfferUrl);
         return {
@@ -25,7 +29,7 @@ export class OpenId4VcController extends ConsumptionBaseController {
         requestedCredentialOffers: string[],
         pinCode?: string
     ): Promise<{ data: string; id: string; type: string; displayInformation: string | undefined }> {
-        const holder = new Holder(this.parent.accountController, this.parent.attributes);
+        const holder = new Holder(this.parent.accountController, this.parent.attributes, this.fetchInstance);
         await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
         const credentialOffer = JSON.parse(fetchedCredentialOffer);
         const credentials = await holder.requestAndStoreCredentials(credentialOffer, { credentialsToRequest: requestedCredentialOffers, txCode: pinCode });
@@ -43,7 +47,7 @@ export class OpenId4VcController extends ConsumptionBaseController {
     }
 
     public async processCredentialOffer(credentialOffer: string): Promise<{ data: string; id: string; type: string; displayInformation: string | undefined }> {
-        const holder = new Holder(this.parent.accountController, this.parent.attributes);
+        const holder = new Holder(this.parent.accountController, this.parent.attributes, this.fetchInstance);
         await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
         const res = await holder.resolveCredentialOffer(credentialOffer);
         const credentials = await holder.requestAndStoreCredentials(res, { credentialsToRequest: Object.keys(res.offeredCredentialConfigurations) });
@@ -63,7 +67,7 @@ export class OpenId4VcController extends ConsumptionBaseController {
     public async resolveAuthorizationRequest(
         requestUrl: string
     ): Promise<{ authorizationRequest: OpenId4VpResolvedAuthorizationRequest; usedCredentials: { id: string; data: string; type: string; displayInformation?: string }[] }> {
-        const holder = new Holder(this.parent.accountController, this.parent.attributes);
+        const holder = new Holder(this.parent.accountController, this.parent.attributes, this.fetchInstance);
         await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
         const authorizationRequest = await holder.resolveAuthorizationRequest(requestUrl);
 
@@ -90,7 +94,7 @@ export class OpenId4VcController extends ConsumptionBaseController {
     public async acceptAuthorizationRequest(
         authorizationRequest: OpenId4VpResolvedAuthorizationRequest
     ): Promise<{ status: number; message: string | Record<string, unknown> | null }> {
-        const holder = new Holder(this.parent.accountController, this.parent.attributes);
+        const holder = new Holder(this.parent.accountController, this.parent.attributes, this.fetchInstance);
         await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
         // parse the credential type to be sdjwt
 
@@ -101,7 +105,7 @@ export class OpenId4VcController extends ConsumptionBaseController {
     }
 
     public async getVerifiableCredentials(ids?: string[]): Promise<{ id: string; data: string; type: string; displayInformation?: string }[]> {
-        const holder = new Holder(this.parent.accountController, this.parent.attributes);
+        const holder = new Holder(this.parent.accountController, this.parent.attributes, this.fetchInstance);
         await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
 
         const credentials = await holder.getVerifiableCredentials(ids);

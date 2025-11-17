@@ -2,16 +2,23 @@ import { OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
 import axios, { AxiosInstance } from "axios";
 import path from "path";
 import { DockerComposeEnvironment, StartedDockerComposeEnvironment, Wait } from "testcontainers";
+import { Agent as UndiciAgent, fetch as undiciFetch } from "undici";
 import { ConsumptionServices } from "../../src";
 import { RuntimeServiceProvider } from "../lib";
 
-const runtimeServiceProvider = new RuntimeServiceProvider();
+const fetchInstance: typeof fetch = (async (input, init) => {
+    const response = await undiciFetch(input as any, { ...(init as any), dispatcher: new UndiciAgent({}) });
+    return response;
+}) as typeof fetch;
+
+const runtimeServiceProvider = new RuntimeServiceProvider(fetchInstance);
 let consumptionServices: ConsumptionServices;
 let axiosInstance: AxiosInstance;
 let dockerComposeStack: StartedDockerComposeEnvironment | undefined;
 
 beforeAll(async () => {
-    const runtimeServices = await runtimeServiceProvider.launch(1);
+    const runtimeServices = await runtimeServiceProvider.launch(1, undefined);
+
     consumptionServices = runtimeServices[0].consumption;
 
     let oid4vcServiceBaseUrl = process.env.OPENID4VC_SERVICE_BASEURL!;
