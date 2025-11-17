@@ -1,5 +1,4 @@
 import { ILogger, ILoggerFactory } from "@js-soft/logging-abstractions";
-import { NodeLoggerFactory } from "@js-soft/node-logger";
 import { EventBus } from "@js-soft/ts-utils";
 import { SodiumWrapper } from "@nmshd/crypto";
 import { AgentOptions } from "http";
@@ -85,26 +84,7 @@ export class Transport {
     public constructor(
         customConfig: IConfigOverwrite,
         public readonly eventBus: EventBus,
-        loggerFactory: ILoggerFactory = new NodeLoggerFactory({
-            appenders: {
-                consoleAppender: {
-                    type: "stdout",
-                    layout: { type: "pattern", pattern: "%[[%p] %c - %m%]" }
-                },
-                console: {
-                    type: "logLevelFilter",
-                    level: "Warn",
-                    appender: "consoleAppender"
-                }
-            },
-
-            categories: {
-                default: {
-                    appenders: ["console"],
-                    level: "TRACE"
-                }
-            }
-        }),
+        loggerFactory: ILoggerFactory,
         public readonly correlator?: ICorrelator
     ) {
         this._config = _.defaultsDeep({}, customConfig, Transport.defaultConfig);

@@ -50,6 +50,7 @@ import {
     ValidationResult
 } from "../../../src";
 
+import { NodeLoggerFactory } from "@js-soft/node-logger";
 import { TestUtil } from "../../core/TestUtil";
 import { MockEventBus } from "../MockEventBus";
 import { TestObjectFactory } from "./testHelpers/TestObjectFactory";
@@ -78,6 +79,26 @@ export class RequestsTestsContext {
             config,
             new EventEmitter2EventBus(() => {
                 // noop
+            }),
+            new NodeLoggerFactory({
+                appenders: {
+                    consoleAppender: {
+                        type: "stdout",
+                        layout: { type: "pattern", pattern: "%[[%p] %c - %m%]" }
+                    },
+                    console: {
+                        type: "logLevelFilter",
+                        level: "Warn",
+                        appender: "consoleAppender"
+                    }
+                },
+
+                categories: {
+                    default: {
+                        appenders: ["console"],
+                        level: "TRACE"
+                    }
+                }
             })
         ).init();
 
