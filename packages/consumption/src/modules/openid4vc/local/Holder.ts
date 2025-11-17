@@ -50,7 +50,7 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         super(3000, `OpenId4VcHolder ${Math.random().toString()}`, getOpenIdHolderModules(), accountController, attributeController);
     }
 
-    public async getVerifiableCredentials(ids: string[] | undefined): Promise<any[]> {
+    public async getVerifiableCredentials(ids: string[] | undefined): Promise<OwnIdentityAttribute[]> {
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         const storageService = this.agent.dependencyManager.resolve(InjectionSymbols.StorageService) as EnmeshedStorageService<BaseRecord>;
         const allCredentials = await storageService.getAllAsAttributes(this.agent.context, SdJwtVcRecord);
@@ -255,13 +255,13 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         return storedCredentials;
     }
 
-    public async resolveProofRequest(proofRequest: string): Promise<OpenId4VpResolvedAuthorizationRequest> {
+    public async resolveAuthorizationRequest(proofRequest: string): Promise<OpenId4VpResolvedAuthorizationRequest> {
         const resolvedProofRequest = await this.agent.openid4vc.holder.resolveOpenId4VpAuthorizationRequest(proofRequest);
 
         return resolvedProofRequest;
     }
 
-    public async acceptPresentationRequest(resolvedPresentationRequest: OpenId4VpResolvedAuthorizationRequest): Promise<
+    public async acceptAuthorizationRequest(resolvedPresentationRequest: OpenId4VpResolvedAuthorizationRequest): Promise<
         | {
               readonly status: number;
               readonly body: string | Record<string, unknown> | null;
