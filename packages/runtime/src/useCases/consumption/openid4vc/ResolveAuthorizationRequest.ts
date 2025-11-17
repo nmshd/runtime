@@ -1,0 +1,33 @@
+import { Result } from "@js-soft/ts-utils";
+import { OpenId4VcController } from "@nmshd/consumption";
+import { FetchedAuthorizationRequestDTO } from "@nmshd/runtime-types";
+import { Inject } from "@nmshd/typescript-ioc";
+import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
+
+export interface ResolveAuthorizationRequestRequest {
+    proofRequestUrl: string;
+}
+
+class Validator extends SchemaValidator<ResolveAuthorizationRequestRequest> {
+    public constructor(@Inject schemaRepository: SchemaRepository) {
+        super(schemaRepository.getSchema("ResolveAuthorizationRequestRequest"));
+    }
+}
+
+export class ResolveAuthorizationRequestUseCase extends UseCase<ResolveAuthorizationRequestRequest, FetchedAuthorizationRequestDTO> {
+    public constructor(
+        @Inject private readonly openId4VcContoller: OpenId4VcController,
+        @Inject validator: Validator
+    ) {
+        super(validator);
+    }
+
+    protected override async executeInternal(request: ResolveAuthorizationRequestRequest): Promise<Result<FetchedAuthorizationRequestDTO>> {
+        const result = await this.openId4VcContoller.resolveAuthorizationRequest(request.proofRequestUrl);
+
+        return Result.ok({
+            jsonRepresentation: result.data,
+            usedCredentials: result.usedCredentials
+        });
+    }
+}

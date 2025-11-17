@@ -16699,11 +16699,11 @@ export const SentNotificationRequest: any = {
     }
 }
 
-export const AcceptProofRequestRequest: any = {
+export const AcceptAuthorizationRequestRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/AcceptProofRequestRequest",
+    "$ref": "#/definitions/AcceptAuthorizationRequestRequest",
     "definitions": {
-        "AcceptProofRequestRequest": {
+        "AcceptAuthorizationRequestRequest": {
             "type": "object",
             "properties": {
                 "jsonEncodedRequest": {
@@ -16737,11 +16737,30 @@ export const FetchCredentialOfferRequest: any = {
     }
 }
 
-export const FetchProofRequestRequest: any = {
+export const GetVerifiableCredentialsRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/FetchProofRequestRequest",
+    "$ref": "#/definitions/GetVerifiableCredentialsRequest",
     "definitions": {
-        "FetchProofRequestRequest": {
+        "GetVerifiableCredentialsRequest": {
+            "type": "object",
+            "properties": {
+                "ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}
+
+export const ResolveAuthorizationRequestRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/ResolveAuthorizationRequestRequest",
+    "definitions": {
+        "ResolveAuthorizationRequestRequest": {
             "type": "object",
             "properties": {
                 "proofRequestUrl": {
@@ -19992,25 +20011,6 @@ export const LoadPeerTokenRequest: any = {
         "URLTokenReferenceString": {
             "type": "string",
             "pattern": "^https?:\\/\\/.*\\/r\\/TOK[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
-        }
-    }
-}
-
-export const GetVerifiableCredentialsRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetVerifiableCredentialsRequest",
-    "definitions": {
-        "GetVerifiableCredentialsRequest": {
-            "type": "object",
-            "properties": {
-                "ids": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            },
-            "additionalProperties": false
         }
     }
 }
