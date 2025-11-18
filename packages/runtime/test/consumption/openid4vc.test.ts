@@ -153,7 +153,7 @@ describe("custom openid4vc service", () => {
         expect(singleCredentialResult).toBeSuccessful();
         expect(singleCredentialResult.value).toHaveLength(1);
         expect(singleCredentialResult.value[0].id).toBe(firstCredentialId);
-    }, 10000000);
+    });
 
     async function startOid4VcComposeStack() {
         let baseUrl = process.env.NMSHD_TEST_BASEURL!;
