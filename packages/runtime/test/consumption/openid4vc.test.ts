@@ -1,7 +1,7 @@
 import { OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
 import axios, { AxiosInstance } from "axios";
 import path from "path";
-import { DockerComposeEnvironment, StartedDockerComposeEnvironment, Wait } from "testcontainers";
+import { DockerComposeEnvironment, GenericContainer, StartedDockerComposeEnvironment, StartedTestContainer, Wait } from "testcontainers";
 import { Agent as UndiciAgent, fetch as undiciFetch } from "undici";
 import { ConsumptionServices } from "../../src";
 import { RuntimeServiceProvider } from "../lib";
@@ -11,36 +11,38 @@ const fetchInstance: typeof fetch = (async (input, init) => {
     return response;
 }) as typeof fetch;
 
-const runtimeServiceProvider = new RuntimeServiceProvider(fetchInstance);
-let consumptionServices: ConsumptionServices;
-let axiosInstance: AxiosInstance;
-let dockerComposeStack: StartedDockerComposeEnvironment | undefined;
+describe("custom openid4vc service", () => {
+    const runtimeServiceProvider = new RuntimeServiceProvider(fetchInstance);
+    let consumptionServices: ConsumptionServices;
 
-beforeAll(async () => {
-    const runtimeServices = await runtimeServiceProvider.launch(1);
-    consumptionServices = runtimeServices[0].consumption;
+    let axiosInstance: AxiosInstance;
+    let dockerComposeStack: StartedDockerComposeEnvironment | undefined;
 
-    let oid4vcServiceBaseUrl = process.env.OPENID4VC_SERVICE_BASEURL!;
-    if (!oid4vcServiceBaseUrl) {
-        dockerComposeStack = await startOid4VcComposeStack();
-        const mappedPort = dockerComposeStack.getContainer("oid4vc-service-1").getMappedPort(9000);
-        oid4vcServiceBaseUrl = `http://localhost:${mappedPort}`;
-    }
+    beforeAll(async () => {
+        const runtimeServices = await runtimeServiceProvider.launch(1);
+        consumptionServices = runtimeServices[0].consumption;
 
-    axiosInstance = axios.create({
-        baseURL: oid4vcServiceBaseUrl,
-        headers: {
-            "Content-Type": "application/json" // eslint-disable-line @typescript-eslint/naming-convention
+        let oid4vcServiceBaseUrl = process.env.OPENID4VC_SERVICE_BASEURL!;
+        if (!oid4vcServiceBaseUrl) {
+            dockerComposeStack = await startOid4VcComposeStack();
+            const mappedPort = dockerComposeStack.getContainer("oid4vc-service-1").getMappedPort(9000);
+            oid4vcServiceBaseUrl = `http://localhost:${mappedPort}`;
         }
+
+        axiosInstance = axios.create({
+            baseURL: oid4vcServiceBaseUrl,
+            headers: {
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                "Content-Type": "application/json"
+            }
+        });
+    }, 120000);
+
+    afterAll(async () => {
+        await runtimeServiceProvider.stop();
+        if (dockerComposeStack) await dockerComposeStack.down();
     });
-}, 120000);
 
-afterAll(async () => {
-    await runtimeServiceProvider.stop();
-    if (dockerComposeStack) await dockerComposeStack.down();
-});
-
-describe("OpenID4VCI and OpenID4VCP", () => {
     let credentialOfferUrl: string;
 
     test("should process a given credential offer", async () => {
@@ -86,6 +88,7 @@ describe("OpenID4VCI and OpenID4VCP", () => {
             pex: {
                 id: "anId",
                 purpose: "To prove you work here",
+
                 // eslint-disable-next-line @typescript-eslint/naming-convention
                 input_descriptors: [
                     {
@@ -151,29 +154,145 @@ describe("OpenID4VCI and OpenID4VCP", () => {
         expect(singleCredentialResult.value).toHaveLength(1);
         expect(singleCredentialResult.value[0].id).toBe(firstCredentialId);
     });
+
+    async function startOid4VcComposeStack() {
+        let baseUrl = process.env.NMSHD_TEST_BASEURL!;
+        let addressGenerationHostnameOverride: string | undefined;
+
+        if (baseUrl.includes("localhost")) {
+            addressGenerationHostnameOverride = "localhost";
+            baseUrl = baseUrl.replace("localhost", "host.docker.internal");
+        }
+
+        const composeFolder = path.resolve(path.join(__dirname, "..", "..", "..", "..", ".dev"));
+        const composeStack = await new DockerComposeEnvironment(composeFolder, "compose.openid4vc.yml")
+            .withProjectName("runtime-oid4vc-tests")
+            .withEnvironment({
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                NMSHD_TEST_BASEURL: baseUrl,
+
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE: addressGenerationHostnameOverride
+            } as Record<string, string>)
+            .withStartupTimeout(60000)
+            .withWaitStrategy("oid4vc-service", Wait.forHealthCheck())
+            .up();
+
+        return composeStack;
+    }
 });
 
-async function startOid4VcComposeStack() {
-    let baseUrl = process.env.NMSHD_TEST_BASEURL!;
-    let addressGenerationHostnameOverride: string | undefined;
+describe("EUDIPLO", () => {
+    const eudiploUser = "test-admin";
+    const eudiploPassword = "test";
+    const eudiploIssuanceConfigurationId = "Employee ID Card";
+    const eudiploPresentationConfigurationId = "Employee ID Card";
+    const eudiploCredentialIdInConfiguration = "EmployeeIdCard";
+    const eudiploPort = 3000; // CAUTION: don't change this. The DCQL query has this port hardcoded in its configuration. The presentation test will fail if we change this.
 
-    if (baseUrl.includes("localhost")) {
-        addressGenerationHostnameOverride = "localhost";
-        baseUrl = baseUrl.replace("localhost", "host.docker.internal");
+    const runtimeServiceProvider = new RuntimeServiceProvider(fetchInstance);
+    let consumptionServices: ConsumptionServices;
+
+    let eudiploContainer: StartedTestContainer | undefined;
+    let axiosInstance: AxiosInstance;
+
+    beforeAll(async () => {
+        eudiploContainer = await startEudiplo();
+
+        const baseUrl = `http://localhost:${eudiploPort}`;
+
+        const accessTokenResponse = await axios.post(
+            `${baseUrl}/oauth2/token`,
+            {
+                grant_type: "client_credentials" // eslint-disable-line @typescript-eslint/naming-convention
+            },
+            {
+                headers: {
+                    "Content-Type": "application/json" // eslint-disable-line @typescript-eslint/naming-convention
+                },
+                auth: {
+                    username: eudiploUser,
+                    password: eudiploPassword
+                }
+            }
+        );
+
+        const accessToken = accessTokenResponse.data.access_token;
+
+        axiosInstance = axios.create({
+            baseURL: baseUrl,
+            headers: {
+                "Content-Type": "application/json", // eslint-disable-line @typescript-eslint/naming-convention
+                Authorization: `Bearer ${accessToken}` // eslint-disable-line @typescript-eslint/naming-convention
+            }
+        });
+
+        const runtimeServices = await runtimeServiceProvider.launch(1);
+        consumptionServices = runtimeServices[0].consumption;
+    });
+
+    afterAll(async () => {
+        await eudiploContainer?.stop();
+
+        await runtimeServiceProvider.stop();
+    });
+
+    test("issuance", async () => {
+        const credentialOfferUrl = (
+            await axiosInstance.post("/issuer-management/offer", {
+                response_type: "uri", // eslint-disable-line @typescript-eslint/naming-convention
+                issuanceId: eudiploIssuanceConfigurationId
+            })
+        ).data.uri;
+
+        const loadResult = await consumptionServices.openId4Vc.fetchCredentialOffer({ credentialOfferUrl });
+        expect(loadResult).toBeSuccessful();
+
+        const resolveResult = await consumptionServices.openId4Vc.resolveFetchedCredentialOffer({
+            data: loadResult.value.jsonRepresentation,
+            requestedCredentials: [eudiploCredentialIdInConfiguration]
+        });
+        expect(resolveResult).toBeSuccessful();
+    });
+
+    test("presentation", async () => {
+        const requestUrl = (
+            await axiosInstance.post(`/presentation-management/request`, {
+                response_type: "uri", // eslint-disable-line @typescript-eslint/naming-convention
+                requestId: eudiploPresentationConfigurationId
+            })
+        ).data.uri;
+
+        const loadResult = await consumptionServices.openId4Vc.resolveAuthorizationRequest({ requestUrl });
+        expect(loadResult).toBeSuccessful();
+
+        const queryResult = loadResult.value.authorizationRequest.dcql.queryResult;
+        expect(queryResult.can_be_satisfied).toBe(true);
+
+        const credentialMatches = queryResult.credential_matches["EmployeeIdCard-vc-sd-jwt"];
+        expect(credentialMatches.valid_credentials).toHaveLength(1);
+
+        // TODO: send the presentation with a manually selected credential
+    });
+
+    function startEudiplo() {
+        const eudiploContainer = new GenericContainer("ghcr.io/openwallet-foundation-labs/eudiplo:1.9")
+            .withCopyDirectoriesToContainer([
+                {
+                    source: path.resolve(path.join(__dirname, "..", "..", "..", "..", ".dev", "eudiplo-assets")),
+                    target: "/app/config"
+                }
+            ])
+            .withEnvironment({
+                JWT_SECRET: "OgwrDcgVQQ2yZwcFt7kPxQm3nUF+X3etF6MdLTstZAY=", // eslint-disable-line @typescript-eslint/naming-convention
+                AUTH_CLIENT_ID: "root", // eslint-disable-line @typescript-eslint/naming-convention
+                AUTH_CLIENT_SECRET: "test", // eslint-disable-line @typescript-eslint/naming-convention
+                PUBLIC_URL: `http://localhost:${eudiploPort}`, // eslint-disable-line @typescript-eslint/naming-convention
+                PORT: eudiploPort.toString() // eslint-disable-line @typescript-eslint/naming-convention
+            })
+            .withExposedPorts({ container: eudiploPort, host: eudiploPort })
+            .start();
+
+        return eudiploContainer;
     }
-
-    const composeFolder = path.resolve(path.join(__dirname, "..", "..", "..", "..", ".dev"));
-    const composeStack = await new DockerComposeEnvironment(composeFolder, "compose.openid4vc.yml")
-        .withProjectName("runtime-oid4vc-tests")
-        .withEnvironment({
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            NMSHD_TEST_BASEURL: baseUrl,
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE: addressGenerationHostnameOverride
-        } as Record<string, string>)
-        .withStartupTimeout(60000)
-        .withWaitStrategy("oid4vc-service", Wait.forHealthCheck())
-        .up();
-
-    return composeStack;
-}
+});

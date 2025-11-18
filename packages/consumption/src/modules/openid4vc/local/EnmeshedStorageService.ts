@@ -194,34 +194,27 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
         agentContext.config.logger.debug(`Finding records by query ${JSON.stringify(query)} and options ${JSON.stringify(queryOptions)}`);
         const records: T[] = [];
         for (const record of await this.getAll(agentContext, recordClass)) {
-            let match = true;
-            for (const [key, value] of Object.entries(query)) {
-                if ((record as any)[key] !== value) {
-                    match = false;
-                    break;
-                }
-            }
-            if (match) {
+            if (this.matchesQuery(record, query)) {
                 records.push(record);
             }
         }
         if (records.length === 0) {
             // try to recover over local storage - temporary fix
             for (const record of this.storage.values()) {
-                let match = true;
-                // there may be keys labeled with an $or - solve them accordingly
-                // TODO: $or and other operators not yet supported
-                for (const [key, value] of Object.entries(query)) {
-                    if ((record as any)[key] !== value) {
-                        match = false;
-                        break;
-                    }
-                }
-                if (match) {
+                if (this.matchesQuery(record, query)) {
                     records.push(record);
                 }
             }
         }
         return records;
+    }
+
+    private matchesQuery(record: BaseRecord, query: Query<T>): boolean {
+        return Object.entries(query).every(([key, value]) => {
+            if (key === "$or") {
+                return (value as any[]).some((subquery) => this.matchesQuery(record, subquery));
+            }
+            return record.getTags()[key] === value;
+        });
     }
 }
