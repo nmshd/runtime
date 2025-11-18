@@ -1,0 +1,37 @@
+diff --git a/node_modules/@openid4vc/openid4vp/dist/index.cjs b/node_modules/@openid4vc/openid4vp/dist/index.cjs
+index 86819af..6a4f7e1 100644
+--- a/node_modules/@openid4vc/openid4vp/dist/index.cjs
++++ b/node_modules/@openid4vc/openid4vp/dist/index.cjs
+@@ -643,7 +643,7 @@ async function validateOpenid4vpClientId(options, parserConfig) {
+ 			});
+ 			if (!isOpenid4vpAuthorizationRequestDcApi(authorizationRequestPayload)) {
+ 				const uri = authorizationRequestPayload.redirect_uri ?? authorizationRequestPayload.response_uri;
+-				if (!uri || new __openid4vc_utils.URL(uri).hostname !== clientIdIdentifier) throw new __openid4vc_oauth2.Oauth2ServerErrorResponseError({
++				if (!uri || new __openid4vc_utils.URL(uri).hostname.toLowerCase() !== clientIdIdentifier.toLowerCase()) throw new __openid4vc_oauth2.Oauth2ServerErrorResponseError({
+ 					error: __openid4vc_oauth2.Oauth2ErrorCodes.InvalidRequest,
+ 					error_description: "Invalid client identifier. The fully qualified domain name of the redirect_uri value MUST match the Client Identifier without the prefix x509_san_dns."
+ 				});
+diff --git a/node_modules/@openid4vc/openid4vp/package.json b/node_modules/@openid4vc/openid4vp/package.json
+index 0108f6c..424aec3 100644
+--- a/node_modules/@openid4vc/openid4vp/package.json
++++ b/node_modules/@openid4vc/openid4vp/package.json
+@@ -8,7 +8,7 @@
+   "exports": {
+     ".": {
+       "import": "./dist/index.mjs",
+-      "require": "./dist/index.js",
++      "require": "./dist/index.cjs",
+       "types": "./dist/index.d.ts"
+     },
+     "./package.json": "./package.json"
+@@ -27,7 +27,7 @@
+   "scripts": {
+     "build": "tsdown src/index.ts --format cjs,esm --dts --sourcemap"
+   },
+-  "main": "./dist/index.js",
++  "main": "./dist/index.cjs",
+   "module": "./dist/index.mjs",
+-  "types": "./dist/index.d.ts"
++  "types": "./dist/index.d.cts"
+ }
+\ No newline at end of file
