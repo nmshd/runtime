@@ -27,12 +27,12 @@ export class KeyStorage {
 
     public async hasKey(keyId: string): Promise<boolean> {
         const existing = await this.collection.read(keyId);
-        return existing !== undefined;
+        return !!existing;
     }
 
     public async storeKey(keyId: string, keyData: any): Promise<void> {
-        const existing = await this.hasKey(keyId);
-        if (existing) {
+        const entry = await this.collection.read(keyId);
+        if (entry) {
             this.logger.info(`Key with id ${keyId} already exists`);
             return;
         }
