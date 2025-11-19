@@ -1,6 +1,7 @@
 import { AgentContext, Kms } from "@credo-ts/core";
 import { ec as EC } from "elliptic";
-import _sodium from "libsodium-wrappers";
+
+import { SodiumWrapper } from "@nmshd/crypto";
 import sjcl from "sjcl";
 import { KeyStorage } from "./KeyStorage";
 
@@ -15,8 +16,8 @@ export class EnmshedHolderKeyManagmentService implements Kms.KeyManagementServic
 
     public readonly backend = EnmshedHolderKeyManagmentService.backend;
 
-    private readonly b64url = (bytes: Uint8Array) => _sodium.to_base64(bytes, _sodium.base64_variants.URLSAFE_NO_PADDING);
-    private readonly b64urlDecode = (b64url: string) => _sodium.from_base64(b64url, _sodium.base64_variants.URLSAFE_NO_PADDING);
+    private readonly b64url = (bytes: Uint8Array) => SodiumWrapper.sodium.to_base64(bytes, (SodiumWrapper.sodium as any).base64_variants.URLSAFE_NO_PADDING);
+    private readonly b64urlDecode = (b64url: string) => SodiumWrapper.sodium.from_base64(b64url, (SodiumWrapper.sodium as any).base64_variants.URLSAFE_NO_PADDING);
 
     // please note: we cannot use buffer here - because it is not available in the browser
     // and yes it could be pollyfilled but that extends the bundle size for no good reason
@@ -75,7 +76,7 @@ export class EnmshedHolderKeyManagmentService implements Kms.KeyManagementServic
     public async createKey<Type extends Kms.KmsCreateKeyType>(agentContext: AgentContext, options: Kms.KmsCreateKeyOptions<Type>): Promise<Kms.KmsCreateKeyReturn<Type>> {
         options.keyId ??= "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
             // Use libsodium's randombytes_uniform for secure random number generation
-            const r = _sodium.randombytes_uniform(16);
+            const r = SodiumWrapper.sodium.randombytes_uniform(16);
             const v = c === "x" ? r : (r & 0x3) | 0x8;
             return v.toString(16);
         });
@@ -114,12 +115,9 @@ export class EnmshedHolderKeyManagmentService implements Kms.KeyManagementServic
             return { keyId: options.keyId, publicJwk: publicJwk as Kms.KmsJwkPublic } as Kms.KmsCreateKeyReturn<Type>;
         }
 
-        await _sodium.ready;
-        const sodium = _sodium;
-
-        const { keyType, publicKey, privateKey } = sodium.crypto_sign_keypair();
+        const { keyType, publicKey, privateKey } = SodiumWrapper.sodium.crypto_sign_keypair();
         agentContext.config.logger.debug(`EKM: Created OKP key pair with id ${options.keyId} and keyType ${keyType}`);
-        const seed = privateKey.slice(0, sodium.crypto_sign_SEEDBYTES);
+        const seed = privateKey.slice(0, (SodiumWrapper.sodium as any).crypto_sign_SEEDBYTES);
 
         // Public JWK
         const publicJwk = {
@@ -192,10 +190,8 @@ export class EnmshedHolderKeyManagmentService implements Kms.KeyManagementServic
             } as Kms.KmsSignReturn);
         }
 
-        await _sodium.ready;
-        const sodium = _sodium;
-        const decode = (bytes: string) => sodium.from_base64(bytes, sodium.base64_variants.URLSAFE_NO_PADDING);
-        // get the priavte key bytes
+        const decode = (bytes: string) => SodiumWrapper.sodium.from_base64(bytes, (SodiumWrapper.sodium as any).base64_variants.URLSAFE_NO_PADDING);
+        // get the private key bytes
         if (privateKey.d === undefined) {
             throw new Error("Private key does not contain 'd' parameter");
         }
@@ -213,7 +209,7 @@ export class EnmshedHolderKeyManagmentService implements Kms.KeyManagementServic
         fullPrivateKeyBytes.set(publicKeyBytes, privateKeyBytes.length);
 
         // and use it to sign the data
-        const signature = sodium.crypto_sign_detached(options.data, fullPrivateKeyBytes);
+        const signature = SodiumWrapper.sodium.crypto_sign_detached(options.data, fullPrivateKeyBytes);
 
         return {
             signature: signature as Uint8Array<ArrayBuffer> // I hope this cast doesn't paper over something
@@ -396,6 +392,6 @@ export class EnmshedHolderKeyManagmentService implements Kms.KeyManagementServic
     }
     public randomBytes(agentContext: AgentContext, options: Kms.KmsRandomBytesOptions): Kms.KmsRandomBytesReturn {
         agentContext.config.logger.debug(`EKM: Generating ${options.length} random bytes`);
-        return _sodium.randombytes_buf(options.length); // Uint8Array
+        return SodiumWrapper.sodium.randombytes_buf(options.length); // Uint8Array
     }
 }
