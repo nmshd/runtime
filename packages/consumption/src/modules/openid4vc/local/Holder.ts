@@ -26,6 +26,7 @@ import { AccountController } from "@nmshd/transport";
 import { AttributesController, OwnIdentityAttribute } from "../../attributes";
 import { BaseAgent } from "./BaseAgent";
 import { EnmeshedStorageService } from "./EnmeshedStorageService";
+import { KeyStorage } from "./KeyStorage";
 
 function getOpenIdHolderModules() {
     return {
@@ -46,12 +47,11 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         redirectUri: "http://localhost:3000/redirect"
     };
 
-    public constructor(accountController: AccountController, attributeController: AttributesController, fetchInstance: typeof fetch) {
-        super(3000, `OpenId4VcHolder ${Math.random().toString()}`, getOpenIdHolderModules(), accountController, attributeController, fetchInstance);
+    public constructor(keyStorage: KeyStorage, accountController: AccountController, attributeController: AttributesController, fetchInstance: typeof fetch) {
+        super(keyStorage, getOpenIdHolderModules(), accountController, attributeController, fetchInstance);
     }
 
     public async getVerifiableCredentials(ids: string[] | undefined): Promise<OwnIdentityAttribute[]> {
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         const storageService = this.agent.dependencyManager.resolve(InjectionSymbols.StorageService) as EnmeshedStorageService<BaseRecord>;
         const allCredentials = await storageService.getAllAsAttributes(this.agent.context, SdJwtVcRecord);
 
@@ -202,7 +202,7 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
             credentialResponse.credentials.map((response) => {
                 // TODO: batch issuance not yet supported
                 const credential = response.credentials[0];
-                // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+
                 const enmeshedStorageService = this.agent.dependencyManager.resolve(InjectionSymbols.StorageService) as EnmeshedStorageService<BaseRecord>;
                 let credentialKey = "";
                 for (const resolved in resolvedCredentialOffer.offeredCredentialConfigurations) {
