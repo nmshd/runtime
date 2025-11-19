@@ -2,6 +2,7 @@ import { AgentContext, Kms } from "@credo-ts/core";
 import { ec as EC } from "elliptic";
 import _sodium from "libsodium-wrappers";
 import sjcl from "sjcl";
+import { KeyStorage } from "./KeyStorage";
 
 export interface JwkKeyPair {
     publicKey: JsonWebKey;
@@ -10,10 +11,9 @@ export interface JwkKeyPair {
 }
 
 export class EnmshedHolderKeyManagmentService implements Kms.KeyManagementService {
-    public static readonly backend = "fakeKeyManagementService";
+    public static readonly backend = "enmeshed";
 
     public readonly backend = EnmshedHolderKeyManagmentService.backend;
-    public keystore: Map<string, string>;
 
     private readonly b64url = (bytes: Uint8Array) => _sodium.to_base64(bytes, _sodium.base64_variants.URLSAFE_NO_PADDING);
     private readonly b64urlDecode = (b64url: string) => _sodium.from_base64(b64url, _sodium.base64_variants.URLSAFE_NO_PADDING);
@@ -33,20 +33,7 @@ export class EnmshedHolderKeyManagmentService implements Kms.KeyManagementServic
         return bytes;
     };
 
-    public constructor() {
-        if ((globalThis as any).fakeKeyStorage) {
-            this.keystore = (globalThis as any).fakeKeyStorage;
-        } else {
-            this.keystore = new Map<string, string>();
-        }
-        this.updateGlobalInstance(this.keystore);
-    }
-
-    public updateGlobalInstance(storage: Map<string, string>): void {
-        // console.log(`FKM: updating global instance ${JSON.stringify(Array.from(storage.entries()))}`);
-        (globalThis as any).fakeKeyStorage = storage;
-        // console.log(`FKM: global instance state ${JSON.stringify(Array.from((globalThis as any).fakeKeyStorage.entries()))}`);
-    }
+    public constructor(private readonly keyStorage: KeyStorage) {}
 
     public isOperationSupported(agentContext: AgentContext, operation: Kms.KmsOperation): boolean {
         agentContext.config.logger.debug(`EKM: Checking if operation is supported: ${JSON.stringify(operation)}`);
@@ -76,14 +63,14 @@ export class EnmshedHolderKeyManagmentService implements Kms.KeyManagementServic
         }
         return false;
     }
-    public getPublicKey(agentContext: AgentContext, keyId: string): Promise<Kms.KmsJwkPublic> {
-        const keyPair = this.keystore.get(keyId);
+    public async getPublicKey(agentContext: AgentContext, keyId: string): Promise<Kms.KmsJwkPublic> {
+        const keyPair = await this.keyStorage.getKey(keyId);
         if (!keyPair) {
             agentContext.config.logger.error(`EKM: Key with id ${keyId} not found`);
             throw new Error(`Key with id ${keyId} not found`);
         }
 
-        return Promise.resolve((JSON.parse(keyPair) as JwkKeyPair).publicKey as Kms.KmsJwkPublic);
+        return (JSON.parse(keyPair) as JwkKeyPair).publicKey as Kms.KmsJwkPublic;
     }
     public async createKey<Type extends Kms.KmsCreateKeyType>(agentContext: AgentContext, options: Kms.KmsCreateKeyOptions<Type>): Promise<Kms.KmsCreateKeyReturn<Type>> {
         options.keyId ??= "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
@@ -122,13 +109,9 @@ export class EnmshedHolderKeyManagmentService implements Kms.KeyManagementServic
 
             agentContext.config.logger.debug(`EKM: Created EC key pair with id ${options.keyId}`);
             // store the key pair in the keystore
-            this.keystore.set(options.keyId, JSON.stringify(jwkKeyPair));
+            await this.keyStorage.storeKey(options.keyId, JSON.stringify(jwkKeyPair));
 
-            this.updateGlobalInstance(this.keystore);
-            return await Promise.resolve({
-                keyId: options.keyId,
-                publicJwk: publicJwk as Kms.KmsJwkPublic
-            } as Kms.KmsCreateKeyReturn<Type>);
+            return { keyId: options.keyId, publicJwk: publicJwk as Kms.KmsJwkPublic } as Kms.KmsCreateKeyReturn<Type>;
         }
 
         await _sodium.ready;
@@ -157,31 +140,28 @@ export class EnmshedHolderKeyManagmentService implements Kms.KeyManagementServic
             keyType: "OKP"
         };
 
-        // store the key pair in the keystore
-        this.keystore.set(options.keyId, JSON.stringify(jwkKeyPair));
-        this.updateGlobalInstance(this.keystore);
-        return await Promise.resolve({
-            keyId: options.keyId,
-            publicJwk: publicJwk as Kms.KmsJwkPublic
-        } as Kms.KmsCreateKeyReturn<Type>);
+        await this.keyStorage.storeKey(options.keyId, JSON.stringify(jwkKeyPair));
+        return { keyId: options.keyId, publicJwk: publicJwk as Kms.KmsJwkPublic } as Kms.KmsCreateKeyReturn<Type>;
     }
+
     public importKey<Jwk extends Kms.KmsJwkPrivate>(agentContext: AgentContext, options: Kms.KmsImportKeyOptions<Jwk>): Promise<Kms.KmsImportKeyReturn<Jwk>> {
         agentContext.config.logger.debug(`EKM: Importing key with  ${JSON.stringify(options)}`);
         throw new Error("Method not implemented.");
     }
-    public deleteKey(agentContext: AgentContext, options: Kms.KmsDeleteKeyOptions): Promise<boolean> {
-        if (this.keystore.has(options.keyId)) {
-            agentContext.config.logger.debug(`EKM: Deleting key with id ${options.keyId}`);
-            this.keystore.delete(options.keyId);
-            this.updateGlobalInstance(this.keystore);
-            return Promise.resolve(true);
-        }
-        throw new Error(`key with id ${options.keyId} not found. and cannot be deleted`);
+
+    public async deleteKey(agentContext: AgentContext, options: Kms.KmsDeleteKeyOptions): Promise<boolean> {
+        const hasKey = await this.keyStorage.hasKey(options.keyId);
+        if (!hasKey) throw new Error(`key with id ${options.keyId} not found. and cannot be deleted`);
+
+        agentContext.config.logger.debug(`EKM: Deleting key with id ${options.keyId}`);
+        await this.keyStorage.deleteKey(options.keyId);
+        return true;
     }
+
     public async sign(agentContext: AgentContext, options: Kms.KmsSignOptions): Promise<Kms.KmsSignReturn> {
         agentContext.config.logger.debug(`EKM: Signing data with key id ${options.keyId} using algorithm ${options.algorithm}`);
 
-        const stringifiedKeyPair = this.keystore.get(options.keyId);
+        const stringifiedKeyPair = await this.keyStorage.getKey(options.keyId);
         if (!stringifiedKeyPair) {
             throw new Error(`Key with id ${options.keyId} not found`);
         }
@@ -273,8 +253,8 @@ export class EnmshedHolderKeyManagmentService implements Kms.KeyManagementServic
         }
     }
 
-    private ecdhEs(localKeyId: string, remotePublicJWK: any): Uint8Array {
-        const keyPairString = this.keystore.get(localKeyId);
+    private async ecdhEs(localKeyId: string, remotePublicJWK: any): Promise<Uint8Array> {
+        const keyPairString = await this.keyStorage.getKey(localKeyId);
         if (!keyPairString) {
             throw new Error(`Key with id ${localKeyId} not found`);
         }
@@ -360,7 +340,7 @@ export class EnmshedHolderKeyManagmentService implements Kms.KeyManagementServic
         return hashBuf.subarray(0, keyLength / 8);
     }
 
-    public encrypt(agentContext: AgentContext, options: Kms.KmsEncryptOptions): Promise<Kms.KmsEncryptReturn> {
+    public async encrypt(agentContext: AgentContext, options: Kms.KmsEncryptOptions): Promise<Kms.KmsEncryptReturn> {
         try {
             // encryption via A-256-GCM
             // we will call the services side bob and the incoming side alice
@@ -372,7 +352,7 @@ export class EnmshedHolderKeyManagmentService implements Kms.KeyManagementServic
             }
 
             // 1. derive the shared secret via ECDH-ES
-            const sharedSecret = this.ecdhEs(options.key.keyAgreement.keyId, options.key.keyAgreement.externalPublicJwk);
+            const sharedSecret = await this.ecdhEs(options.key.keyAgreement.keyId, options.key.keyAgreement.externalPublicJwk);
             agentContext.config.logger.debug(`EKM: Derived shared secret for encryption using ECDH-ES`);
             // 2. Concat KDF to form the final key
             const derivedKey = this.concatKdf(sharedSecret, 256, "A256GCM", options.key.keyAgreement);
@@ -403,7 +383,7 @@ export class EnmshedHolderKeyManagmentService implements Kms.KeyManagementServic
                 tag: tag
             };
 
-            return Promise.resolve(returnValue);
+            return returnValue;
         } catch (e) {
             agentContext.config.logger.error(`EKM: Error during encryption: ${e}`);
             throw e;

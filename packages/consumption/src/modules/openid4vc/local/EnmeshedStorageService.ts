@@ -15,19 +15,21 @@ import {
     W3cCredentialRecord,
     W3cJwtVerifiableCredential
 } from "@credo-ts/core";
-import { IdentityAttribute } from "@nmshd/content";
+import { IdentityAttribute, VerifiableCredential as VerifiableCredentialAttributeValue } from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
 import { AccountController } from "@nmshd/transport";
 import { OwnIdentityAttribute } from "../../attributes";
 import { AttributesController } from "../../attributes/AttributesController";
+import { KeyStorage } from "./KeyStorage";
 
 @injectable()
 export class EnmeshedStorageService<T extends BaseRecord> implements StorageService<T> {
     public storage: Map<string, T> = new Map<string, T>();
 
     public constructor(
-        public accountController: AccountController,
-        public attributeController: AttributesController
+        private readonly accountController: AccountController,
+        private readonly attributeController: AttributesController,
+        private readonly keyStorage: KeyStorage
     ) {}
 
     public async save(agentContext: AgentContext, record: T): Promise<void> {
@@ -144,10 +146,16 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
 
     public async getAll(agentContext: AgentContext, recordClass: BaseRecordConstructor<T>): Promise<T[]> {
         const records: T[] = [];
-        const attributes = await this.attributeController.getLocalAttributes({ "@type": "OwnIdentityAttribute", "content.value.@type": "VerifiableCredential" });
+        const attributes = (await this.attributeController.getLocalAttributes({
+            "@type": "OwnIdentityAttribute",
+            "content.value.@type": "VerifiableCredential"
+        })) as OwnIdentityAttribute[];
+
         for (const attribute of attributes) {
+            const value = attribute.content.value as VerifiableCredentialAttributeValue;
+
             // TODO: Correct casting
-            const type = (attribute as any).content.value.type;
+            const type = value.type;
             let record: T;
             if (type === ClaimFormat.SdJwtDc.toString() && recordClass.name === SdJwtVcRecord.name) {
                 record = new SdJwtVcRecord({ id: (attribute as any).content.id, compactSdJwtVc: (attribute as any).content.value.value }) as unknown as T;
@@ -164,18 +172,14 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
                 agentContext.config.logger.info(`Skipping attribute with id ${attribute.id} and type ${type} as it does not match record class ${recordClass.name}`);
                 continue;
             }
-            if ((attribute as any).content.value.key !== undefined) {
+
+            if (value.key !== undefined) {
                 // TODO: Remove as this is only a workaround for demo purposes
                 agentContext.config.logger.info("Found keys to possibly import");
-                const parsed = JSON.parse((attribute as any).content.value.key) as Map<string, any>;
+
+                const parsed = JSON.parse(value.key) as Map<string, any>;
                 for (const [k, v] of parsed) {
-                    const currentKeys = (globalThis as any).fakeKeyStorage as Map<string, any>;
-                    if (!currentKeys.has(k)) {
-                        (globalThis as any).fakeKeyStorage.set(k, v);
-                        agentContext.config.logger.info(`Added key ${k} to fake keystore`);
-                    } else {
-                        agentContext.config.logger.info(`Key ${k} already in fake keystore`);
-                    }
+                    await this.keyStorage.storeKey(k, v);
                 }
             }
             records.push(record);
