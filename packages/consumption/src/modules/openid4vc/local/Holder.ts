@@ -52,7 +52,7 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
     }
 
     public async getVerifiableCredentials(ids: string[] | undefined): Promise<OwnIdentityAttribute[]> {
-        const storageService = this.agent.dependencyManager.resolve(InjectionSymbols.StorageService) as EnmeshedStorageService<BaseRecord>;
+        const storageService = this.agent.dependencyManager.resolve<EnmeshedStorageService<BaseRecord>>(InjectionSymbols.StorageService);
         const allCredentials = await storageService.getAllAsAttributes(this.agent.context, SdJwtVcRecord);
 
         if (!ids) return allCredentials;
@@ -203,7 +203,7 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
                 // TODO: batch issuance not yet supported
                 const credential = response.credentials[0];
 
-                const enmeshedStorageService = this.agent.dependencyManager.resolve(InjectionSymbols.StorageService) as EnmeshedStorageService<BaseRecord>;
+                const enmeshedStorageService = this.agent.dependencyManager.resolve<EnmeshedStorageService<BaseRecord>>(InjectionSymbols.StorageService);
                 let credentialKey = "";
                 for (const resolved in resolvedCredentialOffer.offeredCredentialConfigurations) {
                     credentialKey = resolved;
