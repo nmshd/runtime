@@ -11,7 +11,7 @@ export interface JwkKeyPair {
 }
 
 export class EnmshedHolderKeyManagmentService implements Kms.KeyManagementService {
-    public static readonly backend = "fakeKeyManagementService";
+    public static readonly backend = "enmeshed";
 
     public readonly backend = EnmshedHolderKeyManagmentService.backend;
 
