@@ -83,7 +83,7 @@ export class OpenId4VcController extends ConsumptionBaseController {
 
         // TODO: extract DTOs
 
-        const usedCredentials = await this.extractUsedCredentials(authorizationRequest);
+        const usedCredentials = await this.extractUsedCredentialsFromAuthorizationRequest(authorizationRequest);
 
         return {
             authorizationRequest,
@@ -91,7 +91,7 @@ export class OpenId4VcController extends ConsumptionBaseController {
         };
     }
 
-    private async extractUsedCredentials(
+    private async extractUsedCredentialsFromAuthorizationRequest(
         authorizationRequest: OpenId4VpResolvedAuthorizationRequest
     ): Promise<{ id: string; data: string; type: string; displayInformation?: string }[]> {
         const dcqlSatisfied = authorizationRequest.dcql?.queryResult.can_be_satisfied ?? false;
