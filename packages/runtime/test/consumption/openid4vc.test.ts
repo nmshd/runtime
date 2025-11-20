@@ -6,10 +6,10 @@ import { Agent as UndiciAgent, fetch as undiciFetch } from "undici";
 import { ConsumptionServices } from "../../src";
 import { RuntimeServiceProvider } from "../lib";
 
-const fetchInstance: typeof fetch = (async (input, init) => {
-    const response = await undiciFetch(input as any, { ...(init as any), dispatcher: new UndiciAgent({}) });
+const fetchInstance: typeof fetch = (async (input: any, init: any) => {
+    const response = await undiciFetch(input, { ...init, dispatcher: new UndiciAgent({}) });
     return response;
-}) as typeof fetch;
+}) as unknown as typeof fetch;
 
 describe("custom openid4vc service", () => {
     const runtimeServiceProvider = new RuntimeServiceProvider(fetchInstance);
