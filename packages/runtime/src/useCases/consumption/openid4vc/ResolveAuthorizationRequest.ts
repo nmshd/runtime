@@ -2,6 +2,7 @@ import { Result } from "@js-soft/ts-utils";
 import { OpenId4VcController } from "@nmshd/consumption";
 import { FetchedAuthorizationRequestDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
+import stringifySafe from "json-stringify-safe";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
 export interface ResolveAuthorizationRequestRequest {
@@ -25,6 +26,9 @@ export class ResolveAuthorizationRequestUseCase extends UseCase<ResolveAuthoriza
     protected override async executeInternal(request: ResolveAuthorizationRequestRequest): Promise<Result<FetchedAuthorizationRequestDTO>> {
         const result = await this.openId4VcContoller.resolveAuthorizationRequest(request.requestUrl);
 
-        return Result.ok({ authorizationRequest: JSON.parse(JSON.stringify(result.authorizationRequest)), usedCredentials: result.usedCredentials });
+        return Result.ok({
+            authorizationRequest: JSON.parse(stringifySafe(result.authorizationRequest)),
+            usedCredentials: result.usedCredentials
+        });
     }
 }
