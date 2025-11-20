@@ -83,7 +83,28 @@ export class OpenId4VcController extends ConsumptionBaseController {
 
         // TODO: extract DTOs
 
-        const matchedCredentialsSdJwtVc = authorizationRequest.presentationExchange?.credentialsForRequest.requirements
+        const usedCredentials = await this.extractUsedCredentialsFromAuthorizationRequest(authorizationRequest);
+
+        return {
+            authorizationRequest,
+            usedCredentials
+        };
+    }
+
+    private async extractUsedCredentialsFromAuthorizationRequest(
+        authorizationRequest: OpenId4VpResolvedAuthorizationRequest
+    ): Promise<{ id: string; data: string; type: string; displayInformation?: string }[]> {
+        const dcqlSatisfied = authorizationRequest.dcql?.queryResult.can_be_satisfied ?? false;
+        const authorizationRequestSatisfied = authorizationRequest.presentationExchange?.credentialsForRequest.areRequirementsSatisfied ?? false;
+        if (!dcqlSatisfied && !authorizationRequestSatisfied) {
+            return [];
+        }
+
+        // there is no easy method to check which credentials were used in dcql
+        // this has to be added later
+        if (!authorizationRequestSatisfied) return [];
+
+        const matchedCredentialsFromPresentationExchange = authorizationRequest.presentationExchange?.credentialsForRequest.requirements
             .map((entry) =>
                 entry.submissionEntry
                     .map((subEntry) => subEntry.verifiableCredentials.filter((vc) => vc.claimFormat === ClaimFormat.SdJwtDc).map((vc) => vc.credentialRecord.compactSdJwtVc))
@@ -93,12 +114,8 @@ export class OpenId4VcController extends ConsumptionBaseController {
 
         const allCredentials = await this.getVerifiableCredentials();
 
-        const usedCredentials = allCredentials.filter((credential) => matchedCredentialsSdJwtVc?.includes(credential.data));
-
-        return {
-            authorizationRequest,
-            usedCredentials
-        };
+        const usedCredentials = allCredentials.filter((credential) => matchedCredentialsFromPresentationExchange?.includes(credential.data));
+        return usedCredentials;
     }
 
     public async acceptAuthorizationRequest(
