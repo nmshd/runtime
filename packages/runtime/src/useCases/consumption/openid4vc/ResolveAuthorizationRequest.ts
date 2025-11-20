@@ -25,6 +25,6 @@ export class ResolveAuthorizationRequestUseCase extends UseCase<ResolveAuthoriza
     protected override async executeInternal(request: ResolveAuthorizationRequestRequest): Promise<Result<FetchedAuthorizationRequestDTO>> {
         const result = await this.openId4VcContoller.resolveAuthorizationRequest(request.requestUrl);
 
-        return Result.ok({ authorizationRequest: result.authorizationRequest, usedCredentials: result.usedCredentials });
+        return Result.ok({ authorizationRequest: JSON.parse(JSON.stringify(result.authorizationRequest)), usedCredentials: result.usedCredentials });
     }
 }
