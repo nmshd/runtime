@@ -16,14 +16,14 @@ class Validator extends SchemaValidator<GetVerifiableCredentialsRequest> {
 
 export class GetVerifiableCredentialsUseCase extends UseCase<GetVerifiableCredentialsRequest, VerifiableCredentialDTO[]> {
     public constructor(
-        @Inject private readonly openId4VcContoller: OpenId4VcController,
+        @Inject private readonly openId4VcController: OpenId4VcController,
         @Inject validator: Validator
     ) {
         super(validator);
     }
 
     protected override async executeInternal(request: GetVerifiableCredentialsRequest): Promise<Result<VerifiableCredentialDTO[]>> {
-        const credentials = await this.openId4VcContoller.getVerifiableCredentials(request.ids);
+        const credentials = await this.openId4VcController.getVerifiableCredentials(request.ids);
         return Result.ok(credentials);
     }
 }
