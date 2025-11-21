@@ -1,6 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
 import { OpenId4VcController } from "@nmshd/consumption";
-import { ResolvedCredentialOfferDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
@@ -28,6 +27,6 @@ export class ResolveCredentialOfferUseCase extends UseCase<ResolveCredentialOffe
 
     protected override async executeInternal(request: ResolveCredentialOfferRequest): Promise<Result<ResolveCredentialOfferResponse>> {
         const result = await this.openId4VcController.resolveCredentialOffer(request.credentialOfferUrl);
-        return Result.ok({ jsonRepresentation: result.data } as ResolvedCredentialOfferDTO);
+        return Result.ok({ jsonRepresentation: result.data });
     }
 }
