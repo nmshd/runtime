@@ -1,5 +1,5 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
-import { ResolvedAuthorizationRequestDTO, ResolvedCredentialOfferDTO, VerifiableCredentialDTO } from "@nmshd/runtime-types";
+import { VerifiableCredentialDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
 import {
     AcceptAuthorizationRequestRequest,
@@ -9,8 +9,10 @@ import {
     AcceptCredentialOfferUseCase,
     GetVerifiableCredentialsUseCase,
     ResolveAuthorizationRequestRequest,
+    ResolveAuthorizationRequestResponse,
     ResolveAuthorizationRequestUseCase,
     ResolveCredentialOfferRequest,
+    ResolveCredentialOfferResponse,
     ResolveCredentialOfferUseCase
 } from "../../../useCases";
 
@@ -23,7 +25,7 @@ export class OpenId4VcFacade {
         @Inject private readonly getVerifiableCredentialsUseCase: GetVerifiableCredentialsUseCase
     ) {}
 
-    public async resolveCredentialOffer(request: ResolveCredentialOfferRequest): Promise<Result<ResolvedCredentialOfferDTO, ApplicationError>> {
+    public async resolveCredentialOffer(request: ResolveCredentialOfferRequest): Promise<Result<ResolveCredentialOfferResponse, ApplicationError>> {
         return await this.resolveCredentialOfferUseCase.execute(request);
     }
 
@@ -31,7 +33,7 @@ export class OpenId4VcFacade {
         return await this.acceptCredentialOfferUseCase.execute(request);
     }
 
-    public async resolveAuthorizationRequest(request: ResolveAuthorizationRequestRequest): Promise<Result<ResolvedAuthorizationRequestDTO, ApplicationError>> {
+    public async resolveAuthorizationRequest(request: ResolveAuthorizationRequestRequest): Promise<Result<ResolveAuthorizationRequestResponse, ApplicationError>> {
         return await this.resolveAuthorizationRequestUseCase.execute(request);
     }
 

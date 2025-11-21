@@ -8,7 +8,5 @@ export * from "./LocalAttributeForwardingDetailsDTO";
 export * from "./LocalNotificationDTO";
 export * from "./LocalRequestDTO";
 export * from "./RequestValidationResultDTO";
-export * from "./ResolvedAuthorizationRequestDTO";
-export * from "./ResolvedCredentialOfferDTO";
 export * from "./SettingDTO";
 export * from "./VerifiableCredentialDTO";
