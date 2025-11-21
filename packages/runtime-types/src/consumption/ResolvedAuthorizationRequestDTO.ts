@@ -1,6 +1,6 @@
 import { VerifiableCredentialDTO } from "./VerifiableCredentialDTO";
 
-export interface FetchedAuthorizationRequestDTO {
+export interface ResolvedAuthorizationRequestDTO {
     authorizationRequest: Record<string, any>;
     usedCredentials: VerifiableCredentialDTO[];
 }

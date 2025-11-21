@@ -16718,19 +16718,29 @@ export const AcceptAuthorizationRequestRequest: any = {
     }
 }
 
-export const FetchCredentialOfferRequest: any = {
+export const AcceptCredentialOfferRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/FetchCredentialOfferRequest",
+    "$ref": "#/definitions/AcceptCredentialOfferRequest",
     "definitions": {
-        "FetchCredentialOfferRequest": {
+        "AcceptCredentialOfferRequest": {
             "type": "object",
             "properties": {
-                "credentialOfferUrl": {
+                "credentialOffer": {
                     "type": "string"
+                },
+                "pinCode": {
+                    "type": "string"
+                },
+                "credentialConfigurationIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             },
             "required": [
-                "credentialOfferUrl"
+                "credentialOffer",
+                "credentialConfigurationIds"
             ],
             "additionalProperties": false
         }
@@ -16756,6 +16766,25 @@ export const GetVerifiableCredentialsRequest: any = {
     }
 }
 
+export const ResolveAndAcceptCredentialOfferRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/ResolveAndAcceptCredentialOfferRequest",
+    "definitions": {
+        "ResolveAndAcceptCredentialOfferRequest": {
+            "type": "object",
+            "properties": {
+                "credentialOfferUrl": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "credentialOfferUrl"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
 export const ResolveAuthorizationRequestRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/ResolveAuthorizationRequestRequest",
@@ -16763,12 +16792,12 @@ export const ResolveAuthorizationRequestRequest: any = {
         "ResolveAuthorizationRequestRequest": {
             "type": "object",
             "properties": {
-                "requestUrl": {
+                "authorizationRequestUrl": {
                     "type": "string"
                 }
             },
             "required": [
-                "requestUrl"
+                "authorizationRequestUrl"
             ],
             "additionalProperties": false
         }
@@ -16788,35 +16817,6 @@ export const ResolveCredentialOfferRequest: any = {
             },
             "required": [
                 "credentialOfferUrl"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
-export const FetchedCredentialOfferRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/FetchedCredentialOfferRequest",
-    "definitions": {
-        "FetchedCredentialOfferRequest": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "type": "string"
-                },
-                "pinCode": {
-                    "type": "string"
-                },
-                "requestedCredentials": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            },
-            "required": [
-                "data",
-                "requestedCredentials"
             ],
             "additionalProperties": false
         }

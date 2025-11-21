@@ -1,12 +1,12 @@
 import { Result } from "@js-soft/ts-utils";
 import { OpenId4VcController } from "@nmshd/consumption";
-import { FetchedAuthorizationRequestDTO } from "@nmshd/runtime-types";
+import { ResolvedAuthorizationRequestDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
 import stringifySafe from "json-stringify-safe";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
 export interface ResolveAuthorizationRequestRequest {
-    requestUrl: string;
+    authorizationRequestUrl: string;
 }
 
 class Validator extends SchemaValidator<ResolveAuthorizationRequestRequest> {
@@ -15,16 +15,16 @@ class Validator extends SchemaValidator<ResolveAuthorizationRequestRequest> {
     }
 }
 
-export class ResolveAuthorizationRequestUseCase extends UseCase<ResolveAuthorizationRequestRequest, FetchedAuthorizationRequestDTO> {
+export class ResolveAuthorizationRequestUseCase extends UseCase<ResolveAuthorizationRequestRequest, ResolvedAuthorizationRequestDTO> {
     public constructor(
-        @Inject private readonly openId4VcContoller: OpenId4VcController,
+        @Inject private readonly openId4VcController: OpenId4VcController,
         @Inject validator: Validator
     ) {
         super(validator);
     }
 
-    protected override async executeInternal(request: ResolveAuthorizationRequestRequest): Promise<Result<FetchedAuthorizationRequestDTO>> {
-        const result = await this.openId4VcContoller.resolveAuthorizationRequest(request.requestUrl);
+    protected override async executeInternal(request: ResolveAuthorizationRequestRequest): Promise<Result<ResolvedAuthorizationRequestDTO>> {
+        const result = await this.openId4VcController.resolveAuthorizationRequest(request.authorizationRequestUrl);
 
         return Result.ok({
             authorizationRequest: JSON.parse(stringifySafe(result.authorizationRequest)),

@@ -25,7 +25,7 @@ export class OpenId4VcController extends ConsumptionBaseController {
         return this.parent.consumptionConfig.fetchInstance ?? fetch;
     }
 
-    public async fetchCredentialOffer(credentialOfferUrl: string): Promise<{ data: string }> {
+    public async resolveCredentialOffer(credentialOfferUrl: string): Promise<{ data: string }> {
         const holder = new Holder(this.keyStorage, this.parent.accountController, this.parent.attributes, this.fetchInstance);
         await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
         const res = await holder.resolveCredentialOffer(credentialOfferUrl);
@@ -34,15 +34,14 @@ export class OpenId4VcController extends ConsumptionBaseController {
         };
     }
 
-    public async processFetchedCredentialOffer(
-        fetchedCredentialOffer: string,
-        requestedCredentialOffers: string[],
+    public async acceptCredentialOffer(
+        credentialOffer: string,
+        credentialConfigurationIds: string[],
         pinCode?: string
     ): Promise<{ data: string; id: string; type: string; displayInformation: string | undefined }> {
         const holder = new Holder(this.keyStorage, this.parent.accountController, this.parent.attributes, this.fetchInstance);
         await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
-        const credentialOffer = JSON.parse(fetchedCredentialOffer);
-        const credentials = await holder.requestAndStoreCredentials(credentialOffer, { credentialsToRequest: requestedCredentialOffers, txCode: pinCode });
+        const credentials = await holder.requestAndStoreCredentials(JSON.parse(credentialOffer), { credentialsToRequest: credentialConfigurationIds, txCode: pinCode });
 
         // TODO: support multiple credentials
         const credential = credentials[0].content.value as VerifiableCredential;
@@ -56,7 +55,7 @@ export class OpenId4VcController extends ConsumptionBaseController {
         };
     }
 
-    public async processCredentialOffer(credentialOffer: string): Promise<{ data: string; id: string; type: string; displayInformation: string | undefined }> {
+    public async resolveAndAcceptCredentialOffer(credentialOffer: string): Promise<{ data: string; id: string; type: string; displayInformation: string | undefined }> {
         const holder = new Holder(this.keyStorage, this.parent.accountController, this.parent.attributes, this.fetchInstance);
         await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
         const res = await holder.resolveCredentialOffer(credentialOffer);
@@ -75,11 +74,11 @@ export class OpenId4VcController extends ConsumptionBaseController {
     }
 
     public async resolveAuthorizationRequest(
-        requestUrl: string
+        authorizationRequestUrl: string
     ): Promise<{ authorizationRequest: OpenId4VpResolvedAuthorizationRequest; usedCredentials: { id: string; data: string; type: string; displayInformation?: string }[] }> {
         const holder = new Holder(this.keyStorage, this.parent.accountController, this.parent.attributes, this.fetchInstance);
         await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
-        const authorizationRequest = await holder.resolveAuthorizationRequest(requestUrl);
+        const authorizationRequest = await holder.resolveAuthorizationRequest(authorizationRequestUrl);
 
         // TODO: extract DTOs
 

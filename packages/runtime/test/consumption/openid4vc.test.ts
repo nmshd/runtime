@@ -54,7 +54,7 @@ describe("custom openid4vc service", () => {
 
         credentialOfferUrl = responseData.result.credentialOffer;
 
-        const result = await consumptionServices.openId4Vc.fetchCredentialOffer({
+        const result = await consumptionServices.openId4Vc.resolveCredentialOffer({
             credentialOfferUrl
         });
 
@@ -72,9 +72,9 @@ describe("custom openid4vc service", () => {
             requestedCredentials = credentialOfferDecoded["credentialOfferPayload"]["credential_configuration_ids"];
         }
 
-        const acceptanceResult = await consumptionServices.openId4Vc.resolveFetchedCredentialOffer({
-            data: jsonRepresentation,
-            requestedCredentials: requestedCredentials
+        const acceptanceResult = await consumptionServices.openId4Vc.acceptCredentialOffer({
+            credentialOffer: jsonRepresentation,
+            credentialConfigurationIds: requestedCredentials
         });
         expect(acceptanceResult).toBeSuccessful();
         expect(typeof acceptanceResult.value.id).toBe("string");
@@ -119,7 +119,7 @@ describe("custom openid4vc service", () => {
         expect(response.status).toBe(200);
         const responseData = await response.data;
 
-        const result = await consumptionServices.openId4Vc.resolveAuthorizationRequest({ requestUrl: responseData.result.presentationRequest });
+        const result = await consumptionServices.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl: responseData.result.presentationRequest });
         expect(result.value.usedCredentials).toHaveLength(1);
 
         const request = result.value.authorizationRequest as OpenId4VpResolvedAuthorizationRequest;
@@ -245,25 +245,25 @@ describe("EUDIPLO", () => {
             })
         ).data.uri;
 
-        const loadResult = await consumptionServices.openId4Vc.fetchCredentialOffer({ credentialOfferUrl });
+        const loadResult = await consumptionServices.openId4Vc.resolveCredentialOffer({ credentialOfferUrl });
         expect(loadResult).toBeSuccessful();
 
-        const resolveResult = await consumptionServices.openId4Vc.resolveFetchedCredentialOffer({
-            data: loadResult.value.jsonRepresentation,
-            requestedCredentials: [eudiploCredentialIdInConfiguration]
+        const resolveResult = await consumptionServices.openId4Vc.acceptCredentialOffer({
+            credentialOffer: loadResult.value.jsonRepresentation,
+            credentialConfigurationIds: [eudiploCredentialIdInConfiguration]
         });
         expect(resolveResult).toBeSuccessful();
     });
 
     test("presentation", async () => {
-        const requestUrl = (
+        const authorizationRequestUrl = (
             await axiosInstance.post(`/presentation-management/request`, {
                 response_type: "uri", // eslint-disable-line @typescript-eslint/naming-convention
                 requestId: eudiploPresentationConfigurationId
             })
         ).data.uri;
 
-        const loadResult = await consumptionServices.openId4Vc.resolveAuthorizationRequest({ requestUrl });
+        const loadResult = await consumptionServices.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl });
         expect(loadResult).toBeSuccessful();
 
         const queryResult = loadResult.value.authorizationRequest.dcql.queryResult;
