@@ -16766,25 +16766,6 @@ export const GetVerifiableCredentialsRequest: any = {
     }
 }
 
-export const ResolveAndAcceptCredentialOfferRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/ResolveAndAcceptCredentialOfferRequest",
-    "definitions": {
-        "ResolveAndAcceptCredentialOfferRequest": {
-            "type": "object",
-            "properties": {
-                "credentialOfferUrl": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "credentialOfferUrl"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
 export const ResolveAuthorizationRequestRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/ResolveAuthorizationRequestRequest",
