@@ -1171,6 +1171,9 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/SurnameJSON"
                 },
                 {
+                    "$ref": "#/definitions/VerifiableCredentialJSON"
+                },
+                {
                     "$ref": "#/definitions/WebsiteJSON"
                 }
             ]
@@ -1793,6 +1796,43 @@ export const CanCreateOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+        "VerifiableCredentialJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "VerifiableCredential"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "displayInformation": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "title",
+                "type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
         "WebsiteJSON": {
             "type": "object",
             "properties": {
@@ -2053,6 +2093,7 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "Sex",
                 "StreetAddress",
                 "Surname",
+                "VerifiableCredential",
                 "Website"
             ]
         },
@@ -3149,6 +3190,9 @@ export const CompleteOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/SurnameJSON"
                 },
                 {
+                    "$ref": "#/definitions/VerifiableCredentialJSON"
+                },
+                {
                     "$ref": "#/definitions/WebsiteJSON"
                 }
             ]
@@ -3767,6 +3811,43 @@ export const CompleteOutgoingRequestRequest: any = {
             },
             "required": [
                 "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "VerifiableCredentialJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "VerifiableCredential"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "displayInformation": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "title",
+                "type",
                 "value"
             ],
             "additionalProperties": false
@@ -5115,6 +5196,9 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "$ref": "#/definitions/SurnameJSON"
                 },
                 {
+                    "$ref": "#/definitions/VerifiableCredentialJSON"
+                },
+                {
                     "$ref": "#/definitions/WebsiteJSON"
                 }
             ]
@@ -5733,6 +5817,43 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
             },
             "required": [
                 "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "VerifiableCredentialJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "VerifiableCredential"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "displayInformation": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "title",
+                "type",
                 "value"
             ],
             "additionalProperties": false
@@ -7698,6 +7819,9 @@ export const CreateOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/SurnameJSON"
                 },
                 {
+                    "$ref": "#/definitions/VerifiableCredentialJSON"
+                },
+                {
                     "$ref": "#/definitions/WebsiteJSON"
                 }
             ]
@@ -8320,6 +8444,43 @@ export const CreateOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+        "VerifiableCredentialJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "VerifiableCredential"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "displayInformation": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "title",
+                "type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
         "WebsiteJSON": {
             "type": "object",
             "properties": {
@@ -8580,6 +8741,7 @@ export const CreateOutgoingRequestRequest: any = {
                 "Sex",
                 "StreetAddress",
                 "Surname",
+                "VerifiableCredential",
                 "Website"
             ]
         },
@@ -10682,6 +10844,9 @@ export const ReceivedIncomingRequestRequest: any = {
                     "$ref": "#/definitions/SurnameJSON"
                 },
                 {
+                    "$ref": "#/definitions/VerifiableCredentialJSON"
+                },
+                {
                     "$ref": "#/definitions/WebsiteJSON"
                 }
             ]
@@ -11304,6 +11469,43 @@ export const ReceivedIncomingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+        "VerifiableCredentialJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "VerifiableCredential"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "displayInformation": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "title",
+                "type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
         "WebsiteJSON": {
             "type": "object",
             "properties": {
@@ -11564,6 +11766,7 @@ export const ReceivedIncomingRequestRequest: any = {
                 "Sex",
                 "StreetAddress",
                 "Surname",
+                "VerifiableCredential",
                 "Website"
             ]
         },
@@ -13084,6 +13287,7 @@ export const ExecuteIdentityAttributeQueryRequest: any = {
                 "Sex",
                 "StreetAddress",
                 "Surname",
+                "VerifiableCredential",
                 "Website"
             ]
         },
@@ -13188,6 +13392,7 @@ export const ExecuteIQLQueryRequest: any = {
                 "Sex",
                 "StreetAddress",
                 "Surname",
+                "VerifiableCredential",
                 "Website"
             ]
         },
@@ -14657,6 +14862,9 @@ export const SucceedOwnIdentityAttributeRequest: any = {
                     "$ref": "#/definitions/SurnameJSON"
                 },
                 {
+                    "$ref": "#/definitions/VerifiableCredentialJSON"
+                },
+                {
                     "$ref": "#/definitions/WebsiteJSON"
                 }
             ]
@@ -15275,6 +15483,43 @@ export const SucceedOwnIdentityAttributeRequest: any = {
             },
             "required": [
                 "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "VerifiableCredentialJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "VerifiableCredential"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "displayInformation": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "title",
+                "type",
                 "value"
             ],
             "additionalProperties": false
@@ -16085,6 +16330,7 @@ export const ValidateIQLQueryRequest: any = {
                 "Sex",
                 "StreetAddress",
                 "Surname",
+                "VerifiableCredential",
                 "Website"
             ]
         },
@@ -16449,6 +16695,109 @@ export const SentNotificationRequest: any = {
         "MessageIdString": {
             "type": "string",
             "pattern": "MSG[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const AcceptAuthorizationRequestRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/AcceptAuthorizationRequestRequest",
+    "definitions": {
+        "AcceptAuthorizationRequestRequest": {
+            "type": "object",
+            "properties": {
+                "authorizationRequest": {}
+            },
+            "required": [
+                "authorizationRequest"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
+export const AcceptCredentialOfferRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/AcceptCredentialOfferRequest",
+    "definitions": {
+        "AcceptCredentialOfferRequest": {
+            "type": "object",
+            "properties": {
+                "credentialOffer": {
+                    "type": "string"
+                },
+                "pinCode": {
+                    "type": "string"
+                },
+                "credentialConfigurationIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "required": [
+                "credentialOffer",
+                "credentialConfigurationIds"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
+export const GetVerifiableCredentialsRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetVerifiableCredentialsRequest",
+    "definitions": {
+        "GetVerifiableCredentialsRequest": {
+            "type": "object",
+            "properties": {
+                "ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}
+
+export const ResolveAuthorizationRequestRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/ResolveAuthorizationRequestRequest",
+    "definitions": {
+        "ResolveAuthorizationRequestRequest": {
+            "type": "object",
+            "properties": {
+                "authorizationRequestUrl": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "authorizationRequestUrl"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
+export const ResolveCredentialOfferRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/ResolveCredentialOfferRequest",
+    "definitions": {
+        "ResolveCredentialOfferRequest": {
+            "type": "object",
+            "properties": {
+                "credentialOfferUrl": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "credentialOfferUrl"
+            ],
+            "additionalProperties": false
         }
     }
 }
@@ -20480,6 +20829,50 @@ export const Sex: any = {
             },
             "required": [
                 "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
+export const VerifiableCredential: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/VerifiableCredential",
+    "definitions": {
+        "VerifiableCredential": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "VerifiableCredential"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "displayInformation": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "title",
+                "type",
                 "value"
             ],
             "additionalProperties": false
