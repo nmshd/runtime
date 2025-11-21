@@ -16706,9 +16706,7 @@ export const AcceptAuthorizationRequestRequest: any = {
         "AcceptAuthorizationRequestRequest": {
             "type": "object",
             "properties": {
-                "authorizationRequest": {
-                    "type": "object"
-                }
+                "authorizationRequest": {}
             },
             "required": [
                 "authorizationRequest"

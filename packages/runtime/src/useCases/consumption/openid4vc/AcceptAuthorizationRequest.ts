@@ -1,11 +1,10 @@
-import { OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
 import { Result } from "@js-soft/ts-utils";
 import { OpenId4VcController } from "@nmshd/consumption";
 import { Inject } from "@nmshd/typescript-ioc";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
 export interface AcceptAuthorizationRequestRequest {
-    authorizationRequest: Record<string, any>;
+    authorizationRequest: any;
 }
 
 export interface AcceptAuthorizationRequestResponse {
@@ -28,7 +27,7 @@ export class AcceptAuthorizationRequestUseCase extends UseCase<AcceptAuthorizati
     }
 
     protected override async executeInternal(request: AcceptAuthorizationRequestRequest): Promise<Result<AcceptAuthorizationRequestResponse>> {
-        const result = await this.openId4VcController.acceptAuthorizationRequest(request.authorizationRequest as OpenId4VpResolvedAuthorizationRequest);
+        const result = await this.openId4VcController.acceptAuthorizationRequest(request.authorizationRequest);
         return Result.ok({ status: result.status, message: JSON.stringify(result.message) });
     }
 }
