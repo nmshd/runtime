@@ -1,14 +1,13 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
-import { Oid4VpVerificationResultDTO, ResolvedAuthorizationRequestDTO, ResolvedCredentialOfferDTO, VerifiableCredentialDTO } from "@nmshd/runtime-types";
+import { ResolvedAuthorizationRequestDTO, ResolvedCredentialOfferDTO, VerifiableCredentialDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
 import {
     AcceptAuthorizationRequestRequest,
+    AcceptAuthorizationRequestResponse,
     AcceptAuthorizationRequestUseCase,
     AcceptCredentialOfferRequest,
     AcceptCredentialOfferUseCase,
     GetVerifiableCredentialsUseCase,
-    ResolveAndAcceptCredentialOfferRequest,
-    ResolveAndAcceptCredentialOfferUseCase,
     ResolveAuthorizationRequestRequest,
     ResolveAuthorizationRequestUseCase,
     ResolveCredentialOfferRequest,
@@ -18,16 +17,11 @@ import {
 export class OpenId4VcFacade {
     public constructor(
         @Inject private readonly resolveCredentialOfferUseCase: ResolveCredentialOfferUseCase,
-        @Inject private readonly resolveAndAcceptCredentialOfferUseCase: ResolveAndAcceptCredentialOfferUseCase,
         @Inject private readonly acceptCredentialOfferUseCase: AcceptCredentialOfferUseCase,
         @Inject private readonly resolveAuthorizationRequestUseCase: ResolveAuthorizationRequestUseCase,
         @Inject private readonly acceptAuthorizationRequestUseCase: AcceptAuthorizationRequestUseCase,
         @Inject private readonly getVerifiableCredentialsUseCase: GetVerifiableCredentialsUseCase
     ) {}
-
-    public async resolveAndAcceptCredentialOffer(request: ResolveAndAcceptCredentialOfferRequest): Promise<Result<VerifiableCredentialDTO, ApplicationError>> {
-        return await this.resolveAndAcceptCredentialOfferUseCase.execute(request);
-    }
 
     public async resolveCredentialOffer(request: ResolveCredentialOfferRequest): Promise<Result<ResolvedCredentialOfferDTO, ApplicationError>> {
         return await this.resolveCredentialOfferUseCase.execute(request);
@@ -41,7 +35,7 @@ export class OpenId4VcFacade {
         return await this.resolveAuthorizationRequestUseCase.execute(request);
     }
 
-    public async acceptAuthorizationRequest(request: AcceptAuthorizationRequestRequest): Promise<Result<Oid4VpVerificationResultDTO, ApplicationError>> {
+    public async acceptAuthorizationRequest(request: AcceptAuthorizationRequestRequest): Promise<Result<AcceptAuthorizationRequestResponse, ApplicationError>> {
         return await this.acceptAuthorizationRequestUseCase.execute(request);
     }
 

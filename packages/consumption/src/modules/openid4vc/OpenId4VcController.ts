@@ -55,24 +55,6 @@ export class OpenId4VcController extends ConsumptionBaseController {
         };
     }
 
-    public async resolveAndAcceptCredentialOffer(credentialOffer: string): Promise<{ data: string; id: string; type: string; displayInformation: string | undefined }> {
-        const holder = new Holder(this.keyStorage, this.parent.accountController, this.parent.attributes, this.fetchInstance);
-        await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
-        const res = await holder.resolveCredentialOffer(credentialOffer);
-        const credentials = await holder.requestAndStoreCredentials(res, { credentialsToRequest: Object.keys(res.offeredCredentialConfigurations) });
-
-        // TODO: support multiple credentials
-        const credential = credentials[0].content.value as VerifiableCredential;
-
-        return {
-            data: credential.value,
-            // multi credentials not supported yet
-            id: credentials[0].id.toString(),
-            type: credential.type,
-            displayInformation: credential.displayInformation
-        };
-    }
-
     public async resolveAuthorizationRequest(
         authorizationRequestUrl: string
     ): Promise<{ authorizationRequest: OpenId4VpResolvedAuthorizationRequest; usedCredentials: { id: string; data: string; type: string; displayInformation?: string }[] }> {
