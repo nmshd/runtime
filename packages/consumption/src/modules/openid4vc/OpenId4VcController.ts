@@ -82,8 +82,8 @@ export class OpenId4VcController extends ConsumptionBaseController {
         })) as OwnIdentityAttribute[];
 
         const usedCredentials = allCredentials.filter((credential) =>
-            matchedCredentialsFromPresentationExchange?.includes((credential.content.value as VerifiableCredential).value)
-        );
+            matchedCredentialsFromPresentationExchange?.includes((credential.content.value as VerifiableCredential).value as string)
+        ); // in current demo scenarios this is a string
         return usedCredentials;
     }
 
