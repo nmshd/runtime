@@ -20873,14 +20873,7 @@ export const VerifiableCredential: any = {
                     "type": "string"
                 },
                 "value": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "object"
-                        }
-                    ]
+                    "type": "string"
                 },
                 "type": {
                     "type": "string"

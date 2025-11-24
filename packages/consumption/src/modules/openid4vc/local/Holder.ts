@@ -195,6 +195,10 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
                 // TODO: batch issuance not yet supported
                 const credential = response.credentials[0];
 
+                if (![ClaimFormat.SdJwtW3cVc, ClaimFormat.SdJwtDc, ClaimFormat.MsoMdoc].includes(credential.claimFormat)) {
+                    throw new Error("Unsupported credential format");
+                }
+
                 const enmeshedStorageService = this.agent.dependencyManager.resolve<EnmeshedStorageService<BaseRecord>>(InjectionSymbols.StorageService);
 
                 const displayInfo = response.credentialConfiguration.display as Record<string, any>[] | undefined;

@@ -5,14 +5,14 @@ import { PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH } from "./proprietary/Prop
 
 export interface VerifiableCredentialJSON extends AbstractAttributeValueJSON {
     "@type": "VerifiableCredential";
-    value: string | Record<string, any>;
+    value: string; // TODO: support credentials of type Record<string, any>
     type: string;
     displayInformation?: Record<string, any>[];
     key?: string;
 }
 
 export interface IVerifiableCredential extends IAbstractAttributeValue {
-    value: string | Record<string, any>;
+    value: string;
     type: string;
     displayInformation?: Record<string, any>[];
     key?: string;
@@ -22,7 +22,7 @@ export interface IVerifiableCredential extends IAbstractAttributeValue {
 export class VerifiableCredential extends AbstractAttributeValue {
     @serialize({ any: true })
     @validate({ customValidator: validateValue })
-    public value: string | Record<string, any>;
+    public value: string;
 
     @serialize()
     @validate({ nullable: true })
