@@ -1,11 +1,16 @@
+import { OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
 import { Result } from "@js-soft/ts-utils";
 import { OpenId4VcController } from "@nmshd/consumption";
 import { Inject } from "@nmshd/typescript-ioc";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
-export interface AcceptAuthorizationRequestRequest {
-    authorizationRequest: any;
+export interface AbstractAcceptAuthorizationRequestRequest<T> {
+    authorizationRequest: T;
 }
+
+export interface AcceptAuthorizationRequestRequest extends AbstractAcceptAuthorizationRequestRequest<OpenId4VpResolvedAuthorizationRequest> {}
+
+export interface SchemaValidatableAcceptAuthorizationRequestRequest extends AbstractAcceptAuthorizationRequestRequest<Record<string, any>> {}
 
 export interface AcceptAuthorizationRequestResponse {
     status: number;

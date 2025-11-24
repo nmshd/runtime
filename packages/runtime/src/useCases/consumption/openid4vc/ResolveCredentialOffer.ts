@@ -1,3 +1,4 @@
+import { OpenId4VciResolvedCredentialOffer } from "@credo-ts/openid4vc";
 import { Result } from "@js-soft/ts-utils";
 import { OpenId4VcController } from "@nmshd/consumption";
 import { Inject } from "@nmshd/typescript-ioc";
@@ -8,7 +9,7 @@ export interface ResolveCredentialOfferRequest {
 }
 
 export interface ResolveCredentialOfferResponse {
-    jsonRepresentation: string;
+    credentialOffer: OpenId4VciResolvedCredentialOffer;
 }
 
 class Validator extends SchemaValidator<ResolveCredentialOfferRequest> {
@@ -26,7 +27,7 @@ export class ResolveCredentialOfferUseCase extends UseCase<ResolveCredentialOffe
     }
 
     protected override async executeInternal(request: ResolveCredentialOfferRequest): Promise<Result<ResolveCredentialOfferResponse>> {
-        const result = await this.openId4VcController.resolveCredentialOffer(request.credentialOfferUrl);
-        return Result.ok({ jsonRepresentation: result.data });
+        const credentialOffer = await this.openId4VcController.resolveCredentialOffer(request.credentialOfferUrl);
+        return Result.ok({ credentialOffer });
     }
 }

@@ -67,15 +67,19 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
         return await Promise.resolve();
     }
 
-    public async saveWithDisplay(agentContext: AgentContext, value: string, type: string, displayInformation: string, title: string): Promise<OwnIdentityAttribute> {
+    public async saveWithDisplay(
+        agentContext: AgentContext,
+        value: string | Record<string, any>,
+        type: string,
+        displayInformation?: Record<string, any>[]
+    ): Promise<OwnIdentityAttribute> {
         const owner = this.accountController.identity.address;
         const identityAttribute = IdentityAttribute.from({
             value: {
                 "@type": "VerifiableCredential",
                 value: value,
                 type: type,
-                displayInformation: displayInformation,
-                title: title
+                displayInformation: displayInformation
             },
             owner: owner
         });

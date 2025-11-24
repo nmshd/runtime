@@ -1,9 +1,10 @@
 import { ClaimFormat } from "@credo-ts/core";
-import { OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
+import { OpenId4VciResolvedCredentialOffer, OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
 import { VerifiableCredential } from "@nmshd/content";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../consumption/ConsumptionController";
 import { ConsumptionControllerName } from "../../consumption/ConsumptionControllerName";
+import { OwnIdentityAttribute } from "../attributes";
 import { Holder } from "./local/Holder";
 import { KeyStorage } from "./local/KeyStorage";
 
@@ -25,44 +26,28 @@ export class OpenId4VcController extends ConsumptionBaseController {
         return this.parent.consumptionConfig.fetchInstance ?? fetch;
     }
 
-    public async resolveCredentialOffer(credentialOfferUrl: string): Promise<{ data: string }> {
+    public async resolveCredentialOffer(credentialOfferUrl: string): Promise<OpenId4VciResolvedCredentialOffer> {
         const holder = new Holder(this.keyStorage, this.parent.accountController, this.parent.attributes, this.fetchInstance);
         await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
-        const res = await holder.resolveCredentialOffer(credentialOfferUrl);
-        return {
-            data: JSON.stringify(res)
-        };
+        return await holder.resolveCredentialOffer(credentialOfferUrl);
     }
 
-    public async acceptCredentialOffer(
-        credentialOffer: string,
-        credentialConfigurationIds: string[],
-        pinCode?: string
-    ): Promise<{ data: string; id: string; type: string; displayInformation: string | undefined }> {
+    public async acceptCredentialOffer(credentialOffer: OpenId4VciResolvedCredentialOffer, credentialConfigurationIds: string[], pinCode?: string): Promise<OwnIdentityAttribute> {
         const holder = new Holder(this.keyStorage, this.parent.accountController, this.parent.attributes, this.fetchInstance);
         await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
-        const credentials = await holder.requestAndStoreCredentials(JSON.parse(credentialOffer), { credentialsToRequest: credentialConfigurationIds, txCode: pinCode });
+        const credentials = await holder.requestAndStoreCredentials(credentialOffer, { credentialsToRequest: credentialConfigurationIds, txCode: pinCode });
 
         // TODO: support multiple credentials
-        const credential = credentials[0].content.value as VerifiableCredential;
-
-        return {
-            data: credential.value,
-            // multi credentials not supported yet
-            id: credentials[0].id.toString(),
-            type: credential.type,
-            displayInformation: credential.displayInformation
-        };
+        return credentials[0];
     }
 
-    public async resolveAuthorizationRequest(
-        authorizationRequestUrl: string
-    ): Promise<{ authorizationRequest: OpenId4VpResolvedAuthorizationRequest; usedCredentials: { id: string; data: string; type: string; displayInformation?: string }[] }> {
+    public async resolveAuthorizationRequest(authorizationRequestUrl: string): Promise<{
+        authorizationRequest: OpenId4VpResolvedAuthorizationRequest;
+        usedCredentials: OwnIdentityAttribute[];
+    }> {
         const holder = new Holder(this.keyStorage, this.parent.accountController, this.parent.attributes, this.fetchInstance);
         await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
         const authorizationRequest = await holder.resolveAuthorizationRequest(authorizationRequestUrl);
-
-        // TODO: extract DTOs
 
         const usedCredentials = await this.extractUsedCredentialsFromAuthorizationRequest(authorizationRequest);
 
@@ -72,9 +57,7 @@ export class OpenId4VcController extends ConsumptionBaseController {
         };
     }
 
-    private async extractUsedCredentialsFromAuthorizationRequest(
-        authorizationRequest: OpenId4VpResolvedAuthorizationRequest
-    ): Promise<{ id: string; data: string; type: string; displayInformation?: string }[]> {
+    private async extractUsedCredentialsFromAuthorizationRequest(authorizationRequest: OpenId4VpResolvedAuthorizationRequest): Promise<OwnIdentityAttribute[]> {
         const dcqlSatisfied = authorizationRequest.dcql?.queryResult.can_be_satisfied ?? false;
         const authorizationRequestSatisfied = authorizationRequest.presentationExchange?.credentialsForRequest.areRequirementsSatisfied ?? false;
         if (!dcqlSatisfied && !authorizationRequestSatisfied) {
@@ -93,9 +76,14 @@ export class OpenId4VcController extends ConsumptionBaseController {
             )
             .flat();
 
-        const allCredentials = await this.getVerifiableCredentials();
+        const allCredentials = (await this.parent.attributes.getLocalAttributes({
+            "@type": "OwnIdentityAttribute",
+            "content.value.@type": "VerifiableCredential"
+        })) as OwnIdentityAttribute[];
 
-        const usedCredentials = allCredentials.filter((credential) => matchedCredentialsFromPresentationExchange?.includes(credential.data));
+        const usedCredentials = allCredentials.filter((credential) =>
+            matchedCredentialsFromPresentationExchange?.includes((credential.content.value as VerifiableCredential).value as string)
+        ); // in current demo scenarios this is a string
         return usedCredentials;
     }
 
@@ -110,18 +98,5 @@ export class OpenId4VcController extends ConsumptionBaseController {
         if (!serverResponse) throw new Error("No response from server");
 
         return { status: serverResponse.status, message: serverResponse.body };
-    }
-
-    public async getVerifiableCredentials(ids?: string[]): Promise<{ id: string; data: string; type: string; displayInformation?: string }[]> {
-        const holder = new Holder(this.keyStorage, this.parent.accountController, this.parent.attributes, this.fetchInstance);
-        await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
-
-        const credentials = await holder.getVerifiableCredentials(ids);
-
-        return credentials.map((credential) => {
-            const value = credential.content.value as VerifiableCredential;
-
-            return { id: credential.id.toString(), data: value.value, type: value.type, displayInformation: value.displayInformation };
-        });
     }
 }

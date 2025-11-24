@@ -51,14 +51,6 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         super(keyStorage, getOpenIdHolderModules(), accountController, attributeController, fetchInstance);
     }
 
-    public async getVerifiableCredentials(ids: string[] | undefined): Promise<OwnIdentityAttribute[]> {
-        const storageService = this.agent.dependencyManager.resolve<EnmeshedStorageService<BaseRecord>>(InjectionSymbols.StorageService);
-        const allCredentials = await storageService.getAllAsAttributes(this.agent.context, SdJwtVcRecord);
-
-        if (!ids) return allCredentials;
-        return allCredentials.filter((vc) => ids.includes(vc.id.toString()));
-    }
-
     public async resolveCredentialOffer(credentialOffer: string): Promise<OpenId4VciResolvedCredentialOffer> {
         return await this.agent.openid4vc.holder.resolveCredentialOffer(credentialOffer);
     }
@@ -204,50 +196,16 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
                 const credential = response.credentials[0];
 
                 const enmeshedStorageService = this.agent.dependencyManager.resolve<EnmeshedStorageService<BaseRecord>>(InjectionSymbols.StorageService);
-                let credentialKey = "";
-                for (const resolved in resolvedCredentialOffer.offeredCredentialConfigurations) {
-                    credentialKey = resolved;
-                }
-                const displayInfo = resolvedCredentialOffer.offeredCredentialConfigurations[credentialKey].display as any;
+
+                const displayInfo = response.credentialConfiguration.display as Record<string, any>[] | undefined;
 
                 // if the displayInfo does not provide a logo - we try to load a logo from the issuers attributes
-                if (
-                    displayInfo !== undefined &&
-                    displayInfo[0]?.logo === undefined &&
-                    resolvedCredentialOffer.metadata.credentialIssuer.display !== undefined &&
-                    (resolvedCredentialOffer.metadata.credentialIssuer.display as any)?.[0] !== undefined &&
-                    (resolvedCredentialOffer.metadata.credentialIssuer.display as any)?.[0]?.["logo"] !== undefined
-                ) {
-                    const logoInformation = (resolvedCredentialOffer.metadata.credentialIssuer.display as any)?.[0]?.["logo"];
-                    displayInfo[0]["logo"] = logoInformation;
+                if (displayInfo && !displayInfo[0]?.logo) {
+                    const logoInformation = resolvedCredentialOffer.metadata.credentialIssuer.display?.[0]?.["logo"];
+                    displayInfo[0].logo = logoInformation;
                 }
 
-                if (credential.claimFormat === ClaimFormat.MsoMdoc) {
-                    return enmeshedStorageService.saveWithDisplay(
-                        this.agent.context,
-                        credential.base64Url,
-                        credential.claimFormat.toString(),
-                        JSON.stringify(displayInfo),
-                        credentialKey
-                    );
-                } else if (credential.claimFormat === ClaimFormat.SdJwtDc) {
-                    return enmeshedStorageService.saveWithDisplay(
-                        this.agent.context,
-                        credential.compact,
-                        credential.claimFormat.toString(),
-                        JSON.stringify(displayInfo),
-                        credentialKey
-                    );
-                } else if (credential.claimFormat === ClaimFormat.SdJwtW3cVc) {
-                    return enmeshedStorageService.saveWithDisplay(
-                        this.agent.context,
-                        credential.encoded,
-                        credential.claimFormat.toString(),
-                        JSON.stringify(displayInfo),
-                        credentialKey
-                    );
-                }
-                throw new Error("Unsupported credential format");
+                return enmeshedStorageService.saveWithDisplay(this.agent.context, credential.encoded, credential.claimFormat, displayInfo);
             })
         );
 

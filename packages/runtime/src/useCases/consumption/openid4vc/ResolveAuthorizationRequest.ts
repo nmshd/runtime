@@ -1,17 +1,19 @@
+import { OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
 import { Result } from "@js-soft/ts-utils";
 import { OpenId4VcController } from "@nmshd/consumption";
-import { VerifiableCredentialDTO } from "@nmshd/runtime-types";
+import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
 import stringifySafe from "json-stringify-safe";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { AttributeMapper } from "../attributes";
 
 export interface ResolveAuthorizationRequestRequest {
     authorizationRequestUrl: string;
 }
 
 export interface ResolveAuthorizationRequestResponse {
-    authorizationRequest: Record<string, any>;
-    usedCredentials: VerifiableCredentialDTO[];
+    authorizationRequest: OpenId4VpResolvedAuthorizationRequest;
+    usedCredentials: LocalAttributeDTO[];
 }
 
 class Validator extends SchemaValidator<ResolveAuthorizationRequestRequest> {
@@ -33,7 +35,7 @@ export class ResolveAuthorizationRequestUseCase extends UseCase<ResolveAuthoriza
 
         return Result.ok({
             authorizationRequest: JSON.parse(stringifySafe(result.authorizationRequest)),
-            usedCredentials: result.usedCredentials
+            usedCredentials: AttributeMapper.toAttributeDTOList(result.usedCredentials)
         });
     }
 }

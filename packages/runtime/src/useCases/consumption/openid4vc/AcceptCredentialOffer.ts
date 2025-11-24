@@ -1,14 +1,20 @@
+import { OpenId4VciResolvedCredentialOffer } from "@credo-ts/openid4vc";
 import { Result } from "@js-soft/ts-utils";
 import { OpenId4VcController } from "@nmshd/consumption";
-import { VerifiableCredentialDTO } from "@nmshd/runtime-types";
+import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { AttributeMapper } from "../attributes";
 
-export interface AcceptCredentialOfferRequest {
-    credentialOffer: string;
+export interface AbstractCredentialOfferRequest<T> {
+    credentialOffer: T;
     pinCode?: string;
     credentialConfigurationIds: string[];
 }
+
+export interface AcceptCredentialOfferRequest extends AbstractCredentialOfferRequest<OpenId4VciResolvedCredentialOffer> {}
+
+export interface SchemaValidatableAcceptCredentialOfferRequest extends AbstractCredentialOfferRequest<Record<string, any>> {}
 
 class Validator extends SchemaValidator<AcceptCredentialOfferRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
@@ -16,7 +22,7 @@ class Validator extends SchemaValidator<AcceptCredentialOfferRequest> {
     }
 }
 
-export class AcceptCredentialOfferUseCase extends UseCase<AcceptCredentialOfferRequest, VerifiableCredentialDTO> {
+export class AcceptCredentialOfferUseCase extends UseCase<AcceptCredentialOfferRequest, LocalAttributeDTO> {
     public constructor(
         @Inject private readonly openId4VcController: OpenId4VcController,
         @Inject validator: Validator
@@ -24,13 +30,8 @@ export class AcceptCredentialOfferUseCase extends UseCase<AcceptCredentialOfferR
         super(validator);
     }
 
-    protected override async executeInternal(request: AcceptCredentialOfferRequest): Promise<Result<VerifiableCredentialDTO>> {
+    protected override async executeInternal(request: AcceptCredentialOfferRequest): Promise<Result<LocalAttributeDTO>> {
         const result = await this.openId4VcController.acceptCredentialOffer(request.credentialOffer, request.credentialConfigurationIds, request.pinCode);
-        return Result.ok({
-            data: result.data,
-            id: result.id,
-            type: result.type,
-            displayInformation: result.displayInformation
-        });
+        return Result.ok(AttributeMapper.toAttributeDTO(result));
     }
 }

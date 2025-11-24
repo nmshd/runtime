@@ -1,4 +1,4 @@
-import { OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
+import { VerifiableCredential } from "@nmshd/content";
 import axios, { AxiosInstance } from "axios";
 import path from "path";
 import { DockerComposeEnvironment, GenericContainer, StartedDockerComposeEnvironment, StartedTestContainer, Wait } from "testcontainers";
@@ -61,23 +61,22 @@ describe("custom openid4vc service", () => {
         expect(result).toBeSuccessful();
 
         // analogously to the app code all presented credentials are accepted
-        const jsonRepresentation = result.value.jsonRepresentation;
-        const credentialOfferDecoded = JSON.parse(jsonRepresentation);
-        let requestedCredentials = [];
+        const credentialOffer = result.value.credentialOffer;
+
         // determine which credentials to pick from the offer for all supported types of offers
 
-        if (credentialOfferDecoded["credentialOfferPayload"]["credentials"] !== undefined) {
-            requestedCredentials = credentialOfferDecoded["credentialOfferPayload"]["credentials"];
-        } else if (credentialOfferDecoded["credentialOfferPayload"]["credential_configuration_ids"] !== undefined) {
-            requestedCredentials = credentialOfferDecoded["credentialOfferPayload"]["credential_configuration_ids"];
-        }
+        const requestedCredentials = credentialOffer.credentialOfferPayload.credential_configuration_ids;
 
         const acceptanceResult = await consumptionServices.openId4Vc.acceptCredentialOffer({
-            credentialOffer: jsonRepresentation,
+            credentialOffer,
             credentialConfigurationIds: requestedCredentials
         });
         expect(acceptanceResult).toBeSuccessful();
         expect(typeof acceptanceResult.value.id).toBe("string");
+
+        const credential = acceptanceResult.value.content.value as unknown as VerifiableCredential;
+        expect(credential.displayInformation?.[0].logo).toBeDefined();
+        expect(credential.displayInformation?.[0].name).toBe("Employee ID Card");
     });
 
     test("should be able to process a given credential presentation", async () => {
@@ -122,7 +121,7 @@ describe("custom openid4vc service", () => {
         const result = await consumptionServices.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl: responseData.result.presentationRequest });
         expect(result.value.usedCredentials).toHaveLength(1);
 
-        const request = result.value.authorizationRequest as OpenId4VpResolvedAuthorizationRequest;
+        const request = result.value.authorizationRequest;
         expect(request.presentationExchange!.credentialsForRequest.areRequirementsSatisfied).toBe(true);
 
         const presentationResult = await consumptionServices.openId4Vc.acceptAuthorizationRequest({ authorizationRequest: result.value.authorizationRequest });
@@ -134,25 +133,14 @@ describe("custom openid4vc service", () => {
         // Ensure the first test has completed
         expect(credentialOfferUrl).toBeDefined();
 
-        const acceptanceResult = await consumptionServices.openId4Vc.getVerifiableCredentials();
+        const acceptanceResult = await consumptionServices.attributes.getOwnIdentityAttributes({
+            query: {
+                "content.value.@type": "VerifiableCredential"
+            }
+        });
 
         expect(acceptanceResult).toBeSuccessful();
         expect(acceptanceResult.value.length).toBeGreaterThan(0);
-    });
-
-    test("getting the earlier created verifiable credential by id should return exactly one credential", async () => {
-        // Ensure the first test has completed
-        expect(credentialOfferUrl).toBeDefined();
-
-        const allCredentialsResult = await consumptionServices.openId4Vc.getVerifiableCredentials();
-        expect(allCredentialsResult).toBeSuccessful();
-        expect(allCredentialsResult.value.length).toBeGreaterThan(0);
-
-        const firstCredentialId = allCredentialsResult.value[0].id;
-        const singleCredentialResult = await consumptionServices.openId4Vc.getVerifiableCredentials([firstCredentialId]);
-        expect(singleCredentialResult).toBeSuccessful();
-        expect(singleCredentialResult.value).toHaveLength(1);
-        expect(singleCredentialResult.value[0].id).toBe(firstCredentialId);
     });
 
     async function startOid4VcComposeStack() {
@@ -249,10 +237,12 @@ describe("EUDIPLO", () => {
         expect(loadResult).toBeSuccessful();
 
         const resolveResult = await consumptionServices.openId4Vc.acceptCredentialOffer({
-            credentialOffer: loadResult.value.jsonRepresentation,
+            credentialOffer: loadResult.value.credentialOffer,
             credentialConfigurationIds: [eudiploCredentialIdInConfiguration]
         });
         expect(resolveResult).toBeSuccessful();
+
+        expect((resolveResult.value.content.value as unknown as VerifiableCredential).displayInformation?.[0].name).toBe("Employee ID Card");
     });
 
     test("presentation", async () => {
@@ -266,7 +256,7 @@ describe("EUDIPLO", () => {
         const loadResult = await consumptionServices.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl });
         expect(loadResult).toBeSuccessful();
 
-        const queryResult = loadResult.value.authorizationRequest.dcql.queryResult;
+        const queryResult = loadResult.value.authorizationRequest.dcql!.queryResult;
         expect(queryResult.can_be_satisfied).toBe(true);
 
         const credentialMatches = queryResult.credential_matches["EmployeeIdCard-vc-sd-jwt"];
