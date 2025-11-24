@@ -35,7 +35,7 @@ export class OpenId4VcController extends ConsumptionBaseController {
     public async acceptCredentialOffer(credentialOffer: OpenId4VciResolvedCredentialOffer, credentialConfigurationIds: string[], pinCode?: string): Promise<OwnIdentityAttribute> {
         const holder = new Holder(this.keyStorage, this.parent.accountController, this.parent.attributes, this.fetchInstance);
         await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
-        const credentials = await holder.requestAndStoreCredentials(credentialOffer, { credentialsToRequest: credentialConfigurationIds, txCode: pinCode });
+        const credentials = await holder.acceptCredentialOffer(credentialOffer, { credentialConfigurationIds: credentialConfigurationIds, txCode: pinCode });
 
         // TODO: support multiple credentials
         return credentials[0];
