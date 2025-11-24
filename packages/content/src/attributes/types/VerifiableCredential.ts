@@ -1,34 +1,28 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { AbstractAttributeValue, AbstractAttributeValueJSON, IAbstractAttributeValue } from "../AbstractAttributeValue";
 import { RenderHints, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../hints";
-import { PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH, PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH } from "./proprietary/ProprietaryAttributeValue";
+import { PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH } from "./proprietary/ProprietaryAttributeValue";
 
 export interface VerifiableCredentialJSON extends AbstractAttributeValueJSON {
     "@type": "VerifiableCredential";
-    title: string;
-    value: string;
+    value: string | Record<string, any>;
     type: string;
-    displayInformation?: string;
+    displayInformation?: Record<string, any>[];
     key?: string;
 }
 
 export interface IVerifiableCredential extends IAbstractAttributeValue {
-    title: string;
-    value: string;
+    value: string | Record<string, any>;
     type: string;
-    displayInformation?: string;
+    displayInformation?: Record<string, any>[];
     key?: string;
 }
 
 @type("VerifiableCredential")
 export class VerifiableCredential extends AbstractAttributeValue {
-    @serialize()
-    @validate({ max: PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH })
-    public title: string;
-
     @serialize({ any: true })
     @validate({ customValidator: validateValue })
-    public value: string;
+    public value: string | Record<string, any>;
 
     @serialize()
     @validate({ nullable: true })
@@ -36,7 +30,7 @@ export class VerifiableCredential extends AbstractAttributeValue {
 
     @serialize()
     @validate({ nullable: true, max: PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH })
-    public displayInformation?: string;
+    public displayInformation?: Record<string, any>[];
 
     @serialize()
     @validate({ nullable: true, max: PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH })

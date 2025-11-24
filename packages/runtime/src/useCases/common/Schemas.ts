@@ -1809,17 +1809,24 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "@version": {
                     "type": "string"
                 },
-                "title": {
-                    "type": "string"
-                },
                 "value": {
-                    "type": "string"
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object"
+                        }
+                    ]
                 },
                 "type": {
                     "type": "string"
                 },
                 "displayInformation": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
                 },
                 "key": {
                     "type": "string"
@@ -1827,7 +1834,6 @@ export const CanCreateOutgoingRequestRequest: any = {
             },
             "required": [
                 "@type",
-                "title",
                 "type",
                 "value"
             ],
@@ -3828,17 +3834,24 @@ export const CompleteOutgoingRequestRequest: any = {
                 "@version": {
                     "type": "string"
                 },
-                "title": {
-                    "type": "string"
-                },
                 "value": {
-                    "type": "string"
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object"
+                        }
+                    ]
                 },
                 "type": {
                     "type": "string"
                 },
                 "displayInformation": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
                 },
                 "key": {
                     "type": "string"
@@ -3846,7 +3859,6 @@ export const CompleteOutgoingRequestRequest: any = {
             },
             "required": [
                 "@type",
-                "title",
                 "type",
                 "value"
             ],
@@ -5834,17 +5846,24 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                 "@version": {
                     "type": "string"
                 },
-                "title": {
-                    "type": "string"
-                },
                 "value": {
-                    "type": "string"
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object"
+                        }
+                    ]
                 },
                 "type": {
                     "type": "string"
                 },
                 "displayInformation": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
                 },
                 "key": {
                     "type": "string"
@@ -5852,7 +5871,6 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
             },
             "required": [
                 "@type",
-                "title",
                 "type",
                 "value"
             ],
@@ -8457,17 +8475,24 @@ export const CreateOutgoingRequestRequest: any = {
                 "@version": {
                     "type": "string"
                 },
-                "title": {
-                    "type": "string"
-                },
                 "value": {
-                    "type": "string"
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object"
+                        }
+                    ]
                 },
                 "type": {
                     "type": "string"
                 },
                 "displayInformation": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
                 },
                 "key": {
                     "type": "string"
@@ -8475,7 +8500,6 @@ export const CreateOutgoingRequestRequest: any = {
             },
             "required": [
                 "@type",
-                "title",
                 "type",
                 "value"
             ],
@@ -11482,17 +11506,24 @@ export const ReceivedIncomingRequestRequest: any = {
                 "@version": {
                     "type": "string"
                 },
-                "title": {
-                    "type": "string"
-                },
                 "value": {
-                    "type": "string"
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object"
+                        }
+                    ]
                 },
                 "type": {
                     "type": "string"
                 },
                 "displayInformation": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
                 },
                 "key": {
                     "type": "string"
@@ -11500,7 +11531,6 @@ export const ReceivedIncomingRequestRequest: any = {
             },
             "required": [
                 "@type",
-                "title",
                 "type",
                 "value"
             ],
@@ -15500,17 +15530,24 @@ export const SucceedOwnIdentityAttributeRequest: any = {
                 "@version": {
                     "type": "string"
                 },
-                "title": {
-                    "type": "string"
-                },
                 "value": {
-                    "type": "string"
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object"
+                        }
+                    ]
                 },
                 "type": {
                     "type": "string"
                 },
                 "displayInformation": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
                 },
                 "key": {
                     "type": "string"
@@ -15518,7 +15555,6 @@ export const SucceedOwnIdentityAttributeRequest: any = {
             },
             "required": [
                 "@type",
-                "title",
                 "type",
                 "value"
             ],
@@ -16705,13 +16741,15 @@ export const AcceptAuthorizationRequestRequest: any = {
     "definitions": {
         "AcceptAuthorizationRequestRequest": {
             "type": "object",
+            "additionalProperties": false,
             "properties": {
-                "authorizationRequest": {}
+                "authorizationRequest": {
+                    "type": "object"
+                }
             },
             "required": [
                 "authorizationRequest"
-            ],
-            "additionalProperties": false
+            ]
         }
     }
 }
@@ -16722,9 +16760,10 @@ export const AcceptCredentialOfferRequest: any = {
     "definitions": {
         "AcceptCredentialOfferRequest": {
             "type": "object",
+            "additionalProperties": false,
             "properties": {
                 "credentialOffer": {
-                    "type": "string"
+                    "type": "object"
                 },
                 "pinCode": {
                     "type": "string"
@@ -16737,29 +16776,9 @@ export const AcceptCredentialOfferRequest: any = {
                 }
             },
             "required": [
-                "credentialOffer",
-                "credentialConfigurationIds"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
-export const GetVerifiableCredentialsRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetVerifiableCredentialsRequest",
-    "definitions": {
-        "GetVerifiableCredentialsRequest": {
-            "type": "object",
-            "properties": {
-                "ids": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            },
-            "additionalProperties": false
+                "credentialConfigurationIds",
+                "credentialOffer"
+            ]
         }
     }
 }
@@ -20853,17 +20872,24 @@ export const VerifiableCredential: any = {
                 "@version": {
                     "type": "string"
                 },
-                "title": {
-                    "type": "string"
-                },
                 "value": {
-                    "type": "string"
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object"
+                        }
+                    ]
                 },
                 "type": {
                     "type": "string"
                 },
                 "displayInformation": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
                 },
                 "key": {
                     "type": "string"
@@ -20871,7 +20897,6 @@ export const VerifiableCredential: any = {
             },
             "required": [
                 "@type",
-                "title",
                 "type",
                 "value"
             ],

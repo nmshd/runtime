@@ -1,5 +1,5 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
-import { VerifiableCredentialDTO } from "@nmshd/runtime-types";
+import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
 import {
     AcceptAuthorizationRequestRequest,
@@ -7,7 +7,6 @@ import {
     AcceptAuthorizationRequestUseCase,
     AcceptCredentialOfferRequest,
     AcceptCredentialOfferUseCase,
-    GetVerifiableCredentialsUseCase,
     ResolveAuthorizationRequestRequest,
     ResolveAuthorizationRequestResponse,
     ResolveAuthorizationRequestUseCase,
@@ -21,15 +20,14 @@ export class OpenId4VcFacade {
         @Inject private readonly resolveCredentialOfferUseCase: ResolveCredentialOfferUseCase,
         @Inject private readonly acceptCredentialOfferUseCase: AcceptCredentialOfferUseCase,
         @Inject private readonly resolveAuthorizationRequestUseCase: ResolveAuthorizationRequestUseCase,
-        @Inject private readonly acceptAuthorizationRequestUseCase: AcceptAuthorizationRequestUseCase,
-        @Inject private readonly getVerifiableCredentialsUseCase: GetVerifiableCredentialsUseCase
+        @Inject private readonly acceptAuthorizationRequestUseCase: AcceptAuthorizationRequestUseCase
     ) {}
 
     public async resolveCredentialOffer(request: ResolveCredentialOfferRequest): Promise<Result<ResolveCredentialOfferResponse, ApplicationError>> {
         return await this.resolveCredentialOfferUseCase.execute(request);
     }
 
-    public async acceptCredentialOffer(request: AcceptCredentialOfferRequest): Promise<Result<VerifiableCredentialDTO, ApplicationError>> {
+    public async acceptCredentialOffer(request: AcceptCredentialOfferRequest): Promise<Result<LocalAttributeDTO, ApplicationError>> {
         return await this.acceptCredentialOfferUseCase.execute(request);
     }
 
@@ -39,9 +37,5 @@ export class OpenId4VcFacade {
 
     public async acceptAuthorizationRequest(request: AcceptAuthorizationRequestRequest): Promise<Result<AcceptAuthorizationRequestResponse, ApplicationError>> {
         return await this.acceptAuthorizationRequestUseCase.execute(request);
-    }
-
-    public async getVerifiableCredentials(ids?: string[]): Promise<Result<VerifiableCredentialDTO[], ApplicationError>> {
-        return await this.getVerifiableCredentialsUseCase.execute({ ids });
     }
 }
