@@ -12,16 +12,7 @@ import {
     SdJwtVcRecord,
     X509Module
 } from "@credo-ts/core";
-import {
-    OpenId4VcModule,
-    OpenId4VciAuthorizationFlow,
-    OpenId4VciDpopRequestOptions,
-    authorizationCodeGrantIdentifier,
-    preAuthorizedCodeGrantIdentifier,
-    type OpenId4VciMetadata,
-    type OpenId4VciResolvedCredentialOffer,
-    type OpenId4VpResolvedAuthorizationRequest
-} from "@credo-ts/openid4vc";
+import { OpenId4VcModule, type OpenId4VciResolvedCredentialOffer, type OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
 import { AccountController } from "@nmshd/transport";
 import { AttributesController, OwnIdentityAttribute } from "../../attributes";
 import { BaseAgent } from "./BaseAgent";
@@ -55,95 +46,21 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         return await this.agent.openid4vc.holder.resolveCredentialOffer(credentialOffer);
     }
 
-    public async resolveIssuerMetadata(credentialIssuer: string): Promise<OpenId4VciMetadata> {
-        return await this.agent.openid4vc.holder.resolveIssuerMetadata(credentialIssuer);
-    }
-
-    public async initiateAuthorization(
-        resolvedCredentialOffer: OpenId4VciResolvedCredentialOffer,
-        credentialsToRequest: string[]
-    ): Promise<
-        | {
-              readonly authorizationFlow: "PreAuthorized";
-              readonly preAuthorizedCode: string;
-          }
-        | {
-              readonly authorizationFlow: "PresentationDuringIssuance";
-              readonly openid4vpRequestUrl: string;
-              readonly authSession: string;
-              readonly dpop?: OpenId4VciDpopRequestOptions;
-              readonly preAuthorizedCode?: undefined;
-          }
-        | {
-              readonly authorizationFlow: "Oauth2Redirect";
-              readonly authorizationRequestUrl: string;
-              readonly codeVerifier?: string;
-              readonly dpop?: OpenId4VciDpopRequestOptions;
-              readonly preAuthorizedCode?: undefined;
-          }
-    > {
-        const grants = resolvedCredentialOffer.credentialOfferPayload.grants;
-        if (grants?.[preAuthorizedCodeGrantIdentifier]) {
-            return {
-                authorizationFlow: "PreAuthorized",
-                preAuthorizedCode: grants[preAuthorizedCodeGrantIdentifier]["pre-authorized_code"]
-            } as const;
-        }
-
-        if (resolvedCredentialOffer.credentialOfferPayload.grants?.[authorizationCodeGrantIdentifier]) {
-            const resolvedAuthorizationRequest = await this.agent.openid4vc.holder.resolveOpenId4VciAuthorizationRequest(resolvedCredentialOffer, {
-                clientId: this.client.clientId,
-                redirectUri: this.client.redirectUri,
-                scope: Object.entries(resolvedCredentialOffer.offeredCredentialConfigurations)
-                    .map(([id, value]) => (credentialsToRequest.includes(id) ? value.scope : undefined))
-                    .filter((v): v is string => Boolean(v))
-            });
-
-            if (resolvedAuthorizationRequest.authorizationFlow === OpenId4VciAuthorizationFlow.PresentationDuringIssuance) {
-                return {
-                    ...resolvedAuthorizationRequest,
-                    authorizationFlow: `${OpenId4VciAuthorizationFlow.PresentationDuringIssuance}`
-                } as const;
-            }
-            return {
-                ...resolvedAuthorizationRequest,
-                authorizationFlow: `${OpenId4VciAuthorizationFlow.Oauth2Redirect}`
-            } as const;
-        }
-
-        throw new Error("Unsupported grant type");
-    }
-
-    public async requestAndStoreCredentials(
+    public async acceptCredentialOffer(
         resolvedCredentialOffer: OpenId4VciResolvedCredentialOffer,
         options: {
-            clientId?: string;
-            codeVerifier?: string;
-            credentialsToRequest: string[];
-            code?: string;
-            redirectUri?: string;
+            credentialConfigurationIds: string[];
             txCode?: string;
         }
     ): Promise<OwnIdentityAttribute[]> {
-        const tokenResponse = await this.agent.openid4vc.holder.requestToken(
-            options.code && options.clientId
-                ? {
-                      resolvedCredentialOffer,
-                      clientId: options.clientId,
-                      codeVerifier: options.codeVerifier,
-                      code: options.code,
-                      redirectUri: options.redirectUri
-                  }
-                : {
-                      resolvedCredentialOffer,
-                      txCode: options.txCode
-                  }
-        );
+        const tokenResponse = await this.agent.openid4vc.holder.requestToken({
+            resolvedCredentialOffer,
+            txCode: options.txCode
+        });
 
         const credentialResponse = await this.agent.openid4vc.holder.requestCredentials({
             resolvedCredentialOffer,
-            clientId: options.clientId,
-            credentialConfigurationIds: options.credentialsToRequest,
+            credentialConfigurationIds: options.credentialConfigurationIds,
             credentialBindingResolver: async ({ supportedDidMethods, supportsAllDidMethods, proofTypes }) => {
                 const key = await this.agent.kms.createKeyForSignatureAlgorithm({
                     algorithm: proofTypes.jwt?.supportedSignatureAlgorithms[0] ?? "EdDSA"
