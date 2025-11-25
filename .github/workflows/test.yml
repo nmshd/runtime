@@ -13,13 +13,13 @@ jobs:
   run-checks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: bash .ci/runChecks.sh
 
   test-app-runtime:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Start Backbone
         run: npm run start:backbone
       - uses: actions/setup-node@v6
@@ -42,7 +42,7 @@ jobs:
   test-consumption-mongodb:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Start Backbone
         run: npm run start:backbone
       - uses: actions/setup-node@v6
@@ -62,7 +62,7 @@ jobs:
   test-consumption-loki:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Start Backbone
         run: npm run start:backbone
       - uses: actions/setup-node@v6
@@ -84,7 +84,7 @@ jobs:
   test-content:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
@@ -100,7 +100,7 @@ jobs:
   test-core-types:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
@@ -116,7 +116,7 @@ jobs:
   test-runtime-mongodb:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Start Backbone
         run: npm run start:backbone
       - name: Login to GitHub Container Registry
@@ -144,7 +144,7 @@ jobs:
   test-runtime-loki:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Start Backbone
         run: npm run start:backbone
       - name: Login to GitHub Container Registry
@@ -175,7 +175,7 @@ jobs:
   test-transport-mongodb:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Start Backbone
         run: npm run start:backbone
       - uses: actions/setup-node@v6
@@ -197,7 +197,7 @@ jobs:
   test-transport-loki:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Start Backbone
         run: npm run start:backbone
       - uses: actions/setup-node@v6
