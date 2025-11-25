@@ -29,6 +29,10 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
     ) {}
 
     public save(_agentContext: AgentContext, record: T): Promise<void> {
+        if (record.id !== "STORAGE_VERSION_RECORD_ID" && record.type !== "DidRecord") {
+            throw new Error("Only storage of STORAGE_VERSION_RECORD_ID and DidRecord implemented because others previously not needed");
+        }
+
         this.storage.set(record.id, record);
         return Promise.resolve();
     }
@@ -56,18 +60,16 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
         return await Promise.resolve(result);
     }
 
-    public async update(agentContext: AgentContext, record: T): Promise<void> {
-        await this.save(agentContext, record);
+    public update(_agentContext: AgentContext, _record: T): Promise<void> {
+        throw new Error("Storage update not implemented because previously not needed");
     }
 
-    public delete(_agentContext: AgentContext, record: T): Promise<void> {
-        this.storage.delete(record.id);
-        return Promise.resolve();
+    public delete(_agentContext: AgentContext, _record: T): Promise<void> {
+        throw new Error("Storage delete not implemented because previously not needed");
     }
 
-    public deleteById(_agentContext: AgentContext, _recordClass: BaseRecordConstructor<T>, id: string): Promise<void> {
-        this.storage.delete(id);
-        return Promise.resolve();
+    public deleteById(_agentContext: AgentContext, _recordClass: BaseRecordConstructor<T>, _id: string): Promise<void> {
+        throw new Error("Storage delete not implemented because previously not needed");
     }
 
     public getById(_agentContext: AgentContext, _recordClass: BaseRecordConstructor<T>, id: string): Promise<T> {
