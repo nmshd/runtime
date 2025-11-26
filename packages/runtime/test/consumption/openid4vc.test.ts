@@ -11,7 +11,7 @@ const fetchInstance: typeof fetch = (async (input: any, init: any) => {
     return response;
 }) as unknown as typeof fetch;
 
-describe.only("custom openid4vc service", () => {
+describe("custom openid4vc service", () => {
     const runtimeServiceProvider = new RuntimeServiceProvider(fetchInstance);
     let consumptionServices: ConsumptionServices;
 
