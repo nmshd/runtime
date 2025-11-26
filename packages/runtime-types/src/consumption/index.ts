@@ -1,9 +1,6 @@
-export * from "./AcceptedAuthorizationRequestDTO";
 export * from "./AttributeTagCollectionDTO";
 export * from "./CredentialOfferDTO";
 export * from "./DraftDTO";
-export * from "./FetchedAuthorizationRequestDTO";
-export * from "./FetchedCredentialOfferDTO";
 export * from "./IdentityMetadataDTO";
 export * from "./LocalAttributeDeletionInfoDTO";
 export * from "./LocalAttributeDTO";
@@ -12,4 +9,3 @@ export * from "./LocalNotificationDTO";
 export * from "./LocalRequestDTO";
 export * from "./RequestValidationResultDTO";
 export * from "./SettingDTO";
-export * from "./VerifiableCredentialDTO";

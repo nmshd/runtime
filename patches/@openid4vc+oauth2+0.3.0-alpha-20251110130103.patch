@@ -1,0 +1,50 @@
+diff --git a/node_modules/@openid4vc/oauth2/dist/index.cjs b/node_modules/@openid4vc/oauth2/dist/index.cjs
+index 618d066..d826d04 100644
+--- a/node_modules/@openid4vc/oauth2/dist/index.cjs
++++ b/node_modules/@openid4vc/oauth2/dist/index.cjs
+@@ -1419,11 +1419,16 @@ async function createJarAuthorizationRequest(options) {
+ * @throws {Error} if parsing json from response fails
+ */
+ async function fetchWellKnownMetadata(wellKnownMetadataUrl, schema, options) {
+-	const { result, response } = await (0, __openid4vc_utils.createZodFetcher)(options?.fetch)(schema, options?.acceptedContentType ?? [__openid4vc_utils.ContentType.Json], wellKnownMetadataUrl);
+-	if (response.status === 404) return null;
+-	if (!response.ok) throw new __openid4vc_utils.InvalidFetchResponseError(`Fetching well known metadata from '${wellKnownMetadataUrl}' resulted in an unsuccessful response with status '${response.status}'.`, await response.clone().text(), response);
+-	if (!result?.success) throw new ValidationError$1(`Validation of metadata from '${wellKnownMetadataUrl}' failed`, result?.error);
+-	return result.data;
++	try {
++		const { result, response } = await (0, __openid4vc_utils.createZodFetcher)(options?.fetch)(schema, options?.acceptedContentType ?? [__openid4vc_utils.ContentType.Json], wellKnownMetadataUrl);
++		if (response.status === 404) return null;
++		if (!response.ok) throw new __openid4vc_utils.InvalidFetchResponseError(`Fetching well known metadata from '${wellKnownMetadataUrl}' resulted in an unsuccessful response with status '${response.status}'.`, await response.clone().text(), response);
++		if (!result?.success) throw new ValidationError$1(`Validation of metadata from '${wellKnownMetadataUrl}' failed`, result?.error);
++		return result.data;
++	} catch(e) {
++	    console.log('Changed By JS-SOFT: Error can probably be ignored', e);
++     	return null;
++   	}
+ }
+ 
+ //#endregion
+diff --git a/node_modules/@openid4vc/oauth2/package.json b/node_modules/@openid4vc/oauth2/package.json
+index ac34772..79816b0 100644
+--- a/node_modules/@openid4vc/oauth2/package.json
++++ b/node_modules/@openid4vc/oauth2/package.json
+@@ -8,7 +8,7 @@
+   "exports": {
+     ".": {
+       "import": "./dist/index.mjs",
+-      "require": "./dist/index.js",
++      "require": "./dist/index.cjs",
+       "types": "./dist/index.d.ts"
+     },
+     "./package.json": "./package.json"
+@@ -29,7 +29,7 @@
+   "scripts": {
+     "build": "tsdown src/index.ts --format cjs,esm --dts --sourcemap"
+   },
+-  "main": "./dist/index.js",
++  "main": "./dist/index.cjs",
+   "module": "./dist/index.mjs",
+-  "types": "./dist/index.d.ts"
++  "types": "./dist/index.d.cts"
+ }
+\ No newline at end of file

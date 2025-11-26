@@ -51,13 +51,16 @@
         "testEnvironment": "node",
         "testTimeout": 60000,
         "transform": {
-            "^.+\\.ts$": [
+            "^.+\\.(t|j)s$": [
                 "ts-jest",
                 {
                     "tsconfig": "test/tsconfig.json"
                 }
             ]
-        }
+        },
+        "transformIgnorePatterns": [
+            "<rootDir>/node_modules/(?!(@noble|@stablelib|@credo\\-ts/core/node_modules/uuid)/)"
+        ]
     },
     "dependencies": {
         "@js-soft/docdb-querytranslator": "^1.1.6",
@@ -88,7 +91,7 @@
         "@js-soft/node-logger": "1.2.1",
         "@types/elliptic": "^6.4.18",
         "@types/json-stringify-safe": "^5.0.3",
-        "@types/lodash": "^4.17.20",
+        "@types/lodash": "^4.17.21",
         "@types/luxon": "^3.7.1",
         "ts-json-schema-generator": "2.4.0",
         "ts-mockito": "^2.6.1"

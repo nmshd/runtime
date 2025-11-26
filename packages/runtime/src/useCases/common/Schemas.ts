@@ -1809,17 +1809,24 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "@version": {
                     "type": "string"
                 },
-                "title": {
-                    "type": "string"
-                },
                 "value": {
-                    "type": "string"
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object"
+                        }
+                    ]
                 },
                 "type": {
                     "type": "string"
                 },
                 "displayInformation": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
                 },
                 "key": {
                     "type": "string"
@@ -1827,7 +1834,6 @@ export const CanCreateOutgoingRequestRequest: any = {
             },
             "required": [
                 "@type",
-                "title",
                 "type",
                 "value"
             ],
@@ -3828,17 +3834,24 @@ export const CompleteOutgoingRequestRequest: any = {
                 "@version": {
                     "type": "string"
                 },
-                "title": {
-                    "type": "string"
-                },
                 "value": {
-                    "type": "string"
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object"
+                        }
+                    ]
                 },
                 "type": {
                     "type": "string"
                 },
                 "displayInformation": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
                 },
                 "key": {
                     "type": "string"
@@ -3846,7 +3859,6 @@ export const CompleteOutgoingRequestRequest: any = {
             },
             "required": [
                 "@type",
-                "title",
                 "type",
                 "value"
             ],
@@ -5834,17 +5846,24 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                 "@version": {
                     "type": "string"
                 },
-                "title": {
-                    "type": "string"
-                },
                 "value": {
-                    "type": "string"
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object"
+                        }
+                    ]
                 },
                 "type": {
                     "type": "string"
                 },
                 "displayInformation": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
                 },
                 "key": {
                     "type": "string"
@@ -5852,7 +5871,6 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
             },
             "required": [
                 "@type",
-                "title",
                 "type",
                 "value"
             ],
@@ -8457,17 +8475,24 @@ export const CreateOutgoingRequestRequest: any = {
                 "@version": {
                     "type": "string"
                 },
-                "title": {
-                    "type": "string"
-                },
                 "value": {
-                    "type": "string"
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object"
+                        }
+                    ]
                 },
                 "type": {
                     "type": "string"
                 },
                 "displayInformation": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
                 },
                 "key": {
                     "type": "string"
@@ -8475,7 +8500,6 @@ export const CreateOutgoingRequestRequest: any = {
             },
             "required": [
                 "@type",
-                "title",
                 "type",
                 "value"
             ],
@@ -11482,17 +11506,24 @@ export const ReceivedIncomingRequestRequest: any = {
                 "@version": {
                     "type": "string"
                 },
-                "title": {
-                    "type": "string"
-                },
                 "value": {
-                    "type": "string"
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object"
+                        }
+                    ]
                 },
                 "type": {
                     "type": "string"
                 },
                 "displayInformation": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
                 },
                 "key": {
                     "type": "string"
@@ -11500,7 +11531,6 @@ export const ReceivedIncomingRequestRequest: any = {
             },
             "required": [
                 "@type",
-                "title",
                 "type",
                 "value"
             ],
@@ -15500,17 +15530,24 @@ export const SucceedOwnIdentityAttributeRequest: any = {
                 "@version": {
                     "type": "string"
                 },
-                "title": {
-                    "type": "string"
-                },
                 "value": {
-                    "type": "string"
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object"
+                        }
+                    ]
                 },
                 "type": {
                     "type": "string"
                 },
                 "displayInformation": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
                 },
                 "key": {
                     "type": "string"
@@ -15518,7 +15555,6 @@ export const SucceedOwnIdentityAttributeRequest: any = {
             },
             "required": [
                 "@type",
-                "title",
                 "type",
                 "value"
             ],
@@ -16705,6 +16741,7 @@ export const AcceptAuthorizationRequestRequest: any = {
     "definitions": {
         "AcceptAuthorizationRequestRequest": {
             "type": "object",
+            "additionalProperties": false,
             "properties": {
                 "authorizationRequest": {
                     "type": "object"
@@ -16712,46 +16749,36 @@ export const AcceptAuthorizationRequestRequest: any = {
             },
             "required": [
                 "authorizationRequest"
-            ],
-            "additionalProperties": false
+            ]
         }
     }
 }
 
-export const FetchCredentialOfferRequest: any = {
+export const AcceptCredentialOfferRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/FetchCredentialOfferRequest",
+    "$ref": "#/definitions/AcceptCredentialOfferRequest",
     "definitions": {
-        "FetchCredentialOfferRequest": {
+        "AcceptCredentialOfferRequest": {
             "type": "object",
+            "additionalProperties": false,
             "properties": {
-                "credentialOfferUrl": {
+                "credentialOffer": {
+                    "type": "object"
+                },
+                "pinCode": {
                     "type": "string"
-                }
-            },
-            "required": [
-                "credentialOfferUrl"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
-export const GetVerifiableCredentialsRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetVerifiableCredentialsRequest",
-    "definitions": {
-        "GetVerifiableCredentialsRequest": {
-            "type": "object",
-            "properties": {
-                "ids": {
+                },
+                "credentialConfigurationIds": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 }
             },
-            "additionalProperties": false
+            "required": [
+                "credentialConfigurationIds",
+                "credentialOffer"
+            ]
         }
     }
 }
@@ -16763,12 +16790,12 @@ export const ResolveAuthorizationRequestRequest: any = {
         "ResolveAuthorizationRequestRequest": {
             "type": "object",
             "properties": {
-                "requestUrl": {
+                "authorizationRequestUrl": {
                     "type": "string"
                 }
             },
             "required": [
-                "requestUrl"
+                "authorizationRequestUrl"
             ],
             "additionalProperties": false
         }
@@ -16788,35 +16815,6 @@ export const ResolveCredentialOfferRequest: any = {
             },
             "required": [
                 "credentialOfferUrl"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
-export const FetchedCredentialOfferRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/FetchedCredentialOfferRequest",
-    "definitions": {
-        "FetchedCredentialOfferRequest": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "type": "string"
-                },
-                "pinCode": {
-                    "type": "string"
-                },
-                "requestedCredentials": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            },
-            "required": [
-                "data",
-                "requestedCredentials"
             ],
             "additionalProperties": false
         }
@@ -20874,17 +20872,24 @@ export const VerifiableCredential: any = {
                 "@version": {
                     "type": "string"
                 },
-                "title": {
-                    "type": "string"
-                },
                 "value": {
-                    "type": "string"
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object"
+                        }
+                    ]
                 },
                 "type": {
                     "type": "string"
                 },
                 "displayInformation": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
                 },
                 "key": {
                     "type": "string"
@@ -20892,7 +20897,6 @@ export const VerifiableCredential: any = {
             },
             "required": [
                 "@type",
-                "title",
                 "type",
                 "value"
             ],

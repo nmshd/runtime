@@ -1,29 +1,9 @@
-import { AgentContext } from "@credo-ts/core";
-import {
-    KeyManagementService,
-    KmsCreateKeyOptions,
-    KmsCreateKeyReturn,
-    KmsCreateKeyType,
-    KmsDecryptOptions,
-    KmsDecryptReturn,
-    KmsDeleteKeyOptions,
-    KmsEncryptOptions,
-    KmsEncryptReturn,
-    KmsImportKeyOptions,
-    KmsImportKeyReturn,
-    KmsJwkPrivate,
-    KmsJwkPublic,
-    KmsOperation,
-    KmsRandomBytesOptions,
-    KmsRandomBytesReturn,
-    KmsSignOptions,
-    KmsSignReturn,
-    KmsVerifyOptions,
-    KmsVerifyReturn
-} from "@credo-ts/core/build/modules/kms";
+import { AgentContext, Kms } from "@credo-ts/core";
 import { ec as EC } from "elliptic";
-import _sodium from "libsodium-wrappers";
+
+import { SodiumWrapper } from "@nmshd/crypto";
 import sjcl from "sjcl";
+import { KeyStorage } from "./KeyStorage";
 
 export interface JwkKeyPair {
     publicKey: JsonWebKey;
@@ -31,14 +11,13 @@ export interface JwkKeyPair {
     keyType?: string;
 }
 
-export class EnmshedHolderKeyManagmentService implements KeyManagementService {
-    public static readonly backend = "fakeKeyManagementService";
+export class EnmshedHolderKeyManagmentService implements Kms.KeyManagementService {
+    public static readonly backend = "enmeshed";
 
     public readonly backend = EnmshedHolderKeyManagmentService.backend;
-    public keystore: Map<string, string>;
 
-    private readonly b64url = (bytes: Uint8Array) => _sodium.to_base64(bytes, _sodium.base64_variants.URLSAFE_NO_PADDING);
-    private readonly b64urlDecode = (b64url: string) => _sodium.from_base64(b64url, _sodium.base64_variants.URLSAFE_NO_PADDING);
+    private readonly b64url = (bytes: Uint8Array) => SodiumWrapper.sodium.to_base64(bytes, (SodiumWrapper.sodium as any).base64_variants.URLSAFE_NO_PADDING);
+    private readonly b64urlDecode = (b64url: string) => SodiumWrapper.sodium.from_base64(b64url, (SodiumWrapper.sodium as any).base64_variants.URLSAFE_NO_PADDING);
 
     // please note: we cannot use buffer here - because it is not available in the browser
     // and yes it could be pollyfilled but that extends the bundle size for no good reason
@@ -55,22 +34,9 @@ export class EnmshedHolderKeyManagmentService implements KeyManagementService {
         return bytes;
     };
 
-    public constructor() {
-        if ((globalThis as any).fakeKeyStorage) {
-            this.keystore = (globalThis as any).fakeKeyStorage;
-        } else {
-            this.keystore = new Map<string, string>();
-        }
-        this.updateGlobalInstance(this.keystore);
-    }
+    public constructor(private readonly keyStorage: KeyStorage) {}
 
-    public updateGlobalInstance(storage: Map<string, string>): void {
-        // console.log(`FKM: updating global instance ${JSON.stringify(Array.from(storage.entries()))}`);
-        (globalThis as any).fakeKeyStorage = storage;
-        // console.log(`FKM: global instance state ${JSON.stringify(Array.from((globalThis as any).fakeKeyStorage.entries()))}`);
-    }
-
-    public isOperationSupported(agentContext: AgentContext, operation: KmsOperation): boolean {
+    public isOperationSupported(agentContext: AgentContext, operation: Kms.KmsOperation): boolean {
         agentContext.config.logger.debug(`EKM: Checking if operation is supported: ${JSON.stringify(operation)}`);
         if (operation.operation === "createKey") {
             if (operation.type.kty === "OKP") {
@@ -98,21 +64,19 @@ export class EnmshedHolderKeyManagmentService implements KeyManagementService {
         }
         return false;
     }
-
-    public getPublicKey(agentContext: AgentContext, keyId: string): Promise<KmsJwkPublic> {
-        const keyPair = this.keystore.get(keyId);
+    public async getPublicKey(agentContext: AgentContext, keyId: string): Promise<Kms.KmsJwkPublic> {
+        const keyPair = await this.keyStorage.getKey(keyId);
         if (!keyPair) {
             agentContext.config.logger.error(`EKM: Key with id ${keyId} not found`);
             throw new Error(`Key with id ${keyId} not found`);
         }
 
-        return Promise.resolve((JSON.parse(keyPair) as JwkKeyPair).publicKey as KmsJwkPublic);
+        return (JSON.parse(keyPair) as JwkKeyPair).publicKey as Kms.KmsJwkPublic;
     }
-
-    public async createKey<Type extends KmsCreateKeyType>(agentContext: AgentContext, options: KmsCreateKeyOptions<Type>): Promise<KmsCreateKeyReturn<Type>> {
+    public async createKey<Type extends Kms.KmsCreateKeyType>(agentContext: AgentContext, options: Kms.KmsCreateKeyOptions<Type>): Promise<Kms.KmsCreateKeyReturn<Type>> {
         options.keyId ??= "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
             // Use libsodium's randombytes_uniform for secure random number generation
-            const r = _sodium.randombytes_uniform(16);
+            const r = SodiumWrapper.sodium.randombytes_uniform(16);
             const v = c === "x" ? r : (r & 0x3) | 0x8;
             return v.toString(16);
         });
@@ -146,21 +110,14 @@ export class EnmshedHolderKeyManagmentService implements KeyManagementService {
 
             agentContext.config.logger.debug(`EKM: Created EC key pair with id ${options.keyId}`);
             // store the key pair in the keystore
-            this.keystore.set(options.keyId, JSON.stringify(jwkKeyPair));
+            await this.keyStorage.storeKey(options.keyId, JSON.stringify(jwkKeyPair));
 
-            this.updateGlobalInstance(this.keystore);
-            return await Promise.resolve({
-                keyId: options.keyId,
-                publicJwk: publicJwk as KmsJwkPublic
-            } as KmsCreateKeyReturn<Type>);
+            return { keyId: options.keyId, publicJwk: publicJwk as Kms.KmsJwkPublic } as Kms.KmsCreateKeyReturn<Type>;
         }
 
-        await _sodium.ready;
-        const sodium = _sodium;
-
-        const { keyType, publicKey, privateKey } = sodium.crypto_sign_keypair();
+        const { keyType, publicKey, privateKey } = SodiumWrapper.sodium.crypto_sign_keypair();
         agentContext.config.logger.debug(`EKM: Created OKP key pair with id ${options.keyId} and keyType ${keyType}`);
-        const seed = privateKey.slice(0, sodium.crypto_sign_SEEDBYTES);
+        const seed = privateKey.slice(0, (SodiumWrapper.sodium as any).crypto_sign_SEEDBYTES);
 
         // Public JWK
         const publicJwk = {
@@ -181,34 +138,28 @@ export class EnmshedHolderKeyManagmentService implements KeyManagementService {
             keyType: "OKP"
         };
 
-        // store the key pair in the keystore
-        this.keystore.set(options.keyId, JSON.stringify(jwkKeyPair));
-        this.updateGlobalInstance(this.keystore);
-        return await Promise.resolve({
-            keyId: options.keyId,
-            publicJwk: publicJwk as KmsJwkPublic
-        } as KmsCreateKeyReturn<Type>);
+        await this.keyStorage.storeKey(options.keyId, JSON.stringify(jwkKeyPair));
+        return { keyId: options.keyId, publicJwk: publicJwk as Kms.KmsJwkPublic } as Kms.KmsCreateKeyReturn<Type>;
     }
 
-    public importKey<Jwk extends KmsJwkPrivate>(agentContext: AgentContext, options: KmsImportKeyOptions<Jwk>): Promise<KmsImportKeyReturn<Jwk>> {
+    public importKey<Jwk extends Kms.KmsJwkPrivate>(agentContext: AgentContext, options: Kms.KmsImportKeyOptions<Jwk>): Promise<Kms.KmsImportKeyReturn<Jwk>> {
         agentContext.config.logger.debug(`EKM: Importing key with  ${JSON.stringify(options)}`);
         throw new Error("Method not implemented.");
     }
 
-    public deleteKey(agentContext: AgentContext, options: KmsDeleteKeyOptions): Promise<boolean> {
-        if (this.keystore.has(options.keyId)) {
-            agentContext.config.logger.debug(`EKM: Deleting key with id ${options.keyId}`);
-            this.keystore.delete(options.keyId);
-            this.updateGlobalInstance(this.keystore);
-            return Promise.resolve(true);
-        }
-        throw new Error(`key with id ${options.keyId} not found. and cannot be deleted`);
+    public async deleteKey(agentContext: AgentContext, options: Kms.KmsDeleteKeyOptions): Promise<boolean> {
+        const hasKey = await this.keyStorage.hasKey(options.keyId);
+        if (!hasKey) throw new Error(`key with id ${options.keyId} not found. and cannot be deleted`);
+
+        agentContext.config.logger.debug(`EKM: Deleting key with id ${options.keyId}`);
+        await this.keyStorage.deleteKey(options.keyId);
+        return true;
     }
 
-    public async sign(agentContext: AgentContext, options: KmsSignOptions): Promise<KmsSignReturn> {
+    public async sign(agentContext: AgentContext, options: Kms.KmsSignOptions): Promise<Kms.KmsSignReturn> {
         agentContext.config.logger.debug(`EKM: Signing data with key id ${options.keyId} using algorithm ${options.algorithm}`);
 
-        const stringifiedKeyPair = this.keystore.get(options.keyId);
+        const stringifiedKeyPair = await this.keyStorage.getKey(options.keyId);
         if (!stringifiedKeyPair) {
             throw new Error(`Key with id ${options.keyId} not found`);
         }
@@ -236,13 +187,11 @@ export class EnmshedHolderKeyManagmentService implements KeyManagementService {
 
             return await Promise.resolve({
                 signature: signatureBytes
-            } as KmsSignReturn);
+            } as Kms.KmsSignReturn);
         }
 
-        await _sodium.ready;
-        const sodium = _sodium;
-        const decode = (bytes: string) => sodium.from_base64(bytes, sodium.base64_variants.URLSAFE_NO_PADDING);
-        // get the priavte key bytes
+        const decode = (bytes: string) => SodiumWrapper.sodium.from_base64(bytes, (SodiumWrapper.sodium as any).base64_variants.URLSAFE_NO_PADDING);
+        // get the private key bytes
         if (privateKey.d === undefined) {
             throw new Error("Private key does not contain 'd' parameter");
         }
@@ -260,14 +209,14 @@ export class EnmshedHolderKeyManagmentService implements KeyManagementService {
         fullPrivateKeyBytes.set(publicKeyBytes, privateKeyBytes.length);
 
         // and use it to sign the data
-        const signature = sodium.crypto_sign_detached(options.data, fullPrivateKeyBytes);
+        const signature = SodiumWrapper.sodium.crypto_sign_detached(options.data, fullPrivateKeyBytes);
 
         return {
-            signature: signature
+            signature: signature as Uint8Array<ArrayBuffer> // I hope this cast doesn't paper over something
         };
     }
 
-    public verify(agentContext: AgentContext, options: KmsVerifyOptions): Promise<KmsVerifyReturn> {
+    public verify(agentContext: AgentContext, options: Kms.KmsVerifyOptions): Promise<Kms.KmsVerifyReturn> {
         agentContext.config.logger.debug(`EKM: Verifying signature with key id ${options.key.keyId} using algorithm ${options.algorithm}`);
         // Use P-256 (aka secp256r1)
         const ec = new EC("p256");
@@ -293,15 +242,15 @@ export class EnmshedHolderKeyManagmentService implements KeyManagementService {
         const dataHash = ec.hash().update(options.data).digest();
         try {
             const verified = key.verify(dataHash, signature);
-            return Promise.resolve({ verified: verified } as KmsVerifyReturn);
+            return Promise.resolve({ verified: verified } as Kms.KmsVerifyReturn);
         } catch (e) {
             agentContext.config.logger.error(`EKM: Error during signature verification: ${e}`);
             throw e;
         }
     }
 
-    private ecdhEs(localKeyId: string, remotePublicJWK: any): Uint8Array {
-        const keyPairString = this.keystore.get(localKeyId);
+    private async ecdhEs(localKeyId: string, remotePublicJWK: any): Promise<Uint8Array> {
+        const keyPairString = await this.keyStorage.getKey(localKeyId);
         if (!keyPairString) {
             throw new Error(`Key with id ${localKeyId} not found`);
         }
@@ -387,7 +336,7 @@ export class EnmshedHolderKeyManagmentService implements KeyManagementService {
         return hashBuf.subarray(0, keyLength / 8);
     }
 
-    public encrypt(agentContext: AgentContext, options: KmsEncryptOptions): Promise<KmsEncryptReturn> {
+    public async encrypt(agentContext: AgentContext, options: Kms.KmsEncryptOptions): Promise<Kms.KmsEncryptReturn> {
         try {
             // encryption via A-256-GCM
             // we will call the services side bob and the incoming side alice
@@ -399,7 +348,7 @@ export class EnmshedHolderKeyManagmentService implements KeyManagementService {
             }
 
             // 1. derive the shared secret via ECDH-ES
-            const sharedSecret = this.ecdhEs(options.key.keyAgreement.keyId, options.key.keyAgreement.externalPublicJwk);
+            const sharedSecret = await this.ecdhEs(options.key.keyAgreement.keyId, options.key.keyAgreement.externalPublicJwk);
             agentContext.config.logger.debug(`EKM: Derived shared secret for encryption using ECDH-ES`);
             // 2. Concat KDF to form the final key
             const derivedKey = this.concatKdf(sharedSecret, 256, "A256GCM", options.key.keyAgreement);
@@ -430,20 +379,19 @@ export class EnmshedHolderKeyManagmentService implements KeyManagementService {
                 tag: tag
             };
 
-            return Promise.resolve(returnValue);
+            return returnValue;
         } catch (e) {
             agentContext.config.logger.error(`EKM: Error during encryption: ${e}`);
             throw e;
         }
     }
 
-    public decrypt(agentContext: AgentContext, options: KmsDecryptOptions): Promise<KmsDecryptReturn> {
+    public decrypt(agentContext: AgentContext, options: Kms.KmsDecryptOptions): Promise<Kms.KmsDecryptReturn> {
         agentContext.config.logger.debug(`EKM: Decrypting data with key id ${options.key.keyId} using options ${options}`);
         throw new Error("Method not implemented.");
     }
-
-    public randomBytes(agentContext: AgentContext, options: KmsRandomBytesOptions): KmsRandomBytesReturn {
+    public randomBytes(agentContext: AgentContext, options: Kms.KmsRandomBytesOptions): Kms.KmsRandomBytesReturn {
         agentContext.config.logger.debug(`EKM: Generating ${options.length} random bytes`);
-        return _sodium.randombytes_buf(options.length); // Uint8Array
+        return SodiumWrapper.sodium.randombytes_buf(options.length); // Uint8Array
     }
 }

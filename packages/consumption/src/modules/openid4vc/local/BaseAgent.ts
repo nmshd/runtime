@@ -4,13 +4,14 @@ import {
     DependencyManager,
     DidKey,
     InjectionSymbols,
+    Kms,
     LogLevel,
+    StorageVersionRecord,
     type InitConfig,
     type KeyDidCreateOptions,
     type ModulesMap,
     type VerificationMethod
 } from "@credo-ts/core";
-import { KeyManagementModuleConfig } from "@credo-ts/core/build/modules/kms";
 import { AccountController } from "@nmshd/transport";
 import { EventEmitter } from "events";
 import webSocket from "ws";
@@ -18,6 +19,7 @@ import { AttributesController } from "../../attributes";
 import { EnmeshedHolderFileSystem } from "./EnmeshedHolderFileSystem";
 import { EnmshedHolderKeyManagmentService } from "./EnmeshedHolderKeyManagmentService";
 import { EnmeshedStorageService } from "./EnmeshedStorageService";
+import { KeyStorage } from "./KeyStorage";
 
 export class BaseAgent<AgentModules extends ModulesMap> {
     public config: InitConfig;
@@ -28,16 +30,12 @@ export class BaseAgent<AgentModules extends ModulesMap> {
     public verificationMethod!: VerificationMethod;
 
     public constructor(
-        public readonly port: number,
-        public readonly name: string,
-        public readonly modules: AgentModules,
-        public readonly accountController: AccountController,
-        public readonly attributeController: AttributesController,
+        private readonly keyStorage: KeyStorage,
+        modules: AgentModules,
+        accountController: AccountController,
+        attributeController: AttributesController,
         fetchInstance: typeof fetch
     ) {
-        this.name = name;
-        this.port = port;
-
         const config = {
             allowInsecureHttpUrls: true,
             logger: new ConsoleLogger(LogLevel.off)
@@ -45,10 +43,8 @@ export class BaseAgent<AgentModules extends ModulesMap> {
 
         this.config = config;
 
-        this.accountController = accountController;
-        this.attributeController = attributeController;
         const dependencyManager = new DependencyManager();
-        dependencyManager.registerInstance(InjectionSymbols.StorageService, new EnmeshedStorageService(accountController, attributeController));
+        dependencyManager.registerInstance(InjectionSymbols.StorageService, new EnmeshedStorageService(accountController, attributeController, this.keyStorage));
         this.agent = new Agent(
             {
                 config,
@@ -70,11 +66,10 @@ export class BaseAgent<AgentModules extends ModulesMap> {
     public async initializeAgent(privateKey: string): Promise<void> {
         // as we are not using askar we need to set the storage version
         const storage = this.agent.dependencyManager.resolve<EnmeshedStorageService<any>>(InjectionSymbols.StorageService);
-        const versionRecord = { id: "STORAGE_VERSION_RECORD_ID", storageVersion: "0.5.0", value: "0.5.0" };
-        await storage.save(this.agent.context, versionRecord);
+        await storage.save(this.agent.context, new StorageVersionRecord({ storageVersion: "0.5.0" }));
 
-        const kmsConfig = this.agent.dependencyManager.resolve(KeyManagementModuleConfig);
-        kmsConfig.registerBackend(new EnmshedHolderKeyManagmentService());
+        const kmsConfig = this.agent.dependencyManager.resolve(Kms.KeyManagementModuleConfig);
+        kmsConfig.registerBackend(new EnmshedHolderKeyManagmentService(this.keyStorage));
 
         if (kmsConfig.backends.length === 0) throw new Error("No KMS backend registered");
 
