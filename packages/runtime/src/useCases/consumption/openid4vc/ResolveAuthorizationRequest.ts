@@ -33,46 +33,13 @@ export class ResolveAuthorizationRequestUseCase extends UseCase<ResolveAuthoriza
     protected override async executeInternal(request: ResolveAuthorizationRequestRequest): Promise<Result<ResolveAuthorizationRequestResponse>> {
         const result = await this.openId4VcController.resolveAuthorizationRequest(request.authorizationRequestUrl);
 
-        return Result.ok({
-            authorizationRequest: JSON.parse(stringifySafe(materializeGetters(result.authorizationRequest))),
-            usedCredentials: AttributeMapper.toAttributeDTOList(result.usedCredentials)
-        });
+        const authorizationRequest = JSON.parse(stringifySafe(result.authorizationRequest));
+        // the 'get encoded' of the credential is lost while making it app-safe, we have to re-add it
+        // quick-fix for PEX and the simplest case with one requested credential only - otherwise every [0] would have to be generalised.
+        const encodedCredential =
+            result.authorizationRequest.presentationExchange?.credentialsForRequest.requirements[0].submissionEntry[0].verifiableCredentials[0].credentialRecord.encoded;
+        authorizationRequest.presentationExchange.credentialsForRequest.requirements[0].submissionEntry[0].verifiableCredentials[0].credentialRecord.encoded = encodedCredential;
+
+        return Result.ok({ authorizationRequest, usedCredentials: AttributeMapper.toAttributeDTOList(result.usedCredentials) });
     }
-}
-
-type AnyObject = Record<string, any>;
-
-export function materializeGetters<T>(input: T): T {
-    return deepCloneWithoutGetters(input) as T;
-}
-
-function deepCloneWithoutGetters(obj: any): any {
-    if (obj === null || typeof obj !== "object") return obj;
-
-    if (Array.isArray(obj)) {
-        return obj.map((item) => deepCloneWithoutGetters(item));
-    }
-
-    const clone: AnyObject = {};
-
-    const descriptors = Object.getOwnPropertyDescriptors(obj);
-
-    for (const [key, desc] of Object.entries(descriptors)) {
-        if (typeof desc.get === "function") {
-            // Replace getter with value
-            try {
-                const value = desc.get.call(obj);
-                clone[key] = deepCloneWithoutGetters(value);
-            } catch {
-                clone[key] = undefined;
-            }
-        } else if ("value" in desc) {
-            clone[key] = deepCloneWithoutGetters(desc.value);
-        } else {
-            // Handle setter-only fields or weird descriptors
-            clone[key] = undefined;
-        }
-    }
-
-    return clone;
 }
