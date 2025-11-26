@@ -12,7 +12,7 @@ export interface ResolveAuthorizationRequestRequest {
 }
 
 export interface ResolveAuthorizationRequestResponse {
-    authorizationRequest: OpenId4VpResolvedAuthorizationRequest; // tief darin enthaltene CredentialRecord-Klassen erhalten?
+    authorizationRequest: OpenId4VpResolvedAuthorizationRequest;
     usedCredentials: LocalAttributeDTO[];
 }
 
