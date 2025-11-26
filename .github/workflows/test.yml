@@ -4,6 +4,8 @@ on:
   pull_request:
   push:
     branches: [main]
+permissions:
+  pull-requests: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
@@ -116,6 +118,8 @@ jobs:
   test-runtime-mongodb:
     runs-on: ubuntu-latest
     steps:
+      - name: Collect Workflow Telemetry
+        uses: catchpoint/workflow-telemetry-action@v2
       - uses: actions/checkout@v6
       - name: Start Backbone
         run: npm run start:backbone
@@ -138,6 +142,8 @@ jobs:
   test-runtime-loki:
     runs-on: ubuntu-latest
     steps:
+      - name: Collect Workflow Telemetry
+        uses: catchpoint/workflow-telemetry-action@v2
       - uses: actions/checkout@v6
       - name: Start Backbone
         run: npm run start:backbone
