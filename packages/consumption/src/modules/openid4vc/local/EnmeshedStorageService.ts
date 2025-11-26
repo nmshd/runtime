@@ -4,14 +4,12 @@ import {
     BaseRecordConstructor,
     ClaimFormat,
     injectable,
-    Mdoc,
     MdocRecord,
     Query,
     QueryOptions,
     SdJwtVcRecord,
     StorageService,
-    W3cCredentialRecord,
-    W3cJwtVerifiableCredential
+    W3cCredentialRecord
 } from "@credo-ts/core";
 import { IdentityAttribute, VerifiableCredential } from "@nmshd/content";
 import { AccountController } from "@nmshd/transport";
@@ -123,14 +121,11 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
     private fromEncoded(type: string, encoded: string | Record<string, any>): BaseRecord<any, any> {
         switch (type) {
             case ClaimFormat.SdJwtDc:
-                return new SdJwtVcRecord({ compactSdJwtVc: encoded as string });
+                return new SdJwtVcRecord({ credentialInstances: [{ compactSdJwtVc: encoded as string }] });
             case ClaimFormat.MsoMdoc:
-                return new MdocRecord({ mdoc: Mdoc.fromBase64Url(encoded as string) });
+                return new MdocRecord({ credentialInstances: [{ issuerSignedBase64Url: encoded as string }] });
             case ClaimFormat.SdJwtW3cVc:
-                return new W3cCredentialRecord({
-                    credential: W3cJwtVerifiableCredential.fromSerializedJwt(encoded as string),
-                    tags: {}
-                });
+                return new W3cCredentialRecord({ credentialInstances: [{ credential: encoded as string }] });
             default:
                 throw new Error("Credential type not supported.");
         }

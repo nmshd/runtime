@@ -1,17 +1,4 @@
-import {
-    BaseRecord,
-    ClaimFormat,
-    DidJwk,
-    DidKey,
-    InjectionSymbols,
-    JwkDidCreateOptions,
-    KeyDidCreateOptions,
-    Kms,
-    Mdoc,
-    MdocRecord,
-    SdJwtVcRecord,
-    X509Module
-} from "@credo-ts/core";
+import { BaseRecord, ClaimFormat, DidJwk, DidKey, InjectionSymbols, JwkDidCreateOptions, KeyDidCreateOptions, Kms, MdocRecord, SdJwtVcRecord, X509Module } from "@credo-ts/core";
 import { OpenId4VcModule, type OpenId4VciResolvedCredentialOffer, type OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
 import { AccountController } from "@nmshd/transport";
 import { AttributesController, OwnIdentityAttribute } from "../../attributes";
@@ -110,7 +97,7 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         const storedCredentials = await Promise.all(
             credentialResponse.credentials.map((response) => {
                 // TODO: batch issuance not yet supported
-                const credential = response.credentials[0];
+                const credential = response.record.firstCredential;
 
                 if (![ClaimFormat.SdJwtW3cVc, ClaimFormat.SdJwtDc, ClaimFormat.MsoMdoc].includes(credential.claimFormat)) {
                     throw new Error("Unsupported credential format");
@@ -166,7 +153,7 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
                             const record = new SdJwtVcRecord({
                                 id: recordUncast.id,
                                 createdAt: recordUncast.createdAt,
-                                compactSdJwtVc: recordUncast.compactSdJwtVc
+                                credentialInstances: [{ compactSdJwtVc: recordUncast.encoded }]
                             });
                             vc.credentialRecord = record;
                         } else if (vc.claimFormat === ClaimFormat.MsoMdoc) {
@@ -174,7 +161,7 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
                             const record = new MdocRecord({
                                 id: recordUncast.id,
                                 createdAt: recordUncast.createdAt,
-                                mdoc: Mdoc.fromBase64Url(recordUncast.base64Url)
+                                credentialInstances: [{ issuerSignedBase64Url: recordUncast.encoded }]
                             });
                             vc.credentialRecord = record;
                         } else {

@@ -12,7 +12,7 @@ export interface ResolveAuthorizationRequestRequest {
 }
 
 export interface ResolveAuthorizationRequestResponse {
-    authorizationRequest: OpenId4VpResolvedAuthorizationRequest;
+    authorizationRequest: OpenId4VpResolvedAuthorizationRequest; // tief darin enthaltene CredentialRecord-Klassen erhalten?
     usedCredentials: LocalAttributeDTO[];
 }
 
@@ -34,8 +34,45 @@ export class ResolveAuthorizationRequestUseCase extends UseCase<ResolveAuthoriza
         const result = await this.openId4VcController.resolveAuthorizationRequest(request.authorizationRequestUrl);
 
         return Result.ok({
-            authorizationRequest: JSON.parse(stringifySafe(result.authorizationRequest)),
+            authorizationRequest: JSON.parse(stringifySafe(materializeGetters(result.authorizationRequest))),
             usedCredentials: AttributeMapper.toAttributeDTOList(result.usedCredentials)
         });
     }
+}
+
+type AnyObject = Record<string, any>;
+
+export function materializeGetters<T>(input: T): T {
+    return deepCloneWithoutGetters(input) as T;
+}
+
+function deepCloneWithoutGetters(obj: any): any {
+    if (obj === null || typeof obj !== "object") return obj;
+
+    if (Array.isArray(obj)) {
+        return obj.map((item) => deepCloneWithoutGetters(item));
+    }
+
+    const clone: AnyObject = {};
+
+    const descriptors = Object.getOwnPropertyDescriptors(obj);
+
+    for (const [key, desc] of Object.entries(descriptors)) {
+        if (typeof desc.get === "function") {
+            // Replace getter with value
+            try {
+                const value = desc.get.call(obj);
+                clone[key] = deepCloneWithoutGetters(value);
+            } catch {
+                clone[key] = undefined;
+            }
+        } else if ("value" in desc) {
+            clone[key] = deepCloneWithoutGetters(desc.value);
+        } else {
+            // Handle setter-only fields or weird descriptors
+            clone[key] = undefined;
+        }
+    }
+
+    return clone;
 }

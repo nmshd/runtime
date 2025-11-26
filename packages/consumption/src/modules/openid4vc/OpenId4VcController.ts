@@ -71,7 +71,7 @@ export class OpenId4VcController extends ConsumptionBaseController {
         const matchedCredentialsFromPresentationExchange = authorizationRequest.presentationExchange?.credentialsForRequest.requirements
             .map((entry) =>
                 entry.submissionEntry
-                    .map((subEntry) => subEntry.verifiableCredentials.filter((vc) => vc.claimFormat === ClaimFormat.SdJwtDc).map((vc) => vc.credentialRecord.compactSdJwtVc))
+                    .map((subEntry) => subEntry.verifiableCredentials.filter((vc) => vc.claimFormat === ClaimFormat.SdJwtDc).map((vc) => vc.credentialRecord.encoded))
                     .flat()
             )
             .flat();
