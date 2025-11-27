@@ -1,4 +1,5 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
+import { isValidIBAN } from "ibantools";
 import { ValueHints } from "../../hints";
 import { AbstractString, AbstractStringJSON, IAbstractString } from "../AbstractString";
 
@@ -16,7 +17,7 @@ export class AccountNumber extends AbstractString implements IAccountNumber {
     @validate({
         min: MIN_ACCOUNT_NUMBER_LENGTH,
         max: MAX_ACCOUNT_NUMBER_LENGTH,
-        customValidator: (iban) => (!isValid(iban) ? "invalid IBAN" : undefined)
+        customValidator: (iban) => (!isValidIBAN(iban) ? "invalid IBAN" : undefined)
     })
     public override value: string;
 
