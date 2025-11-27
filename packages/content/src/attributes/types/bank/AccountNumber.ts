@@ -1,5 +1,4 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { isValid } from "iban-ts";
 import { ValueHints } from "../../hints";
 import { AbstractString, AbstractStringJSON, IAbstractString } from "../AbstractString";
 
