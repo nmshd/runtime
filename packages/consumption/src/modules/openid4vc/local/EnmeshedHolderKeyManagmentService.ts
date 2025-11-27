@@ -112,6 +112,10 @@ export class EnmshedHolderKeyManagmentService implements Kms.KeyManagementServic
             // store the key pair in the keystore
             await this.keyStorage.storeKey(options.keyId, JSON.stringify(jwkKeyPair));
 
+            // Credo doesn't trust the key id provided in the key binding jwk anymore, so there are two options: Storing the key id with the credential and making sure that key id is properly fetched - this turned out to be difficult - or the easy way out by storing this alternative key id computed from the public key.
+            const credoLegacyKeyId = Kms.PublicJwk.fromPublicJwk(publicJwk as any).legacyKeyId;
+            await this.keyStorage.storeKey(credoLegacyKeyId, JSON.stringify(jwkKeyPair));
+
             return { keyId: options.keyId, publicJwk: publicJwk as Kms.KmsJwkPublic } as Kms.KmsCreateKeyReturn<Type>;
         }
 

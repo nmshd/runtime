@@ -33,9 +33,16 @@ export class ResolveAuthorizationRequestUseCase extends UseCase<ResolveAuthoriza
     protected override async executeInternal(request: ResolveAuthorizationRequestRequest): Promise<Result<ResolveAuthorizationRequestResponse>> {
         const result = await this.openId4VcController.resolveAuthorizationRequest(request.authorizationRequestUrl);
 
-        return Result.ok({
-            authorizationRequest: JSON.parse(stringifySafe(result.authorizationRequest)),
-            usedCredentials: AttributeMapper.toAttributeDTOList(result.usedCredentials)
-        });
+        const authorizationRequest = JSON.parse(stringifySafe(result.authorizationRequest));
+        // the 'get encoded' of the credential is lost while making it app-safe, we have to re-add it for PEX
+        // quick-fix for the simplest case with one requested credential only - otherwise every [0] would have to be generalised.
+        if (result.authorizationRequest.presentationExchange) {
+            const encodedCredential =
+                result.authorizationRequest.presentationExchange.credentialsForRequest.requirements[0].submissionEntry[0].verifiableCredentials[0].credentialRecord.encoded;
+            authorizationRequest.presentationExchange.credentialsForRequest.requirements[0].submissionEntry[0].verifiableCredentials[0].credentialRecord.encoded =
+                encodedCredential;
+        }
+
+        return Result.ok({ authorizationRequest, usedCredentials: AttributeMapper.toAttributeDTOList(result.usedCredentials) });
     }
 }
