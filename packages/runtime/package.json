@@ -57,7 +57,8 @@
                     "tsconfig": "test/tsconfig.json"
                 }
             ]
-        }
+        },
+        "runtime": "@side/jest-runtime"
     },
     "dependencies": {
         "@js-soft/docdb-querytranslator": "^1.1.6",
