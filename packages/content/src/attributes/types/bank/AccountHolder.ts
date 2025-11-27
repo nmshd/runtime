@@ -1,4 +1,4 @@
-import { serialize, type, validate } from "@js-soft/ts-serval";
+import { type } from "@js-soft/ts-serval";
 import { AbstractString, AbstractStringJSON, IAbstractString } from "../AbstractString";
 
 export interface AccountHolderJSON extends AbstractStringJSON {
@@ -9,10 +9,6 @@ export interface IAccountHolder extends IAbstractString {}
 
 @type("AccountHolder")
 export class AccountHolder extends AbstractString implements IAccountHolder {
-    @serialize()
-    @validate({ max: 100 })
-    public override value: string;
-
     public static from(value: IAccountHolder | Omit<AccountHolderJSON, "@type"> | string): AccountHolder {
         return this.fromAny(value);
     }
