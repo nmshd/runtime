@@ -42,7 +42,6 @@
             "lcov"
         ],
         "maxWorkers": 1,
-        "preset": "ts-jest",
         "setupFilesAfterEnv": [
             "./test/customMatchers.ts",
             "./test/disableTimeoutForDebugging.ts",
