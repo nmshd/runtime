@@ -1,6 +1,8 @@
 import {
     Affiliation,
     AffiliationJSON,
+    BankAccount,
+    BankAccountJSON,
     BirthDate,
     BirthDateJSON,
     BirthName,
@@ -28,6 +30,7 @@ import {
     HonorificSuffix,
     HonorificSuffixJSON,
     IAffiliation,
+    IBankAccount,
     IBirthDate,
     IBirthName,
     IBirthPlace,
@@ -125,6 +128,7 @@ export namespace AttributeValues {
         export namespace Editable {
             export type Json =
                 | AffiliationJSON
+                | BankAccountJSON
                 | BirthDateJSON
                 | BirthNameJSON
                 | BirthPlaceJSON
@@ -151,6 +155,7 @@ export namespace AttributeValues {
 
             export type Interface =
                 | IAffiliation
+                | IBankAccount
                 | IBirthDate
                 | IBirthName
                 | IBirthPlace
@@ -177,6 +182,7 @@ export namespace AttributeValues {
 
             export type Class =
                 | Affiliation
+                | BankAccount
                 | BirthDate
                 | BirthName
                 | BirthPlace
@@ -203,6 +209,7 @@ export namespace AttributeValues {
 
             export const CLASSES = [
                 Affiliation,
+                BankAccount,
                 BirthDate,
                 BirthName,
                 BirthPlace,
@@ -230,6 +237,7 @@ export namespace AttributeValues {
 
             export const TYPE_NAMES = [
                 "Affiliation",
+                "BankAccount",
                 "BirthDate",
                 "BirthName",
                 "BirthPlace",

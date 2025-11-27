@@ -4,6 +4,7 @@ export * from "./AbstractInteger";
 export * from "./AbstractString";
 export * from "./address";
 export * from "./affiliation";
+export * from "./bank";
 export * from "./birth";
 export * from "./communication";
 export * from "./dates";
