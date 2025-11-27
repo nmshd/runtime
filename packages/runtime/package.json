@@ -51,7 +51,13 @@
         "testEnvironment": "node",
         "testTimeout": 60000,
         "transform": {
-            "^.+\\.(t|j)s$": [
+            "^.+\\.ts$": [
+                "ts-jest",
+                {
+                    "tsconfig": "test/tsconfig.json"
+                }
+            ],
+            "^.+(@noble|@stablelib|@digitalcredentials|@credo\\-ts/core/node_modules/uuid).+\\.js$": [
                 "ts-jest",
                 {
                     "tsconfig": "test/tsconfig.json"
