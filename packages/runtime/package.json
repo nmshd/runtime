@@ -51,9 +51,7 @@
         "testEnvironment": "node",
         "testTimeout": 60000,
         "transform": {
-            "transform": {
-                "^.+\\.ts$": "@swc/jest"
-            }
+            "^.+\\.ts$": "@swc/jest"
         },
         "runtime": "@side/jest-runtime"
     },
