@@ -7,7 +7,6 @@ import { AccountHolder, IAccountHolder } from "./AccountHolder";
 import { AccountNumber, IAccountNumber } from "./AccountNumber";
 import { BankCode, IBankCode } from "./BankCode";
 
-
 export interface BankAccountJSON extends AbstractComplexValueJSON {
     "@type": "BankAccount";
     accountHolder: string;

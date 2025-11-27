@@ -1,4 +1,5 @@
-import { type } from "@js-soft/ts-serval";
+import { serialize, type, validate } from "@js-soft/ts-serval";
+import { isValid } from "iban-ts";
 import { AbstractString, AbstractStringJSON, IAbstractString } from "../AbstractString";
 
 export interface AccountNumberJSON extends AbstractStringJSON {
@@ -9,6 +10,10 @@ export interface IAccountNumber extends IAbstractString {}
 
 @type("AccountNumber")
 export class AccountNumber extends AbstractString implements IAccountNumber {
+    @serialize()
+    @validate({customValidator: (iban) => (!isValid(iban) ? "invalid IBAN" : undefined)})
+    public override value: string;
+
     public static from(value: IAccountNumber | Omit<AccountNumberJSON, "@type"> | string): AccountNumber {
         return this.fromAny(value);
     }
