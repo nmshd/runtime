@@ -23,7 +23,7 @@ export interface IBankAccount extends IAbstractComplexValue {
 @type("BankAccount")
 export class BankAccount extends AbstractComplexValue implements IBankAccount {
     @serialize({ customGenerator: AbstractAttributeValue.valueGenerator })
-    @validate({ max: 100 })
+    @validate()
     public accountHolder: AccountHolder;
 
     @serialize({ customGenerator: AbstractAttributeValue.valueGenerator })
