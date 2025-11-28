@@ -67,10 +67,11 @@ describe("custom openid4vc service", () => {
 
         const requestedCredentials = credentialOffer.credentialOfferPayload.credential_configuration_ids;
 
-        const acceptanceResult = await consumptionServices.openId4Vc.acceptCredentialOffer({
+        const credentialResponseResult = await consumptionServices.openId4Vc.requestCredentials({
             credentialOffer,
             credentialConfigurationIds: requestedCredentials
         });
+        const acceptanceResult = await consumptionServices.openId4Vc.acceptCredentials({ credentialResponses: credentialResponseResult.value.credentialResponses });
         expect(acceptanceResult).toBeSuccessful();
         expect(typeof acceptanceResult.value.id).toBe("string");
 
@@ -233,16 +234,17 @@ describe("EUDIPLO", () => {
             })
         ).data.uri;
 
-        const loadResult = await consumptionServices.openId4Vc.resolveCredentialOffer({ credentialOfferUrl });
-        expect(loadResult).toBeSuccessful();
+        const resolveCredentialOfferResult = await consumptionServices.openId4Vc.resolveCredentialOffer({ credentialOfferUrl });
+        expect(resolveCredentialOfferResult).toBeSuccessful();
 
-        const resolveResult = await consumptionServices.openId4Vc.acceptCredentialOffer({
-            credentialOffer: loadResult.value.credentialOffer,
+        const credentialResponsesResult = await consumptionServices.openId4Vc.requestCredentials({
+            credentialOffer: resolveCredentialOfferResult.value.credentialOffer,
             credentialConfigurationIds: [eudiploCredentialIdInConfiguration]
         });
-        expect(resolveResult).toBeSuccessful();
+        const acceptCredentialsResponse = await consumptionServices.openId4Vc.acceptCredentials({ credentialResponses: credentialResponsesResult.value.credentialResponses });
+        expect(acceptCredentialsResponse).toBeSuccessful();
 
-        expect((resolveResult.value.content.value as unknown as VerifiableCredential).displayInformation?.[0].name).toBe("Employee ID Card");
+        expect((acceptCredentialsResponse.value.content.value as unknown as VerifiableCredential).displayInformation?.[0].name).toBe("Employee ID Card");
     });
 
     test("presentation", async () => {
