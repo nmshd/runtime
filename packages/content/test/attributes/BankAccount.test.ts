@@ -2,7 +2,7 @@ import { BankAccount } from "../../src";
 
 describe("creation of IdentityAttributes with value type BankAccount", () => {
     const aValidAccountHolder = "Max Mustermann";
-    const aValidAccountNumber = "DE02500105170137075030"; 
+    const aValidAccountNumber = "DE02500105170137075030";
     const aValidBankCode = "INGDDEFF";
 
     test("can create a BankAccount", function () {
