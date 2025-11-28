@@ -31,16 +31,6 @@
         "test:local:start:mongodb": "docker compose -f ../../.dev/compose.yml up -d runtime-mongo",
         "test:local:teardown": "docker compose -f ../../.dev/compose.yml rm -fsv"
     },
-    "babel": {
-        "presets": [
-            [
-                "@babel/preset-env",
-                {
-                    "modules": "commonjs"
-                }
-            ]
-        ]
-    },
     "jest": {
         "collectCoverageFrom": [
             "./src/**"
