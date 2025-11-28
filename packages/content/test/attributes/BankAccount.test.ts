@@ -9,17 +9,17 @@ describe("creation of IdentityAttributes with value type BankAccount", () => {
         const validBankAccount = BankAccount.from({ accountHolder: aValidAccountHolder, accountNumber: aValidAccountNumber, bankCode: aValidBankCode });
 
         expect(validBankAccount.constructor.name).toBe("BankAccount");
-        expect(validBankAccount.accountHolder.value).toBe(aValidAccountHolder);
-        expect(validBankAccount.accountNumber.value).toBe(aValidAccountNumber);
-        expect(validBankAccount.bankCode!.value).toBe(aValidBankCode);
+        expect(validBankAccount.accountHolder).toBe(aValidAccountHolder);
+        expect(validBankAccount.accountNumber).toBe(aValidAccountNumber);
+        expect(validBankAccount.bankCode!).toBe(aValidBankCode);
     });
 
     test("can create a BankAccount without optional bankCode property", function () {
         const validBankAccount = BankAccount.from({ accountHolder: aValidAccountHolder, accountNumber: aValidAccountNumber });
 
         expect(validBankAccount.constructor.name).toBe("BankAccount");
-        expect(validBankAccount.accountHolder.value).toBe(aValidAccountHolder);
-        expect(validBankAccount.accountNumber.value).toBe(aValidAccountNumber);
+        expect(validBankAccount.accountHolder).toBe(aValidAccountHolder);
+        expect(validBankAccount.accountNumber).toBe(aValidAccountNumber);
         expect(validBankAccount.bankCode).toBeUndefined();
     });
 
@@ -29,7 +29,7 @@ describe("creation of IdentityAttributes with value type BankAccount", () => {
             BankAccount.from({ accountHolder: aValidAccountHolder, accountNumber: anInvalidAccountNumber, bankCode: aValidBankCode });
         };
 
-        expect(invalidBankAccountCall).toThrow("AccountNumber.value:String :: invalid IBAN");
+        expect(invalidBankAccountCall).toThrow("BankAccount.accountNumber:String :: invalid IBAN");
     });
 
     test("returns an error when trying to create a BankAccount with an invalid bankCode", function () {
@@ -38,6 +38,6 @@ describe("creation of IdentityAttributes with value type BankAccount", () => {
             BankAccount.from({ accountHolder: aValidAccountHolder, accountNumber: aValidAccountNumber, bankCode: anInvalidBankCode });
         };
 
-        expect(invalidBankAccountCall).toThrow("BankCode.value:String :: invalid BIC");
+        expect(invalidBankAccountCall).toThrow("BankAccount.bankCode:String :: invalid BIC");
     });
 });
