@@ -5,6 +5,7 @@ import { AbstractString, AbstractStringJSON, IAbstractString } from "../Abstract
 
 const MIN_ACCOUNT_NUMBER_LENGTH = 14;
 const MAX_ACCOUNT_NUMBER_LENGTH = 34;
+
 export interface AccountNumberJSON extends AbstractStringJSON {
     "@type": "AccountNumber";
 }
