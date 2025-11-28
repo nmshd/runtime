@@ -1,5 +1,5 @@
 import { ClaimFormat } from "@credo-ts/core";
-import { OpenId4VciResolvedCredentialOffer, OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
+import { OpenId4VciCredentialResponse, OpenId4VciResolvedCredentialOffer, OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
 import { VerifiableCredential } from "@nmshd/content";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../consumption/ConsumptionController";
@@ -32,10 +32,23 @@ export class OpenId4VcController extends ConsumptionBaseController {
         return await holder.resolveCredentialOffer(credentialOfferUrl);
     }
 
-    public async acceptCredentialOffer(credentialOffer: OpenId4VciResolvedCredentialOffer, credentialConfigurationIds: string[], pinCode?: string): Promise<OwnIdentityAttribute> {
+    public async requestCredentials(
+        credentialOffer: OpenId4VciResolvedCredentialOffer,
+        credentialConfigurationIds: string[],
+        pinCode?: string
+    ): Promise<OpenId4VciCredentialResponse[]> {
         const holder = new Holder(this.keyStorage, this.parent.accountController, this.parent.attributes, this.fetchInstance);
         await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
-        const credentials = await holder.acceptCredentialOffer(credentialOffer, { credentialConfigurationIds: credentialConfigurationIds, txCode: pinCode });
+
+        const credentialsResponses = await holder.requestCredentials(credentialOffer, { credentialConfigurationIds: credentialConfigurationIds, txCode: pinCode });
+        return credentialsResponses;
+    }
+
+    public async acceptCredentials(credentialResponses: OpenId4VciCredentialResponse[]): Promise<OwnIdentityAttribute> {
+        const holder = new Holder(this.keyStorage, this.parent.accountController, this.parent.attributes, this.fetchInstance);
+        await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
+
+        const credentials = await holder.acceptCredentials(credentialResponses);
 
         // TODO: support multiple credentials
         return credentials[0];
