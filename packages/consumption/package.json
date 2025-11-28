@@ -55,15 +55,28 @@
                 {
                     "tsconfig": "test/tsconfig.json"
                 }
+            ],
+            "^.+\\.mjs$": [
+                "babel-jest",
+                {
+                    "presets": [
+                        [
+                            "@babel/preset-env",
+                            {
+                                "modules": "commonjs"
+                            }
+                        ]
+                    ]
+                }
             ]
         },
         "transformIgnorePatterns": [
-            "<rootDir>/node_modules/(?!(@noble|@stablelib|@credo\\-ts/core/node_modules/uuid)/)"
+            "<rootDir>/node_modules/(?!(@noble|@stablelib|@credo\\-ts)/)"
         ]
     },
     "dependencies": {
-        "@credo-ts/core": "v0.6.0-alpha-20251121023030",
-        "@credo-ts/openid4vc": "v0.6.0-alpha-20251121023030",
+        "@credo-ts/core": "v0.6.0-alpha-20251127101655",
+        "@credo-ts/openid4vc": "v0.6.0-alpha-20251127101655",
         "@js-soft/docdb-querytranslator": "^1.1.6",
         "@js-soft/ts-serval": "2.0.14",
         "@js-soft/ts-utils": "2.3.5",
