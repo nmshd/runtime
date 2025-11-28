@@ -1223,17 +1223,17 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "accountHolder": {
                     "type": "string"
                 },
-                "accountNumber": {
+                "iban": {
                     "type": "string"
                 },
-                "bankCode": {
+                "bic": {
                     "type": "string"
                 }
             },
             "required": [
                 "@type",
                 "accountHolder",
-                "accountNumber"
+                "iban"
             ],
             "additionalProperties": false
         },
@@ -3235,17 +3235,17 @@ export const CompleteOutgoingRequestRequest: any = {
                 "accountHolder": {
                     "type": "string"
                 },
-                "accountNumber": {
+                "iban": {
                     "type": "string"
                 },
-                "bankCode": {
+                "bic": {
                     "type": "string"
                 }
             },
             "required": [
                 "@type",
                 "accountHolder",
-                "accountNumber"
+                "iban"
             ],
             "additionalProperties": false
         },
@@ -5234,17 +5234,17 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                 "accountHolder": {
                     "type": "string"
                 },
-                "accountNumber": {
+                "iban": {
                     "type": "string"
                 },
-                "bankCode": {
+                "bic": {
                     "type": "string"
                 }
             },
             "required": [
                 "@type",
                 "accountHolder",
-                "accountNumber"
+                "iban"
             ],
             "additionalProperties": false
         },
@@ -7850,17 +7850,17 @@ export const CreateOutgoingRequestRequest: any = {
                 "accountHolder": {
                     "type": "string"
                 },
-                "accountNumber": {
+                "iban": {
                     "type": "string"
                 },
-                "bankCode": {
+                "bic": {
                     "type": "string"
                 }
             },
             "required": [
                 "@type",
                 "accountHolder",
-                "accountNumber"
+                "iban"
             ],
             "additionalProperties": false
         },
@@ -10868,17 +10868,17 @@ export const ReceivedIncomingRequestRequest: any = {
                 "accountHolder": {
                     "type": "string"
                 },
-                "accountNumber": {
+                "iban": {
                     "type": "string"
                 },
-                "bankCode": {
+                "bic": {
                     "type": "string"
                 }
             },
             "required": [
                 "@type",
                 "accountHolder",
-                "accountNumber"
+                "iban"
             ],
             "additionalProperties": false
         },
@@ -14879,17 +14879,17 @@ export const SucceedOwnIdentityAttributeRequest: any = {
                 "accountHolder": {
                     "type": "string"
                 },
-                "accountNumber": {
+                "iban": {
                     "type": "string"
                 },
-                "bankCode": {
+                "bic": {
                     "type": "string"
                 }
             },
             "required": [
                 "@type",
                 "accountHolder",
-                "accountNumber"
+                "iban"
             ],
             "additionalProperties": false
         },
@@ -20213,17 +20213,17 @@ export const BankAccount: any = {
                 "accountHolder": {
                     "type": "string"
                 },
-                "accountNumber": {
+                "iban": {
                     "type": "string"
                 },
-                "bankCode": {
+                "bic": {
                     "type": "string"
                 }
             },
             "required": [
                 "@type",
                 "accountHolder",
-                "accountNumber"
+                "iban"
             ],
             "additionalProperties": false
         }

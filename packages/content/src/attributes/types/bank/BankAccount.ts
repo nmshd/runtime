@@ -15,14 +15,14 @@ const MAX_BANK_CODE_LENGTH = 11;
 export interface BankAccountJSON extends AbstractComplexValueJSON {
     "@type": "BankAccount";
     accountHolder: string;
-    accountNumber: string;
-    bankCode?: string;
+    iban: string;
+    bic?: string;
 }
 
 export interface IBankAccount extends IAbstractComplexValue {
     accountHolder: string;
-    accountNumber: string;
-    bankCode?: string;
+    iban: string;
+    bic?: string;
 }
 
 @type("BankAccount")
@@ -37,7 +37,7 @@ export class BankAccount extends AbstractComplexValue implements IBankAccount {
         max: MAX_ACCOUNT_NUMBER_LENGTH,
         customValidator: (iban) => (!isValidIBAN(iban) ? "invalid IBAN" : undefined)
     })
-    public accountNumber: string;
+    public iban: string;
 
     @serialize({ customGenerator: AbstractAttributeValue.valueGenerator })
     @validate({
@@ -46,7 +46,7 @@ export class BankAccount extends AbstractComplexValue implements IBankAccount {
         max: MAX_BANK_CODE_LENGTH,
         customValidator: (bic) => (!isValidBIC(bic) ? "invalid BIC" : undefined)
     })
-    public bankCode?: string;
+    public bic?: string;
 
     public static from(value: IBankAccount | Omit<BankAccountJSON, "@type">): BankAccount {
         return this.fromAny(value);
@@ -58,11 +58,11 @@ export class BankAccount extends AbstractComplexValue implements IBankAccount {
                 [nameof<BankAccount>((s) => s.accountHolder)]: ValueHints.from({
                     max: MAX_ACCOUNT_HOLDER_LENGTH
                 }),
-                [nameof<BankAccount>((s) => s.accountNumber)]: ValueHints.from({
+                [nameof<BankAccount>((s) => s.iban)]: ValueHints.from({
                     min: MIN_ACCOUNT_NUMBER_LENGTH,
                     max: MAX_ACCOUNT_NUMBER_LENGTH
                 }),
-                [nameof<BankAccount>((s) => s.bankCode)]: ValueHints.from({
+                [nameof<BankAccount>((s) => s.bic)]: ValueHints.from({
                     min: MIN_BANK_CODE_LENGTH,
                     max: MAX_BANK_CODE_LENGTH
                 })
@@ -74,8 +74,8 @@ export class BankAccount extends AbstractComplexValue implements IBankAccount {
         return super.renderHints.copyWith({
             propertyHints: {
                 [nameof<BankAccount>((s) => s.accountHolder)]: AbstractString.renderHints,
-                [nameof<BankAccount>((s) => s.accountNumber)]: AbstractString.renderHints,
-                [nameof<BankAccount>((s) => s.bankCode)]: AbstractString.renderHints
+                [nameof<BankAccount>((s) => s.iban)]: AbstractString.renderHints,
+                [nameof<BankAccount>((s) => s.bic)]: AbstractString.renderHints
             }
         });
     }
@@ -83,9 +83,9 @@ export class BankAccount extends AbstractComplexValue implements IBankAccount {
     public override toString(): string {
         const value: string[] = [];
         value.push(`${this.accountHolder}`);
-        value.push(`${this.accountNumber}`);
-        if (this.bankCode) {
-            value.push(this.bankCode.toString());
+        value.push(`${this.iban}`);
+        if (this.bic) {
+            value.push(this.bic.toString());
         }
 
         return value.join("\n");
