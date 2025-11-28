@@ -31,6 +31,16 @@
         "test:local:start:mongodb": "docker compose -f ../../.dev/compose.yml up -d runtime-mongo",
         "test:local:teardown": "docker compose -f ../../.dev/compose.yml rm -fsv"
     },
+    "babel": {
+        "presets": [
+            [
+                "@babel/preset-env",
+                {
+                    "modules": "commonjs"
+                }
+            ]
+        ]
+    },
     "jest": {
         "collectCoverageFrom": [
             "./src/**"
@@ -56,10 +66,23 @@
                 {
                     "tsconfig": "test/tsconfig.json"
                 }
+            ],
+            "^.+\\.mjs$": [
+                "babel-jest",
+                {
+                    "presets": [
+                        [
+                            "@babel/preset-env",
+                            {
+                                "modules": "commonjs"
+                            }
+                        ]
+                    ]
+                }
             ]
         },
         "transformIgnorePatterns": [
-            "<rootDir>/node_modules/(?!(@noble|@stablelib|@credo\\-ts/core/node_modules/uuid)/)"
+            "<rootDir>/node_modules/(?!(@noble|@stablelib|@credo\\-ts)/)"
         ]
     },
     "dependencies": {
