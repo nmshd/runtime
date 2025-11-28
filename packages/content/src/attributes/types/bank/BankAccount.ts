@@ -7,10 +7,10 @@ import { RenderHints, ValueHints } from "../../hints";
 import { AbstractString } from "../AbstractString";
 
 const MAX_ACCOUNT_HOLDER_LENGTH = 100;
-const MIN_ACCOUNT_NUMBER_LENGTH = 14;
-const MAX_ACCOUNT_NUMBER_LENGTH = 34;
-const MIN_BANK_CODE_LENGTH = 8;
-const MAX_BANK_CODE_LENGTH = 11;
+const MIN_IBAN_LENGTH = 14;
+const MAX_IBAN_LENGTH = 34;
+const MIN_BIC_LENGTH = 8;
+const MAX_BIC_LENGTH = 11;
 
 export interface BankAccountJSON extends AbstractComplexValueJSON {
     "@type": "BankAccount";
@@ -33,8 +33,8 @@ export class BankAccount extends AbstractComplexValue implements IBankAccount {
 
     @serialize({ customGenerator: AbstractAttributeValue.valueGenerator })
     @validate({
-        min: MIN_ACCOUNT_NUMBER_LENGTH,
-        max: MAX_ACCOUNT_NUMBER_LENGTH,
+        min: MIN_IBAN_LENGTH,
+        max: MAX_IBAN_LENGTH,
         customValidator: (iban) => (!isValidIBAN(iban) ? "invalid IBAN" : undefined)
     })
     public iban: string;
@@ -42,8 +42,8 @@ export class BankAccount extends AbstractComplexValue implements IBankAccount {
     @serialize({ customGenerator: AbstractAttributeValue.valueGenerator })
     @validate({
         nullable: true,
-        min: MIN_BANK_CODE_LENGTH,
-        max: MAX_BANK_CODE_LENGTH,
+        min: MIN_BIC_LENGTH,
+        max: MAX_BIC_LENGTH,
         customValidator: (bic) => (!isValidBIC(bic) ? "invalid BIC" : undefined)
     })
     public bic?: string;
@@ -59,12 +59,12 @@ export class BankAccount extends AbstractComplexValue implements IBankAccount {
                     max: MAX_ACCOUNT_HOLDER_LENGTH
                 }),
                 [nameof<BankAccount>((s) => s.iban)]: ValueHints.from({
-                    min: MIN_ACCOUNT_NUMBER_LENGTH,
-                    max: MAX_ACCOUNT_NUMBER_LENGTH
+                    min: MIN_IBAN_LENGTH,
+                    max: MAX_IBAN_LENGTH
                 }),
                 [nameof<BankAccount>((s) => s.bic)]: ValueHints.from({
-                    min: MIN_BANK_CODE_LENGTH,
-                    max: MAX_BANK_CODE_LENGTH
+                    min: MIN_BIC_LENGTH,
+                    max: MAX_BIC_LENGTH
                 })
             }
         });
