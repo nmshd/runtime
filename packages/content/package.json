@@ -59,8 +59,8 @@
         "ts-simple-nameof": "^1.3.3"
     },
     "devDependencies": {
-        "@nmshd/crypto": "2.1.3",
-        "@types/luxon": "^3.7.1"
+        "@types/luxon": "^3.7.1",
+        "@nmshd/crypto": "2.1.3"
     },
     "publishConfig": {
         "access": "public",
