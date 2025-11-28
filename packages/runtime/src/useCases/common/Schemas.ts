@@ -16754,11 +16754,33 @@ export const AcceptAuthorizationRequestRequest: any = {
     }
 }
 
-export const AcceptCredentialOfferRequest: any = {
+export const AcceptCredentialsRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/AcceptCredentialOfferRequest",
+    "$ref": "#/definitions/AcceptCredentialsRequest",
     "definitions": {
-        "AcceptCredentialOfferRequest": {
+        "AcceptCredentialsRequest": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "credentialResponses": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                }
+            },
+            "required": [
+                "credentialResponses"
+            ]
+        }
+    }
+}
+
+export const RequestCredentialsRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/RequestCredentialsRequest",
+    "definitions": {
+        "RequestCredentialsRequest": {
             "type": "object",
             "additionalProperties": false,
             "properties": {
