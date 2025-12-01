@@ -95,7 +95,7 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
                     _agentContext.config.logger.info("Found keys to possibly import");
 
                     const parsed = JSON.parse(attributeValue.key) as Map<string, any>;
-                    for (const [k, v] of parsed) {
+                    for (const [k, v] of Object.entries(parsed)) {
                         await this.keyStorage.storeKey(k, v);
                     }
                 }
