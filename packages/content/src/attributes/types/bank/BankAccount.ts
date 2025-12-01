@@ -3,8 +3,7 @@ import { isValidBIC, isValidIBAN } from "ibantools";
 import { nameof } from "ts-simple-nameof";
 import { AbstractAttributeValue } from "../../AbstractAttributeValue";
 import { AbstractComplexValue, AbstractComplexValueJSON, IAbstractComplexValue } from "../../AbstractComplexValue";
-import { RenderHints, ValueHints } from "../../hints";
-import { AbstractString } from "../AbstractString";
+import { RenderHints, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../../hints";
 
 const MAX_ACCOUNT_HOLDER_LENGTH = 100;
 const MIN_IBAN_LENGTH = 14;
@@ -73,9 +72,18 @@ export class BankAccount extends AbstractComplexValue implements IBankAccount {
     public static override get renderHints(): RenderHints {
         return super.renderHints.copyWith({
             propertyHints: {
-                [nameof<BankAccount>((s) => s.accountHolder)]: AbstractString.renderHints,
-                [nameof<BankAccount>((s) => s.iban)]: AbstractString.renderHints,
-                [nameof<BankAccount>((s) => s.bic)]: AbstractString.renderHints
+                [nameof<BankAccount>((s) => s.accountHolder)]: RenderHints.from({
+                    editType: RenderHintsEditType.InputLike,
+                    technicalType: RenderHintsTechnicalType.String
+                }),
+                [nameof<BankAccount>((s) => s.iban)]: RenderHints.from({
+                    editType: RenderHintsEditType.InputLike,
+                    technicalType: RenderHintsTechnicalType.String
+                }),
+                [nameof<BankAccount>((s) => s.bic)]: RenderHints.from({
+                    editType: RenderHintsEditType.InputLike,
+                    technicalType: RenderHintsTechnicalType.String
+                })
             }
         });
     }
