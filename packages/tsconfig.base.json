@@ -21,6 +21,7 @@
         "useDefineForClassFields": false,
         "lib": ["ES2022", "DOM"],
         "composite": true,
+        // ONLY POC - THIS IS STRICTLY FORBIDDEN IN PRODUCTION
         "skipLibCheck": true
     }
 }
