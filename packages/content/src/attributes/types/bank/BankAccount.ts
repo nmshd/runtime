@@ -1,7 +1,6 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { isValidBIC, isValidIBAN } from "ibantools";
 import { nameof } from "ts-simple-nameof";
-import { AbstractAttributeValue } from "../../AbstractAttributeValue";
 import { AbstractComplexValue, AbstractComplexValueJSON, IAbstractComplexValue } from "../../AbstractComplexValue";
 import { RenderHints, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../../hints";
 
@@ -26,11 +25,11 @@ export interface IBankAccount extends IAbstractComplexValue {
 
 @type("BankAccount")
 export class BankAccount extends AbstractComplexValue implements IBankAccount {
-    @serialize({ customGenerator: AbstractAttributeValue.valueGenerator })
+    @serialize()
     @validate({ max: MAX_ACCOUNT_HOLDER_LENGTH })
     public accountHolder: string;
 
-    @serialize({ customGenerator: AbstractAttributeValue.valueGenerator })
+    @serialize()
     @validate({
         min: MIN_IBAN_LENGTH,
         max: MAX_IBAN_LENGTH,
@@ -38,7 +37,7 @@ export class BankAccount extends AbstractComplexValue implements IBankAccount {
     })
     public iban: string;
 
-    @serialize({ customGenerator: AbstractAttributeValue.valueGenerator })
+    @serialize()
     @validate({
         nullable: true,
         min: MIN_BIC_LENGTH,
