@@ -20193,43 +20193,6 @@ export const Affiliation: any = {
     }
 }
 
-export const BankAccount: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/BankAccount",
-    "definitions": {
-        "BankAccount": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "BankAccount"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "accountHolder": {
-                    "type": "string"
-                },
-                "iban": {
-                    "type": "string"
-                },
-                "bic": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "@type",
-                "accountHolder",
-                "iban"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
 export const BirthDate: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/BirthDate",
@@ -20299,6 +20262,43 @@ export const BirthPlace: any = {
                 "@type",
                 "city",
                 "country"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
+export const BankAccount: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/BankAccount",
+    "definitions": {
+        "BankAccount": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "BankAccount"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "accountHolder": {
+                    "type": "string"
+                },
+                "iban": {
+                    "type": "string"
+                },
+                "bic": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "accountHolder",
+                "iban"
             ],
             "additionalProperties": false
         }
