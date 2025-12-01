@@ -9,7 +9,7 @@ import { Holder } from "./local/Holder";
 import { KeyStorage } from "./local/KeyStorage";
 
 export class OpenId4VcController extends ConsumptionBaseController {
-    private keyStorage: KeyStorage;
+    private holder: Holder;
 
     public constructor(parent: ConsumptionController) {
         super(ConsumptionControllerName.OpenId4VcController, parent);
@@ -17,7 +17,10 @@ export class OpenId4VcController extends ConsumptionBaseController {
 
     public override async init(): Promise<this> {
         const collection = await this.parent.accountController.getSynchronizedCollection("openid4vc-keys");
-        this.keyStorage = new KeyStorage(collection, this._log);
+        const keyStorage = new KeyStorage(collection, this._log);
+
+        this.holder = new Holder(keyStorage, this.parent.accountController, this.parent.attributes, this.fetchInstance);
+        await this.holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
 
         return this;
     }
@@ -27,9 +30,7 @@ export class OpenId4VcController extends ConsumptionBaseController {
     }
 
     public async resolveCredentialOffer(credentialOfferUrl: string): Promise<OpenId4VciResolvedCredentialOffer> {
-        const holder = new Holder(this.keyStorage, this.parent.accountController, this.parent.attributes, this.fetchInstance);
-        await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
-        return await holder.resolveCredentialOffer(credentialOfferUrl);
+        return await this.holder.resolveCredentialOffer(credentialOfferUrl);
     }
 
     public async requestCredentials(
@@ -37,18 +38,12 @@ export class OpenId4VcController extends ConsumptionBaseController {
         credentialConfigurationIds: string[],
         pinCode?: string
     ): Promise<OpenId4VciCredentialResponse[]> {
-        const holder = new Holder(this.keyStorage, this.parent.accountController, this.parent.attributes, this.fetchInstance);
-        await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
-
-        const credentialsResponses = await holder.requestCredentials(credentialOffer, { credentialConfigurationIds: credentialConfigurationIds, txCode: pinCode });
+        const credentialsResponses = await this.holder.requestCredentials(credentialOffer, { credentialConfigurationIds: credentialConfigurationIds, txCode: pinCode });
         return credentialsResponses;
     }
 
     public async acceptCredentials(credentialResponses: OpenId4VciCredentialResponse[]): Promise<OwnIdentityAttribute> {
-        const holder = new Holder(this.keyStorage, this.parent.accountController, this.parent.attributes, this.fetchInstance);
-        await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
-
-        const credentials = await holder.acceptCredentials(credentialResponses);
+        const credentials = await this.holder.acceptCredentials(credentialResponses);
 
         // TODO: support multiple credentials
         return credentials[0];
@@ -58,9 +53,7 @@ export class OpenId4VcController extends ConsumptionBaseController {
         authorizationRequest: OpenId4VpResolvedAuthorizationRequest;
         usedCredentials: OwnIdentityAttribute[];
     }> {
-        const holder = new Holder(this.keyStorage, this.parent.accountController, this.parent.attributes, this.fetchInstance);
-        await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
-        const authorizationRequest = await holder.resolveAuthorizationRequest(authorizationRequestUrl);
+        const authorizationRequest = await this.holder.resolveAuthorizationRequest(authorizationRequestUrl);
 
         const usedCredentials = await this.extractUsedCredentialsFromAuthorizationRequest(authorizationRequest);
 
@@ -103,11 +96,9 @@ export class OpenId4VcController extends ConsumptionBaseController {
     public async acceptAuthorizationRequest(
         authorizationRequest: OpenId4VpResolvedAuthorizationRequest
     ): Promise<{ status: number; message: string | Record<string, unknown> | null }> {
-        const holder = new Holder(this.keyStorage, this.parent.accountController, this.parent.attributes, this.fetchInstance);
-        await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
         // parse the credential type to be sdjwt
 
-        const serverResponse = await holder.acceptAuthorizationRequest(authorizationRequest);
+        const serverResponse = await this.holder.acceptAuthorizationRequest(authorizationRequest);
         if (!serverResponse) throw new Error("No response from server");
 
         return { status: serverResponse.status, message: serverResponse.body };
