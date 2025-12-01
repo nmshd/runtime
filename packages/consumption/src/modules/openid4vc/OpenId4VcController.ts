@@ -9,18 +9,17 @@ import { Holder } from "./local/Holder";
 import { KeyStorage } from "./local/KeyStorage";
 
 export class OpenId4VcController extends ConsumptionBaseController {
-    private keyStorage: KeyStorage;
-    private readonly holder: Holder;
+    private holder: Holder;
 
     public constructor(parent: ConsumptionController) {
         super(ConsumptionControllerName.OpenId4VcController, parent);
-        this.holder = new Holder(this.keyStorage, this.parent.accountController, this.parent.attributes, this.fetchInstance);
     }
 
     public override async init(): Promise<this> {
         const collection = await this.parent.accountController.getSynchronizedCollection("openid4vc-keys");
-        this.keyStorage = new KeyStorage(collection, this._log);
+        const keyStorage = new KeyStorage(collection, this._log);
 
+        this.holder = new Holder(keyStorage, this.parent.accountController, this.parent.attributes, this.fetchInstance);
         await this.holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
 
         return this;
