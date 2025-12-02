@@ -18617,6 +18617,19 @@ export const GetMessagesRequest: any = {
                         }
                     ]
                 },
+                "content.bodyFormat": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
                 "content.subject": {
                     "anyOf": [
                         {
