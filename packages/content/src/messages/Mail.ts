@@ -13,7 +13,7 @@ export interface MailJSON extends ContentJSON {
     cc?: string[];
     subject: string;
     body: string;
-    bodyFormat?: `${MailBodyFormat}`;
+    bodyFormat: `${MailBodyFormat}`;
 }
 
 export interface IMail extends ISerializable {
@@ -21,7 +21,7 @@ export interface IMail extends ISerializable {
     cc?: ICoreAddress[];
     subject: string;
     body: string;
-    bodyFormat?: MailBodyFormat;
+    bodyFormat: MailBodyFormat;
 }
 
 @type("Mail")
@@ -43,16 +43,14 @@ export class Mail extends Serializable implements IMail {
     public body: string;
 
     @serialize()
-    @validate({ nullable: true, customValidator: (v) => (!Object.values(MailBodyFormat).includes(v) ? `must be one of: ${Object.values(MailBodyFormat)}` : undefined) })
-    public bodyFormat?: MailBodyFormat;
+    @validate({ customValidator: (v) => (!Object.values(MailBodyFormat).includes(v) ? `must be one of: ${Object.values(MailBodyFormat)}` : undefined) })
+    public bodyFormat: MailBodyFormat;
 
     protected static override preFrom(value: any): any {
         value.cc ??= [];
 
-        if (!value.body && value.content) {
-            value.body = value.content;
-            delete value.content;
-        }
+        // @deprecated bodyFormat default
+        value.bodyFormat ??= MailBodyFormat.PlainText;
 
         return value;
     }

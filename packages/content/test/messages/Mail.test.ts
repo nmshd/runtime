@@ -25,7 +25,20 @@ describe("Mail", function () {
         expect(mail).toBeInstanceOf(Mail);
     });
 
-    test.each([MailBodyFormat.PlainText, MailBodyFormat.Markdown, "PlainText", "Markdown", undefined] satisfies (MailBodyFormat | "PlainText" | "Markdown" | undefined)[])(
+    test("should create a Mail from JSON with defaulting body format to PlainText", function () {
+        const mail = Serializable.fromUnknown({
+            "@type": "Mail",
+            to: ["did:e:a-domain:dids:anidentity"],
+            cc: [],
+            subject: "aSubject",
+            body: "aBody"
+        });
+
+        expect(mail).toBeInstanceOf(Mail);
+        expect((mail as Mail).bodyFormat).toBe(MailBodyFormat.PlainText);
+    });
+
+    test.each([MailBodyFormat.PlainText, MailBodyFormat.Markdown, "PlainText", "Markdown"] satisfies (MailBodyFormat | "PlainText" | "Markdown")[])(
         "should create a mail with different body formats",
         function (bodyFormat) {
             const mail = Mail.from({ to: ["did:e:a-domain:dids:anidentity"], cc: [], subject: "aSubject", body: "aBody", bodyFormat });
