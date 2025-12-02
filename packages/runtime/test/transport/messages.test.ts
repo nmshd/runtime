@@ -108,7 +108,8 @@ describe("Messaging", () => {
             subject: "aSubject",
             body: "aBody",
             cc: [],
-            to: [client2.address]
+            to: [client2.address],
+            bodyFormat: "PlainText"
         });
     });
 
@@ -128,7 +129,8 @@ describe("Messaging", () => {
             subject: "aSubject",
             body: "aBody",
             cc: [],
-            to: [client2.address]
+            to: [client2.address],
+            bodyFormat: "PlainText"
         });
     });
 
