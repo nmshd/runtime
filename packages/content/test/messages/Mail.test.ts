@@ -94,7 +94,7 @@ describe("Mail", function () {
                 cc: [],
                 subject: "aSubject",
                 body: "aBody",
-                bodyFormat: "InvalidFormat"
+                bodyFormat: "anInvalidFormat"
             });
         } catch (e) {
             error = e;
