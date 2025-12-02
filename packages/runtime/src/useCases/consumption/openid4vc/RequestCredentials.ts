@@ -2,12 +2,17 @@ import { OpenId4VciCredentialResponse, OpenId4VciResolvedCredentialOffer } from 
 import { Result } from "@js-soft/ts-utils";
 import { OpenId4VcController } from "@nmshd/consumption";
 import { Inject } from "@nmshd/typescript-ioc";
+import stringifySafe from "json-stringify-safe";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
 export interface AbstractRequestCredentialsRequest<T> {
     credentialOffer: T;
     pinCode?: string;
     credentialConfigurationIds: string[];
+}
+
+export interface RequestCredentialsResponse {
+    credentialResponses: OpenId4VciCredentialResponse[];
 }
 
 export interface RequestCredentialsRequest extends AbstractRequestCredentialsRequest<OpenId4VciResolvedCredentialOffer> {}
@@ -20,10 +25,6 @@ class Validator extends SchemaValidator<RequestCredentialsRequest> {
     }
 }
 
-export interface RequestCredentialsResponse {
-    credentialResponses: OpenId4VciCredentialResponse[];
-}
-
 export class RequestCredentialsUseCase extends UseCase<RequestCredentialsRequest, RequestCredentialsResponse> {
     public constructor(
         @Inject private readonly openId4VcController: OpenId4VcController,
@@ -34,6 +35,6 @@ export class RequestCredentialsUseCase extends UseCase<RequestCredentialsRequest
 
     protected override async executeInternal(request: RequestCredentialsRequest): Promise<Result<RequestCredentialsResponse>> {
         const credentialResponses = await this.openId4VcController.requestCredentials(request.credentialOffer, request.credentialConfigurationIds, request.pinCode);
-        return Result.ok({ credentialResponses });
+        return Result.ok({ credentialResponses: JSON.parse(stringifySafe(credentialResponses)) });
     }
 }
