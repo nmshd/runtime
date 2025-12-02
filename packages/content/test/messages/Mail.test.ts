@@ -84,7 +84,7 @@ describe("Mail", function () {
         expect(error.message).toBe("Mail.to :: Value is not defined");
     });
 
-    test("should throw an Error if an invalid bodyFormat is passed", function () {
+    test("should throw an Error if an invalid body format is passed", function () {
         let error: any;
 
         try {
