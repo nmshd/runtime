@@ -7,6 +7,7 @@ export * from "./affiliation";
 export * from "./birth";
 export * from "./communication";
 export * from "./dates";
+export * from "./finance";
 export * from "./identity";
 export * from "./measurements";
 export * from "./name";
