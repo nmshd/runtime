@@ -57,7 +57,8 @@ describe("Message with Mail", () => {
                 body: "aBody",
                 cc: [],
                 subject: "aSubject",
-                to: [transportService2Address]
+                to: [transportService2Address],
+                bodyFormat: "PlainText"
             },
             attachments: [fileId]
         };

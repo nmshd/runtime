@@ -87,7 +87,8 @@ describe("Messaging", () => {
                 body: "aBody",
                 cc: [],
                 subject: "aSubject",
-                to: [client2.address]
+                to: [client2.address],
+                bodyFormat: "PlainText"
             },
             attachments: [fileId]
         });
@@ -148,7 +149,8 @@ describe("Messaging", () => {
                 body: "aBody",
                 cc: [client3.address],
                 subject: "aSubject",
-                to: [client2.address]
+                to: [client2.address],
+                bodyFormat: "PlainText"
             },
             attachments: [fileId]
         });
@@ -186,7 +188,8 @@ describe("Message errors", () => {
                 "@type": "Mail",
                 to: [],
                 subject: "A Subject",
-                body: "A Body"
+                body: "A Body",
+                bodyFormat: "PlainText"
             }
         });
         expect(result).toBeAnError("recipients must NOT have duplicate items", "error.runtime.validation.invalidPropertyValue");
@@ -199,7 +202,8 @@ describe("Message errors", () => {
                 "@type": "Mail",
                 to: [],
                 subject: "A Subject",
-                body: "A Body"
+                body: "A Body",
+                bodyFormat: "PlainText"
             },
             attachments: ["FIL12345678901234567", "FIL12345678901234567"]
         });
@@ -213,7 +217,8 @@ describe("Message errors", () => {
                 "@type": "Mail",
                 to: [],
                 subject: "aSubject",
-                body: "aBody"
+                body: "aBody",
+                bodyFormat: "PlainText"
             }
         });
         expect(result).toBeAnError("Mail.to:Array :: may not be empty", "error.runtime.requestDeserialization");
@@ -225,7 +230,8 @@ describe("Message errors", () => {
             content: {
                 "@type": "Mail",
                 subject: "aSubject",
-                body: "aBody"
+                body: "aBody",
+                bodyFormat: "PlainText"
             } as any
         });
         expect(result).toBeAnError("Mail.to :: Value is not defined", "error.runtime.requestDeserialization");
@@ -238,7 +244,8 @@ describe("Message errors", () => {
                 "@type": "Mail",
                 to: [client2.address, client2.address],
                 subject: "A Subject",
-                body: "A Body"
+                body: "A Body",
+                bodyFormat: "PlainText"
             }
         });
         expect(result).toBeAnError("Some recipients in 'to' are listed multiple times.", "error.runtime.validation.invalidPropertyValue");
@@ -252,7 +259,8 @@ describe("Message errors", () => {
                 to: [client2.address],
                 cc: ["did:e:a-domain:dids:an-identity", "did:e:a-domain:dids:an-identity"],
                 subject: "A Subject",
-                body: "A Body"
+                body: "A Body",
+                bodyFormat: "PlainText"
             }
         });
         expect(result).toBeAnError("Some recipients in 'cc' are listed multiple times.", "error.runtime.validation.invalidPropertyValue");
@@ -265,7 +273,8 @@ describe("Message errors", () => {
                 "@type": "Mail",
                 to: [client2.address],
                 subject: "A Subject",
-                body: "A Body"
+                body: "A Body",
+                bodyFormat: "PlainText"
             }
         });
         expect(result).toBeAnError(
@@ -281,7 +290,8 @@ describe("Message errors", () => {
                 "@type": "Mail",
                 to: [client2.address, "did:e:a-domain:dids:an-identity"],
                 subject: "A Subject",
-                body: "A Body"
+                body: "A Body",
+                bodyFormat: "PlainText"
             }
         });
         expect(result).toBeAnError(
@@ -298,7 +308,8 @@ describe("Message errors", () => {
                 to: [client2.address],
                 cc: ["did:e:a-domain:dids:an-identity"],
                 subject: "A Subject",
-                body: "A Body"
+                body: "A Body",
+                bodyFormat: "PlainText"
             }
         });
         expect(result).toBeAnError(
@@ -315,7 +326,8 @@ describe("Message errors", () => {
                 to: [client2.address],
                 cc: [client2.address],
                 subject: "A Subject",
-                body: "A Body"
+                body: "A Body",
+                bodyFormat: "PlainText"
             }
         });
         expect(result).toBeAnError(`The recipients '${client2.address}' are put into both 'to' and 'cc'.`, "error.runtime.validation.invalidPropertyValue");
@@ -484,7 +496,8 @@ describe("Message errors", () => {
                     body: "aBody",
                     cc: [client4.address],
                     subject: "aSubject",
-                    to: [client5.address]
+                    to: [client5.address],
+                    bodyFormat: "PlainText"
                 }
             });
             expect(result).toBeAnError(/.*/, "error.runtime.messages.hasNoActiveRelationship");
@@ -511,7 +524,8 @@ describe("Message errors", () => {
                     body: "aBody",
                     cc: [client2.address],
                     subject: "aSubject",
-                    to: [client4.address]
+                    to: [client4.address],
+                    bodyFormat: "PlainText"
                 }
             });
             expect(result).toBeAnError(/.*/, "error.runtime.messages.hasNoActiveRelationship");
@@ -535,7 +549,8 @@ describe("Message errors", () => {
                     body: "aBody",
                     cc: [],
                     subject: "aSubject",
-                    to: [client3.address]
+                    to: [client3.address],
+                    bodyFormat: "PlainText"
                 }
             });
             expect(result).toBeAnError(/.*/, "error.runtime.messages.hasNoActiveRelationship");
@@ -790,7 +805,8 @@ describe("Mark Message as un-/read", () => {
                 body: "aBody",
                 cc: [],
                 subject: "aSubject",
-                to: [client2.address]
+                to: [client2.address],
+                bodyFormat: "PlainText"
             }
         });
         messageId = result.value.id;
