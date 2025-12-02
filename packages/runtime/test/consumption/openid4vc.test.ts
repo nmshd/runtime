@@ -71,11 +71,11 @@ describe("custom openid4vc service", () => {
             credentialOffer,
             credentialConfigurationIds: requestedCredentials
         });
-        const acceptanceResult = await consumptionServices.openId4Vc.acceptCredentials({ credentialResponses: credentialResponseResult.value.credentialResponses });
-        expect(acceptanceResult).toBeSuccessful();
-        expect(typeof acceptanceResult.value.id).toBe("string");
+        const storeResult = await consumptionServices.openId4Vc.storeCredentials({ credentialResponses: credentialResponseResult.value.credentialResponses });
+        expect(storeResult).toBeSuccessful();
+        expect(typeof storeResult.value.id).toBe("string");
 
-        const credential = acceptanceResult.value.content.value as unknown as VerifiableCredential;
+        const credential = storeResult.value.content.value as unknown as VerifiableCredential;
         expect(credential.displayInformation?.[0].logo).toBeDefined();
         expect(credential.displayInformation?.[0].name).toBe("Employee ID Card");
     });
@@ -241,10 +241,10 @@ describe("EUDIPLO", () => {
             credentialOffer: resolveCredentialOfferResult.value.credentialOffer,
             credentialConfigurationIds: [eudiploCredentialIdInConfiguration]
         });
-        const acceptCredentialsResponse = await consumptionServices.openId4Vc.acceptCredentials({ credentialResponses: credentialResponsesResult.value.credentialResponses });
-        expect(acceptCredentialsResponse).toBeSuccessful();
+        const storeCredentialsResponse = await consumptionServices.openId4Vc.storeCredentials({ credentialResponses: credentialResponsesResult.value.credentialResponses });
+        expect(storeCredentialsResponse).toBeSuccessful();
 
-        expect((acceptCredentialsResponse.value.content.value as unknown as VerifiableCredential).displayInformation?.[0].name).toBe("Employee ID Card");
+        expect((storeCredentialsResponse.value.content.value as unknown as VerifiableCredential).displayInformation?.[0].name).toBe("Employee ID Card");
     });
 
     test("presentation", async () => {

@@ -97,7 +97,7 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         return credentialResponse.credentials;
     }
 
-    public async acceptCredentials(credentialResponses: OpenId4VciCredentialResponse[]): Promise<OwnIdentityAttribute[]> {
+    public async storeCredentials(credentialResponses: OpenId4VciCredentialResponse[]): Promise<OwnIdentityAttribute[]> {
         const storedCredentials = await Promise.all(
             credentialResponses.map((credentialResponse) => {
                 // TODO: batch issuance not yet supported

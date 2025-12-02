@@ -5,8 +5,6 @@ import {
     AcceptAuthorizationRequestRequest,
     AcceptAuthorizationRequestResponse,
     AcceptAuthorizationRequestUseCase,
-    AcceptCredentialsRequest,
-    AcceptCredentialsUseCase,
     RequestCredentialsRequest,
     RequestCredentialsResponse,
     RequestCredentialsUseCase,
@@ -15,14 +13,16 @@ import {
     ResolveAuthorizationRequestUseCase,
     ResolveCredentialOfferRequest,
     ResolveCredentialOfferResponse,
-    ResolveCredentialOfferUseCase
+    ResolveCredentialOfferUseCase,
+    StoreCredentialsRequest,
+    StoreCredentialsUseCase
 } from "../../../useCases";
 
 export class OpenId4VcFacade {
     public constructor(
         @Inject private readonly resolveCredentialOfferUseCase: ResolveCredentialOfferUseCase,
         @Inject private readonly requestCredentialsUseCase: RequestCredentialsUseCase,
-        @Inject private readonly acceptCredentialsUseCase: AcceptCredentialsUseCase,
+        @Inject private readonly storeCredentialsUseCase: StoreCredentialsUseCase,
         @Inject private readonly resolveAuthorizationRequestUseCase: ResolveAuthorizationRequestUseCase,
         @Inject private readonly acceptAuthorizationRequestUseCase: AcceptAuthorizationRequestUseCase
     ) {}
@@ -35,8 +35,8 @@ export class OpenId4VcFacade {
         return await this.requestCredentialsUseCase.execute(request);
     }
 
-    public async acceptCredentials(request: AcceptCredentialsRequest): Promise<Result<LocalAttributeDTO>> {
-        return await this.acceptCredentialsUseCase.execute(request);
+    public async storeCredentials(request: StoreCredentialsRequest): Promise<Result<LocalAttributeDTO>> {
+        return await this.storeCredentialsUseCase.execute(request);
     }
 
     public async resolveAuthorizationRequest(request: ResolveAuthorizationRequestRequest): Promise<Result<ResolveAuthorizationRequestResponse>> {

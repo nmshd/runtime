@@ -6,21 +6,21 @@ import { Inject } from "@nmshd/typescript-ioc";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { AttributeMapper } from "../attributes";
 
-export interface AbstractAcceptCredentialsRequest<T> {
+export interface AbstractStoreCredentialsRequest<T> {
     credentialResponses: T;
 }
 
-export interface AcceptCredentialsRequest extends AbstractAcceptCredentialsRequest<OpenId4VciCredentialResponse[]> {}
+export interface StoreCredentialsRequest extends AbstractStoreCredentialsRequest<OpenId4VciCredentialResponse[]> {}
 
-export interface SchemaValidatableAcceptCredentialsRequest extends AbstractAcceptCredentialsRequest<Record<string, any>[]> {}
+export interface SchemaValidatableStoreCredentialsRequest extends AbstractStoreCredentialsRequest<Record<string, any>[]> {}
 
-class Validator extends SchemaValidator<AcceptCredentialsRequest> {
+class Validator extends SchemaValidator<StoreCredentialsRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
-        super(schemaRepository.getSchema("AcceptCredentialsRequest"));
+        super(schemaRepository.getSchema("StoreCredentialsRequest"));
     }
 }
 
-export class AcceptCredentialsUseCase extends UseCase<AcceptCredentialsRequest, LocalAttributeDTO> {
+export class StoreCredentialsUseCase extends UseCase<StoreCredentialsRequest, LocalAttributeDTO> {
     public constructor(
         @Inject private readonly openId4VcController: OpenId4VcController,
         @Inject validator: Validator
@@ -28,8 +28,8 @@ export class AcceptCredentialsUseCase extends UseCase<AcceptCredentialsRequest, 
         super(validator);
     }
 
-    protected override async executeInternal(request: AcceptCredentialsRequest): Promise<Result<LocalAttributeDTO>> {
-        const result = await this.openId4VcController.acceptCredentials(request.credentialResponses);
+    protected override async executeInternal(request: StoreCredentialsRequest): Promise<Result<LocalAttributeDTO>> {
+        const result = await this.openId4VcController.storeCredentials(request.credentialResponses);
         return Result.ok(AttributeMapper.toAttributeDTO(result));
     }
 }

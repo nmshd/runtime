@@ -42,8 +42,8 @@ export class OpenId4VcController extends ConsumptionBaseController {
         return credentialsResponses;
     }
 
-    public async acceptCredentials(credentialResponses: OpenId4VciCredentialResponse[]): Promise<OwnIdentityAttribute> {
-        const credentials = await this.holder.acceptCredentials(credentialResponses);
+    public async storeCredentials(credentialResponses: OpenId4VciCredentialResponse[]): Promise<OwnIdentityAttribute> {
+        const credentials = await this.holder.storeCredentials(credentialResponses);
 
         // TODO: support multiple credentials
         return credentials[0];

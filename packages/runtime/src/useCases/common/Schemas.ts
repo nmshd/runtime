@@ -16754,11 +16754,11 @@ export const AcceptAuthorizationRequestRequest: any = {
     }
 }
 
-export const AcceptCredentialsRequest: any = {
+export const StoreCredentialsRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/AcceptCredentialsRequest",
+    "$ref": "#/definitions/StoreCredentialsRequest",
     "definitions": {
-        "AcceptCredentialsRequest": {
+        "StoreCredentialsRequest": {
             "type": "object",
             "additionalProperties": false,
             "properties": {
