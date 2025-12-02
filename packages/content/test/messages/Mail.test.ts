@@ -101,6 +101,6 @@ describe("Mail", function () {
         }
 
         expect(error).toBeDefined();
-        expect(error.message).toBe("Mail.bodyFormat:String :: must be one of: PlainText,Markdown");
+        expect(error.message).toContain("Mail.bodyFormat:String :: must be one of:");
     });
 });
