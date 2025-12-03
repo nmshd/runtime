@@ -855,7 +855,8 @@ describe("RelationshipTermination", () => {
                 body: "aBody",
                 cc: [],
                 subject: "aSubject",
-                to: [services2.address]
+                to: [services2.address],
+                bodyFormat: "PlainText"
             }
         });
         expect(result).toBeAnError(/.*/, "error.runtime.messages.hasNoActiveRelationship");

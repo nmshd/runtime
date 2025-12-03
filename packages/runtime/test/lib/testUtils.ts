@@ -283,7 +283,8 @@ export async function sendMessage(transportServices: TransportServices, recipien
             subject: "aSubject",
             body: "aBody",
             cc: [],
-            to: [recipient]
+            to: [recipient],
+            bodyFormat: "PlainText"
         },
         attachments
     });

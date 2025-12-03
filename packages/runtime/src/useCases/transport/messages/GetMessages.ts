@@ -14,6 +14,7 @@ export interface GetMessagesQuery {
     createdAt?: string | string[];
     "content.@type"?: string | string[];
     "content.body"?: string | string[];
+    "content.bodyFormat"?: string | string[];
     "content.subject"?: string | string[];
     attachments?: string | string[];
     "recipients.address"?: string | string[];
@@ -41,6 +42,7 @@ export class GetMessagesUseCase extends UseCase<GetMessagesRequest, MessageDTO[]
             [nameof<MessageDTO>((m) => m.createdAt)]: true,
             [`${nameof<MessageDTO>((m) => m.content)}.@type`]: true,
             [`${nameof<MessageDTO>((m) => m.content)}.body`]: true,
+            [`${nameof<MessageDTO>((m) => m.content)}.bodyFormat`]: true,
             [`${nameof<MessageDTO>((m) => m.content)}.subject`]: true,
             [nameof<MessageDTO>((m) => m.attachments)]: true,
             [`${nameof<MessageDTO>((m) => m.recipients)}.${nameof<RecipientDTO>((r) => r.address)}`]: true,
@@ -60,6 +62,7 @@ export class GetMessagesUseCase extends UseCase<GetMessagesRequest, MessageDTO[]
             [`${nameof<MessageDTO>((m) => m.recipients)}.${nameof<RecipientDTO>((r) => r.relationshipId)}`]: `${nameof<Message>((m) => m.recipients)}.${nameof<MessageRecipient>((m) => m.relationshipId)}`,
             [`${nameof<MessageDTO>((m) => m.content)}.@type`]: `${nameof<Message>((m) => m.content)}.@type`,
             [`${nameof<MessageDTO>((m) => m.content)}.body`]: `${nameof<Message>((m) => m.content)}.body`,
+            [`${nameof<MessageDTO>((m) => m.content)}.bodyFormat`]: `${nameof<Message>((m) => m.content)}.bodyFormat`,
             [`${nameof<MessageDTO>((m) => m.content)}.subject`]: `${nameof<Message>((m) => m.content)}.subject`,
             [nameof<MessageDTO>((m) => m.wasReadAt)]: nameof<Message>((m) => m.wasReadAt)
         },
