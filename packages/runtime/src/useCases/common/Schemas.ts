@@ -1105,6 +1105,9 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/AffiliationJSON"
                 },
                 {
+                    "$ref": "#/definitions/BankAccountJSON"
+                },
+                {
                     "$ref": "#/definitions/BirthDateJSON"
                 },
                 {
@@ -1204,6 +1207,36 @@ export const CanCreateOutgoingRequestRequest: any = {
             "required": [
                 "@type",
                 "organization"
+            ],
+            "additionalProperties": false
+        },
+        "BankAccountJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "BankAccount"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "accountHolder": {
+                    "type": "string"
+                },
+                "iban": {
+                    "type": "string"
+                },
+                "bic": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "accountHolder",
+                "iban"
             ],
             "additionalProperties": false
         },
@@ -2077,6 +2110,7 @@ export const CanCreateOutgoingRequestRequest: any = {
             "type": "string",
             "enum": [
                 "Affiliation",
+                "BankAccount",
                 "BirthDate",
                 "BirthName",
                 "BirthPlace",
@@ -3130,6 +3164,9 @@ export const CompleteOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/AffiliationJSON"
                 },
                 {
+                    "$ref": "#/definitions/BankAccountJSON"
+                },
+                {
                     "$ref": "#/definitions/BirthDateJSON"
                 },
                 {
@@ -3229,6 +3266,36 @@ export const CompleteOutgoingRequestRequest: any = {
             "required": [
                 "@type",
                 "organization"
+            ],
+            "additionalProperties": false
+        },
+        "BankAccountJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "BankAccount"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "accountHolder": {
+                    "type": "string"
+                },
+                "iban": {
+                    "type": "string"
+                },
+                "bic": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "accountHolder",
+                "iban"
             ],
             "additionalProperties": false
         },
@@ -5142,6 +5209,9 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "$ref": "#/definitions/AffiliationJSON"
                 },
                 {
+                    "$ref": "#/definitions/BankAccountJSON"
+                },
+                {
                     "$ref": "#/definitions/BirthDateJSON"
                 },
                 {
@@ -5241,6 +5311,36 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
             "required": [
                 "@type",
                 "organization"
+            ],
+            "additionalProperties": false
+        },
+        "BankAccountJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "BankAccount"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "accountHolder": {
+                    "type": "string"
+                },
+                "iban": {
+                    "type": "string"
+                },
+                "bic": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "accountHolder",
+                "iban"
             ],
             "additionalProperties": false
         },
@@ -7771,6 +7871,9 @@ export const CreateOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/AffiliationJSON"
                 },
                 {
+                    "$ref": "#/definitions/BankAccountJSON"
+                },
+                {
                     "$ref": "#/definitions/BirthDateJSON"
                 },
                 {
@@ -7870,6 +7973,36 @@ export const CreateOutgoingRequestRequest: any = {
             "required": [
                 "@type",
                 "organization"
+            ],
+            "additionalProperties": false
+        },
+        "BankAccountJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "BankAccount"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "accountHolder": {
+                    "type": "string"
+                },
+                "iban": {
+                    "type": "string"
+                },
+                "bic": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "accountHolder",
+                "iban"
             ],
             "additionalProperties": false
         },
@@ -8743,6 +8876,7 @@ export const CreateOutgoingRequestRequest: any = {
             "type": "string",
             "enum": [
                 "Affiliation",
+                "BankAccount",
                 "BirthDate",
                 "BirthName",
                 "BirthPlace",
@@ -10802,6 +10936,9 @@ export const ReceivedIncomingRequestRequest: any = {
                     "$ref": "#/definitions/AffiliationJSON"
                 },
                 {
+                    "$ref": "#/definitions/BankAccountJSON"
+                },
+                {
                     "$ref": "#/definitions/BirthDateJSON"
                 },
                 {
@@ -10901,6 +11038,36 @@ export const ReceivedIncomingRequestRequest: any = {
             "required": [
                 "@type",
                 "organization"
+            ],
+            "additionalProperties": false
+        },
+        "BankAccountJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "BankAccount"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "accountHolder": {
+                    "type": "string"
+                },
+                "iban": {
+                    "type": "string"
+                },
+                "bic": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "accountHolder",
+                "iban"
             ],
             "additionalProperties": false
         },
@@ -11774,6 +11941,7 @@ export const ReceivedIncomingRequestRequest: any = {
             "type": "string",
             "enum": [
                 "Affiliation",
+                "BankAccount",
                 "BirthDate",
                 "BirthName",
                 "BirthPlace",
@@ -13295,6 +13463,7 @@ export const ExecuteIdentityAttributeQueryRequest: any = {
             "type": "string",
             "enum": [
                 "Affiliation",
+                "BankAccount",
                 "BirthDate",
                 "BirthName",
                 "BirthPlace",
@@ -13400,6 +13569,7 @@ export const ExecuteIQLQueryRequest: any = {
             "type": "string",
             "enum": [
                 "Affiliation",
+                "BankAccount",
                 "BirthDate",
                 "BirthName",
                 "BirthPlace",
@@ -14826,6 +14996,9 @@ export const SucceedOwnIdentityAttributeRequest: any = {
                     "$ref": "#/definitions/AffiliationJSON"
                 },
                 {
+                    "$ref": "#/definitions/BankAccountJSON"
+                },
+                {
                     "$ref": "#/definitions/BirthDateJSON"
                 },
                 {
@@ -14925,6 +15098,36 @@ export const SucceedOwnIdentityAttributeRequest: any = {
             "required": [
                 "@type",
                 "organization"
+            ],
+            "additionalProperties": false
+        },
+        "BankAccountJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "BankAccount"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "accountHolder": {
+                    "type": "string"
+                },
+                "iban": {
+                    "type": "string"
+                },
+                "bic": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "accountHolder",
+                "iban"
             ],
             "additionalProperties": false
         },
@@ -16344,6 +16547,7 @@ export const ValidateIQLQueryRequest: any = {
             "type": "string",
             "enum": [
                 "Affiliation",
+                "BankAccount",
                 "BirthDate",
                 "BirthName",
                 "BirthPlace",
@@ -18803,6 +19007,19 @@ export const GetMessagesRequest: any = {
                         }
                     ]
                 },
+                "content.bodyFormat": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
                 "content.subject": {
                     "anyOf": [
                         {
@@ -20448,6 +20665,43 @@ export const BirthPlace: any = {
                 "@type",
                 "city",
                 "country"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
+export const BankAccount: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/BankAccount",
+    "definitions": {
+        "BankAccount": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "BankAccount"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "accountHolder": {
+                    "type": "string"
+                },
+                "iban": {
+                    "type": "string"
+                },
+                "bic": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "accountHolder",
+                "iban"
             ],
             "additionalProperties": false
         }

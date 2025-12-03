@@ -1,5 +1,5 @@
 import { Serializable } from "@js-soft/ts-serval";
-import { Mail } from "../../src";
+import { Mail, MailBodyFormat } from "../../src";
 
 describe("Mail", function () {
     test("should create a Mail from JSON", function () {
@@ -24,6 +24,28 @@ describe("Mail", function () {
 
         expect(mail).toBeInstanceOf(Mail);
     });
+
+    test("should create a Mail from JSON with defaulting body format to PlainText", function () {
+        const mail = Serializable.fromUnknown({
+            "@type": "Mail",
+            to: ["did:e:a-domain:dids:anidentity"],
+            cc: [],
+            subject: "aSubject",
+            body: "aBody"
+        });
+
+        expect(mail).toBeInstanceOf(Mail);
+        expect((mail as Mail).bodyFormat).toBe(MailBodyFormat.PlainText);
+    });
+
+    test.each([MailBodyFormat.PlainText, MailBodyFormat.Markdown, "PlainText", "Markdown"] satisfies (MailBodyFormat | "PlainText" | "Markdown")[])(
+        "should create a mail with different body formats",
+        function (bodyFormat) {
+            const mail = Mail.from({ to: ["did:e:a-domain:dids:anidentity"], cc: [], subject: "aSubject", body: "aBody", bodyFormat });
+            expect(mail).toBeInstanceOf(Mail);
+            expect(mail.bodyFormat).toBe(bodyFormat);
+        }
+    );
 
     test("should throw an Error if to is empty", function () {
         let error: any;
@@ -60,5 +82,25 @@ describe("Mail", function () {
 
         expect(error).toBeDefined();
         expect(error.message).toBe("Mail.to :: Value is not defined");
+    });
+
+    test("should throw an Error if an invalid body format is passed", function () {
+        let error: any;
+
+        try {
+            Serializable.fromUnknown({
+                "@type": "Mail",
+                to: ["did:e:a-domain:dids:anidentity"],
+                cc: [],
+                subject: "aSubject",
+                body: "aBody",
+                bodyFormat: "anInvalidFormat"
+            });
+        } catch (e) {
+            error = e;
+        }
+
+        expect(error).toBeDefined();
+        expect(error.message).toContain("Mail.bodyFormat:String :: must be one of:");
     });
 });
