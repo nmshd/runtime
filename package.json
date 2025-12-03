@@ -43,7 +43,7 @@
         "madge": "^8.0.0",
         "npm-check-updates": "^19.1.2",
         "patch-package": "^8.0.1",
-        "prettier": "^3.7.3",
+        "prettier": "^3.7.4",
         "ts-jest": "^29.4.6",
         "ts-node": "^10.9.2",
         "tsconfig-paths": "^4.2.0",
