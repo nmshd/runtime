@@ -22,6 +22,7 @@ export interface MailDVO extends Omit<MessageDVO, "type"> {
     cc: RecipientDVO[];
     subject: string;
     body: string;
+    bodyFormat: string;
 
     // new
     toCount: number;

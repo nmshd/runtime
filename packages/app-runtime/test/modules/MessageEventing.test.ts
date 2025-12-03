@@ -31,7 +31,8 @@ describe("MessageEventingTest", function () {
             "@type": "Mail",
             to: [recipient],
             subject: "aSubject",
-            body: "aBody"
+            body: "aBody",
+            bodyFormat: "PlainText"
         };
         const message = await TestUtil.sendMessage(sessionA, sessionB, mail);
         const eventListener = new EventListener(runtime, [MailReceivedEvent, MessageReceivedEvent]);

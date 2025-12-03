@@ -2,12 +2,18 @@ import { ISerializable, Serializable, serialize, type, validate } from "@js-soft
 import { CoreAddress, ICoreAddress } from "@nmshd/core-types";
 import { ContentJSON } from "../ContentJSON";
 
+export enum MailBodyFormat {
+    PlainText = "PlainText",
+    Markdown = "Markdown"
+}
+
 export interface MailJSON extends ContentJSON {
     "@type": "Mail";
     to: string[];
     cc?: string[];
     subject: string;
     body: string;
+    bodyFormat: `${MailBodyFormat}`;
 }
 
 export interface IMail extends ISerializable {
@@ -15,6 +21,7 @@ export interface IMail extends ISerializable {
     cc?: ICoreAddress[];
     subject: string;
     body: string;
+    bodyFormat: MailBodyFormat;
 }
 
 @type("Mail")
@@ -35,13 +42,15 @@ export class Mail extends Serializable implements IMail {
     @validate({ max: 50000 })
     public body: string;
 
+    @serialize()
+    @validate({ customValidator: (v) => (!Object.values(MailBodyFormat).includes(v) ? `must be one of: ${Object.values(MailBodyFormat)}` : undefined) })
+    public bodyFormat: MailBodyFormat;
+
     protected static override preFrom(value: any): any {
         value.cc ??= [];
 
-        if (!value.body && value.content) {
-            value.body = value.content;
-            delete value.content;
-        }
+        // @deprecated bodyFormat default
+        value.bodyFormat ??= MailBodyFormat.PlainText;
 
         return value;
     }

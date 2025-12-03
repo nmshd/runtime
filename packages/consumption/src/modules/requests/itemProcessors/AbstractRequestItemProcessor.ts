@@ -12,8 +12,7 @@ export abstract class AbstractRequestItemProcessor<
     TRequestItem extends RequestItem = RequestItem,
     TAcceptParams extends AcceptRequestItemParametersJSON = AcceptRequestItemParametersJSON,
     TRejectParams extends RejectRequestItemParametersJSON = RejectRequestItemParametersJSON
-> implements IRequestItemProcessor<TRequestItem, TAcceptParams, TRejectParams>
-{
+> implements IRequestItemProcessor<TRequestItem, TAcceptParams, TRejectParams> {
     protected accountController: AccountController;
     protected currentIdentityAddress: CoreAddress;
 

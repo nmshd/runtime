@@ -65,17 +65,17 @@ describe("custom openid4vc service", () => {
             const credentialOffer = result.value.credentialOffer;
 
             // determine which credentials to pick from the offer for all supported types of offers
-
             const requestedCredentials = credentialOffer.credentialOfferPayload.credential_configuration_ids;
 
-            const acceptanceResult = await consumptionServices.openId4Vc.acceptCredentialOffer({
+            const credentialResponseResult = await consumptionServices.openId4Vc.requestCredentials({
                 credentialOffer,
                 credentialConfigurationIds: requestedCredentials
             });
-            expect(acceptanceResult).toBeSuccessful();
-            expect(typeof acceptanceResult.value.id).toBe("string");
+            const storeResult = await consumptionServices.openId4Vc.storeCredentials({ credentialResponses: credentialResponseResult.value.credentialResponses });
+            expect(storeResult).toBeSuccessful();
+            expect(typeof storeResult.value.id).toBe("string");
 
-            const credential = acceptanceResult.value.content.value as unknown as VerifiableCredential;
+            const credential = storeResult.value.content.value as unknown as VerifiableCredential;
             expect(credential.displayInformation?.[0].logo).toBeDefined();
             expect(credential.displayInformation?.[0].name).toBe("Employee ID Card");
         });
@@ -97,34 +97,37 @@ describe("custom openid4vc service", () => {
                                 // eslint-disable-next-line @typescript-eslint/naming-convention
                                 "vc+sd-jwt": {
                                     // eslint-disable-next-line @typescript-eslint/naming-convention
-                                    "sd-jwt_alg_values": [
-                                        "RS256",
-                                        "PS256",
-                                        "HS256",
-                                        "ES256",
-                                        "ES256K",
-                                        "RS384",
-                                        "PS384",
-                                        "HS384",
-                                        "ES384",
-                                        "RS512",
-                                        "PS512",
-                                        "HS512",
-                                        "ES512",
-                                        "EdDSA"
+                                    "vc+sd-jwt": {
+                                        // eslint-disable-next-line @typescript-eslint/naming-convention
+                                        "sd-jwt_alg_values": [
+                                            "RS256",
+                                            "PS256",
+                                            "HS256",
+                                            "ES256",
+                                            "ES256K",
+                                            "RS384",
+                                            "PS384",
+                                            "HS384",
+                                            "ES384",
+                                            "RS512",
+                                            "PS512",
+                                            "HS512",
+                                            "ES512",
+                                            "EdDSA"
+                                        ]
+                                    }
+                                },
+                                constraints: {
+                                    fields: [
+                                        {
+                                            path: ["$.vct"],
+                                            filter: {
+                                                type: "string",
+                                                pattern: "EmployeeIdCard"
+                                            }
+                                        }
                                     ]
                                 }
-                            },
-                            constraints: {
-                                fields: [
-                                    {
-                                        path: ["$.vct"],
-                                        filter: {
-                                            type: "string",
-                                            pattern: "EmployeeIdCard"
-                                        }
-                                    }
-                                ]
                             }
                         }
                     ]
@@ -180,17 +183,17 @@ describe("custom openid4vc service", () => {
             const credentialOffer = result.value.credentialOffer;
 
             // determine which credentials to pick from the offer for all supported types of offers
-
             const requestedCredentials = credentialOffer.credentialOfferPayload.credential_configuration_ids;
 
-            const acceptanceResult = await consumptionServices.openId4Vc.acceptCredentialOffer({
+            const credentialResponseResult = await consumptionServices.openId4Vc.requestCredentials({
                 credentialOffer,
                 credentialConfigurationIds: requestedCredentials
             });
-            expect(acceptanceResult).toBeSuccessful();
-            expect(typeof acceptanceResult.value.id).toBe("string");
+            const storeResult = await consumptionServices.openId4Vc.storeCredentials({ credentialResponses: credentialResponseResult.value.credentialResponses });
+            expect(storeResult).toBeSuccessful();
+            expect(typeof storeResult.value.id).toBe("string");
 
-            const credential = acceptanceResult.value.content.value as unknown as VerifiableCredential;
+            const credential = storeResult.value.content.value as unknown as VerifiableCredential;
             expect(credential.displayInformation?.[0].logo).toBeDefined();
             expect(credential.displayInformation?.[0].name).toBe("Employee ID Card");
         });
@@ -336,16 +339,17 @@ describe("EUDIPLO", () => {
             })
         ).data.uri;
 
-        const loadResult = await consumptionServices.openId4Vc.resolveCredentialOffer({ credentialOfferUrl });
-        expect(loadResult).toBeSuccessful();
+        const resolveCredentialOfferResult = await consumptionServices.openId4Vc.resolveCredentialOffer({ credentialOfferUrl });
+        expect(resolveCredentialOfferResult).toBeSuccessful();
 
-        const resolveResult = await consumptionServices.openId4Vc.acceptCredentialOffer({
-            credentialOffer: loadResult.value.credentialOffer,
+        const credentialResponsesResult = await consumptionServices.openId4Vc.requestCredentials({
+            credentialOffer: resolveCredentialOfferResult.value.credentialOffer,
             credentialConfigurationIds: [eudiploCredentialIdInConfiguration]
         });
-        expect(resolveResult).toBeSuccessful();
+        const storeCredentialsResponse = await consumptionServices.openId4Vc.storeCredentials({ credentialResponses: credentialResponsesResult.value.credentialResponses });
+        expect(storeCredentialsResponse).toBeSuccessful();
 
-        expect((resolveResult.value.content.value as unknown as VerifiableCredential).displayInformation?.[0].name).toBe("Employee ID Card");
+        expect((storeCredentialsResponse.value.content.value as unknown as VerifiableCredential).displayInformation?.[0].name).toBe("Employee ID Card");
     });
 
     test("presentation", async () => {
