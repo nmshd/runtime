@@ -292,6 +292,7 @@ export class DataViewExpander {
                 name: mailContent.subject ? mailContent.subject : DataViewTranslateable.consumption.mails.mailSubjectFallback,
                 subject: mailContent.subject,
                 body: mailContent.body,
+                bodyFormat: mailContent.bodyFormat,
                 to: to,
                 toCount: mailContent.to.length,
                 cc: cc,
