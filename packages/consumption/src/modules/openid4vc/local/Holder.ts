@@ -1,5 +1,18 @@
-import { BaseRecord, ClaimFormat, DidJwk, DidKey, InjectionSymbols, JwkDidCreateOptions, KeyDidCreateOptions, Kms, MdocRecord, SdJwtVcRecord, X509Module } from "@credo-ts/core";
-import { OpenId4VcModule, type OpenId4VciResolvedCredentialOffer, type OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
+import {
+    BaseRecord,
+    ClaimFormat,
+    DidJwk,
+    DidKey,
+    InjectionSymbols,
+    JwkDidCreateOptions,
+    KeyDidCreateOptions,
+    Kms,
+    MdocRecord,
+    SdJwtVcRecord,
+    W3cJsonCredential,
+    X509Module
+} from "@credo-ts/core";
+import { OpenId4VciCredentialResponse, OpenId4VcModule, type OpenId4VciResolvedCredentialOffer, type OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
 import { AccountController } from "@nmshd/transport";
 import { AttributesController, OwnIdentityAttribute } from "../../attributes";
 import { BaseAgent } from "./BaseAgent";
@@ -33,13 +46,13 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         return await this.agent.openid4vc.holder.resolveCredentialOffer(credentialOffer);
     }
 
-    public async acceptCredentialOffer(
+    public async requestCredentials(
         resolvedCredentialOffer: OpenId4VciResolvedCredentialOffer,
         options: {
             credentialConfigurationIds: string[];
             txCode?: string;
         }
-    ): Promise<OwnIdentityAttribute[]> {
+    ): Promise<OpenId4VciCredentialResponse[]> {
         const tokenResponse = await this.agent.openid4vc.holder.requestToken({
             resolvedCredentialOffer,
             txCode: options.txCode
@@ -94,10 +107,15 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
 
         this.agent.config.logger.info("Credential response:", credentialResponse);
 
+        return credentialResponse.credentials;
+    }
+
+    public async storeCredentials(
+        credentialResponses: (Omit<OpenId4VciCredentialResponse, "record"> & { record: { claimFormat: ClaimFormat; encoded: string | W3cJsonCredential } })[]
+    ): Promise<OwnIdentityAttribute[]> {
         const storedCredentials = await Promise.all(
-            credentialResponse.credentials.map((response) => {
-                // TODO: batch issuance not yet supported
-                const credential = response.record.firstCredential;
+            credentialResponses.map((credentialResponse) => {
+                const credential = credentialResponse.record;
 
                 if (![ClaimFormat.SdJwtW3cVc, ClaimFormat.SdJwtDc, ClaimFormat.MsoMdoc].includes(credential.claimFormat)) {
                     throw new Error("Unsupported credential format");
@@ -105,13 +123,7 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
 
                 const enmeshedStorageService = this.agent.dependencyManager.resolve<EnmeshedStorageService<BaseRecord>>(InjectionSymbols.StorageService);
 
-                const displayInfo = response.credentialConfiguration.display as Record<string, any>[] | undefined;
-
-                // if the displayInfo does not provide a logo - we try to load a logo from the issuers attributes
-                if (displayInfo && !displayInfo[0]?.logo) {
-                    const logoInformation = resolvedCredentialOffer.metadata.credentialIssuer.display?.[0]?.["logo"];
-                    displayInfo[0].logo = logoInformation;
-                }
+                const displayInfo = credentialResponse.credentialConfiguration.display as Record<string, any>[] | undefined;
 
                 return enmeshedStorageService.saveWithDisplay(this.agent.context, credential.encoded, credential.claimFormat, displayInfo);
             })

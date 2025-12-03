@@ -1,5 +1,5 @@
-import { ClaimFormat } from "@credo-ts/core";
-import { OpenId4VciResolvedCredentialOffer, OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
+import { ClaimFormat, W3cJsonCredential } from "@credo-ts/core";
+import { OpenId4VciCredentialResponse, OpenId4VciResolvedCredentialOffer, OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
 import { VerifiableCredential } from "@nmshd/content";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../consumption/ConsumptionController";
@@ -33,8 +33,19 @@ export class OpenId4VcController extends ConsumptionBaseController {
         return await this.holder.resolveCredentialOffer(credentialOfferUrl);
     }
 
-    public async acceptCredentialOffer(credentialOffer: OpenId4VciResolvedCredentialOffer, credentialConfigurationIds: string[], pinCode?: string): Promise<OwnIdentityAttribute> {
-        const credentials = await this.holder.acceptCredentialOffer(credentialOffer, { credentialConfigurationIds: credentialConfigurationIds, txCode: pinCode });
+    public async requestCredentials(
+        credentialOffer: OpenId4VciResolvedCredentialOffer,
+        credentialConfigurationIds: string[],
+        pinCode?: string
+    ): Promise<OpenId4VciCredentialResponse[]> {
+        const credentialsResponses = await this.holder.requestCredentials(credentialOffer, { credentialConfigurationIds: credentialConfigurationIds, txCode: pinCode });
+        return credentialsResponses;
+    }
+
+    public async storeCredentials(
+        credentialResponses: (Omit<OpenId4VciCredentialResponse, "record"> & { record: { claimFormat: ClaimFormat; encoded: string | W3cJsonCredential } })[]
+    ): Promise<OwnIdentityAttribute> {
+        const credentials = await this.holder.storeCredentials(credentialResponses);
 
         // TODO: support multiple credentials
         return credentials[0];

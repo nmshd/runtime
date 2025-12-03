@@ -16958,11 +16958,11 @@ export const AcceptAuthorizationRequestRequest: any = {
     }
 }
 
-export const AcceptCredentialOfferRequest: any = {
+export const RequestCredentialsRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/AcceptCredentialOfferRequest",
+    "$ref": "#/definitions/RequestCredentialsRequest",
     "definitions": {
-        "AcceptCredentialOfferRequest": {
+        "RequestCredentialsRequest": {
             "type": "object",
             "additionalProperties": false,
             "properties": {
@@ -17021,6 +17021,28 @@ export const ResolveCredentialOfferRequest: any = {
                 "credentialOfferUrl"
             ],
             "additionalProperties": false
+        }
+    }
+}
+
+export const StoreCredentialsRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/StoreCredentialsRequest",
+    "definitions": {
+        "StoreCredentialsRequest": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "credentialResponses": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                }
+            },
+            "required": [
+                "credentialResponses"
+            ]
         }
     }
 }
