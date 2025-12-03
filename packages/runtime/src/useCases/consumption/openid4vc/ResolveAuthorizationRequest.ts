@@ -34,6 +34,12 @@ export class ResolveAuthorizationRequestUseCase extends UseCase<ResolveAuthoriza
         const result = await this.openId4VcController.resolveAuthorizationRequest(request.authorizationRequestUrl);
 
         const authorizationRequest = JSON.parse(stringifySafe(result.authorizationRequest));
+
+        if (result.usedCredentials.length === 0) {
+            // no match
+            return Result.ok({ authorizationRequest, usedCredentials: [] });
+        }
+
         // the 'get encoded' of the credential is lost while making it app-safe, we have to re-add it for PEX
         // quick-fix for the simplest case with one requested credential only - otherwise every [0] would have to be generalised.
         if (result.authorizationRequest.presentationExchange) {

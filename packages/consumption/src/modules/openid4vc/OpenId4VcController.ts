@@ -1,4 +1,3 @@
-import { ClaimFormat } from "@credo-ts/core";
 import { OpenId4VciResolvedCredentialOffer, OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
 import { VerifiableCredential } from "@nmshd/content";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
@@ -69,11 +68,7 @@ export class OpenId4VcController extends ConsumptionBaseController {
         if (!authorizationRequestSatisfied) return [];
 
         const matchedCredentialsFromPresentationExchange = authorizationRequest.presentationExchange?.credentialsForRequest.requirements
-            .map((entry) =>
-                entry.submissionEntry
-                    .map((subEntry) => subEntry.verifiableCredentials.filter((vc) => vc.claimFormat === ClaimFormat.SdJwtDc).map((vc) => vc.credentialRecord.encoded))
-                    .flat()
-            )
+            .map((entry) => entry.submissionEntry.map((subEntry) => subEntry.verifiableCredentials.map((vc) => vc.credentialRecord.encoded)).flat())
             .flat();
 
         const allCredentials = (await this.parent.attributes.getLocalAttributes({
