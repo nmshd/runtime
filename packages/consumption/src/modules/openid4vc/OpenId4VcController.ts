@@ -1,4 +1,4 @@
-import { ClaimFormat } from "@credo-ts/core";
+import { ClaimFormat, W3cJsonCredential } from "@credo-ts/core";
 import { OpenId4VciCredentialResponse, OpenId4VciResolvedCredentialOffer, OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
 import { VerifiableCredential } from "@nmshd/content";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
@@ -42,7 +42,9 @@ export class OpenId4VcController extends ConsumptionBaseController {
         return credentialsResponses;
     }
 
-    public async storeCredentials(credentialResponses: OpenId4VciCredentialResponse[]): Promise<OwnIdentityAttribute> {
+    public async storeCredentials(
+        credentialResponses: (Omit<OpenId4VciCredentialResponse, "record"> & { record: { claimFormat: ClaimFormat; encoded: string | W3cJsonCredential } })[]
+    ): Promise<OwnIdentityAttribute> {
         const credentials = await this.holder.storeCredentials(credentialResponses);
 
         // TODO: support multiple credentials

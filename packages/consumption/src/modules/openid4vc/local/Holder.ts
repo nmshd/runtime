@@ -1,4 +1,17 @@
-import { BaseRecord, ClaimFormat, DidJwk, DidKey, InjectionSymbols, JwkDidCreateOptions, KeyDidCreateOptions, Kms, MdocRecord, SdJwtVcRecord, X509Module } from "@credo-ts/core";
+import {
+    BaseRecord,
+    ClaimFormat,
+    DidJwk,
+    DidKey,
+    InjectionSymbols,
+    JwkDidCreateOptions,
+    KeyDidCreateOptions,
+    Kms,
+    MdocRecord,
+    SdJwtVcRecord,
+    W3cJsonCredential,
+    X509Module
+} from "@credo-ts/core";
 import { OpenId4VciCredentialResponse, OpenId4VcModule, type OpenId4VciResolvedCredentialOffer, type OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
 import { AccountController } from "@nmshd/transport";
 import { AttributesController, OwnIdentityAttribute } from "../../attributes";
@@ -97,11 +110,12 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         return credentialResponse.credentials;
     }
 
-    public async storeCredentials(credentialResponses: OpenId4VciCredentialResponse[]): Promise<OwnIdentityAttribute[]> {
+    public async storeCredentials(
+        credentialResponses: (Omit<OpenId4VciCredentialResponse, "record"> & { record: { claimFormat: ClaimFormat; encoded: string | W3cJsonCredential } })[]
+    ): Promise<OwnIdentityAttribute[]> {
         const storedCredentials = await Promise.all(
             credentialResponses.map((credentialResponse) => {
-                // TODO: batch issuance not yet supported
-                const credential = credentialResponse.record.firstCredential;
+                const credential = credentialResponse.record;
 
                 if (![ClaimFormat.SdJwtW3cVc, ClaimFormat.SdJwtDc, ClaimFormat.MsoMdoc].includes(credential.claimFormat)) {
                     throw new Error("Unsupported credential format");
