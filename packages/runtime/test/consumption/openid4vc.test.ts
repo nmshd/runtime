@@ -45,7 +45,7 @@ describe("custom openid4vc service", () => {
 
     let credentialOfferUrl: string;
 
-    test("should process a given credential offer", async () => {
+    test("should process a given sd-jwt credential offer", async () => {
         const response = await axiosInstance.post("/issuance/credentialOffers", {
             credentialConfigurationIds: ["EmployeeIdCard-sdjwt"]
         });
@@ -79,7 +79,7 @@ describe("custom openid4vc service", () => {
         expect(credential.displayInformation?.[0].name).toBe("Employee ID Card");
     });
 
-    test("should be able to process a given credential presentation", async () => {
+    test("should be able to process a given sd-jwt credential presentation", async () => {
         // Ensure the first test has completed
         expect(credentialOfferUrl).toBeDefined();
 
@@ -127,6 +127,92 @@ describe("custom openid4vc service", () => {
         const presentationResult = await consumptionServices.openId4Vc.acceptAuthorizationRequest({ authorizationRequest: result.value.authorizationRequest });
         expect(presentationResult).toBeSuccessful();
         expect(presentationResult.value.status).toBe(200);
+    });
+
+    describe.only("mdoc", () => {
+        test("should process a given mdoc credential offer", async () => {
+            const response = await axiosInstance.post("/issuance/credentialOffers", {
+                credentialConfigurationIds: ["EmployeeIdCard-mdoc"]
+            });
+            expect(response.status).toBe(200);
+            const responseData = await response.data;
+
+            credentialOfferUrl = responseData.result.credentialOffer;
+
+            const result = await consumptionServices.openId4Vc.resolveCredentialOffer({
+                credentialOfferUrl
+            });
+
+            expect(result).toBeSuccessful();
+
+            // analogously to the app code all presented credentials are accepted
+            const credentialOffer = result.value.credentialOffer;
+
+            // determine which credentials to pick from the offer for all supported types of offers
+
+            const requestedCredentials = credentialOffer.credentialOfferPayload.credential_configuration_ids;
+
+            const acceptanceResult = await consumptionServices.openId4Vc.acceptCredentialOffer({
+                credentialOffer,
+                credentialConfigurationIds: requestedCredentials
+            });
+            expect(acceptanceResult).toBeSuccessful();
+            expect(typeof acceptanceResult.value.id).toBe("string");
+
+            const credential = acceptanceResult.value.content.value as unknown as VerifiableCredential;
+            expect(credential.displayInformation?.[0].logo).toBeDefined();
+            expect(credential.displayInformation?.[0].name).toBe("Employee ID Card");
+        });
+
+        test("should be able to process a given mdoc credential presentation", async () => {
+            // Ensure the first test has completed
+            expect(credentialOfferUrl).toBeDefined();
+
+            const response = await axiosInstance.post("/presentation/presentationRequests", {
+                pex: {
+                    // see openid4vp-draft21.e2e.test.ts of credo for a more detailed example how to build a query
+                    id: "anId",
+                    purpose: "To prove you work here",
+
+                    // eslint-disable-next-line @typescript-eslint/naming-convention
+                    input_descriptors: [
+                        {
+                            id: "EmployeeIdCard",
+                            format: {
+                                // eslint-disable-next-line @typescript-eslint/naming-convention
+                                mso_mdoc: {
+                                    alg: ["EdDSA", "ES256"]
+                                }
+                            },
+                            constraints: {
+                                fields: [
+                                    {
+                                        path: ["$['employeeIdCard']['degree']"],
+                                        // eslint-disable-next-line @typescript-eslint/naming-convention
+                                        intent_to_retain: false
+                                    }
+                                ],
+                                // eslint-disable-next-line @typescript-eslint/naming-convention
+                                limit_disclosure: "required"
+                            }
+                        }
+                    ]
+                },
+                version: "v1.draft21"
+            });
+            expect(response.status).toBe(200);
+            const responseData = await response.data;
+
+            const result = await consumptionServices.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl: responseData.result.presentationRequest });
+            expect(result.value.usedCredentials).toHaveLength(1);
+
+            const request = result.value.authorizationRequest;
+            expect(request.presentationExchange!.credentialsForRequest.areRequirementsSatisfied).toBe(true);
+
+            const presentationResult = await consumptionServices.openId4Vc.acceptAuthorizationRequest({ authorizationRequest: result.value.authorizationRequest });
+            expect(presentationResult).toBeSuccessful();
+            expect(presentationResult.value.status).toBe(200);
+        });
     });
 
     test("getting all verifiable credentials should not return an empty list", async () => {
