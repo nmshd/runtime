@@ -19,6 +19,7 @@ import {
     IProposeAttributeRequestItem,
     IReadAttributeRequestItem,
     IShareAttributeRequestItem,
+    IShareCredentialOfferRequestItem,
     ITransferFileOwnershipRequestItem,
     ProposeAttributeRequestItem,
     ProposeAttributeRequestItemJSON,
@@ -26,6 +27,8 @@ import {
     ReadAttributeRequestItemJSON,
     ShareAttributeRequestItem,
     ShareAttributeRequestItemJSON,
+    ShareCredentialOfferRequestItem,
+    ShareCredentialOfferRequestItemJSON,
     TransferFileOwnershipRequestItem,
     TransferFileOwnershipRequestItemJSON
 } from "./items";
@@ -61,7 +64,8 @@ export type RequestItemJSONDerivations =
     | ConsentRequestItemJSON
     | AuthenticationRequestItemJSON
     | FormFieldRequestItemJSON
-    | TransferFileOwnershipRequestItemJSON;
+    | TransferFileOwnershipRequestItemJSON
+    | ShareCredentialOfferRequestItemJSON;
 
 export interface IRequestItem extends ISerializable {
     /**
@@ -94,7 +98,8 @@ export type IRequestItemDerivations =
     | IConsentRequestItem
     | IAuthenticationRequestItem
     | IFormFieldRequestItem
-    | ITransferFileOwnershipRequestItem;
+    | ITransferFileOwnershipRequestItem
+    | IShareCredentialOfferRequestItem;
 
 export abstract class RequestItem extends Serializable {
     @serialize()
@@ -124,7 +129,8 @@ export type RequestItemDerivations =
     | ConsentRequestItem
     | AuthenticationRequestItem
     | FormFieldRequestItem
-    | TransferFileOwnershipRequestItem;
+    | TransferFileOwnershipRequestItem
+    | ShareCredentialOfferRequestItem;
 
 export function isRequestItemDerivation(input: any): input is RequestItemDerivations {
     return (

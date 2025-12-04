@@ -22,8 +22,8 @@ export class RequestedCredentialCache {
     public constructor(private readonly collection: SynchronizedCollection) {}
 
     public async get(credentialOfferUrl: string): Promise<OpenId4VciCredentialResponseJSON[] | undefined> {
-        const entry = await this.collection.read(credentialOfferUrl);
-        return entry ? RequestedCredentialCacheEntry.fromAny(entry.credentials).entry : undefined;
+        const doc = await this.collection.read(credentialOfferUrl);
+        return doc ? RequestedCredentialCacheEntry.fromAny(doc).entry : undefined;
     }
 
     public async set(credentialOfferUrl: string, credentials: OpenId4VciCredentialResponseJSON[]): Promise<void> {

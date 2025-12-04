@@ -3,25 +3,34 @@ import axios, { AxiosInstance } from "axios";
 import path from "path";
 import { DockerComposeEnvironment, GenericContainer, StartedDockerComposeEnvironment, StartedTestContainer, Wait } from "testcontainers";
 import { Agent as UndiciAgent, fetch as undiciFetch } from "undici";
-import { ConsumptionServices } from "../../src";
-import { RuntimeServiceProvider } from "../lib";
+import { ensureActiveRelationship, exchangeAndAcceptRequestByMessage, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
 const fetchInstance: typeof fetch = (async (input: any, init: any) => {
     const response = await undiciFetch(input, { ...init, dispatcher: new UndiciAgent({}) });
     return response;
 }) as unknown as typeof fetch;
 
-describe("custom openid4vc service", () => {
-    const runtimeServiceProvider = new RuntimeServiceProvider(fetchInstance);
-    let consumptionServices: ConsumptionServices;
+const runtimeServiceProvider = new RuntimeServiceProvider(fetchInstance);
+let runtimeServices1: TestRuntimeServices;
+let runtimeServices2: TestRuntimeServices;
 
+beforeAll(async () => {
+    const runtimeServices = await runtimeServiceProvider.launch(2, { enableDeciderModule: true, enableRequestModule: true });
+    runtimeServices1 = runtimeServices[0];
+    runtimeServices2 = runtimeServices[1];
+
+    await ensureActiveRelationship(runtimeServices1.transport, runtimeServices2.transport);
+}, 120000);
+
+afterAll(async () => {
+    await runtimeServiceProvider.stop();
+});
+
+describe("custom openid4vc service", () => {
     let axiosInstance: AxiosInstance;
     let dockerComposeStack: StartedDockerComposeEnvironment | undefined;
 
     beforeAll(async () => {
-        const runtimeServices = await runtimeServiceProvider.launch(1);
-        consumptionServices = runtimeServices[0].consumption;
-
         let oid4vcServiceBaseUrl = process.env.OPENID4VC_SERVICE_BASEURL!;
         if (!oid4vcServiceBaseUrl) {
             dockerComposeStack = await startOid4VcComposeStack();
@@ -39,7 +48,6 @@ describe("custom openid4vc service", () => {
     }, 120000);
 
     afterAll(async () => {
-        await runtimeServiceProvider.stop();
         if (dockerComposeStack) await dockerComposeStack.down();
     });
 
@@ -54,7 +62,7 @@ describe("custom openid4vc service", () => {
 
         credentialOfferUrl = responseData.result.credentialOffer;
 
-        const result = await consumptionServices.openId4Vc.resolveCredentialOffer({
+        const result = await runtimeServices1.consumption.openId4Vc.resolveCredentialOffer({
             credentialOfferUrl
         });
 
@@ -67,11 +75,11 @@ describe("custom openid4vc service", () => {
 
         const requestedCredentials = credentialOffer.credentialOfferPayload.credential_configuration_ids;
 
-        const credentialResponseResult = await consumptionServices.openId4Vc.requestCredentials({
+        const credentialResponseResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
             credentialOffer,
             credentialConfigurationIds: requestedCredentials
         });
-        const storeResult = await consumptionServices.openId4Vc.storeCredentials({ credentialResponses: credentialResponseResult.value.credentialResponses });
+        const storeResult = await runtimeServices1.consumption.openId4Vc.storeCredentials({ credentialResponses: credentialResponseResult.value.credentialResponses });
         expect(storeResult).toBeSuccessful();
         expect(typeof storeResult.value.id).toBe("string");
 
@@ -119,13 +127,13 @@ describe("custom openid4vc service", () => {
         expect(response.status).toBe(200);
         const responseData = await response.data;
 
-        const result = await consumptionServices.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl: responseData.result.presentationRequest });
+        const result = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl: responseData.result.presentationRequest });
         expect(result.value.usedCredentials).toHaveLength(1);
 
         const request = result.value.authorizationRequest;
         expect(request.presentationExchange!.credentialsForRequest.areRequirementsSatisfied).toBe(true);
 
-        const presentationResult = await consumptionServices.openId4Vc.acceptAuthorizationRequest({ authorizationRequest: result.value.authorizationRequest });
+        const presentationResult = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest: result.value.authorizationRequest });
         expect(presentationResult).toBeSuccessful();
         expect(presentationResult.value.status).toBe(200);
     });
@@ -134,7 +142,7 @@ describe("custom openid4vc service", () => {
         // Ensure the first test has completed
         expect(credentialOfferUrl).toBeDefined();
 
-        const acceptanceResult = await consumptionServices.attributes.getOwnIdentityAttributes({
+        const acceptanceResult = await runtimeServices1.consumption.attributes.getOwnIdentityAttributes({
             query: {
                 "content.value.@type": "VerifiableCredential"
             }
@@ -142,6 +150,82 @@ describe("custom openid4vc service", () => {
 
         expect(acceptanceResult).toBeSuccessful();
         expect(acceptanceResult.value.length).toBeGreaterThan(0);
+    });
+
+    test("transfer offer using requests", async () => {
+        const response = await axiosInstance.post("/issuance/credentialOffers", {
+            credentialConfigurationIds: ["EmployeeIdCard-sdjwt"]
+        });
+        expect(response.status).toBe(200);
+        const responseData = await response.data;
+
+        credentialOfferUrl = responseData.result.credentialOffer;
+
+        await exchangeAndAcceptRequestByMessage(
+            runtimeServices1,
+            runtimeServices2,
+            {
+                content: { items: [{ "@type": "ShareCredentialOfferRequestItem", credentialOfferUrl, mustBeAccepted: true }] },
+                peer: (await runtimeServices2.transport.account.getIdentityInfo()).value.address
+            },
+            [{ accept: true }]
+        );
+
+        const attributes = await runtimeServices2.consumption.attributes.getOwnIdentityAttributes({
+            query: {
+                "content.value.@type": "VerifiableCredential"
+            }
+        });
+
+        expect(attributes).toBeSuccessful();
+        expect(attributes.value.length).toBeGreaterThan(0);
+
+        const createPresentationResponse = await axiosInstance.post("/presentation/presentationRequests", {
+            pex: {
+                id: "anId",
+                purpose: "To prove you work here",
+
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                input_descriptors: [
+                    {
+                        id: "EmployeeIdCard",
+                        format: {
+                            // eslint-disable-next-line @typescript-eslint/naming-convention
+                            "vc+sd-jwt": {
+                                // eslint-disable-next-line @typescript-eslint/naming-convention
+                                "sd-jwt_alg_values": ["RS256", "PS256", "HS256", "ES256", "ES256K", "RS384", "PS384", "HS384", "ES384", "RS512", "PS512", "HS512", "ES512", "EdDSA"]
+                            }
+                        },
+                        constraints: {
+                            fields: [
+                                {
+                                    path: ["$.vct"],
+                                    filter: {
+                                        type: "string",
+                                        pattern: "EmployeeIdCard"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            version: "v1.draft21"
+        });
+        expect(createPresentationResponse.status).toBe(200);
+        const createPresentationResponseData = await createPresentationResponse.data;
+
+        const result = await runtimeServices2.consumption.openId4Vc.resolveAuthorizationRequest({
+            authorizationRequestUrl: createPresentationResponseData.result.presentationRequest
+        });
+        expect(result.value.usedCredentials).toHaveLength(1);
+
+        const request = result.value.authorizationRequest;
+        expect(request.presentationExchange!.credentialsForRequest.areRequirementsSatisfied).toBe(true);
+
+        const presentationResult = await runtimeServices2.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest: result.value.authorizationRequest });
+        expect(presentationResult).toBeSuccessful();
+        expect(presentationResult.value.status).toBe(200);
     });
 
     async function startOid4VcComposeStack() {
@@ -179,9 +263,6 @@ describe("EUDIPLO", () => {
     const eudiploCredentialIdInConfiguration = "EmployeeIdCard";
     const eudiploPort = 3000; // CAUTION: don't change this. The DCQL query has this port hardcoded in its configuration. The presentation test will fail if we change this.
 
-    const runtimeServiceProvider = new RuntimeServiceProvider(fetchInstance);
-    let consumptionServices: ConsumptionServices;
-
     let eudiploContainer: StartedTestContainer | undefined;
     let axiosInstance: AxiosInstance;
 
@@ -215,15 +296,10 @@ describe("EUDIPLO", () => {
                 Authorization: `Bearer ${accessToken}` // eslint-disable-line @typescript-eslint/naming-convention
             }
         });
-
-        const runtimeServices = await runtimeServiceProvider.launch(1);
-        consumptionServices = runtimeServices[0].consumption;
     });
 
     afterAll(async () => {
         await eudiploContainer?.stop();
-
-        await runtimeServiceProvider.stop();
     });
 
     test("issuance", async () => {
@@ -234,14 +310,16 @@ describe("EUDIPLO", () => {
             })
         ).data.uri;
 
-        const resolveCredentialOfferResult = await consumptionServices.openId4Vc.resolveCredentialOffer({ credentialOfferUrl });
+        const resolveCredentialOfferResult = await runtimeServices1.consumption.openId4Vc.resolveCredentialOffer({ credentialOfferUrl });
         expect(resolveCredentialOfferResult).toBeSuccessful();
 
-        const credentialResponsesResult = await consumptionServices.openId4Vc.requestCredentials({
+        const credentialResponsesResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
             credentialOffer: resolveCredentialOfferResult.value.credentialOffer,
             credentialConfigurationIds: [eudiploCredentialIdInConfiguration]
         });
-        const storeCredentialsResponse = await consumptionServices.openId4Vc.storeCredentials({ credentialResponses: credentialResponsesResult.value.credentialResponses });
+        const storeCredentialsResponse = await runtimeServices1.consumption.openId4Vc.storeCredentials({
+            credentialResponses: credentialResponsesResult.value.credentialResponses
+        });
         expect(storeCredentialsResponse).toBeSuccessful();
 
         expect((storeCredentialsResponse.value.content.value as unknown as VerifiableCredential).displayInformation?.[0].name).toBe("Employee ID Card");
@@ -255,7 +333,7 @@ describe("EUDIPLO", () => {
             })
         ).data.uri;
 
-        const loadResult = await consumptionServices.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl });
+        const loadResult = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl });
         expect(loadResult).toBeSuccessful();
 
         const queryResult = loadResult.value.authorizationRequest.dcql!.queryResult;
