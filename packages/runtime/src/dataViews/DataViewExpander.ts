@@ -49,6 +49,7 @@ import {
     ResponseJSON,
     SexJSON,
     ShareAttributeRequestItemJSON,
+    ShareCredentialOfferRequestItemJSON,
     SurnameJSON,
     ThirdPartyRelationshipAttributeQueryJSON,
     TransferFileOwnershipAcceptResponseItemJSON,
@@ -132,6 +133,7 @@ import {
     ResponseItemDVO,
     ResponseItemGroupDVO,
     ShareAttributeRequestItemDVO,
+    ShareCredentialOfferRequestItemDVO,
     ThirdPartyRelationshipAttributeQueryDVO,
     TransferFileOwnershipAcceptResponseItemDVO,
     TransferFileOwnershipRequestItemDVO
@@ -631,6 +633,30 @@ export class DataViewExpander {
                     response: responseItemDVO,
                     file
                 } as TransferFileOwnershipRequestItemDVO;
+
+            case "ShareCredentialOfferRequestItem":
+                const shareCredentialOfferRequestItem = requestItem as ShareCredentialOfferRequestItemJSON;
+
+                const requestSafe = async () => {
+                    try {
+                        const credentials = await this.consumptionController.openId4Vc.requestCredentialsCached(shareCredentialOfferRequestItem.credentialOfferUrl);
+                        return credentials;
+                    } catch {
+                        return;
+                    }
+                };
+
+                const credentialResponses = await requestSafe();
+
+                return {
+                    ...shareCredentialOfferRequestItem,
+                    type: "ShareCredentialOfferRequestItemDVO",
+                    id: "",
+                    name: this.generateRequestItemName(requestItem["@type"], isDecidable),
+                    isDecidable: isDecidable && !!credentialResponses,
+                    response: responseItemDVO,
+                    credentialResponses
+                } as ShareCredentialOfferRequestItemDVO;
 
             default:
                 return {
