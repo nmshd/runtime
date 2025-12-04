@@ -314,6 +314,9 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 {
                     "$ref": "#/definitions/TransferFileOwnershipRequestItemJSON"
+                },
+                {
+                    "$ref": "#/definitions/ShareCredentialOfferRequestItemJSON"
                 }
             ]
         },
@@ -1860,9 +1863,6 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "items": {
                         "type": "object"
                     }
-                },
-                "key": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -2718,6 +2718,42 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "fileReference",
                 "mustBeAccepted",
                 "ownershipToken"
+            ],
+            "additionalProperties": false
+        },
+        "ShareCredentialOfferRequestItemJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ShareCredentialOfferRequestItem"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "credentialOfferUrl": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "credentialOfferUrl",
+                "mustBeAccepted"
             ],
             "additionalProperties": false
         },
@@ -3919,9 +3955,6 @@ export const CompleteOutgoingRequestRequest: any = {
                     "items": {
                         "type": "object"
                     }
-                },
-                "key": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -5964,9 +5997,6 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "items": {
                         "type": "object"
                     }
-                },
-                "key": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -7080,6 +7110,9 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 {
                     "$ref": "#/definitions/TransferFileOwnershipRequestItemJSON"
+                },
+                {
+                    "$ref": "#/definitions/ShareCredentialOfferRequestItemJSON"
                 }
             ]
         },
@@ -8626,9 +8659,6 @@ export const CreateOutgoingRequestRequest: any = {
                     "items": {
                         "type": "object"
                     }
-                },
-                "key": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -9484,6 +9514,42 @@ export const CreateOutgoingRequestRequest: any = {
                 "fileReference",
                 "mustBeAccepted",
                 "ownershipToken"
+            ],
+            "additionalProperties": false
+        },
+        "ShareCredentialOfferRequestItemJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ShareCredentialOfferRequestItem"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "credentialOfferUrl": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "credentialOfferUrl",
+                "mustBeAccepted"
             ],
             "additionalProperties": false
         },
@@ -10145,6 +10211,9 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 {
                     "$ref": "#/definitions/TransferFileOwnershipRequestItemJSON"
+                },
+                {
+                    "$ref": "#/definitions/ShareCredentialOfferRequestItemJSON"
                 }
             ]
         },
@@ -11691,9 +11760,6 @@ export const ReceivedIncomingRequestRequest: any = {
                     "items": {
                         "type": "object"
                     }
-                },
-                "key": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -12549,6 +12615,42 @@ export const ReceivedIncomingRequestRequest: any = {
                 "fileReference",
                 "mustBeAccepted",
                 "ownershipToken"
+            ],
+            "additionalProperties": false
+        },
+        "ShareCredentialOfferRequestItemJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ShareCredentialOfferRequestItem"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "credentialOfferUrl": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "credentialOfferUrl",
+                "mustBeAccepted"
             ],
             "additionalProperties": false
         },
@@ -15751,9 +15853,6 @@ export const SucceedOwnIdentityAttributeRequest: any = {
                     "items": {
                         "type": "object"
                     }
-                },
-                "key": {
-                    "type": "string"
                 }
             },
             "required": [
@@ -21166,9 +21265,6 @@ export const VerifiableCredential: any = {
                     "items": {
                         "type": "object"
                     }
-                },
-                "key": {
-                    "type": "string"
                 }
             },
             "required": [
