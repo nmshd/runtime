@@ -1863,6 +1863,19 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 "key": {
                     "type": "string"
+                },
+                "defaultDisclosures": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                            }
+                        ]
+                    }
                 }
             },
             "required": [
@@ -1871,6 +1884,19 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "value"
             ],
             "additionalProperties": false
+        },
+        "interface-1894649334-822-900-1894649334-0-4702": {
+            "type": "object",
+            "additionalProperties": {
+                "anyOf": [
+                    {
+                        "type": "boolean"
+                    },
+                    {
+                        "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                    }
+                ]
+            }
         },
         "WebsiteJSON": {
             "type": "object",
@@ -3922,6 +3948,19 @@ export const CompleteOutgoingRequestRequest: any = {
                 },
                 "key": {
                     "type": "string"
+                },
+                "defaultDisclosures": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                            }
+                        ]
+                    }
                 }
             },
             "required": [
@@ -3930,6 +3969,19 @@ export const CompleteOutgoingRequestRequest: any = {
                 "value"
             ],
             "additionalProperties": false
+        },
+        "interface-1894649334-822-900-1894649334-0-4702": {
+            "type": "object",
+            "additionalProperties": {
+                "anyOf": [
+                    {
+                        "type": "boolean"
+                    },
+                    {
+                        "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                    }
+                ]
+            }
         },
         "WebsiteJSON": {
             "type": "object",
@@ -5967,6 +6019,19 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                 },
                 "key": {
                     "type": "string"
+                },
+                "defaultDisclosures": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                            }
+                        ]
+                    }
                 }
             },
             "required": [
@@ -5975,6 +6040,19 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                 "value"
             ],
             "additionalProperties": false
+        },
+        "interface-1894649334-822-900-1894649334-0-4702": {
+            "type": "object",
+            "additionalProperties": {
+                "anyOf": [
+                    {
+                        "type": "boolean"
+                    },
+                    {
+                        "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                    }
+                ]
+            }
         },
         "WebsiteJSON": {
             "type": "object",
@@ -8629,6 +8707,19 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 "key": {
                     "type": "string"
+                },
+                "defaultDisclosures": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                            }
+                        ]
+                    }
                 }
             },
             "required": [
@@ -8637,6 +8728,19 @@ export const CreateOutgoingRequestRequest: any = {
                 "value"
             ],
             "additionalProperties": false
+        },
+        "interface-1894649334-822-900-1894649334-0-4702": {
+            "type": "object",
+            "additionalProperties": {
+                "anyOf": [
+                    {
+                        "type": "boolean"
+                    },
+                    {
+                        "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                    }
+                ]
+            }
         },
         "WebsiteJSON": {
             "type": "object",
@@ -11694,6 +11798,19 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 "key": {
                     "type": "string"
+                },
+                "defaultDisclosures": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                            }
+                        ]
+                    }
                 }
             },
             "required": [
@@ -11702,6 +11819,19 @@ export const ReceivedIncomingRequestRequest: any = {
                 "value"
             ],
             "additionalProperties": false
+        },
+        "interface-1894649334-822-900-1894649334-0-4702": {
+            "type": "object",
+            "additionalProperties": {
+                "anyOf": [
+                    {
+                        "type": "boolean"
+                    },
+                    {
+                        "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                    }
+                ]
+            }
         },
         "WebsiteJSON": {
             "type": "object",
@@ -15754,6 +15884,19 @@ export const SucceedOwnIdentityAttributeRequest: any = {
                 },
                 "key": {
                     "type": "string"
+                },
+                "defaultDisclosures": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                            }
+                        ]
+                    }
                 }
             },
             "required": [
@@ -15762,6 +15905,19 @@ export const SucceedOwnIdentityAttributeRequest: any = {
                 "value"
             ],
             "additionalProperties": false
+        },
+        "interface-1894649334-822-900-1894649334-0-4702": {
+            "type": "object",
+            "additionalProperties": {
+                "anyOf": [
+                    {
+                        "type": "boolean"
+                    },
+                    {
+                        "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                    }
+                ]
+            }
         },
         "WebsiteJSON": {
             "type": "object",
@@ -16954,6 +17110,25 @@ export const AcceptAuthorizationRequestRequest: any = {
             "required": [
                 "authorizationRequest"
             ]
+        }
+    }
+}
+
+export const CreateDefaultPresentationRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/CreateDefaultPresentationRequest",
+    "definitions": {
+        "CreateDefaultPresentationRequest": {
+            "type": "object",
+            "properties": {
+                "attributeId": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "attributeId"
+            ],
+            "additionalProperties": false
         }
     }
 }
@@ -21169,6 +21344,19 @@ export const VerifiableCredential: any = {
                 },
                 "key": {
                     "type": "string"
+                },
+                "defaultDisclosures": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                            }
+                        ]
+                    }
                 }
             },
             "required": [
@@ -21177,6 +21365,19 @@ export const VerifiableCredential: any = {
                 "value"
             ],
             "additionalProperties": false
+        },
+        "interface-1894649334-822-900-1894649334-0-4702": {
+            "type": "object",
+            "additionalProperties": {
+                "anyOf": [
+                    {
+                        "type": "boolean"
+                    },
+                    {
+                        "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                    }
+                ]
+            }
         }
     }
 }
