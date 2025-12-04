@@ -87,22 +87,10 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
             "content.value.type": correspondingCredentialType
         });
 
-        return await Promise.all(
-            attributes.map(async (attribute) => {
-                const attributeValue = attribute.content.value as VerifiableCredential;
-                if (attributeValue.key !== undefined) {
-                    // TODO: Remove as this is only a workaround for demo purposes
-                    _agentContext.config.logger.info("Found keys to possibly import");
-
-                    const parsed = JSON.parse(attributeValue.key) as Map<string, any>;
-                    for (const [k, v] of Object.entries(parsed)) {
-                        await this.keyStorage.storeKey(k, v);
-                    }
-                }
-
-                return this.fromEncoded(correspondingCredentialType, (attribute.content.value as VerifiableCredential).value) as T;
-            })
-        );
+        return attributes.map((attribute) => {
+            const attributeValue = attribute.content.value as VerifiableCredential;
+            return this.fromEncoded(correspondingCredentialType, attributeValue.value) as T;
+        });
     }
 
     private recordTypeToCredentialType(recordType: string): string {
