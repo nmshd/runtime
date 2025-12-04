@@ -97,37 +97,34 @@ describe("custom openid4vc service", () => {
                                 // eslint-disable-next-line @typescript-eslint/naming-convention
                                 "vc+sd-jwt": {
                                     // eslint-disable-next-line @typescript-eslint/naming-convention
-                                    "vc+sd-jwt": {
-                                        // eslint-disable-next-line @typescript-eslint/naming-convention
-                                        "sd-jwt_alg_values": [
-                                            "RS256",
-                                            "PS256",
-                                            "HS256",
-                                            "ES256",
-                                            "ES256K",
-                                            "RS384",
-                                            "PS384",
-                                            "HS384",
-                                            "ES384",
-                                            "RS512",
-                                            "PS512",
-                                            "HS512",
-                                            "ES512",
-                                            "EdDSA"
-                                        ]
-                                    }
-                                },
-                                constraints: {
-                                    fields: [
-                                        {
-                                            path: ["$.vct"],
-                                            filter: {
-                                                type: "string",
-                                                pattern: "EmployeeIdCard"
-                                            }
-                                        }
+                                    "sd-jwt_alg_values": [
+                                        "RS256",
+                                        "PS256",
+                                        "HS256",
+                                        "ES256",
+                                        "ES256K",
+                                        "RS384",
+                                        "PS384",
+                                        "HS384",
+                                        "ES384",
+                                        "RS512",
+                                        "PS512",
+                                        "HS512",
+                                        "ES512",
+                                        "EdDSA"
                                     ]
                                 }
+                            },
+                            constraints: {
+                                fields: [
+                                    {
+                                        path: ["$.vct"],
+                                        filter: {
+                                            type: "string",
+                                            pattern: "EmployeeIdCard"
+                                        }
+                                    }
+                                ]
                             }
                         }
                     ]
