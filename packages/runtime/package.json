@@ -25,7 +25,7 @@
         "test:ci:lokijs": "USE_LOKIJS=true jest -i --coverage",
         "test:ci:mongodb": "jest -i --coverage",
         "test:local:ferretdb": "npm run test:local:start:ferretdb && CONNECTION_STRING='mongodb://root:example@localhost:27022' jest",
-        "test:local:lokijs": "USE_LOKIJS=true jest",
+        "test:local:lokijs": "USE_LOKIJS=true jest test/consumption/openid4vc.test.ts",
         "test:local:mongodb": "npm run test:local:start:mongodb && CONNECTION_STRING='mongodb://root:example@localhost:27021' jest",
         "test:local:start:ferretdb": "docker compose -f ../../.dev/compose.yml up -d runtime-ferret",
         "test:local:start:mongodb": "docker compose -f ../../.dev/compose.yml up -d runtime-mongo",
@@ -106,6 +106,8 @@
         "@types/json-stringify-safe": "^5.0.3",
         "@types/lodash": "^4.17.21",
         "@types/luxon": "^3.7.1",
+        "jwt-decode": "^3.1.2",
+        "openid-client": "^6.8.1",
         "ts-json-schema-generator": "2.4.0",
         "ts-mockito": "^2.6.1"
     },
