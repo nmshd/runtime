@@ -17,6 +17,11 @@ import {
     StoreCredentialsRequest,
     StoreCredentialsUseCase
 } from "../../../useCases";
+import {
+    CreateDefaultPresentationRequest,
+    CreateDefaultPresentationResponse,
+    CreateDefaultPresentationUseCase
+} from "../../../useCases/consumption/openid4vc/CreateDefaultPresentation";
 
 export class OpenId4VcFacade {
     public constructor(
@@ -24,7 +29,8 @@ export class OpenId4VcFacade {
         @Inject private readonly requestCredentialsUseCase: RequestCredentialsUseCase,
         @Inject private readonly storeCredentialsUseCase: StoreCredentialsUseCase,
         @Inject private readonly resolveAuthorizationRequestUseCase: ResolveAuthorizationRequestUseCase,
-        @Inject private readonly acceptAuthorizationRequestUseCase: AcceptAuthorizationRequestUseCase
+        @Inject private readonly acceptAuthorizationRequestUseCase: AcceptAuthorizationRequestUseCase,
+        @Inject private readonly createDefaultPresentationUseCase: CreateDefaultPresentationUseCase
     ) {}
 
     public async resolveCredentialOffer(request: ResolveCredentialOfferRequest): Promise<Result<ResolveCredentialOfferResponse>> {
@@ -45,5 +51,9 @@ export class OpenId4VcFacade {
 
     public async acceptAuthorizationRequest(request: AcceptAuthorizationRequestRequest): Promise<Result<AcceptAuthorizationRequestResponse>> {
         return await this.acceptAuthorizationRequestUseCase.execute(request);
+    }
+
+    public async createDefaultPresentation(request: CreateDefaultPresentationRequest): Promise<Result<CreateDefaultPresentationResponse>> {
+        return await this.createDefaultPresentationUseCase.execute(request);
     }
 }

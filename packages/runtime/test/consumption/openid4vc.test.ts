@@ -1,4 +1,4 @@
-import { VerifiableCredential } from "@nmshd/content";
+import { VerifiableCredential, VerifiableCredentialJSON } from "@nmshd/content";
 import axios, { AxiosInstance } from "axios";
 import path from "path";
 import { DockerComposeEnvironment, GenericContainer, StartedDockerComposeEnvironment, StartedTestContainer, Wait } from "testcontainers";
@@ -17,6 +17,7 @@ describe("custom openid4vc service", () => {
 
     let axiosInstance: AxiosInstance;
     let dockerComposeStack: StartedDockerComposeEnvironment | undefined;
+    let attributeId: string;
 
     beforeAll(async () => {
         const runtimeServices = await runtimeServiceProvider.launch(1);
@@ -78,6 +79,8 @@ describe("custom openid4vc service", () => {
         const credential = storeResult.value.content.value as unknown as VerifiableCredential;
         expect(credential.displayInformation?.[0].logo).toBeDefined();
         expect(credential.displayInformation?.[0].name).toBe("Employee ID Card");
+
+        attributeId = storeResult.value.id;
     });
 
     test("should be able to process a given credential presentation", async () => {
@@ -169,6 +172,18 @@ describe("custom openid4vc service", () => {
 
         return composeStack;
     }
+
+    test("one disclosure, no key binding", async () => {
+        const attribute = (await consumptionServices.attributes.getAttribute({ id: attributeId })).value;
+        const newAttribute = (
+            await consumptionServices.attributes.createOwnIdentityAttribute({
+                content: { value: { ...attribute.content.value, defaultDisclosures: { lob: true } } as VerifiableCredentialJSON }
+            })
+        ).value;
+
+        const defaultPresentation = await consumptionServices.openId4Vc.createDefaultPresentation({ attributeId: newAttribute.id });
+        expect(defaultPresentation).toBeSuccessful();
+    });
 });
 
 describe("EUDIPLO", () => {

@@ -8,11 +8,13 @@ import {
     KeyDidCreateOptions,
     Kms,
     MdocRecord,
+    SdJwtVcApi,
     SdJwtVcRecord,
     W3cJsonCredential,
     X509Module
 } from "@credo-ts/core";
 import { OpenId4VciCredentialResponse, OpenId4VcModule, type OpenId4VciResolvedCredentialOffer, type OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
+import { VerifiableCredential } from "@nmshd/content";
 import { AccountController } from "@nmshd/transport";
 import { AttributesController, OwnIdentityAttribute } from "../../attributes";
 import { BaseAgent } from "./BaseAgent";
@@ -201,6 +203,18 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
                 : undefined
         });
         return submissionResult.serverResponse;
+    }
+
+    public async createDefaultPresentation(credential: VerifiableCredential): Promise<string> {
+        if (credential.type !== ClaimFormat.SdJwtDc) throw new Error("Creating a default presentation is only supported for dc+sd-jwt credentials.");
+
+        const sdJwtVcApi = this.agent.dependencyManager.resolve(SdJwtVcApi);
+        const presentation = await sdJwtVcApi.present({
+            sdJwtVc: sdJwtVcApi.fromCompact(credential.value as string),
+            presentationFrame: credential.defaultDisclosures
+        });
+
+        return presentation;
     }
 
     public async exit(): Promise<void> {
