@@ -1,4 +1,5 @@
-import { OpenId4VciResolvedCredentialOffer, OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
+/* eslint-disable no-console */
+import { OpenId4VciRequestTokenResponse, OpenId4VciResolvedCredentialOffer, OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
 import { VerifiableCredential } from "@nmshd/content";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../consumption/ConsumptionController";
@@ -51,13 +52,19 @@ export class OpenId4VcController extends ConsumptionBaseController {
         return await this.holder.resolveCredentialOffer(credentialOfferUrl);
     }
 
-    public async requestCredentials(
+    public async acceptCredentialOffer(
         credentialOffer: OpenId4VciResolvedCredentialOffer,
         credentialConfigurationIds: string[],
-        pinCode?: string
-    ): Promise<OpenId4VciCredentialResponseJSON[]> {
-        const credentialResponses = await this.holder.requestCredentials(credentialOffer, { credentialConfigurationIds: credentialConfigurationIds, txCode: pinCode });
+        pinCode?: string,
+        accessToken?: OpenId4VciRequestTokenResponse
+    ): Promise<OwnIdentityAttribute> {
+        const credentialResponses = await this.holder.requestCredentials(credentialOffer, {
+            credentialConfigurationIds: credentialConfigurationIds,
+            txCode: pinCode,
+            token: accessToken
+        });
 
+        // TODO: support multiple credentials
         const mappedResponses = credentialResponses.map((response) => ({
             claimFormat: response.record.firstCredential.claimFormat,
             encoded: response.record.firstCredential.encoded,
@@ -65,13 +72,6 @@ export class OpenId4VcController extends ConsumptionBaseController {
         }));
 
         return mappedResponses;
-    }
-
-    public async storeCredentials(credentialResponses: OpenId4VciCredentialResponseJSON[]): Promise<OwnIdentityAttribute> {
-        const credentials = await this.holder.storeCredentials(credentialResponses);
-
-        // TODO: support multiple credentials
-        return credentials[0];
     }
 
     public async resolveAuthorizationRequest(authorizationRequestUrl: string): Promise<{

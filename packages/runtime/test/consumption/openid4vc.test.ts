@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { VerifiableCredential } from "@nmshd/content";
 import axios, { AxiosInstance } from "axios";
 import path from "path";
@@ -10,6 +11,12 @@ const fetchInstance: typeof fetch = (async (input: any, init: any) => {
     const response = await undiciFetch(input, { ...init, dispatcher: new UndiciAgent({}) });
     return response;
 }) as unknown as typeof fetch;
+
+interface CredentialData {
+    pernr: string;
+    name: string;
+    lob: string;
+}
 
 const runtimeServiceProvider = new RuntimeServiceProvider(fetchInstance);
 let runtimeServices1: TestRuntimeServices;
