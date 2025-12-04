@@ -1,4 +1,4 @@
-import { OpenId4VciResolvedCredentialOffer } from "@credo-ts/openid4vc";
+import { OpenId4VciRequestTokenResponse, OpenId4VciResolvedCredentialOffer } from "@credo-ts/openid4vc";
 import { Result } from "@js-soft/ts-utils";
 import { OpenId4VcController } from "@nmshd/consumption";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
@@ -8,8 +8,9 @@ import { AttributeMapper } from "../attributes";
 
 export interface AbstractCredentialOfferRequest<T> {
     credentialOffer: T;
-    pinCode?: string;
     credentialConfigurationIds: string[];
+    pinCode?: string;
+    accessToken?: OpenId4VciRequestTokenResponse;
 }
 
 export interface AcceptCredentialOfferRequest extends AbstractCredentialOfferRequest<OpenId4VciResolvedCredentialOffer> {}
@@ -31,7 +32,7 @@ export class AcceptCredentialOfferUseCase extends UseCase<AcceptCredentialOfferR
     }
 
     protected override async executeInternal(request: AcceptCredentialOfferRequest): Promise<Result<LocalAttributeDTO>> {
-        const result = await this.openId4VcController.acceptCredentialOffer(request.credentialOffer, request.credentialConfigurationIds, request.pinCode);
+        const result = await this.openId4VcController.acceptCredentialOffer(request.credentialOffer, request.credentialConfigurationIds, request.pinCode, request.accessToken);
         return Result.ok(AttributeMapper.toAttributeDTO(result));
     }
 }

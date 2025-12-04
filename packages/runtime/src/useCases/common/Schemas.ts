@@ -16773,7 +16773,10 @@ export const AcceptCredentialOfferRequest: any = {
                     "items": {
                         "type": "string"
                     }
-                }
+                },
+                "accessToken": {
+                    "type": "object"
+                },
             },
             "required": [
                 "credentialConfigurationIds",

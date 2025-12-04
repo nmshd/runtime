@@ -1,5 +1,6 @@
+/* eslint-disable no-console */
 import { ClaimFormat } from "@credo-ts/core";
-import { OpenId4VciResolvedCredentialOffer, OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
+import { OpenId4VciRequestTokenResponse, OpenId4VciResolvedCredentialOffer, OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
 import { VerifiableCredential } from "@nmshd/content";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../consumption/ConsumptionController";
@@ -32,10 +33,19 @@ export class OpenId4VcController extends ConsumptionBaseController {
         return await holder.resolveCredentialOffer(credentialOfferUrl);
     }
 
-    public async acceptCredentialOffer(credentialOffer: OpenId4VciResolvedCredentialOffer, credentialConfigurationIds: string[], pinCode?: string): Promise<OwnIdentityAttribute> {
+    public async acceptCredentialOffer(
+        credentialOffer: OpenId4VciResolvedCredentialOffer,
+        credentialConfigurationIds: string[],
+        pinCode?: string,
+        accessToken?: OpenId4VciRequestTokenResponse
+    ): Promise<OwnIdentityAttribute> {
         const holder = new Holder(this.keyStorage, this.parent.accountController, this.parent.attributes, this.fetchInstance);
         await holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
-        const credentials = await holder.acceptCredentialOffer(credentialOffer, { credentialConfigurationIds: credentialConfigurationIds, txCode: pinCode });
+
+        // TODO: remove debug code upon publishing
+        console.log("Using new version of code with access token support");
+        console.log("Access Token:", accessToken);
+        const credentials = await holder.acceptCredentialOffer(credentialOffer, { credentialConfigurationIds: credentialConfigurationIds, txCode: pinCode, token: accessToken });
 
         // TODO: support multiple credentials
         return credentials[0];

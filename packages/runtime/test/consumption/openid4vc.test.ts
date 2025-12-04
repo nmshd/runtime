@@ -1,5 +1,9 @@
+/* eslint-disable @typescript-eslint/naming-convention */
+import { OpenId4VciRequestTokenResponse } from "@credo-ts/openid4vc";
 import { VerifiableCredential } from "@nmshd/content";
 import axios, { AxiosInstance } from "axios";
+import jwtDecode from "jwt-decode";
+import * as client from "openid-client";
 import path from "path";
 import { DockerComposeEnvironment, GenericContainer, StartedDockerComposeEnvironment, StartedTestContainer, Wait } from "testcontainers";
 import { Agent as UndiciAgent, fetch as undiciFetch } from "undici";
@@ -10,6 +14,12 @@ const fetchInstance: typeof fetch = (async (input: any, init: any) => {
     const response = await undiciFetch(input, { ...init, dispatcher: new UndiciAgent({}) });
     return response;
 }) as unknown as typeof fetch;
+
+interface CredentialData {
+    pernr: string;
+    name: string;
+    lob: string;
+}
 
 describe("custom openid4vc service", () => {
     const runtimeServiceProvider = new RuntimeServiceProvider(fetchInstance);
@@ -119,6 +129,69 @@ describe("custom openid4vc service", () => {
         expect(credential.displayInformation?.[0].name).toBe("Employee ID Card");
     });
 
+    test("should be able to process a credential offer with external authentication", async () => {
+        const response = await axiosInstance.post("/issuance/credentialOffers", {
+            credentialConfigurationIds: ["EmployeeIdCard-sdjwt"],
+            authentication: "externalAuthentication"
+        });
+
+        expect(response.status).toBe(200);
+        const responseData = await response.data;
+
+        credentialOfferUrl = responseData.result.credentialOffer;
+
+        const result = await consumptionServices.openId4Vc.resolveCredentialOffer({
+            credentialOfferUrl
+        });
+
+        expect(result).toBeSuccessful();
+
+        // analogously to the app code all presented credentials are accepted
+        const credentialOffer = result.value.credentialOffer;
+
+        // determine which credentials to pick from the offer for all supported types of offers
+        const requestedCredentials = credentialOffer.credentialOfferPayload.credential_configuration_ids;
+
+        const server = URL.parse("https://kc-openid4vc.is.enmeshed.eu/realms/enmeshed-openid4vci")!; // Authorization Server's Issuer Identifier
+        const clientId = "wallet"; // Client identifier at the Authorization Server
+
+        const config: client.Configuration = await client.discovery(server, clientId);
+        const grantReq = await client.genericGrantRequest(config, "password", {
+            username: "test",
+            password: "test",
+            scope: "wallet-demo"
+        });
+
+        const tokenResponse: OpenId4VciRequestTokenResponse = {
+            accessToken: grantReq.access_token,
+            accessTokenResponse: {
+                access_token: grantReq.access_token,
+                token_type: grantReq.token_type,
+                claims: grantReq.claims
+            }
+        };
+
+        const acceptanceResult = await consumptionServices.openId4Vc.acceptCredentialOffer({
+            credentialOffer,
+            credentialConfigurationIds: requestedCredentials,
+            accessToken: tokenResponse
+        });
+
+        expect(acceptanceResult).toBeSuccessful();
+        expect(typeof acceptanceResult.value.id).toBe("string");
+
+        const credential = acceptanceResult.value.content.value as unknown as VerifiableCredential;
+        expect(credential.displayInformation?.[0].logo).toBeDefined();
+        expect(credential.displayInformation?.[0].name).toBe("Employee ID Card");
+
+        // decode the sdjwt to ensure that it was personalized for the test user
+        const encodedSdJwt = credential.value as string;
+        const decoded = jwtDecode<CredentialData>(encodedSdJwt);
+
+        expect(decoded.pernr).toBe("0019122023");
+        expect(decoded.lob).toBe("Test BU");
+    });
+
     test("should be able to process a given credential presentation", async () => {
         // Ensure the first test has completed
         expect(credentialOfferUrl).toBeDefined();
@@ -159,7 +232,7 @@ describe("custom openid4vc service", () => {
         const responseData = await response.data;
 
         const result = await consumptionServices.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl: responseData.result.presentationRequest });
-        expect(result.value.usedCredentials).toHaveLength(2);
+        expect(result.value.usedCredentials).toHaveLength(3);
 
         const request = result.value.authorizationRequest;
         expect(request.presentationExchange!.credentialsForRequest.areRequirementsSatisfied).toBe(true);
