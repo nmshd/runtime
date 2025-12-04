@@ -8,26 +8,45 @@ import { OwnIdentityAttribute } from "../attributes";
 import { Holder } from "./local/Holder";
 import { KeyStorage } from "./local/KeyStorage";
 import { OpenId4VciCredentialResponseJSON } from "./local/OpenId4VciCredentialResponseJSON";
+import { RequestedCredentialCache } from "./local/RequestedCredentialCache";
 
 export class OpenId4VcController extends ConsumptionBaseController {
     private holder: Holder;
+    private credentialRequestCache: RequestedCredentialCache;
 
     public constructor(parent: ConsumptionController) {
         super(ConsumptionControllerName.OpenId4VcController, parent);
     }
 
     public override async init(): Promise<this> {
-        const collection = await this.parent.accountController.getSynchronizedCollection("openid4vc-keys");
-        const keyStorage = new KeyStorage(collection, this._log);
+        const keyCollection = await this.parent.accountController.getSynchronizedCollection("openid4vc-keys");
+        const keyStorage = new KeyStorage(keyCollection, this._log);
 
         this.holder = new Holder(keyStorage, this.parent.accountController, this.parent.attributes, this.fetchInstance);
         await this.holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
+
+        const requestedCredentialsCacheCollection = await this.parent.accountController.getSynchronizedCollection("openid4vc-requested-credentials-cache");
+        this.credentialRequestCache = new RequestedCredentialCache(requestedCredentialsCacheCollection);
 
         return this;
     }
 
     private get fetchInstance(): typeof fetch {
         return this.parent.consumptionConfig.fetchInstance ?? fetch;
+    }
+
+    // TODO: this naming is bad
+    public async requestCredentialsCached(credentialOfferUrl: string): Promise<OpenId4VciCredentialResponseJSON[]> {
+        const cached = await this.credentialRequestCache.get(credentialOfferUrl);
+        if (cached) return cached;
+
+        const offer = await this.resolveCredentialOffer(credentialOfferUrl);
+        const credentials = await this.requestCredentials(offer, offer.credentialOfferPayload.credential_configuration_ids);
+
+        await this.credentialRequestCache.set(credentialOfferUrl, credentials);
+        await this.parent.accountController.syncDatawallet();
+
+        return credentials;
     }
 
     public async resolveCredentialOffer(credentialOfferUrl: string): Promise<OpenId4VciResolvedCredentialOffer> {
