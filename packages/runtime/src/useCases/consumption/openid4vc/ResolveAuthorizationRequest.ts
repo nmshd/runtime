@@ -13,7 +13,7 @@ export interface ResolveAuthorizationRequestRequest {
 
 export interface ResolveAuthorizationRequestResponse {
     authorizationRequest: OpenId4VpResolvedAuthorizationRequest;
-    usedCredentials: LocalAttributeDTO[];
+    matchingCredentials: LocalAttributeDTO[];
 }
 
 class Validator extends SchemaValidator<ResolveAuthorizationRequestRequest> {
@@ -34,6 +34,11 @@ export class ResolveAuthorizationRequestUseCase extends UseCase<ResolveAuthoriza
         const result = await this.openId4VcController.resolveAuthorizationRequest(request.authorizationRequestUrl);
 
         const authorizationRequest = JSON.parse(stringifySafe(result.authorizationRequest));
+
+        if (result.matchingCredentials.length === 0) {
+            return Result.ok({ authorizationRequest, matchingCredentials: [] });
+        }
+
         // the 'get encoded' of the credential is lost while making it app-safe, we have to re-add it for PEX
         // quick-fix for the simplest case with one requested credential only - otherwise every [0] would have to be generalised.
         if (result.authorizationRequest.presentationExchange) {
@@ -43,6 +48,6 @@ export class ResolveAuthorizationRequestUseCase extends UseCase<ResolveAuthoriza
                 encodedCredential;
         }
 
-        return Result.ok({ authorizationRequest, usedCredentials: AttributeMapper.toAttributeDTOList(result.usedCredentials) });
+        return Result.ok({ authorizationRequest, matchingCredentials: AttributeMapper.toAttributeDTOList(result.matchingCredentials) });
     }
 }
