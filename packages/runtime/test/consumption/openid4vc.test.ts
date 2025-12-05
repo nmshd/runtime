@@ -17,7 +17,6 @@ describe("custom openid4vc service", () => {
 
     let axiosInstance: AxiosInstance;
     let dockerComposeStack: StartedDockerComposeEnvironment | undefined;
-    let attributeId: string;
 
     beforeAll(async () => {
         const runtimeServices = await runtimeServiceProvider.launch(1);
@@ -47,6 +46,8 @@ describe("custom openid4vc service", () => {
     let credentialOfferUrl: string;
 
     describe("sd-jwt", () => {
+        let attributeId: string;
+
         test("should process a given sd-jwt credential offer", async () => {
             const response = await axiosInstance.post("/issuance/credentialOffers", {
                 credentialConfigurationIds: ["EmployeeIdCard-sdjwt"]
@@ -158,6 +159,48 @@ describe("custom openid4vc service", () => {
 
             expect(acceptanceResult).toBeSuccessful();
             expect(acceptanceResult.value.length).toBeGreaterThan(0);
+        });
+
+        test("default presentation with one disclosure, no key binding", async () => {
+            const attribute = (await consumptionServices.attributes.getAttribute({ id: attributeId })).value;
+            const newAttribute = (
+                await consumptionServices.attributes.succeedOwnIdentityAttribute({
+                    // create attribute runs into an error
+                    predecessorId: attributeId,
+                    successorContent: { value: { ...attribute.content.value, defaultPresentation: { presentationFrame: { degree: true } } } as VerifiableCredentialJSON }
+                })
+            ).value.successor;
+            attributeId = newAttribute.id;
+
+            const defaultPresentation = await consumptionServices.openId4Vc.createDefaultPresentation({ attributeId: newAttribute.id });
+            expect(defaultPresentation).toBeSuccessful();
+            const presentationParts = defaultPresentation.value.presentation.split("~");
+
+            // one disclosure
+            expect(presentationParts).toHaveLength(3);
+            expect(presentationParts.at(-1)).toBe("");
+        });
+
+        test("default presentation with one disclosure and key binding", async () => {
+            const attribute = (await consumptionServices.attributes.getAttribute({ id: attributeId })).value;
+            const newAttribute = (
+                await consumptionServices.attributes.succeedOwnIdentityAttribute({
+                    // create attribute runs into an error
+                    predecessorId: attributeId,
+                    successorContent: {
+                        value: { ...attribute.content.value, defaultPresentation: { keyBinding: true, presentationFrame: { degree: true } } } as VerifiableCredentialJSON
+                    }
+                })
+            ).value.successor;
+            attributeId = newAttribute.id;
+
+            const defaultPresentation = await consumptionServices.openId4Vc.createDefaultPresentation({ attributeId: newAttribute.id });
+            expect(defaultPresentation).toBeSuccessful();
+            const presentationParts = defaultPresentation.value.presentation.split("~");
+
+            // one disclosure, one key binding jwt
+            expect(presentationParts).toHaveLength(3);
+            expect(presentationParts.at(-1)).toMatch(/^ey/);
         });
     });
 
@@ -272,48 +315,6 @@ describe("custom openid4vc service", () => {
 
         return composeStack;
     }
-
-    test("one disclosure, no key binding", async () => {
-        const attribute = (await consumptionServices.attributes.getAttribute({ id: attributeId })).value;
-        const newAttribute = (
-            await consumptionServices.attributes.succeedOwnIdentityAttribute({
-                // create attribute runs into an error
-                predecessorId: attributeId,
-                successorContent: { value: { ...attribute.content.value, defaultPresentation: { presentationFrame: { degree: true } } } as VerifiableCredentialJSON }
-            })
-        ).value.successor;
-        attributeId = newAttribute.id;
-
-        const defaultPresentation = await consumptionServices.openId4Vc.createDefaultPresentation({ attributeId: newAttribute.id });
-        expect(defaultPresentation).toBeSuccessful();
-        const presentationParts = defaultPresentation.value.presentation.split("~");
-
-        // one disclosure
-        expect(presentationParts).toHaveLength(3);
-        expect(presentationParts.at(-1)).toBe("");
-    });
-
-    test("one disclosure, key binding", async () => {
-        const attribute = (await consumptionServices.attributes.getAttribute({ id: attributeId })).value;
-        const newAttribute = (
-            await consumptionServices.attributes.succeedOwnIdentityAttribute({
-                // create attribute runs into an error
-                predecessorId: attributeId,
-                successorContent: {
-                    value: { ...attribute.content.value, defaultPresentation: { keyBinding: true, presentationFrame: { degree: true } } } as VerifiableCredentialJSON
-                }
-            })
-        ).value.successor;
-        attributeId = newAttribute.id;
-
-        const defaultPresentation = await consumptionServices.openId4Vc.createDefaultPresentation({ attributeId: newAttribute.id });
-        expect(defaultPresentation).toBeSuccessful();
-        const presentationParts = defaultPresentation.value.presentation.split("~");
-
-        // one disclosure, one key binding jwt
-        expect(presentationParts).toHaveLength(3);
-        expect(presentationParts.at(-1)).toMatch(/^ey/);
-    });
 });
 
 describe("EUDIPLO", () => {
