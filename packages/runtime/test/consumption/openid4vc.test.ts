@@ -3,6 +3,7 @@ import axios, { AxiosInstance } from "axios";
 import path from "path";
 import { DockerComposeEnvironment, GenericContainer, StartedDockerComposeEnvironment, StartedTestContainer, Wait } from "testcontainers";
 import { Agent as UndiciAgent, fetch as undiciFetch } from "undici";
+import { ShareCredentialOfferRequestItemProcessedByRecipientEvent } from "../../src";
 import { ensureActiveRelationship, exchangeAndAcceptRequestByMessage, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
 const fetchInstance: typeof fetch = (async (input: any, init: any) => {
@@ -271,6 +272,11 @@ describe("custom openid4vc service", () => {
                 peer: (await runtimeServices2.transport.account.getIdentityInfo()).value.address
             },
             [{ accept: true }]
+        );
+
+        await expect(runtimeServices1.eventBus).toHavePublished(
+            ShareCredentialOfferRequestItemProcessedByRecipientEvent,
+            (m) => m.data.accepted && m.data.credentialOfferUrl === credentialOfferUrl
         );
 
         const attributes = await runtimeServices2.consumption.attributes.getOwnIdentityAttributes({
