@@ -16,7 +16,8 @@ import {
     OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent,
     OutgoingRequestStatusChangedEvent,
     OwnAttributeDeletedByOwnerEvent,
-    PeerRelationshipAttributeDeletedByPeerEvent
+    PeerRelationshipAttributeDeletedByPeerEvent,
+    ShareCredentialOfferRequestItemProcessedByRecipientEvent
 } from "./consumption";
 import {
     DatawalletSynchronizedEvent,
@@ -203,6 +204,16 @@ export class EventProxy {
                     request: RequestMapper.toLocalRequestDTO(event.data.request),
                     oldStatus: event.data.oldStatus,
                     newStatus: event.data.newStatus
+                })
+            );
+        });
+
+        this.subscribeToSourceEvent(consumption.ShareCredentialOfferRequestItemProcessedByRecipientEvent, (event) => {
+            this.targetEventBus.publish(
+                new ShareCredentialOfferRequestItemProcessedByRecipientEvent(event.eventTargetAddress, {
+                    credentialOfferUrl: event.data.credentialOfferUrl,
+                    accepted: event.data.accepted,
+                    peer: event.data.peer.toString()
                 })
             );
         });

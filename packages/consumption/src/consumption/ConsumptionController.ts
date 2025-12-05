@@ -11,6 +11,7 @@ import {
     ProposeAttributeRequestItem,
     ReadAttributeRequestItem,
     ShareAttributeRequestItem,
+    ShareCredentialOfferRequestItem,
     TransferFileOwnershipRequestItem
 } from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
@@ -41,6 +42,7 @@ import {
     RequestItemProcessorRegistry,
     SettingsController,
     ShareAttributeRequestItemProcessor,
+    ShareCredentialOfferRequestItemProcessor,
     TransferFileOwnershipRequestItemProcessor
 } from "../modules";
 import { ConsumptionConfig } from "./ConsumptionConfig";
@@ -160,7 +162,8 @@ export class ConsumptionController {
             [ConsentRequestItem, GenericRequestItemProcessor],
             [AuthenticationRequestItem, GenericRequestItemProcessor],
             [FormFieldRequestItem, FormFieldRequestItemProcessor],
-            [TransferFileOwnershipRequestItem, TransferFileOwnershipRequestItemProcessor]
+            [TransferFileOwnershipRequestItem, TransferFileOwnershipRequestItemProcessor],
+            [ShareCredentialOfferRequestItem, ShareCredentialOfferRequestItemProcessor]
         ]);
     }
 

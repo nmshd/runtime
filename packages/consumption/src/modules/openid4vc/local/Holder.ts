@@ -10,7 +10,6 @@ import {
     MdocRecord,
     SdJwtVcApi,
     SdJwtVcRecord,
-    W3cJsonCredential,
     X509Module
 } from "@credo-ts/core";
 import { OpenId4VciCredentialResponse, OpenId4VcModule, type OpenId4VciResolvedCredentialOffer, type OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
@@ -20,6 +19,7 @@ import { AttributesController, OwnIdentityAttribute } from "../../attributes";
 import { BaseAgent } from "./BaseAgent";
 import { EnmeshedStorageService } from "./EnmeshedStorageService";
 import { KeyStorage } from "./KeyStorage";
+import { OpenId4VciCredentialResponseJSON } from "./OpenId4VciCredentialResponseJSON";
 
 function getOpenIdHolderModules() {
     return {
@@ -112,22 +112,21 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         return credentialResponse.credentials;
     }
 
-    public async storeCredentials(
-        credentialResponses: (Omit<OpenId4VciCredentialResponse, "record"> & { record: { claimFormat: ClaimFormat; encoded: string | W3cJsonCredential } })[]
-    ): Promise<OwnIdentityAttribute[]> {
+    public async storeCredentials(credentialResponses: OpenId4VciCredentialResponseJSON[]): Promise<OwnIdentityAttribute[]> {
         const storedCredentials = await Promise.all(
             credentialResponses.map((credentialResponse) => {
-                const credential = credentialResponse.record;
-
-                if (![ClaimFormat.SdJwtW3cVc, ClaimFormat.SdJwtDc, ClaimFormat.MsoMdoc].includes(credential.claimFormat)) {
+                if (![ClaimFormat.SdJwtW3cVc, ClaimFormat.SdJwtDc, ClaimFormat.MsoMdoc].includes(credentialResponse.claimFormat)) {
                     throw new Error("Unsupported credential format");
                 }
 
                 const enmeshedStorageService = this.agent.dependencyManager.resolve<EnmeshedStorageService<BaseRecord>>(InjectionSymbols.StorageService);
 
-                const displayInfo = credentialResponse.credentialConfiguration.display as Record<string, any>[] | undefined;
-
-                return enmeshedStorageService.saveWithDisplay(this.agent.context, credential.encoded, credential.claimFormat, displayInfo);
+                return enmeshedStorageService.saveWithDisplay(
+                    this.agent.context,
+                    credentialResponse.encoded,
+                    credentialResponse.claimFormat,
+                    credentialResponse.displayInformation
+                );
             })
         );
 

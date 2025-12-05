@@ -1,5 +1,4 @@
-import { ClaimFormat, W3cJsonCredential } from "@credo-ts/core";
-import { OpenId4VciCredentialResponse, OpenId4VciResolvedCredentialOffer, OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
+import { OpenId4VciResolvedCredentialOffer, OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
 import { VerifiableCredential } from "@nmshd/content";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../consumption/ConsumptionController";
@@ -7,26 +6,45 @@ import { ConsumptionControllerName } from "../../consumption/ConsumptionControll
 import { OwnIdentityAttribute } from "../attributes";
 import { Holder } from "./local/Holder";
 import { KeyStorage } from "./local/KeyStorage";
+import { OpenId4VciCredentialResponseJSON } from "./local/OpenId4VciCredentialResponseJSON";
+import { RequestedCredentialCache } from "./local/RequestedCredentialCache";
 
 export class OpenId4VcController extends ConsumptionBaseController {
     private holder: Holder;
+    private requestedCredentialCache: RequestedCredentialCache;
 
     public constructor(parent: ConsumptionController) {
         super(ConsumptionControllerName.OpenId4VcController, parent);
     }
 
     public override async init(): Promise<this> {
-        const collection = await this.parent.accountController.getSynchronizedCollection("openid4vc-keys");
-        const keyStorage = new KeyStorage(collection, this._log);
+        const keyCollection = await this.parent.accountController.getSynchronizedCollection("openid4vc-keys");
+        const keyStorage = new KeyStorage(keyCollection, this._log);
 
         this.holder = new Holder(keyStorage, this.parent.accountController, this.parent.attributes, this.fetchInstance);
         await this.holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
+
+        const requestedCredentialsCacheCollection = await this.parent.accountController.getSynchronizedCollection("openid4vc-requested-credentials-cache");
+        this.requestedCredentialCache = new RequestedCredentialCache(requestedCredentialsCacheCollection);
 
         return this;
     }
 
     private get fetchInstance(): typeof fetch {
         return this.parent.consumptionConfig.fetchInstance ?? fetch;
+    }
+
+    public async requestAllCredentialsFromCredentialOfferUrl(credentialOfferUrl: string): Promise<OpenId4VciCredentialResponseJSON[]> {
+        const cachedCredentialResponses = await this.requestedCredentialCache.get(credentialOfferUrl);
+        if (cachedCredentialResponses) return cachedCredentialResponses;
+
+        const offer = await this.resolveCredentialOffer(credentialOfferUrl);
+        const credentialResponses = await this.requestCredentials(offer, offer.credentialOfferPayload.credential_configuration_ids);
+
+        await this.requestedCredentialCache.set(credentialOfferUrl, credentialResponses);
+        await this.parent.accountController.syncDatawallet();
+
+        return credentialResponses;
     }
 
     public async resolveCredentialOffer(credentialOfferUrl: string): Promise<OpenId4VciResolvedCredentialOffer> {
@@ -37,14 +55,19 @@ export class OpenId4VcController extends ConsumptionBaseController {
         credentialOffer: OpenId4VciResolvedCredentialOffer,
         credentialConfigurationIds: string[],
         pinCode?: string
-    ): Promise<OpenId4VciCredentialResponse[]> {
-        const credentialsResponses = await this.holder.requestCredentials(credentialOffer, { credentialConfigurationIds: credentialConfigurationIds, txCode: pinCode });
-        return credentialsResponses;
+    ): Promise<OpenId4VciCredentialResponseJSON[]> {
+        const credentialResponses = await this.holder.requestCredentials(credentialOffer, { credentialConfigurationIds: credentialConfigurationIds, txCode: pinCode });
+
+        const mappedResponses = credentialResponses.map((response) => ({
+            claimFormat: response.record.firstCredential.claimFormat,
+            encoded: response.record.firstCredential.encoded,
+            displayInformation: response.credentialConfiguration.credential_metadata?.display ?? (response.credentialConfiguration.display as Record<string, unknown>[] | undefined)
+        }));
+
+        return mappedResponses;
     }
 
-    public async storeCredentials(
-        credentialResponses: (Omit<OpenId4VciCredentialResponse, "record"> & { record: { claimFormat: ClaimFormat; encoded: string | W3cJsonCredential } })[]
-    ): Promise<OwnIdentityAttribute> {
+    public async storeCredentials(credentialResponses: OpenId4VciCredentialResponseJSON[]): Promise<OwnIdentityAttribute> {
         const credentials = await this.holder.storeCredentials(credentialResponses);
 
         // TODO: support multiple credentials

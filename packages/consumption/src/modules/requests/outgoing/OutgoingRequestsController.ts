@@ -387,7 +387,8 @@ export class OutgoingRequestsController extends ConsumptionBaseController {
 
     private async applyItem(requestItem: RequestItem, responseItem: ResponseItem, request: LocalRequest) {
         const processor = this.processorRegistry.getProcessorForItem(requestItem);
-        await processor.applyIncomingResponseItem(responseItem, requestItem, request);
+        const event = await processor.applyIncomingResponseItem(responseItem, requestItem, request);
+        if (event) this.eventBus.publish(event);
     }
 
     public async getOutgoingRequests(query?: any): Promise<LocalRequest[]> {

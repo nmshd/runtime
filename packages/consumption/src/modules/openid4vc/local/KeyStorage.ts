@@ -2,13 +2,14 @@ import { ILogger } from "@js-soft/logging-abstractions";
 import { serialize, validate } from "@js-soft/ts-serval";
 import { CoreId } from "@nmshd/core-types";
 import { CoreSynchronizable, ICoreSynchronizable, SynchronizedCollection } from "@nmshd/transport";
+import { nameof } from "ts-simple-nameof";
 
 interface IKeyStorageEntry extends ICoreSynchronizable {
     key: any;
 }
 
 class KeyStorageEntry extends CoreSynchronizable {
-    public override technicalProperties: string[] = ["key"];
+    public override technicalProperties: string[] = [nameof<KeyStorageEntry>((r) => r.key)];
 
     @serialize({ any: true })
     @validate()

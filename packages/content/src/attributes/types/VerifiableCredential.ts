@@ -9,7 +9,6 @@ export interface VerifiableCredentialJSON extends AbstractAttributeValueJSON {
     value: string | Record<string, any>;
     type: string;
     displayInformation?: Record<string, any>[];
-    key?: string;
     defaultPresentation?: { presentationFrame: IPresentationFrame; keyBinding?: boolean };
 }
 
@@ -17,7 +16,6 @@ export interface IVerifiableCredential extends IAbstractAttributeValue {
     value: string | Record<string, any>;
     type: string;
     displayInformation?: Record<string, any>[];
-    key?: string;
     defaultPresentation?: { presentationFrame: IPresentationFrame; keyBinding?: boolean };
 }
 
@@ -34,10 +32,6 @@ export class VerifiableCredential extends AbstractAttributeValue {
     @serialize()
     @validate({ nullable: true, max: PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH })
     public displayInformation?: Record<string, any>[];
-
-    @serialize()
-    @validate({ nullable: true, max: PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH })
-    public key?: string;
 
     @serialize({ any: true })
     @validate({ nullable: true })
