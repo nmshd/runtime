@@ -1,10 +1,11 @@
 import { serialize, validate } from "@js-soft/ts-serval";
 import { CoreId } from "@nmshd/core-types";
 import { CoreSynchronizable, SynchronizedCollection } from "@nmshd/transport";
+import { nameof } from "ts-simple-nameof";
 import { OpenId4VciCredentialResponseJSON } from "./OpenId4VciCredentialResponseJSON";
 
 class RequestedCredentialCacheEntry extends CoreSynchronizable {
-    public override technicalProperties: string[] = ["entry"];
+    public override technicalProperties: string[] = [nameof<RequestedCredentialCacheEntry>((r) => r.credentialResponses)];
 
     @serialize({ any: true })
     @validate()
