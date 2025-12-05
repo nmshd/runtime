@@ -70,6 +70,7 @@ import {
     ISex,
     IStreetAddress,
     ISurname,
+    IVerifiableCredential,
     IWebsite,
     JobTitle,
     JobTitleJSON,
@@ -117,6 +118,8 @@ import {
     StreetAddressJSON,
     Surname,
     SurnameJSON,
+    VerifiableCredential,
+    VerifiableCredentialJSON,
     Website,
     WebsiteJSON
 } from "./types";
@@ -151,6 +154,7 @@ export namespace AttributeValues {
                 | SexJSON
                 | StreetAddressJSON
                 | SurnameJSON
+                | VerifiableCredentialJSON
                 | WebsiteJSON;
 
             export type Interface =
@@ -178,6 +182,7 @@ export namespace AttributeValues {
                 | ISex
                 | IStreetAddress
                 | ISurname
+                | IVerifiableCredential
                 | IWebsite;
 
             export type Class =
@@ -205,6 +210,7 @@ export namespace AttributeValues {
                 | Sex
                 | StreetAddress
                 | Surname
+                | VerifiableCredential
                 | Website;
 
             export const CLASSES = [
@@ -232,6 +238,7 @@ export namespace AttributeValues {
                 Sex,
                 StreetAddress,
                 Surname,
+                VerifiableCredential,
                 Website
             ];
 
@@ -260,6 +267,7 @@ export namespace AttributeValues {
                 "Sex",
                 "StreetAddress",
                 "Surname",
+                "VerifiableCredential",
                 "Website"
             ] as const;
 
