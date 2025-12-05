@@ -143,6 +143,7 @@ export function isRequestItemDerivation(input: any): input is RequestItemDerivat
         input["@type"] === "ConsentRequestItem" ||
         input["@type"] === "AuthenticationRequestItem" ||
         input["@type"] === "FormFieldRequestItem" ||
-        input["@type"] === "TransferFileOwnershipRequestItem"
+        input["@type"] === "TransferFileOwnershipRequestItem" ||
+        input["@type"] === "ShareCredentialOfferRequestItem"
     );
 }
