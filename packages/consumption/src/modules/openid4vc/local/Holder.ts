@@ -206,6 +206,7 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
 
     public async createDefaultPresentation(credential: VerifiableCredential): Promise<string> {
         if (credential.type !== ClaimFormat.SdJwtDc) throw new Error("Creating a default presentation is only supported for dc+sd-jwt credentials.");
+        if (!credential.defaultPresentation) throw new Error("Default presentation not configured.");
 
         const sdJwtVcApi = this.agent.dependencyManager.resolve(SdJwtVcApi);
         const presentation = await sdJwtVcApi.present({
