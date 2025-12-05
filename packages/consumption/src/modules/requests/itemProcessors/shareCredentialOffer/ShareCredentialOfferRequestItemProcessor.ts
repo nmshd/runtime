@@ -28,7 +28,7 @@ export class ShareCredentialOfferRequestItemProcessor extends GenericRequestItem
         _requestInfo: LocalRequestInfo
     ): Promise<ValidationResult> {
         try {
-            await this.consumptionController.openId4Vc.requestCredentialsCached(requestItem.credentialOfferUrl);
+            await this.consumptionController.openId4Vc.requestAllCredentialsFromCredentialOfferUrl(requestItem.credentialOfferUrl);
             return ValidationResult.success();
         } catch (error) {
             return ValidationResult.error(
@@ -42,7 +42,7 @@ export class ShareCredentialOfferRequestItemProcessor extends GenericRequestItem
         _params: AcceptRequestItemParametersJSON,
         _requestInfo: LocalRequestInfo
     ): Promise<AcceptResponseItem> {
-        const cachedCredentials = await this.consumptionController.openId4Vc.requestCredentialsCached(requestItem.credentialOfferUrl);
+        const cachedCredentials = await this.consumptionController.openId4Vc.requestAllCredentialsFromCredentialOfferUrl(requestItem.credentialOfferUrl);
         await this.consumptionController.openId4Vc.storeCredentials(cachedCredentials);
 
         return AcceptResponseItem.from({ result: ResponseItemResult.Accepted });

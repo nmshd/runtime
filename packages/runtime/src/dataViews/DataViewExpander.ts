@@ -639,7 +639,7 @@ export class DataViewExpander {
 
                 const credentialResponses = await (async () => {
                     try {
-                        return await this.consumptionController.openId4Vc.requestCredentialsCached(shareCredentialOfferRequestItem.credentialOfferUrl);
+                        return await this.consumptionController.openId4Vc.requestAllCredentialsFromCredentialOfferUrl(shareCredentialOfferRequestItem.credentialOfferUrl);
                     } catch {
                         return;
                     }

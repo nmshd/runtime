@@ -35,7 +35,7 @@ export class OpenId4VcController extends ConsumptionBaseController {
         return this.parent.consumptionConfig.fetchInstance ?? fetch;
     }
 
-    public async requestCredentialsCached(credentialOfferUrl: string): Promise<OpenId4VciCredentialResponseJSON[]> {
+    public async requestAllCredentialsFromCredentialOfferUrl(credentialOfferUrl: string): Promise<OpenId4VciCredentialResponseJSON[]> {
         const cached = await this.requestedCredentialCache.get(credentialOfferUrl);
         if (cached) return cached;
 
