@@ -1,3 +1,4 @@
+import { OpenId4VciCredentialResponseJSON } from "@nmshd/consumption";
 import { FormFieldSettingsJSONDerivations } from "@nmshd/content";
 import { LocalAttributeDVO } from "../consumption";
 import { DataViewObject } from "../DataViewObject";
@@ -74,4 +75,10 @@ export interface TransferFileOwnershipRequestItemDVO extends RequestItemDVO {
     fileReference: string;
     file: FileDVO;
     ownershipToken: string;
+}
+
+export interface ShareCredentialOfferRequestItemDVO extends RequestItemDVO {
+    type: "ShareCredentialOfferRequestItemDVO";
+    credentialOfferUrl: string;
+    credentialResponses?: OpenId4VciCredentialResponseJSON[];
 }
