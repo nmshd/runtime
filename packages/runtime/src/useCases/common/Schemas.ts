@@ -1864,18 +1864,30 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "key": {
                     "type": "string"
                 },
-                "defaultDisclosures": {
+                "defaultPresentation": {
                     "type": "object",
-                    "additionalProperties": {
-                        "anyOf": [
-                            {
-                                "type": "boolean"
-                            },
-                            {
-                                "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                    "properties": {
+                        "presentationFrame": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "anyOf": [
+                                    {
+                                        "type": "boolean"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                                    }
+                                ]
                             }
-                        ]
-                    }
+                        },
+                        "keyBinding": {
+                            "type": "boolean"
+                        }
+                    },
+                    "required": [
+                        "presentationFrame"
+                    ],
+                    "additionalProperties": false
                 }
             },
             "required": [
@@ -3949,18 +3961,30 @@ export const CompleteOutgoingRequestRequest: any = {
                 "key": {
                     "type": "string"
                 },
-                "defaultDisclosures": {
+                "defaultPresentation": {
                     "type": "object",
-                    "additionalProperties": {
-                        "anyOf": [
-                            {
-                                "type": "boolean"
-                            },
-                            {
-                                "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                    "properties": {
+                        "presentationFrame": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "anyOf": [
+                                    {
+                                        "type": "boolean"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                                    }
+                                ]
                             }
-                        ]
-                    }
+                        },
+                        "keyBinding": {
+                            "type": "boolean"
+                        }
+                    },
+                    "required": [
+                        "presentationFrame"
+                    ],
+                    "additionalProperties": false
                 }
             },
             "required": [
@@ -6020,18 +6044,30 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                 "key": {
                     "type": "string"
                 },
-                "defaultDisclosures": {
+                "defaultPresentation": {
                     "type": "object",
-                    "additionalProperties": {
-                        "anyOf": [
-                            {
-                                "type": "boolean"
-                            },
-                            {
-                                "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                    "properties": {
+                        "presentationFrame": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "anyOf": [
+                                    {
+                                        "type": "boolean"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                                    }
+                                ]
                             }
-                        ]
-                    }
+                        },
+                        "keyBinding": {
+                            "type": "boolean"
+                        }
+                    },
+                    "required": [
+                        "presentationFrame"
+                    ],
+                    "additionalProperties": false
                 }
             },
             "required": [
@@ -8708,18 +8744,30 @@ export const CreateOutgoingRequestRequest: any = {
                 "key": {
                     "type": "string"
                 },
-                "defaultDisclosures": {
+                "defaultPresentation": {
                     "type": "object",
-                    "additionalProperties": {
-                        "anyOf": [
-                            {
-                                "type": "boolean"
-                            },
-                            {
-                                "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                    "properties": {
+                        "presentationFrame": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "anyOf": [
+                                    {
+                                        "type": "boolean"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                                    }
+                                ]
                             }
-                        ]
-                    }
+                        },
+                        "keyBinding": {
+                            "type": "boolean"
+                        }
+                    },
+                    "required": [
+                        "presentationFrame"
+                    ],
+                    "additionalProperties": false
                 }
             },
             "required": [
@@ -11799,18 +11847,30 @@ export const ReceivedIncomingRequestRequest: any = {
                 "key": {
                     "type": "string"
                 },
-                "defaultDisclosures": {
+                "defaultPresentation": {
                     "type": "object",
-                    "additionalProperties": {
-                        "anyOf": [
-                            {
-                                "type": "boolean"
-                            },
-                            {
-                                "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                    "properties": {
+                        "presentationFrame": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "anyOf": [
+                                    {
+                                        "type": "boolean"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                                    }
+                                ]
                             }
-                        ]
-                    }
+                        },
+                        "keyBinding": {
+                            "type": "boolean"
+                        }
+                    },
+                    "required": [
+                        "presentationFrame"
+                    ],
+                    "additionalProperties": false
                 }
             },
             "required": [
@@ -15885,18 +15945,30 @@ export const SucceedOwnIdentityAttributeRequest: any = {
                 "key": {
                     "type": "string"
                 },
-                "defaultDisclosures": {
+                "defaultPresentation": {
                     "type": "object",
-                    "additionalProperties": {
-                        "anyOf": [
-                            {
-                                "type": "boolean"
-                            },
-                            {
-                                "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                    "properties": {
+                        "presentationFrame": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "anyOf": [
+                                    {
+                                        "type": "boolean"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                                    }
+                                ]
                             }
-                        ]
-                    }
+                        },
+                        "keyBinding": {
+                            "type": "boolean"
+                        }
+                    },
+                    "required": [
+                        "presentationFrame"
+                    ],
+                    "additionalProperties": false
                 }
             },
             "required": [
@@ -21345,18 +21417,30 @@ export const VerifiableCredential: any = {
                 "key": {
                     "type": "string"
                 },
-                "defaultDisclosures": {
+                "defaultPresentation": {
                     "type": "object",
-                    "additionalProperties": {
-                        "anyOf": [
-                            {
-                                "type": "boolean"
-                            },
-                            {
-                                "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                    "properties": {
+                        "presentationFrame": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "anyOf": [
+                                    {
+                                        "type": "boolean"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                                    }
+                                ]
                             }
-                        ]
-                    }
+                        },
+                        "keyBinding": {
+                            "type": "boolean"
+                        }
+                    },
+                    "required": [
+                        "presentationFrame"
+                    ],
+                    "additionalProperties": false
                 }
             },
             "required": [

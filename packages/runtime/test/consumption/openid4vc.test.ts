@@ -11,7 +11,7 @@ const fetchInstance: typeof fetch = (async (input: any, init: any) => {
     return response;
 }) as unknown as typeof fetch;
 
-describe("custom openid4vc service", () => {
+describe.only("custom openid4vc service", () => {
     const runtimeServiceProvider = new RuntimeServiceProvider(fetchInstance);
     let consumptionServices: ConsumptionServices;
 
@@ -176,13 +176,35 @@ describe("custom openid4vc service", () => {
     test("one disclosure, no key binding", async () => {
         const attribute = (await consumptionServices.attributes.getAttribute({ id: attributeId })).value;
         const newAttribute = (
-            await consumptionServices.attributes.createOwnIdentityAttribute({
-                content: { value: { ...attribute.content.value, defaultDisclosures: { lob: true } } as VerifiableCredentialJSON }
+            await consumptionServices.attributes.succeedOwnIdentityAttribute({
+                // create attribute runs into an error
+                predecessorId: attributeId,
+                successorContent: { value: { ...attribute.content.value, defaultPresentation: { presentationFrame: { degree: true } } } as VerifiableCredentialJSON }
             })
-        ).value;
+        ).value.successor;
+        attributeId = newAttribute.id;
 
         const defaultPresentation = await consumptionServices.openId4Vc.createDefaultPresentation({ attributeId: newAttribute.id });
         expect(defaultPresentation).toBeSuccessful();
+        expect(defaultPresentation.value.presentation.split("~")).toHaveLength(2); // one disclosure
+    });
+
+    test("one disclosure, key binding", async () => {
+        const attribute = (await consumptionServices.attributes.getAttribute({ id: attributeId })).value;
+        const newAttribute = (
+            await consumptionServices.attributes.succeedOwnIdentityAttribute({
+                // create attribute runs into an error
+                predecessorId: attributeId,
+                successorContent: {
+                    value: { ...attribute.content.value, defaultPresentation: { keyBinding: true, presentationFrame: { degree: true } } } as VerifiableCredentialJSON
+                }
+            })
+        ).value.successor;
+        attributeId = newAttribute.id;
+
+        const defaultPresentation = await consumptionServices.openId4Vc.createDefaultPresentation({ attributeId: newAttribute.id });
+        expect(defaultPresentation).toBeSuccessful();
+        expect(defaultPresentation.value.presentation.split("~")).toHaveLength(2); // one disclosure
     });
 });
 
