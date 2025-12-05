@@ -8,13 +8,10 @@ class RequestedCredentialCacheEntry extends CoreSynchronizable {
 
     @serialize({ any: true })
     @validate()
-    public entry: OpenId4VciCredentialResponseJSON[];
+    public credentialResponses: OpenId4VciCredentialResponseJSON[];
 
-    public static create(credentialOfferUrl: string, entry: any): RequestedCredentialCacheEntry {
-        return this.fromAny<RequestedCredentialCacheEntry>({
-            id: CoreId.from(credentialOfferUrl),
-            entry: entry
-        });
+    public static create(credentialOfferUrl: string, credentialResponses: OpenId4VciCredentialResponseJSON[]): RequestedCredentialCacheEntry {
+        return this.fromAny<RequestedCredentialCacheEntry>({ id: CoreId.from(credentialOfferUrl), credentialResponses });
     }
 }
 
@@ -23,10 +20,10 @@ export class RequestedCredentialCache {
 
     public async get(credentialOfferUrl: string): Promise<OpenId4VciCredentialResponseJSON[] | undefined> {
         const doc = await this.collection.read(credentialOfferUrl);
-        return doc ? RequestedCredentialCacheEntry.fromAny(doc).entry : undefined;
+        return doc ? RequestedCredentialCacheEntry.fromAny(doc).credentialResponses : undefined;
     }
 
-    public async set(credentialOfferUrl: string, credentials: OpenId4VciCredentialResponseJSON[]): Promise<void> {
-        await this.collection.create(RequestedCredentialCacheEntry.create(credentialOfferUrl, credentials));
+    public async set(credentialOfferUrl: string, credentialResponses: OpenId4VciCredentialResponseJSON[]): Promise<void> {
+        await this.collection.create(RequestedCredentialCacheEntry.create(credentialOfferUrl, credentialResponses));
     }
 }

@@ -637,16 +637,13 @@ export class DataViewExpander {
             case "ShareCredentialOfferRequestItem":
                 const shareCredentialOfferRequestItem = requestItem as ShareCredentialOfferRequestItemJSON;
 
-                const requestSafe = async () => {
+                const credentialResponses = await (async () => {
                     try {
-                        const credentials = await this.consumptionController.openId4Vc.requestCredentialsCached(shareCredentialOfferRequestItem.credentialOfferUrl);
-                        return credentials;
+                        return await this.consumptionController.openId4Vc.requestCredentialsCached(shareCredentialOfferRequestItem.credentialOfferUrl);
                     } catch {
                         return;
                     }
-                };
-
-                const credentialResponses = await requestSafe();
+                })();
 
                 return {
                     ...shareCredentialOfferRequestItem,

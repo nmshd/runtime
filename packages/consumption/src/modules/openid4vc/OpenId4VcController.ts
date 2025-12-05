@@ -40,12 +40,12 @@ export class OpenId4VcController extends ConsumptionBaseController {
         if (cached) return cached;
 
         const offer = await this.resolveCredentialOffer(credentialOfferUrl);
-        const credentials = await this.requestCredentials(offer, offer.credentialOfferPayload.credential_configuration_ids);
+        const credentialResponses = await this.requestCredentials(offer, offer.credentialOfferPayload.credential_configuration_ids);
 
-        await this.credentialRequestCache.set(credentialOfferUrl, credentials);
+        await this.credentialRequestCache.set(credentialOfferUrl, credentialResponses);
         await this.parent.accountController.syncDatawallet();
 
-        return credentials;
+        return credentialResponses;
     }
 
     public async resolveCredentialOffer(credentialOfferUrl: string): Promise<OpenId4VciResolvedCredentialOffer> {
