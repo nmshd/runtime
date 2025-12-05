@@ -13,8 +13,6 @@ export interface IShareCredentialOfferRequestItem extends IRequestItem {
 
 @type("ShareCredentialOfferRequestItem")
 export class ShareCredentialOfferRequestItem extends RequestItem implements IShareCredentialOfferRequestItem {
-    // TODO: validate URL format?
-
     @serialize()
     @validate()
     public credentialOfferUrl: string;
