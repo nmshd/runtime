@@ -11,7 +11,7 @@ const fetchInstance: typeof fetch = (async (input: any, init: any) => {
     return response;
 }) as unknown as typeof fetch;
 
-describe.only("custom openid4vc service", () => {
+describe("custom openid4vc service", () => {
     const runtimeServiceProvider = new RuntimeServiceProvider(fetchInstance);
     let consumptionServices: ConsumptionServices;
 
@@ -186,7 +186,11 @@ describe.only("custom openid4vc service", () => {
 
         const defaultPresentation = await consumptionServices.openId4Vc.createDefaultPresentation({ attributeId: newAttribute.id });
         expect(defaultPresentation).toBeSuccessful();
-        expect(defaultPresentation.value.presentation.split("~")).toHaveLength(2); // one disclosure
+        const presentationParts = defaultPresentation.value.presentation.split("~");
+
+        // one disclosure
+        expect(presentationParts).toHaveLength(3);
+        expect(presentationParts.at(-1)).toBe("");
     });
 
     test("one disclosure, key binding", async () => {
@@ -204,7 +208,11 @@ describe.only("custom openid4vc service", () => {
 
         const defaultPresentation = await consumptionServices.openId4Vc.createDefaultPresentation({ attributeId: newAttribute.id });
         expect(defaultPresentation).toBeSuccessful();
-        expect(defaultPresentation.value.presentation.split("~")).toHaveLength(2); // one disclosure
+        const presentationParts = defaultPresentation.value.presentation.split("~");
+
+        // one disclosure, one key binding jwt
+        expect(presentationParts).toHaveLength(3);
+        expect(presentationParts.at(-1)).toMatch(/^ey/);
     });
 });
 
