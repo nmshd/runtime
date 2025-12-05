@@ -107,9 +107,12 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
 
                 const enmeshedStorageService = this.agent.dependencyManager.resolve<EnmeshedStorageService<BaseRecord>>(InjectionSymbols.StorageService);
 
-                const displayInfo = credentialResponse.displayInformation;
-
-                return enmeshedStorageService.saveWithDisplay(this.agent.context, credentialResponse.encoded, credentialResponse.claimFormat, displayInfo);
+                return enmeshedStorageService.saveWithDisplay(
+                    this.agent.context,
+                    credentialResponse.encoded,
+                    credentialResponse.claimFormat,
+                    credentialResponse.displayInformation
+                );
             })
         );
 
