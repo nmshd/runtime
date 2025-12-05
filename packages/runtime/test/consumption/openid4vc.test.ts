@@ -171,9 +171,9 @@ describe("custom openid4vc service", () => {
         });
 
         test("default presentation with one disclosure, no key binding", async () => {
-            const attribute = (await consumptionServices.attributes.getAttribute({ id: attributeId })).value;
+            const attribute = (await runtimeServices1.consumption.attributes.getAttribute({ id: attributeId })).value;
             const newAttribute = (
-                await consumptionServices.attributes.succeedOwnIdentityAttribute({
+                await runtimeServices1.consumption.attributes.succeedOwnIdentityAttribute({
                     // create attribute runs into an error
                     predecessorId: attributeId,
                     successorContent: { value: { ...attribute.content.value, defaultPresentation: { presentationFrame: { degree: true } } } as VerifiableCredentialJSON }
@@ -181,7 +181,7 @@ describe("custom openid4vc service", () => {
             ).value.successor;
             attributeId = newAttribute.id;
 
-            const defaultPresentation = await consumptionServices.openId4Vc.createDefaultPresentation({ attributeId: newAttribute.id });
+            const defaultPresentation = await runtimeServices1.consumption.openId4Vc.createDefaultPresentation({ attributeId: newAttribute.id });
             expect(defaultPresentation).toBeSuccessful();
             const presentationParts = defaultPresentation.value.presentation.split("~");
 
@@ -191,9 +191,9 @@ describe("custom openid4vc service", () => {
         });
 
         test("default presentation with one disclosure and key binding", async () => {
-            const attribute = (await consumptionServices.attributes.getAttribute({ id: attributeId })).value;
+            const attribute = (await runtimeServices1.consumption.attributes.getAttribute({ id: attributeId })).value;
             const newAttribute = (
-                await consumptionServices.attributes.succeedOwnIdentityAttribute({
+                await runtimeServices1.consumption.attributes.succeedOwnIdentityAttribute({
                     // create attribute runs into an error
                     predecessorId: attributeId,
                     successorContent: {
@@ -203,7 +203,7 @@ describe("custom openid4vc service", () => {
             ).value.successor;
             attributeId = newAttribute.id;
 
-            const defaultPresentation = await consumptionServices.openId4Vc.createDefaultPresentation({ attributeId: newAttribute.id });
+            const defaultPresentation = await runtimeServices1.consumption.openId4Vc.createDefaultPresentation({ attributeId: newAttribute.id });
             expect(defaultPresentation).toBeSuccessful();
             const presentationParts = defaultPresentation.value.presentation.split("~");
 
