@@ -135,7 +135,7 @@ describe("custom openid4vc service", () => {
             const responseData = await response.data;
 
             const result = await consumptionServices.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl: responseData.result.presentationRequest });
-            expect(result.value.usedCredentials).toHaveLength(1);
+            expect(result.value.matchingCredentials).toHaveLength(1);
 
             const request = result.value.authorizationRequest;
             expect(request.presentationExchange!.credentialsForRequest.areRequirementsSatisfied).toBe(true);
@@ -235,7 +235,7 @@ describe("custom openid4vc service", () => {
             const responseData = await response.data;
 
             const result = await consumptionServices.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl: responseData.result.presentationRequest });
-            expect(result.value.usedCredentials).toHaveLength(1);
+            expect(result.value.matchingCredentials).toHaveLength(1);
 
             const request = result.value.authorizationRequest;
             expect(request.presentationExchange!.credentialsForRequest.areRequirementsSatisfied).toBe(true);
