@@ -35,8 +35,8 @@ export class OpenId4VcController extends ConsumptionBaseController {
     }
 
     public async requestAllCredentialsFromCredentialOfferUrl(credentialOfferUrl: string): Promise<OpenId4VciCredentialResponseJSON[]> {
-        const cached = await this.requestedCredentialCache.get(credentialOfferUrl);
-        if (cached) return cached;
+        const cachedCredentialResponses = await this.requestedCredentialCache.get(credentialOfferUrl);
+        if (cachedCredentialResponses) return cachedCredentialResponses;
 
         const offer = await this.resolveCredentialOffer(credentialOfferUrl);
         const credentialResponses = await this.requestCredentials(offer, offer.credentialOfferPayload.credential_configuration_ids);

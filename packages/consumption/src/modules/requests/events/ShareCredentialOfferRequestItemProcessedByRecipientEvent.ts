@@ -8,7 +8,7 @@ export interface ShareCredentialOfferRequestItemProcessedByRecipientEventData {
 }
 
 export class ShareCredentialOfferRequestItemProcessedByRecipientEvent extends TransportDataEvent<ShareCredentialOfferRequestItemProcessedByRecipientEventData> {
-    public static readonly namespace = "consumption.shareCredentialOfferRequestItemProcessedByRecipientEvent";
+    public static readonly namespace = "consumption.shareCredentialOfferRequestItemProcessedByRecipient";
 
     public constructor(eventTargetAddress: string, data: ShareCredentialOfferRequestItemProcessedByRecipientEventData) {
         super(ShareCredentialOfferRequestItemProcessedByRecipientEvent.namespace, eventTargetAddress, data);
