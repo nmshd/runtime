@@ -1863,6 +1863,31 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "items": {
                         "type": "object"
                     }
+                },
+                "defaultPresentation": {
+                    "type": "object",
+                    "properties": {
+                        "presentationFrame": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "anyOf": [
+                                    {
+                                        "type": "boolean"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                                    }
+                                ]
+                            }
+                        },
+                        "keyBinding": {
+                            "type": "boolean"
+                        }
+                    },
+                    "required": [
+                        "presentationFrame"
+                    ],
+                    "additionalProperties": false
                 }
             },
             "required": [
@@ -1871,6 +1896,19 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "value"
             ],
             "additionalProperties": false
+        },
+        "interface-1894649334-822-900-1894649334-0-4702": {
+            "type": "object",
+            "additionalProperties": {
+                "anyOf": [
+                    {
+                        "type": "boolean"
+                    },
+                    {
+                        "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                    }
+                ]
+            }
         },
         "WebsiteJSON": {
             "type": "object",
@@ -3955,6 +3993,31 @@ export const CompleteOutgoingRequestRequest: any = {
                     "items": {
                         "type": "object"
                     }
+                },
+                "defaultPresentation": {
+                    "type": "object",
+                    "properties": {
+                        "presentationFrame": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "anyOf": [
+                                    {
+                                        "type": "boolean"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                                    }
+                                ]
+                            }
+                        },
+                        "keyBinding": {
+                            "type": "boolean"
+                        }
+                    },
+                    "required": [
+                        "presentationFrame"
+                    ],
+                    "additionalProperties": false
                 }
             },
             "required": [
@@ -3963,6 +4026,19 @@ export const CompleteOutgoingRequestRequest: any = {
                 "value"
             ],
             "additionalProperties": false
+        },
+        "interface-1894649334-822-900-1894649334-0-4702": {
+            "type": "object",
+            "additionalProperties": {
+                "anyOf": [
+                    {
+                        "type": "boolean"
+                    },
+                    {
+                        "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                    }
+                ]
+            }
         },
         "WebsiteJSON": {
             "type": "object",
@@ -5997,6 +6073,31 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "items": {
                         "type": "object"
                     }
+                },
+                "defaultPresentation": {
+                    "type": "object",
+                    "properties": {
+                        "presentationFrame": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "anyOf": [
+                                    {
+                                        "type": "boolean"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                                    }
+                                ]
+                            }
+                        },
+                        "keyBinding": {
+                            "type": "boolean"
+                        }
+                    },
+                    "required": [
+                        "presentationFrame"
+                    ],
+                    "additionalProperties": false
                 }
             },
             "required": [
@@ -6005,6 +6106,19 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                 "value"
             ],
             "additionalProperties": false
+        },
+        "interface-1894649334-822-900-1894649334-0-4702": {
+            "type": "object",
+            "additionalProperties": {
+                "anyOf": [
+                    {
+                        "type": "boolean"
+                    },
+                    {
+                        "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                    }
+                ]
+            }
         },
         "WebsiteJSON": {
             "type": "object",
@@ -8659,6 +8773,31 @@ export const CreateOutgoingRequestRequest: any = {
                     "items": {
                         "type": "object"
                     }
+                },
+                "defaultPresentation": {
+                    "type": "object",
+                    "properties": {
+                        "presentationFrame": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "anyOf": [
+                                    {
+                                        "type": "boolean"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                                    }
+                                ]
+                            }
+                        },
+                        "keyBinding": {
+                            "type": "boolean"
+                        }
+                    },
+                    "required": [
+                        "presentationFrame"
+                    ],
+                    "additionalProperties": false
                 }
             },
             "required": [
@@ -8667,6 +8806,19 @@ export const CreateOutgoingRequestRequest: any = {
                 "value"
             ],
             "additionalProperties": false
+        },
+        "interface-1894649334-822-900-1894649334-0-4702": {
+            "type": "object",
+            "additionalProperties": {
+                "anyOf": [
+                    {
+                        "type": "boolean"
+                    },
+                    {
+                        "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                    }
+                ]
+            }
         },
         "WebsiteJSON": {
             "type": "object",
@@ -11760,6 +11912,31 @@ export const ReceivedIncomingRequestRequest: any = {
                     "items": {
                         "type": "object"
                     }
+                },
+                "defaultPresentation": {
+                    "type": "object",
+                    "properties": {
+                        "presentationFrame": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "anyOf": [
+                                    {
+                                        "type": "boolean"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                                    }
+                                ]
+                            }
+                        },
+                        "keyBinding": {
+                            "type": "boolean"
+                        }
+                    },
+                    "required": [
+                        "presentationFrame"
+                    ],
+                    "additionalProperties": false
                 }
             },
             "required": [
@@ -11768,6 +11945,19 @@ export const ReceivedIncomingRequestRequest: any = {
                 "value"
             ],
             "additionalProperties": false
+        },
+        "interface-1894649334-822-900-1894649334-0-4702": {
+            "type": "object",
+            "additionalProperties": {
+                "anyOf": [
+                    {
+                        "type": "boolean"
+                    },
+                    {
+                        "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                    }
+                ]
+            }
         },
         "WebsiteJSON": {
             "type": "object",
@@ -15853,6 +16043,31 @@ export const SucceedOwnIdentityAttributeRequest: any = {
                     "items": {
                         "type": "object"
                     }
+                },
+                "defaultPresentation": {
+                    "type": "object",
+                    "properties": {
+                        "presentationFrame": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "anyOf": [
+                                    {
+                                        "type": "boolean"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                                    }
+                                ]
+                            }
+                        },
+                        "keyBinding": {
+                            "type": "boolean"
+                        }
+                    },
+                    "required": [
+                        "presentationFrame"
+                    ],
+                    "additionalProperties": false
                 }
             },
             "required": [
@@ -15861,6 +16076,19 @@ export const SucceedOwnIdentityAttributeRequest: any = {
                 "value"
             ],
             "additionalProperties": false
+        },
+        "interface-1894649334-822-900-1894649334-0-4702": {
+            "type": "object",
+            "additionalProperties": {
+                "anyOf": [
+                    {
+                        "type": "boolean"
+                    },
+                    {
+                        "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                    }
+                ]
+            }
         },
         "WebsiteJSON": {
             "type": "object",
@@ -17053,6 +17281,25 @@ export const AcceptAuthorizationRequestRequest: any = {
             "required": [
                 "authorizationRequest"
             ]
+        }
+    }
+}
+
+export const CreateDefaultPresentationRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/CreateDefaultPresentationRequest",
+    "definitions": {
+        "CreateDefaultPresentationRequest": {
+            "type": "object",
+            "properties": {
+                "attributeId": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "attributeId"
+            ],
+            "additionalProperties": false
         }
     }
 }
@@ -21265,6 +21512,31 @@ export const VerifiableCredential: any = {
                     "items": {
                         "type": "object"
                     }
+                },
+                "defaultPresentation": {
+                    "type": "object",
+                    "properties": {
+                        "presentationFrame": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "anyOf": [
+                                    {
+                                        "type": "boolean"
+                                    },
+                                    {
+                                        "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                                    }
+                                ]
+                            }
+                        },
+                        "keyBinding": {
+                            "type": "boolean"
+                        }
+                    },
+                    "required": [
+                        "presentationFrame"
+                    ],
+                    "additionalProperties": false
                 }
             },
             "required": [
@@ -21273,6 +21545,19 @@ export const VerifiableCredential: any = {
                 "value"
             ],
             "additionalProperties": false
+        },
+        "interface-1894649334-822-900-1894649334-0-4702": {
+            "type": "object",
+            "additionalProperties": {
+                "anyOf": [
+                    {
+                        "type": "boolean"
+                    },
+                    {
+                        "$ref": "#/definitions/interface-1894649334-822-900-1894649334-0-4702"
+                    }
+                ]
+            }
         }
     }
 }
