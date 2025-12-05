@@ -1,4 +1,3 @@
-import { ClaimFormat } from "@credo-ts/core";
 import { OpenId4VciResolvedCredentialOffer, OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
 import { VerifiableCredential } from "@nmshd/content";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
@@ -75,19 +74,19 @@ export class OpenId4VcController extends ConsumptionBaseController {
 
     public async resolveAuthorizationRequest(authorizationRequestUrl: string): Promise<{
         authorizationRequest: OpenId4VpResolvedAuthorizationRequest;
-        usedCredentials: OwnIdentityAttribute[];
+        matchingCredentials: OwnIdentityAttribute[];
     }> {
         const authorizationRequest = await this.holder.resolveAuthorizationRequest(authorizationRequestUrl);
 
-        const usedCredentials = await this.extractUsedCredentialsFromAuthorizationRequest(authorizationRequest);
+        const matchingCredentials = await this.extractMatchingCredentialsFromAuthorizationRequest(authorizationRequest);
 
         return {
             authorizationRequest,
-            usedCredentials
+            matchingCredentials
         };
     }
 
-    private async extractUsedCredentialsFromAuthorizationRequest(authorizationRequest: OpenId4VpResolvedAuthorizationRequest): Promise<OwnIdentityAttribute[]> {
+    private async extractMatchingCredentialsFromAuthorizationRequest(authorizationRequest: OpenId4VpResolvedAuthorizationRequest): Promise<OwnIdentityAttribute[]> {
         const dcqlSatisfied = authorizationRequest.dcql?.queryResult.can_be_satisfied ?? false;
         const authorizationRequestSatisfied = authorizationRequest.presentationExchange?.credentialsForRequest.areRequirementsSatisfied ?? false;
         if (!dcqlSatisfied && !authorizationRequestSatisfied) {
@@ -99,11 +98,7 @@ export class OpenId4VcController extends ConsumptionBaseController {
         if (!authorizationRequestSatisfied) return [];
 
         const matchedCredentialsFromPresentationExchange = authorizationRequest.presentationExchange?.credentialsForRequest.requirements
-            .map((entry) =>
-                entry.submissionEntry
-                    .map((subEntry) => subEntry.verifiableCredentials.filter((vc) => vc.claimFormat === ClaimFormat.SdJwtDc).map((vc) => vc.credentialRecord.encoded))
-                    .flat()
-            )
+            .map((entry) => entry.submissionEntry.map((subEntry) => subEntry.verifiableCredentials.map((vc) => vc.credentialRecord.encoded)).flat())
             .flat();
 
         const allCredentials = (await this.parent.attributes.getLocalAttributes({
@@ -111,10 +106,10 @@ export class OpenId4VcController extends ConsumptionBaseController {
             "content.value.@type": "VerifiableCredential"
         })) as OwnIdentityAttribute[];
 
-        const usedCredentials = allCredentials.filter((credential) =>
+        const matchingCredentials = allCredentials.filter((credential) =>
             matchedCredentialsFromPresentationExchange?.includes((credential.content.value as VerifiableCredential).value as string)
         ); // in current demo scenarios this is a string
-        return usedCredentials;
+        return matchingCredentials;
     }
 
     public async acceptAuthorizationRequest(

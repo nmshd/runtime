@@ -2,7 +2,7 @@ name: runtime-oid4vc-tests
 
 services:
   oid4vc-service:
-    image: ghcr.io/js-soft/openid4vc-service:1.1.14@sha256:d8601d031769f2ce850bcfcea32da839c0d444ed90ad6d345d85d9d864f1620a
+    image: ghcr.io/js-soft/openid4vc-service:1.2.0-alpha.12@sha256:57064c1deee358b44a107de9633fc98c3f9511f96eac9d9bbd22cb53f3fb529c
     ports:
       - "9000:9000"
     platform: linux/amd64
@@ -18,7 +18,7 @@ services:
       - default
 
   connector:
-    image: ghcr.io/nmshd/connector:7.1.0-openid4vc.2@sha256:b8458560fa85b190485aa544d9db34ab7d0b6b7b88129eda487b723e201734f8
+    image: ghcr.io/nmshd/connector:7.3.0-openid4vc.1@sha256:4be31417d10d67454d7732949601a2136417fefc78107e3751eccea7946a7aca
     environment:
       CUSTOM_CONFIG_LOCATION: "/config.json"
       transportLibrary__baseUrl: "http://consumer-api:8080"
