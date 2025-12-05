@@ -5,6 +5,9 @@ import {
     AcceptAuthorizationRequestRequest,
     AcceptAuthorizationRequestResponse,
     AcceptAuthorizationRequestUseCase,
+    CreateDefaultPresentationRequest,
+    CreateDefaultPresentationResponse,
+    CreateDefaultPresentationUseCase,
     RequestCredentialsRequest,
     RequestCredentialsResponse,
     RequestCredentialsUseCase,
@@ -17,11 +20,6 @@ import {
     StoreCredentialsRequest,
     StoreCredentialsUseCase
 } from "../../../useCases";
-import {
-    CreateDefaultPresentationRequest,
-    CreateDefaultPresentationResponse,
-    CreateDefaultPresentationUseCase
-} from "../../../useCases/consumption/openid4vc/CreateDefaultPresentation";
 
 export class OpenId4VcFacade {
     public constructor(
