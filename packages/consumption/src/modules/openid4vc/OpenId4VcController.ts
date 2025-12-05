@@ -12,7 +12,7 @@ import { RequestedCredentialCache } from "./local/RequestedCredentialCache";
 
 export class OpenId4VcController extends ConsumptionBaseController {
     private holder: Holder;
-    private credentialRequestCache: RequestedCredentialCache;
+    private requestedCredentialCache: RequestedCredentialCache;
 
     public constructor(parent: ConsumptionController) {
         super(ConsumptionControllerName.OpenId4VcController, parent);
@@ -26,7 +26,7 @@ export class OpenId4VcController extends ConsumptionBaseController {
         await this.holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
 
         const requestedCredentialsCacheCollection = await this.parent.accountController.getSynchronizedCollection("openid4vc-requested-credentials-cache");
-        this.credentialRequestCache = new RequestedCredentialCache(requestedCredentialsCacheCollection);
+        this.requestedCredentialCache = new RequestedCredentialCache(requestedCredentialsCacheCollection);
 
         return this;
     }
@@ -36,13 +36,13 @@ export class OpenId4VcController extends ConsumptionBaseController {
     }
 
     public async requestCredentialsCached(credentialOfferUrl: string): Promise<OpenId4VciCredentialResponseJSON[]> {
-        const cached = await this.credentialRequestCache.get(credentialOfferUrl);
+        const cached = await this.requestedCredentialCache.get(credentialOfferUrl);
         if (cached) return cached;
 
         const offer = await this.resolveCredentialOffer(credentialOfferUrl);
         const credentialResponses = await this.requestCredentials(offer, offer.credentialOfferPayload.credential_configuration_ids);
 
-        await this.credentialRequestCache.set(credentialOfferUrl, credentialResponses);
+        await this.requestedCredentialCache.set(credentialOfferUrl, credentialResponses);
         await this.parent.accountController.syncDatawallet();
 
         return credentialResponses;
@@ -60,12 +60,9 @@ export class OpenId4VcController extends ConsumptionBaseController {
         const credentialResponses = await this.holder.requestCredentials(credentialOffer, { credentialConfigurationIds: credentialConfigurationIds, txCode: pinCode });
 
         return credentialResponses.map((response) => ({
-            ...response,
-            record: {
-                // TODO: batch issuance not yet supported
-                claimFormat: response.record.firstCredential.claimFormat,
-                encoded: response.record.firstCredential.encoded
-            }
+            claimFormat: response.record.firstCredential.claimFormat,
+            encoded: response.record.firstCredential.encoded,
+            displayInformation: response.credentialConfiguration.display as Record<string, any>[] | undefined
         }));
     }
 
