@@ -84,7 +84,8 @@ describe("custom openid4vc service", () => {
             });
             const storeResult = await runtimeServices1.consumption.openId4Vc.storeCredentials({ credentialResponses: credentialResponseResult.value.credentialResponses });
             expect(storeResult).toBeSuccessful();
-            expect(typeof storeResult.value.id).toBe("string");
+            attributeId = storeResult.value.id;
+            expect(typeof attributeId).toBe("string");
 
             const credential = storeResult.value.content.value as unknown as VerifiableCredential;
             expect(credential.displayInformation?.[0].logo).toBeDefined();
