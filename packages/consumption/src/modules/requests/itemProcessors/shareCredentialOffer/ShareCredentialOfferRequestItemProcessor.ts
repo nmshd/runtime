@@ -30,9 +30,9 @@ export class ShareCredentialOfferRequestItemProcessor extends GenericRequestItem
         try {
             await this.consumptionController.openId4Vc.requestCredentialsCached(requestItem.credentialOfferUrl);
             return ValidationResult.success();
-        } catch (_) {
+        } catch (error) {
             return ValidationResult.error(
-                ConsumptionCoreErrors.requests.invalidRequestItem(`The credential offer at URL '${requestItem.credentialOfferUrl}' could not be processed.`)
+                ConsumptionCoreErrors.requests.invalidRequestItem(`The credential offer at URL '${requestItem.credentialOfferUrl}' could not be processed. Cause: ${error}`)
             );
         }
     }
