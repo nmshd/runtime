@@ -1,4 +1,4 @@
-import { AbstractStringJSON, BiologicalSex } from "@nmshd/content";
+import { AbstractStringJSON, BiologicalSex, MaritalStatusValue } from "@nmshd/content";
 import { CreateOwnIdentityAttributeRequest, OwnIdentityAttributeDVO } from "../../src";
 import { ensureActiveRelationship, executeFullCreateAndShareOwnIdentityAttributeFlow, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
@@ -47,6 +47,14 @@ describe("OwnIdentityAttributeDVO", () => {
                     value: {
                         "@type": "Nationality",
                         value: "DE"
+                    }
+                }
+            },
+            {
+                content: {
+                    value: {
+                        "@type": "MaritalStatus",
+                        value: MaritalStatusValue.Married
                     }
                 }
             },
@@ -177,8 +185,45 @@ describe("OwnIdentityAttributeDVO", () => {
         expect(dvo.valueHints.values![61]).toStrictEqual({ key: "DE", displayName: "i18n://attributes.values.countries.DE" });
     });
 
+    test("check the MaritalStatus", async () => {
+        const attribute = (await services1.consumption.attributes.createOwnIdentityAttribute(requests[4])).value;
+        const dvo = (await services1.expander.expandLocalAttributeDTO(attribute)) as OwnIdentityAttributeDVO;
+        expect(dvo).toBeDefined();
+        expect(dvo.type).toBe("OwnIdentityAttributeDVO");
+        expect(dvo.id).toStrictEqual(attribute.id);
+        expect(dvo.name).toBe("i18n://dvo.attribute.name.MaritalStatus");
+        expect(dvo.description).toBe("i18n://dvo.attribute.description.MaritalStatus");
+        expect(dvo.date).toStrictEqual(attribute.createdAt);
+        expect(dvo.wasViewedAt).toBeUndefined();
+        expect(dvo.content).toStrictEqual(attribute.content);
+        const value = dvo.value as AbstractStringJSON;
+        expect(value["@type"]).toBe("MaritalStatus");
+        expect(value.value).toBe("married");
+        expect(dvo.createdAt).toStrictEqual(attribute.createdAt);
+        expect(dvo.isOwn).toBe(true);
+        expect(dvo.isDefault).toBe(attribute.isDefault);
+        expect(dvo.forwardingPeers).toStrictEqual([]);
+        expect(dvo.forwardingDetails).toStrictEqual([]);
+        expect(dvo.owner).toStrictEqual(attribute.content.owner);
+        expect(dvo.renderHints["@type"]).toBe("RenderHints");
+        expect(dvo.renderHints.technicalType).toBe("String");
+        expect(dvo.renderHints.editType).toBe("ButtonLike");
+        expect(dvo.valueHints["@type"]).toBe("ValueHints");
+
+        expect(dvo.valueHints.values).toStrictEqual([
+            { key: "single", displayName: "i18n://attributes.values.maritalStatus.single" },
+            { key: "married", displayName: "i18n://attributes.values.maritalStatus.married" },
+            { key: "separated", displayName: "i18n://attributes.values.maritalStatus.separated" },
+            { key: "divorced", displayName: "i18n://attributes.values.maritalStatus.divorced" },
+            { key: "widowed", displayName: "i18n://attributes.values.maritalStatus.widowed" },
+            { key: "civilPartnership", displayName: "i18n://attributes.values.maritalStatus.civilPartnership" },
+            { key: "civilPartnershipDissolved", displayName: "i18n://attributes.values.maritalStatus.civilPartnershipDissolved" },
+            { key: "civilPartnerDeceased", displayName: "i18n://attributes.values.maritalStatus.civilPartnerDeceased" }
+        ]);
+    });
+
     test("check the CommunicationLanguage for forwarded OwnIdentityAttribute", async () => {
-        const attribute = await executeFullCreateAndShareOwnIdentityAttributeFlow(services1, services2, requests[4]);
+        const attribute = await executeFullCreateAndShareOwnIdentityAttributeFlow(services1, services2, requests[5]);
 
         const forwardingDetails = (await services1.consumption.attributes.getForwardingDetailsForAttribute({ attributeId: attribute.id })).value;
 
