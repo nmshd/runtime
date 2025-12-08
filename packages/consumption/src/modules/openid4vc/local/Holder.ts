@@ -211,8 +211,8 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         const sdJwtVcApi = this.agent.dependencyManager.resolve(SdJwtVcApi);
         const presentation = await sdJwtVcApi.present({
             sdJwtVc: sdJwtVcApi.fromCompact(credential.value as string),
-            presentationFrame: credential.defaultPresentation?.presentationFrame,
-            verifierMetadata: credential.defaultPresentation?.keyBinding
+            presentationFrame: credential.defaultPresentation.presentationFrame,
+            verifierMetadata: credential.defaultPresentation.keyBinding
                 ? {
                       audience: "defaultPresentationAudience",
                       issuedAt: Date.now() / 1000,
