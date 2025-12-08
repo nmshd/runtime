@@ -2,7 +2,7 @@ name: runtime-oid4vc-tests
 
 services:
   oid4vc-service:
-    image: ghcr.io/js-soft/openid4vc-service:1.2.0-alpha.12@sha256:57064c1deee358b44a107de9633fc98c3f9511f96eac9d9bbd22cb53f3fb529c
+    image: ghcr.io/js-soft/openid4vc-service:1.2.0@sha256:653358212651a992d211a187a0d405f56ae50b05d6c95bbdc37e1647fd8e6c33
     ports:
       - "9000:9000"
     platform: linux/amd64
