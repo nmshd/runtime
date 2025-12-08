@@ -199,7 +199,10 @@ describe("PeerIdentityAttributeDVO", () => {
             { key: "married", displayName: "i18n://attributes.values.maritalStatus.married" },
             { key: "separated", displayName: "i18n://attributes.values.maritalStatus.separated" },
             { key: "divorced", displayName: "i18n://attributes.values.maritalStatus.divorced" },
-            { key: "widowed", displayName: "i18n://attributes.values.maritalStatus.widowed" }
+            { key: "widowed", displayName: "i18n://attributes.values.maritalStatus.widowed" },
+            { key: "civilPartnership", displayName: "i18n://attributes.values.maritalStatus.civilPartnership" },
+            { key: "civilPartnershipDissolved", displayName: "i18n://attributes.values.maritalStatus.civilPartnershipDissolved" },
+            { key: "civilPartnerDeceased", displayName: "i18n://attributes.values.maritalStatus.civilPartnerDeceased" }
         ]);
         expect(dvo.succeeds).toBe(rPeerIdentityAttribute.succeeds);
         expect(dvo.succeededBy).toBe(rPeerIdentityAttribute.succeededBy);

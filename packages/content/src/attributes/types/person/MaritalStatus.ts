@@ -7,7 +7,10 @@ export enum MaritalStatusValue {
     Married = "married",
     Separated = "separated",
     Divorced = "divorced",
-    Widowed = "widowed"
+    Widowed = "widowed",
+    CivilPartnership = "civilPartnership",
+    CivilPartnershipDissolved = "civilPartnershipDissolved",
+    CivilPartnerDeceased = "civilPartnerDeceased"
 }
 
 export interface MaritalStatusJSON extends AbstractStringJSON {

@@ -186,7 +186,7 @@ describe("OwnIdentityAttributeDVO", () => {
     });
 
     test("check the MaritalStatus", async () => {
-        const attribute = (await services1.consumption.attributes.createOwnIdentityAttribute(requests[2])).value;
+        const attribute = (await services1.consumption.attributes.createOwnIdentityAttribute(requests[4])).value;
         const dvo = (await services1.expander.expandLocalAttributeDTO(attribute)) as OwnIdentityAttributeDVO;
         expect(dvo).toBeDefined();
         expect(dvo.type).toBe("OwnIdentityAttributeDVO");
@@ -215,12 +215,15 @@ describe("OwnIdentityAttributeDVO", () => {
             { key: "married", displayName: "i18n://attributes.values.maritalStatus.married" },
             { key: "separated", displayName: "i18n://attributes.values.maritalStatus.separated" },
             { key: "divorced", displayName: "i18n://attributes.values.maritalStatus.divorced" },
-            { key: "widowed", displayName: "i18n://attributes.values.maritalStatus.widowed" }
+            { key: "widowed", displayName: "i18n://attributes.values.maritalStatus.widowed" },
+            { key: "civilPartnership", displayName: "i18n://attributes.values.maritalStatus.civilPartnership" },
+            { key: "civilPartnershipDissolved", displayName: "i18n://attributes.values.maritalStatus.civilPartnershipDissolved" },
+            { key: "civilPartnerDeceased", displayName: "i18n://attributes.values.maritalStatus.civilPartnerDeceased" }
         ]);
     });
 
     test("check the CommunicationLanguage for forwarded OwnIdentityAttribute", async () => {
-        const attribute = await executeFullCreateAndShareOwnIdentityAttributeFlow(services1, services2, requests[4]);
+        const attribute = await executeFullCreateAndShareOwnIdentityAttributeFlow(services1, services2, requests[5]);
 
         const forwardingDetails = (await services1.consumption.attributes.getForwardingDetailsForAttribute({ attributeId: attribute.id })).value;
 
