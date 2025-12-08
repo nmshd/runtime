@@ -1,4 +1,4 @@
-import { AbstractStringJSON, CommunicationLanguage, GivenName, IdentityAttribute, Nationality, Sex, StreetAddress } from "@nmshd/content";
+import { AbstractStringJSON, CommunicationLanguage, GivenName, IdentityAttribute, MaritalStatus, Nationality, Sex, StreetAddress } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { DataViewExpander, TransportServices } from "../../src";
 import { RuntimeServiceProvider } from "../lib";
@@ -134,6 +134,38 @@ describe("DraftIdentityAttributeDVO", () => {
         expect(dvo.valueHints.max).toBe(2);
         expect(dvo.valueHints.values).toHaveLength(183);
         expect(dvo.valueHints.values![31]).toStrictEqual({ key: "de", displayName: "i18n://attributes.values.languages.de" });
+    });
+
+    test("check the MaritalStatus", async () => {
+        const attribute = IdentityAttribute.from<MaritalStatus>({
+            owner: transportService1Address,
+            value: MaritalStatus.from("married")
+        }).toJSON();
+        const dvo = await expander1.expandAttribute(attribute);
+        expect(dvo).toBeDefined();
+        expect(dvo.type).toBe("DraftIdentityAttributeDVO");
+        expect(dvo.id).toBe("");
+        expect(dvo.name).toBe("i18n://dvo.attribute.name.MaritalStatus");
+        expect(dvo.description).toBe("i18n://dvo.attribute.description.MaritalStatus");
+        expect(dvo.content).toStrictEqual(attribute);
+        const value = dvo.value as AbstractStringJSON;
+        expect(value["@type"]).toBe("MaritalStatus");
+        expect(value.value).toBe("married");
+        expect(dvo.owner.type).toBe("IdentityDVO");
+        expect(dvo.owner.id).toStrictEqual(attribute.owner);
+        expect(dvo.owner.name).toBe("i18n://dvo.identity.self.name");
+        expect(dvo.owner.isSelf).toBe(true);
+        expect(dvo.renderHints["@type"]).toBe("RenderHints");
+        expect(dvo.renderHints.technicalType).toBe("String");
+        expect(dvo.renderHints.editType).toBe("ButtonLike");
+        expect(dvo.valueHints["@type"]).toBe("ValueHints");
+        expect(dvo.valueHints.values).toStrictEqual([
+            { key: "single", displayName: "i18n://attributes.values.maritalStatus.single" },
+            { key: "married", displayName: "i18n://attributes.values.maritalStatus.married" },
+            { key: "separated", displayName: "i18n://attributes.values.maritalStatus.separated" },
+            { key: "divorced", displayName: "i18n://attributes.values.maritalStatus.divorced" },
+            { key: "widowed", displayName: "i18n://attributes.values.maritalStatus.widowed" }
+        ]);
     });
 
     test("check a complex StreetAddress", async () => {
