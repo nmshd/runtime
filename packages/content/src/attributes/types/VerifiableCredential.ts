@@ -9,18 +9,18 @@ export interface VerifiableCredentialJSON extends AbstractAttributeValueJSON {
     value: string | Record<string, any>;
     type: string;
     displayInformation?: Record<string, any>[];
-    defaultPresentation?: { presentationFrame: IPresentationFrame; keyBinding?: boolean };
+    defaultPresentationConfig?: { presentationFrame: IPresentationFrame; keyBinding?: boolean };
 }
 
 export interface IVerifiableCredential extends IAbstractAttributeValue {
     value: string | Record<string, any>;
     type: string;
     displayInformation?: Record<string, any>[];
-    defaultPresentation?: { presentationFrame: IPresentationFrame; keyBinding?: boolean };
+    defaultPresentationConfig?: { presentationFrame: IPresentationFrame; keyBinding?: boolean };
 }
 
 @type("VerifiableCredential")
-export class VerifiableCredential extends AbstractAttributeValue {
+export class VerifiableCredential extends AbstractAttributeValue implements IVerifiableCredential {
     @serialize({ any: true })
     @validate({ customValidator: validateValue })
     public value: string | Record<string, any>;
@@ -35,7 +35,7 @@ export class VerifiableCredential extends AbstractAttributeValue {
 
     @serialize({ any: true })
     @validate({ nullable: true })
-    public defaultPresentation?: { presentationFrame: IPresentationFrame; keyBinding?: boolean };
+    public defaultPresentationConfig?: { presentationFrame: IPresentationFrame; keyBinding?: boolean };
 
     public static get valueHints(): ValueHints {
         return ValueHints.from({});

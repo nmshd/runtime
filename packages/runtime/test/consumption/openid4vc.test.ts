@@ -177,7 +177,7 @@ describe("custom openid4vc service", () => {
                 await runtimeServices1.consumption.attributes.succeedOwnIdentityAttribute({
                     // create attribute runs into an error
                     predecessorId: attributeId,
-                    successorContent: { value: { ...attribute.content.value, defaultPresentation: { presentationFrame: { degree: true } } } as VerifiableCredentialJSON }
+                    successorContent: { value: { ...attribute.content.value, defaultPresentationConfig: { presentationFrame: { degree: true } } } as VerifiableCredentialJSON }
                 })
             ).value.successor;
             attributeId = newAttribute.id;
@@ -198,7 +198,7 @@ describe("custom openid4vc service", () => {
                     // create attribute runs into an error
                     predecessorId: attributeId,
                     successorContent: {
-                        value: { ...attribute.content.value, defaultPresentation: { keyBinding: true, presentationFrame: { degree: true } } } as VerifiableCredentialJSON
+                        value: { ...attribute.content.value, defaultPresentationConfig: { keyBinding: true, presentationFrame: { degree: true } } } as VerifiableCredentialJSON
                     }
                 })
             ).value.successor;
