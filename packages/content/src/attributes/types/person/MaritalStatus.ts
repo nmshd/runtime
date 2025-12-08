@@ -2,6 +2,9 @@ import { serialize, type, validate } from "@js-soft/ts-serval";
 import { RenderHints, RenderHintsEditType, ValueHints, ValueHintsValue } from "../../../attributes/hints";
 import { AbstractString, AbstractStringJSON, IAbstractString } from "../AbstractString";
 
+/**
+ * Particularly reflects marital status in Germany according to https://www.destatis.de/DE/Themen/Gesellschaft-Umwelt/Bevoelkerung/Haushalte-Familien/Glossar/familienstand.html
+ */
 export enum MaritalStatusValue {
     Single = "single",
     Married = "married",
