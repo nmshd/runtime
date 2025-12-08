@@ -1864,7 +1864,7 @@ export const CanCreateOutgoingRequestRequest: any = {
                         "type": "object"
                     }
                 },
-                "defaultPresentation": {
+                "defaultPresentationConfig": {
                     "type": "object",
                     "properties": {
                         "presentationFrame": {
@@ -3994,7 +3994,7 @@ export const CompleteOutgoingRequestRequest: any = {
                         "type": "object"
                     }
                 },
-                "defaultPresentation": {
+                "defaultPresentationConfig": {
                     "type": "object",
                     "properties": {
                         "presentationFrame": {
@@ -6074,7 +6074,7 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                         "type": "object"
                     }
                 },
-                "defaultPresentation": {
+                "defaultPresentationConfig": {
                     "type": "object",
                     "properties": {
                         "presentationFrame": {
@@ -8774,7 +8774,7 @@ export const CreateOutgoingRequestRequest: any = {
                         "type": "object"
                     }
                 },
-                "defaultPresentation": {
+                "defaultPresentationConfig": {
                     "type": "object",
                     "properties": {
                         "presentationFrame": {
@@ -11913,7 +11913,7 @@ export const ReceivedIncomingRequestRequest: any = {
                         "type": "object"
                     }
                 },
-                "defaultPresentation": {
+                "defaultPresentationConfig": {
                     "type": "object",
                     "properties": {
                         "presentationFrame": {
@@ -16044,7 +16044,7 @@ export const SucceedOwnIdentityAttributeRequest: any = {
                         "type": "object"
                     }
                 },
-                "defaultPresentation": {
+                "defaultPresentationConfig": {
                     "type": "object",
                     "properties": {
                         "presentationFrame": {
@@ -21513,7 +21513,7 @@ export const VerifiableCredential: any = {
                         "type": "object"
                     }
                 },
-                "defaultPresentation": {
+                "defaultPresentationConfig": {
                     "type": "object",
                     "properties": {
                         "presentationFrame": {
