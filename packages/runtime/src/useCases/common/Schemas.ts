@@ -1150,6 +1150,9 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/JobTitleJSON"
                 },
                 {
+                    "$ref": "#/definitions/MaritalStatusJSON"
+                },
+                {
                     "$ref": "#/definitions/MiddleNameJSON"
                 },
                 {
@@ -1583,6 +1586,29 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "@type": {
                     "type": "string",
                     "const": "JobTitle"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "MaritalStatusJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "MaritalStatus"
                 },
                 "@context": {
                     "type": "string"
@@ -2080,6 +2106,7 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "IdentityFileReference",
                 "JobTitle",
                 "Nationality",
+                "MaritalStatus",
                 "MiddleName",
                 "PhoneNumber",
                 "PostOfficeBoxAddress",
@@ -3162,6 +3189,9 @@ export const CompleteOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/JobTitleJSON"
                 },
                 {
+                    "$ref": "#/definitions/MaritalStatusJSON"
+                },
+                {
                     "$ref": "#/definitions/MiddleNameJSON"
                 },
                 {
@@ -3595,6 +3625,29 @@ export const CompleteOutgoingRequestRequest: any = {
                 "@type": {
                     "type": "string",
                     "const": "JobTitle"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "MaritalStatusJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "MaritalStatus"
                 },
                 "@context": {
                     "type": "string"
@@ -5161,6 +5214,9 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "$ref": "#/definitions/JobTitleJSON"
                 },
                 {
+                    "$ref": "#/definitions/MaritalStatusJSON"
+                },
+                {
                     "$ref": "#/definitions/MiddleNameJSON"
                 },
                 {
@@ -5594,6 +5650,29 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                 "@type": {
                     "type": "string",
                     "const": "JobTitle"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "MaritalStatusJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "MaritalStatus"
                 },
                 "@context": {
                     "type": "string"
@@ -7777,6 +7856,9 @@ export const CreateOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/JobTitleJSON"
                 },
                 {
+                    "$ref": "#/definitions/MaritalStatusJSON"
+                },
+                {
                     "$ref": "#/definitions/MiddleNameJSON"
                 },
                 {
@@ -8210,6 +8292,29 @@ export const CreateOutgoingRequestRequest: any = {
                 "@type": {
                     "type": "string",
                     "const": "JobTitle"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "MaritalStatusJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "MaritalStatus"
                 },
                 "@context": {
                     "type": "string"
@@ -8707,6 +8812,7 @@ export const CreateOutgoingRequestRequest: any = {
                 "IdentityFileReference",
                 "JobTitle",
                 "Nationality",
+                "MaritalStatus",
                 "MiddleName",
                 "PhoneNumber",
                 "PostOfficeBoxAddress",
@@ -10795,6 +10901,9 @@ export const ReceivedIncomingRequestRequest: any = {
                     "$ref": "#/definitions/JobTitleJSON"
                 },
                 {
+                    "$ref": "#/definitions/MaritalStatusJSON"
+                },
+                {
                     "$ref": "#/definitions/MiddleNameJSON"
                 },
                 {
@@ -11228,6 +11337,29 @@ export const ReceivedIncomingRequestRequest: any = {
                 "@type": {
                     "type": "string",
                     "const": "JobTitle"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "MaritalStatusJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "MaritalStatus"
                 },
                 "@context": {
                     "type": "string"
@@ -11725,6 +11857,7 @@ export const ReceivedIncomingRequestRequest: any = {
                 "IdentityFileReference",
                 "JobTitle",
                 "Nationality",
+                "MaritalStatus",
                 "MiddleName",
                 "PhoneNumber",
                 "PostOfficeBoxAddress",
@@ -13246,6 +13379,7 @@ export const ExecuteIdentityAttributeQueryRequest: any = {
                 "IdentityFileReference",
                 "JobTitle",
                 "Nationality",
+                "MaritalStatus",
                 "MiddleName",
                 "PhoneNumber",
                 "PostOfficeBoxAddress",
@@ -13351,6 +13485,7 @@ export const ExecuteIQLQueryRequest: any = {
                 "IdentityFileReference",
                 "JobTitle",
                 "Nationality",
+                "MaritalStatus",
                 "MiddleName",
                 "PhoneNumber",
                 "PostOfficeBoxAddress",
@@ -14806,6 +14941,9 @@ export const SucceedOwnIdentityAttributeRequest: any = {
                     "$ref": "#/definitions/JobTitleJSON"
                 },
                 {
+                    "$ref": "#/definitions/MaritalStatusJSON"
+                },
+                {
                     "$ref": "#/definitions/MiddleNameJSON"
                 },
                 {
@@ -15239,6 +15377,29 @@ export const SucceedOwnIdentityAttributeRequest: any = {
                 "@type": {
                     "type": "string",
                     "const": "JobTitle"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "MaritalStatusJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "MaritalStatus"
                 },
                 "@context": {
                     "type": "string"
@@ -16282,6 +16443,7 @@ export const ValidateIQLQueryRequest: any = {
                 "IdentityFileReference",
                 "JobTitle",
                 "Nationality",
+                "MaritalStatus",
                 "MiddleName",
                 "PhoneNumber",
                 "PostOfficeBoxAddress",
@@ -20661,6 +20823,36 @@ export const JobTitle: any = {
                 "@type": {
                     "type": "string",
                     "const": "JobTitle"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
+export const MaritalStatus: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/MaritalStatus",
+    "definitions": {
+        "MaritalStatus": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "MaritalStatus"
                 },
                 "@context": {
                     "type": "string"
