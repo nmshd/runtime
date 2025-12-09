@@ -1,5 +1,11 @@
 import { BaseRecord, ClaimFormat, DidJwk, DidKey, InjectionSymbols, JwkDidCreateOptions, KeyDidCreateOptions, Kms, MdocRecord, SdJwtVcRecord, X509Module } from "@credo-ts/core";
-import { OpenId4VciRequestTokenResponse, OpenId4VcModule, type OpenId4VciResolvedCredentialOffer, type OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
+import {
+    OpenId4VciCredentialResponse,
+    OpenId4VciRequestTokenResponse,
+    OpenId4VcModule,
+    type OpenId4VciResolvedCredentialOffer,
+    type OpenId4VpResolvedAuthorizationRequest
+} from "@credo-ts/openid4vc";
 import { AccountController } from "@nmshd/transport";
 import { AttributesController, OwnIdentityAttribute } from "../../attributes";
 import { BaseAgent } from "./BaseAgent";
@@ -41,7 +47,7 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
             txCode?: string;
             token?: OpenId4VciRequestTokenResponse;
         }
-    ): Promise<OwnIdentityAttribute[]> {
+    ): Promise<OpenId4VciCredentialResponse[]> {
         const tokenResponse =
             options.token ??
             (await this.agent.openid4vc.holder.requestToken({

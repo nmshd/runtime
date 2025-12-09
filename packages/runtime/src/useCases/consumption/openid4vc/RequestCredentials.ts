@@ -1,4 +1,4 @@
-import { OpenId4VciResolvedCredentialOffer } from "@credo-ts/openid4vc";
+import { OpenId4VciRequestTokenResponse, OpenId4VciResolvedCredentialOffer } from "@credo-ts/openid4vc";
 import { Result } from "@js-soft/ts-utils";
 import { OpenId4VcController, OpenId4VciCredentialResponseJSON } from "@nmshd/consumption";
 import { Inject } from "@nmshd/typescript-ioc";
@@ -7,6 +7,7 @@ import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
 export interface AbstractRequestCredentialsRequest<T> {
     credentialOffer: T;
     pinCode?: string;
+    accessToken?: OpenId4VciRequestTokenResponse;
     credentialConfigurationIds: string[];
 }
 
@@ -33,7 +34,12 @@ export class RequestCredentialsUseCase extends UseCase<RequestCredentialsRequest
     }
 
     protected override async executeInternal(request: RequestCredentialsRequest): Promise<Result<RequestCredentialsResponse>> {
-        const credentialResponses = await this.openId4VcController.requestCredentials(request.credentialOffer, request.credentialConfigurationIds, request.pinCode);
+        const credentialResponses = await this.openId4VcController.requestCredentials(
+            request.credentialOffer,
+            request.credentialConfigurationIds,
+            request.pinCode,
+            request.accessToken
+        );
         return Result.ok({ credentialResponses: credentialResponses });
     }
 }

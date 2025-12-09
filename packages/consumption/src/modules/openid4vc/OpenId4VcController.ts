@@ -52,19 +52,18 @@ export class OpenId4VcController extends ConsumptionBaseController {
         return await this.holder.resolveCredentialOffer(credentialOfferUrl);
     }
 
-    public async acceptCredentialOffer(
+    public async requestCredentials(
         credentialOffer: OpenId4VciResolvedCredentialOffer,
         credentialConfigurationIds: string[],
         pinCode?: string,
         accessToken?: OpenId4VciRequestTokenResponse
-    ): Promise<OwnIdentityAttribute> {
+    ): Promise<OpenId4VciCredentialResponseJSON[]> {
         const credentialResponses = await this.holder.requestCredentials(credentialOffer, {
             credentialConfigurationIds: credentialConfigurationIds,
             txCode: pinCode,
             token: accessToken
         });
 
-        // TODO: support multiple credentials
         const mappedResponses = credentialResponses.map((response) => ({
             claimFormat: response.record.firstCredential.claimFormat,
             encoded: response.record.firstCredential.encoded,
@@ -72,6 +71,13 @@ export class OpenId4VcController extends ConsumptionBaseController {
         }));
 
         return mappedResponses;
+    }
+
+    public async storeCredentials(credentialResponses: OpenId4VciCredentialResponseJSON[]): Promise<OwnIdentityAttribute> {
+        const credentials = await this.holder.storeCredentials(credentialResponses);
+
+        // TODO: support multiple credentials
+        return credentials[0];
     }
 
     public async resolveAuthorizationRequest(authorizationRequestUrl: string): Promise<{
