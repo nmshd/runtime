@@ -48,6 +48,7 @@ import {
     IHonorificSuffix,
     IIdentityFileReference,
     IJobTitle,
+    IMaritalStatus,
     IMiddleName,
     INationality,
     IPhoneNumber,
@@ -74,6 +75,8 @@ import {
     IWebsite,
     JobTitle,
     JobTitleJSON,
+    MaritalStatus,
+    MaritalStatusJSON,
     MiddleName,
     MiddleNameJSON,
     Nationality,
@@ -146,6 +149,7 @@ export namespace AttributeValues {
                 | HonorificSuffixJSON
                 | IdentityFileReferenceJSON
                 | JobTitleJSON
+                | MaritalStatusJSON
                 | MiddleNameJSON
                 | NationalityJSON
                 | PhoneNumberJSON
@@ -174,6 +178,7 @@ export namespace AttributeValues {
                 | IHonorificSuffix
                 | IIdentityFileReference
                 | IJobTitle
+                | IMaritalStatus
                 | IMiddleName
                 | INationality
                 | IPhoneNumber
@@ -202,6 +207,7 @@ export namespace AttributeValues {
                 | HonorificSuffix
                 | IdentityFileReference
                 | JobTitle
+                | MaritalStatus
                 | MiddleName
                 | Nationality
                 | PhoneNumber
@@ -230,6 +236,7 @@ export namespace AttributeValues {
                 HonorificSuffix,
                 IdentityFileReference,
                 JobTitle,
+                MaritalStatus,
                 MiddleName,
                 Nationality,
                 PhoneNumber,
@@ -260,6 +267,7 @@ export namespace AttributeValues {
                 "IdentityFileReference",
                 "JobTitle",
                 "Nationality",
+                "MaritalStatus",
                 "MiddleName",
                 "PhoneNumber",
                 "PostOfficeBoxAddress",

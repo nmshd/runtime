@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { OpenId4VciRequestTokenResponse } from "@credo-ts/openid4vc";
-import { VerifiableCredential } from "@nmshd/content";
+import { VerifiableCredentialJSON } from "@nmshd/content";
 import axios, { AxiosInstance } from "axios";
 import jwtDecode from "jwt-decode";
 import * as client from "openid-client";
@@ -94,7 +94,7 @@ describe("custom openid4vc service", () => {
             expect(storeResult).toBeSuccessful();
             expect(typeof storeResult.value.id).toBe("string");
 
-            const credential = storeResult.value.content.value as unknown as VerifiableCredential;
+            const credential = storeResult.value.content.value as VerifiableCredentialJSON;
             expect(credential.displayInformation?.[0].logo).toBeDefined();
             expect(credential.displayInformation?.[0].name).toBe("Employee ID Card");
         });
@@ -251,7 +251,7 @@ describe("custom openid4vc service", () => {
             expect(storeResult).toBeSuccessful();
             expect(typeof storeResult.value.id).toBe("string");
 
-            const credential = storeResult.value.content.value as unknown as VerifiableCredential;
+            const credential = storeResult.value.content.value as VerifiableCredentialJSON;
             expect(credential.displayInformation?.[0].logo).toBeDefined();
             expect(credential.displayInformation?.[0].name).toBe("Employee ID Card");
         });
@@ -482,7 +482,7 @@ describe("EUDIPLO", () => {
         });
         expect(storeCredentialsResponse).toBeSuccessful();
 
-        expect((storeCredentialsResponse.value.content.value as unknown as VerifiableCredential).displayInformation?.[0].name).toBe("Employee ID Card");
+        expect((storeCredentialsResponse.value.content.value as VerifiableCredentialJSON).displayInformation?.[0].name).toBe("Employee ID Card");
     });
 
     test("presentation", async () => {

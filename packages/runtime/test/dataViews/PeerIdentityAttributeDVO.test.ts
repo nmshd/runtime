@@ -162,4 +162,56 @@ describe("PeerIdentityAttributeDVO", () => {
         expect(dvo.valueType).toBe(rPeerIdentityAttribute.content.value["@type"]);
         expect(dvo.wasViewedAt).toBeUndefined();
     });
+
+    test("check the MaritalStatus", async () => {
+        const sOwnIdentityAttribute = await executeFullCreateAndShareOwnIdentityAttributeFlow(services2, services1, {
+            content: {
+                value: {
+                    "@type": "MaritalStatus",
+                    value: "married"
+                }
+            }
+        });
+        const rPeerIdentityAttribute = (await services1.consumption.attributes.getAttribute({ id: sOwnIdentityAttribute.id })).value;
+
+        const dto = (await services1.consumption.attributes.getAttribute({ id: rPeerIdentityAttribute.id })).value;
+        const dvo = (await services1.expander.expandLocalAttributeDTO(dto)) as PeerIdentityAttributeDVO;
+        expect(dvo).toBeDefined();
+        expect(dvo.type).toBe("PeerIdentityAttributeDVO");
+        expect(dvo.id).toStrictEqual(rPeerIdentityAttribute.id);
+        expect(dvo.name).toBe("i18n://dvo.attribute.name.MaritalStatus");
+        expect(dvo.description).toBe("i18n://dvo.attribute.description.MaritalStatus");
+        expect(dvo.date).toStrictEqual(rPeerIdentityAttribute.createdAt);
+        expect(dvo.content).toStrictEqual(rPeerIdentityAttribute.content);
+        const value = dvo.value as AbstractStringJSON;
+        expect(value["@type"]).toBe("MaritalStatus");
+        expect(value.value).toBe("married");
+        expect(dvo.createdAt).toStrictEqual(rPeerIdentityAttribute.createdAt);
+        expect(dvo.isOwn).toBe(false);
+        expect(dvo.isDraft).toBe(false);
+        expect(dvo.owner).toStrictEqual(rPeerIdentityAttribute.content.owner);
+        expect(dvo.renderHints["@type"]).toBe("RenderHints");
+        expect(dvo.renderHints.technicalType).toBe("String");
+        expect(dvo.renderHints.editType).toBe("ButtonLike");
+        expect(dvo.valueHints["@type"]).toBe("ValueHints");
+        expect(dvo.valueHints.values).toStrictEqual([
+            { key: "single", displayName: "i18n://attributes.values.maritalStatus.single" },
+            { key: "married", displayName: "i18n://attributes.values.maritalStatus.married" },
+            { key: "separated", displayName: "i18n://attributes.values.maritalStatus.separated" },
+            { key: "divorced", displayName: "i18n://attributes.values.maritalStatus.divorced" },
+            { key: "widowed", displayName: "i18n://attributes.values.maritalStatus.widowed" },
+            { key: "civilPartnership", displayName: "i18n://attributes.values.maritalStatus.civilPartnership" },
+            { key: "civilPartnershipDissolved", displayName: "i18n://attributes.values.maritalStatus.civilPartnershipDissolved" },
+            { key: "civilPartnerDeceased", displayName: "i18n://attributes.values.maritalStatus.civilPartnerDeceased" }
+        ]);
+        expect(dvo.succeeds).toBe(rPeerIdentityAttribute.succeeds);
+        expect(dvo.succeededBy).toBe(rPeerIdentityAttribute.succeededBy);
+        expect(dvo.peer).toBe(rPeerIdentityAttribute.peer);
+        expect(dvo.sourceReference).toBe(rPeerIdentityAttribute.sourceReference);
+        expect(dvo.deletionStatus).toBe(rPeerIdentityAttribute.deletionInfo?.deletionStatus);
+        expect(dvo.deletionDate).toBe(rPeerIdentityAttribute.deletionInfo?.deletionDate);
+        expect(dvo.tags).toBe((rPeerIdentityAttribute.content as IdentityAttributeJSON).tags);
+        expect(dvo.valueType).toBe(rPeerIdentityAttribute.content.value["@type"]);
+        expect(dvo.wasViewedAt).toBeUndefined();
+    });
 });
