@@ -61,7 +61,7 @@ export class OpenId4VcController extends ConsumptionBaseController {
         const mappedResponses = credentialResponses.map((response) => ({
             claimFormat: response.record.firstCredential.claimFormat,
             encoded: response.record.firstCredential.encoded,
-            displayInformation: response.credentialConfiguration.credential_metadata?.display
+            displayInformation: response.credentialConfiguration.credential_metadata?.display ?? (response.credentialConfiguration.display as Record<string, unknown>[] | undefined)
         }));
 
         return mappedResponses;
