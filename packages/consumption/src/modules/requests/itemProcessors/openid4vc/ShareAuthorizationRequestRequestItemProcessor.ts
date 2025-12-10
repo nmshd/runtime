@@ -1,7 +1,6 @@
-import { AcceptResponseItem, RejectResponseItem, ResponseItemResult, ShareAuthorizationRequestRequestItem } from "@nmshd/content";
+import { AcceptResponseItem, ResponseItemResult, ShareAuthorizationRequestRequestItem } from "@nmshd/content";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import { ValidationResult } from "../../../common/ValidationResult";
-import { ShareAuthorizationRequestRequestItemProcessedByRecipientEvent } from "../../events";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 import { LocalRequestInfo } from "../IRequestItemProcessor";
@@ -40,17 +39,5 @@ export class ShareAuthorizationRequestRequestItemProcessor extends GenericReques
         await this.consumptionController.openId4Vc.acceptAuthorizationRequest(resolvedAuthorizationRequest.authorizationRequest);
 
         return AcceptResponseItem.from({ result: ResponseItemResult.Accepted });
-    }
-
-    public override applyIncomingResponseItem(
-        responseItem: AcceptResponseItem | RejectResponseItem,
-        requestItem: ShareAuthorizationRequestRequestItem,
-        requestInfo: LocalRequestInfo
-    ): ShareAuthorizationRequestRequestItemProcessedByRecipientEvent {
-        return new ShareAuthorizationRequestRequestItemProcessedByRecipientEvent(this.currentIdentityAddress.toString(), {
-            authorizationRequestUrl: requestItem.authorizationRequestUrl,
-            accepted: responseItem.result === ResponseItemResult.Accepted,
-            peer: requestInfo.peer
-        });
     }
 }
