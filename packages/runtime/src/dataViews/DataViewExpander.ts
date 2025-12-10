@@ -660,23 +660,19 @@ export class DataViewExpander {
             case "ShareAuthorizationRequestRequestItem":
                 const shareAuthorizationRequestRequestItem = requestItem as ShareAuthorizationRequestRequestItemJSON;
 
-                const matchingCredentials = await (async () => {
-                    try {
-                        return (await this.consumptionController.openId4Vc.resolveAuthorizationRequest(shareAuthorizationRequestRequestItem.authorizationRequestUrl))
-                            .matchingCredentials;
-                    } catch {
-                        return;
-                    }
-                })();
+                const resolutionResult = await this.consumption.openId4Vc.resolveAuthorizationRequest({
+                    authorizationRequestUrl: shareAuthorizationRequestRequestItem.authorizationRequestUrl
+                });
+                const matchingCredentials = resolutionResult.isSuccess ? resolutionResult.value.matchingCredentials : [];
 
                 return {
                     ...shareAuthorizationRequestRequestItem,
                     type: "ShareAuthorizationRequestRequestItemDVO",
                     id: "",
                     name: this.generateRequestItemName(requestItem["@type"], isDecidable),
-                    isDecidable: isDecidable && !!credentialResponses,
+                    isDecidable: isDecidable && matchingCredentials.length > 0,
                     response: responseItemDVO,
-                    matchingCredentials
+                    matchingCredentials: await this.expandLocalAttributeDTOs(matchingCredentials)
                 } as ShareAuthorizationRequestRequestItemDVO;
 
             default:
