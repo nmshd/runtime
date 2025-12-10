@@ -24,6 +24,10 @@ export class SynchronizedCollection implements IDatabaseCollection {
     }
 
     public async create(newObject: CoreSynchronizable): Promise<any> {
+        if (newObject.id.toString().length > 100) {
+            throw new Error("Object ID exceeds maximum length of 100 characters.");
+        }
+
         const newObjectJson = newObject.toJSON();
 
         if (!this.datawalletModifications) {
