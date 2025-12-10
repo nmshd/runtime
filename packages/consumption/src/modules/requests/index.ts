@@ -18,6 +18,8 @@ export * from "./itemProcessors/formField/AcceptFormFieldRequestItemParameters";
 export * from "./itemProcessors/formField/FormFieldRequestItemProcessor";
 export * from "./itemProcessors/GenericRequestItemProcessor";
 export * from "./itemProcessors/IRequestItemProcessor";
+export * from "./itemProcessors/openid4vc/ShareAuthorizationRequestRequestItemProcessor";
+export * from "./itemProcessors/openid4vc/ShareCredentialOfferRequestItemProcessor";
 export * from "./itemProcessors/proposeAttribute/AcceptProposeAttributeRequestItemParameters";
 export * from "./itemProcessors/proposeAttribute/ProposeAttributeRequestItemProcessor";
 export {
@@ -30,7 +32,6 @@ export * from "./itemProcessors/RequestItemConstructor";
 export * from "./itemProcessors/RequestItemProcessorConstructor";
 export * from "./itemProcessors/RequestItemProcessorRegistry";
 export * from "./itemProcessors/shareAttribute/ShareAttributeRequestItemProcessor";
-export * from "./itemProcessors/shareCredentialOffer/ShareCredentialOfferRequestItemProcessor";
 export * from "./itemProcessors/transferFileOwnership/TransferFileOwnershipRequestItemProcessor";
 export * from "./local/LocalRequest";
 export * from "./local/LocalRequestStatus";

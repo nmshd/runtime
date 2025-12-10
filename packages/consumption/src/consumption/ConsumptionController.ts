@@ -11,6 +11,7 @@ import {
     ProposeAttributeRequestItem,
     ReadAttributeRequestItem,
     ShareAttributeRequestItem,
+    ShareAuthorizationRequestRequestItem,
     ShareCredentialOfferRequestItem,
     TransferFileOwnershipRequestItem
 } from "@nmshd/content";
@@ -45,6 +46,7 @@ import {
     ShareCredentialOfferRequestItemProcessor,
     TransferFileOwnershipRequestItemProcessor
 } from "../modules";
+import { ShareAuthorizationRequestRequestItemProcessor } from "../modules/requests/itemProcessors/openid4vc/ShareAuthorizationRequestRequestItemProcessor";
 import { ConsumptionConfig } from "./ConsumptionConfig";
 
 export class ConsumptionController {
@@ -163,7 +165,8 @@ export class ConsumptionController {
             [AuthenticationRequestItem, GenericRequestItemProcessor],
             [FormFieldRequestItem, FormFieldRequestItemProcessor],
             [TransferFileOwnershipRequestItem, TransferFileOwnershipRequestItemProcessor],
-            [ShareCredentialOfferRequestItem, ShareCredentialOfferRequestItemProcessor]
+            [ShareCredentialOfferRequestItem, ShareCredentialOfferRequestItemProcessor],
+            [ShareAuthorizationRequestRequestItem, ShareAuthorizationRequestRequestItemProcessor]
         ]);
     }
 

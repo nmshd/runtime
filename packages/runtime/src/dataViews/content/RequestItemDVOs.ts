@@ -82,3 +82,9 @@ export interface ShareCredentialOfferRequestItemDVO extends RequestItemDVO {
     credentialOfferUrl: string;
     credentialResponses?: OpenId4VciCredentialResponseJSON[];
 }
+
+export interface ShareAuthorizationRequestRequestItemDVO extends RequestItemDVO {
+    type: "ShareAuthorizationRequestRequestItemDVO";
+    authorizationRequestUrl: string;
+    matchingCredentials?: LocalAttributeDVO[];
+}
