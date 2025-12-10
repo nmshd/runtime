@@ -43,10 +43,10 @@ import {
     RequestItemProcessorRegistry,
     SettingsController,
     ShareAttributeRequestItemProcessor,
+    ShareAuthorizationRequestRequestItemProcessor,
     ShareCredentialOfferRequestItemProcessor,
     TransferFileOwnershipRequestItemProcessor
 } from "../modules";
-import { ShareAuthorizationRequestRequestItemProcessor } from "../modules/requests/itemProcessors/openid4vc/ShareAuthorizationRequestRequestItemProcessor";
 import { ConsumptionConfig } from "./ConsumptionConfig";
 
 export class ConsumptionController {
