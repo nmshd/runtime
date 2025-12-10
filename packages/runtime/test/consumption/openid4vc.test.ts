@@ -509,6 +509,66 @@ describe("custom openid4vc service", () => {
         expect(presentationResult.value.status).toBe(200);
     });
 
+    test("request presentation using requests", async () => {
+        const createPresentationResponse = await axiosInstance.post("/presentation/presentationRequests", {
+            pex: {
+                id: "anId",
+                purpose: "To prove you work here",
+
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                input_descriptors: [
+                    {
+                        id: "EmployeeIdCard",
+                        format: {
+                            // eslint-disable-next-line @typescript-eslint/naming-convention
+                            "vc+sd-jwt": {
+                                // eslint-disable-next-line @typescript-eslint/naming-convention
+                                "sd-jwt_alg_values": ["RS256", "PS256", "HS256", "ES256", "ES256K", "RS384", "PS384", "HS384", "ES384", "RS512", "PS512", "HS512", "ES512", "EdDSA"]
+                            }
+                        },
+                        constraints: {
+                            fields: [
+                                {
+                                    path: ["$.vct"],
+                                    filter: {
+                                        type: "string",
+                                        pattern: "EmployeeIdCard"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            version: "v1.draft21"
+        });
+        expect(createPresentationResponse.status).toBe(200);
+        const createPresentationResponseData = await createPresentationResponse.data;
+        const authorizationRequestUrl = createPresentationResponseData.result.presentationRequest as string;
+        const authorizationRequestId = authorizationRequestUrl.split("%2F").at(-1)?.slice(0, 36);
+
+        await exchangeAndAcceptRequestByMessage(
+            runtimeServices1,
+            runtimeServices2,
+            {
+                content: {
+                    items: [
+                        {
+                            "@type": "ShareAuthorizationRequestRequestItem",
+                            authorizationRequestUrl,
+                            mustBeAccepted: true
+                        }
+                    ]
+                },
+                peer: (await runtimeServices2.transport.account.getIdentityInfo()).value.address
+            },
+            [{ accept: true }]
+        );
+
+        const verificationStatus = (await axiosInstance.get(`/presentation/presentationRequests/${authorizationRequestId}/verificationSessionState`)).data.result;
+        expect(verificationStatus).toBe("ResponseVerified");
+    });
+
     async function startOid4VcComposeStack() {
         let baseUrl = process.env.NMSHD_TEST_BASEURL!;
         let addressGenerationHostnameOverride: string | undefined;
