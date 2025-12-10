@@ -48,6 +48,13 @@ export class ResolveAuthorizationRequestUseCase extends UseCase<ResolveAuthoriza
                 encodedCredential;
         }
 
+        if (result.authorizationRequest.dcql) {
+            const encodedCredential =
+                result.authorizationRequest.presentationExchange.credentialsForRequest.requirements[0].submissionEntry[0].verifiableCredentials[0].credentialRecord.encoded;
+            authorizationRequest.presentationExchange.credentialsForRequest.requirements[0].submissionEntry[0].verifiableCredentials[0].credentialRecord.encoded =
+                encodedCredential;
+        }
+
         return Result.ok({ authorizationRequest, matchingCredentials: AttributeMapper.toAttributeDTOList(result.matchingCredentials) });
     }
 }

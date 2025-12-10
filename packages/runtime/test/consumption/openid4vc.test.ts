@@ -27,7 +27,7 @@ afterAll(async () => {
     await runtimeServiceProvider.stop();
 });
 
-describe("custom openid4vc service", () => {
+describe.only("custom openid4vc service", () => {
     let axiosInstance: AxiosInstance;
     let dockerComposeStack: StartedDockerComposeEnvironment | undefined;
 
@@ -89,7 +89,7 @@ describe("custom openid4vc service", () => {
             expect(credential.displayInformation?.[0].name).toBe("Employee ID Card");
         });
 
-        test("should be able to process a given sd-jwt credential presentation", async () => {
+        test("should be able to process a given sd-jwt credential presentation with pex", async () => {
             // Ensure the first test has completed
             expect(credentialOfferUrl).toBeDefined();
 
@@ -154,6 +154,39 @@ describe("custom openid4vc service", () => {
             expect(presentationResult.value.status).toBe(200);
         });
 
+        test("should be able to process a given sd-jwt credential presentation with dcql", async () => {
+            // Ensure the first test has completed
+            expect(credentialOfferUrl).toBeDefined();
+
+            const response = await axiosInstance.post("/presentation/presentationRequests", {
+                dcql: {
+                    credentials: [
+                        {
+                            id: "EmployeeIdCard-vc-sd-jwt",
+                            format: "vc+sd-jwt",
+                            meta: {
+                                // eslint-disable-next-line @typescript-eslint/naming-convention
+                                vct_values: ["EmployeeIdCard"]
+                            }
+                        }
+                    ]
+                },
+                signWithDid: true
+            });
+            expect(response.status).toBe(200);
+            const responseData = await response.data;
+
+            const result = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl: responseData.result.presentationRequest });
+            expect(result.value.matchingCredentials).toHaveLength(1);
+
+            const request = result.value.authorizationRequest;
+            expect(request.dcql!.queryResult.can_be_satisfied).toBe(true);
+
+            const presentationResult = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest: result.value.authorizationRequest });
+            expect(presentationResult).toBeSuccessful();
+            expect(presentationResult.value.status).toBe(200);
+        });
+
         test("getting all verifiable credentials should not return an empty list", async () => {
             // Ensure the first test has completed
             expect(credentialOfferUrl).toBeDefined();
@@ -204,7 +237,7 @@ describe("custom openid4vc service", () => {
             expect(credential.displayInformation?.[0].name).toBe("Employee ID Card");
         });
 
-        test("should be able to process a given mdoc credential presentation", async () => {
+        test("should be able to process a given mdoc pex credential presentation", async () => {
             // Ensure the first test has completed
             expect(credentialOfferUrl).toBeDefined();
 
@@ -248,6 +281,37 @@ describe("custom openid4vc service", () => {
 
             const request = result.value.authorizationRequest;
             expect(request.presentationExchange!.credentialsForRequest.areRequirementsSatisfied).toBe(true);
+
+            const presentationResult = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest: result.value.authorizationRequest });
+            expect(presentationResult).toBeSuccessful();
+            expect(presentationResult.value.status).toBe(200);
+        });
+
+        test("should be able to process a given mdoc dcql credential presentation", async () => {
+            // Ensure the first test has completed
+            expect(credentialOfferUrl).toBeDefined();
+
+            const response = await axiosInstance.post("/presentation/presentationRequests", {
+                dcql: {
+                    credentials: [
+                        {
+                            id: "EmployeeIdCard-mdoc",
+                            format: "mso_mdoc",
+                            // eslint-disable-next-line @typescript-eslint/naming-convention
+                            meta: { doctype_value: "EmployeeIdCard" },
+                            claims: [{ path: ["employeeIdCard", "degree"] }]
+                        }
+                    ]
+                }
+            });
+            expect(response.status).toBe(200);
+            const responseData = await response.data;
+
+            const result = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl: responseData.result.presentationRequest });
+            expect(result.value.matchingCredentials).toHaveLength(1);
+
+            const request = result.value.authorizationRequest;
+            expect(request.dcql!.queryResult.can_be_satisfied).toBe(true);
 
             const presentationResult = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest: result.value.authorizationRequest });
             expect(presentationResult).toBeSuccessful();
