@@ -16,7 +16,7 @@ export class ShareAuthorizationRequestRequestItemProcessor extends GenericReques
             if (resolvedAuthorizationRequest.matchingCredentials.length === 0) {
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.invalidRequestItem(
-                        `The authorization request at URL '${requestItem.authorizationRequestUrl}' can't be fulfilled with currently available credentials.`
+                        `The authorization request at URL '${requestItem.authorizationRequestUrl}' can't be fulfilled with the credentials currently in the wallet.`
                     )
                 );
             }
