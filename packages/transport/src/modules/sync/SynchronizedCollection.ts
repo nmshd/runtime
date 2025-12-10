@@ -17,6 +17,10 @@ export class SynchronizedCollection implements IDatabaseCollection {
     ) {
         this.name = parent.name;
         this.databaseType = parent.databaseType;
+
+        if (this.name.length > 50) {
+            throw new Error("Collection name exceeds maximum length of 50 characters.");
+        }
     }
 
     public async create(newObject: CoreSynchronizable): Promise<any> {
