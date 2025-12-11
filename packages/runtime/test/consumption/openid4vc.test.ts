@@ -108,8 +108,6 @@ describe("custom openid4vc service", () => {
 
             credentialOfferUrl = responseData.result.credentialOffer;
             const pin = responseData.result.pin;
-
-            // remove later
             expect(pin).toBeDefined();
 
             const result = await runtimeServices1.consumption.openId4Vc.resolveCredentialOffer({
@@ -124,13 +122,13 @@ describe("custom openid4vc service", () => {
             // determine which credentials to pick from the offer for all supported types of offers
             const requestedCredentials = credentialOffer.credentialOfferPayload.credential_configuration_ids;
 
-            const reqestResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
+            const requestResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
                 credentialOffer,
                 credentialConfigurationIds: requestedCredentials,
                 pinCode: pin
             });
 
-            const storeResult = await runtimeServices1.consumption.openId4Vc.storeCredentials({ credentialResponses: reqestResult.value.credentialResponses });
+            const storeResult = await runtimeServices1.consumption.openId4Vc.storeCredentials({ credentialResponses: requestResult.value.credentialResponses });
 
             expect(storeResult).toBeSuccessful();
             expect(typeof storeResult.value.id).toBe("string");
@@ -161,8 +159,9 @@ describe("custom openid4vc service", () => {
 
             const requestedCredentialIds = credentialOffer.credentialOfferPayload.credential_configuration_ids;
 
-            const server = URL.parse("https://kc-openid4vc.is.enmeshed.eu/realms/enmeshed-openid4vci")!; // Authorization Server's Issuer Identifier
-            const clientId = "wallet"; // Client identifier at the Authorization Server
+            // due to the long startup time of the test authorization server we use the externally deployed one here
+            const server = URL.parse("https://kc-openid4vc.is.enmeshed.eu/realms/enmeshed-openid4vci")!;
+            const clientId = "wallet";
             const config: client.Configuration = await client.discovery(server, clientId);
             const grantReq = await client.genericGrantRequest(config, "password", {
                 username: "test",
@@ -190,8 +189,8 @@ describe("custom openid4vc service", () => {
 
             const decoded = jwtDecode<CredentialData>(encodedSdJwt);
 
+            // these values are set in the test authorization server for the test user
             expect(decoded.pernr).toBe("0019122023");
-
             expect(decoded.lob).toBe("Test BU");
         });
 

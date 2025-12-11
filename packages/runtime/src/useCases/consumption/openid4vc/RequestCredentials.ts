@@ -37,6 +37,8 @@ export class RequestCredentialsUseCase extends UseCase<RequestCredentialsRequest
     protected override async executeInternal(request: RequestCredentialsRequest): Promise<Result<RequestCredentialsResponse>> {
         let token: OpenId4VciRequestTokenResponse | undefined;
         if (request.accessToken !== undefined) {
+            // credo provides its own machanism to handle authentication and therefore expects the token to be in this format
+            // as we however can not use credo's solution from within the app calling this code, we need to manually create this structure here
             token = {
                 accessToken: request.accessToken,
                 accessTokenResponse: {

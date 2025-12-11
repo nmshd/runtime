@@ -15,7 +15,6 @@
         "dist"
     ],
     "scripts": {
-        "build:dev": "patch-package && esbuild src/index.ts --bundle --minify --keep-names --target=chrome60,firefox60,safari11,edge18 --external:https --outdir=../assets --tsconfig=tsconfig.esbuild.json",
         "build": "npm run build:node",
         "build:ci": "npm run build:node && ../../.ci/writeBuildInformation.sh",
         "build:node": "tsc -p tsconfig.json",
@@ -77,8 +76,7 @@
     "devDependencies": {
         "@js-soft/node-logger": "^1.2.1",
         "@types/lodash": "^4.17.21",
-        "@types/lokijs": "^1.5.14",
-        "esbuild": "^0.27.0"
+        "@types/lokijs": "^1.5.14"
     },
     "publishConfig": {
         "access": "public",
