@@ -17240,7 +17240,7 @@ export const RequestCredentialsRequest: any = {
                     }
                 },
                 "accessToken": {
-                    "type": "object"
+                    "type": "string"
                 },
             },
             "required": [

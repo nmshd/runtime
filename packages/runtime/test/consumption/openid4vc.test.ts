@@ -166,19 +166,10 @@ describe("custom openid4vc service", () => {
                 scope: "wallet-demo"
             });
 
-            const tokenResponse: OpenId4VciRequestTokenResponse = {
-                accessToken: grantReq.access_token,
-                accessTokenResponse: {
-                    access_token: grantReq.access_token,
-                    token_type: grantReq.token_type,
-                    claims: grantReq.claims
-                }
-            };
-
             const requestedCredentials = await runtimeServices1.consumption.openId4Vc.requestCredentials({
                 credentialOffer,
                 credentialConfigurationIds: requestedCredentialIds,
-                accessToken: tokenResponse
+                accessToken: grantReq.access_token
             });
             const storeResult = await runtimeServices1.consumption.openId4Vc.storeCredentials({ credentialResponses: requestedCredentials.value.credentialResponses });
 

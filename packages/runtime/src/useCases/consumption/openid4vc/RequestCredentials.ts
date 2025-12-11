@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { OpenId4VciRequestTokenResponse, OpenId4VciResolvedCredentialOffer } from "@credo-ts/openid4vc";
 import { Result } from "@js-soft/ts-utils";
 import { OpenId4VcController, OpenId4VciCredentialResponseJSON } from "@nmshd/consumption";
@@ -7,7 +8,7 @@ import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
 export interface AbstractRequestCredentialsRequest<T> {
     credentialOffer: T;
     pinCode?: string;
-    accessToken?: OpenId4VciRequestTokenResponse;
+    accessToken?: string;
     credentialConfigurationIds: string[];
 }
 
@@ -34,12 +35,18 @@ export class RequestCredentialsUseCase extends UseCase<RequestCredentialsRequest
     }
 
     protected override async executeInternal(request: RequestCredentialsRequest): Promise<Result<RequestCredentialsResponse>> {
-        const credentialResponses = await this.openId4VcController.requestCredentials(
-            request.credentialOffer,
-            request.credentialConfigurationIds,
-            request.pinCode,
-            request.accessToken
-        );
+        let token: OpenId4VciRequestTokenResponse | undefined;
+        if (request.accessToken !== undefined) {
+            token = {
+                accessToken: request.accessToken,
+                accessTokenResponse: {
+                    access_token: request.accessToken,
+                    token_type: "bearer"
+                }
+            };
+        }
+
+        const credentialResponses = await this.openId4VcController.requestCredentials(request.credentialOffer, request.credentialConfigurationIds, request.pinCode, token);
         return Result.ok({ credentialResponses: credentialResponses });
     }
 }
