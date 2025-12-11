@@ -2,9 +2,6 @@ import { serialize, type, validate } from "@js-soft/ts-serval";
 import { RenderHints, RenderHintsEditType, ValueHints, ValueHintsValue } from "../../../attributes/hints";
 import { AbstractString, AbstractStringJSON, IAbstractString } from "../AbstractString";
 
-/**
- * Biologisches Geschlecht
- */
 export enum BiologicalSex {
     X = "intersex",
     F = "female",
