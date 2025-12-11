@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { OpenId4VciRequestTokenResponse, OpenId4VciResolvedCredentialOffer, OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
 import { VerifiableCredential } from "@nmshd/content";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
