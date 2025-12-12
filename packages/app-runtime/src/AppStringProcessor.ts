@@ -129,8 +129,34 @@ export class AppStringProcessor {
         return Result.ok(undefined);
     }
 
-    private processOpenID4VPURL(_url: string, _account?: LocalAccountDTO): Promise<Result<void>> {
-        throw new Error("Method not implemented.");
+    private async processOpenID4VPURL(url: string, account?: LocalAccountDTO): Promise<Result<void>> {
+        if (!account) {
+            const result = await this.selectAccount();
+            if (result.isError) {
+                this.logger.info("Could not query account", result.error);
+                return Result.fail(result.error);
+            }
+
+            if (!result.value) {
+                this.logger.info("User cancelled account selection");
+                return Result.ok(undefined);
+            }
+
+            account = result.value;
+        }
+
+        const session = await this.runtime.getServices(account.id);
+        const result = await session.consumptionServices.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl: url });
+
+        const uiBridge = await this.runtime.uiBridge();
+        if (result.isError) {
+            this.logger.error("Could not resolve authorization request", result.error);
+            await uiBridge.showError(result.error);
+
+            return Result.ok(undefined);
+        }
+
+        return await uiBridge.showResolvedAuthorizationRequest(account, result.value);
     }
 
     private async _processReference(reference: Reference, account?: LocalAccountDTO): Promise<Result<void>> {
