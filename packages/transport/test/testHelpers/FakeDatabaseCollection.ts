@@ -31,6 +31,10 @@ export class FakeDatabaseCollection implements IDatabaseCollection {
         return Promise.resolve(results[0]);
     }
 
+    public patch(_oldDocument: any, _newObject: any): Promise<any> {
+        throw new Error("Method not implemented. Use update() instead.");
+    }
+
     public update(oldDocument: any, data: any): Promise<any> {
         let document;
         if (typeof data.toJSON === "function") {
