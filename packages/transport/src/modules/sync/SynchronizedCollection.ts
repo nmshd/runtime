@@ -103,6 +103,10 @@ export class SynchronizedCollection implements IDatabaseCollection {
         return await this.parent.read(id);
     }
 
+    public patch(_oldDoc: any, _newObject: CoreSynchronizable): Promise<any> {
+        throw new Error("Method not implemented. Use update() instead.");
+    }
+
     public async update(oldDoc: any, newObject: CoreSynchronizable): Promise<any> {
         const oldObject = Serializable.fromUnknown(oldDoc);
 
