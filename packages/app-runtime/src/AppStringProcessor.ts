@@ -1,6 +1,6 @@
 import { ILogger, ILoggerFactory } from "@js-soft/logging-abstractions";
 import { Serializable } from "@js-soft/ts-serval";
-import { EventBus, Result } from "@js-soft/ts-utils";
+import { ApplicationError, EventBus, Result } from "@js-soft/ts-utils";
 import { ICoreAddress, Reference, SharedPasswordProtection } from "@nmshd/core-types";
 import { AnonymousServices, DeviceMapper, RuntimeServices } from "@nmshd/runtime";
 import { BackboneIds, TokenContentDeviceSharedSecret } from "@nmshd/transport";
@@ -29,8 +29,12 @@ export class AppStringProcessor {
         url = url.trim();
 
         const parsed = new URL(url);
-        const allowedProtocols = ["http:", "https:"];
+
+        const allowedProtocols = ["http:", "https:", "openid4vp:", "openid-credential-offer:"];
         if (!allowedProtocols.includes(parsed.protocol)) return Result.fail(AppRuntimeErrors.appStringProcessor.wrongURL());
+
+        if (parsed.protocol === "openid-credential-offer:") return await this.processOpenIDCredentialOfferURL(url, account);
+        if (parsed.protocol === "openid4vp:") return await this.processOpenID4VPURL(url, account);
 
         return await this.processReference(url, account);
     }
@@ -42,6 +46,71 @@ export class AppStringProcessor {
         } catch (_) {
             return Result.fail(AppRuntimeErrors.appStringProcessor.invalidReference());
         }
+    }
+
+    private async processOpenIDCredentialOfferURL(url: string, account?: LocalAccountDTO): Promise<Result<void>> {
+        if (!account) {
+            const result = await this.selectAccount();
+            if (result.isError) {
+                this.logger.info("Could not query account", result.error);
+                return Result.fail(result.error);
+            }
+
+            if (!result.value) {
+                this.logger.info("User cancelled account selection");
+                return Result.ok(undefined);
+            }
+
+            account = result.value;
+        }
+
+        const session = await this.runtime.getServices(account.id);
+        const resolveCredentialOfferResult = await session.consumptionServices.openId4Vc.resolveCredentialOffer({ credentialOfferUrl: url });
+
+        const uiBridge = await this.runtime.uiBridge();
+
+        if (resolveCredentialOfferResult.isError) {
+            // TODO: log
+            await uiBridge.showError(resolveCredentialOfferResult.error);
+
+            return Result.ok(undefined);
+        }
+
+        const credentialOffer = resolveCredentialOfferResult.value.credentialOffer;
+
+        const grants = credentialOffer.credentialOfferPayload.grants;
+
+        if (grants?.["authorization_code"]) {
+            await uiBridge.showError(new ApplicationError("error.app.openid4vc.authorizationCodeGrantNotSupported", ""));
+
+            return Result.ok(undefined);
+        }
+
+        const preAuthorizedCodeGrant = grants?.["urn:ietf:params:oauth:grant-type:pre-authorized_code"];
+
+        const pin = preAuthorizedCodeGrant?.tx_code
+            ? (await uiBridge.enterPassword(preAuthorizedCodeGrant.tx_code.input_mode === "text" ? "pw" : "pin", preAuthorizedCodeGrant.tx_code.length ?? 4, 1)).value
+            : undefined;
+
+        const requestCredentialsResult = await session.consumptionServices.openId4Vc.requestCredentials({
+            credentialOffer: credentialOffer,
+            credentialConfigurationIds: credentialOffer.credentialOfferPayload.credential_configuration_ids,
+            pinCode: pin
+        });
+
+        if (requestCredentialsResult.isSuccess) {
+            await uiBridge.showResolvedCredentialOffer(account, requestCredentialsResult.value.credentialResponses, credentialOffer.metadata.credentialIssuer.display);
+
+            return Result.ok(undefined);
+        }
+
+        await uiBridge.showError(new ApplicationError(requestCredentialsResult.error.code, ""));
+
+        return Result.ok(undefined);
+    }
+
+    private processOpenID4VPURL(_url: string, _account?: LocalAccountDTO): Promise<Result<void>> {
+        throw new Error("Method not implemented.");
     }
 
     private async _processReference(reference: Reference, account?: LocalAccountDTO): Promise<Result<void>> {
