@@ -1,4 +1,4 @@
-import { IDatabaseCollection } from "@js-soft/docdb-access-abstractions";
+import { IDatabaseCollection, IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { LokiJsConnection } from "@js-soft/docdb-access-loki";
 import { CoreIdHelper } from "@nmshd/core-types";
 import { instance, mock, verify } from "ts-mockito";
@@ -7,17 +7,21 @@ import { ASynchronizedCollectionItem } from "../../testHelpers/ASynchronizedColl
 import { objectWith } from "../../testHelpers/PartialObjectMatcher";
 
 describe("SynchronizedCollection", function () {
+    const connection: IDatabaseConnection = LokiJsConnection.inMemory();
     let datawalletModificationsCollectionMock: IDatabaseCollection;
     let synchronizedCollection: SynchronizedCollection;
     let parentCollection: IDatabaseCollection;
 
     beforeEach(async function () {
-        const lokiJsConnection = LokiJsConnection.inMemory();
-        parentCollection = await (await lokiJsConnection.getDatabase("test")).getCollection("parentCollection");
+        parentCollection = await (await connection.getDatabase("test")).getCollection("parentCollection");
 
         datawalletModificationsCollectionMock = mock<IDatabaseCollection>();
 
         synchronizedCollection = new SynchronizedCollection(parentCollection, 1, instance(datawalletModificationsCollectionMock));
+    });
+
+    afterAll(async function () {
+        await connection.close();
     });
 
     test("when inserting a new item, datawallet modifications are created for each category of data", async function () {
