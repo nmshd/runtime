@@ -101,8 +101,7 @@ export class AppStringProcessor {
                       {
                           passwordType: preAuthorizedCodeGrant.tx_code.input_mode === "text" ? "pw" : `pin${preAuthorizedCodeGrant.tx_code.length ?? 4}`
                       },
-                      // TODO: what's the correct error code here?
-                      "error.runtime.openid4vc.invalidPinCode"
+                      "error.runtime.openid4vc.oauth.invalid_grant"
                   )
               ).result
             : await session.consumptionServices.openId4Vc.requestCredentials({
