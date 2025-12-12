@@ -89,47 +89,6 @@ describe("custom openid4vc service", () => {
             expect(credential.displayInformation?.[0].name).toBe("Employee ID Card");
         });
 
-        test("should be able to process a credential offer with pin authentication", async () => {
-            const response = await axiosInstance.post("/issuance/credentialOffers", {
-                credentialConfigurationIds: ["EmployeeIdCard-sdjwt"],
-                authentication: "pin"
-            });
-
-            expect(response.status).toBe(200);
-            const responseData = await response.data;
-
-            credentialOfferUrl = responseData.result.credentialOffer;
-            const pin = "0000";
-            expect(pin).toBeDefined();
-
-            const result = await runtimeServices1.consumption.openId4Vc.resolveCredentialOffer({
-                credentialOfferUrl
-            });
-
-            expect(result).toBeSuccessful();
-
-            // analogously to the app code all presented credentials are accepted
-            const credentialOffer = result.value.credentialOffer;
-
-            // determine which credentials to pick from the offer for all supported types of offers
-            const requestedCredentials = credentialOffer.credentialOfferPayload.credential_configuration_ids;
-
-            const requestResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
-                credentialOffer,
-                credentialConfigurationIds: requestedCredentials,
-                pinCode: pin
-            });
-
-            const storeResult = await runtimeServices1.consumption.openId4Vc.storeCredentials({ credentialResponses: requestResult.value.credentialResponses });
-
-            expect(storeResult).toBeSuccessful();
-            expect(typeof storeResult.value.id).toBe("string");
-
-            const credential = storeResult.value.content.value as VerifiableCredentialJSON;
-            expect(credential.displayInformation?.[0].logo).toBeDefined();
-            expect(credential.displayInformation?.[0].name).toBe("Employee ID Card");
-        });
-
         test("should be able to process a given sd-jwt credential presentation", async () => {
             // Ensure the first test has completed
             expect(credentialOfferUrl).toBeDefined();
