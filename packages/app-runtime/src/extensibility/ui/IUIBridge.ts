@@ -10,7 +10,19 @@ export interface IUIBridge {
     showDeviceOnboarding(deviceOnboardingInfo: DeviceOnboardingInfoDTO): Promise<Result<void>>;
     showRequest(account: LocalAccountDTO, request: LocalRequestDVO): Promise<Result<void>>;
     showResolvedAuthorizationRequest(account: LocalAccountDTO, response: ResolveAuthorizationRequestResponse): Promise<Result<void>>;
-    showResolvedCredentialOffer(account: LocalAccountDTO, credentialResponses: OpenId4VciCredentialResponseJSON[], issuerDisplayInformation: any): Promise<Result<void>>;
+    showResolvedCredentialOffer(
+        account: LocalAccountDTO,
+        credentialResponses: OpenId4VciCredentialResponseJSON[],
+        issuerDisplayInformation?: {
+            name?: string;
+            locale?: string;
+            logo?: {
+                uri?: string;
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                alt_text?: string;
+            };
+        }[]
+    ): Promise<Result<void>>;
     showError(error: ApplicationError, account?: LocalAccountDTO): Promise<Result<void>>;
     requestAccountSelection(possibleAccounts: LocalAccountDTO[], title?: string, description?: string): Promise<Result<LocalAccountDTO | undefined>>;
     enterPassword(passwordType: "pw" | "pin", pinLength?: number, attempt?: number, passwordLocationIndicator?: number): Promise<Result<string>>;

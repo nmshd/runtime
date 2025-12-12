@@ -1,3 +1,4 @@
+import { OpenId4VciResolvedCredentialOffer } from "@credo-ts/openid4vc";
 import { ILogger, ILoggerFactory } from "@js-soft/logging-abstractions";
 import { Serializable } from "@js-soft/ts-serval";
 import { ApplicationError, EventBus, Result } from "@js-soft/ts-utils";
@@ -64,8 +65,8 @@ export class AppStringProcessor {
             account = result.value;
         }
 
-        const session = await this.runtime.getServices(account.id);
-        const resolveCredentialOfferResult = await session.consumptionServices.openId4Vc.resolveCredentialOffer({ credentialOfferUrl: url });
+        const services = await this.runtime.getServices(account.id);
+        const resolveCredentialOfferResult = await services.consumptionServices.openId4Vc.resolveCredentialOffer({ credentialOfferUrl: url });
 
         const uiBridge = await this.runtime.uiBridge();
 
@@ -78,22 +79,40 @@ export class AppStringProcessor {
         }
 
         const credentialOffer = resolveCredentialOfferResult.value.credentialOffer;
-
         const grants = credentialOffer.credentialOfferPayload.grants;
 
-        if (grants?.["authorization_code"]) {
-            await uiBridge.showError(new ApplicationError("error.app.openid4vc.authorizationCodeGrantNotSupported", ""));
+        if (grants?.authorization_code) return await this.processAuthCodeOpenIDCredentialOffer(services, account, credentialOffer);
+        if (grants?.["urn:ietf:params:oauth:grant-type:pre-authorized_code"]) return await this.processPreAuthorizedOpenIDCredentialOffer(services, account, credentialOffer);
 
-            return Result.ok(undefined);
-        }
+        await uiBridge.showError(new ApplicationError("error.app.openid4vc.noSupportedGrantFound", ""));
+        return Result.ok(undefined);
+    }
 
-        const preAuthorizedCodeGrant = grants?.["urn:ietf:params:oauth:grant-type:pre-authorized_code"];
+    private async processAuthCodeOpenIDCredentialOffer(
+        _services: RuntimeServices,
+        _account: LocalAccountDTO,
+        _credentialOffer: OpenId4VciResolvedCredentialOffer
+    ): Promise<Result<void>> {
+        // Not implemented yet
+        const uiBridge = await this.runtime.uiBridge();
+        await uiBridge.showError(new ApplicationError("error.app.openid4vc.authorizationCodeGrantNotSupported", ""));
+        return Result.ok(undefined);
+    }
+
+    private async processPreAuthorizedOpenIDCredentialOffer(
+        services: RuntimeServices,
+        account: LocalAccountDTO,
+        credentialOffer: OpenId4VciResolvedCredentialOffer
+    ): Promise<Result<void>> {
+        const uiBridge = await this.runtime.uiBridge();
+
+        const preAuthorizedCodeGrant = credentialOffer.credentialOfferPayload.grants!["urn:ietf:params:oauth:grant-type:pre-authorized_code"];
 
         const requestCredentialsResult = preAuthorizedCodeGrant?.tx_code
             ? (
                   await this._fetchPasswordProtectedItemWithRetry(
                       async (password) =>
-                          await session.consumptionServices.openId4Vc.requestCredentials({
+                          await services.consumptionServices.openId4Vc.requestCredentials({
                               credentialOffer: credentialOffer,
                               credentialConfigurationIds: credentialOffer.credentialOfferPayload.credential_configuration_ids,
                               pinCode: password
@@ -104,19 +123,18 @@ export class AppStringProcessor {
                       "error.runtime.openid4vc.oauth.invalid_grant"
                   )
               ).result
-            : await session.consumptionServices.openId4Vc.requestCredentials({
+            : await services.consumptionServices.openId4Vc.requestCredentials({
                   credentialOffer: credentialOffer,
                   credentialConfigurationIds: credentialOffer.credentialOfferPayload.credential_configuration_ids
               });
 
-        if (requestCredentialsResult.isSuccess) {
-            await uiBridge.showResolvedCredentialOffer(account, requestCredentialsResult.value.credentialResponses, credentialOffer.metadata.credentialIssuer.display);
+        if (requestCredentialsResult.isError) {
+            await uiBridge.showError(requestCredentialsResult.error);
 
             return Result.ok(undefined);
         }
 
-        await uiBridge.showError(new ApplicationError(requestCredentialsResult.error.code, ""));
-
+        await uiBridge.showResolvedCredentialOffer(account, requestCredentialsResult.value.credentialResponses, credentialOffer.metadata.credentialIssuer.display);
         return Result.ok(undefined);
     }
 
