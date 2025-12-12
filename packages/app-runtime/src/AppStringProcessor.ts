@@ -70,7 +70,8 @@ export class AppStringProcessor {
         const uiBridge = await this.runtime.uiBridge();
 
         if (resolveCredentialOfferResult.isError) {
-            // TODO: log
+            this.logger.error("Could not resolve credential offer", resolveCredentialOfferResult.error);
+
             await uiBridge.showError(resolveCredentialOfferResult.error);
 
             return Result.ok(undefined);
