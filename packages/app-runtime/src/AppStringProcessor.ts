@@ -89,10 +89,6 @@ export class AppStringProcessor {
 
         const preAuthorizedCodeGrant = grants?.["urn:ietf:params:oauth:grant-type:pre-authorized_code"];
 
-        const pin = preAuthorizedCodeGrant?.tx_code
-            ? (await uiBridge.enterPassword(preAuthorizedCodeGrant.tx_code.input_mode === "text" ? "pw" : "pin", preAuthorizedCodeGrant.tx_code.length ?? 4, 1)).value
-            : undefined;
-
         const requestCredentialsResult = preAuthorizedCodeGrant?.tx_code
             ? (
                   await this._fetchPasswordProtectedItemWithRetry(
@@ -111,12 +107,6 @@ export class AppStringProcessor {
                   credentialOffer: credentialOffer,
                   credentialConfigurationIds: credentialOffer.credentialOfferPayload.credential_configuration_ids
               });
-
-        await session.consumptionServices.openId4Vc.requestCredentials({
-            credentialOffer: credentialOffer,
-            credentialConfigurationIds: credentialOffer.credentialOfferPayload.credential_configuration_ids,
-            pinCode: pin
-        });
 
         if (requestCredentialsResult.isSuccess) {
             await uiBridge.showResolvedCredentialOffer(account, requestCredentialsResult.value.credentialResponses, credentialOffer.metadata.credentialIssuer.display);
