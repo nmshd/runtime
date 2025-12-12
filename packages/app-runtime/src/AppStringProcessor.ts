@@ -100,7 +100,9 @@ export class AppStringProcessor {
                           }),
                       {
                           passwordType: preAuthorizedCodeGrant.tx_code.input_mode === "text" ? "pw" : `pin${preAuthorizedCodeGrant.tx_code.length ?? 4}`
-                      }
+                      },
+                      // TODO: what's the correct error code here?
+                      "error.runtime.openid4vc.invalidPinCode"
                   )
               ).result
             : await session.consumptionServices.openId4Vc.requestCredentials({
@@ -298,7 +300,8 @@ export class AppStringProcessor {
         passwordProtection: {
             passwordType: "pw" | `pin${number}`;
             passwordLocationIndicator?: number;
-        }
+        },
+        wrongPasswordErrorCode = "error.runtime.recordNotFound"
     ): Promise<{ result: Result<T>; password?: string }> {
         let attempt = 1;
 
@@ -322,7 +325,7 @@ export class AppStringProcessor {
             attempt++;
 
             if (result.isSuccess) return { result, password };
-            if (result.isError && result.error.code === "error.runtime.recordNotFound") continue;
+            if (result.isError && result.error.code === wrongPasswordErrorCode) continue;
             return { result };
         }
 
