@@ -153,7 +153,7 @@ expect.extend({
 
         const calls = mockUIBridge.calls.filter((x) => x.method === "showResolvedAuthorizationRequest");
         if (calls.length > 0) {
-            return { pass: false, message: () => `The method showResolvedAuthorizationRequest called: ${calls.map((c) => `'account id: ${c.account.id}'`)}` };
+            return { pass: false, message: () => `The method showResolvedAuthorizationRequest was called: ${calls.map((c) => `'account id: ${c.account.id}'`)}` };
         }
 
         return { pass: true, message: () => "" };
@@ -177,7 +177,7 @@ expect.extend({
 
         const calls = mockUIBridge.calls.filter((x) => x.method === "showResolvedCredentialOffer");
         if (calls.length > 0) {
-            return { pass: false, message: () => `The method showResolvedCredentialOffer called: ${calls.map((c) => `'account id: ${c.account.id}'`)}` };
+            return { pass: false, message: () => `The method showResolvedCredentialOffer was called: ${calls.map((c) => `'account id: ${c.account.id}'`)}` };
         }
 
         return { pass: true, message: () => "" };
