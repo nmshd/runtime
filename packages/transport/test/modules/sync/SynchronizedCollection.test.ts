@@ -1,22 +1,27 @@
-import { IDatabaseCollection } from "@js-soft/docdb-access-abstractions";
+import { IDatabaseCollection, IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
+import { LokiJsConnection } from "@js-soft/docdb-access-loki";
 import { CoreIdHelper } from "@nmshd/core-types";
 import { instance, mock, verify } from "ts-mockito";
 import { DatawalletModification, DatawalletModificationCategory, DatawalletModificationType, SynchronizedCollection } from "../../../src";
 import { ASynchronizedCollectionItem } from "../../testHelpers/ASynchronizedCollectionItem";
-import { FakeDatabaseCollection } from "../../testHelpers/FakeDatabaseCollection";
 import { objectWith } from "../../testHelpers/PartialObjectMatcher";
 
 describe("SynchronizedCollection", function () {
+    const connection: IDatabaseConnection = LokiJsConnection.inMemory();
     let datawalletModificationsCollectionMock: IDatabaseCollection;
     let synchronizedCollection: SynchronizedCollection;
     let parentCollection: IDatabaseCollection;
 
-    beforeEach(function () {
-        parentCollection = new FakeDatabaseCollection("synchronizedCollectionName");
+    beforeEach(async function () {
+        parentCollection = await (await connection.getDatabase("test")).getCollection("parentCollection");
 
         datawalletModificationsCollectionMock = mock<IDatabaseCollection>();
 
         synchronizedCollection = new SynchronizedCollection(parentCollection, 1, instance(datawalletModificationsCollectionMock));
+    });
+
+    afterAll(async function () {
+        await connection.close();
     });
 
     test("when inserting a new item, datawallet modifications are created for each category of data", async function () {
@@ -157,6 +162,37 @@ describe("SynchronizedCollection", function () {
                         someTechnicalBooleanProperty: true,
                         someTechnicalNumberProperty: 0,
                         someTechnicalStringProperty: ""
+                    }
+                })
+            )
+        ).once();
+    });
+
+    test("when patching an item, should add every property of a category to the payload even if only one was changed", async function () {
+        const itemId = await CoreIdHelper.notPrefixed.generate();
+        await synchronizedCollection.create(
+            ASynchronizedCollectionItem.from({
+                id: itemId,
+                someMetadataBooleanProperty: false,
+                someMetadataNumberProperty: 0,
+                someMetadataStringProperty: ""
+            })
+        );
+
+        const itemDoc = await synchronizedCollection.read(itemId.toString());
+        const item = ASynchronizedCollectionItem.from(itemDoc);
+
+        item.someMetadataBooleanProperty = true;
+        await synchronizedCollection.patch(itemDoc, item);
+
+        verify(
+            datawalletModificationsCollectionMock.create(
+                objectWith<DatawalletModification>({
+                    payloadCategory: DatawalletModificationCategory.Metadata,
+                    payload: {
+                        someMetadataBooleanProperty: true,
+                        someMetadataNumberProperty: 0,
+                        someMetadataStringProperty: ""
                     }
                 })
             )
