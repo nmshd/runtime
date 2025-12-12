@@ -9,8 +9,8 @@ export interface IUIBridge {
     showFile(account: LocalAccountDTO, file: FileDVO): Promise<Result<void>>;
     showDeviceOnboarding(deviceOnboardingInfo: DeviceOnboardingInfoDTO): Promise<Result<void>>;
     showRequest(account: LocalAccountDTO, request: LocalRequestDVO): Promise<Result<void>>;
-    showResolvedAuthorizationRequest(account: LocalAccountDTO, value: ResolveAuthorizationRequestResponse): Promise<Result<void>>;
-    showResolvedCredentialOffer(account: LocalAccountDTO, credentialResponses: OpenId4VciCredentialResponseJSON[], issuesDisplayInformation: any): Promise<Result<void>>;
+    showResolvedAuthorizationRequest(account: LocalAccountDTO, response: ResolveAuthorizationRequestResponse): Promise<Result<void>>;
+    showResolvedCredentialOffer(account: LocalAccountDTO, credentialResponses: OpenId4VciCredentialResponseJSON[], issuerDisplayInformation: any): Promise<Result<void>>;
     showError(error: ApplicationError, account?: LocalAccountDTO): Promise<Result<void>>;
     requestAccountSelection(possibleAccounts: LocalAccountDTO[], title?: string, description?: string): Promise<Result<LocalAccountDTO | undefined>>;
     enterPassword(passwordType: "pw" | "pin", pinLength?: number, attempt?: number, passwordLocationIndicator?: number): Promise<Result<string>>;
