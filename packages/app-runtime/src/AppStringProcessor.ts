@@ -84,7 +84,7 @@ export class AppStringProcessor {
         if (grants?.authorization_code) return await this.processAuthCodeOpenIDCredentialOffer(services, account, credentialOffer);
         if (grants?.["urn:ietf:params:oauth:grant-type:pre-authorized_code"]) return await this.processPreAuthorizedOpenIDCredentialOffer(services, account, credentialOffer);
 
-        await uiBridge.showError(new ApplicationError("error.app.openid4vc.noSupportedGrantFound", ""));
+        await uiBridge.showError(AppRuntimeErrors.appStringProcessor.unsupportedOid4vcCredentialOfferGrantFound());
         return Result.ok(undefined);
     }
 
