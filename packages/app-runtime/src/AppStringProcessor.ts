@@ -1,7 +1,7 @@
 import { ILogger, ILoggerFactory } from "@js-soft/logging-abstractions";
 import { Serializable } from "@js-soft/ts-serval";
 import { ApplicationError, EventBus, Result } from "@js-soft/ts-utils";
-import { ICoreAddress, Reference, SharedPasswordProtection } from "@nmshd/core-types";
+import { ICoreAddress, Reference } from "@nmshd/core-types";
 import { AnonymousServices, DeviceMapper, RuntimeServices } from "@nmshd/runtime";
 import { BackboneIds, TokenContentDeviceSharedSecret } from "@nmshd/transport";
 import { AppRuntimeErrors } from "./AppRuntimeErrors";
@@ -92,7 +92,26 @@ export class AppStringProcessor {
             ? (await uiBridge.enterPassword(preAuthorizedCodeGrant.tx_code.input_mode === "text" ? "pw" : "pin", preAuthorizedCodeGrant.tx_code.length ?? 4, 1)).value
             : undefined;
 
-        const requestCredentialsResult = await session.consumptionServices.openId4Vc.requestCredentials({
+        const requestCredentialsResult = preAuthorizedCodeGrant?.tx_code
+            ? (
+                  await this._fetchPasswordProtectedItemWithRetry(
+                      async (password) =>
+                          await session.consumptionServices.openId4Vc.requestCredentials({
+                              credentialOffer: credentialOffer,
+                              credentialConfigurationIds: credentialOffer.credentialOfferPayload.credential_configuration_ids,
+                              pinCode: password
+                          }),
+                      {
+                          passwordType: preAuthorizedCodeGrant.tx_code.input_mode === "text" ? "pw" : `pin${preAuthorizedCodeGrant.tx_code.length ?? 4}`
+                      }
+                  )
+              ).result
+            : await session.consumptionServices.openId4Vc.requestCredentials({
+                  credentialOffer: credentialOffer,
+                  credentialConfigurationIds: credentialOffer.credentialOfferPayload.credential_configuration_ids
+              });
+
+        await session.consumptionServices.openId4Vc.requestCredentials({
             credentialOffer: credentialOffer,
             credentialConfigurationIds: credentialOffer.credentialOfferPayload.credential_configuration_ids,
             pinCode: pin
@@ -259,7 +278,10 @@ export class AppStringProcessor {
 
     private async _fetchPasswordProtectedItemWithRetry<T>(
         fetchFunction: (password: string) => Promise<Result<T>>,
-        passwordProtection: SharedPasswordProtection
+        passwordProtection: {
+            passwordType: "pw" | `pin${number}`;
+            passwordLocationIndicator?: number;
+        }
     ): Promise<{ result: Result<T>; password?: string }> {
         let attempt = 1;
 
