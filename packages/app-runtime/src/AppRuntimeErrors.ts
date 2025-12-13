@@ -38,6 +38,13 @@ class AppStringProcessor {
             "The scanned code does not contain a device onboarding info, but this scanner is only able to process device onboarding codes."
         );
     }
+
+    public unsupportedOid4vcCredentialOfferGrantFound(): ApplicationError {
+        return new ApplicationError(
+            "error.appruntime.appStringProcessor.unsupportedOid4vcCredentialOfferGrantFound",
+            "The OpenID4VC Credential Offer contain an unsupported grant type."
+        );
+    }
 }
 
 class General {

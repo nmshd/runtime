@@ -22,6 +22,14 @@ export class FakeUIBridge implements IUIBridge {
         return Promise.resolve(Result.ok(undefined));
     }
 
+    public showResolvedAuthorizationRequest(): Promise<Result<void>> {
+        return Promise.resolve(Result.ok(undefined));
+    }
+
+    public showResolvedCredentialOffer(): Promise<Result<void>> {
+        return Promise.resolve(Result.ok(undefined));
+    }
+
     public showError(): Promise<Result<void, ApplicationError>> {
         return Promise.resolve(Result.ok(undefined));
     }
