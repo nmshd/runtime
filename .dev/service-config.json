@@ -1,0 +1,23 @@
+{
+    "port": 9000,
+    "baseUrl": "http://127.0.0.1:9000",
+    "mongodb": {
+        "host": "mongodb",
+        "port": 27017,
+        "user": "root",
+        "password": "example"
+    },
+    "connector": {
+        "baseUrl": "http://connector:80",
+        "apiKey": "aVeryCoolApiKeyWith30CharactersOr+"
+    },
+    "customizing": {
+        "organization": {
+            "displayName": "js-soft AG",
+            "logoUrl": "http://127.0.0.1:9000/ui/img/js_soft.png"
+        }
+    },
+    "cors": {
+        "origin": "*"
+    }
+}

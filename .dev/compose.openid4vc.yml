@@ -1,0 +1,51 @@
+name: runtime-oid4vc-tests
+
+services:
+  oid4vc-service:
+    image: ghcr.io/js-soft/openid4vc-service:1.2.0@sha256:653358212651a992d211a187a0d405f56ae50b05d6c95bbdc37e1647fd8e6c33
+    ports:
+      - "9000:9000"
+    platform: linux/amd64
+    environment:
+      authServer__baseUrl: "https://kc-openid4vc.is.enmeshed.eu/realms/enmeshed-openid4vci"
+    volumes:
+      - ./service-config.json:/usr/app/config.json
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - mongodb
+    networks:
+      - default
+
+  connector:
+    image: ghcr.io/nmshd/connector:7.3.0-openid4vc.1@sha256:4be31417d10d67454d7732949601a2136417fefc78107e3751eccea7946a7aca
+    environment:
+      CUSTOM_CONFIG_LOCATION: "/config.json"
+      transportLibrary__baseUrl: "http://consumer-api:8080"
+      transportLibrary__platformClientId: test
+      transportLibrary__platformClientSecret: test
+      transportLibrary__addressGenerationHostnameOverride: localhost
+      database__connectionString: mongodb://root:example@mongodb:27017
+      infrastructure__httpServer__authentication__apiKey__keys__default__key: aVeryCoolApiKeyWith30CharactersOr+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - mongodb
+    networks:
+      - default
+      - local-test-backbone
+
+  mongodb:
+    image: mongo@sha256:c23684919810f0341e58744987e4b1c510fb8becdae850217d2d04b6fa7605e7
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    networks:
+      - default
+
+networks:
+  default:
+    name: runtime-oid4vc-tests-network
+  local-test-backbone:
+    name: local-test-backbone
+    external: true
