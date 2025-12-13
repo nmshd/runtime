@@ -1,4 +1,4 @@
-import { OpenId4VciResolvedCredentialOffer, OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
+import { OpenId4VciRequestTokenResponse, OpenId4VciResolvedCredentialOffer, OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
 import { VerifiableCredential } from "@nmshd/content";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../consumption/ConsumptionController";
@@ -54,9 +54,14 @@ export class OpenId4VcController extends ConsumptionBaseController {
     public async requestCredentials(
         credentialOffer: OpenId4VciResolvedCredentialOffer,
         credentialConfigurationIds: string[],
-        pinCode?: string
+        pinCode?: string,
+        accessToken?: OpenId4VciRequestTokenResponse
     ): Promise<OpenId4VciCredentialResponseJSON[]> {
-        const credentialResponses = await this.holder.requestCredentials(credentialOffer, { credentialConfigurationIds: credentialConfigurationIds, txCode: pinCode });
+        const credentialResponses = await this.holder.requestCredentials(credentialOffer, {
+            credentialConfigurationIds: credentialConfigurationIds,
+            txCode: pinCode,
+            token: accessToken
+        });
 
         const mappedResponses = credentialResponses.map((response) => ({
             claimFormat: response.record.firstCredential.claimFormat,

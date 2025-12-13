@@ -17238,7 +17238,10 @@ export const RequestCredentialsRequest: any = {
                     "items": {
                         "type": "string"
                     }
-                }
+                },
+                "accessToken": {
+                    "type": "string"
+                },
             },
             "required": [
                 "credentialConfigurationIds",

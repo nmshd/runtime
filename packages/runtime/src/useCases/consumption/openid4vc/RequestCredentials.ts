@@ -1,4 +1,5 @@
-import { OpenId4VciResolvedCredentialOffer } from "@credo-ts/openid4vc";
+/* eslint-disable @typescript-eslint/naming-convention */
+import { OpenId4VciRequestTokenResponse, OpenId4VciResolvedCredentialOffer } from "@credo-ts/openid4vc";
 import { Result } from "@js-soft/ts-utils";
 import { OpenId4VcController, OpenId4VciCredentialResponseJSON } from "@nmshd/consumption";
 import { Inject } from "@nmshd/typescript-ioc";
@@ -7,6 +8,7 @@ import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
 export interface AbstractRequestCredentialsRequest<T> {
     credentialOffer: T;
     pinCode?: string;
+    accessToken?: string;
     credentialConfigurationIds: string[];
 }
 
@@ -33,7 +35,20 @@ export class RequestCredentialsUseCase extends UseCase<RequestCredentialsRequest
     }
 
     protected override async executeInternal(request: RequestCredentialsRequest): Promise<Result<RequestCredentialsResponse>> {
-        const credentialResponses = await this.openId4VcController.requestCredentials(request.credentialOffer, request.credentialConfigurationIds, request.pinCode);
+        let token: OpenId4VciRequestTokenResponse | undefined;
+        if (request.accessToken !== undefined) {
+            // credo provides its own machanism to handle authentication and therefore expects the token to be in this format
+            // as we however can not use credo's solution from within the app calling this code, we need to manually create this structure here
+            token = {
+                accessToken: request.accessToken,
+                accessTokenResponse: {
+                    access_token: request.accessToken,
+                    token_type: "bearer"
+                }
+            };
+        }
+
+        const credentialResponses = await this.openId4VcController.requestCredentials(request.credentialOffer, request.credentialConfigurationIds, request.pinCode, token);
         return Result.ok({ credentialResponses: credentialResponses });
     }
 }
