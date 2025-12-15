@@ -130,6 +130,7 @@ export class AppStringProcessor {
 
         if (requestCredentialsResult.isError) {
             if (!requestCredentialsResult.error.equals(AppRuntimeErrors.appStringProcessor.passwordNotProvided())) {
+                await uiBridge.showError(requestCredentialsResult.error);
             }
 
             return Result.ok(undefined);
