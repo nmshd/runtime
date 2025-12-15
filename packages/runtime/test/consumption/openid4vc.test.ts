@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/naming-convention */
-import { OpenId4VciRequestTokenResponse } from "@credo-ts/openid4vc";
-import { VerifiableCredentialJSON } from "@nmshd/content";
+import { VerifiableCredential, VerifiableCredentialJSON } from "@nmshd/content";
 import axios, { AxiosInstance } from "axios";
 import jwtDecode from "jwt-decode";
 import * as client from "openid-client";
@@ -14,6 +12,12 @@ const fetchInstance: typeof fetch = (async (input: any, init: any) => {
     const response = await undiciFetch(input, { ...init, dispatcher: new UndiciAgent({}) });
     return response;
 }) as unknown as typeof fetch;
+
+interface CredentialData {
+    pernr: string;
+    name: string;
+    lob: string;
+}
 
 const runtimeServiceProvider = new RuntimeServiceProvider(fetchInstance);
 let runtimeServices1: TestRuntimeServices;
@@ -130,7 +134,7 @@ describe("custom openid4vc service", () => {
             expect(storeResult).toBeSuccessful();
             expect(typeof storeResult.value.id).toBe("string");
 
-            const credential = storeResult.value.content.value as unknown as VerifiableCredentialJSON;
+            const credential = storeResult.value.content.value as unknown as VerifiableCredential;
             expect(credential.displayInformation?.[0].logo).toBeDefined();
             expect(credential.displayInformation?.[0].name).toBe("Employee ID Card");
         });
@@ -176,7 +180,7 @@ describe("custom openid4vc service", () => {
             expect(storeResult).toBeSuccessful();
             expect(typeof storeResult.value.id).toBe("string");
 
-            const credential = storeResult.value.content.value as unknown as VerifiableCredentialJSON;
+            const credential = storeResult.value.content.value as unknown as VerifiableCredential;
             expect(credential.displayInformation?.[0].logo).toBeDefined();
             expect(credential.displayInformation?.[0].name).toBe("Employee ID Card");
 
