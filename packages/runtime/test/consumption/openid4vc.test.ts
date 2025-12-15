@@ -86,7 +86,8 @@ describe("custom openid4vc service", () => {
 
             const credentialResponseResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
                 credentialOffer,
-                credentialConfigurationIds: requestedCredentials
+                credentialConfigurationIds: requestedCredentials,
+                authentication: {}
             });
             const storeResult = await runtimeServices1.consumption.openId4Vc.storeCredentials({ credentialResponses: credentialResponseResult.value.credentialResponses });
             expect(storeResult).toBeSuccessful();
@@ -125,7 +126,7 @@ describe("custom openid4vc service", () => {
             const requestResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
                 credentialOffer,
                 credentialConfigurationIds: requestedCredentials,
-                pinCode: pin
+                authentication: { pinCode: pin }
             });
 
             const storeResult = await runtimeServices1.consumption.openId4Vc.storeCredentials({ credentialResponses: requestResult.value.credentialResponses });
@@ -169,12 +170,12 @@ describe("custom openid4vc service", () => {
                 scope: "wallet-demo"
             });
 
-            const requestedCredentials = await runtimeServices1.consumption.openId4Vc.requestCredentials({
+            const credentialRequestResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
                 credentialOffer,
                 credentialConfigurationIds: requestedCredentialIds,
-                accessToken: grantReq.access_token
+                authentication: { accessToken: grantReq.access_token }
             });
-            const storeResult = await runtimeServices1.consumption.openId4Vc.storeCredentials({ credentialResponses: requestedCredentials.value.credentialResponses });
+            const storeResult = await runtimeServices1.consumption.openId4Vc.storeCredentials({ credentialResponses: credentialRequestResult.value.credentialResponses });
 
             expect(storeResult).toBeSuccessful();
             expect(typeof storeResult.value.id).toBe("string");
@@ -183,15 +184,79 @@ describe("custom openid4vc service", () => {
             expect(credential.displayInformation?.[0].logo).toBeDefined();
             expect(credential.displayInformation?.[0].name).toBe("Employee ID Card");
 
-            // decode the sdjwt to ensure that it was personalized for the test user
-
+            // Decode the SD-JWT to verify that the issued credential contains personalized data for the test user.
             const encodedSdJwt = credential.value as string;
 
-            const decoded = jwtDecode<CredentialData>(encodedSdJwt);
+            const decoded = jwtDecode<{ pernr: string; lob: string }>(encodedSdJwt);
 
             // these values are set in the test authorization server for the test user
             expect(decoded.pernr).toBe("0019122023");
             expect(decoded.lob).toBe("Test BU");
+        });
+
+        test("should be able to process a given sd-jwt credential presentation", async () => {
+            // Ensure the first test has completed
+            expect(credentialOfferUrl).toBeDefined();
+
+            const response = await axiosInstance.post("/presentation/presentationRequests", {
+                pex: {
+                    id: "anId",
+                    purpose: "To prove you work here",
+
+                    // eslint-disable-next-line @typescript-eslint/naming-convention
+                    input_descriptors: [
+                        {
+                            id: "EmployeeIdCard",
+                            format: {
+                                // eslint-disable-next-line @typescript-eslint/naming-convention
+                                "vc+sd-jwt": {
+                                    // eslint-disable-next-line @typescript-eslint/naming-convention
+                                    "sd-jwt_alg_values": [
+                                        "RS256",
+                                        "PS256",
+                                        "HS256",
+                                        "ES256",
+                                        "ES256K",
+                                        "RS384",
+                                        "PS384",
+                                        "HS384",
+                                        "ES384",
+                                        "RS512",
+                                        "PS512",
+                                        "HS512",
+                                        "ES512",
+                                        "EdDSA"
+                                    ]
+                                }
+                            },
+                            constraints: {
+                                fields: [
+                                    {
+                                        path: ["$.vct"],
+                                        filter: {
+                                            type: "string",
+                                            pattern: "EmployeeIdCard"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                version: "v1.draft21"
+            });
+            expect(response.status).toBe(200);
+            const responseData = await response.data;
+
+            const result = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl: responseData.result.presentationRequest });
+            expect(result.value.matchingCredentials).toHaveLength(1);
+
+            const request = result.value.authorizationRequest;
+            expect(request.presentationExchange!.credentialsForRequest.areRequirementsSatisfied).toBe(true);
+
+            const presentationResult = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest: result.value.authorizationRequest });
+            expect(presentationResult).toBeSuccessful();
+            expect(presentationResult.value.status).toBe(200);
         });
 
         test("getting all verifiable credentials should not return an empty list", async () => {
@@ -233,7 +298,8 @@ describe("custom openid4vc service", () => {
 
             const credentialResponseResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
                 credentialOffer,
-                credentialConfigurationIds: requestedCredentials
+                credentialConfigurationIds: requestedCredentials,
+                authentication: {}
             });
             const storeResult = await runtimeServices1.consumption.openId4Vc.storeCredentials({ credentialResponses: credentialResponseResult.value.credentialResponses });
             expect(storeResult).toBeSuccessful();
@@ -463,7 +529,8 @@ describe("EUDIPLO", () => {
 
         const credentialResponsesResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
             credentialOffer: resolveCredentialOfferResult.value.credentialOffer,
-            credentialConfigurationIds: [eudiploCredentialIdInConfiguration]
+            credentialConfigurationIds: [eudiploCredentialIdInConfiguration],
+            authentication: {}
         });
         const storeCredentialsResponse = await runtimeServices1.consumption.openId4Vc.storeCredentials({
             credentialResponses: credentialResponsesResult.value.credentialResponses
