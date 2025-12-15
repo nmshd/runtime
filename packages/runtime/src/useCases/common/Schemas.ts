@@ -17224,14 +17224,13 @@ export const RequestCredentialsRequest: any = {
     "$ref": "#/definitions/RequestCredentialsRequest",
     "definitions": {
         "RequestCredentialsRequest": {
+            "$ref": "#/definitions/AbstractRequestCredentialsRequest%3Calias-2033348025-74138-74264-2033348025-0-218439%3Cstring%2Cany%3E%3E"
+        },
+        "AbstractRequestCredentialsRequest<alias-2033348025-74138-74264-2033348025-0-218439<string,any>>": {
             "type": "object",
-            "additionalProperties": false,
             "properties": {
                 "credentialOffer": {
                     "type": "object"
-                },
-                "pinCode": {
-                    "type": "string"
                 },
                 "credentialConfigurationIds": {
                     "type": "array",
@@ -17239,13 +17238,41 @@ export const RequestCredentialsRequest: any = {
                         "type": "string"
                     }
                 },
-                "accessToken": {
-                    "type": "string"
-                },
+                "authentication": {
+                    "$ref": "#/definitions/Oid4vciAuthentication"
+                }
             },
             "required": [
+                "credentialOffer",
                 "credentialConfigurationIds",
-                "credentialOffer"
+                "authentication"
+            ],
+            "additionalProperties": false
+        },
+        "Oid4vciAuthentication": {
+            "anyOf": [
+                {
+                    "type": "object",
+                    "additionalProperties": false
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "pinCode": {
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "accessToken": {
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false
+                }
             ]
         }
     }
