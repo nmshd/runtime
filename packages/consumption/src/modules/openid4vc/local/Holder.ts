@@ -1,11 +1,5 @@
 import { BaseRecord, ClaimFormat, DidJwk, DidKey, InjectionSymbols, JwkDidCreateOptions, KeyDidCreateOptions, Kms, MdocRecord, SdJwtVcRecord, X509Module } from "@credo-ts/core";
-import {
-    OpenId4VciCredentialResponse,
-    OpenId4VciRequestTokenResponse,
-    OpenId4VcModule,
-    type OpenId4VciResolvedCredentialOffer,
-    type OpenId4VpResolvedAuthorizationRequest
-} from "@credo-ts/openid4vc";
+import { OpenId4VciCredentialResponse, OpenId4VcModule, type OpenId4VciResolvedCredentialOffer, type OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
 import { AccountController } from "@nmshd/transport";
 import { AttributesController, OwnIdentityAttribute } from "../../attributes";
 import { BaseAgent } from "./BaseAgent";
@@ -45,15 +39,24 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         options: {
             credentialConfigurationIds: string[];
             txCode?: string;
-            token?: OpenId4VciRequestTokenResponse;
+            token?: string;
         }
     ): Promise<OpenId4VciCredentialResponse[]> {
         const tokenResponse =
-            options.token ??
-            (await this.agent.openid4vc.holder.requestToken({
-                resolvedCredentialOffer,
-                txCode: options.txCode
-            }));
+            options.token !== undefined
+                ? {
+                      accessToken: options.token,
+                      accessTokenResponse: {
+                          // eslint-disable-next-line @typescript-eslint/naming-convention
+                          access_token: options.token,
+                          // eslint-disable-next-line @typescript-eslint/naming-convention
+                          token_type: "bearer"
+                      }
+                  }
+                : await this.agent.openid4vc.holder.requestToken({
+                      resolvedCredentialOffer,
+                      txCode: options.txCode
+                  });
 
         const credentialResponse = await this.agent.openid4vc.holder.requestCredentials({
             resolvedCredentialOffer,
@@ -99,7 +102,7 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
                     keys: [publicJwk]
                 };
             },
-            ...(options.token ?? tokenResponse)
+            ...tokenResponse
         });
 
         this.agent.config.logger.info("Credential response:", credentialResponse);
