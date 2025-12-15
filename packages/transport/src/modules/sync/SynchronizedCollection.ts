@@ -103,15 +103,21 @@ export class SynchronizedCollection implements IDatabaseCollection {
         return await this.parent.read(id);
     }
 
+    public async patch(oldDoc: any, newObject: CoreSynchronizable): Promise<any> {
+        const patchedObject = await this.parent.patch(oldDoc, newObject);
+
+        if (this.datawalletModifications) {
+            await this.createDatawalletModificationForUpdatedObject(oldDoc, (newObject.constructor as any).fromAny(patchedObject) as CoreSynchronizable);
+        }
+
+        return patchedObject;
+    }
+
     public async update(oldDoc: any, newObject: CoreSynchronizable): Promise<any> {
-        const oldObject = Serializable.fromUnknown(oldDoc);
-
-        const newObjectJson = newObject.toJSON();
-
         if (typeof globalThis.process === "object" && globalThis.process.env.CI) {
             const databaseObject = Serializable.fromUnknown(await this.parent.read(newObject.id.toString()));
 
-            const readDiff = jsonpatch.compare(databaseObject.toJSON(), oldObject.toJSON());
+            const readDiff = jsonpatch.compare(databaseObject.toJSON(), oldDoc);
             if (readDiff.length > 0) {
                 // eslint-disable-next-line no-console
                 console.error(`
@@ -134,7 +140,17 @@ ${new Error().stack}`);
             return await this.parent.update(oldDoc, newObject);
         }
 
-        const diff = jsonpatch.compare(oldObject.toJSON(), newObjectJson);
+        await this.createDatawalletModificationForUpdatedObject(oldDoc, newObject);
+
+        return await this.parent.update(oldDoc, newObject);
+    }
+
+    private async createDatawalletModificationForUpdatedObject(oldDoc: any, newObject: CoreSynchronizable): Promise<void> {
+        if (!this.datawalletModifications) throw new Error("This method can only be called when the datawallet is enabled.");
+
+        const newObjectJson = newObject.toJSON();
+
+        const diff = jsonpatch.compare(oldDoc, newObjectJson);
 
         const changedRootProperties: string[] = [];
         for (const diffItem of diff) {
@@ -148,7 +164,7 @@ ${new Error().stack}`);
         const haveMetadataPropertiesChanged = _.intersection(newObject.metadataProperties, changedRootProperties).length !== 0;
         const haveUserdataPropertiesChanged = _.intersection(newObject.userdataProperties, changedRootProperties).length !== 0;
 
-        const objectIdentifier = (newObject as any)["id"];
+        const objectIdentifier = newObject["id"];
 
         if (haveTechnicalPropertiesChanged) {
             const payload = _.pick(newObjectJson, newObject.technicalProperties);
@@ -209,8 +225,6 @@ ${new Error().stack}`);
                 })
             );
         }
-
-        return await this.parent.update(oldDoc, newObject);
     }
 
     public async delete(object: CoreSynchronizable | ICoreSynchronizable): Promise<boolean> {
