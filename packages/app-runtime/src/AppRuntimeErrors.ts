@@ -28,8 +28,16 @@ class AppStringProcessor {
         return new ApplicationError("error.appruntime.appStringProcessor.passwordNotProvided", "No password was provided.");
     }
 
+    public externalOauthRegistrationNotProvided(): ApplicationError {
+        return new ApplicationError("error.appruntime.appStringProcessor.externalOauthRegistrationNotProvided", "No external OAuth registration information was provided.");
+    }
+
     public passwordRetryLimitReached(): ApplicationError {
         return new ApplicationError("error.appruntime.appStringProcessor.passwordRetryLimitReached", "The maximum number of attempts to enter the password was reached.");
+    }
+
+    public externalOauthRegistrationRetryLimitReached(): ApplicationError {
+        return new ApplicationError("error.appruntime.appStringProcessor.externalOauthRegistrationRetryLimitReached", "The maximum number of attempts to register was reached.");
     }
 
     public noDeviceOnboardingCode(): ApplicationError {

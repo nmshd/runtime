@@ -1,7 +1,7 @@
 import { OpenId4VciResolvedCredentialOffer } from "@credo-ts/openid4vc";
 import { ILogger, ILoggerFactory } from "@js-soft/logging-abstractions";
 import { Serializable } from "@js-soft/ts-serval";
-import { ApplicationError, EventBus, Result } from "@js-soft/ts-utils";
+import { EventBus, Result } from "@js-soft/ts-utils";
 import { ICoreAddress, Reference } from "@nmshd/core-types";
 import { AnonymousServices, DeviceMapper, RuntimeServices } from "@nmshd/runtime";
 import { BackboneIds, TokenContentDeviceSharedSecret } from "@nmshd/transport";
@@ -89,13 +89,29 @@ export class AppStringProcessor {
     }
 
     private async processAuthCodeOpenIDCredentialOffer(
-        _services: RuntimeServices,
-        _account: LocalAccountDTO,
-        _credentialOffer: OpenId4VciResolvedCredentialOffer
+        services: RuntimeServices,
+        account: LocalAccountDTO,
+        credentialOffer: OpenId4VciResolvedCredentialOffer
     ): Promise<Result<void>> {
-        // Not implemented yet
         const uiBridge = await this.runtime.uiBridge();
-        await uiBridge.showError(new ApplicationError("error.app.openid4vc.authorizationCodeGrantNotSupported", ""));
+
+        const requestCredentialsResult = await this._fetchOAuthProtectedItem(
+            async (token: string) =>
+                await services.consumptionServices.openId4Vc.requestCredentials({
+                    credentialOffer: credentialOffer,
+                    credentialConfigurationIds: credentialOffer.credentialOfferPayload.credential_configuration_ids,
+                    authentication: { accessToken: token }
+                }),
+            credentialOffer.metadata.authorizationServers[0].issuer
+        );
+
+        if (requestCredentialsResult.isError) {
+            await uiBridge.showError(requestCredentialsResult.error);
+
+            return Result.ok(undefined);
+        }
+
+        await uiBridge.showResolvedCredentialOffer(account, requestCredentialsResult.value.credentialResponses, credentialOffer.metadata.credentialIssuer.display);
         return Result.ok(undefined);
     }
 
@@ -115,7 +131,7 @@ export class AppStringProcessor {
                           await services.consumptionServices.openId4Vc.requestCredentials({
                               credentialOffer: credentialOffer,
                               credentialConfigurationIds: credentialOffer.credentialOfferPayload.credential_configuration_ids,
-                              pinCode: password
+                              authentication: { pinCode: password }
                           }),
                       {
                           passwordType: preAuthorizedCodeGrant.tx_code.input_mode === "text" ? "pw" : `pin${preAuthorizedCodeGrant.tx_code.length ?? 4}`
@@ -125,7 +141,8 @@ export class AppStringProcessor {
               ).result
             : await services.consumptionServices.openId4Vc.requestCredentials({
                   credentialOffer: credentialOffer,
-                  credentialConfigurationIds: credentialOffer.credentialOfferPayload.credential_configuration_ids
+                  credentialConfigurationIds: credentialOffer.credentialOfferPayload.credential_configuration_ids,
+                  authentication: {}
               });
 
         if (requestCredentialsResult.isError) {
@@ -349,6 +366,20 @@ export class AppStringProcessor {
         return {
             result: Result.fail(AppRuntimeErrors.appStringProcessor.passwordRetryLimitReached())
         };
+    }
+
+    private async _fetchOAuthProtectedItem<T>(fetchFunction: (token: string) => Promise<Result<T>>, authorizationChallengeEndpoint: string): Promise<Result<T>> {
+        const uiBridge = await this.runtime.uiBridge();
+
+        const tokenResult = await uiBridge.externalOAuthRegistration(authorizationChallengeEndpoint);
+        if (tokenResult.isError) {
+            return Result.fail(AppRuntimeErrors.appStringProcessor.externalOauthRegistrationNotProvided());
+        }
+
+        const token = tokenResult.value;
+
+        const result = await fetchFunction(token);
+        return result;
     }
 
     private async selectAccount(forIdentityTruncated?: string): Promise<Result<LocalAccountDTO | undefined>> {

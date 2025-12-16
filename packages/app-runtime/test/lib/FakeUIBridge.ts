@@ -41,4 +41,8 @@ export class FakeUIBridge implements IUIBridge {
     public enterPassword(_passwordType: "pw" | "pin", _pinLength?: number, _attempt?: number): Promise<Result<string>> {
         return Promise.resolve(Result.fail(new ApplicationError("not implemented", "not implemented")));
     }
+
+    public externalOAuthRegistration(_authenticationServerUrl: string): Promise<Result<string>> {
+        return Promise.resolve(Result.fail(new ApplicationError("not implemented", "not implemented")));
+    }
 }

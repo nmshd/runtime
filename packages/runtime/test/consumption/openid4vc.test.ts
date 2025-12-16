@@ -1,6 +1,6 @@
 import { VerifiableCredential, VerifiableCredentialJSON } from "@nmshd/content";
 import axios, { AxiosInstance } from "axios";
-import jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import * as client from "openid-client";
 import path from "path";
 import { DockerComposeEnvironment, GenericContainer, StartedDockerComposeEnvironment, StartedTestContainer, Wait } from "testcontainers";
@@ -12,12 +12,6 @@ const fetchInstance: typeof fetch = (async (input: any, init: any) => {
     const response = await undiciFetch(input, { ...init, dispatcher: new UndiciAgent({}) });
     return response;
 }) as unknown as typeof fetch;
-
-interface CredentialData {
-    pernr: string;
-    name: string;
-    lob: string;
-}
 
 const runtimeServiceProvider = new RuntimeServiceProvider(fetchInstance);
 let runtimeServices1: TestRuntimeServices;
@@ -249,7 +243,7 @@ describe("custom openid4vc service", () => {
             const responseData = await response.data;
 
             const result = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl: responseData.result.presentationRequest });
-            expect(result.value.matchingCredentials).toHaveLength(1);
+            expect(result.value.matchingCredentials).toHaveLength(3);
 
             const request = result.value.authorizationRequest;
             expect(request.presentationExchange!.credentialsForRequest.areRequirementsSatisfied).toBe(true);
@@ -309,58 +303,49 @@ describe("custom openid4vc service", () => {
             expect(credential.displayInformation?.[0].logo).toBeDefined();
             expect(credential.displayInformation?.[0].name).toBe("Employee ID Card");
         });
-        const acceptanceResult = await consumptionServices.openId4Vc.acceptCredentialOffer({
-            credentialOffer,
-            credentialConfigurationIds: requestedCredentials
+
+        test("should be able to process a credential offer with pin authentication", async () => {
+            const response = await axiosInstance.post("/issuance/credentialOffers", {
+                credentialConfigurationIds: ["EmployeeIdCard-sdjwt"],
+                authentication: "pin"
+            });
+
+            expect(response.status).toBe(200);
+            const responseData = await response.data;
+
+            credentialOfferUrl = responseData.result.credentialOffer;
+            const pin = responseData.result.pin;
+
+            // remove later
+            expect(pin).toBeDefined();
+
+            const result = await runtimeServices1.consumption.openId4Vc.resolveCredentialOffer({
+                credentialOfferUrl
+            });
+
+            expect(result).toBeSuccessful();
+
+            // analogously to the app code all presented credentials are accepted
+            const credentialOffer = result.value.credentialOffer;
+
+            // determine which credentials to pick from the offer for all supported types of offers
+            const requestedCredentials = credentialOffer.credentialOfferPayload.credential_configuration_ids;
+
+            const requesteResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
+                credentialOffer,
+                credentialConfigurationIds: requestedCredentials,
+                authentication: { pinCode: pin }
+            });
+
+            const acceptanceResult = await runtimeServices1.consumption.openId4Vc.storeCredentials({ credentialResponses: requesteResult.value.credentialResponses });
+
+            expect(acceptanceResult).toBeSuccessful();
+            expect(typeof acceptanceResult.value.id).toBe("string");
+
+            const credential = acceptanceResult.value.content.value as unknown as VerifiableCredential;
+            expect(credential.displayInformation?.[0].logo).toBeDefined();
+            expect(credential.displayInformation?.[0].name).toBe("Employee ID Card");
         });
-        expect(acceptanceResult).toBeSuccessful();
-        expect(typeof acceptanceResult.value.id).toBe("string");
-
-        const credential = acceptanceResult.value.content.value as unknown as VerifiableCredential;
-        expect(credential.displayInformation?.[0].logo).toBeDefined();
-        expect(credential.displayInformation?.[0].name).toBe("Employee ID Card");
-    });
-
-    test("should be able to process a credential offer with pin authentication", async () => {
-        const response = await axiosInstance.post("/issuance/credentialOffers", {
-            credentialConfigurationIds: ["EmployeeIdCard-sdjwt"],
-            authentication: "pin"
-        });
-
-        expect(response.status).toBe(200);
-        const responseData = await response.data;
-
-        credentialOfferUrl = responseData.result.credentialOffer;
-        const pin = responseData.result.pin;
-
-        // remove later
-        expect(pin).toBeDefined();
-
-        const result = await consumptionServices.openId4Vc.resolveCredentialOffer({
-            credentialOfferUrl
-        });
-
-        expect(result).toBeSuccessful();
-
-        // analogously to the app code all presented credentials are accepted
-        const credentialOffer = result.value.credentialOffer;
-
-        // determine which credentials to pick from the offer for all supported types of offers
-        const requestedCredentials = credentialOffer.credentialOfferPayload.credential_configuration_ids;
-
-        const acceptanceResult = await consumptionServices.openId4Vc.acceptCredentialOffer({
-            credentialOffer,
-            credentialConfigurationIds: requestedCredentials,
-            pinCode: pin
-        });
-
-        expect(acceptanceResult).toBeSuccessful();
-        expect(typeof acceptanceResult.value.id).toBe("string");
-
-        const credential = acceptanceResult.value.content.value as unknown as VerifiableCredential;
-        expect(credential.displayInformation?.[0].logo).toBeDefined();
-        expect(credential.displayInformation?.[0].name).toBe("Employee ID Card");
-    });
 
         test("should be able to process a given mdoc credential presentation", async () => {
             // Ensure the first test has completed
