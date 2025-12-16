@@ -107,8 +107,8 @@ export class MockUIBridge implements IUIBridge {
         return Promise.resolve(Result.ok(password));
     }
 
-    public externalOAuthRegistration(url: string, attempt?: number | undefined): Promise<Result<string>> {
-        this._calls.push({ method: "externalOAuthRegistration", url, attempt });
+    public externalOAuthRegistration(url: string): Promise<Result<string>> {
+        this._calls.push({ method: "externalOAuthRegistration", url });
         return Promise.resolve(Result.ok("test-token"));
     }
 }

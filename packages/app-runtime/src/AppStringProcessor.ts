@@ -146,7 +146,9 @@ export class AppStringProcessor {
               });
 
         if (requestCredentialsResult.isError) {
-            await uiBridge.showError(requestCredentialsResult.error);
+            if (!requestCredentialsResult.error.equals(AppRuntimeErrors.appStringProcessor.passwordNotProvided())) {
+                await uiBridge.showError(requestCredentialsResult.error);
+            }
 
             return Result.ok(undefined);
         }
