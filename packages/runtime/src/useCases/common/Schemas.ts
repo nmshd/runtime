@@ -17239,7 +17239,30 @@ export const RequestCredentialsRequest: any = {
                     }
                 },
                 "authentication": {
-                    "$ref": "#/definitions/Oid4vciAuthentication"
+                    "anyOf": [
+                        {
+                            "type": "object",
+                            "additionalProperties": false
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "pinCode": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "accessToken": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    ]
                 }
             },
             "required": [
@@ -17248,32 +17271,6 @@ export const RequestCredentialsRequest: any = {
                 "authentication"
             ],
             "additionalProperties": false
-        },
-        "Oid4vciAuthentication": {
-            "anyOf": [
-                {
-                    "type": "object",
-                    "additionalProperties": false
-                },
-                {
-                    "type": "object",
-                    "properties": {
-                        "pinCode": {
-                            "type": "string"
-                        }
-                    },
-                    "additionalProperties": false
-                },
-                {
-                    "type": "object",
-                    "properties": {
-                        "accessToken": {
-                            "type": "string"
-                        }
-                    },
-                    "additionalProperties": false
-                }
-            ]
         }
     }
 }
