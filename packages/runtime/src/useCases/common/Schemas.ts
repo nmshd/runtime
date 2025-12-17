@@ -17227,50 +17227,73 @@ export const RequestCredentialsRequest: any = {
             "$ref": "#/definitions/AbstractRequestCredentialsRequest%3Calias-2033348025-74138-74264-2033348025-0-218439%3Cstring%2Cany%3E%3E"
         },
         "AbstractRequestCredentialsRequest<alias-2033348025-74138-74264-2033348025-0-218439<string,any>>": {
-            "type": "object",
-            "properties": {
-                "credentialOffer": {
-                    "type": "object"
-                },
-                "credentialConfigurationIds": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "authentication": {
-                    "anyOf": [
-                        {
-                            "type": "object",
-                            "additionalProperties": false
+            "anyOf": [
+                {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "credentialOffer": {
+                            "type": "object"
                         },
-                        {
-                            "type": "object",
-                            "properties": {
-                                "pinCode": {
-                                    "type": "string"
-                                }
-                            },
-                            "additionalProperties": false
-                        },
-                        {
-                            "type": "object",
-                            "properties": {
-                                "accessToken": {
-                                    "type": "string"
-                                }
-                            },
-                            "additionalProperties": false
+                        "credentialConfigurationIds": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
                         }
+                    },
+                    "required": [
+                        "credentialConfigurationIds",
+                        "credentialOffer"
+                    ]
+                },
+                {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "pinCode": {
+                            "type": "string"
+                        },
+                        "credentialOffer": {
+                            "type": "object"
+                        },
+                        "credentialConfigurationIds": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "required": [
+                        "credentialConfigurationIds",
+                        "credentialOffer",
+                        "pinCode"
+                    ]
+                },
+                {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "accessToken": {
+                            "type": "string"
+                        },
+                        "credentialOffer": {
+                            "type": "object"
+                        },
+                        "credentialConfigurationIds": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "required": [
+                        "accessToken",
+                        "credentialConfigurationIds",
+                        "credentialOffer"
                     ]
                 }
-            },
-            "required": [
-                "credentialOffer",
-                "credentialConfigurationIds",
-                "authentication"
-            ],
-            "additionalProperties": false
+            ]
         }
     }
 }

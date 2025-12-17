@@ -105,7 +105,7 @@ export class AppStringProcessor {
                 await services.consumptionServices.openId4Vc.requestCredentials({
                     credentialOffer: credentialOffer,
                     credentialConfigurationIds: credentialOffer.credentialOfferPayload.credential_configuration_ids,
-                    authentication: { accessToken: token }
+                    accessToken: token
                 }),
             // TODO: Multiple authorization servers not supported yet
             credentialOffer.metadata.authorizationServers[0].issuer
@@ -139,7 +139,7 @@ export class AppStringProcessor {
                           await services.consumptionServices.openId4Vc.requestCredentials({
                               credentialOffer: credentialOffer,
                               credentialConfigurationIds: credentialOffer.credentialOfferPayload.credential_configuration_ids,
-                              authentication: { pinCode: password }
+                              pinCode: password
                           }),
                       {
                           passwordType: preAuthorizedCodeGrant.tx_code.input_mode === "text" ? "pw" : `pin${preAuthorizedCodeGrant.tx_code.length ?? 4}`
@@ -149,8 +149,7 @@ export class AppStringProcessor {
               ).result
             : await services.consumptionServices.openId4Vc.requestCredentials({
                   credentialOffer: credentialOffer,
-                  credentialConfigurationIds: credentialOffer.credentialOfferPayload.credential_configuration_ids,
-                  authentication: {}
+                  credentialConfigurationIds: credentialOffer.credentialOfferPayload.credential_configuration_ids
               });
 
         if (requestCredentialsResult.isError) {

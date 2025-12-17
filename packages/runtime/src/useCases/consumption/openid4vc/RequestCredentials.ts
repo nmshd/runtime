@@ -4,11 +4,10 @@ import { OpenId4VcController, OpenId4VciCredentialResponseJSON } from "@nmshd/co
 import { Inject } from "@nmshd/typescript-ioc";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
-export interface AbstractRequestCredentialsRequest<T> {
+export type AbstractRequestCredentialsRequest<T> = {
     credentialOffer: T;
     credentialConfigurationIds: string[];
-    authentication: {} | { pinCode?: string } | { accessToken?: string };
-}
+} & ({} | { pinCode: string } | { accessToken: string });
 
 export interface RequestCredentialsResponse {
     credentialResponses: OpenId4VciCredentialResponseJSON[];
@@ -36,8 +35,8 @@ export class RequestCredentialsUseCase extends UseCase<RequestCredentialsRequest
         const credentialResponses = await this.openId4VcController.requestCredentials(
             request.credentialOffer,
             request.credentialConfigurationIds,
-            "pinCode" in request.authentication ? request.authentication.pinCode : undefined,
-            "accessToken" in request.authentication ? request.authentication.accessToken : undefined
+            "pinCode" in request ? request.pinCode : undefined,
+            "accessToken" in request ? request.accessToken : undefined
         );
         return Result.ok({ credentialResponses: credentialResponses });
     }

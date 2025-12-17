@@ -59,8 +59,8 @@ export class OpenId4VcController extends ConsumptionBaseController {
     ): Promise<OpenId4VciCredentialResponseJSON[]> {
         const credentialResponses = await this.holder.requestCredentials(credentialOffer, {
             credentialConfigurationIds: credentialConfigurationIds,
-            txCode: pinCode,
-            token: accessToken
+            pinCode: pinCode,
+            accessToken: accessToken
         });
 
         const mappedResponses = credentialResponses.map((response) => ({

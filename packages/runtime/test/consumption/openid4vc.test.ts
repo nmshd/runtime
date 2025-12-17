@@ -80,8 +80,7 @@ describe("custom openid4vc service", () => {
 
             const credentialResponseResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
                 credentialOffer,
-                credentialConfigurationIds: requestedCredentials,
-                authentication: {}
+                credentialConfigurationIds: requestedCredentials
             });
             const storeResult = await runtimeServices1.consumption.openId4Vc.storeCredentials({ credentialResponses: credentialResponseResult.value.credentialResponses });
             expect(storeResult).toBeSuccessful();
@@ -120,7 +119,7 @@ describe("custom openid4vc service", () => {
             const requestResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
                 credentialOffer,
                 credentialConfigurationIds: requestedCredentials,
-                authentication: { pinCode: pin }
+                pinCode: pin
             });
 
             const storeResult = await runtimeServices1.consumption.openId4Vc.storeCredentials({ credentialResponses: requestResult.value.credentialResponses });
@@ -167,7 +166,7 @@ describe("custom openid4vc service", () => {
             const credentialRequestResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
                 credentialOffer,
                 credentialConfigurationIds: requestedCredentialIds,
-                authentication: { accessToken: grantReq.access_token }
+                accessToken: grantReq.access_token
             });
             const storeResult = await runtimeServices1.consumption.openId4Vc.storeCredentials({ credentialResponses: credentialRequestResult.value.credentialResponses });
 
@@ -292,8 +291,7 @@ describe("custom openid4vc service", () => {
 
             const credentialResponseResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
                 credentialOffer,
-                credentialConfigurationIds: requestedCredentials,
-                authentication: {}
+                credentialConfigurationIds: requestedCredentials
             });
             const storeResult = await runtimeServices1.consumption.openId4Vc.storeCredentials({ credentialResponses: credentialResponseResult.value.credentialResponses });
             expect(storeResult).toBeSuccessful();
@@ -523,8 +521,7 @@ describe("EUDIPLO", () => {
 
         const credentialResponsesResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
             credentialOffer: resolveCredentialOfferResult.value.credentialOffer,
-            credentialConfigurationIds: [eudiploCredentialIdInConfiguration],
-            authentication: {}
+            credentialConfigurationIds: [eudiploCredentialIdInConfiguration]
         });
         const storeCredentialsResponse = await runtimeServices1.consumption.openId4Vc.storeCredentials({
             credentialResponses: credentialResponsesResult.value.credentialResponses

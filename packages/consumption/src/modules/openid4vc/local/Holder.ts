@@ -38,24 +38,24 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         resolvedCredentialOffer: OpenId4VciResolvedCredentialOffer,
         options: {
             credentialConfigurationIds: string[];
-            txCode?: string;
-            token?: string;
+            pinCode?: string;
+            accessToken?: string;
         }
     ): Promise<OpenId4VciCredentialResponse[]> {
         const tokenResponse =
-            options.token !== undefined
+            options.accessToken !== undefined
                 ? {
-                      accessToken: options.token,
+                      accessToken: options.accessToken,
                       accessTokenResponse: {
                           // eslint-disable-next-line @typescript-eslint/naming-convention
-                          access_token: options.token,
+                          access_token: options.accessToken,
                           // eslint-disable-next-line @typescript-eslint/naming-convention
                           token_type: "bearer"
                       }
                   }
                 : await this.agent.openid4vc.holder.requestToken({
                       resolvedCredentialOffer,
-                      txCode: options.txCode
+                      txCode: options.pinCode
                   });
 
         const credentialResponse = await this.agent.openid4vc.holder.requestCredentials({
