@@ -4,12 +4,10 @@ import { OpenId4VcController, OpenId4VciCredentialResponseJSON } from "@nmshd/co
 import { Inject } from "@nmshd/typescript-ioc";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
-export type Oid4vciAuthentication = {} | { pinCode?: string } | { accessToken?: string };
-
 export interface AbstractRequestCredentialsRequest<T> {
     credentialOffer: T;
     credentialConfigurationIds: string[];
-    authentication: Oid4vciAuthentication;
+    authentication: {} | { pinCode?: string } | { accessToken?: string };
 }
 
 export interface RequestCredentialsResponse {
