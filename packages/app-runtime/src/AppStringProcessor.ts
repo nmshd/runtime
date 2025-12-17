@@ -95,6 +95,11 @@ export class AppStringProcessor {
     ): Promise<Result<void>> {
         const uiBridge = await this.runtime.uiBridge();
 
+        if (credentialOffer.metadata.authorizationServers.length === 0) {
+            await uiBridge.showError(AppRuntimeErrors.appStringProcessor.unsupportedOid4vcCredentialOfferGrantFound());
+            return Result.ok(undefined);
+        }
+
         const requestCredentialsResult = await this._fetchOAuthProtectedItem(
             async (token: string) =>
                 await services.consumptionServices.openId4Vc.requestCredentials({
@@ -102,6 +107,7 @@ export class AppStringProcessor {
                     credentialConfigurationIds: credentialOffer.credentialOfferPayload.credential_configuration_ids,
                     authentication: { accessToken: token }
                 }),
+            // TODO: Multiple authorization servers not supported yet
             credentialOffer.metadata.authorizationServers[0].issuer
         );
 
