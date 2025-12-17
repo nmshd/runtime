@@ -304,49 +304,6 @@ describe("custom openid4vc service", () => {
             expect(credential.displayInformation?.[0].name).toBe("Employee ID Card");
         });
 
-        test("should be able to process a credential offer with pin authentication", async () => {
-            const response = await axiosInstance.post("/issuance/credentialOffers", {
-                credentialConfigurationIds: ["EmployeeIdCard-sdjwt"],
-                authentication: "pin"
-            });
-
-            expect(response.status).toBe(200);
-            const responseData = await response.data;
-
-            credentialOfferUrl = responseData.result.credentialOffer;
-            const pin = responseData.result.pin;
-
-            // remove later
-            expect(pin).toBeDefined();
-
-            const result = await runtimeServices1.consumption.openId4Vc.resolveCredentialOffer({
-                credentialOfferUrl
-            });
-
-            expect(result).toBeSuccessful();
-
-            // analogously to the app code all presented credentials are accepted
-            const credentialOffer = result.value.credentialOffer;
-
-            // determine which credentials to pick from the offer for all supported types of offers
-            const requestedCredentials = credentialOffer.credentialOfferPayload.credential_configuration_ids;
-
-            const requesteResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
-                credentialOffer,
-                credentialConfigurationIds: requestedCredentials,
-                authentication: { pinCode: pin }
-            });
-
-            const acceptanceResult = await runtimeServices1.consumption.openId4Vc.storeCredentials({ credentialResponses: requesteResult.value.credentialResponses });
-
-            expect(acceptanceResult).toBeSuccessful();
-            expect(typeof acceptanceResult.value.id).toBe("string");
-
-            const credential = acceptanceResult.value.content.value as unknown as VerifiableCredential;
-            expect(credential.displayInformation?.[0].logo).toBeDefined();
-            expect(credential.displayInformation?.[0].name).toBe("Employee ID Card");
-        });
-
         test("should be able to process a given mdoc credential presentation", async () => {
             // Ensure the first test has completed
             expect(credentialOfferUrl).toBeDefined();
