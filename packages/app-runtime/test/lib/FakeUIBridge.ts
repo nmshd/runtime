@@ -42,7 +42,7 @@ export class FakeUIBridge implements IUIBridge {
         return Promise.resolve(Result.fail(new ApplicationError("not implemented", "not implemented")));
     }
 
-    public externalOAuthRegistration(_authenticationServerUrl: string): Promise<Result<string>> {
+    public performOauthAuthentication(_authenticationServerUrl: string): Promise<Result<string>> {
         return Promise.resolve(Result.fail(new ApplicationError("not implemented", "not implemented")));
     }
 }

@@ -14,7 +14,7 @@ export type MockUIBridgeCall =
     | { method: "showError"; error: ApplicationError; account?: LocalAccountDTO }
     | { method: "requestAccountSelection"; possibleAccounts: LocalAccountDTO[]; title?: string; description?: string }
     | { method: "enterPassword"; passwordType: "pw" | "pin"; pinLength?: number; attempt?: number; passwordLocationIndicator?: number }
-    | { method: "externalOAuthRegistration"; url: string };
+    | { method: "performOauthAuthentication "; url: string };
 
 export class MockUIBridge implements IUIBridge {
     private _accountIdToReturn: string | undefined;
@@ -107,8 +107,8 @@ export class MockUIBridge implements IUIBridge {
         return Promise.resolve(Result.ok(password));
     }
 
-    public externalOAuthRegistration(url: string): Promise<Result<string>> {
-        this._calls.push({ method: "externalOAuthRegistration", url });
+    public performOauthAuthentication(url: string): Promise<Result<string>> {
+        this._calls.push({ method: "performOauthAuthentication ", url });
         return Promise.resolve(Result.ok("test-token"));
     }
 }
