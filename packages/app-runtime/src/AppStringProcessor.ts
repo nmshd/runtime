@@ -100,22 +100,21 @@ export class AppStringProcessor {
             return Result.ok(undefined);
         }
 
-        const requestCredentialsResult = await this._fetchOAuthProtectedItem(
-            async (token: string) =>
-                await services.consumptionServices.openId4Vc.requestCredentials({
-                    credentialOffer: credentialOffer,
-                    credentialConfigurationIds: credentialOffer.credentialOfferPayload.credential_configuration_ids,
-                    accessToken: token
-                }),
-            // TODO: Multiple authorization servers not supported yet
-            credentialOffer.metadata.authorizationServers[0].issuer
-        );
+        // TODO: Multiple authorization servers not supported yet
+        const tokenResult = await uiBridge.performOauthAuthentication(credentialOffer.metadata.authorizationServers[0].issuer);
+        if (tokenResult.isError) {
+            return Result.ok(undefined);
+        }
+        const token = tokenResult.value;
+
+        const requestCredentialsResult = await services.consumptionServices.openId4Vc.requestCredentials({
+            credentialOffer: credentialOffer,
+            credentialConfigurationIds: credentialOffer.credentialOfferPayload.credential_configuration_ids,
+            accessToken: token
+        });
 
         if (requestCredentialsResult.isError) {
-            if (!requestCredentialsResult.error.equals(AppRuntimeErrors.appStringProcessor.externalOauthRegistrationNotProvided())) {
-                await uiBridge.showError(requestCredentialsResult.error);
-            }
-
+            await uiBridge.showError(requestCredentialsResult.error);
             return Result.ok(undefined);
         }
 
@@ -375,20 +374,6 @@ export class AppStringProcessor {
         return {
             result: Result.fail(AppRuntimeErrors.appStringProcessor.passwordRetryLimitReached())
         };
-    }
-
-    private async _fetchOAuthProtectedItem<T>(fetchFunction: (token: string) => Promise<Result<T>>, authorizationChallengeEndpoint: string): Promise<Result<T>> {
-        const uiBridge = await this.runtime.uiBridge();
-
-        const tokenResult = await uiBridge.externalOAuthRegistration(authorizationChallengeEndpoint);
-        if (tokenResult.isError) {
-            return Result.fail(AppRuntimeErrors.appStringProcessor.externalOauthRegistrationNotProvided());
-        }
-
-        const token = tokenResult.value;
-
-        const result = await fetchFunction(token);
-        return result;
     }
 
     private async selectAccount(forIdentityTruncated?: string): Promise<Result<LocalAccountDTO | undefined>> {
