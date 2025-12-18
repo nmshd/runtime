@@ -39,7 +39,7 @@ export class OpenId4VcController extends ConsumptionBaseController {
         if (cachedCredentialResponses) return cachedCredentialResponses;
 
         const offer = await this.resolveCredentialOffer(credentialOfferUrl);
-        const credentialResponses = await this.requestCredentials(offer, offer.credentialOfferPayload.credential_configuration_ids);
+        const credentialResponses = await this.requestCredentials(offer, offer.credentialOfferPayload.credential_configuration_ids, { pinCode: undefined });
 
         await this.requestedCredentialCache.set(credentialOfferUrl, credentialResponses);
         await this.parent.accountController.syncDatawallet();
@@ -54,14 +54,9 @@ export class OpenId4VcController extends ConsumptionBaseController {
     public async requestCredentials(
         credentialOffer: OpenId4VciResolvedCredentialOffer,
         credentialConfigurationIds: string[],
-        pinCode?: string,
-        accessToken?: string
+        access: { pinCode?: string } | { accessToken: string }
     ): Promise<OpenId4VciCredentialResponseJSON[]> {
-        const credentialResponses = await this.holder.requestCredentials(credentialOffer, {
-            credentialConfigurationIds: credentialConfigurationIds,
-            pinCode: pinCode,
-            accessToken: accessToken
-        });
+        const credentialResponses = await this.holder.requestCredentials(credentialOffer, credentialConfigurationIds, access);
 
         const mappedResponses = credentialResponses.map((response) => ({
             claimFormat: response.record.firstCredential.claimFormat,

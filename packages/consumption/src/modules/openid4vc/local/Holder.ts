@@ -36,31 +36,25 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
 
     public async requestCredentials(
         resolvedCredentialOffer: OpenId4VciResolvedCredentialOffer,
-        options: {
-            credentialConfigurationIds: string[];
-            pinCode?: string;
-            accessToken?: string;
-        }
+        credentialConfigurationIds: string[],
+        access: { accessToken: string } | { pinCode?: string }
     ): Promise<OpenId4VciCredentialResponse[]> {
         const tokenResponse =
-            options.accessToken !== undefined
+            "accessToken" in access
                 ? {
-                      accessToken: options.accessToken,
+                      accessToken: access.accessToken,
                       accessTokenResponse: {
                           // eslint-disable-next-line @typescript-eslint/naming-convention
-                          access_token: options.accessToken,
+                          access_token: access.accessToken,
                           // eslint-disable-next-line @typescript-eslint/naming-convention
                           token_type: "bearer"
                       }
                   }
-                : await this.agent.openid4vc.holder.requestToken({
-                      resolvedCredentialOffer,
-                      txCode: options.pinCode
-                  });
+                : await this.agent.openid4vc.holder.requestToken({ resolvedCredentialOffer, txCode: access.pinCode });
 
         const credentialResponse = await this.agent.openid4vc.holder.requestCredentials({
             resolvedCredentialOffer,
-            credentialConfigurationIds: options.credentialConfigurationIds,
+            credentialConfigurationIds: credentialConfigurationIds,
             credentialBindingResolver: async ({ supportedDidMethods, supportsAllDidMethods, proofTypes }) => {
                 const key = await this.agent.kms.createKeyForSignatureAlgorithm({
                     algorithm: proofTypes.jwt?.supportedSignatureAlgorithms[0] ?? "EdDSA"
