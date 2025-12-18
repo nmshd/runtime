@@ -106,6 +106,8 @@
         "@types/json-stringify-safe": "^5.0.3",
         "@types/lodash": "^4.17.21",
         "@types/luxon": "^3.7.1",
+        "jwt-decode": "^4.0.0",
+        "openid-client": "^6.8.1",
         "ts-json-schema-generator": "2.4.0",
         "ts-mockito": "^2.6.1"
     },

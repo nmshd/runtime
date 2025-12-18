@@ -1,7 +1,7 @@
 import { OpenId4VciResolvedCredentialOffer } from "@credo-ts/openid4vc";
 import { ILogger, ILoggerFactory } from "@js-soft/logging-abstractions";
 import { Serializable } from "@js-soft/ts-serval";
-import { ApplicationError, EventBus, Result } from "@js-soft/ts-utils";
+import { EventBus, Result } from "@js-soft/ts-utils";
 import { ICoreAddress, Reference } from "@nmshd/core-types";
 import { AnonymousServices, DeviceMapper, RuntimeServices } from "@nmshd/runtime";
 import { BackboneIds, TokenContentDeviceSharedSecret } from "@nmshd/transport";
@@ -89,13 +89,36 @@ export class AppStringProcessor {
     }
 
     private async processAuthCodeOpenIDCredentialOffer(
-        _services: RuntimeServices,
-        _account: LocalAccountDTO,
-        _credentialOffer: OpenId4VciResolvedCredentialOffer
+        services: RuntimeServices,
+        account: LocalAccountDTO,
+        credentialOffer: OpenId4VciResolvedCredentialOffer
     ): Promise<Result<void>> {
-        // Not implemented yet
         const uiBridge = await this.runtime.uiBridge();
-        await uiBridge.showError(new ApplicationError("error.app.openid4vc.authorizationCodeGrantNotSupported", ""));
+
+        if (credentialOffer.metadata.authorizationServers.length === 0) {
+            await uiBridge.showError(AppRuntimeErrors.appStringProcessor.unsupportedOid4vcCredentialOfferGrantFound());
+            return Result.ok(undefined);
+        }
+
+        // TODO: Multiple authorization servers not supported yet
+        const tokenResult = await uiBridge.performOauthAuthentication(credentialOffer.metadata.authorizationServers[0].issuer);
+        if (tokenResult.isError) {
+            this.logger.error("Could not perform OAuth authentication", tokenResult.error);
+            return Result.ok(undefined);
+        }
+
+        const requestCredentialsResult = await services.consumptionServices.openId4Vc.requestCredentials({
+            credentialOffer: credentialOffer,
+            credentialConfigurationIds: credentialOffer.credentialOfferPayload.credential_configuration_ids,
+            accessToken: tokenResult.value
+        });
+
+        if (requestCredentialsResult.isError) {
+            await uiBridge.showError(requestCredentialsResult.error);
+            return Result.ok(undefined);
+        }
+
+        await uiBridge.showResolvedCredentialOffer(account, requestCredentialsResult.value.credentialResponses, credentialOffer.metadata.credentialIssuer.display);
         return Result.ok(undefined);
     }
 
