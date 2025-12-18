@@ -103,14 +103,14 @@ export class AppStringProcessor {
         // TODO: Multiple authorization servers not supported yet
         const tokenResult = await uiBridge.performOauthAuthentication(credentialOffer.metadata.authorizationServers[0].issuer);
         if (tokenResult.isError) {
+            this.logger.error("Could not perform OAuth authentication", tokenResult.error);
             return Result.ok(undefined);
         }
-        const token = tokenResult.value;
 
         const requestCredentialsResult = await services.consumptionServices.openId4Vc.requestCredentials({
             credentialOffer: credentialOffer,
             credentialConfigurationIds: credentialOffer.credentialOfferPayload.credential_configuration_ids,
-            accessToken: token
+            accessToken: tokenResult.value
         });
 
         if (requestCredentialsResult.isError) {

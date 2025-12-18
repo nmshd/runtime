@@ -74,8 +74,6 @@ describe("custom openid4vc service", () => {
 
             // analogously to the app code all presented credentials are accepted
             const credentialOffer = result.value.credentialOffer;
-
-            // determine which credentials to pick from the offer for all supported types of offers
             const requestedCredentials = credentialOffer.credentialOfferPayload.credential_configuration_ids;
 
             const credentialResponseResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
@@ -112,8 +110,6 @@ describe("custom openid4vc service", () => {
 
             // analogously to the app code all presented credentials are accepted
             const credentialOffer = result.value.credentialOffer;
-
-            // determine which credentials to pick from the offer for all supported types of offers
             const requestedCredentials = credentialOffer.credentialOfferPayload.credential_configuration_ids;
 
             const requestResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
@@ -153,7 +149,6 @@ describe("custom openid4vc service", () => {
 
             const requestedCredentialIds = credentialOffer.credentialOfferPayload.credential_configuration_ids;
 
-            // due to the long startup time of the test authorization server we use the externally deployed one here
             const server = URL.parse("https://kc-openid4vc.is.enmeshed.eu/realms/enmeshed-openid4vci")!;
             const clientId = "wallet";
             const config: client.Configuration = await client.discovery(server, clientId);
@@ -177,9 +172,7 @@ describe("custom openid4vc service", () => {
             expect(credential.displayInformation?.[0].logo).toBeDefined();
             expect(credential.displayInformation?.[0].name).toBe("Employee ID Card");
 
-            // Decode the SD-JWT to verify that the issued credential contains personalized data for the test user.
             const encodedSdJwt = credential.value as string;
-
             const decoded = jwtDecode<{ pernr: string; lob: string }>(encodedSdJwt);
 
             // these values are set in the test authorization server for the test user
@@ -285,8 +278,6 @@ describe("custom openid4vc service", () => {
 
             // analogously to the app code all presented credentials are accepted
             const credentialOffer = result.value.credentialOffer;
-
-            // determine which credentials to pick from the offer for all supported types of offers
             const requestedCredentials = credentialOffer.credentialOfferPayload.credential_configuration_ids;
 
             const credentialResponseResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
