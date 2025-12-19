@@ -57,7 +57,7 @@ describe("custom openid4vc service", () => {
     let credentialOfferUrl: string;
 
     describe("sd-jwt", () => {
-        test.only("should process a given sd-jwt credential offer", async () => {
+        test("should process a given sd-jwt credential offer", async () => {
             const response = await axiosInstance.post("/issuance/credentialOffers", {
                 credentialConfigurationIds: ["EmployeeIdCard-sdjwt"]
             });
@@ -178,7 +178,7 @@ describe("custom openid4vc service", () => {
             expect(decoded.lob).toBe("Test BU");
         });
 
-        test.only("should be able to process a given sd-jwt credential presentation with pex", async () => {
+        test("should be able to process a given sd-jwt credential presentation with pex", async () => {
             // Ensure the first test has completed
             expect(credentialOfferUrl).toBeDefined();
 
@@ -247,7 +247,7 @@ describe("custom openid4vc service", () => {
             expect(presentationResult.value.status).toBe(200);
         });
 
-        test.only("should be able to process a given sd-jwt credential presentation with dcql", async () => {
+        test("should be able to process a given sd-jwt credential presentation with dcql", async () => {
             // Ensure the first test has completed
             expect(credentialOfferUrl).toBeDefined();
 
@@ -611,16 +611,19 @@ describe("EUDIPLO", () => {
             })
         ).data.uri;
 
-        const loadResult = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl });
-        expect(loadResult).toBeSuccessful();
+        const result = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl });
+        const matchingCredentials = result.value.matchingCredentials;
+        expect(matchingCredentials).toHaveLength(1);
 
-        const queryResult = loadResult.value.authorizationRequest.dcql!.queryResult;
-        expect(queryResult.can_be_satisfied).toBe(true);
+        const request = result.value.authorizationRequest;
+        expect(request.dcql!.queryResult.can_be_satisfied).toBe(true);
 
-        const credentialMatches = queryResult.credential_matches["EmployeeIdCard-vc-sd-jwt"];
-        expect(credentialMatches.valid_credentials).toHaveLength(1);
-
-        // TODO: send the presentation with a manually selected credential
+        const presentationResult = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({
+            authorizationRequest: result.value.authorizationRequest,
+            attributeId: matchingCredentials[0].id
+        });
+        expect(presentationResult).toBeSuccessful();
+        expect(presentationResult.value.status).toBe(200);
     });
 
     function startEudiplo() {
