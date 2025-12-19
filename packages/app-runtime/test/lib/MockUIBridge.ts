@@ -1,5 +1,6 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
-import { DeviceOnboardingInfoDTO, FileDVO, IdentityDVO, LocalRequestDVO, MailDVO, MessageDVO, RequestMessageDVO } from "@nmshd/runtime";
+import { OpenId4VciCredentialResponseJSON } from "@nmshd/consumption";
+import { DeviceOnboardingInfoDTO, FileDVO, IdentityDVO, LocalRequestDVO, MailDVO, MessageDVO, RequestMessageDVO, ResolveAuthorizationRequestResponse } from "@nmshd/runtime";
 import { IUIBridge, LocalAccountDTO } from "../../src";
 
 export type MockUIBridgeCall =
@@ -8,9 +9,12 @@ export type MockUIBridgeCall =
     | { method: "showFile"; account: LocalAccountDTO; file: FileDVO }
     | { method: "showDeviceOnboarding"; deviceOnboardingInfo: DeviceOnboardingInfoDTO }
     | { method: "showRequest"; account: LocalAccountDTO; request: LocalRequestDVO }
+    | { method: "showResolvedAuthorizationRequest"; account: LocalAccountDTO; response: ResolveAuthorizationRequestResponse }
+    | { method: "showResolvedCredentialOffer"; account: LocalAccountDTO; credentialResponses: OpenId4VciCredentialResponseJSON[]; issuerDisplayInformation: any }
     | { method: "showError"; error: ApplicationError; account?: LocalAccountDTO }
     | { method: "requestAccountSelection"; possibleAccounts: LocalAccountDTO[]; title?: string; description?: string }
-    | { method: "enterPassword"; passwordType: "pw" | "pin"; pinLength?: number; attempt?: number; passwordLocationIndicator?: number };
+    | { method: "enterPassword"; passwordType: "pw" | "pin"; pinLength?: number; attempt?: number; passwordLocationIndicator?: number }
+    | { method: "performOauthAuthentication "; url: string };
 
 export class MockUIBridge implements IUIBridge {
     private _accountIdToReturn: string | undefined;
@@ -65,6 +69,18 @@ export class MockUIBridge implements IUIBridge {
         return Promise.resolve(Result.ok(undefined));
     }
 
+    public showResolvedAuthorizationRequest(account: LocalAccountDTO, response: ResolveAuthorizationRequestResponse): Promise<Result<void>> {
+        this._calls.push({ method: "showResolvedAuthorizationRequest", account, response });
+
+        return Promise.resolve(Result.ok(undefined));
+    }
+
+    public showResolvedCredentialOffer(account: LocalAccountDTO, credentialResponses: OpenId4VciCredentialResponseJSON[], issuerDisplayInformation: any): Promise<Result<void>> {
+        this._calls.push({ method: "showResolvedCredentialOffer", account, credentialResponses, issuerDisplayInformation });
+
+        return Promise.resolve(Result.ok(undefined));
+    }
+
     public showError(error: ApplicationError, account?: LocalAccountDTO): Promise<Result<void>> {
         this._calls.push({ method: "showError", error, account });
 
@@ -89,5 +105,10 @@ export class MockUIBridge implements IUIBridge {
         if (!password) return Promise.resolve(Result.fail(new ApplicationError("code", "message")));
 
         return Promise.resolve(Result.ok(password));
+    }
+
+    public performOauthAuthentication(url: string): Promise<Result<string>> {
+        this._calls.push({ method: "performOauthAuthentication ", url });
+        return Promise.resolve(Result.ok("test-token"));
     }
 }
