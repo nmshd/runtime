@@ -169,7 +169,15 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         let credentialForPex: DifPexInputDescriptorToCredentials | undefined;
         if (resolvedAuthorizationRequest.presentationExchange) {
             const inputDescriptor = resolvedAuthorizationRequest.presentationExchange.credentialsForRequest.requirements[0].submissionEntry[0].inputDescriptorId;
-            credentialForPex = { [inputDescriptor]: [credentialRecord] } as any;
+            credentialForPex = {
+                [inputDescriptor]: [
+                    {
+                        credentialRecord,
+                        claimFormat: credentialContent.type as any,
+                        disclosedPayload: {} // TODO: implement SD properly
+                    }
+                ]
+            } as any;
         }
 
         let credentialForDcql: DcqlCredentialsForRequest | undefined;
@@ -178,7 +186,7 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
             credentialForDcql = {
                 [queryId]: [
                     {
-                        credentialRecord: EnmeshedStorageService.fromEncoded(credentialContent.type, credentialContent.value),
+                        credentialRecord,
                         claimFormat: credentialContent.type as any,
                         disclosedPayload: {} // TODO: implement SD properly
                     }
