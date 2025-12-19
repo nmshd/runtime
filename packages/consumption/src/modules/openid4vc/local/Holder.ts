@@ -1,5 +1,18 @@
-import { BaseRecord, ClaimFormat, DidJwk, DidKey, InjectionSymbols, JwkDidCreateOptions, KeyDidCreateOptions, Kms, MdocRecord, SdJwtVcRecord, X509Module } from "@credo-ts/core";
+import {
+    BaseRecord,
+    ClaimFormat,
+    DcqlCredentialsForRequest,
+    DidJwk,
+    DidKey,
+    DifPexInputDescriptorToCredentials,
+    InjectionSymbols,
+    JwkDidCreateOptions,
+    KeyDidCreateOptions,
+    Kms,
+    X509Module
+} from "@credo-ts/core";
 import { OpenId4VciCredentialResponse, OpenId4VcModule, type OpenId4VciResolvedCredentialOffer, type OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
+import { VerifiableCredential } from "@nmshd/content";
 import { AccountController } from "@nmshd/transport";
 import { AttributesController, OwnIdentityAttribute } from "../../attributes";
 import { BaseAgent } from "./BaseAgent";
@@ -131,7 +144,10 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         return resolvedRequest;
     }
 
-    public async acceptAuthorizationRequest(resolvedAuthenticationRequest: OpenId4VpResolvedAuthorizationRequest): Promise<
+    public async acceptAuthorizationRequest(
+        resolvedAuthorizationRequest: OpenId4VpResolvedAuthorizationRequest,
+        credential: OwnIdentityAttribute
+    ): Promise<
         | {
               readonly status: number;
               readonly body: string | Record<string, unknown> | null;
@@ -142,56 +158,38 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
           }
         | undefined
     > {
-        if (!resolvedAuthenticationRequest.presentationExchange && !resolvedAuthenticationRequest.dcql) {
+        if (!resolvedAuthorizationRequest.presentationExchange && !resolvedAuthorizationRequest.dcql) {
             throw new Error("Missing presentation exchange or dcql on resolved authorization request");
         }
+        const credentialContent = credential.content.value as VerifiableCredential;
+        const credentialRecord = EnmeshedStorageService.fromEncoded(credentialContent.type, credentialContent.value);
 
         // This fix ensures that the credential records which have been loaded here actually do provide the encoded() method
         // this issue arises as the records are loaded and then communicated to the app as a json object, losing the class prototype
-        if (resolvedAuthenticationRequest.presentationExchange) {
-            for (const requirementKey in resolvedAuthenticationRequest.presentationExchange.credentialsForRequest.requirements) {
-                const requirement = resolvedAuthenticationRequest.presentationExchange.credentialsForRequest.requirements[requirementKey];
-                for (const submissionEntry of requirement.submissionEntry) {
-                    for (const vc of submissionEntry.verifiableCredentials) {
-                        if (vc.claimFormat === ClaimFormat.SdJwtDc) {
-                            const recordUncast = vc.credentialRecord;
-                            const record = new SdJwtVcRecord({
-                                id: recordUncast.id,
-                                createdAt: recordUncast.createdAt,
-                                credentialInstances: [{ compactSdJwtVc: recordUncast.encoded }]
-                            });
-                            vc.credentialRecord = record;
-                        } else if (vc.claimFormat === ClaimFormat.MsoMdoc) {
-                            const recordUncast = vc.credentialRecord;
-                            const record = new MdocRecord({
-                                id: recordUncast.id,
-                                createdAt: recordUncast.createdAt,
-                                credentialInstances: [{ issuerSignedBase64Url: recordUncast.encoded }]
-                            });
-                            vc.credentialRecord = record;
-                        } else {
-                            // eslint-disable-next-line no-console
-                            console.log("Unsupported credential format in demo app, only sd-jwt-vc is supported at the moment");
-                        }
+        let credentialForPex: DifPexInputDescriptorToCredentials | undefined;
+        if (resolvedAuthorizationRequest.presentationExchange) {
+            const inputDescriptor = resolvedAuthorizationRequest.presentationExchange.credentialsForRequest.requirements[0].submissionEntry[0].inputDescriptorId;
+            credentialForPex = { [inputDescriptor]: [credentialRecord] } as any;
+        }
+
+        let credentialForDcql: DcqlCredentialsForRequest | undefined;
+        if (resolvedAuthorizationRequest.dcql) {
+            const queryId = resolvedAuthorizationRequest.dcql.queryResult.credentials[0].id;
+            credentialForDcql = {
+                [queryId]: [
+                    {
+                        credentialRecord: EnmeshedStorageService.fromEncoded(credentialContent.type, credentialContent.value),
+                        claimFormat: credentialContent.type as any,
+                        disclosedPayload: {} // TODO: implement SD properly
                     }
-                }
-            }
+                ]
+            } as any;
         }
 
         const submissionResult = await this.agent.openid4vc.holder.acceptOpenId4VpAuthorizationRequest({
-            authorizationRequestPayload: resolvedAuthenticationRequest.authorizationRequestPayload,
-            presentationExchange: resolvedAuthenticationRequest.presentationExchange
-                ? {
-                      credentials: this.agent.openid4vc.holder.selectCredentialsForPresentationExchangeRequest(
-                          resolvedAuthenticationRequest.presentationExchange.credentialsForRequest
-                      )
-                  }
-                : undefined,
-            dcql: resolvedAuthenticationRequest.dcql
-                ? {
-                      credentials: this.agent.openid4vc.holder.selectCredentialsForDcqlRequest(resolvedAuthenticationRequest.dcql.queryResult)
-                  }
-                : undefined
+            authorizationRequestPayload: resolvedAuthorizationRequest.authorizationRequestPayload,
+            presentationExchange: credentialForPex ? { credentials: credentialForPex } : undefined,
+            dcql: credentialForDcql ? { credentials: credentialForDcql } : undefined
         });
         return submissionResult.serverResponse;
     }

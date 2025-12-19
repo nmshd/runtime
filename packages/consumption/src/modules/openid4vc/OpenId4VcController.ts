@@ -96,7 +96,7 @@ export class OpenId4VcController extends ConsumptionBaseController {
             return [];
         }
 
-        let matchedCredentials: (string | W3cJsonCredential)[];
+        let matchedCredentials: (string | W3cJsonCredential)[] = [];
         if (dcqlSatisfied) {
             const queryId = authorizationRequest.dcql!.queryResult.credentials[0].id; // assume there is only one query for now
             const queryResult = authorizationRequest.dcql!.queryResult.credential_matches[queryId];
@@ -121,11 +121,12 @@ export class OpenId4VcController extends ConsumptionBaseController {
     }
 
     public async acceptAuthorizationRequest(
-        authorizationRequest: OpenId4VpResolvedAuthorizationRequest
+        authorizationRequest: OpenId4VpResolvedAuthorizationRequest,
+        credential: OwnIdentityAttribute
     ): Promise<{ status: number; message: string | Record<string, unknown> | null }> {
         // parse the credential type to be sdjwt
 
-        const serverResponse = await this.holder.acceptAuthorizationRequest(authorizationRequest);
+        const serverResponse = await this.holder.acceptAuthorizationRequest(authorizationRequest, credential);
         if (!serverResponse) throw new Error("No response from server");
 
         return { status: serverResponse.status, message: serverResponse.body };

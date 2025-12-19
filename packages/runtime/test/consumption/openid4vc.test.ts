@@ -29,7 +29,7 @@ afterAll(async () => {
     await runtimeServiceProvider.stop();
 });
 
-describe.only("custom openid4vc service", () => {
+describe("custom openid4vc service", () => {
     let axiosInstance: AxiosInstance;
     let dockerComposeStack: StartedDockerComposeEnvironment | undefined;
 
@@ -57,7 +57,7 @@ describe.only("custom openid4vc service", () => {
     let credentialOfferUrl: string;
 
     describe("sd-jwt", () => {
-        test("should process a given sd-jwt credential offer", async () => {
+        test.only("should process a given sd-jwt credential offer", async () => {
             const response = await axiosInstance.post("/issuance/credentialOffers", {
                 credentialConfigurationIds: ["EmployeeIdCard-sdjwt"]
             });
@@ -178,7 +178,7 @@ describe.only("custom openid4vc service", () => {
             expect(decoded.lob).toBe("Test BU");
         });
 
-        test("should be able to process a given sd-jwt credential presentation with pex", async () => {
+        test.only("should be able to process a given sd-jwt credential presentation with pex", async () => {
             // Ensure the first test has completed
             expect(credentialOfferUrl).toBeDefined();
 
@@ -233,17 +233,21 @@ describe.only("custom openid4vc service", () => {
             const responseData = await response.data;
 
             const result = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl: responseData.result.presentationRequest });
-            expect(result.value.matchingCredentials).toHaveLength(3);
+            const matchingCredentials = result.value.matchingCredentials;
+            expect(matchingCredentials).toHaveLength(1);
 
             const request = result.value.authorizationRequest;
             expect(request.presentationExchange!.credentialsForRequest.areRequirementsSatisfied).toBe(true);
 
-            const presentationResult = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest: result.value.authorizationRequest });
+            const presentationResult = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({
+                authorizationRequest: result.value.authorizationRequest,
+                attributeId: matchingCredentials[0].id
+            });
             expect(presentationResult).toBeSuccessful();
             expect(presentationResult.value.status).toBe(200);
         });
 
-        test("should be able to process a given sd-jwt credential presentation with dcql", async () => {
+        test.only("should be able to process a given sd-jwt credential presentation with dcql", async () => {
             // Ensure the first test has completed
             expect(credentialOfferUrl).toBeDefined();
 
@@ -266,12 +270,16 @@ describe.only("custom openid4vc service", () => {
             const responseData = await response.data;
 
             const result = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl: responseData.result.presentationRequest });
-            expect(result.value.matchingCredentials).toHaveLength(1);
+            const matchingCredentials = result.value.matchingCredentials;
+            expect(matchingCredentials).toHaveLength(1);
 
             const request = result.value.authorizationRequest;
             expect(request.dcql!.queryResult.can_be_satisfied).toBe(true);
 
-            const presentationResult = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest: result.value.authorizationRequest });
+            const presentationResult = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({
+                authorizationRequest: result.value.authorizationRequest,
+                attributeId: matchingCredentials[0].id
+            });
             expect(presentationResult).toBeSuccessful();
             expect(presentationResult.value.status).toBe(200);
         });
@@ -363,12 +371,16 @@ describe.only("custom openid4vc service", () => {
             const responseData = await response.data;
 
             const result = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl: responseData.result.presentationRequest });
-            expect(result.value.matchingCredentials).toHaveLength(1);
+            const matchingCredentials = result.value.matchingCredentials;
+            expect(matchingCredentials).toHaveLength(3);
 
             const request = result.value.authorizationRequest;
             expect(request.presentationExchange!.credentialsForRequest.areRequirementsSatisfied).toBe(true);
 
-            const presentationResult = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest: result.value.authorizationRequest });
+            const presentationResult = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({
+                authorizationRequest: result.value.authorizationRequest,
+                attributeId: matchingCredentials[0].id
+            });
             expect(presentationResult).toBeSuccessful();
             expect(presentationResult.value.status).toBe(200);
         });
@@ -394,12 +406,16 @@ describe.only("custom openid4vc service", () => {
             const responseData = await response.data;
 
             const result = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl: responseData.result.presentationRequest });
-            expect(result.value.matchingCredentials).toHaveLength(1);
+            const matchingCredentials = result.value.matchingCredentials;
+            expect(matchingCredentials).toHaveLength(3);
 
             const request = result.value.authorizationRequest;
             expect(request.dcql!.queryResult.can_be_satisfied).toBe(true);
 
-            const presentationResult = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest: result.value.authorizationRequest });
+            const presentationResult = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({
+                authorizationRequest: result.value.authorizationRequest,
+                attributeId: matchingCredentials[0].id
+            });
             expect(presentationResult).toBeSuccessful();
             expect(presentationResult.value.status).toBe(200);
         });
@@ -476,12 +492,16 @@ describe.only("custom openid4vc service", () => {
         const result = await runtimeServices2.consumption.openId4Vc.resolveAuthorizationRequest({
             authorizationRequestUrl: createPresentationResponseData.result.presentationRequest
         });
-        expect(result.value.matchingCredentials).toHaveLength(1);
+        const matchingCredentials = result.value.matchingCredentials;
+        expect(matchingCredentials).toHaveLength(3);
 
         const request = result.value.authorizationRequest;
         expect(request.presentationExchange!.credentialsForRequest.areRequirementsSatisfied).toBe(true);
 
-        const presentationResult = await runtimeServices2.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest: result.value.authorizationRequest });
+        const presentationResult = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({
+            authorizationRequest: result.value.authorizationRequest,
+            attributeId: matchingCredentials[0].id
+        });
         expect(presentationResult).toBeSuccessful();
         expect(presentationResult.value.status).toBe(200);
     });
