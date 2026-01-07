@@ -26,7 +26,7 @@ function getOpenIdHolderModules() {
         x509: new X509Module({
             getTrustedCertificatesForVerification: (_agentContext, { certificateChain, verification }) => {
                 // eslint-disable-next-line no-console
-                console.log(`dyncamically trusting certificate ${certificateChain[0].getIssuerNameField("C")} for verification of ${verification.type}`);
+                console.log(`dynamically trusting certificate ${certificateChain[0].getIssuerNameField("C")} for verification of ${verification.type}`);
                 return [certificateChain[0].toString("pem")];
             }
         })
