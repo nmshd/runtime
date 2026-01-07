@@ -164,8 +164,6 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         const credentialContent = credential.content.value as VerifiableCredential;
         const credentialRecord = EnmeshedStorageService.fromEncoded(credentialContent.type, credentialContent.value);
 
-        // This fix ensures that the credential records which have been loaded here actually do provide the encoded() method
-        // this issue arises as the records are loaded and then communicated to the app as a json object, losing the class prototype
         let credentialForPex: DifPexInputDescriptorToCredentials | undefined;
         if (resolvedAuthorizationRequest.presentationExchange) {
             const inputDescriptor = resolvedAuthorizationRequest.presentationExchange.credentialsForRequest.requirements[0].submissionEntry[0].inputDescriptorId;
