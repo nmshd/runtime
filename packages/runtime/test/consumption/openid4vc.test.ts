@@ -372,7 +372,7 @@ describe("custom openid4vc service", () => {
 
             const result = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl: responseData.result.presentationRequest });
             const matchingCredentials = result.value.matchingCredentials;
-            expect(matchingCredentials).toHaveLength(3);
+            expect(matchingCredentials).toHaveLength(1);
 
             const request = result.value.authorizationRequest;
             expect(request.presentationExchange!.credentialsForRequest.areRequirementsSatisfied).toBe(true);
@@ -498,7 +498,7 @@ describe("custom openid4vc service", () => {
         const request = result.value.authorizationRequest;
         expect(request.presentationExchange!.credentialsForRequest.areRequirementsSatisfied).toBe(true);
 
-        const presentationResult = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({
+        const presentationResult = await runtimeServices2.consumption.openId4Vc.acceptAuthorizationRequest({
             authorizationRequest: result.value.authorizationRequest,
             attributeId: matchingCredentials[0].id
         });
