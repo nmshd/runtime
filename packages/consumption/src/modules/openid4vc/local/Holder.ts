@@ -50,19 +50,25 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
 
     public async requestCredentials(
         resolvedCredentialOffer: OpenId4VciResolvedCredentialOffer,
-        options: {
-            credentialConfigurationIds: string[];
-            txCode?: string;
-        }
+        credentialConfigurationIds: string[],
+        access: { accessToken: string } | { pinCode?: string }
     ): Promise<OpenId4VciCredentialResponse[]> {
-        const tokenResponse = await this.agent.openid4vc.holder.requestToken({
-            resolvedCredentialOffer,
-            txCode: options.txCode
-        });
+        const tokenResponse =
+            "accessToken" in access
+                ? {
+                      accessToken: access.accessToken,
+                      accessTokenResponse: {
+                          // eslint-disable-next-line @typescript-eslint/naming-convention
+                          access_token: access.accessToken,
+                          // eslint-disable-next-line @typescript-eslint/naming-convention
+                          token_type: "bearer"
+                      }
+                  }
+                : await this.agent.openid4vc.holder.requestToken({ resolvedCredentialOffer, txCode: access.pinCode });
 
         const credentialResponse = await this.agent.openid4vc.holder.requestCredentials({
             resolvedCredentialOffer,
-            credentialConfigurationIds: options.credentialConfigurationIds,
+            credentialConfigurationIds: credentialConfigurationIds,
             credentialBindingResolver: async ({ supportedDidMethods, supportsAllDidMethods, proofTypes }) => {
                 const key = await this.agent.kms.createKeyForSignatureAlgorithm({
                     algorithm: proofTypes.jwt?.supportedSignatureAlgorithms[0] ?? "EdDSA"

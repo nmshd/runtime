@@ -1,5 +1,7 @@
 import { VerifiableCredential, VerifiableCredentialJSON } from "@nmshd/content";
 import axios, { AxiosInstance } from "axios";
+import { jwtDecode } from "jwt-decode";
+import * as client from "openid-client";
 import path from "path";
 import { DockerComposeEnvironment, GenericContainer, StartedDockerComposeEnvironment, StartedTestContainer, Wait } from "testcontainers";
 import { Agent as UndiciAgent, fetch as undiciFetch } from "undici";
@@ -72,10 +74,7 @@ describe("custom openid4vc service", () => {
 
             expect(result).toBeSuccessful();
 
-            // analogously to the app code all presented credentials are accepted
             const credentialOffer = result.value.credentialOffer;
-
-            // determine which credentials to pick from the offer for all supported types of offers
             const requestedCredentials = credentialOffer.credentialOfferPayload.credential_configuration_ids;
 
             const credentialResponseResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
@@ -87,9 +86,99 @@ describe("custom openid4vc service", () => {
             attributeId = storeResult.value.id;
             expect(typeof attributeId).toBe("string");
 
+            const credential = storeResult.value.content.value as VerifiableCredentialJSON;
+            expect(credential.displayInformation?.[0].logo).toBeDefined();
+            expect(credential.displayInformation?.[0].name).toBe("Employee ID Card");
+        });
+
+        test("should be able to process a credential offer with pin authentication", async () => {
+            const response = await axiosInstance.post("/issuance/credentialOffers", {
+                credentialConfigurationIds: ["EmployeeIdCard-sdjwt"],
+                authentication: "pin"
+            });
+
+            expect(response.status).toBe(200);
+            const responseData = await response.data;
+
+            credentialOfferUrl = responseData.result.credentialOffer;
+            const pin = responseData.result.pin;
+            expect(pin).toBeDefined();
+
+            const result = await runtimeServices1.consumption.openId4Vc.resolveCredentialOffer({
+                credentialOfferUrl
+            });
+
+            expect(result).toBeSuccessful();
+
+            const credentialOffer = result.value.credentialOffer;
+            const requestedCredentials = credentialOffer.credentialOfferPayload.credential_configuration_ids;
+
+            const requestResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
+                credentialOffer,
+                credentialConfigurationIds: requestedCredentials,
+                pinCode: pin
+            });
+
+            const storeResult = await runtimeServices1.consumption.openId4Vc.storeCredentials({ credentialResponses: requestResult.value.credentialResponses });
+
+            expect(storeResult).toBeSuccessful();
+            expect(typeof storeResult.value.id).toBe("string");
+
             const credential = storeResult.value.content.value as unknown as VerifiableCredential;
             expect(credential.displayInformation?.[0].logo).toBeDefined();
             expect(credential.displayInformation?.[0].name).toBe("Employee ID Card");
+        });
+
+        test("should be able to process a credential offer with external authentication", async () => {
+            const response = await axiosInstance.post("/issuance/credentialOffers", {
+                credentialConfigurationIds: ["EmployeeIdCard-sdjwt"],
+
+                authentication: "externalAuthentication"
+            });
+
+            expect(response.status).toBe(200);
+
+            const responseData = await response.data;
+
+            credentialOfferUrl = responseData.result.credentialOffer;
+
+            const result = await runtimeServices1.consumption.openId4Vc.resolveCredentialOffer({
+                credentialOfferUrl
+            });
+            expect(result).toBeSuccessful();
+            const credentialOffer = result.value.credentialOffer;
+
+            const requestedCredentialIds = credentialOffer.credentialOfferPayload.credential_configuration_ids;
+
+            const server = URL.parse("https://kc-openid4vc.is.enmeshed.eu/realms/enmeshed-openid4vci")!;
+            const clientId = "wallet";
+            const config: client.Configuration = await client.discovery(server, clientId);
+            const grantReq = await client.genericGrantRequest(config, "password", {
+                username: "test",
+                password: "test",
+                scope: "wallet-demo"
+            });
+
+            const credentialRequestResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
+                credentialOffer,
+                credentialConfigurationIds: requestedCredentialIds,
+                accessToken: grantReq.access_token
+            });
+            const storeResult = await runtimeServices1.consumption.openId4Vc.storeCredentials({ credentialResponses: credentialRequestResult.value.credentialResponses });
+
+            expect(storeResult).toBeSuccessful();
+            expect(typeof storeResult.value.id).toBe("string");
+
+            const credential = storeResult.value.content.value as unknown as VerifiableCredential;
+            expect(credential.displayInformation?.[0].logo).toBeDefined();
+            expect(credential.displayInformation?.[0].name).toBe("Employee ID Card");
+
+            const encodedSdJwt = credential.value as string;
+            const decoded = jwtDecode<{ pernr: string; lob: string }>(encodedSdJwt);
+
+            // these values are set in the test authorization server for the test user
+            expect(decoded.pernr).toBe("0019122023");
+            expect(decoded.lob).toBe("Test BU");
         });
 
         test("should be able to process a given sd-jwt credential presentation", async () => {
@@ -147,7 +236,7 @@ describe("custom openid4vc service", () => {
             const responseData = await response.data;
 
             const result = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl: responseData.result.presentationRequest });
-            expect(result.value.matchingCredentials).toHaveLength(1);
+            expect(result.value.matchingCredentials).toHaveLength(3);
 
             const request = result.value.authorizationRequest;
             expect(request.presentationExchange!.credentialsForRequest.areRequirementsSatisfied).toBe(true);
@@ -230,10 +319,7 @@ describe("custom openid4vc service", () => {
 
             expect(result).toBeSuccessful();
 
-            // analogously to the app code all presented credentials are accepted
             const credentialOffer = result.value.credentialOffer;
-
-            // determine which credentials to pick from the offer for all supported types of offers
             const requestedCredentials = credentialOffer.credentialOfferPayload.credential_configuration_ids;
 
             const credentialResponseResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
@@ -244,7 +330,7 @@ describe("custom openid4vc service", () => {
             expect(storeResult).toBeSuccessful();
             expect(typeof storeResult.value.id).toBe("string");
 
-            const credential = storeResult.value.content.value as unknown as VerifiableCredential;
+            const credential = storeResult.value.content.value as VerifiableCredentialJSON;
             expect(credential.displayInformation?.[0].logo).toBeDefined();
             expect(credential.displayInformation?.[0].name).toBe("Employee ID Card");
         });
@@ -475,7 +561,7 @@ describe("EUDIPLO", () => {
         });
         expect(storeCredentialsResponse).toBeSuccessful();
 
-        expect((storeCredentialsResponse.value.content.value as unknown as VerifiableCredential).displayInformation?.[0].name).toBe("Employee ID Card");
+        expect((storeCredentialsResponse.value.content.value as VerifiableCredentialJSON).displayInformation?.[0].name).toBe("Employee ID Card");
     });
 
     test("presentation", async () => {
