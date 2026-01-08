@@ -536,9 +536,7 @@ describe("custom openid4vc service", () => {
     }
 });
 
-// TODO: un-skip this test once a workable EUDIPLO version is available - the current version 1.9 doesn't work with credo because the presentation key exchange key doesn't have a kid, and the currently latest version 1.13 can't be easily configured with the UI because the issuer display can't be configured
-// eslint-disable-next-line jest/no-disabled-tests
-describe.skip("EUDIPLO", () => {
+describe("EUDIPLO", () => {
     const eudiploUser = "test-admin";
     const eudiploPassword = "test";
     const eudiploIssuanceConfigurationId = "Employee ID Card";
@@ -608,7 +606,9 @@ describe.skip("EUDIPLO", () => {
         expect((storeCredentialsResponse.value.content.value as VerifiableCredentialJSON).displayInformation?.[0].name).toBe("Employee ID Card");
     });
 
-    test("presentation", async () => {
+    // TODO: un-skip this test once a workable EUDIPLO version is available - the current version 1.9 doesn't work with credo because the exchange key for presentation encryption doesn't have a kid, and the currently latest version 1.13 can't be easily configured with the UI because the issuer display can't be configured
+    // eslint-disable-next-line jest/no-disabled-tests
+    test.skip("presentation", async () => {
         const authorizationRequestUrl = (
             await axiosInstance.post(`/presentation-management/request`, {
                 response_type: "uri", // eslint-disable-line @typescript-eslint/naming-convention
@@ -616,15 +616,15 @@ describe.skip("EUDIPLO", () => {
             })
         ).data.uri;
 
-        const result = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl });
-        const matchingCredentials = result.value.matchingCredentials;
+        const loadResult = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl });
+        const matchingCredentials = loadResult.value.matchingCredentials;
         expect(matchingCredentials).toHaveLength(1);
 
-        const request = result.value.authorizationRequest;
-        expect(request.dcql!.queryResult.can_be_satisfied).toBe(true);
+        const queryResult = loadResult.value.authorizationRequest.dcql!.queryResult;
+        expect(queryResult.can_be_satisfied).toBe(true);
 
         const presentationResult = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({
-            authorizationRequest: result.value.authorizationRequest,
+            authorizationRequest: loadResult.value.authorizationRequest,
             attributeId: matchingCredentials[0].id
         });
         expect(presentationResult).toBeSuccessful();
