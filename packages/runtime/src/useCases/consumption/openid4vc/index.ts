@@ -1,5 +1,5 @@
 export * from "./AcceptAuthorizationRequest";
-export * from "./CreateDefaultPresentation";
+export * from "./CreatePresentationToken";
 export * from "./RequestCredentials";
 export * from "./ResolveAuthorizationRequest";
 export * from "./ResolveCredentialOffer";

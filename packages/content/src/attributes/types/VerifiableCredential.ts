@@ -1,4 +1,3 @@
-import { IPresentationFrame } from "@credo-ts/core";
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { AbstractAttributeValue, AbstractAttributeValueJSON, IAbstractAttributeValue } from "../AbstractAttributeValue";
 import { RenderHints, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../hints";
@@ -9,14 +8,12 @@ export interface VerifiableCredentialJSON extends AbstractAttributeValueJSON {
     value: string | Record<string, any>;
     type: string;
     displayInformation?: Record<string, any>[];
-    defaultPresentationConfig?: { presentationFrame: IPresentationFrame; keyBinding?: boolean };
 }
 
 export interface IVerifiableCredential extends IAbstractAttributeValue {
     value: string | Record<string, any>;
     type: string;
     displayInformation?: Record<string, any>[];
-    defaultPresentationConfig?: { presentationFrame: IPresentationFrame; keyBinding?: boolean };
 }
 
 @type("VerifiableCredential")
@@ -32,10 +29,6 @@ export class VerifiableCredential extends AbstractAttributeValue implements IVer
     @serialize()
     @validate({ nullable: true, max: PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH })
     public displayInformation?: Record<string, any>[];
-
-    @serialize({ any: true })
-    @validate({ nullable: true })
-    public defaultPresentationConfig?: { presentationFrame: IPresentationFrame; keyBinding?: boolean };
 
     public static get valueHints(): ValueHints {
         return ValueHints.from({});

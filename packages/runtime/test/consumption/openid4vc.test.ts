@@ -260,46 +260,23 @@ describe("custom openid4vc service", () => {
             expect(acceptanceResult.value.length).toBeGreaterThan(0);
         });
 
-        test("default presentation with one disclosure, no key binding", async () => {
-            const attribute = (await runtimeServices1.consumption.attributes.getAttribute({ id: attributeId })).value;
-            const newAttribute = (
-                await runtimeServices1.consumption.attributes.succeedOwnIdentityAttribute({
-                    // create attribute runs into an error
-                    predecessorId: attributeId,
-                    successorContent: { value: { ...attribute.content.value, defaultPresentationConfig: { presentationFrame: { degree: true } } } as VerifiableCredentialJSON }
-                })
-            ).value.successor;
-            attributeId = newAttribute.id;
+        test("presentation with token", async () => {
+            const token = (await runtimeServices1.consumption.openId4Vc.createPresentationToken({ attributeId })).value;
 
-            const defaultPresentation = await runtimeServices1.consumption.openId4Vc.createDefaultPresentation({ attributeId: newAttribute.id });
-            expect(defaultPresentation).toBeSuccessful();
-            const presentationParts = defaultPresentation.value.presentation.split("~");
+            const loadedToken = (await runtimeServices1.anonymous.tokens.loadPeerToken({ reference: token.reference.url })).value;
 
-            // one disclosure
-            expect(presentationParts).toHaveLength(3);
-            expect(presentationParts.at(-1)).toBe("");
-        });
+            const credential = ((await runtimeServices1.consumption.attributes.getAttribute({ id: attributeId })).value.content.value as VerifiableCredentialJSON).value;
+            const presentation = (loadedToken.content as VerifiableCredentialJSON).value;
+            expect(presentation.substring(0, credential.length)).toBe(credential);
+            expect(presentation.substring(credential.length, credential.length + 2)).toBe("ey");
 
-        test("default presentation with one disclosure and key binding", async () => {
-            const attribute = (await runtimeServices1.consumption.attributes.getAttribute({ id: attributeId })).value;
-            const newAttribute = (
-                await runtimeServices1.consumption.attributes.succeedOwnIdentityAttribute({
-                    // create attribute runs into an error
-                    predecessorId: attributeId,
-                    successorContent: {
-                        value: { ...attribute.content.value, defaultPresentationConfig: { keyBinding: true, presentationFrame: { degree: true } } } as VerifiableCredentialJSON
-                    }
-                })
-            ).value.successor;
-            attributeId = newAttribute.id;
-
-            const defaultPresentation = await runtimeServices1.consumption.openId4Vc.createDefaultPresentation({ attributeId: newAttribute.id });
-            expect(defaultPresentation).toBeSuccessful();
-            const presentationParts = defaultPresentation.value.presentation.split("~");
-
-            // one disclosure, one key binding jwt
-            expect(presentationParts).toHaveLength(3);
-            expect(presentationParts.at(-1)).toMatch(/^ey/);
+            const verificationResult = await axiosInstance.post("/presentation/verify", {
+                credential: presentation,
+                format: "dc+sd-jwt",
+                nonce: "defaultPresentationNonce",
+                audience: "defaultPresentationAudience"
+            });
+            expect(verificationResult.data.result.verified).toBe(true);
         });
     });
 

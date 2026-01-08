@@ -210,24 +210,25 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         return submissionResult.serverResponse;
     }
 
-    public async createDefaultPresentation(credential: VerifiableCredential): Promise<string> {
-        if (credential.type !== ClaimFormat.SdJwtDc) throw new Error("Creating a default presentation is only supported for dc+sd-jwt credentials.");
-        if (!credential.defaultPresentationConfig) throw new Error("Default presentation not configured.");
+    // hacky solution because credo doesn't support credentials without key binding
+    // TODO: use credentials without key binding once supported
+    public async createDefaultPresentation(credential: VerifiableCredential): Promise<VerifiableCredential> {
+        if (credential.type !== ClaimFormat.SdJwtDc) throw new Error("Only SD-JWT credentials have been tested so far with default presentation");
 
         const sdJwtVcApi = this.agent.dependencyManager.resolve(SdJwtVcApi);
         const presentation = await sdJwtVcApi.present({
             sdJwtVc: sdJwtVcApi.fromCompact(credential.value as string),
-            presentationFrame: credential.defaultPresentationConfig.presentationFrame,
-            verifierMetadata: credential.defaultPresentationConfig.keyBinding
-                ? {
-                      audience: "defaultPresentationAudience",
-                      issuedAt: Date.now() / 1000,
-                      nonce: "defaultPresentationNonce"
-                  }
-                : undefined
+            verifierMetadata: {
+                audience: "defaultPresentationAudience",
+                issuedAt: Date.now() / 1000,
+                nonce: "defaultPresentationNonce"
+            }
         });
 
-        return presentation;
+        return VerifiableCredential.from({
+            ...credential,
+            value: presentation
+        });
     }
 
     public async exit(): Promise<void> {
