@@ -24,6 +24,7 @@ import {
     CreateOwnIdentityAttributeRequest,
     CreateOwnIdentityAttributeUseCase,
     CreateOwnRelationshipTemplateRequest,
+    CreateTokenForAttributeUseCase,
     DeleteAttributeAndNotifyUseCase,
     ExecuteIdentityAttributeQueryUseCase,
     ExecuteRelationshipAttributeQueryUseCase,
@@ -3727,5 +3728,24 @@ describe(MarkAttributeAsViewedUseCase.name, () => {
         expect(actualViewingTime.isSameOrAfter(expectedViewingTime)).toBe(true);
 
         await expect(services1.eventBus).toHavePublished(AttributeWasViewedAtChangedEvent, (m) => m.data.id === localAttribute.id);
+    });
+});
+
+describe.only(CreateTokenForAttributeUseCase.name, () => {
+    test("should create and load a Token for an attribute", async () => {
+        const request: CreateOwnIdentityAttributeRequest = {
+            content: {
+                value: {
+                    "@type": "GivenName",
+                    value: "aGivenName"
+                }
+            }
+        };
+        const localAttribute = (await services1.consumption.attributes.createOwnIdentityAttribute(request)).value;
+
+        const token = await services1.consumption.attributes.createTokenForAttribute({ attributeId: localAttribute.id });
+        const loadedToken = await services2.anonymous.tokens.loadPeerToken({ reference: token.value.reference.url });
+
+        expect(loadedToken.value.content).toStrictEqual(localAttribute.content.value);
     });
 });

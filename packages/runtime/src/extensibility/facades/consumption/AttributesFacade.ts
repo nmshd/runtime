@@ -1,5 +1,5 @@
 import { Result } from "@js-soft/ts-utils";
-import { AttributeTagCollectionDTO, LocalAttributeDTO, LocalAttributeForwardingDetailsDTO, LocalRequestDTO } from "@nmshd/runtime-types";
+import { AttributeTagCollectionDTO, LocalAttributeDTO, LocalAttributeForwardingDetailsDTO, LocalRequestDTO, TokenDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
 import {
     CanCreateOwnIdentityAttributeRequest,
@@ -11,6 +11,8 @@ import {
     CreateAndShareRelationshipAttributeUseCase,
     CreateOwnIdentityAttributeRequest,
     CreateOwnIdentityAttributeUseCase,
+    CreateTokenForAttributeRequest,
+    CreateTokenForAttributeUseCase,
     DeleteAttributeAndNotifyRequest,
     DeleteAttributeAndNotifyResponse,
     DeleteAttributeAndNotifyUseCase,
@@ -88,7 +90,8 @@ export class AttributesFacade {
         @Inject private readonly getAttributeTagCollectionUseCase: GetAttributeTagCollectionUseCase,
         @Inject private readonly setAttributeDeletionInfoOfDeletionProposedRelationshipUseCase: SetAttributeDeletionInfoOfDeletionProposedRelationshipUseCase,
         @Inject private readonly markAttributeAsViewedUseCase: MarkAttributeAsViewedUseCase,
-        @Inject private readonly getForwardingDetailsForAttributeUseCase: GetForwardingDetailsForAttributeUseCase
+        @Inject private readonly getForwardingDetailsForAttributeUseCase: GetForwardingDetailsForAttributeUseCase,
+        @Inject private readonly createTokenForAttributeUseCase: CreateTokenForAttributeUseCase
     ) {}
 
     public async canCreateOwnIdentityAttribute(request: CanCreateOwnIdentityAttributeRequest): Promise<Result<CanCreateOwnIdentityAttributeResponse>> {
@@ -197,5 +200,9 @@ export class AttributesFacade {
 
     public async getForwardingDetailsForAttribute(request: GetForwardingDetailsForAttributeRequest): Promise<Result<LocalAttributeForwardingDetailsDTO[]>> {
         return await this.getForwardingDetailsForAttributeUseCase.execute(request);
+    }
+
+    public async createTokenForAttribute(request: CreateTokenForAttributeRequest): Promise<Result<TokenDTO>> {
+        return await this.createTokenForAttributeUseCase.execute(request);
     }
 }

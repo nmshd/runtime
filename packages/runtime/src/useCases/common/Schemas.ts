@@ -13258,6 +13258,2942 @@ export const CreateOwnIdentityAttributeRequest: any = {
     }
 }
 
+export const DownloadFileRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/DownloadFileRequest",
+    "definitions": {
+        "DownloadFileRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/FileIdString"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "additionalProperties": false
+        },
+        "FileIdString": {
+            "type": "string",
+            "pattern": "FIL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const LoadItemFromReferenceRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/LoadItemFromReferenceRequest",
+    "definitions": {
+        "LoadItemFromReferenceRequest": {
+            "type": "object",
+            "properties": {
+                "reference": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/TokenReferenceString"
+                        },
+                        {
+                            "$ref": "#/definitions/FileReferenceString"
+                        },
+                        {
+                            "$ref": "#/definitions/RelationshipTemplateReferenceString"
+                        },
+                        {
+                            "$ref": "#/definitions/URLTokenReferenceString"
+                        },
+                        {
+                            "$ref": "#/definitions/URLFileReferenceString"
+                        },
+                        {
+                            "$ref": "#/definitions/URLRelationshipTemplateReferenceString"
+                        }
+                    ]
+                },
+                "password": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "reference"
+            ],
+            "additionalProperties": false
+        },
+        "TokenReferenceString": {
+            "type": "string",
+            "pattern": "VE9L.{84}"
+        },
+        "FileReferenceString": {
+            "type": "string",
+            "pattern": "RklM.{84}"
+        },
+        "RelationshipTemplateReferenceString": {
+            "type": "string",
+            "pattern": "UkxU.{84}"
+        },
+        "URLTokenReferenceString": {
+            "type": "string",
+            "pattern": "^https?:\\/\\/.*\\/r\\/TOK[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
+        },
+        "URLFileReferenceString": {
+            "type": "string",
+            "pattern": "^https?:\\/\\/.*\\/r\\/FIL[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
+        },
+        "URLRelationshipTemplateReferenceString": {
+            "type": "string",
+            "pattern": "^https?:\\/\\/.*\\/r\\/RLT[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
+        }
+    }
+}
+
+export const RegisterPushNotificationTokenRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/RegisterPushNotificationTokenRequest",
+    "definitions": {
+        "RegisterPushNotificationTokenRequest": {
+            "type": "object",
+            "properties": {
+                "handle": {
+                    "type": "string"
+                },
+                "platform": {
+                    "type": "string"
+                },
+                "appId": {
+                    "type": "string"
+                },
+                "environment": {
+                    "type": "string",
+                    "enum": [
+                        "Development",
+                        "Production"
+                    ]
+                }
+            },
+            "required": [
+                "handle",
+                "platform",
+                "appId"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
+export const CreateTokenForFileRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/CreateTokenForFileRequest",
+    "definitions": {
+        "CreateTokenForFileRequest": {
+            "type": "object",
+            "properties": {
+                "fileId": {
+                    "$ref": "#/definitions/FileIdString"
+                },
+                "expiresAt": {
+                    "$ref": "#/definitions/ISO8601DateTimeString"
+                },
+                "ephemeral": {
+                    "type": "boolean"
+                },
+                "forIdentity": {
+                    "$ref": "#/definitions/AddressString"
+                },
+                "passwordProtection": {
+                    "type": "object",
+                    "properties": {
+                        "password": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "passwordIsPin": {
+                            "type": "boolean",
+                            "const": true
+                        },
+                        "passwordLocationIndicator": {}
+                    },
+                    "required": [
+                        "password"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "fileId"
+            ],
+            "additionalProperties": false
+        },
+        "FileIdString": {
+            "type": "string",
+            "pattern": "FIL[A-Za-z0-9]{17}"
+        },
+        "ISO8601DateTimeString": {
+            "type": "string",
+            "errorMessage": "must match ISO8601 datetime format",
+            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
+        },
+        "AddressString": {
+            "type": "string",
+            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
+        }
+    }
+}
+
+export const DeleteFileRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/DeleteFileRequest",
+    "definitions": {
+        "DeleteFileRequest": {
+            "type": "object",
+            "properties": {
+                "fileId": {
+                    "$ref": "#/definitions/FileIdString"
+                }
+            },
+            "required": [
+                "fileId"
+            ],
+            "additionalProperties": false
+        },
+        "FileIdString": {
+            "type": "string",
+            "pattern": "FIL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const GetFileRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetFileRequest",
+    "definitions": {
+        "GetFileRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/FileIdString"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "additionalProperties": false
+        },
+        "FileIdString": {
+            "type": "string",
+            "pattern": "FIL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const GetFilesRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetFilesRequest",
+    "definitions": {
+        "GetFilesRequest": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "$ref": "#/definitions/GetFilesQuery"
+                },
+                "ownerRestriction": {
+                    "$ref": "#/definitions/OwnerRestriction"
+                }
+            },
+            "additionalProperties": false
+        },
+        "GetFilesQuery": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "createdBy": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "createdByDevice": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "description": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "expiresAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "filename": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "filesize": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "mimetype": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "title": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "isOwn": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "tags": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "ownershipToken": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "ownershipIsLocked": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
+        "OwnerRestriction": {
+            "type": "string",
+            "enum": [
+                "o",
+                "p"
+            ]
+        }
+    }
+}
+
+export const GetOrLoadFileRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetOrLoadFileRequest",
+    "definitions": {
+        "GetOrLoadFileRequest": {
+            "type": "object",
+            "properties": {
+                "reference": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/TokenReferenceString"
+                        },
+                        {
+                            "$ref": "#/definitions/FileReferenceString"
+                        },
+                        {
+                            "$ref": "#/definitions/URLTokenReferenceString"
+                        },
+                        {
+                            "$ref": "#/definitions/URLFileReferenceString"
+                        }
+                    ]
+                },
+                "password": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "reference"
+            ],
+            "additionalProperties": false,
+            "errorMessage": "token / file reference invalid"
+        },
+        "TokenReferenceString": {
+            "type": "string",
+            "pattern": "VE9L.{84}"
+        },
+        "FileReferenceString": {
+            "type": "string",
+            "pattern": "RklM.{84}"
+        },
+        "URLTokenReferenceString": {
+            "type": "string",
+            "pattern": "^https?:\\/\\/.*\\/r\\/TOK[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
+        },
+        "URLFileReferenceString": {
+            "type": "string",
+            "pattern": "^https?:\\/\\/.*\\/r\\/FIL[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
+        }
+    }
+}
+
+export const RegenerateFileOwnershipTokenRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/RegenerateFileOwnershipTokenRequest",
+    "definitions": {
+        "RegenerateFileOwnershipTokenRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/FileIdString"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "additionalProperties": false
+        },
+        "FileIdString": {
+            "type": "string",
+            "pattern": "FIL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const UploadOwnFileRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/UploadOwnFileRequest",
+    "definitions": {
+        "UploadOwnFileRequest": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "object",
+                    "properties": {
+                        "BYTES_PER_ELEMENT": {
+                            "type": "number"
+                        },
+                        "buffer": {
+                            "type": "object",
+                            "properties": {
+                                "byteLength": {
+                                    "type": "number"
+                                }
+                            },
+                            "required": [
+                                "byteLength"
+                            ],
+                            "additionalProperties": false
+                        },
+                        "byteLength": {
+                            "type": "number"
+                        },
+                        "byteOffset": {
+                            "type": "number"
+                        },
+                        "length": {
+                            "type": "number"
+                        }
+                    },
+                    "required": [
+                        "BYTES_PER_ELEMENT",
+                        "buffer",
+                        "byteLength",
+                        "byteOffset",
+                        "length"
+                    ],
+                    "additionalProperties": {
+                        "type": "number"
+                    }
+                },
+                "filename": {
+                    "type": "string"
+                },
+                "mimetype": {
+                    "type": "string"
+                },
+                "expiresAt": {
+                    "$ref": "#/definitions/ISO8601DateTimeString"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "uniqueItems": true
+                }
+            },
+            "required": [
+                "content",
+                "filename",
+                "mimetype"
+            ],
+            "additionalProperties": false
+        },
+        "ISO8601DateTimeString": {
+            "type": "string",
+            "errorMessage": "must match ISO8601 datetime format",
+            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
+        }
+    }
+}
+
+export const UploadOwnFileValidatableRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/UploadOwnFileValidatableRequest",
+    "definitions": {
+        "UploadOwnFileValidatableRequest": {
+            "type": "object",
+            "properties": {
+                "filename": {
+                    "type": "string"
+                },
+                "mimetype": {
+                    "type": "string"
+                },
+                "expiresAt": {
+                    "$ref": "#/definitions/ISO8601DateTimeString"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "uniqueItems": true
+                },
+                "content": {
+                    "type": "object"
+                }
+            },
+            "required": [
+                "content",
+                "filename",
+                "mimetype"
+            ],
+            "additionalProperties": false
+        },
+        "ISO8601DateTimeString": {
+            "type": "string",
+            "errorMessage": "must match ISO8601 datetime format",
+            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
+        }
+    }
+}
+
+export const GetIdentityDeletionProcessRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetIdentityDeletionProcessRequest",
+    "definitions": {
+        "GetIdentityDeletionProcessRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/IdentityDeletionProcessIdString"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "additionalProperties": false
+        },
+        "IdentityDeletionProcessIdString": {
+            "type": "string",
+            "pattern": "IDP[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const InitiateIdentityDeletionProcessRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/InitiateIdentityDeletionProcessRequest",
+    "definitions": {
+        "InitiateIdentityDeletionProcessRequest": {
+            "type": "object",
+            "properties": {
+                "lengthOfGracePeriodInDays": {
+                    "type": "number"
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}
+
+export const DownloadAttachmentRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/DownloadAttachmentRequest",
+    "definitions": {
+        "DownloadAttachmentRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/MessageIdString"
+                },
+                "attachmentId": {
+                    "$ref": "#/definitions/FileIdString"
+                }
+            },
+            "required": [
+                "id",
+                "attachmentId"
+            ],
+            "additionalProperties": false
+        },
+        "MessageIdString": {
+            "type": "string",
+            "pattern": "MSG[A-Za-z0-9]{17}"
+        },
+        "FileIdString": {
+            "type": "string",
+            "pattern": "FIL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const GetAnnouncementsRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetAnnouncementsRequest",
+    "definitions": {
+        "GetAnnouncementsRequest": {
+            "type": "object",
+            "properties": {
+                "language": {
+                    "$ref": "#/definitions/LanguageISO639"
+                }
+            },
+            "required": [
+                "language"
+            ],
+            "additionalProperties": false
+        },
+        "LanguageISO639": {
+            "type": "string",
+            "enum": [
+                "aa",
+                "ab",
+                "ae",
+                "af",
+                "ak",
+                "am",
+                "an",
+                "ar",
+                "as",
+                "av",
+                "ay",
+                "az",
+                "ba",
+                "be",
+                "bg",
+                "bi",
+                "bm",
+                "bn",
+                "bo",
+                "br",
+                "bs",
+                "ca",
+                "ce",
+                "ch",
+                "co",
+                "cr",
+                "cs",
+                "cu",
+                "cv",
+                "cy",
+                "da",
+                "de",
+                "dv",
+                "dz",
+                "ee",
+                "el",
+                "en",
+                "eo",
+                "es",
+                "et",
+                "eu",
+                "fa",
+                "ff",
+                "fi",
+                "fj",
+                "fo",
+                "fr",
+                "fy",
+                "ga",
+                "gd",
+                "gl",
+                "gn",
+                "gu",
+                "gv",
+                "ha",
+                "he",
+                "hi",
+                "ho",
+                "hr",
+                "ht",
+                "hu",
+                "hy",
+                "hz",
+                "ia",
+                "id",
+                "ie",
+                "ig",
+                "ii",
+                "ik",
+                "io",
+                "is",
+                "it",
+                "iu",
+                "ja",
+                "jv",
+                "ka",
+                "kg",
+                "ki",
+                "kj",
+                "kk",
+                "kl",
+                "km",
+                "kn",
+                "ko",
+                "kr",
+                "ks",
+                "ku",
+                "kv",
+                "kw",
+                "ky",
+                "la",
+                "lb",
+                "lg",
+                "li",
+                "ln",
+                "lo",
+                "lt",
+                "lu",
+                "lv",
+                "mg",
+                "mh",
+                "mi",
+                "mk",
+                "ml",
+                "mn",
+                "mr",
+                "ms",
+                "mt",
+                "my",
+                "na",
+                "nb",
+                "nd",
+                "ne",
+                "ng",
+                "nl",
+                "nn",
+                "no",
+                "nr",
+                "nv",
+                "ny",
+                "oc",
+                "oj",
+                "om",
+                "or",
+                "os",
+                "pa",
+                "pi",
+                "pl",
+                "ps",
+                "pt",
+                "qu",
+                "rm",
+                "rn",
+                "ro",
+                "ru",
+                "rw",
+                "sa",
+                "sc",
+                "sd",
+                "se",
+                "sg",
+                "si",
+                "sk",
+                "sl",
+                "sm",
+                "sn",
+                "so",
+                "sq",
+                "sr",
+                "ss",
+                "st",
+                "su",
+                "sv",
+                "sw",
+                "ta",
+                "te",
+                "tg",
+                "th",
+                "ti",
+                "tk",
+                "tl",
+                "tn",
+                "to",
+                "tr",
+                "ts",
+                "tt",
+                "tw",
+                "ty",
+                "ug",
+                "uk",
+                "ur",
+                "uz",
+                "ve",
+                "vi",
+                "vo",
+                "wa",
+                "wo",
+                "xh",
+                "yi",
+                "yo",
+                "za",
+                "zh",
+                "zu"
+            ]
+        }
+    }
+}
+
+export const SendBackboneNotificationRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/SendBackboneNotificationRequest",
+    "definitions": {
+        "SendBackboneNotificationRequest": {
+            "type": "object",
+            "properties": {
+                "recipients": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/AddressString"
+                    }
+                },
+                "code": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "recipients",
+                "code"
+            ],
+            "additionalProperties": false
+        },
+        "AddressString": {
+            "type": "string",
+            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
+        }
+    }
+}
+
+export const CreateRelationshipChallengeRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/CreateRelationshipChallengeRequest",
+    "definitions": {
+        "CreateRelationshipChallengeRequest": {
+            "type": "object",
+            "properties": {
+                "challengeType": {
+                    "type": "string",
+                    "const": "Relationship"
+                },
+                "relationship": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                }
+            },
+            "required": [
+                "challengeType",
+                "relationship"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const isCreateRelationshipChallengeRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/isCreateRelationshipChallengeRequest",
+    "definitions": {
+        "isCreateRelationshipChallengeRequest": {
+            "$comment": "(value: any) => value is CreateRelationshipChallengeRequest",
+            "type": "object",
+            "properties": {
+                "namedArgs": {
+                    "type": "object",
+                    "properties": {
+                        "value": {}
+                    },
+                    "required": [
+                        "value"
+                    ],
+                    "additionalProperties": false
+                }
+            }
+        }
+    }
+}
+
+export const CreateIdentityChallengeRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/CreateIdentityChallengeRequest",
+    "definitions": {
+        "CreateIdentityChallengeRequest": {
+            "type": "object",
+            "properties": {
+                "challengeType": {
+                    "type": "string",
+                    "const": "Identity"
+                }
+            },
+            "required": [
+                "challengeType"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
+export const isCreateIdentityChallengeRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/isCreateIdentityChallengeRequest",
+    "definitions": {
+        "isCreateIdentityChallengeRequest": {
+            "$comment": "(value: any) => value is CreateIdentityChallengeRequest",
+            "type": "object",
+            "properties": {
+                "namedArgs": {
+                    "type": "object",
+                    "properties": {
+                        "value": {}
+                    },
+                    "required": [
+                        "value"
+                    ],
+                    "additionalProperties": false
+                }
+            }
+        }
+    }
+}
+
+export const CreateDeviceChallengeRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/CreateDeviceChallengeRequest",
+    "definitions": {
+        "CreateDeviceChallengeRequest": {
+            "type": "object",
+            "properties": {
+                "challengeType": {
+                    "type": "string",
+                    "const": "Device"
+                }
+            },
+            "required": [
+                "challengeType"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
+export const isCreateDeviceChallengeRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/isCreateDeviceChallengeRequest",
+    "definitions": {
+        "isCreateDeviceChallengeRequest": {
+            "$comment": "(value: any) => value is CreateDeviceChallengeRequest",
+            "type": "object",
+            "properties": {
+                "namedArgs": {
+                    "type": "object",
+                    "properties": {
+                        "value": {}
+                    },
+                    "required": [
+                        "value"
+                    ],
+                    "additionalProperties": false
+                }
+            }
+        }
+    }
+}
+
+export const CreateChallengeRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/CreateChallengeRequest",
+    "definitions": {
+        "CreateChallengeRequest": {
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/CreateRelationshipChallengeRequest"
+                },
+                {
+                    "$ref": "#/definitions/CreateIdentityChallengeRequest"
+                },
+                {
+                    "$ref": "#/definitions/CreateDeviceChallengeRequest"
+                }
+            ]
+        },
+        "CreateRelationshipChallengeRequest": {
+            "type": "object",
+            "properties": {
+                "challengeType": {
+                    "type": "string",
+                    "const": "Relationship"
+                },
+                "relationship": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                }
+            },
+            "required": [
+                "challengeType",
+                "relationship"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        },
+        "CreateIdentityChallengeRequest": {
+            "type": "object",
+            "properties": {
+                "challengeType": {
+                    "type": "string",
+                    "const": "Identity"
+                }
+            },
+            "required": [
+                "challengeType"
+            ],
+            "additionalProperties": false
+        },
+        "CreateDeviceChallengeRequest": {
+            "type": "object",
+            "properties": {
+                "challengeType": {
+                    "type": "string",
+                    "const": "Device"
+                }
+            },
+            "required": [
+                "challengeType"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
+export const ValidateChallengeRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/ValidateChallengeRequest",
+    "definitions": {
+        "ValidateChallengeRequest": {
+            "type": "object",
+            "properties": {
+                "challengeString": {
+                    "type": "string"
+                },
+                "signature": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "challengeString",
+                "signature"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
+export const DeleteDeviceRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/DeleteDeviceRequest",
+    "definitions": {
+        "DeleteDeviceRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/DeviceIdString"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "additionalProperties": false
+        },
+        "DeviceIdString": {
+            "type": "string",
+            "pattern": "DVC[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const FillDeviceOnboardingTokenWithNewDeviceRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/FillDeviceOnboardingTokenWithNewDeviceRequest",
+    "definitions": {
+        "FillDeviceOnboardingTokenWithNewDeviceRequest": {
+            "type": "object",
+            "properties": {
+                "reference": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/TokenReferenceString"
+                        },
+                        {
+                            "$ref": "#/definitions/URLTokenReferenceString"
+                        }
+                    ]
+                },
+                "profileName": {
+                    "type": "string"
+                },
+                "isAdmin": {
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "reference"
+            ],
+            "additionalProperties": false
+        },
+        "TokenReferenceString": {
+            "type": "string",
+            "pattern": "VE9L.{84}"
+        },
+        "URLTokenReferenceString": {
+            "type": "string",
+            "pattern": "^https?:\\/\\/.*\\/r\\/TOK[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
+        }
+    }
+}
+
+export const GetDeviceRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetDeviceRequest",
+    "definitions": {
+        "GetDeviceRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/DeviceIdString"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "additionalProperties": false
+        },
+        "DeviceIdString": {
+            "type": "string",
+            "pattern": "DVC[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const SetCommunicationLanguageRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/SetCommunicationLanguageRequest",
+    "definitions": {
+        "SetCommunicationLanguageRequest": {
+            "type": "object",
+            "properties": {
+                "communicationLanguage": {
+                    "type": "string",
+                    "enum": [
+                        "aa",
+                        "ab",
+                        "ae",
+                        "af",
+                        "ak",
+                        "am",
+                        "an",
+                        "ar",
+                        "as",
+                        "av",
+                        "ay",
+                        "az",
+                        "ba",
+                        "be",
+                        "bg",
+                        "bi",
+                        "bm",
+                        "bn",
+                        "bo",
+                        "br",
+                        "bs",
+                        "ca",
+                        "ce",
+                        "ch",
+                        "co",
+                        "cr",
+                        "cs",
+                        "cu",
+                        "cv",
+                        "cy",
+                        "da",
+                        "de",
+                        "dv",
+                        "dz",
+                        "ee",
+                        "el",
+                        "en",
+                        "eo",
+                        "es",
+                        "et",
+                        "eu",
+                        "fa",
+                        "ff",
+                        "fi",
+                        "fj",
+                        "fo",
+                        "fr",
+                        "fy",
+                        "ga",
+                        "gd",
+                        "gl",
+                        "gn",
+                        "gu",
+                        "gv",
+                        "ha",
+                        "he",
+                        "hi",
+                        "ho",
+                        "hr",
+                        "ht",
+                        "hu",
+                        "hy",
+                        "hz",
+                        "ia",
+                        "id",
+                        "ie",
+                        "ig",
+                        "ii",
+                        "ik",
+                        "io",
+                        "is",
+                        "it",
+                        "iu",
+                        "ja",
+                        "jv",
+                        "ka",
+                        "kg",
+                        "ki",
+                        "kj",
+                        "kk",
+                        "kl",
+                        "km",
+                        "kn",
+                        "ko",
+                        "kr",
+                        "ks",
+                        "ku",
+                        "kv",
+                        "kw",
+                        "ky",
+                        "la",
+                        "lb",
+                        "lg",
+                        "li",
+                        "ln",
+                        "lo",
+                        "lt",
+                        "lu",
+                        "lv",
+                        "mg",
+                        "mh",
+                        "mi",
+                        "mk",
+                        "ml",
+                        "mn",
+                        "mr",
+                        "ms",
+                        "mt",
+                        "my",
+                        "na",
+                        "nb",
+                        "nd",
+                        "ne",
+                        "ng",
+                        "nl",
+                        "nn",
+                        "no",
+                        "nr",
+                        "nv",
+                        "ny",
+                        "oc",
+                        "oj",
+                        "om",
+                        "or",
+                        "os",
+                        "pa",
+                        "pi",
+                        "pl",
+                        "ps",
+                        "pt",
+                        "qu",
+                        "rm",
+                        "rn",
+                        "ro",
+                        "ru",
+                        "rw",
+                        "sa",
+                        "sc",
+                        "sd",
+                        "se",
+                        "sg",
+                        "si",
+                        "sk",
+                        "sl",
+                        "sm",
+                        "sn",
+                        "so",
+                        "sq",
+                        "sr",
+                        "ss",
+                        "st",
+                        "su",
+                        "sv",
+                        "sw",
+                        "ta",
+                        "te",
+                        "tg",
+                        "th",
+                        "ti",
+                        "tk",
+                        "tl",
+                        "tn",
+                        "to",
+                        "tr",
+                        "ts",
+                        "tt",
+                        "tw",
+                        "ty",
+                        "ug",
+                        "uk",
+                        "ur",
+                        "uz",
+                        "ve",
+                        "vi",
+                        "vo",
+                        "wa",
+                        "wo",
+                        "xh",
+                        "yi",
+                        "yo",
+                        "za",
+                        "zh",
+                        "zu"
+                    ]
+                }
+            },
+            "required": [
+                "communicationLanguage"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
+export const UpdateCurrentDeviceRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/UpdateCurrentDeviceRequest",
+    "definitions": {
+        "UpdateCurrentDeviceRequest": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}
+
+export const UpdateDeviceRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/UpdateDeviceRequest",
+    "definitions": {
+        "UpdateDeviceRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/DeviceIdString"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "additionalProperties": false
+        },
+        "DeviceIdString": {
+            "type": "string",
+            "pattern": "DVC[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const CreateIdentityRecoveryKitRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/CreateIdentityRecoveryKitRequest",
+    "definitions": {
+        "CreateIdentityRecoveryKitRequest": {
+            "type": "object",
+            "properties": {
+                "profileName": {
+                    "type": "string"
+                },
+                "passwordProtection": {
+                    "type": "object",
+                    "properties": {
+                        "password": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "passwordIsPin": {
+                            "type": "boolean",
+                            "const": true
+                        }
+                    },
+                    "required": [
+                        "password"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "profileName",
+                "passwordProtection"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
+export const GetAttachmentMetadataRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetAttachmentMetadataRequest",
+    "definitions": {
+        "GetAttachmentMetadataRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/MessageIdString"
+                },
+                "attachmentId": {
+                    "$ref": "#/definitions/FileIdString"
+                }
+            },
+            "required": [
+                "id",
+                "attachmentId"
+            ],
+            "additionalProperties": false
+        },
+        "MessageIdString": {
+            "type": "string",
+            "pattern": "MSG[A-Za-z0-9]{17}"
+        },
+        "FileIdString": {
+            "type": "string",
+            "pattern": "FIL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const GetMessageRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetMessageRequest",
+    "definitions": {
+        "GetMessageRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/MessageIdString"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "additionalProperties": false
+        },
+        "MessageIdString": {
+            "type": "string",
+            "pattern": "MSG[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const GetMessagesRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetMessagesRequest",
+    "definitions": {
+        "GetMessagesRequest": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "$ref": "#/definitions/GetMessagesQuery"
+                }
+            },
+            "additionalProperties": false
+        },
+        "GetMessagesQuery": {
+            "type": "object",
+            "properties": {
+                "isOwn": {
+                    "type": "string"
+                },
+                "createdBy": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "createdByDevice": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "createdAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.@type": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.body": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.bodyFormat": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "content.subject": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "attachments": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "recipients.address": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "recipients.relationshipId": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "wasReadAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "participant": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}
+
+export const MarkMessageAsReadRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/MarkMessageAsReadRequest",
+    "definitions": {
+        "MarkMessageAsReadRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/MessageIdString"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "additionalProperties": false
+        },
+        "MessageIdString": {
+            "type": "string",
+            "pattern": "MSG[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const MarkMessageAsUnreadRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/MarkMessageAsUnreadRequest",
+    "definitions": {
+        "MarkMessageAsUnreadRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/MessageIdString"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "additionalProperties": false
+        },
+        "MessageIdString": {
+            "type": "string",
+            "pattern": "MSG[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const SendMessageRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/SendMessageRequest",
+    "definitions": {
+        "SendMessageRequest": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "recipients": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/AddressString"
+                    },
+                    "minItems": 1,
+                    "uniqueItems": true
+                },
+                "content": {},
+                "attachments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/FileIdString"
+                    },
+                    "uniqueItems": true
+                }
+            },
+            "required": [
+                "content",
+                "recipients"
+            ]
+        },
+        "AddressString": {
+            "type": "string",
+            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
+        },
+        "FileIdString": {
+            "type": "string",
+            "pattern": "FIL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const AcceptRelationshipRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/AcceptRelationshipRequest",
+    "definitions": {
+        "AcceptRelationshipRequest": {
+            "type": "object",
+            "properties": {
+                "relationshipId": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                }
+            },
+            "required": [
+                "relationshipId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const AcceptRelationshipReactivationRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/AcceptRelationshipReactivationRequest",
+    "definitions": {
+        "AcceptRelationshipReactivationRequest": {
+            "type": "object",
+            "properties": {
+                "relationshipId": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                }
+            },
+            "required": [
+                "relationshipId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const CanCreateRelationshipRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/CanCreateRelationshipRequest",
+    "definitions": {
+        "CanCreateRelationshipRequest": {
+            "type": "object",
+            "properties": {
+                "templateId": {
+                    "$ref": "#/definitions/RelationshipTemplateIdString"
+                },
+                "creationContent": {}
+            },
+            "required": [
+                "templateId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipTemplateIdString": {
+            "type": "string",
+            "pattern": "RLT[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const CreateRelationshipRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/CreateRelationshipRequest",
+    "definitions": {
+        "CreateRelationshipRequest": {
+            "type": "object",
+            "properties": {
+                "templateId": {
+                    "$ref": "#/definitions/RelationshipTemplateIdString"
+                },
+                "creationContent": {}
+            },
+            "required": [
+                "templateId",
+                "creationContent"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipTemplateIdString": {
+            "type": "string",
+            "pattern": "RLT[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const DecomposeRelationshipRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/DecomposeRelationshipRequest",
+    "definitions": {
+        "DecomposeRelationshipRequest": {
+            "type": "object",
+            "properties": {
+                "relationshipId": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                }
+            },
+            "required": [
+                "relationshipId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const GetAttributesForRelationshipRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetAttributesForRelationshipRequest",
+    "definitions": {
+        "GetAttributesForRelationshipRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                },
+                "hideTechnical": {
+                    "type": "boolean"
+                },
+                "onlyLatestVersions": {
+                    "type": "boolean",
+                    "description": "default: true"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const GetRelationshipRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetRelationshipRequest",
+    "definitions": {
+        "GetRelationshipRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const GetRelationshipByAddressRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetRelationshipByAddressRequest",
+    "definitions": {
+        "GetRelationshipByAddressRequest": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "$ref": "#/definitions/AddressString"
+                }
+            },
+            "required": [
+                "address"
+            ],
+            "additionalProperties": false
+        },
+        "AddressString": {
+            "type": "string",
+            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
+        }
+    }
+}
+
+export const GetRelationshipsRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetRelationshipsRequest",
+    "definitions": {
+        "GetRelationshipsRequest": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "$ref": "#/definitions/GetRelationshipsQuery"
+                }
+            },
+            "additionalProperties": false
+        },
+        "GetRelationshipsQuery": {
+            "type": "object",
+            "properties": {
+                "peer": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "status": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "templateId": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}
+
+export const RejectRelationshipRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/RejectRelationshipRequest",
+    "definitions": {
+        "RejectRelationshipRequest": {
+            "type": "object",
+            "properties": {
+                "relationshipId": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                }
+            },
+            "required": [
+                "relationshipId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const RejectRelationshipReactivationRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/RejectRelationshipReactivationRequest",
+    "definitions": {
+        "RejectRelationshipReactivationRequest": {
+            "type": "object",
+            "properties": {
+                "relationshipId": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                }
+            },
+            "required": [
+                "relationshipId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const RequestRelationshipReactivationRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/RequestRelationshipReactivationRequest",
+    "definitions": {
+        "RequestRelationshipReactivationRequest": {
+            "type": "object",
+            "properties": {
+                "relationshipId": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                }
+            },
+            "required": [
+                "relationshipId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const RevokeRelationshipRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/RevokeRelationshipRequest",
+    "definitions": {
+        "RevokeRelationshipRequest": {
+            "type": "object",
+            "properties": {
+                "relationshipId": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                }
+            },
+            "required": [
+                "relationshipId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const RevokeRelationshipReactivationRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/RevokeRelationshipReactivationRequest",
+    "definitions": {
+        "RevokeRelationshipReactivationRequest": {
+            "type": "object",
+            "properties": {
+                "relationshipId": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                }
+            },
+            "required": [
+                "relationshipId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const TerminateRelationshipRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/TerminateRelationshipRequest",
+    "definitions": {
+        "TerminateRelationshipRequest": {
+            "type": "object",
+            "properties": {
+                "relationshipId": {
+                    "$ref": "#/definitions/RelationshipIdString"
+                }
+            },
+            "required": [
+                "relationshipId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipIdString": {
+            "type": "string",
+            "pattern": "REL[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const CreateOwnRelationshipTemplateRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/CreateOwnRelationshipTemplateRequest",
+    "definitions": {
+        "CreateOwnRelationshipTemplateRequest": {
+            "type": "object",
+            "properties": {
+                "expiresAt": {
+                    "$ref": "#/definitions/ISO8601DateTimeString"
+                },
+                "content": {},
+                "maxNumberOfAllocations": {
+                    "type": "number",
+                    "minimum": 1
+                },
+                "forIdentity": {
+                    "$ref": "#/definitions/AddressString"
+                },
+                "passwordProtection": {
+                    "type": "object",
+                    "properties": {
+                        "password": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "passwordIsPin": {
+                            "type": "boolean",
+                            "const": true
+                        },
+                        "passwordLocationIndicator": {}
+                    },
+                    "required": [
+                        "password"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "expiresAt",
+                "content"
+            ],
+            "additionalProperties": false
+        },
+        "ISO8601DateTimeString": {
+            "type": "string",
+            "errorMessage": "must match ISO8601 datetime format",
+            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
+        },
+        "AddressString": {
+            "type": "string",
+            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
+        }
+    }
+}
+
+export const CreateTokenForOwnRelationshipTemplateRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/CreateTokenForOwnRelationshipTemplateRequest",
+    "definitions": {
+        "CreateTokenForOwnRelationshipTemplateRequest": {
+            "type": "object",
+            "properties": {
+                "templateId": {
+                    "$ref": "#/definitions/RelationshipTemplateIdString"
+                },
+                "expiresAt": {
+                    "$ref": "#/definitions/ISO8601DateTimeString"
+                },
+                "ephemeral": {
+                    "type": "boolean"
+                },
+                "forIdentity": {
+                    "$ref": "#/definitions/AddressString"
+                },
+                "passwordProtection": {
+                    "type": "object",
+                    "properties": {
+                        "password": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "passwordIsPin": {
+                            "type": "boolean",
+                            "const": true
+                        },
+                        "passwordLocationIndicator": {}
+                    },
+                    "required": [
+                        "password"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "templateId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipTemplateIdString": {
+            "type": "string",
+            "pattern": "RLT[A-Za-z0-9]{17}"
+        },
+        "ISO8601DateTimeString": {
+            "type": "string",
+            "errorMessage": "must match ISO8601 datetime format",
+            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
+        },
+        "AddressString": {
+            "type": "string",
+            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
+        }
+    }
+}
+
+export const DeleteRelationshipTemplateRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/DeleteRelationshipTemplateRequest",
+    "definitions": {
+        "DeleteRelationshipTemplateRequest": {
+            "type": "object",
+            "properties": {
+                "templateId": {
+                    "$ref": "#/definitions/RelationshipTemplateIdString"
+                }
+            },
+            "required": [
+                "templateId"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipTemplateIdString": {
+            "type": "string",
+            "pattern": "RLT[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const GetRelationshipTemplateRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetRelationshipTemplateRequest",
+    "definitions": {
+        "GetRelationshipTemplateRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/RelationshipTemplateIdString"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipTemplateIdString": {
+            "type": "string",
+            "pattern": "RLT[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const GetRelationshipTemplatesRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetRelationshipTemplatesRequest",
+    "definitions": {
+        "GetRelationshipTemplatesRequest": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "$ref": "#/definitions/GetRelationshipTemplatesQuery"
+                },
+                "ownerRestriction": {
+                    "$ref": "#/definitions/OwnerRestriction"
+                }
+            },
+            "additionalProperties": false
+        },
+        "GetRelationshipTemplatesQuery": {
+            "type": "object",
+            "properties": {
+                "isOwn": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "createdAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "expiresAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "createdBy": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "createdByDevice": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "maxNumberOfAllocations": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forIdentity": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "passwordProtection": {
+                    "type": "string",
+                    "enum": [
+                        "",
+                        "!"
+                    ]
+                },
+                "passwordProtection.password": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "passwordProtection.passwordIsPin": {
+                    "type": "string",
+                    "enum": [
+                        "true",
+                        "!"
+                    ]
+                },
+                "passwordProtection.passwordLocationIndicator": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": false
+        },
+        "OwnerRestriction": {
+            "type": "string",
+            "enum": [
+                "o",
+                "p"
+            ]
+        }
+    }
+}
+
+export const LoadPeerRelationshipTemplateRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/LoadPeerRelationshipTemplateRequest",
+    "definitions": {
+        "LoadPeerRelationshipTemplateRequest": {
+            "type": "object",
+            "properties": {
+                "reference": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/TokenReferenceString"
+                        },
+                        {
+                            "$ref": "#/definitions/RelationshipTemplateReferenceString"
+                        },
+                        {
+                            "$ref": "#/definitions/URLTokenReferenceString"
+                        },
+                        {
+                            "$ref": "#/definitions/URLRelationshipTemplateReferenceString"
+                        }
+                    ]
+                },
+                "password": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "reference"
+            ],
+            "additionalProperties": false,
+            "errorMessage": "token / relationship template reference invalid"
+        },
+        "TokenReferenceString": {
+            "type": "string",
+            "pattern": "VE9L.{84}"
+        },
+        "RelationshipTemplateReferenceString": {
+            "type": "string",
+            "pattern": "UkxU.{84}"
+        },
+        "URLTokenReferenceString": {
+            "type": "string",
+            "pattern": "^https?:\\/\\/.*\\/r\\/TOK[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
+        },
+        "URLRelationshipTemplateReferenceString": {
+            "type": "string",
+            "pattern": "^https?:\\/\\/.*\\/r\\/RLT[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
+        }
+    }
+}
+
+export const CreateOwnTokenRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/CreateOwnTokenRequest",
+    "definitions": {
+        "CreateOwnTokenRequest": {
+            "type": "object",
+            "properties": {
+                "content": {},
+                "expiresAt": {
+                    "$ref": "#/definitions/ISO8601DateTimeString"
+                },
+                "ephemeral": {
+                    "type": "boolean"
+                },
+                "forIdentity": {
+                    "$ref": "#/definitions/AddressString"
+                },
+                "passwordProtection": {
+                    "type": "object",
+                    "properties": {
+                        "password": {
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "passwordIsPin": {
+                            "type": "boolean",
+                            "const": true
+                        },
+                        "passwordLocationIndicator": {}
+                    },
+                    "required": [
+                        "password"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "content",
+                "expiresAt",
+                "ephemeral"
+            ],
+            "additionalProperties": false
+        },
+        "ISO8601DateTimeString": {
+            "type": "string",
+            "errorMessage": "must match ISO8601 datetime format",
+            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
+        },
+        "AddressString": {
+            "type": "string",
+            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
+        }
+    }
+}
+
+export const DeleteTokenRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/DeleteTokenRequest",
+    "definitions": {
+        "DeleteTokenRequest": {
+            "type": "object",
+            "properties": {
+                "tokenId": {
+                    "$ref": "#/definitions/TokenIdString"
+                }
+            },
+            "required": [
+                "tokenId"
+            ],
+            "additionalProperties": false
+        },
+        "TokenIdString": {
+            "type": "string",
+            "pattern": "TOK[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const GetTokenRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetTokenRequest",
+    "definitions": {
+        "GetTokenRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/TokenIdString"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "additionalProperties": false
+        },
+        "TokenIdString": {
+            "type": "string",
+            "pattern": "TOK[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const GetTokensRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetTokensRequest",
+    "definitions": {
+        "GetTokensRequest": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "$ref": "#/definitions/GetTokensQuery"
+                },
+                "ownerRestriction": {
+                    "$ref": "#/definitions/OwnerRestriction"
+                }
+            },
+            "additionalProperties": false
+        },
+        "GetTokensQuery": {
+            "type": "object",
+            "properties": {
+                "isOwn": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "createdAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "createdBy": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "createdByDevice": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "expiresAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "forIdentity": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "passwordProtection": {
+                    "type": "string",
+                    "enum": [
+                        "",
+                        "!"
+                    ]
+                },
+                "passwordProtection.password": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "passwordProtection.passwordIsPin": {
+                    "type": "string",
+                    "enum": [
+                        "true",
+                        "!"
+                    ]
+                },
+                "passwordProtection.passwordLocationIndicator": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": false
+        },
+        "OwnerRestriction": {
+            "type": "string",
+            "enum": [
+                "o",
+                "p"
+            ]
+        }
+    }
+}
+
+export const LoadPeerTokenRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/LoadPeerTokenRequest",
+    "definitions": {
+        "LoadPeerTokenRequest": {
+            "type": "object",
+            "properties": {
+                "reference": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/TokenReferenceString"
+                        },
+                        {
+                            "$ref": "#/definitions/URLTokenReferenceString"
+                        }
+                    ]
+                },
+                "ephemeral": {
+                    "type": "boolean"
+                },
+                "password": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "reference",
+                "ephemeral"
+            ],
+            "additionalProperties": false,
+            "errorMessage": "token reference invalid"
+        },
+        "TokenReferenceString": {
+            "type": "string",
+            "pattern": "VE9L.{84}"
+        },
+        "URLTokenReferenceString": {
+            "type": "string",
+            "pattern": "^https?:\\/\\/.*\\/r\\/TOK[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
+        }
+    }
+}
+
+export const CreateTokenForAttributeRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/CreateTokenForAttributeRequest",
+    "definitions": {
+        "CreateTokenForAttributeRequest": {
+            "type": "object",
+            "properties": {
+                "attributeId": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "attributeId"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
 export const DeleteAttributeAndNotifyRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/DeleteAttributeAndNotifyRequest",
@@ -17103,2923 +20039,6 @@ export const UpsertSettingByKeyRequest: any = {
         "GenericIdString": {
             "type": "string",
             "pattern": "[A-Za-z0-9]{20}"
-        }
-    }
-}
-
-export const DownloadFileRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/DownloadFileRequest",
-    "definitions": {
-        "DownloadFileRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/FileIdString"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "additionalProperties": false
-        },
-        "FileIdString": {
-            "type": "string",
-            "pattern": "FIL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const LoadItemFromReferenceRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/LoadItemFromReferenceRequest",
-    "definitions": {
-        "LoadItemFromReferenceRequest": {
-            "type": "object",
-            "properties": {
-                "reference": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/TokenReferenceString"
-                        },
-                        {
-                            "$ref": "#/definitions/FileReferenceString"
-                        },
-                        {
-                            "$ref": "#/definitions/RelationshipTemplateReferenceString"
-                        },
-                        {
-                            "$ref": "#/definitions/URLTokenReferenceString"
-                        },
-                        {
-                            "$ref": "#/definitions/URLFileReferenceString"
-                        },
-                        {
-                            "$ref": "#/definitions/URLRelationshipTemplateReferenceString"
-                        }
-                    ]
-                },
-                "password": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "reference"
-            ],
-            "additionalProperties": false
-        },
-        "TokenReferenceString": {
-            "type": "string",
-            "pattern": "VE9L.{84}"
-        },
-        "FileReferenceString": {
-            "type": "string",
-            "pattern": "RklM.{84}"
-        },
-        "RelationshipTemplateReferenceString": {
-            "type": "string",
-            "pattern": "UkxU.{84}"
-        },
-        "URLTokenReferenceString": {
-            "type": "string",
-            "pattern": "^https?:\\/\\/.*\\/r\\/TOK[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
-        },
-        "URLFileReferenceString": {
-            "type": "string",
-            "pattern": "^https?:\\/\\/.*\\/r\\/FIL[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
-        },
-        "URLRelationshipTemplateReferenceString": {
-            "type": "string",
-            "pattern": "^https?:\\/\\/.*\\/r\\/RLT[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
-        }
-    }
-}
-
-export const RegisterPushNotificationTokenRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/RegisterPushNotificationTokenRequest",
-    "definitions": {
-        "RegisterPushNotificationTokenRequest": {
-            "type": "object",
-            "properties": {
-                "handle": {
-                    "type": "string"
-                },
-                "platform": {
-                    "type": "string"
-                },
-                "appId": {
-                    "type": "string"
-                },
-                "environment": {
-                    "type": "string",
-                    "enum": [
-                        "Development",
-                        "Production"
-                    ]
-                }
-            },
-            "required": [
-                "handle",
-                "platform",
-                "appId"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
-export const CreateTokenForFileRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CreateTokenForFileRequest",
-    "definitions": {
-        "CreateTokenForFileRequest": {
-            "type": "object",
-            "properties": {
-                "fileId": {
-                    "$ref": "#/definitions/FileIdString"
-                },
-                "expiresAt": {
-                    "$ref": "#/definitions/ISO8601DateTimeString"
-                },
-                "ephemeral": {
-                    "type": "boolean"
-                },
-                "forIdentity": {
-                    "$ref": "#/definitions/AddressString"
-                },
-                "passwordProtection": {
-                    "type": "object",
-                    "properties": {
-                        "password": {
-                            "type": "string",
-                            "minLength": 1
-                        },
-                        "passwordIsPin": {
-                            "type": "boolean",
-                            "const": true
-                        },
-                        "passwordLocationIndicator": {}
-                    },
-                    "required": [
-                        "password"
-                    ],
-                    "additionalProperties": false
-                }
-            },
-            "required": [
-                "fileId"
-            ],
-            "additionalProperties": false
-        },
-        "FileIdString": {
-            "type": "string",
-            "pattern": "FIL[A-Za-z0-9]{17}"
-        },
-        "ISO8601DateTimeString": {
-            "type": "string",
-            "errorMessage": "must match ISO8601 datetime format",
-            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
-        },
-        "AddressString": {
-            "type": "string",
-            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
-        }
-    }
-}
-
-export const DeleteFileRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/DeleteFileRequest",
-    "definitions": {
-        "DeleteFileRequest": {
-            "type": "object",
-            "properties": {
-                "fileId": {
-                    "$ref": "#/definitions/FileIdString"
-                }
-            },
-            "required": [
-                "fileId"
-            ],
-            "additionalProperties": false
-        },
-        "FileIdString": {
-            "type": "string",
-            "pattern": "FIL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const GetFileRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetFileRequest",
-    "definitions": {
-        "GetFileRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/FileIdString"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "additionalProperties": false
-        },
-        "FileIdString": {
-            "type": "string",
-            "pattern": "FIL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const GetFilesRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetFilesRequest",
-    "definitions": {
-        "GetFilesRequest": {
-            "type": "object",
-            "properties": {
-                "query": {
-                    "$ref": "#/definitions/GetFilesQuery"
-                },
-                "ownerRestriction": {
-                    "$ref": "#/definitions/OwnerRestriction"
-                }
-            },
-            "additionalProperties": false
-        },
-        "GetFilesQuery": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "createdBy": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "createdByDevice": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "description": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "expiresAt": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "filename": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "filesize": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "mimetype": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "title": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "isOwn": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "tags": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "ownershipToken": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "ownershipIsLocked": {
-                    "type": "string"
-                }
-            },
-            "additionalProperties": false
-        },
-        "OwnerRestriction": {
-            "type": "string",
-            "enum": [
-                "o",
-                "p"
-            ]
-        }
-    }
-}
-
-export const GetOrLoadFileRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetOrLoadFileRequest",
-    "definitions": {
-        "GetOrLoadFileRequest": {
-            "type": "object",
-            "properties": {
-                "reference": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/TokenReferenceString"
-                        },
-                        {
-                            "$ref": "#/definitions/FileReferenceString"
-                        },
-                        {
-                            "$ref": "#/definitions/URLTokenReferenceString"
-                        },
-                        {
-                            "$ref": "#/definitions/URLFileReferenceString"
-                        }
-                    ]
-                },
-                "password": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "reference"
-            ],
-            "additionalProperties": false,
-            "errorMessage": "token / file reference invalid"
-        },
-        "TokenReferenceString": {
-            "type": "string",
-            "pattern": "VE9L.{84}"
-        },
-        "FileReferenceString": {
-            "type": "string",
-            "pattern": "RklM.{84}"
-        },
-        "URLTokenReferenceString": {
-            "type": "string",
-            "pattern": "^https?:\\/\\/.*\\/r\\/TOK[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
-        },
-        "URLFileReferenceString": {
-            "type": "string",
-            "pattern": "^https?:\\/\\/.*\\/r\\/FIL[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
-        }
-    }
-}
-
-export const RegenerateFileOwnershipTokenRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/RegenerateFileOwnershipTokenRequest",
-    "definitions": {
-        "RegenerateFileOwnershipTokenRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/FileIdString"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "additionalProperties": false
-        },
-        "FileIdString": {
-            "type": "string",
-            "pattern": "FIL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const UploadOwnFileRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/UploadOwnFileRequest",
-    "definitions": {
-        "UploadOwnFileRequest": {
-            "type": "object",
-            "properties": {
-                "content": {
-                    "type": "object",
-                    "properties": {
-                        "BYTES_PER_ELEMENT": {
-                            "type": "number"
-                        },
-                        "buffer": {
-                            "type": "object",
-                            "properties": {
-                                "byteLength": {
-                                    "type": "number"
-                                }
-                            },
-                            "required": [
-                                "byteLength"
-                            ],
-                            "additionalProperties": false
-                        },
-                        "byteLength": {
-                            "type": "number"
-                        },
-                        "byteOffset": {
-                            "type": "number"
-                        },
-                        "length": {
-                            "type": "number"
-                        }
-                    },
-                    "required": [
-                        "BYTES_PER_ELEMENT",
-                        "buffer",
-                        "byteLength",
-                        "byteOffset",
-                        "length"
-                    ],
-                    "additionalProperties": {
-                        "type": "number"
-                    }
-                },
-                "filename": {
-                    "type": "string"
-                },
-                "mimetype": {
-                    "type": "string"
-                },
-                "expiresAt": {
-                    "$ref": "#/definitions/ISO8601DateTimeString"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "tags": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
-                    "uniqueItems": true
-                }
-            },
-            "required": [
-                "content",
-                "filename",
-                "mimetype"
-            ],
-            "additionalProperties": false
-        },
-        "ISO8601DateTimeString": {
-            "type": "string",
-            "errorMessage": "must match ISO8601 datetime format",
-            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
-        }
-    }
-}
-
-export const UploadOwnFileValidatableRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/UploadOwnFileValidatableRequest",
-    "definitions": {
-        "UploadOwnFileValidatableRequest": {
-            "type": "object",
-            "properties": {
-                "filename": {
-                    "type": "string"
-                },
-                "mimetype": {
-                    "type": "string"
-                },
-                "expiresAt": {
-                    "$ref": "#/definitions/ISO8601DateTimeString"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "tags": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
-                    "uniqueItems": true
-                },
-                "content": {
-                    "type": "object"
-                }
-            },
-            "required": [
-                "content",
-                "filename",
-                "mimetype"
-            ],
-            "additionalProperties": false
-        },
-        "ISO8601DateTimeString": {
-            "type": "string",
-            "errorMessage": "must match ISO8601 datetime format",
-            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
-        }
-    }
-}
-
-export const GetIdentityDeletionProcessRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetIdentityDeletionProcessRequest",
-    "definitions": {
-        "GetIdentityDeletionProcessRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/IdentityDeletionProcessIdString"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "additionalProperties": false
-        },
-        "IdentityDeletionProcessIdString": {
-            "type": "string",
-            "pattern": "IDP[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const InitiateIdentityDeletionProcessRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/InitiateIdentityDeletionProcessRequest",
-    "definitions": {
-        "InitiateIdentityDeletionProcessRequest": {
-            "type": "object",
-            "properties": {
-                "lengthOfGracePeriodInDays": {
-                    "type": "number"
-                }
-            },
-            "additionalProperties": false
-        }
-    }
-}
-
-export const DownloadAttachmentRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/DownloadAttachmentRequest",
-    "definitions": {
-        "DownloadAttachmentRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/MessageIdString"
-                },
-                "attachmentId": {
-                    "$ref": "#/definitions/FileIdString"
-                }
-            },
-            "required": [
-                "id",
-                "attachmentId"
-            ],
-            "additionalProperties": false
-        },
-        "MessageIdString": {
-            "type": "string",
-            "pattern": "MSG[A-Za-z0-9]{17}"
-        },
-        "FileIdString": {
-            "type": "string",
-            "pattern": "FIL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const GetAnnouncementsRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetAnnouncementsRequest",
-    "definitions": {
-        "GetAnnouncementsRequest": {
-            "type": "object",
-            "properties": {
-                "language": {
-                    "$ref": "#/definitions/LanguageISO639"
-                }
-            },
-            "required": [
-                "language"
-            ],
-            "additionalProperties": false
-        },
-        "LanguageISO639": {
-            "type": "string",
-            "enum": [
-                "aa",
-                "ab",
-                "ae",
-                "af",
-                "ak",
-                "am",
-                "an",
-                "ar",
-                "as",
-                "av",
-                "ay",
-                "az",
-                "ba",
-                "be",
-                "bg",
-                "bi",
-                "bm",
-                "bn",
-                "bo",
-                "br",
-                "bs",
-                "ca",
-                "ce",
-                "ch",
-                "co",
-                "cr",
-                "cs",
-                "cu",
-                "cv",
-                "cy",
-                "da",
-                "de",
-                "dv",
-                "dz",
-                "ee",
-                "el",
-                "en",
-                "eo",
-                "es",
-                "et",
-                "eu",
-                "fa",
-                "ff",
-                "fi",
-                "fj",
-                "fo",
-                "fr",
-                "fy",
-                "ga",
-                "gd",
-                "gl",
-                "gn",
-                "gu",
-                "gv",
-                "ha",
-                "he",
-                "hi",
-                "ho",
-                "hr",
-                "ht",
-                "hu",
-                "hy",
-                "hz",
-                "ia",
-                "id",
-                "ie",
-                "ig",
-                "ii",
-                "ik",
-                "io",
-                "is",
-                "it",
-                "iu",
-                "ja",
-                "jv",
-                "ka",
-                "kg",
-                "ki",
-                "kj",
-                "kk",
-                "kl",
-                "km",
-                "kn",
-                "ko",
-                "kr",
-                "ks",
-                "ku",
-                "kv",
-                "kw",
-                "ky",
-                "la",
-                "lb",
-                "lg",
-                "li",
-                "ln",
-                "lo",
-                "lt",
-                "lu",
-                "lv",
-                "mg",
-                "mh",
-                "mi",
-                "mk",
-                "ml",
-                "mn",
-                "mr",
-                "ms",
-                "mt",
-                "my",
-                "na",
-                "nb",
-                "nd",
-                "ne",
-                "ng",
-                "nl",
-                "nn",
-                "no",
-                "nr",
-                "nv",
-                "ny",
-                "oc",
-                "oj",
-                "om",
-                "or",
-                "os",
-                "pa",
-                "pi",
-                "pl",
-                "ps",
-                "pt",
-                "qu",
-                "rm",
-                "rn",
-                "ro",
-                "ru",
-                "rw",
-                "sa",
-                "sc",
-                "sd",
-                "se",
-                "sg",
-                "si",
-                "sk",
-                "sl",
-                "sm",
-                "sn",
-                "so",
-                "sq",
-                "sr",
-                "ss",
-                "st",
-                "su",
-                "sv",
-                "sw",
-                "ta",
-                "te",
-                "tg",
-                "th",
-                "ti",
-                "tk",
-                "tl",
-                "tn",
-                "to",
-                "tr",
-                "ts",
-                "tt",
-                "tw",
-                "ty",
-                "ug",
-                "uk",
-                "ur",
-                "uz",
-                "ve",
-                "vi",
-                "vo",
-                "wa",
-                "wo",
-                "xh",
-                "yi",
-                "yo",
-                "za",
-                "zh",
-                "zu"
-            ]
-        }
-    }
-}
-
-export const SendBackboneNotificationRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/SendBackboneNotificationRequest",
-    "definitions": {
-        "SendBackboneNotificationRequest": {
-            "type": "object",
-            "properties": {
-                "recipients": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/AddressString"
-                    }
-                },
-                "code": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "recipients",
-                "code"
-            ],
-            "additionalProperties": false
-        },
-        "AddressString": {
-            "type": "string",
-            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
-        }
-    }
-}
-
-export const CreateRelationshipChallengeRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CreateRelationshipChallengeRequest",
-    "definitions": {
-        "CreateRelationshipChallengeRequest": {
-            "type": "object",
-            "properties": {
-                "challengeType": {
-                    "type": "string",
-                    "const": "Relationship"
-                },
-                "relationship": {
-                    "$ref": "#/definitions/RelationshipIdString"
-                }
-            },
-            "required": [
-                "challengeType",
-                "relationship"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipIdString": {
-            "type": "string",
-            "pattern": "REL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const isCreateRelationshipChallengeRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/isCreateRelationshipChallengeRequest",
-    "definitions": {
-        "isCreateRelationshipChallengeRequest": {
-            "$comment": "(value: any) => value is CreateRelationshipChallengeRequest",
-            "type": "object",
-            "properties": {
-                "namedArgs": {
-                    "type": "object",
-                    "properties": {
-                        "value": {}
-                    },
-                    "required": [
-                        "value"
-                    ],
-                    "additionalProperties": false
-                }
-            }
-        }
-    }
-}
-
-export const CreateIdentityChallengeRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CreateIdentityChallengeRequest",
-    "definitions": {
-        "CreateIdentityChallengeRequest": {
-            "type": "object",
-            "properties": {
-                "challengeType": {
-                    "type": "string",
-                    "const": "Identity"
-                }
-            },
-            "required": [
-                "challengeType"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
-export const isCreateIdentityChallengeRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/isCreateIdentityChallengeRequest",
-    "definitions": {
-        "isCreateIdentityChallengeRequest": {
-            "$comment": "(value: any) => value is CreateIdentityChallengeRequest",
-            "type": "object",
-            "properties": {
-                "namedArgs": {
-                    "type": "object",
-                    "properties": {
-                        "value": {}
-                    },
-                    "required": [
-                        "value"
-                    ],
-                    "additionalProperties": false
-                }
-            }
-        }
-    }
-}
-
-export const CreateDeviceChallengeRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CreateDeviceChallengeRequest",
-    "definitions": {
-        "CreateDeviceChallengeRequest": {
-            "type": "object",
-            "properties": {
-                "challengeType": {
-                    "type": "string",
-                    "const": "Device"
-                }
-            },
-            "required": [
-                "challengeType"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
-export const isCreateDeviceChallengeRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/isCreateDeviceChallengeRequest",
-    "definitions": {
-        "isCreateDeviceChallengeRequest": {
-            "$comment": "(value: any) => value is CreateDeviceChallengeRequest",
-            "type": "object",
-            "properties": {
-                "namedArgs": {
-                    "type": "object",
-                    "properties": {
-                        "value": {}
-                    },
-                    "required": [
-                        "value"
-                    ],
-                    "additionalProperties": false
-                }
-            }
-        }
-    }
-}
-
-export const CreateChallengeRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CreateChallengeRequest",
-    "definitions": {
-        "CreateChallengeRequest": {
-            "anyOf": [
-                {
-                    "$ref": "#/definitions/CreateRelationshipChallengeRequest"
-                },
-                {
-                    "$ref": "#/definitions/CreateIdentityChallengeRequest"
-                },
-                {
-                    "$ref": "#/definitions/CreateDeviceChallengeRequest"
-                }
-            ]
-        },
-        "CreateRelationshipChallengeRequest": {
-            "type": "object",
-            "properties": {
-                "challengeType": {
-                    "type": "string",
-                    "const": "Relationship"
-                },
-                "relationship": {
-                    "$ref": "#/definitions/RelationshipIdString"
-                }
-            },
-            "required": [
-                "challengeType",
-                "relationship"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipIdString": {
-            "type": "string",
-            "pattern": "REL[A-Za-z0-9]{17}"
-        },
-        "CreateIdentityChallengeRequest": {
-            "type": "object",
-            "properties": {
-                "challengeType": {
-                    "type": "string",
-                    "const": "Identity"
-                }
-            },
-            "required": [
-                "challengeType"
-            ],
-            "additionalProperties": false
-        },
-        "CreateDeviceChallengeRequest": {
-            "type": "object",
-            "properties": {
-                "challengeType": {
-                    "type": "string",
-                    "const": "Device"
-                }
-            },
-            "required": [
-                "challengeType"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
-export const ValidateChallengeRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/ValidateChallengeRequest",
-    "definitions": {
-        "ValidateChallengeRequest": {
-            "type": "object",
-            "properties": {
-                "challengeString": {
-                    "type": "string"
-                },
-                "signature": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "challengeString",
-                "signature"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
-export const DeleteDeviceRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/DeleteDeviceRequest",
-    "definitions": {
-        "DeleteDeviceRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/DeviceIdString"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "additionalProperties": false
-        },
-        "DeviceIdString": {
-            "type": "string",
-            "pattern": "DVC[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const FillDeviceOnboardingTokenWithNewDeviceRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/FillDeviceOnboardingTokenWithNewDeviceRequest",
-    "definitions": {
-        "FillDeviceOnboardingTokenWithNewDeviceRequest": {
-            "type": "object",
-            "properties": {
-                "reference": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/TokenReferenceString"
-                        },
-                        {
-                            "$ref": "#/definitions/URLTokenReferenceString"
-                        }
-                    ]
-                },
-                "profileName": {
-                    "type": "string"
-                },
-                "isAdmin": {
-                    "type": "boolean"
-                }
-            },
-            "required": [
-                "reference"
-            ],
-            "additionalProperties": false
-        },
-        "TokenReferenceString": {
-            "type": "string",
-            "pattern": "VE9L.{84}"
-        },
-        "URLTokenReferenceString": {
-            "type": "string",
-            "pattern": "^https?:\\/\\/.*\\/r\\/TOK[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
-        }
-    }
-}
-
-export const GetDeviceRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetDeviceRequest",
-    "definitions": {
-        "GetDeviceRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/DeviceIdString"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "additionalProperties": false
-        },
-        "DeviceIdString": {
-            "type": "string",
-            "pattern": "DVC[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const SetCommunicationLanguageRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/SetCommunicationLanguageRequest",
-    "definitions": {
-        "SetCommunicationLanguageRequest": {
-            "type": "object",
-            "properties": {
-                "communicationLanguage": {
-                    "type": "string",
-                    "enum": [
-                        "aa",
-                        "ab",
-                        "ae",
-                        "af",
-                        "ak",
-                        "am",
-                        "an",
-                        "ar",
-                        "as",
-                        "av",
-                        "ay",
-                        "az",
-                        "ba",
-                        "be",
-                        "bg",
-                        "bi",
-                        "bm",
-                        "bn",
-                        "bo",
-                        "br",
-                        "bs",
-                        "ca",
-                        "ce",
-                        "ch",
-                        "co",
-                        "cr",
-                        "cs",
-                        "cu",
-                        "cv",
-                        "cy",
-                        "da",
-                        "de",
-                        "dv",
-                        "dz",
-                        "ee",
-                        "el",
-                        "en",
-                        "eo",
-                        "es",
-                        "et",
-                        "eu",
-                        "fa",
-                        "ff",
-                        "fi",
-                        "fj",
-                        "fo",
-                        "fr",
-                        "fy",
-                        "ga",
-                        "gd",
-                        "gl",
-                        "gn",
-                        "gu",
-                        "gv",
-                        "ha",
-                        "he",
-                        "hi",
-                        "ho",
-                        "hr",
-                        "ht",
-                        "hu",
-                        "hy",
-                        "hz",
-                        "ia",
-                        "id",
-                        "ie",
-                        "ig",
-                        "ii",
-                        "ik",
-                        "io",
-                        "is",
-                        "it",
-                        "iu",
-                        "ja",
-                        "jv",
-                        "ka",
-                        "kg",
-                        "ki",
-                        "kj",
-                        "kk",
-                        "kl",
-                        "km",
-                        "kn",
-                        "ko",
-                        "kr",
-                        "ks",
-                        "ku",
-                        "kv",
-                        "kw",
-                        "ky",
-                        "la",
-                        "lb",
-                        "lg",
-                        "li",
-                        "ln",
-                        "lo",
-                        "lt",
-                        "lu",
-                        "lv",
-                        "mg",
-                        "mh",
-                        "mi",
-                        "mk",
-                        "ml",
-                        "mn",
-                        "mr",
-                        "ms",
-                        "mt",
-                        "my",
-                        "na",
-                        "nb",
-                        "nd",
-                        "ne",
-                        "ng",
-                        "nl",
-                        "nn",
-                        "no",
-                        "nr",
-                        "nv",
-                        "ny",
-                        "oc",
-                        "oj",
-                        "om",
-                        "or",
-                        "os",
-                        "pa",
-                        "pi",
-                        "pl",
-                        "ps",
-                        "pt",
-                        "qu",
-                        "rm",
-                        "rn",
-                        "ro",
-                        "ru",
-                        "rw",
-                        "sa",
-                        "sc",
-                        "sd",
-                        "se",
-                        "sg",
-                        "si",
-                        "sk",
-                        "sl",
-                        "sm",
-                        "sn",
-                        "so",
-                        "sq",
-                        "sr",
-                        "ss",
-                        "st",
-                        "su",
-                        "sv",
-                        "sw",
-                        "ta",
-                        "te",
-                        "tg",
-                        "th",
-                        "ti",
-                        "tk",
-                        "tl",
-                        "tn",
-                        "to",
-                        "tr",
-                        "ts",
-                        "tt",
-                        "tw",
-                        "ty",
-                        "ug",
-                        "uk",
-                        "ur",
-                        "uz",
-                        "ve",
-                        "vi",
-                        "vo",
-                        "wa",
-                        "wo",
-                        "xh",
-                        "yi",
-                        "yo",
-                        "za",
-                        "zh",
-                        "zu"
-                    ]
-                }
-            },
-            "required": [
-                "communicationLanguage"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
-export const UpdateCurrentDeviceRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/UpdateCurrentDeviceRequest",
-    "definitions": {
-        "UpdateCurrentDeviceRequest": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                }
-            },
-            "additionalProperties": false
-        }
-    }
-}
-
-export const UpdateDeviceRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/UpdateDeviceRequest",
-    "definitions": {
-        "UpdateDeviceRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/DeviceIdString"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "additionalProperties": false
-        },
-        "DeviceIdString": {
-            "type": "string",
-            "pattern": "DVC[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const CreateIdentityRecoveryKitRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CreateIdentityRecoveryKitRequest",
-    "definitions": {
-        "CreateIdentityRecoveryKitRequest": {
-            "type": "object",
-            "properties": {
-                "profileName": {
-                    "type": "string"
-                },
-                "passwordProtection": {
-                    "type": "object",
-                    "properties": {
-                        "password": {
-                            "type": "string",
-                            "minLength": 1
-                        },
-                        "passwordIsPin": {
-                            "type": "boolean",
-                            "const": true
-                        }
-                    },
-                    "required": [
-                        "password"
-                    ],
-                    "additionalProperties": false
-                }
-            },
-            "required": [
-                "profileName",
-                "passwordProtection"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
-export const GetAttachmentMetadataRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetAttachmentMetadataRequest",
-    "definitions": {
-        "GetAttachmentMetadataRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/MessageIdString"
-                },
-                "attachmentId": {
-                    "$ref": "#/definitions/FileIdString"
-                }
-            },
-            "required": [
-                "id",
-                "attachmentId"
-            ],
-            "additionalProperties": false
-        },
-        "MessageIdString": {
-            "type": "string",
-            "pattern": "MSG[A-Za-z0-9]{17}"
-        },
-        "FileIdString": {
-            "type": "string",
-            "pattern": "FIL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const GetMessageRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetMessageRequest",
-    "definitions": {
-        "GetMessageRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/MessageIdString"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "additionalProperties": false
-        },
-        "MessageIdString": {
-            "type": "string",
-            "pattern": "MSG[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const GetMessagesRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetMessagesRequest",
-    "definitions": {
-        "GetMessagesRequest": {
-            "type": "object",
-            "properties": {
-                "query": {
-                    "$ref": "#/definitions/GetMessagesQuery"
-                }
-            },
-            "additionalProperties": false
-        },
-        "GetMessagesQuery": {
-            "type": "object",
-            "properties": {
-                "isOwn": {
-                    "type": "string"
-                },
-                "createdBy": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "createdByDevice": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "createdAt": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.@type": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.body": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.bodyFormat": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "content.subject": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "attachments": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "recipients.address": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "recipients.relationshipId": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "wasReadAt": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "participant": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                }
-            },
-            "additionalProperties": false
-        }
-    }
-}
-
-export const MarkMessageAsReadRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/MarkMessageAsReadRequest",
-    "definitions": {
-        "MarkMessageAsReadRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/MessageIdString"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "additionalProperties": false
-        },
-        "MessageIdString": {
-            "type": "string",
-            "pattern": "MSG[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const MarkMessageAsUnreadRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/MarkMessageAsUnreadRequest",
-    "definitions": {
-        "MarkMessageAsUnreadRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/MessageIdString"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "additionalProperties": false
-        },
-        "MessageIdString": {
-            "type": "string",
-            "pattern": "MSG[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const SendMessageRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/SendMessageRequest",
-    "definitions": {
-        "SendMessageRequest": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "recipients": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/AddressString"
-                    },
-                    "minItems": 1,
-                    "uniqueItems": true
-                },
-                "content": {},
-                "attachments": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/FileIdString"
-                    },
-                    "uniqueItems": true
-                }
-            },
-            "required": [
-                "content",
-                "recipients"
-            ]
-        },
-        "AddressString": {
-            "type": "string",
-            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
-        },
-        "FileIdString": {
-            "type": "string",
-            "pattern": "FIL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const AcceptRelationshipRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/AcceptRelationshipRequest",
-    "definitions": {
-        "AcceptRelationshipRequest": {
-            "type": "object",
-            "properties": {
-                "relationshipId": {
-                    "$ref": "#/definitions/RelationshipIdString"
-                }
-            },
-            "required": [
-                "relationshipId"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipIdString": {
-            "type": "string",
-            "pattern": "REL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const AcceptRelationshipReactivationRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/AcceptRelationshipReactivationRequest",
-    "definitions": {
-        "AcceptRelationshipReactivationRequest": {
-            "type": "object",
-            "properties": {
-                "relationshipId": {
-                    "$ref": "#/definitions/RelationshipIdString"
-                }
-            },
-            "required": [
-                "relationshipId"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipIdString": {
-            "type": "string",
-            "pattern": "REL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const CanCreateRelationshipRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CanCreateRelationshipRequest",
-    "definitions": {
-        "CanCreateRelationshipRequest": {
-            "type": "object",
-            "properties": {
-                "templateId": {
-                    "$ref": "#/definitions/RelationshipTemplateIdString"
-                },
-                "creationContent": {}
-            },
-            "required": [
-                "templateId"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipTemplateIdString": {
-            "type": "string",
-            "pattern": "RLT[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const CreateRelationshipRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CreateRelationshipRequest",
-    "definitions": {
-        "CreateRelationshipRequest": {
-            "type": "object",
-            "properties": {
-                "templateId": {
-                    "$ref": "#/definitions/RelationshipTemplateIdString"
-                },
-                "creationContent": {}
-            },
-            "required": [
-                "templateId",
-                "creationContent"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipTemplateIdString": {
-            "type": "string",
-            "pattern": "RLT[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const DecomposeRelationshipRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/DecomposeRelationshipRequest",
-    "definitions": {
-        "DecomposeRelationshipRequest": {
-            "type": "object",
-            "properties": {
-                "relationshipId": {
-                    "$ref": "#/definitions/RelationshipIdString"
-                }
-            },
-            "required": [
-                "relationshipId"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipIdString": {
-            "type": "string",
-            "pattern": "REL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const GetAttributesForRelationshipRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetAttributesForRelationshipRequest",
-    "definitions": {
-        "GetAttributesForRelationshipRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/RelationshipIdString"
-                },
-                "hideTechnical": {
-                    "type": "boolean"
-                },
-                "onlyLatestVersions": {
-                    "type": "boolean",
-                    "description": "default: true"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipIdString": {
-            "type": "string",
-            "pattern": "REL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const GetRelationshipRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetRelationshipRequest",
-    "definitions": {
-        "GetRelationshipRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/RelationshipIdString"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipIdString": {
-            "type": "string",
-            "pattern": "REL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const GetRelationshipByAddressRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetRelationshipByAddressRequest",
-    "definitions": {
-        "GetRelationshipByAddressRequest": {
-            "type": "object",
-            "properties": {
-                "address": {
-                    "$ref": "#/definitions/AddressString"
-                }
-            },
-            "required": [
-                "address"
-            ],
-            "additionalProperties": false
-        },
-        "AddressString": {
-            "type": "string",
-            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
-        }
-    }
-}
-
-export const GetRelationshipsRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetRelationshipsRequest",
-    "definitions": {
-        "GetRelationshipsRequest": {
-            "type": "object",
-            "properties": {
-                "query": {
-                    "$ref": "#/definitions/GetRelationshipsQuery"
-                }
-            },
-            "additionalProperties": false
-        },
-        "GetRelationshipsQuery": {
-            "type": "object",
-            "properties": {
-                "peer": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "status": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "templateId": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                }
-            },
-            "additionalProperties": false
-        }
-    }
-}
-
-export const RejectRelationshipRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/RejectRelationshipRequest",
-    "definitions": {
-        "RejectRelationshipRequest": {
-            "type": "object",
-            "properties": {
-                "relationshipId": {
-                    "$ref": "#/definitions/RelationshipIdString"
-                }
-            },
-            "required": [
-                "relationshipId"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipIdString": {
-            "type": "string",
-            "pattern": "REL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const RejectRelationshipReactivationRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/RejectRelationshipReactivationRequest",
-    "definitions": {
-        "RejectRelationshipReactivationRequest": {
-            "type": "object",
-            "properties": {
-                "relationshipId": {
-                    "$ref": "#/definitions/RelationshipIdString"
-                }
-            },
-            "required": [
-                "relationshipId"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipIdString": {
-            "type": "string",
-            "pattern": "REL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const RequestRelationshipReactivationRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/RequestRelationshipReactivationRequest",
-    "definitions": {
-        "RequestRelationshipReactivationRequest": {
-            "type": "object",
-            "properties": {
-                "relationshipId": {
-                    "$ref": "#/definitions/RelationshipIdString"
-                }
-            },
-            "required": [
-                "relationshipId"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipIdString": {
-            "type": "string",
-            "pattern": "REL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const RevokeRelationshipRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/RevokeRelationshipRequest",
-    "definitions": {
-        "RevokeRelationshipRequest": {
-            "type": "object",
-            "properties": {
-                "relationshipId": {
-                    "$ref": "#/definitions/RelationshipIdString"
-                }
-            },
-            "required": [
-                "relationshipId"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipIdString": {
-            "type": "string",
-            "pattern": "REL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const RevokeRelationshipReactivationRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/RevokeRelationshipReactivationRequest",
-    "definitions": {
-        "RevokeRelationshipReactivationRequest": {
-            "type": "object",
-            "properties": {
-                "relationshipId": {
-                    "$ref": "#/definitions/RelationshipIdString"
-                }
-            },
-            "required": [
-                "relationshipId"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipIdString": {
-            "type": "string",
-            "pattern": "REL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const TerminateRelationshipRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/TerminateRelationshipRequest",
-    "definitions": {
-        "TerminateRelationshipRequest": {
-            "type": "object",
-            "properties": {
-                "relationshipId": {
-                    "$ref": "#/definitions/RelationshipIdString"
-                }
-            },
-            "required": [
-                "relationshipId"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipIdString": {
-            "type": "string",
-            "pattern": "REL[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const CreateOwnRelationshipTemplateRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CreateOwnRelationshipTemplateRequest",
-    "definitions": {
-        "CreateOwnRelationshipTemplateRequest": {
-            "type": "object",
-            "properties": {
-                "expiresAt": {
-                    "$ref": "#/definitions/ISO8601DateTimeString"
-                },
-                "content": {},
-                "maxNumberOfAllocations": {
-                    "type": "number",
-                    "minimum": 1
-                },
-                "forIdentity": {
-                    "$ref": "#/definitions/AddressString"
-                },
-                "passwordProtection": {
-                    "type": "object",
-                    "properties": {
-                        "password": {
-                            "type": "string",
-                            "minLength": 1
-                        },
-                        "passwordIsPin": {
-                            "type": "boolean",
-                            "const": true
-                        },
-                        "passwordLocationIndicator": {}
-                    },
-                    "required": [
-                        "password"
-                    ],
-                    "additionalProperties": false
-                }
-            },
-            "required": [
-                "expiresAt",
-                "content"
-            ],
-            "additionalProperties": false
-        },
-        "ISO8601DateTimeString": {
-            "type": "string",
-            "errorMessage": "must match ISO8601 datetime format",
-            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
-        },
-        "AddressString": {
-            "type": "string",
-            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
-        }
-    }
-}
-
-export const CreateTokenForOwnRelationshipTemplateRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CreateTokenForOwnRelationshipTemplateRequest",
-    "definitions": {
-        "CreateTokenForOwnRelationshipTemplateRequest": {
-            "type": "object",
-            "properties": {
-                "templateId": {
-                    "$ref": "#/definitions/RelationshipTemplateIdString"
-                },
-                "expiresAt": {
-                    "$ref": "#/definitions/ISO8601DateTimeString"
-                },
-                "ephemeral": {
-                    "type": "boolean"
-                },
-                "forIdentity": {
-                    "$ref": "#/definitions/AddressString"
-                },
-                "passwordProtection": {
-                    "type": "object",
-                    "properties": {
-                        "password": {
-                            "type": "string",
-                            "minLength": 1
-                        },
-                        "passwordIsPin": {
-                            "type": "boolean",
-                            "const": true
-                        },
-                        "passwordLocationIndicator": {}
-                    },
-                    "required": [
-                        "password"
-                    ],
-                    "additionalProperties": false
-                }
-            },
-            "required": [
-                "templateId"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipTemplateIdString": {
-            "type": "string",
-            "pattern": "RLT[A-Za-z0-9]{17}"
-        },
-        "ISO8601DateTimeString": {
-            "type": "string",
-            "errorMessage": "must match ISO8601 datetime format",
-            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
-        },
-        "AddressString": {
-            "type": "string",
-            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
-        }
-    }
-}
-
-export const DeleteRelationshipTemplateRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/DeleteRelationshipTemplateRequest",
-    "definitions": {
-        "DeleteRelationshipTemplateRequest": {
-            "type": "object",
-            "properties": {
-                "templateId": {
-                    "$ref": "#/definitions/RelationshipTemplateIdString"
-                }
-            },
-            "required": [
-                "templateId"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipTemplateIdString": {
-            "type": "string",
-            "pattern": "RLT[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const GetRelationshipTemplateRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetRelationshipTemplateRequest",
-    "definitions": {
-        "GetRelationshipTemplateRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/RelationshipTemplateIdString"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "additionalProperties": false
-        },
-        "RelationshipTemplateIdString": {
-            "type": "string",
-            "pattern": "RLT[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const GetRelationshipTemplatesRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetRelationshipTemplatesRequest",
-    "definitions": {
-        "GetRelationshipTemplatesRequest": {
-            "type": "object",
-            "properties": {
-                "query": {
-                    "$ref": "#/definitions/GetRelationshipTemplatesQuery"
-                },
-                "ownerRestriction": {
-                    "$ref": "#/definitions/OwnerRestriction"
-                }
-            },
-            "additionalProperties": false
-        },
-        "GetRelationshipTemplatesQuery": {
-            "type": "object",
-            "properties": {
-                "isOwn": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "createdAt": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "expiresAt": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "createdBy": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "createdByDevice": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "maxNumberOfAllocations": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "forIdentity": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "passwordProtection": {
-                    "type": "string",
-                    "enum": [
-                        "",
-                        "!"
-                    ]
-                },
-                "passwordProtection.password": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "passwordProtection.passwordIsPin": {
-                    "type": "string",
-                    "enum": [
-                        "true",
-                        "!"
-                    ]
-                },
-                "passwordProtection.passwordLocationIndicator": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                }
-            },
-            "additionalProperties": false
-        },
-        "OwnerRestriction": {
-            "type": "string",
-            "enum": [
-                "o",
-                "p"
-            ]
-        }
-    }
-}
-
-export const LoadPeerRelationshipTemplateRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/LoadPeerRelationshipTemplateRequest",
-    "definitions": {
-        "LoadPeerRelationshipTemplateRequest": {
-            "type": "object",
-            "properties": {
-                "reference": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/TokenReferenceString"
-                        },
-                        {
-                            "$ref": "#/definitions/RelationshipTemplateReferenceString"
-                        },
-                        {
-                            "$ref": "#/definitions/URLTokenReferenceString"
-                        },
-                        {
-                            "$ref": "#/definitions/URLRelationshipTemplateReferenceString"
-                        }
-                    ]
-                },
-                "password": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "reference"
-            ],
-            "additionalProperties": false,
-            "errorMessage": "token / relationship template reference invalid"
-        },
-        "TokenReferenceString": {
-            "type": "string",
-            "pattern": "VE9L.{84}"
-        },
-        "RelationshipTemplateReferenceString": {
-            "type": "string",
-            "pattern": "UkxU.{84}"
-        },
-        "URLTokenReferenceString": {
-            "type": "string",
-            "pattern": "^https?:\\/\\/.*\\/r\\/TOK[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
-        },
-        "URLRelationshipTemplateReferenceString": {
-            "type": "string",
-            "pattern": "^https?:\\/\\/.*\\/r\\/RLT[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
-        }
-    }
-}
-
-export const CreateOwnTokenRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CreateOwnTokenRequest",
-    "definitions": {
-        "CreateOwnTokenRequest": {
-            "type": "object",
-            "properties": {
-                "content": {},
-                "expiresAt": {
-                    "$ref": "#/definitions/ISO8601DateTimeString"
-                },
-                "ephemeral": {
-                    "type": "boolean"
-                },
-                "forIdentity": {
-                    "$ref": "#/definitions/AddressString"
-                },
-                "passwordProtection": {
-                    "type": "object",
-                    "properties": {
-                        "password": {
-                            "type": "string",
-                            "minLength": 1
-                        },
-                        "passwordIsPin": {
-                            "type": "boolean",
-                            "const": true
-                        },
-                        "passwordLocationIndicator": {}
-                    },
-                    "required": [
-                        "password"
-                    ],
-                    "additionalProperties": false
-                }
-            },
-            "required": [
-                "content",
-                "expiresAt",
-                "ephemeral"
-            ],
-            "additionalProperties": false
-        },
-        "ISO8601DateTimeString": {
-            "type": "string",
-            "errorMessage": "must match ISO8601 datetime format",
-            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
-        },
-        "AddressString": {
-            "type": "string",
-            "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
-        }
-    }
-}
-
-export const DeleteTokenRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/DeleteTokenRequest",
-    "definitions": {
-        "DeleteTokenRequest": {
-            "type": "object",
-            "properties": {
-                "tokenId": {
-                    "$ref": "#/definitions/TokenIdString"
-                }
-            },
-            "required": [
-                "tokenId"
-            ],
-            "additionalProperties": false
-        },
-        "TokenIdString": {
-            "type": "string",
-            "pattern": "TOK[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const GetTokenRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetTokenRequest",
-    "definitions": {
-        "GetTokenRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/TokenIdString"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "additionalProperties": false
-        },
-        "TokenIdString": {
-            "type": "string",
-            "pattern": "TOK[A-Za-z0-9]{17}"
-        }
-    }
-}
-
-export const GetTokensRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetTokensRequest",
-    "definitions": {
-        "GetTokensRequest": {
-            "type": "object",
-            "properties": {
-                "query": {
-                    "$ref": "#/definitions/GetTokensQuery"
-                },
-                "ownerRestriction": {
-                    "$ref": "#/definitions/OwnerRestriction"
-                }
-            },
-            "additionalProperties": false
-        },
-        "GetTokensQuery": {
-            "type": "object",
-            "properties": {
-                "isOwn": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "createdAt": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "createdBy": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "createdByDevice": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "expiresAt": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "forIdentity": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "passwordProtection": {
-                    "type": "string",
-                    "enum": [
-                        "",
-                        "!"
-                    ]
-                },
-                "passwordProtection.password": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "passwordProtection.passwordIsPin": {
-                    "type": "string",
-                    "enum": [
-                        "true",
-                        "!"
-                    ]
-                },
-                "passwordProtection.passwordLocationIndicator": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                }
-            },
-            "additionalProperties": false
-        },
-        "OwnerRestriction": {
-            "type": "string",
-            "enum": [
-                "o",
-                "p"
-            ]
-        }
-    }
-}
-
-export const LoadPeerTokenRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/LoadPeerTokenRequest",
-    "definitions": {
-        "LoadPeerTokenRequest": {
-            "type": "object",
-            "properties": {
-                "reference": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/TokenReferenceString"
-                        },
-                        {
-                            "$ref": "#/definitions/URLTokenReferenceString"
-                        }
-                    ]
-                },
-                "ephemeral": {
-                    "type": "boolean"
-                },
-                "password": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "reference",
-                "ephemeral"
-            ],
-            "additionalProperties": false,
-            "errorMessage": "token reference invalid"
-        },
-        "TokenReferenceString": {
-            "type": "string",
-            "pattern": "VE9L.{84}"
-        },
-        "URLTokenReferenceString": {
-            "type": "string",
-            "pattern": "^https?:\\/\\/.*\\/r\\/TOK[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
         }
     }
 }

@@ -4,6 +4,7 @@ export * from "./CanCreateOwnIdentityAttribute";
 export * from "./ChangeDefaultOwnIdentityAttribute";
 export * from "./CreateAndShareRelationshipAttribute";
 export * from "./CreateOwnIdentityAttribute";
+export * from "./CreateTokenForAttributeUseCase";
 export * from "./DeleteAttributeAndNotify";
 export * from "./DeleteSharedAttributesForRejectedOrRevokedRelationship";
 export * from "./ExecuteIdentityAttributeQuery";
