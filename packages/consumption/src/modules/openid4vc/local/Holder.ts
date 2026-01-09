@@ -161,6 +161,7 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         if (!resolvedAuthorizationRequest.presentationExchange && !resolvedAuthorizationRequest.dcql) {
             throw new Error("Missing presentation exchange or dcql on resolved authorization request");
         }
+
         const credentialContent = credential.content.value as VerifiableCredential;
         const credentialRecord = decodeRecord(credentialContent.type, credentialContent.value);
 

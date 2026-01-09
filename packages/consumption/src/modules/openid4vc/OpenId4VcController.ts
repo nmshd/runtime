@@ -92,9 +92,7 @@ export class OpenId4VcController extends ConsumptionBaseController {
     private async extractMatchingCredentialsFromAuthorizationRequest(authorizationRequest: OpenId4VpResolvedAuthorizationRequest): Promise<OwnIdentityAttribute[]> {
         const dcqlSatisfied = authorizationRequest.dcql?.queryResult.can_be_satisfied ?? false;
         const pexSatisfied = authorizationRequest.presentationExchange?.credentialsForRequest.areRequirementsSatisfied ?? false;
-        if (!dcqlSatisfied && !pexSatisfied) {
-            return [];
-        }
+        if (!dcqlSatisfied && !pexSatisfied) return [];
 
         let matchedCredentials: (string | W3cJsonCredential)[] = [];
         if (dcqlSatisfied) {
