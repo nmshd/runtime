@@ -346,7 +346,8 @@ describe("custom openid4vc service", () => {
                         }
                     ]
                 },
-                version: "v1.draft21"
+                version: "v1.draft21",
+                encryptResponse: true
             });
             expect(response.status).toBe(200);
             const responseData = await response.data;
