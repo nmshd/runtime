@@ -178,7 +178,7 @@ describe("custom openid4vc service", () => {
             expect(decoded.lob).toBe("Test BU");
         });
 
-        test("should be able to process a given sd-jwt credential presentation", async () => {
+        test("should be able to process a given sd-jwt credential presentation with pex", async () => {
             // Ensure the first test has completed
             expect(credentialOfferUrl).toBeDefined();
 
@@ -233,12 +233,53 @@ describe("custom openid4vc service", () => {
             const responseData = await response.data;
 
             const result = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl: responseData.result.presentationRequest });
-            expect(result.value.matchingCredentials).toHaveLength(3);
+            const matchingCredentials = result.value.matchingCredentials;
+            expect(matchingCredentials).toHaveLength(3);
 
             const request = result.value.authorizationRequest;
             expect(request.presentationExchange!.credentialsForRequest.areRequirementsSatisfied).toBe(true);
 
-            const presentationResult = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest: result.value.authorizationRequest });
+            const presentationResult = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({
+                authorizationRequest: result.value.authorizationRequest,
+                attributeId: matchingCredentials[0].id
+            });
+            expect(presentationResult).toBeSuccessful();
+            expect(presentationResult.value.status).toBe(200);
+        });
+
+        test("should be able to process a given sd-jwt credential presentation with dcql", async () => {
+            // Ensure the first test has completed
+            expect(credentialOfferUrl).toBeDefined();
+
+            const response = await axiosInstance.post("/presentation/presentationRequests", {
+                dcql: {
+                    credentials: [
+                        {
+                            id: "EmployeeIdCard-vc-sd-jwt",
+                            format: "vc+sd-jwt",
+                            meta: {
+                                // eslint-disable-next-line @typescript-eslint/naming-convention
+                                vct_values: ["EmployeeIdCard"]
+                            }
+                        }
+                    ]
+                },
+                signWithDid: true
+            });
+            expect(response.status).toBe(200);
+            const responseData = await response.data;
+
+            const result = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl: responseData.result.presentationRequest });
+            const matchingCredentials = result.value.matchingCredentials;
+            expect(matchingCredentials).toHaveLength(3);
+
+            const request = result.value.authorizationRequest;
+            expect(request.dcql!.queryResult.can_be_satisfied).toBe(true);
+
+            const presentationResult = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({
+                authorizationRequest: result.value.authorizationRequest,
+                attributeId: matchingCredentials[0].id
+            });
             expect(presentationResult).toBeSuccessful();
             expect(presentationResult.value.status).toBe(200);
         });
@@ -290,7 +331,7 @@ describe("custom openid4vc service", () => {
             expect(credential.displayInformation?.[0].name).toBe("Employee ID Card");
         });
 
-        test("should be able to process a given mdoc credential presentation", async () => {
+        test("should be able to process a given mdoc pex credential presentation", async () => {
             // Ensure the first test has completed
             expect(credentialOfferUrl).toBeDefined();
 
@@ -324,18 +365,60 @@ describe("custom openid4vc service", () => {
                         }
                     ]
                 },
-                version: "v1.draft21"
+                version: "v1.draft21",
+                encryptResponse: true
             });
             expect(response.status).toBe(200);
             const responseData = await response.data;
 
             const result = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl: responseData.result.presentationRequest });
-            expect(result.value.matchingCredentials).toHaveLength(1);
+            const matchingCredentials = result.value.matchingCredentials;
+            expect(matchingCredentials).toHaveLength(1);
 
             const request = result.value.authorizationRequest;
             expect(request.presentationExchange!.credentialsForRequest.areRequirementsSatisfied).toBe(true);
 
-            const presentationResult = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest: result.value.authorizationRequest });
+            const presentationResult = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({
+                authorizationRequest: result.value.authorizationRequest,
+                attributeId: matchingCredentials[0].id
+            });
+            expect(presentationResult).toBeSuccessful();
+            expect(presentationResult.value.status).toBe(200);
+        });
+
+        // TODO: un-skip this test once SD is implemented because all mdoc claims are SD - somehow the pex test doesn't fail
+        // eslint-disable-next-line jest/no-disabled-tests
+        test.skip("should be able to process a given mdoc dcql credential presentation", async () => {
+            // Ensure the first test has completed
+            expect(credentialOfferUrl).toBeDefined();
+
+            const response = await axiosInstance.post("/presentation/presentationRequests", {
+                dcql: {
+                    credentials: [
+                        {
+                            id: "EmployeeIdCard-mdoc",
+                            format: "mso_mdoc",
+                            // eslint-disable-next-line @typescript-eslint/naming-convention
+                            meta: { doctype_value: "EmployeeIdCard" },
+                            claims: [{ path: ["employeeIdCard", "degree"] }]
+                        }
+                    ]
+                }
+            });
+            expect(response.status).toBe(200);
+            const responseData = await response.data;
+
+            const result = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl: responseData.result.presentationRequest });
+            const matchingCredentials = result.value.matchingCredentials;
+            expect(matchingCredentials).toHaveLength(1);
+
+            const request = result.value.authorizationRequest;
+            expect(request.dcql!.queryResult.can_be_satisfied).toBe(true);
+
+            const presentationResult = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({
+                authorizationRequest: result.value.authorizationRequest,
+                attributeId: matchingCredentials[0].id
+            });
             expect(presentationResult).toBeSuccessful();
             expect(presentationResult.value.status).toBe(200);
         });
@@ -412,12 +495,16 @@ describe("custom openid4vc service", () => {
         const result = await runtimeServices2.consumption.openId4Vc.resolveAuthorizationRequest({
             authorizationRequestUrl: createPresentationResponseData.result.presentationRequest
         });
-        expect(result.value.matchingCredentials).toHaveLength(1);
+        const matchingCredentials = result.value.matchingCredentials;
+        expect(matchingCredentials).toHaveLength(1);
 
         const request = result.value.authorizationRequest;
         expect(request.presentationExchange!.credentialsForRequest.areRequirementsSatisfied).toBe(true);
 
-        const presentationResult = await runtimeServices2.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest: result.value.authorizationRequest });
+        const presentationResult = await runtimeServices2.consumption.openId4Vc.acceptAuthorizationRequest({
+            authorizationRequest: result.value.authorizationRequest,
+            attributeId: matchingCredentials[0].id
+        });
         expect(presentationResult).toBeSuccessful();
         expect(presentationResult.value.status).toBe(200);
     });
@@ -519,7 +606,9 @@ describe("EUDIPLO", () => {
         expect((storeCredentialsResponse.value.content.value as VerifiableCredentialJSON).displayInformation?.[0].name).toBe("Employee ID Card");
     });
 
-    test("presentation", async () => {
+    // TODO: un-skip this test once a workable EUDIPLO version is available - the current version 1.9 doesn't work with credo because the exchange key for presentation encryption doesn't have a kid, and the currently latest version 1.13 can't be easily configured with the UI because the issuer display can't be configured
+    // eslint-disable-next-line jest/no-disabled-tests
+    test.skip("presentation", async () => {
         const authorizationRequestUrl = (
             await axiosInstance.post(`/presentation-management/request`, {
                 response_type: "uri", // eslint-disable-line @typescript-eslint/naming-convention
@@ -528,15 +617,18 @@ describe("EUDIPLO", () => {
         ).data.uri;
 
         const loadResult = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl });
-        expect(loadResult).toBeSuccessful();
+        const matchingCredentials = loadResult.value.matchingCredentials;
+        expect(matchingCredentials).toHaveLength(1);
 
         const queryResult = loadResult.value.authorizationRequest.dcql!.queryResult;
         expect(queryResult.can_be_satisfied).toBe(true);
 
-        const credentialMatches = queryResult.credential_matches["EmployeeIdCard-vc-sd-jwt"];
-        expect(credentialMatches.valid_credentials).toHaveLength(1);
-
-        // TODO: send the presentation with a manually selected credential
+        const presentationResult = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({
+            authorizationRequest: loadResult.value.authorizationRequest,
+            attributeId: matchingCredentials[0].id
+        });
+        expect(presentationResult).toBeSuccessful();
+        expect(presentationResult.value.status).toBe(200);
     });
 
     function startEudiplo() {
