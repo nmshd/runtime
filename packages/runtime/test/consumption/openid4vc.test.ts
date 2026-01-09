@@ -1,3 +1,4 @@
+import { AcceptShareAuthorizationRequestRequestItemParametersJSON, OwnIdentityAttributeJSON } from "@nmshd/consumption";
 import { VerifiableCredential, VerifiableCredentialJSON } from "@nmshd/content";
 import axios, { AxiosInstance } from "axios";
 import { jwtDecode } from "jwt-decode";
@@ -546,6 +547,8 @@ describe("custom openid4vc service", () => {
         const authorizationRequestUrl = response.data.result.presentationRequest as string;
         const authorizationRequestId = authorizationRequestUrl.split("%2F").at(-1)?.slice(0, 36);
 
+        const matchingCredential = (await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl })).value.matchingCredentials[0];
+
         await exchangeAndAcceptRequestByMessage(
             runtimeServices1,
             runtimeServices2,
@@ -561,7 +564,7 @@ describe("custom openid4vc service", () => {
                 },
                 peer: (await runtimeServices2.transport.account.getIdentityInfo()).value.address
             },
-            [{ accept: true }]
+            [{ accept: true, attribute: matchingCredential as OwnIdentityAttributeJSON } as AcceptShareAuthorizationRequestRequestItemParametersJSON]
         );
 
         const verificationStatus = (await axiosInstance.get(`/presentation/presentationRequests/${authorizationRequestId}/verificationSessionState`)).data.result;
