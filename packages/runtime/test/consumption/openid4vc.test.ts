@@ -510,7 +510,7 @@ describe("custom openid4vc service", () => {
     });
 
     test("request presentation using requests", async () => {
-        const createPresentationResponse = await axiosInstance.post("/presentation/presentationRequests", {
+        const response = await axiosInstance.post("/presentation/presentationRequests", {
             pex: {
                 id: "anId",
                 purpose: "To prove you work here",
@@ -542,9 +542,8 @@ describe("custom openid4vc service", () => {
             },
             version: "v1.draft21"
         });
-        expect(createPresentationResponse.status).toBe(200);
-        const createPresentationResponseData = await createPresentationResponse.data;
-        const authorizationRequestUrl = createPresentationResponseData.result.presentationRequest as string;
+        expect(response.status).toBe(200);
+        const authorizationRequestUrl = response.data.result.presentationRequest as string;
         const authorizationRequestId = authorizationRequestUrl.split("%2F").at(-1)?.slice(0, 36);
 
         await exchangeAndAcceptRequestByMessage(
