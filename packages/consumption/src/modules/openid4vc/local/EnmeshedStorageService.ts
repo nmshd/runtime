@@ -89,7 +89,7 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
 
         return attributes.map((attribute) => {
             const attributeValue = attribute.content.value as VerifiableCredential;
-            return EnmeshedStorageService.fromEncoded(correspondingCredentialType, attributeValue.value) as T;
+            return EnmeshedStorageService.getRecordFromEncoded(correspondingCredentialType, attributeValue.value) as T;
         });
     }
 
@@ -106,7 +106,7 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
         }
     }
 
-    public static fromEncoded(type: string, encoded: string | Record<string, any>): BaseRecord<any, any> {
+    public static getRecordFromEncoded(type: string, encoded: string | Record<string, any>): BaseRecord<any, any> {
         switch (type) {
             case ClaimFormat.SdJwtDc:
                 return new SdJwtVcRecord({ credentialInstances: [{ compactSdJwtVc: encoded as string }] });

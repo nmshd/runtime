@@ -162,7 +162,7 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
             throw new Error("Missing presentation exchange or dcql on resolved authorization request");
         }
         const credentialContent = credential.content.value as VerifiableCredential;
-        const credentialRecord = EnmeshedStorageService.fromEncoded(credentialContent.type, credentialContent.value);
+        const credentialRecord = EnmeshedStorageService.getRecordFromEncoded(credentialContent.type, credentialContent.value);
 
         let credentialForPex: DifPexInputDescriptorToCredentials | undefined;
         if (resolvedAuthorizationRequest.presentationExchange) {
