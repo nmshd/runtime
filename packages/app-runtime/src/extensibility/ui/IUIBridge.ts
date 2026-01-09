@@ -26,4 +26,5 @@ export interface IUIBridge {
     showError(error: ApplicationError, account?: LocalAccountDTO): Promise<Result<void>>;
     requestAccountSelection(possibleAccounts: LocalAccountDTO[], title?: string, description?: string): Promise<Result<LocalAccountDTO | undefined>>;
     enterPassword(passwordType: "pw" | "pin", pinLength?: number, attempt?: number, passwordLocationIndicator?: number): Promise<Result<string>>;
+    performOauthAuthentication(authenticationServerUrl: string): Promise<Result<string>>;
 }

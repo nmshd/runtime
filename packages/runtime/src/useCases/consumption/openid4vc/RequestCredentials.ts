@@ -4,19 +4,18 @@ import { OpenId4VcController, OpenId4VciCredentialResponseJSON } from "@nmshd/co
 import { Inject } from "@nmshd/typescript-ioc";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
-export interface AbstractRequestCredentialsRequest<T> {
+export type AbstractRequestCredentialsRequest<T> = {
     credentialOffer: T;
-    pinCode?: string;
     credentialConfigurationIds: string[];
-}
+} & ({} | { pinCode: string } | { accessToken: string });
 
 export interface RequestCredentialsResponse {
     credentialResponses: OpenId4VciCredentialResponseJSON[];
 }
 
-export interface RequestCredentialsRequest extends AbstractRequestCredentialsRequest<OpenId4VciResolvedCredentialOffer> {}
+export type RequestCredentialsRequest = AbstractRequestCredentialsRequest<OpenId4VciResolvedCredentialOffer>;
 
-export interface SchemaValidatableRequestCredentialsRequest extends AbstractRequestCredentialsRequest<Record<string, any>> {}
+export type SchemaValidatableRequestCredentialsRequest = AbstractRequestCredentialsRequest<Record<string, any>>;
 
 class Validator extends SchemaValidator<RequestCredentialsRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
@@ -33,7 +32,8 @@ export class RequestCredentialsUseCase extends UseCase<RequestCredentialsRequest
     }
 
     protected override async executeInternal(request: RequestCredentialsRequest): Promise<Result<RequestCredentialsResponse>> {
-        const credentialResponses = await this.openId4VcController.requestCredentials(request.credentialOffer, request.credentialConfigurationIds, request.pinCode);
-        return Result.ok({ credentialResponses: credentialResponses });
+        const access = "accessToken" in request ? { accessToken: request.accessToken } : { pinCode: "pinCode" in request ? request.pinCode : undefined };
+        const credentialResponses = await this.openId4VcController.requestCredentials(request.credentialOffer, request.credentialConfigurationIds, access);
+        return Result.ok({ credentialResponses });
     }
 }

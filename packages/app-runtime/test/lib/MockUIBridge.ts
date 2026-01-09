@@ -13,7 +13,8 @@ export type MockUIBridgeCall =
     | { method: "showResolvedCredentialOffer"; account: LocalAccountDTO; credentialResponses: OpenId4VciCredentialResponseJSON[]; issuerDisplayInformation: any }
     | { method: "showError"; error: ApplicationError; account?: LocalAccountDTO }
     | { method: "requestAccountSelection"; possibleAccounts: LocalAccountDTO[]; title?: string; description?: string }
-    | { method: "enterPassword"; passwordType: "pw" | "pin"; pinLength?: number; attempt?: number; passwordLocationIndicator?: number };
+    | { method: "enterPassword"; passwordType: "pw" | "pin"; pinLength?: number; attempt?: number; passwordLocationIndicator?: number }
+    | { method: "performOauthAuthentication "; url: string };
 
 export class MockUIBridge implements IUIBridge {
     private _accountIdToReturn: string | undefined;
@@ -104,5 +105,10 @@ export class MockUIBridge implements IUIBridge {
         if (!password) return Promise.resolve(Result.fail(new ApplicationError("code", "message")));
 
         return Promise.resolve(Result.ok(password));
+    }
+
+    public performOauthAuthentication(url: string): Promise<Result<string>> {
+        this._calls.push({ method: "performOauthAuthentication ", url });
+        return Promise.resolve(Result.ok("test-token"));
     }
 }
