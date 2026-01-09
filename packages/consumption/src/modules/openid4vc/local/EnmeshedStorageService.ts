@@ -89,7 +89,7 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
 
         return attributes.map((attribute) => {
             const attributeValue = attribute.content.value as VerifiableCredential;
-            return EnmeshedStorageService.getRecordFromEncoded(correspondingCredentialType, attributeValue.value) as T;
+            return decodeRecord(correspondingCredentialType, attributeValue.value) as T;
         });
     }
 
@@ -103,19 +103,6 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
                 return ClaimFormat.SdJwtW3cVc;
             default:
                 throw new Error("Record type not supported.");
-        }
-    }
-
-    public static getRecordFromEncoded(type: string, encoded: string | Record<string, any>): BaseRecord<any, any> {
-        switch (type) {
-            case ClaimFormat.SdJwtDc:
-                return new SdJwtVcRecord({ credentialInstances: [{ compactSdJwtVc: encoded as string }] });
-            case ClaimFormat.MsoMdoc:
-                return new MdocRecord({ credentialInstances: [{ issuerSignedBase64Url: encoded as string }] });
-            case ClaimFormat.SdJwtW3cVc:
-                return new W3cCredentialRecord({ credentialInstances: [{ credential: encoded as string }] });
-            default:
-                throw new Error("Credential type not supported.");
         }
     }
 
@@ -146,5 +133,18 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
             }
             return record.getTags()[key] === value;
         });
+    }
+}
+
+export function decodeRecord(type: string, encoded: string | Record<string, any>): BaseRecord<any, any> {
+    switch (type) {
+        case ClaimFormat.SdJwtDc:
+            return new SdJwtVcRecord({ credentialInstances: [{ compactSdJwtVc: encoded as string }] });
+        case ClaimFormat.MsoMdoc:
+            return new MdocRecord({ credentialInstances: [{ issuerSignedBase64Url: encoded as string }] });
+        case ClaimFormat.SdJwtW3cVc:
+            return new W3cCredentialRecord({ credentialInstances: [{ credential: encoded as string }] });
+        default:
+            throw new Error("Credential type not supported.");
     }
 }

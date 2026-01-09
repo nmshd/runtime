@@ -16,7 +16,7 @@ import { VerifiableCredential } from "@nmshd/content";
 import { AccountController } from "@nmshd/transport";
 import { AttributesController, OwnIdentityAttribute } from "../../attributes";
 import { BaseAgent } from "./BaseAgent";
-import { EnmeshedStorageService } from "./EnmeshedStorageService";
+import { decodeRecord, EnmeshedStorageService } from "./EnmeshedStorageService";
 import { KeyStorage } from "./KeyStorage";
 import { OpenId4VciCredentialResponseJSON } from "./OpenId4VciCredentialResponseJSON";
 
@@ -162,7 +162,7 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
             throw new Error("Missing presentation exchange or dcql on resolved authorization request");
         }
         const credentialContent = credential.content.value as VerifiableCredential;
-        const credentialRecord = EnmeshedStorageService.getRecordFromEncoded(credentialContent.type, credentialContent.value);
+        const credentialRecord = decodeRecord(credentialContent.type, credentialContent.value);
 
         let credentialForPex: DifPexInputDescriptorToCredentials | undefined;
         if (resolvedAuthorizationRequest.presentationExchange) {
