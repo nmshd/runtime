@@ -86,5 +86,5 @@ export interface ShareCredentialOfferRequestItemDVO extends RequestItemDVO {
 export interface ShareAuthorizationRequestRequestItemDVO extends RequestItemDVO {
     type: "ShareAuthorizationRequestRequestItemDVO";
     authorizationRequestUrl: string;
-    matchingCredentials?: LocalAttributeDVO[];
+    matchingCredentials: LocalAttributeDVO[];
 }
