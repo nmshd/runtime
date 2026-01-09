@@ -17219,6 +17219,452 @@ export const AcceptAuthorizationRequestRequest: any = {
     }
 }
 
+export const CreatePresentationTokenRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/CreatePresentationTokenRequest",
+    "definitions": {
+        "CreatePresentationTokenRequest": {
+            "type": "object",
+            "properties": {
+                "attributeId": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "attributeId"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
+export const RequestCredentialsRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/RequestCredentialsRequest",
+    "definitions": {
+        "RequestCredentialsRequest": {
+            "$ref": "#/definitions/AbstractRequestCredentialsRequest%3Calias-2033348025-74138-74264-2033348025-0-218439%3Cstring%2Cany%3E%3E"
+        },
+        "AbstractRequestCredentialsRequest<alias-2033348025-74138-74264-2033348025-0-218439<string,any>>": {
+            "anyOf": [
+                {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "credentialOffer": {
+                            "type": "object"
+                        },
+                        "credentialConfigurationIds": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "required": [
+                        "credentialConfigurationIds",
+                        "credentialOffer"
+                    ]
+                },
+                {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "pinCode": {
+                            "type": "string"
+                        },
+                        "credentialOffer": {
+                            "type": "object"
+                        },
+                        "credentialConfigurationIds": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "required": [
+                        "credentialConfigurationIds",
+                        "credentialOffer",
+                        "pinCode"
+                    ]
+                },
+                {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "accessToken": {
+                            "type": "string"
+                        },
+                        "credentialOffer": {
+                            "type": "object"
+                        },
+                        "credentialConfigurationIds": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "required": [
+                        "accessToken",
+                        "credentialConfigurationIds",
+                        "credentialOffer"
+                    ]
+                }
+            ]
+        }
+    }
+}
+
+export const ResolveAuthorizationRequestRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/ResolveAuthorizationRequestRequest",
+    "definitions": {
+        "ResolveAuthorizationRequestRequest": {
+            "type": "object",
+            "properties": {
+                "authorizationRequestUrl": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "authorizationRequestUrl"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
+export const ResolveCredentialOfferRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/ResolveCredentialOfferRequest",
+    "definitions": {
+        "ResolveCredentialOfferRequest": {
+            "type": "object",
+            "properties": {
+                "credentialOfferUrl": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "credentialOfferUrl"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
+export const StoreCredentialsRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/StoreCredentialsRequest",
+    "definitions": {
+        "StoreCredentialsRequest": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "credentialResponses": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                }
+            },
+            "required": [
+                "credentialResponses"
+            ]
+        }
+    }
+}
+
+export const CreateSettingRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/CreateSettingRequest",
+    "definitions": {
+        "CreateSettingRequest": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "value": {},
+                "reference": {
+                    "$ref": "#/definitions/GenericIdString"
+                },
+                "scope": {
+                    "type": "string",
+                    "enum": [
+                        "Identity",
+                        "Device",
+                        "Relationship"
+                    ]
+                },
+                "succeedsAt": {
+                    "$ref": "#/definitions/ISO8601DateTimeString"
+                },
+                "succeedsItem": {
+                    "$ref": "#/definitions/LocalSettingIdString"
+                }
+            },
+            "required": [
+                "key",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "GenericIdString": {
+            "type": "string",
+            "pattern": "[A-Za-z0-9]{20}"
+        },
+        "ISO8601DateTimeString": {
+            "type": "string",
+            "errorMessage": "must match ISO8601 datetime format",
+            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
+        },
+        "LocalSettingIdString": {
+            "type": "string",
+            "pattern": "LCLSET[A-Za-z0-9]{14}"
+        }
+    }
+}
+
+export const DeleteSettingRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/DeleteSettingRequest",
+    "definitions": {
+        "DeleteSettingRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/LocalSettingIdString"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "additionalProperties": false
+        },
+        "LocalSettingIdString": {
+            "type": "string",
+            "pattern": "LCLSET[A-Za-z0-9]{14}"
+        }
+    }
+}
+
+export const GetSettingRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetSettingRequest",
+    "definitions": {
+        "GetSettingRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/LocalSettingIdString"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "additionalProperties": false
+        },
+        "LocalSettingIdString": {
+            "type": "string",
+            "pattern": "LCLSET[A-Za-z0-9]{14}"
+        }
+    }
+}
+
+export const GetSettingByKeyRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetSettingByKeyRequest",
+    "definitions": {
+        "GetSettingByKeyRequest": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "reference": {
+                    "type": "string"
+                },
+                "scope": {
+                    "type": "string",
+                    "enum": [
+                        "Identity",
+                        "Device",
+                        "Relationship"
+                    ]
+                }
+            },
+            "required": [
+                "key"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
+export const GetSettingsRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/GetSettingsRequest",
+    "definitions": {
+        "GetSettingsRequest": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "$ref": "#/definitions/GetSettingsQuery"
+                }
+            },
+            "additionalProperties": false
+        },
+        "GetSettingsQuery": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "scope": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "reference": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "createdAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "succeedsItem": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                },
+                "succeedsAt": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}
+
+export const UpdateSettingRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/UpdateSettingRequest",
+    "definitions": {
+        "UpdateSettingRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/LocalSettingIdString"
+                },
+                "value": {}
+            },
+            "required": [
+                "id",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "LocalSettingIdString": {
+            "type": "string",
+            "pattern": "LCLSET[A-Za-z0-9]{14}"
+        }
+    }
+}
+
+export const UpsertSettingByKeyRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/UpsertSettingByKeyRequest",
+    "definitions": {
+        "UpsertSettingByKeyRequest": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "value": {},
+                "reference": {
+                    "$ref": "#/definitions/GenericIdString"
+                },
+                "scope": {
+                    "type": "string",
+                    "enum": [
+                        "Identity",
+                        "Device",
+                        "Relationship"
+                    ]
+                }
+            },
+            "required": [
+                "key",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "GenericIdString": {
+            "type": "string",
+            "pattern": "[A-Za-z0-9]{20}"
+        }
+    }
+}
+
 export const DownloadFileRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/DownloadFileRequest",
@@ -20132,452 +20578,6 @@ export const LoadPeerTokenRequest: any = {
         "URLTokenReferenceString": {
             "type": "string",
             "pattern": "^https?:\\/\\/.*\\/r\\/TOK[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
-        }
-    }
-}
-
-export const CreatePresentationTokenRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CreatePresentationTokenRequest",
-    "definitions": {
-        "CreatePresentationTokenRequest": {
-            "type": "object",
-            "properties": {
-                "attributeId": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "attributeId"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
-export const RequestCredentialsRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/RequestCredentialsRequest",
-    "definitions": {
-        "RequestCredentialsRequest": {
-            "$ref": "#/definitions/AbstractRequestCredentialsRequest%3Calias-2033348025-74138-74264-2033348025-0-218439%3Cstring%2Cany%3E%3E"
-        },
-        "AbstractRequestCredentialsRequest<alias-2033348025-74138-74264-2033348025-0-218439<string,any>>": {
-            "anyOf": [
-                {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "credentialOffer": {
-                            "type": "object"
-                        },
-                        "credentialConfigurationIds": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "required": [
-                        "credentialConfigurationIds",
-                        "credentialOffer"
-                    ]
-                },
-                {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "pinCode": {
-                            "type": "string"
-                        },
-                        "credentialOffer": {
-                            "type": "object"
-                        },
-                        "credentialConfigurationIds": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "required": [
-                        "credentialConfigurationIds",
-                        "credentialOffer",
-                        "pinCode"
-                    ]
-                },
-                {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                        "accessToken": {
-                            "type": "string"
-                        },
-                        "credentialOffer": {
-                            "type": "object"
-                        },
-                        "credentialConfigurationIds": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "required": [
-                        "accessToken",
-                        "credentialConfigurationIds",
-                        "credentialOffer"
-                    ]
-                }
-            ]
-        }
-    }
-}
-
-export const ResolveAuthorizationRequestRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/ResolveAuthorizationRequestRequest",
-    "definitions": {
-        "ResolveAuthorizationRequestRequest": {
-            "type": "object",
-            "properties": {
-                "authorizationRequestUrl": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "authorizationRequestUrl"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
-export const ResolveCredentialOfferRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/ResolveCredentialOfferRequest",
-    "definitions": {
-        "ResolveCredentialOfferRequest": {
-            "type": "object",
-            "properties": {
-                "credentialOfferUrl": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "credentialOfferUrl"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
-export const StoreCredentialsRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/StoreCredentialsRequest",
-    "definitions": {
-        "StoreCredentialsRequest": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "credentialResponses": {
-                    "type": "array",
-                    "items": {
-                        "type": "object"
-                    }
-                }
-            },
-            "required": [
-                "credentialResponses"
-            ]
-        }
-    }
-}
-
-export const CreateSettingRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/CreateSettingRequest",
-    "definitions": {
-        "CreateSettingRequest": {
-            "type": "object",
-            "properties": {
-                "key": {
-                    "type": "string"
-                },
-                "value": {},
-                "reference": {
-                    "$ref": "#/definitions/GenericIdString"
-                },
-                "scope": {
-                    "type": "string",
-                    "enum": [
-                        "Identity",
-                        "Device",
-                        "Relationship"
-                    ]
-                },
-                "succeedsAt": {
-                    "$ref": "#/definitions/ISO8601DateTimeString"
-                },
-                "succeedsItem": {
-                    "$ref": "#/definitions/LocalSettingIdString"
-                }
-            },
-            "required": [
-                "key",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "GenericIdString": {
-            "type": "string",
-            "pattern": "[A-Za-z0-9]{20}"
-        },
-        "ISO8601DateTimeString": {
-            "type": "string",
-            "errorMessage": "must match ISO8601 datetime format",
-            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
-        },
-        "LocalSettingIdString": {
-            "type": "string",
-            "pattern": "LCLSET[A-Za-z0-9]{14}"
-        }
-    }
-}
-
-export const DeleteSettingRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/DeleteSettingRequest",
-    "definitions": {
-        "DeleteSettingRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/LocalSettingIdString"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "additionalProperties": false
-        },
-        "LocalSettingIdString": {
-            "type": "string",
-            "pattern": "LCLSET[A-Za-z0-9]{14}"
-        }
-    }
-}
-
-export const GetSettingRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetSettingRequest",
-    "definitions": {
-        "GetSettingRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/LocalSettingIdString"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "additionalProperties": false
-        },
-        "LocalSettingIdString": {
-            "type": "string",
-            "pattern": "LCLSET[A-Za-z0-9]{14}"
-        }
-    }
-}
-
-export const GetSettingByKeyRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetSettingByKeyRequest",
-    "definitions": {
-        "GetSettingByKeyRequest": {
-            "type": "object",
-            "properties": {
-                "key": {
-                    "type": "string"
-                },
-                "reference": {
-                    "type": "string"
-                },
-                "scope": {
-                    "type": "string",
-                    "enum": [
-                        "Identity",
-                        "Device",
-                        "Relationship"
-                    ]
-                }
-            },
-            "required": [
-                "key"
-            ],
-            "additionalProperties": false
-        }
-    }
-}
-
-export const GetSettingsRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/GetSettingsRequest",
-    "definitions": {
-        "GetSettingsRequest": {
-            "type": "object",
-            "properties": {
-                "query": {
-                    "$ref": "#/definitions/GetSettingsQuery"
-                }
-            },
-            "additionalProperties": false
-        },
-        "GetSettingsQuery": {
-            "type": "object",
-            "properties": {
-                "key": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "scope": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "reference": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "createdAt": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "succeedsItem": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                },
-                "succeedsAt": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    ]
-                }
-            },
-            "additionalProperties": false
-        }
-    }
-}
-
-export const UpdateSettingRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/UpdateSettingRequest",
-    "definitions": {
-        "UpdateSettingRequest": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/LocalSettingIdString"
-                },
-                "value": {}
-            },
-            "required": [
-                "id",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "LocalSettingIdString": {
-            "type": "string",
-            "pattern": "LCLSET[A-Za-z0-9]{14}"
-        }
-    }
-}
-
-export const UpsertSettingByKeyRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/UpsertSettingByKeyRequest",
-    "definitions": {
-        "UpsertSettingByKeyRequest": {
-            "type": "object",
-            "properties": {
-                "key": {
-                    "type": "string"
-                },
-                "value": {},
-                "reference": {
-                    "$ref": "#/definitions/GenericIdString"
-                },
-                "scope": {
-                    "type": "string",
-                    "enum": [
-                        "Identity",
-                        "Device",
-                        "Relationship"
-                    ]
-                }
-            },
-            "required": [
-                "key",
-                "value"
-            ],
-            "additionalProperties": false
-        },
-        "GenericIdString": {
-            "type": "string",
-            "pattern": "[A-Za-z0-9]{20}"
         }
     }
 }
