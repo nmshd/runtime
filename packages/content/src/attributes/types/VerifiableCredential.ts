@@ -17,7 +17,7 @@ export interface IVerifiableCredential extends IAbstractAttributeValue {
 }
 
 @type("VerifiableCredential")
-export class VerifiableCredential extends AbstractAttributeValue {
+export class VerifiableCredential extends AbstractAttributeValue implements IVerifiableCredential {
     @serialize({ any: true })
     @validate({ customValidator: validateValue })
     public value: string | Record<string, any>;

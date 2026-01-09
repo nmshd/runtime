@@ -1,10 +1,12 @@
 import { Result } from "@js-soft/ts-utils";
-import { LocalAttributeDTO } from "@nmshd/runtime-types";
+import { LocalAttributeDTO, TokenDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
 import {
     AcceptAuthorizationRequestRequest,
     AcceptAuthorizationRequestResponse,
     AcceptAuthorizationRequestUseCase,
+    CreatePresentationTokenRequest,
+    CreatePresentationTokenUseCase,
     RequestCredentialsRequest,
     RequestCredentialsResponse,
     RequestCredentialsUseCase,
@@ -24,7 +26,8 @@ export class OpenId4VcFacade {
         @Inject private readonly requestCredentialsUseCase: RequestCredentialsUseCase,
         @Inject private readonly storeCredentialsUseCase: StoreCredentialsUseCase,
         @Inject private readonly resolveAuthorizationRequestUseCase: ResolveAuthorizationRequestUseCase,
-        @Inject private readonly acceptAuthorizationRequestUseCase: AcceptAuthorizationRequestUseCase
+        @Inject private readonly acceptAuthorizationRequestUseCase: AcceptAuthorizationRequestUseCase,
+        @Inject private readonly createPresentationTokenUseCase: CreatePresentationTokenUseCase
     ) {}
 
     public async resolveCredentialOffer(request: ResolveCredentialOfferRequest): Promise<Result<ResolveCredentialOfferResponse>> {
@@ -45,5 +48,9 @@ export class OpenId4VcFacade {
 
     public async acceptAuthorizationRequest(request: AcceptAuthorizationRequestRequest): Promise<Result<AcceptAuthorizationRequestResponse>> {
         return await this.acceptAuthorizationRequestUseCase.execute(request);
+    }
+
+    public async createPresentationToken(request: CreatePresentationTokenRequest): Promise<Result<TokenDTO>> {
+        return await this.createPresentationTokenUseCase.execute(request);
     }
 }
