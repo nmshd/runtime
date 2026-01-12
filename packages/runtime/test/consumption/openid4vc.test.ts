@@ -1,3 +1,4 @@
+import { AcceptShareAuthorizationRequestRequestItemParametersJSON, OwnIdentityAttributeJSON } from "@nmshd/consumption";
 import { VerifiableCredential, VerifiableCredentialJSON } from "@nmshd/content";
 import axios, { AxiosInstance } from "axios";
 import { jwtDecode } from "jwt-decode";
@@ -12,6 +13,39 @@ const fetchInstance: typeof fetch = (async (input: any, init: any) => {
     const response = await undiciFetch(input, { ...init, dispatcher: new UndiciAgent({}) });
     return response;
 }) as unknown as typeof fetch;
+
+const sdJwtPresentationRequestForPex = {
+    pex: {
+        id: "anId",
+        purpose: "To prove you work here",
+
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        input_descriptors: [
+            {
+                id: "EmployeeIdCard",
+                format: {
+                    // eslint-disable-next-line @typescript-eslint/naming-convention
+                    "vc+sd-jwt": {
+                        // eslint-disable-next-line @typescript-eslint/naming-convention
+                        "sd-jwt_alg_values": ["RS256", "PS256", "HS256", "ES256", "ES256K", "RS384", "PS384", "HS384", "ES384", "RS512", "PS512", "HS512", "ES512", "EdDSA"]
+                    }
+                },
+                constraints: {
+                    fields: [
+                        {
+                            path: ["$.vct"],
+                            filter: {
+                                type: "string",
+                                pattern: "EmployeeIdCard"
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    version: "v1.draft21"
+};
 
 const runtimeServiceProvider = new RuntimeServiceProvider(fetchInstance);
 let runtimeServices1: TestRuntimeServices;
@@ -182,53 +216,7 @@ describe("custom openid4vc service", () => {
             // Ensure the first test has completed
             expect(credentialOfferUrl).toBeDefined();
 
-            const response = await axiosInstance.post("/presentation/presentationRequests", {
-                pex: {
-                    id: "anId",
-                    purpose: "To prove you work here",
-
-                    // eslint-disable-next-line @typescript-eslint/naming-convention
-                    input_descriptors: [
-                        {
-                            id: "EmployeeIdCard",
-                            format: {
-                                // eslint-disable-next-line @typescript-eslint/naming-convention
-                                "vc+sd-jwt": {
-                                    // eslint-disable-next-line @typescript-eslint/naming-convention
-                                    "sd-jwt_alg_values": [
-                                        "RS256",
-                                        "PS256",
-                                        "HS256",
-                                        "ES256",
-                                        "ES256K",
-                                        "RS384",
-                                        "PS384",
-                                        "HS384",
-                                        "ES384",
-                                        "RS512",
-                                        "PS512",
-                                        "HS512",
-                                        "ES512",
-                                        "EdDSA"
-                                    ]
-                                }
-                            },
-                            constraints: {
-                                fields: [
-                                    {
-                                        path: ["$.vct"],
-                                        filter: {
-                                            type: "string",
-                                            pattern: "EmployeeIdCard"
-                                        }
-                                    }
-                                ]
-                            }
-                        }
-                    ]
-                },
-                version: "v1.draft21"
-            });
+            const response = await axiosInstance.post("/presentation/presentationRequests", sdJwtPresentationRequestForPex);
             expect(response.status).toBe(200);
             const responseData = await response.data;
 
@@ -457,38 +445,7 @@ describe("custom openid4vc service", () => {
         expect(attributes).toBeSuccessful();
         expect(attributes.value.length).toBeGreaterThan(0);
 
-        const createPresentationResponse = await axiosInstance.post("/presentation/presentationRequests", {
-            pex: {
-                id: "anId",
-                purpose: "To prove you work here",
-
-                // eslint-disable-next-line @typescript-eslint/naming-convention
-                input_descriptors: [
-                    {
-                        id: "EmployeeIdCard",
-                        format: {
-                            // eslint-disable-next-line @typescript-eslint/naming-convention
-                            "vc+sd-jwt": {
-                                // eslint-disable-next-line @typescript-eslint/naming-convention
-                                "sd-jwt_alg_values": ["RS256", "PS256", "HS256", "ES256", "ES256K", "RS384", "PS384", "HS384", "ES384", "RS512", "PS512", "HS512", "ES512", "EdDSA"]
-                            }
-                        },
-                        constraints: {
-                            fields: [
-                                {
-                                    path: ["$.vct"],
-                                    filter: {
-                                        type: "string",
-                                        pattern: "EmployeeIdCard"
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                ]
-            },
-            version: "v1.draft21"
-        });
+        const createPresentationResponse = await axiosInstance.post("/presentation/presentationRequests", sdJwtPresentationRequestForPex);
         expect(createPresentationResponse.status).toBe(200);
         const createPresentationResponseData = await createPresentationResponse.data;
 
@@ -507,6 +464,36 @@ describe("custom openid4vc service", () => {
         });
         expect(presentationResult).toBeSuccessful();
         expect(presentationResult.value.status).toBe(200);
+    });
+
+    test("request presentation using requests", async () => {
+        const response = await axiosInstance.post("/presentation/presentationRequests", sdJwtPresentationRequestForPex);
+        expect(response.status).toBe(200);
+        const authorizationRequestUrl = response.data.result.presentationRequest as string;
+        const authorizationRequestId = authorizationRequestUrl.split("%2F").at(-1)?.slice(0, 36);
+
+        const matchingCredential = (await runtimeServices2.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl })).value.matchingCredentials[0];
+
+        await exchangeAndAcceptRequestByMessage(
+            runtimeServices1,
+            runtimeServices2,
+            {
+                content: {
+                    items: [
+                        {
+                            "@type": "ShareAuthorizationRequestRequestItem",
+                            authorizationRequestUrl,
+                            mustBeAccepted: true
+                        }
+                    ]
+                },
+                peer: (await runtimeServices2.transport.account.getIdentityInfo()).value.address
+            },
+            [{ accept: true, attribute: matchingCredential as OwnIdentityAttributeJSON } as AcceptShareAuthorizationRequestRequestItemParametersJSON]
+        );
+
+        const verificationStatus = (await axiosInstance.get(`/presentation/presentationRequests/${authorizationRequestId}/verificationSessionState`)).data.result;
+        expect(verificationStatus).toBe("ResponseVerified");
     });
 
     async function startOid4VcComposeStack() {

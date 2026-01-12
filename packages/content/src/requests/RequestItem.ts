@@ -19,6 +19,7 @@ import {
     IProposeAttributeRequestItem,
     IReadAttributeRequestItem,
     IShareAttributeRequestItem,
+    IShareAuthorizationRequestRequestItem,
     IShareCredentialOfferRequestItem,
     ITransferFileOwnershipRequestItem,
     ProposeAttributeRequestItem,
@@ -27,6 +28,8 @@ import {
     ReadAttributeRequestItemJSON,
     ShareAttributeRequestItem,
     ShareAttributeRequestItemJSON,
+    ShareAuthorizationRequestRequestItem,
+    ShareAuthorizationRequestRequestItemJSON,
     ShareCredentialOfferRequestItem,
     ShareCredentialOfferRequestItemJSON,
     TransferFileOwnershipRequestItem,
@@ -65,7 +68,8 @@ export type RequestItemJSONDerivations =
     | AuthenticationRequestItemJSON
     | FormFieldRequestItemJSON
     | TransferFileOwnershipRequestItemJSON
-    | ShareCredentialOfferRequestItemJSON;
+    | ShareCredentialOfferRequestItemJSON
+    | ShareAuthorizationRequestRequestItemJSON;
 
 export interface IRequestItem extends ISerializable {
     /**
@@ -99,7 +103,8 @@ export type IRequestItemDerivations =
     | IAuthenticationRequestItem
     | IFormFieldRequestItem
     | ITransferFileOwnershipRequestItem
-    | IShareCredentialOfferRequestItem;
+    | IShareCredentialOfferRequestItem
+    | IShareAuthorizationRequestRequestItem;
 
 export abstract class RequestItem extends Serializable {
     @serialize()
@@ -130,7 +135,8 @@ export type RequestItemDerivations =
     | AuthenticationRequestItem
     | FormFieldRequestItem
     | TransferFileOwnershipRequestItem
-    | ShareCredentialOfferRequestItem;
+    | ShareCredentialOfferRequestItem
+    | ShareAuthorizationRequestRequestItem;
 
 export function isRequestItemDerivation(input: any): input is RequestItemDerivations {
     return (
@@ -144,6 +150,7 @@ export function isRequestItemDerivation(input: any): input is RequestItemDerivat
         input["@type"] === "AuthenticationRequestItem" ||
         input["@type"] === "FormFieldRequestItem" ||
         input["@type"] === "TransferFileOwnershipRequestItem" ||
-        input["@type"] === "ShareCredentialOfferRequestItem"
+        input["@type"] === "ShareCredentialOfferRequestItem" ||
+        input["@type"] === "ShareAuthorizationRequestRequestItem"
     );
 }
