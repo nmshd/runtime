@@ -115,20 +115,21 @@ export class SynchronizedCollection implements IDatabaseCollection {
 
     public async update(oldDoc: any, newObject: CoreSynchronizable): Promise<any> {
         if (typeof globalThis.process === "object" && globalThis.process.env.CI) {
-            const databaseObject = Serializable.fromUnknown(await this.parent.read(newObject.id.toString()));
+            const oldObject = Serializable.fromUnknown(oldDoc).toJSON();
+            const currentObject = Serializable.fromUnknown(await this.parent.read(newObject.id.toString())).toJSON();
 
-            const readDiff = jsonpatch.compare(databaseObject.toJSON(), Serializable.fromUnknown(oldDoc).toJSON());
+            const readDiff = jsonpatch.compare(currentObject, oldObject);
             if (readDiff.length > 0) {
                 // eslint-disable-next-line no-console
                 console.error(`
-The data that is currently updated got modified between it initial reading and this update.
+The data that is currently updated got modified between its initial reading and this update.
 This will lead to an data loss and inconsistency.
 Here is the diff of the data:
 ${JSON.stringify(readDiff, null, 2)}
 Old Object from Database:
-${JSON.stringify(oldDoc, null, 2)}
+${JSON.stringify(oldObject, null, 2)}
 Object in Database:
-${JSON.stringify(databaseObject, null, 2)}
+${JSON.stringify(currentObject, null, 2)}
 
 
 Stack:
