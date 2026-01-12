@@ -125,7 +125,7 @@ export class OpenId4VcController extends ConsumptionBaseController {
         return { status: serverResponse.status, message: serverResponse.body };
     }
 
-    public async createDefaultPresentation(credential: VerifiableCredential): Promise<VerifiableCredential> {
-        return await this.holder.createDefaultPresentation(credential);
+    public async createPresentationForToken(credential: VerifiableCredential): Promise<VerifiableCredential> {
+        return await this.holder.createPresentationForToken(credential);
     }
 }
