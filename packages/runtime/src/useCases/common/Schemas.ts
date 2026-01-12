@@ -317,6 +317,9 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 {
                     "$ref": "#/definitions/ShareCredentialOfferRequestItemJSON"
+                },
+                {
+                    "$ref": "#/definitions/ShareAuthorizationRequestRequestItemJSON"
                 }
             ]
         },
@@ -2780,6 +2783,42 @@ export const CanCreateOutgoingRequestRequest: any = {
             "required": [
                 "@type",
                 "credentialOfferUrl",
+                "mustBeAccepted"
+            ],
+            "additionalProperties": false
+        },
+        "ShareAuthorizationRequestRequestItemJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ShareAuthorizationRequestRequestItem"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "authorizationRequestUrl": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "authorizationRequestUrl",
                 "mustBeAccepted"
             ],
             "additionalProperties": false
@@ -7192,6 +7231,9 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 {
                     "$ref": "#/definitions/ShareCredentialOfferRequestItemJSON"
+                },
+                {
+                    "$ref": "#/definitions/ShareAuthorizationRequestRequestItemJSON"
                 }
             ]
         },
@@ -9655,6 +9697,42 @@ export const CreateOutgoingRequestRequest: any = {
             "required": [
                 "@type",
                 "credentialOfferUrl",
+                "mustBeAccepted"
+            ],
+            "additionalProperties": false
+        },
+        "ShareAuthorizationRequestRequestItemJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ShareAuthorizationRequestRequestItem"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "authorizationRequestUrl": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "authorizationRequestUrl",
                 "mustBeAccepted"
             ],
             "additionalProperties": false
@@ -10320,6 +10398,9 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 {
                     "$ref": "#/definitions/ShareCredentialOfferRequestItemJSON"
+                },
+                {
+                    "$ref": "#/definitions/ShareAuthorizationRequestRequestItemJSON"
                 }
             ]
         },
@@ -12783,6 +12864,42 @@ export const ReceivedIncomingRequestRequest: any = {
             "required": [
                 "@type",
                 "credentialOfferUrl",
+                "mustBeAccepted"
+            ],
+            "additionalProperties": false
+        },
+        "ShareAuthorizationRequestRequestItemJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ShareAuthorizationRequestRequestItem"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "authorizationRequestUrl": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "authorizationRequestUrl",
                 "mustBeAccepted"
             ],
             "additionalProperties": false
