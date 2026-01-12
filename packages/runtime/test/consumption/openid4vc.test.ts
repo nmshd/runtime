@@ -1,4 +1,4 @@
-import { VerifiableCredential, VerifiableCredentialJSON } from "@nmshd/content";
+import { VerifiableCredential, VerifiableCredentialJSON, VerifiablePresentationJSON } from "@nmshd/content";
 import axios, { AxiosInstance } from "axios";
 import { jwtDecode } from "jwt-decode";
 import * as client from "openid-client";
@@ -266,7 +266,7 @@ describe("custom openid4vc service", () => {
             const loadedToken = (await runtimeServices1.anonymous.tokens.loadPeerToken({ reference: token.reference.url })).value;
 
             const credential = ((await runtimeServices1.consumption.attributes.getAttribute({ id: attributeId })).value.content.value as VerifiableCredentialJSON).value;
-            const presentation = (loadedToken.content as VerifiableCredentialJSON).value;
+            const presentation = (loadedToken.content as VerifiablePresentationJSON).value;
             expect(presentation.substring(0, credential.length)).toBe(credential);
             expect(presentation.substring(credential.length, credential.length + 2)).toBe("ey");
 

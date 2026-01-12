@@ -13,7 +13,7 @@ import {
     X509Module
 } from "@credo-ts/core";
 import { OpenId4VciCredentialResponse, OpenId4VcModule, type OpenId4VciResolvedCredentialOffer, type OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
-import { VerifiableCredential } from "@nmshd/content";
+import { VerifiableCredential, VerifiablePresentation } from "@nmshd/content";
 import { AccountController } from "@nmshd/transport";
 import { AttributesController, OwnIdentityAttribute } from "../../attributes";
 import { BaseAgent } from "./BaseAgent";
@@ -212,8 +212,8 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
 
     // hacky solution because credo doesn't support credentials without key binding
     // TODO: use credentials without key binding once supported
-    public async createPresentationForToken(credential: VerifiableCredential): Promise<VerifiableCredential> {
-        if (credential.type !== ClaimFormat.SdJwtDc) throw new Error("Only SD-JWT credentials have been tested so far with default presentation");
+    public async createPresentationForToken(credential: VerifiableCredential): Promise<VerifiablePresentation> {
+        if (credential.type !== ClaimFormat.SdJwtDc) throw new Error("Only SD-JWT credentials have been tested so far with token presentation");
 
         const sdJwtVcApi = this.agent.dependencyManager.resolve(SdJwtVcApi);
         const presentation = await sdJwtVcApi.present({
@@ -225,7 +225,7 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
             }
         });
 
-        return VerifiableCredential.from({
+        return VerifiablePresentation.from({
             ...credential,
             value: presentation
         });
