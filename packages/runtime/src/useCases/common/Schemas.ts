@@ -17340,6 +17340,25 @@ export const AcceptAuthorizationRequestRequest: any = {
     }
 }
 
+export const CreatePresentationTokenRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/CreatePresentationTokenRequest",
+    "definitions": {
+        "CreatePresentationTokenRequest": {
+            "type": "object",
+            "properties": {
+                "attributeId": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "attributeId"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
 export const RequestCredentialsRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/RequestCredentialsRequest",

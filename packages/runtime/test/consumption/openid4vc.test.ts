@@ -1,5 +1,5 @@
 import { AcceptShareAuthorizationRequestRequestItemParametersJSON, OwnIdentityAttributeJSON } from "@nmshd/consumption";
-import { VerifiableCredential, VerifiableCredentialJSON } from "@nmshd/content";
+import { VerifiableCredential, VerifiableCredentialJSON, VerifiablePresentationJSON } from "@nmshd/content";
 import axios, { AxiosInstance } from "axios";
 import { jwtDecode } from "jwt-decode";
 import * as client from "openid-client";
@@ -91,6 +91,8 @@ describe("custom openid4vc service", () => {
     let credentialOfferUrl: string;
 
     describe("sd-jwt", () => {
+        let attributeId: string;
+
         test("should process a given sd-jwt credential offer", async () => {
             const response = await axiosInstance.post("/issuance/credentialOffers", {
                 credentialConfigurationIds: ["EmployeeIdCard-sdjwt"]
@@ -115,7 +117,8 @@ describe("custom openid4vc service", () => {
             });
             const storeResult = await runtimeServices1.consumption.openId4Vc.storeCredentials({ credentialResponses: credentialResponseResult.value.credentialResponses });
             expect(storeResult).toBeSuccessful();
-            expect(typeof storeResult.value.id).toBe("string");
+            attributeId = storeResult.value.id;
+            expect(typeof attributeId).toBe("string");
 
             const credential = storeResult.value.content.value as VerifiableCredentialJSON;
             expect(credential.displayInformation?.[0].logo).toBeDefined();
@@ -284,6 +287,25 @@ describe("custom openid4vc service", () => {
 
             expect(acceptanceResult).toBeSuccessful();
             expect(acceptanceResult.value.length).toBeGreaterThan(0);
+        });
+
+        test("presentation with token", async () => {
+            const token = (await runtimeServices1.consumption.openId4Vc.createPresentationToken({ attributeId })).value;
+
+            const loadedToken = (await runtimeServices1.anonymous.tokens.loadPeerToken({ reference: token.reference.url })).value;
+
+            const credential = ((await runtimeServices1.consumption.attributes.getAttribute({ id: attributeId })).value.content.value as VerifiableCredentialJSON).value;
+            const presentation = (loadedToken.content as VerifiablePresentationJSON).value;
+            expect(presentation.substring(0, credential.length)).toBe(credential);
+            expect(presentation.substring(credential.length, credential.length + 2)).toBe("ey");
+
+            const verificationResult = await axiosInstance.post("/presentation/verify", {
+                credential: presentation,
+                format: "dc+sd-jwt",
+                nonce: "defaultPresentationNonce",
+                audience: "defaultPresentationAudience"
+            });
+            expect(verificationResult.data.result.verified).toBe(true);
         });
     });
 

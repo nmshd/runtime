@@ -3,21 +3,21 @@ import { AbstractAttributeValue, AbstractAttributeValueJSON, IAbstractAttributeV
 import { RenderHints, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../hints";
 import { PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH } from "./proprietary/ProprietaryAttributeValue";
 
-export interface VerifiableCredentialJSON extends AbstractAttributeValueJSON {
-    "@type": "VerifiableCredential";
+export interface VerifiablePresentationJSON extends AbstractAttributeValueJSON {
+    "@type": "VerifiablePresentation";
     value: string | Record<string, any>;
     type: string;
     displayInformation?: Record<string, any>[];
 }
 
-export interface IVerifiableCredential extends IAbstractAttributeValue {
+export interface IVerifiablePresentation extends IAbstractAttributeValue {
     value: string | Record<string, any>;
     type: string;
     displayInformation?: Record<string, any>[];
 }
 
-@type("VerifiableCredential")
-export class VerifiableCredential extends AbstractAttributeValue implements IVerifiableCredential {
+@type("VerifiablePresentation")
+export class VerifiablePresentation extends AbstractAttributeValue implements IVerifiablePresentation {
     @serialize({ any: true })
     @validate({ customValidator: validateValue })
     public value: string | Record<string, any>;
@@ -41,12 +41,12 @@ export class VerifiableCredential extends AbstractAttributeValue implements IVer
         });
     }
 
-    public static from(value: IVerifiableCredential | Omit<VerifiableCredentialJSON, "@type">): VerifiableCredential {
+    public static from(value: IVerifiablePresentation | Omit<VerifiablePresentationJSON, "@type">): VerifiablePresentation {
         return this.fromAny(value);
     }
 
-    public override toJSON(verbose?: boolean | undefined, serializeAsString?: boolean | undefined): VerifiableCredentialJSON {
-        return super.toJSON(verbose, serializeAsString) as VerifiableCredentialJSON;
+    public override toJSON(verbose?: boolean | undefined, serializeAsString?: boolean | undefined): VerifiablePresentationJSON {
+        return super.toJSON(verbose, serializeAsString) as VerifiablePresentationJSON;
     }
 }
 
