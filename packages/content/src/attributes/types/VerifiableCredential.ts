@@ -50,7 +50,7 @@ export class VerifiableCredential extends AbstractAttributeValue implements IVer
     }
 }
 
-function validateValue(value: any) {
+export function validateValue(value: any): string | undefined {
     try {
         const string = JSON.stringify(value);
         // the length correspondes to 50MB - maybe this needs to be restricted further in the future
