@@ -17210,9 +17210,13 @@ export const AcceptAuthorizationRequestRequest: any = {
             "properties": {
                 "authorizationRequest": {
                     "type": "object"
+                },
+                "attributeId": {
+                    "type": "string"
                 }
             },
             "required": [
+                "attributeId",
                 "authorizationRequest"
             ]
         }
