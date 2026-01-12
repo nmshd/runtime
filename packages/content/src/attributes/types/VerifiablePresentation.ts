@@ -1,14 +1,20 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { AbstractAttributeValue } from "../AbstractAttributeValue";
+import { AbstractAttributeValue, AbstractAttributeValueJSON, IAbstractAttributeValue } from "../AbstractAttributeValue";
 import { RenderHints, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../hints";
 import { PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH } from "./proprietary/ProprietaryAttributeValue";
-import { IVerifiableCredential, validateValue, VerifiableCredentialJSON } from "./VerifiableCredential";
 
-export interface VerifiablePresentationJSON extends Omit<VerifiableCredentialJSON, "@type"> {
+export interface VerifiablePresentationJSON extends AbstractAttributeValueJSON {
     "@type": "VerifiablePresentation";
+    value: string | Record<string, any>;
+    type: string;
+    displayInformation?: Record<string, any>[];
 }
 
-export interface IVerifiablePresentation extends IVerifiableCredential {}
+export interface IVerifiablePresentation extends IAbstractAttributeValue {
+    value: string | Record<string, any>;
+    type: string;
+    displayInformation?: Record<string, any>[];
+}
 
 @type("VerifiablePresentation")
 export class VerifiablePresentation extends AbstractAttributeValue implements IVerifiablePresentation {
@@ -42,4 +48,22 @@ export class VerifiablePresentation extends AbstractAttributeValue implements IV
     public override toJSON(verbose?: boolean | undefined, serializeAsString?: boolean | undefined): VerifiablePresentationJSON {
         return super.toJSON(verbose, serializeAsString) as VerifiablePresentationJSON;
     }
+}
+
+function validateValue(value: any) {
+    try {
+        const string = JSON.stringify(value);
+        // the length correspondes to 50MB - maybe this needs to be restricted further in the future
+        if (string.length > 52428800) {
+            return "stringified value must not be longer than 52428800 characters";
+        }
+    } catch (e) {
+        if (e instanceof SyntaxError) {
+            return "must be a valid JSON object";
+        }
+
+        return "could not validate value";
+    }
+
+    return undefined;
 }
