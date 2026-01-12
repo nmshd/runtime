@@ -117,7 +117,7 @@ export class SynchronizedCollection implements IDatabaseCollection {
         if (typeof globalThis.process === "object" && globalThis.process.env.CI) {
             const databaseObject = Serializable.fromUnknown(await this.parent.read(newObject.id.toString()));
 
-            const readDiff = jsonpatch.compare(databaseObject.toJSON(), oldDoc);
+            const readDiff = jsonpatch.compare(databaseObject.toJSON(), Serializable.fromUnknown(oldDoc).toJSON());
             if (readDiff.length > 0) {
                 // eslint-disable-next-line no-console
                 console.error(`
