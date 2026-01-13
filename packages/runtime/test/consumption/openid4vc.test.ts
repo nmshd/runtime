@@ -516,7 +516,7 @@ describe("custom openid4vc service", () => {
 
         const requestId = (message.content as RequestJSON).id!;
         const request = (await runtimeServices2.consumption.incomingRequests.getRequest({ id: requestId })).value;
-        expect(request.response?.content.items[0]).toStrictEqual({ result: ResponseItemResult.Accepted });
+        expect(request.response?.content.items[0]).toStrictEqual({ "@type": "AcceptResponseItem", result: ResponseItemResult.Accepted });
 
         const verificationStatus = (await axiosInstance.get(`/presentation/presentationRequests/${authorizationRequestId}/verificationSessionState`)).data.result;
         expect(verificationStatus).toBe("ResponseVerified");
