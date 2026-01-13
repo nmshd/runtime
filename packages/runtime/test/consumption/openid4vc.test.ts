@@ -1,5 +1,5 @@
-import { AcceptShareAuthorizationRequestRequestItemParametersJSON, OwnIdentityAttributeJSON } from "@nmshd/consumption";
-import { VerifiableCredential, VerifiableCredentialJSON, VerifiablePresentationJSON } from "@nmshd/content";
+import { AcceptShareAuthorizationRequestRequestItemParametersJSON } from "@nmshd/consumption";
+import { RequestJSON, ResponseItemResult, VerifiableCredential, VerifiableCredentialJSON, VerifiablePresentationJSON } from "@nmshd/content";
 import axios, { AxiosInstance } from "axios";
 import { jwtDecode } from "jwt-decode";
 import * as client from "openid-client";
@@ -496,7 +496,7 @@ describe("custom openid4vc service", () => {
 
         const matchingCredential = (await runtimeServices2.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl })).value.matchingCredentials[0];
 
-        await exchangeAndAcceptRequestByMessage(
+        const message = await exchangeAndAcceptRequestByMessage(
             runtimeServices1,
             runtimeServices2,
             {
@@ -511,8 +511,12 @@ describe("custom openid4vc service", () => {
                 },
                 peer: (await runtimeServices2.transport.account.getIdentityInfo()).value.address
             },
-            [{ accept: true, attribute: matchingCredential as OwnIdentityAttributeJSON } as AcceptShareAuthorizationRequestRequestItemParametersJSON]
+            [{ accept: true, attributeId: matchingCredential.id } as AcceptShareAuthorizationRequestRequestItemParametersJSON]
         );
+
+        const requestId = (message.content as RequestJSON).id!;
+        const request = (await runtimeServices2.consumption.incomingRequests.getRequest({ id: requestId })).value;
+        expect(request.response?.content.items[0]).toStrictEqual({ result: ResponseItemResult.Accepted });
 
         const verificationStatus = (await axiosInstance.get(`/presentation/presentationRequests/${authorizationRequestId}/verificationSessionState`)).data.result;
         expect(verificationStatus).toBe("ResponseVerified");
