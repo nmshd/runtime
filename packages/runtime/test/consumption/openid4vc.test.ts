@@ -7,7 +7,7 @@ import path from "path";
 import { DockerComposeEnvironment, GenericContainer, StartedDockerComposeEnvironment, StartedTestContainer, Wait } from "testcontainers";
 import { Agent as UndiciAgent, fetch as undiciFetch } from "undici";
 import { ShareCredentialOfferRequestItemProcessedByRecipientEvent } from "../../src";
-import { ensureActiveRelationship, exchangeAndAcceptRequestByMessage, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
+import { ensureActiveRelationship, exchangeAndAcceptRequestByMessage, exchangeMessageWithRequest, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
 const fetchInstance: typeof fetch = (async (input: any, init: any) => {
     const response = await undiciFetch(input, { ...init, dispatcher: new UndiciAgent({}) });
@@ -488,18 +488,58 @@ describe("custom openid4vc service", () => {
         expect(presentationResult.value.status).toBe(200);
     });
 
-    test("request presentation using requests", async () => {
-        const response = await axiosInstance.post("/presentation/presentationRequests", sdJwtPresentationRequestForPex);
-        expect(response.status).toBe(200);
-        const authorizationRequestUrl = response.data.result.presentationRequest as string;
-        const authorizationRequestId = authorizationRequestUrl.split("%2F").at(-1)?.slice(0, 36);
+    describe("request presentation using requests", () => {
+        test("happy path", async () => {
+            const response = await axiosInstance.post("/presentation/presentationRequests", sdJwtPresentationRequestForPex);
+            expect(response.status).toBe(200);
+            const authorizationRequestUrl = response.data.result.presentationRequest as string;
+            const authorizationRequestId = authorizationRequestUrl.split("%2F").at(-1)?.slice(0, 36);
 
-        const matchingCredential = (await runtimeServices2.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl })).value.matchingCredentials[0];
+            const matchingCredential = (await runtimeServices2.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl })).value.matchingCredentials[0];
 
-        const message = await exchangeAndAcceptRequestByMessage(
-            runtimeServices1,
-            runtimeServices2,
-            {
+            const message = await exchangeAndAcceptRequestByMessage(
+                runtimeServices1,
+                runtimeServices2,
+                {
+                    content: {
+                        items: [
+                            {
+                                "@type": "ShareAuthorizationRequestRequestItem",
+                                authorizationRequestUrl,
+                                mustBeAccepted: true
+                            }
+                        ]
+                    },
+                    peer: (await runtimeServices2.transport.account.getIdentityInfo()).value.address
+                },
+                [{ accept: true, attributeId: matchingCredential.id } as AcceptShareAuthorizationRequestRequestItemParametersJSON]
+            );
+
+            const requestId = (message.content as RequestJSON).id!;
+            const request = (await runtimeServices2.consumption.incomingRequests.getRequest({ id: requestId })).value;
+            expect(request.response?.content.items[0]).toStrictEqual({ "@type": "AcceptResponseItem", result: ResponseItemResult.Accepted });
+
+            const verificationStatus = (await axiosInstance.get(`/presentation/presentationRequests/${authorizationRequestId}/verificationSessionState`)).data.result;
+            expect(verificationStatus).toBe("ResponseVerified");
+        });
+
+        test("accepting with non-matching attribute fails", async () => {
+            const nonMatchingAttributeId = (
+                await runtimeServices2.consumption.attributes.createOwnIdentityAttribute({
+                    content: {
+                        value: {
+                            "@type": "GivenName",
+                            value: "aGivenName"
+                        }
+                    }
+                })
+            ).value.id;
+
+            const response = await axiosInstance.post("/presentation/presentationRequests", sdJwtPresentationRequestForPex);
+            expect(response.status).toBe(200);
+            const authorizationRequestUrl = response.data.result.presentationRequest as string;
+
+            const message = await exchangeMessageWithRequest(runtimeServices1, runtimeServices2, {
                 content: {
                     items: [
                         {
@@ -510,16 +550,19 @@ describe("custom openid4vc service", () => {
                     ]
                 },
                 peer: (await runtimeServices2.transport.account.getIdentityInfo()).value.address
-            },
-            [{ accept: true, attributeId: matchingCredential.id } as AcceptShareAuthorizationRequestRequestItemParametersJSON]
-        );
+            });
 
-        const requestId = (message.content as RequestJSON).id!;
-        const request = (await runtimeServices2.consumption.incomingRequests.getRequest({ id: requestId })).value;
-        expect(request.response?.content.items[0]).toStrictEqual({ "@type": "AcceptResponseItem", result: ResponseItemResult.Accepted });
+            const requestId = (message.content as RequestJSON).id!;
+            const canAcceptResult = (
+                await runtimeServices2.consumption.incomingRequests.canAccept({
+                    requestId,
+                    items: [{ accept: true, attributeId: nonMatchingAttributeId } as AcceptShareAuthorizationRequestRequestItemParametersJSON]
+                })
+            ).value;
 
-        const verificationStatus = (await axiosInstance.get(`/presentation/presentationRequests/${authorizationRequestId}/verificationSessionState`)).data.result;
-        expect(verificationStatus).toBe("ResponseVerified");
+            expect(canAcceptResult.items[0].isSuccess).toBe(false);
+            expect(canAcceptResult.items[0].message).toBe("The credential selected for presentation doesn't match the query.");
+        });
     });
 
     async function startOid4VcComposeStack() {
