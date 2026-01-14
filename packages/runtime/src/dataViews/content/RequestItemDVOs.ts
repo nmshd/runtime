@@ -1,6 +1,6 @@
 import { OpenId4VciCredentialResponseJSON } from "@nmshd/consumption";
 import { FormFieldSettingsJSONDerivations } from "@nmshd/content";
-import { LocalAttributeDVO } from "../consumption";
+import { LocalAttributeDVO, OwnIdentityAttributeDVO } from "../consumption";
 import { DataViewObject } from "../DataViewObject";
 import { FileDVO } from "../transport";
 import { AttributeQueryDVO, DraftIdentityAttributeDVO, DraftRelationshipAttributeDVO } from "./AttributeDVOs";
@@ -86,5 +86,5 @@ export interface ShareCredentialOfferRequestItemDVO extends RequestItemDVO {
 export interface ShareAuthorizationRequestRequestItemDVO extends RequestItemDVO {
     type: "ShareAuthorizationRequestRequestItemDVO";
     authorizationRequestUrl: string;
-    matchingCredentials: LocalAttributeDVO[];
+    matchingCredentials: OwnIdentityAttributeDVO[];
 }

@@ -1,16 +1,16 @@
 import { Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { OwnIdentityAttribute, OwnIdentityAttributeJSON } from "../../../attributes";
+import { CoreId } from "@nmshd/core-types";
 import { AcceptRequestItemParametersJSON } from "../../incoming/decide/AcceptRequestItemParameters";
 
 export interface AcceptShareAuthorizationRequestRequestItemParametersJSON extends AcceptRequestItemParametersJSON {
-    attribute: OwnIdentityAttributeJSON;
+    attributeId: string;
 }
 
 @type("AcceptShareAuthorizationRequestRequestItemParameters")
 export class AcceptShareAuthorizationRequestRequestItemParameters extends Serializable {
     @serialize()
     @validate()
-    public attribute: OwnIdentityAttribute;
+    public attributeId: CoreId;
 
     public static from(value: AcceptShareAuthorizationRequestRequestItemParametersJSON): AcceptShareAuthorizationRequestRequestItemParameters {
         return this.fromAny(value);
