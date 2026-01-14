@@ -2,7 +2,7 @@ name: runtime-tests
 
 services:
   runtime-mongo:
-    image: mongo@sha256:7f5bbdafebde7c42e42e33396d01c0eda3eb753da8dae99071a30e350568a0a4
+    image: mongo@sha256:dfa32f68d02281185978619aac453896c85c46ee4911c93b8e5a5d2167af4856
     container_name: runtime-mongo
     ports:
       - "27021:27017"
