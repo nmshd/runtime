@@ -32,7 +32,13 @@ export class ShareAuthorizationRequestRequestItemProcessor extends GenericReques
         const attribute = (await this.consumptionController.attributes.getLocalAttribute(parsedParams.attributeId)) as OwnIdentityAttribute | undefined;
         if (!attribute) return ValidationResult.error(TransportCoreErrors.general.recordNotFound(LocalAttribute, parsedParams.attributeId.toString()));
 
-        const resolvedAuthorizationRequest = await this.consumptionController.openId4Vc.resolveAuthorizationRequest(requestItem.authorizationRequestUrl);
+        let resolvedAuthorizationRequest;
+        try {
+            resolvedAuthorizationRequest = await this.consumptionController.openId4Vc.resolveAuthorizationRequest(requestItem.authorizationRequestUrl);
+        } catch (_) {
+            return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("The authorization request url can't be resolved."));
+        }
+
         const matchingCredentials = resolvedAuthorizationRequest.matchingCredentials;
         const matchingAttributeIds = matchingCredentials.map((c) => c.id.toString());
         if (!matchingAttributeIds.includes(parsedParams.attributeId.toString())) {
