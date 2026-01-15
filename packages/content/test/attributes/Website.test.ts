@@ -35,7 +35,7 @@ describe("Test invalid URLs", () => {
         );
     });
 
-    test("returns an error when trying to create an Attribute Value Type Website wich is empty", function () {
+    test("returns an error when trying to create an Attribute Value Type Website which is empty", function () {
         const invalidWebsiteCall = () => {
             Website.from({
                 value: ""

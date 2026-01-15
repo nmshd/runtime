@@ -28,7 +28,7 @@ describe("Test invalid EMailAddresses", () => {
         );
     });
 
-    test("returns an error when trying to create an Attribute Value Type EMailAddress wich is empty", function () {
+    test("returns an error when trying to create an Attribute Value Type EMailAddress which is empty", function () {
         const invalidEMailAddressCall = () => {
             EMailAddress.from({
                 value: ""
