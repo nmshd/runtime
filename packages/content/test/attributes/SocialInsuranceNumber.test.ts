@@ -19,13 +19,7 @@ describe("Test invalid SocialInsuranceNumbers", () => {
                 value: number
             });
         };
-        expect(invalidSocialInsuranceNumberCall).toThrow(
-            new ParsingError(
-                "SocialInsuranceNumber",
-                "value",
-                "Value does not match regular expression /^[A-Z0-9]+$/"
-            )
-        );
+        expect(invalidSocialInsuranceNumberCall).toThrow(new ParsingError("SocialInsuranceNumber", "value", "Value does not match regular expression /^[A-Z0-9]+$/"));
     });
 
     test("returns an error when trying to create an Attribute Value Type SocialInsuranceNumber which is empty", function () {

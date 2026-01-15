@@ -13,9 +13,7 @@ export interface ISocialInsuranceNumber extends IAbstractString {}
 
 @type("SocialInsuranceNumber")
 export class SocialInsuranceNumber extends AbstractString implements ISocialInsuranceNumber {
-    private static readonly regExp = new RegExp(
-        /^[A-Z0-9]+$/
-    );
+    private static readonly regExp = new RegExp(/^[A-Z0-9]+$/);
     @serialize()
     @validate({
         min: MIN_SOCIAL_INSURANCE_NUMBER_LENGTH,
