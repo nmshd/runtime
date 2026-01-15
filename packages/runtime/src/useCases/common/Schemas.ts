@@ -1171,6 +1171,9 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/SexJSON"
                 },
                 {
+                    "$ref": "#/definitions/SocialInsuranceNumberJSON"
+                },
+                {
                     "$ref": "#/definitions/StreetAddressJSON"
                 },
                 {
@@ -1783,6 +1786,29 @@ export const CanCreateOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+        "SocialInsuranceNumberJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "SocialInsuranceNumber"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
         "StreetAddressJSON": {
             "type": "object",
             "properties": {
@@ -2112,6 +2138,7 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "PostOfficeBoxAddress",
                 "Pseudonym",
                 "Sex",
+                "SocialInsuranceNumber",
                 "StreetAddress",
                 "Surname",
                 "Website"
@@ -3210,6 +3237,9 @@ export const CompleteOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/SexJSON"
                 },
                 {
+                    "$ref": "#/definitions/SocialInsuranceNumberJSON"
+                },
+                {
                     "$ref": "#/definitions/StreetAddressJSON"
                 },
                 {
@@ -3805,6 +3835,29 @@ export const CompleteOutgoingRequestRequest: any = {
                 "@type": {
                     "type": "string",
                     "const": "Sex"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "SocialInsuranceNumberJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "SocialInsuranceNumber"
                 },
                 "@context": {
                     "type": "string"
@@ -5235,6 +5288,9 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "$ref": "#/definitions/SexJSON"
                 },
                 {
+                    "$ref": "#/definitions/SocialInsuranceNumberJSON"
+                },
+                {
                     "$ref": "#/definitions/StreetAddressJSON"
                 },
                 {
@@ -5830,6 +5886,29 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                 "@type": {
                     "type": "string",
                     "const": "Sex"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "SocialInsuranceNumberJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "SocialInsuranceNumber"
                 },
                 "@context": {
                     "type": "string"
@@ -7877,6 +7956,9 @@ export const CreateOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/SexJSON"
                 },
                 {
+                    "$ref": "#/definitions/SocialInsuranceNumberJSON"
+                },
+                {
                     "$ref": "#/definitions/StreetAddressJSON"
                 },
                 {
@@ -8489,6 +8571,29 @@ export const CreateOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+        "SocialInsuranceNumberJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "SocialInsuranceNumber"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
         "StreetAddressJSON": {
             "type": "object",
             "properties": {
@@ -8818,6 +8923,7 @@ export const CreateOutgoingRequestRequest: any = {
                 "PostOfficeBoxAddress",
                 "Pseudonym",
                 "Sex",
+                "SocialInsuranceNumber",
                 "StreetAddress",
                 "Surname",
                 "Website"
@@ -10922,6 +11028,9 @@ export const ReceivedIncomingRequestRequest: any = {
                     "$ref": "#/definitions/SexJSON"
                 },
                 {
+                    "$ref": "#/definitions/SocialInsuranceNumberJSON"
+                },
+                {
                     "$ref": "#/definitions/StreetAddressJSON"
                 },
                 {
@@ -11534,6 +11643,29 @@ export const ReceivedIncomingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+        "SocialInsuranceNumberJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "SocialInsuranceNumber"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
         "StreetAddressJSON": {
             "type": "object",
             "properties": {
@@ -11863,6 +11995,7 @@ export const ReceivedIncomingRequestRequest: any = {
                 "PostOfficeBoxAddress",
                 "Pseudonym",
                 "Sex",
+                "SocialInsuranceNumber",
                 "StreetAddress",
                 "Surname",
                 "Website"
@@ -13385,6 +13518,7 @@ export const ExecuteIdentityAttributeQueryRequest: any = {
                 "PostOfficeBoxAddress",
                 "Pseudonym",
                 "Sex",
+                "SocialInsuranceNumber",
                 "StreetAddress",
                 "Surname",
                 "Website"
@@ -13491,6 +13625,7 @@ export const ExecuteIQLQueryRequest: any = {
                 "PostOfficeBoxAddress",
                 "Pseudonym",
                 "Sex",
+                "SocialInsuranceNumber",
                 "StreetAddress",
                 "Surname",
                 "Website"
@@ -14962,6 +15097,9 @@ export const SucceedOwnIdentityAttributeRequest: any = {
                     "$ref": "#/definitions/SexJSON"
                 },
                 {
+                    "$ref": "#/definitions/SocialInsuranceNumberJSON"
+                },
+                {
                     "$ref": "#/definitions/StreetAddressJSON"
                 },
                 {
@@ -15557,6 +15695,29 @@ export const SucceedOwnIdentityAttributeRequest: any = {
                 "@type": {
                     "type": "string",
                     "const": "Sex"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "SocialInsuranceNumberJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "SocialInsuranceNumber"
                 },
                 "@context": {
                     "type": "string"
@@ -16449,6 +16610,7 @@ export const ValidateIQLQueryRequest: any = {
                 "PostOfficeBoxAddress",
                 "Pseudonym",
                 "Sex",
+                "SocialInsuranceNumber",
                 "StreetAddress",
                 "Surname",
                 "Website"
@@ -20561,6 +20723,36 @@ export const SchematizedXML: any = {
                     "type": "string"
                 },
                 "schemaURL": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
+export const SocialInsuranceNumber: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/SocialInsuranceNumber",
+    "definitions": {
+        "SocialInsuranceNumber": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "SocialInsuranceNumber"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
                     "type": "string"
                 }
             },
