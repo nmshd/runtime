@@ -69,6 +69,7 @@ import {
     IPseudonym,
     ISchematizedXML,
     ISex,
+    ISocialInsuranceNumber,
     IStreetAddress,
     ISurname,
     IWebsite,
@@ -116,6 +117,8 @@ import {
     SchematizedXMLJSON,
     Sex,
     SexJSON,
+    SocialInsuranceNumber,
+    SocialInsuranceNumberJSON,
     StreetAddress,
     StreetAddressJSON,
     Surname,
@@ -153,6 +156,7 @@ export namespace AttributeValues {
                 | PostOfficeBoxAddressJSON
                 | PseudonymJSON
                 | SexJSON
+                | SocialInsuranceNumberJSON
                 | StreetAddressJSON
                 | SurnameJSON
                 | WebsiteJSON;
@@ -181,6 +185,7 @@ export namespace AttributeValues {
                 | IPostOfficeBoxAddress
                 | IPseudonym
                 | ISex
+                | ISocialInsuranceNumber
                 | IStreetAddress
                 | ISurname
                 | IWebsite;
@@ -209,6 +214,7 @@ export namespace AttributeValues {
                 | PostOfficeBoxAddress
                 | Pseudonym
                 | Sex
+                | SocialInsuranceNumber
                 | StreetAddress
                 | Surname
                 | Website;
@@ -237,6 +243,7 @@ export namespace AttributeValues {
                 PostOfficeBoxAddress,
                 Pseudonym,
                 Sex,
+                SocialInsuranceNumber,
                 StreetAddress,
                 Surname,
                 Website
@@ -266,6 +273,7 @@ export namespace AttributeValues {
                 "PostOfficeBoxAddress",
                 "Pseudonym",
                 "Sex",
+                "SocialInsuranceNumber",
                 "StreetAddress",
                 "Surname",
                 "Website"
