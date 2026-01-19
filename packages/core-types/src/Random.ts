@@ -1,5 +1,4 @@
 import { CryptoRandom, ICoreBuffer } from "@nmshd/crypto";
-import { v4 as uuidv4 } from "uuid";
 
 export enum RandomCharacterRange {
     Digit = "0123456789",
@@ -58,7 +57,7 @@ export class Random implements IRandom {
     }
 
     public static uuid(): string {
-        return uuidv4();
+        return crypto.randomUUID();
     }
 
     public static async scramble(input: string): Promise<string> {
