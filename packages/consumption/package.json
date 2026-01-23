@@ -86,7 +86,7 @@
         "@nmshd/transport": "*",
         "@noble/ciphers": "^2.0.1",
         "jose": "^6.1.1",
-        "lodash": "^4.17.21",
+        "lodash": "^4.17.23",
         "sjcl": "^1.0.8",
         "ts-simple-nameof": "^1.3.3",
         "ws": "^8.18.3"
