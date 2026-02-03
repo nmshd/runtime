@@ -1233,14 +1233,14 @@ export class DataViewExpander {
             hints.valueHints = query.attributeCreationHints.valueHints;
         }
 
-        const emptyOwnerIsSelf = query.owner === "" && isOwnRequest === false;
+        const owner = query.owner !== "" ? await this.expandAddress(query.owner) : isOwnRequest ? this.expandUnknown("") : this.expandSelf();
 
         return {
             type: "RelationshipAttributeQueryDVO",
             id: "",
             name,
             description,
-            owner: emptyOwnerIsSelf ? this.expandSelf() : await this.expandAddress(query.owner),
+            owner,
             key: query.key,
             attributeCreationHints: query.attributeCreationHints,
             renderHints: hints.renderHints,
