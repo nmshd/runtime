@@ -3,7 +3,18 @@ import {
     AcceptReadAttributeRequestItemParametersWithNewAttributeJSON,
     DecideRequestItemParametersJSON
 } from "@nmshd/consumption";
-import { GivenNameJSON, IdentityAttributeQuery, IQLQuery, ReadAttributeAcceptResponseItemJSON, ReadAttributeRequestItem, RequestJSON, SurnameJSON } from "@nmshd/content";
+import {
+    GivenNameJSON,
+    IdentityAttributeQuery,
+    IQLQuery,
+    ReadAttributeAcceptResponseItemJSON,
+    ReadAttributeRequestItem,
+    RelationshipAttributeConfidentiality,
+    RelationshipAttributeJSON,
+    RelationshipAttributeQuery,
+    RequestJSON,
+    SurnameJSON
+} from "@nmshd/content";
 import { CoreId } from "@nmshd/core-types";
 import {
     AttributeAlreadySharedAcceptResponseItemDVO,
@@ -18,8 +29,10 @@ import {
     OutgoingRequestStatusChangedEvent,
     ProcessedIdentityAttributeQueryDVO,
     ProcessedIQLQueryDVO,
+    ProcessedRelationshipAttributeQueryDVO,
     ReadAttributeAcceptResponseItemDVO,
     ReadAttributeRequestItemDVO,
+    RelationshipAttributeQueryDVO,
     RequestMessageDVO,
     TransportServices
 } from "../../../src";
@@ -1176,6 +1189,211 @@ describe("AttributeAlreadySharedAcceptResponseItemDVO with IdentityAttributeQuer
         expect(responseItem.attribute.type).toBe("PeerIdentityAttributeDVO");
         expect(responseItem.attribute.content.value["@type"]).toBe("GivenName");
         expect((responseItem.attribute.content.value as GivenNameJSON).value).toBe("aGivenName");
+        expect(requestItemDVO.response).toStrictEqual(responseItem);
+    });
+});
+
+describe("ReadAttributeRequestItemDVO with RelationshipAttributeQuery", () => {
+    beforeAll(async () => {
+        const runtimeServices = await serviceProvider.launch(2, { enableRequestModule: true });
+        runtimeServices1 = runtimeServices[0];
+        runtimeServices2 = runtimeServices[1];
+        transportServices1 = runtimeServices1.transport;
+        transportServices2 = runtimeServices2.transport;
+        expander1 = runtimeServices1.expander;
+        expander2 = runtimeServices2.expander;
+        consumptionServices1 = runtimeServices1.consumption;
+        consumptionServices2 = runtimeServices2.consumption;
+        eventBus1 = runtimeServices1.eventBus;
+        eventBus2 = runtimeServices2.eventBus;
+
+        await establishRelationship(transportServices1, transportServices2);
+        address2 = (await transportServices2.account.getIdentityInfo()).value.address;
+
+        requestContent = {
+            content: {
+                items: [
+                    ReadAttributeRequestItem.from({
+                        mustBeAccepted: true,
+                        query: RelationshipAttributeQuery.from({
+                            key: "aKey",
+                            owner: "",
+                            attributeCreationHints: {
+                                title: "aTitle",
+                                valueType: "ProprietaryString",
+                                confidentiality: RelationshipAttributeConfidentiality.Public
+                            }
+                        })
+                    }).toJSON()
+                ]
+            },
+            peer: address2
+        };
+
+        const relationshipAttribute: RelationshipAttributeJSON = {
+            "@type": "RelationshipAttribute",
+            value: {
+                "@type": "ProprietaryString",
+                value: "aString",
+                title: "aTitle"
+            },
+            owner: address2,
+            key: "aKey",
+            confidentiality: RelationshipAttributeConfidentiality.Public
+        };
+
+        responseItems = [{ accept: true, newAttribute: relationshipAttribute } as AcceptReadAttributeRequestItemParametersWithNewAttributeJSON];
+    }, 30000);
+
+    beforeEach(async () => await cleanupAttributes([runtimeServices2]));
+
+    test("check the MessageDVO for the sender", async () => {
+        const senderMessage = await sendMessageWithRequest(runtimeServices1, runtimeServices2, requestContent);
+        await syncUntilHasMessageWithRequest(transportServices2, senderMessage.content.id!);
+        const dto = senderMessage;
+        const dvo = (await expander1.expandMessageDTO(senderMessage)) as RequestMessageDVO;
+        expect(dvo).toBeDefined();
+        expect(dvo.id).toBe(dto.id);
+        expect(dvo.name).toBe("i18n://dvo.message.name");
+        expect(dvo.type).toBe("RequestMessageDVO");
+        expect(dvo.date).toBe(dto.createdAt);
+        expect(dvo.request).toBeDefined();
+        expect(dvo.request.isOwn).toBe(true);
+        expect(dvo.request.status).toBe("Open");
+        expect(dvo.request.statusText).toBe("i18n://dvo.localRequest.status.Open");
+        expect(dvo.request.type).toBe("LocalRequestDVO");
+        expect(dvo.request.content.type).toBe("RequestDVO");
+        expect(dvo.request.content.items).toHaveLength(1);
+        expect(dvo.request.isDecidable).toBe(false);
+        const requestItemDVO = dvo.request.content.items[0] as ReadAttributeRequestItemDVO;
+        expect(requestItemDVO.type).toBe("ReadAttributeRequestItemDVO");
+        expect(requestItemDVO.isDecidable).toBe(false);
+        expect(requestItemDVO.mustBeAccepted).toBe(true);
+        expect(requestItemDVO.query).toBeDefined();
+        expect(requestItemDVO.query.type).toBe("RelationshipAttributeQueryDVO");
+        const relationshipAttributeQueryDVO = requestItemDVO.query as RelationshipAttributeQueryDVO;
+        expect(relationshipAttributeQueryDVO.owner.id).toBe("");
+    });
+
+    test("check the MessageDVO for the recipient", async () => {
+        const recipientMessage = await exchangeMessageWithRequest(runtimeServices1, runtimeServices2, requestContent);
+        await eventBus2.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
+        const dto = recipientMessage;
+        const dvo = (await expander2.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
+        expect(dvo).toBeDefined();
+        expect(dvo.id).toBe(dto.id);
+        expect(dvo.name).toBe("i18n://dvo.message.name");
+        expect(dvo.type).toBe("RequestMessageDVO");
+        expect(dvo.date).toBe(dto.createdAt);
+        expect(dvo.request).toBeDefined();
+        expect(dvo.request.isOwn).toBe(false);
+        expect(dvo.request.status).toBe("DecisionRequired");
+        expect(dvo.request.statusText).toBe("i18n://dvo.localRequest.status.DecisionRequired");
+        expect(dvo.request.type).toBe("LocalRequestDVO");
+        expect(dvo.request.content.type).toBe("RequestDVO");
+        expect(dvo.request.content.items).toHaveLength(1);
+        expect(dvo.request.isDecidable).toBe(true);
+        const requestItemDVO = dvo.request.content.items[0] as ReadAttributeRequestItemDVO;
+        expect(requestItemDVO.type).toBe("ReadAttributeRequestItemDVO");
+        expect(requestItemDVO.isDecidable).toBe(true);
+        expect(requestItemDVO.mustBeAccepted).toBe(true);
+        expect(requestItemDVO.query).toBeDefined();
+        expect(requestItemDVO.query.type).toBe("ProcessedRelationshipAttributeQueryDVO");
+        const relationshipAttributeQueryDVO = requestItemDVO.query as ProcessedRelationshipAttributeQueryDVO;
+        expect(relationshipAttributeQueryDVO.owner.id).toBe(address2);
+    });
+
+    test("check the MessageDVO for the recipient after acceptance", async () => {
+        const recipientMessage = await exchangeMessageWithRequest(runtimeServices1, runtimeServices2, requestContent);
+        await eventBus2.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
+        const acceptResult = await consumptionServices2.incomingRequests.accept({
+            requestId: recipientMessage.content.id!,
+            items: responseItems
+        });
+        expect(acceptResult).toBeSuccessful();
+
+        const dto = recipientMessage;
+        const dvo = (await expander2.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
+        expect(dvo).toBeDefined();
+        expect(dvo.id).toBe(dto.id);
+        expect(dvo.name).toBe("i18n://dvo.message.name");
+        expect(dvo.type).toBe("RequestMessageDVO");
+        expect(dvo.date).toBe(dto.createdAt);
+        expect(dvo.request).toBeDefined();
+        expect(dvo.request.isOwn).toBe(false);
+        expect(dvo.request.status).toBe("Decided");
+        expect(dvo.request.statusText).toBe("i18n://dvo.localRequest.status.Decided");
+        expect(dvo.request.type).toBe("LocalRequestDVO");
+        expect(dvo.request.content.type).toBe("RequestDVO");
+        expect(dvo.request.content.items).toHaveLength(1);
+        expect(dvo.request.isDecidable).toBe(false);
+        const requestItemDVO = dvo.request.content.items[0] as ReadAttributeRequestItemDVO;
+        expect(requestItemDVO.type).toBe("ReadAttributeRequestItemDVO");
+        expect(requestItemDVO.isDecidable).toBe(false);
+        expect(requestItemDVO.mustBeAccepted).toBe(true);
+        expect(requestItemDVO.query).toBeDefined();
+        expect(requestItemDVO.query.type).toBe("RelationshipAttributeQueryDVO");
+        const relationshipAttributeQueryDVO = requestItemDVO.query as ProcessedRelationshipAttributeQueryDVO;
+        expect(relationshipAttributeQueryDVO.owner.id).toBe(address2);
+
+        const response = dvo.request.response;
+        expect(response).toBeDefined();
+        expect(response!.type).toBe("LocalResponseDVO");
+        expect(response!.name).toBe("i18n://dvo.localResponse.name");
+        expect(response!.date).toBeDefined();
+        expect(response!.content.result).toBe("Accepted");
+        expect(response!.content.items).toHaveLength(1);
+        const responseItem = response!.content.items[0] as ReadAttributeAcceptResponseItemDVO;
+        expect(responseItem.result).toBe("Accepted");
+        expect(responseItem.type).toBe("ReadAttributeAcceptResponseItemDVO");
+        expect(responseItem.attribute).toBeDefined();
+        const recipientAddress = (await transportServices2.account.getIdentityInfo()).value.address;
+        expect(responseItem.attribute.owner).toBe(recipientAddress);
+        expect(responseItem.attribute.type).toBe("OwnRelationshipAttributeDVO");
+        expect(responseItem.attribute.content.value["@type"]).toBe("ProprietaryString");
+        expect((responseItem.attribute.content.value as GivenNameJSON).value).toBe("aString");
+        expect(requestItemDVO.response).toStrictEqual(responseItem);
+
+        await syncUntilHasMessageWithResponse(transportServices1, recipientMessage.content.id!);
+        await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
+    });
+
+    test("check the MessageDVO for the sender after acceptance", async () => {
+        const senderMessage = await exchangeAndAcceptRequestByMessage(runtimeServices1, runtimeServices2, requestContent, responseItems);
+        const dto = senderMessage;
+        const dvo = (await expander1.expandMessageDTO(senderMessage)) as RequestMessageDVO;
+        expect(dvo).toBeDefined();
+        expect(dvo.id).toBe(dto.id);
+        expect(dvo.name).toBe("i18n://dvo.message.name");
+        expect(dvo.type).toBe("RequestMessageDVO");
+        expect(dvo.date).toBe(dto.createdAt);
+        expect(dvo.request).toBeDefined();
+        expect(dvo.request.isOwn).toBe(true);
+        expect(dvo.request.status).toBe("Completed");
+        expect(dvo.request.statusText).toBe("i18n://dvo.localRequest.status.Completed");
+        expect(dvo.request.type).toBe("LocalRequestDVO");
+        expect(dvo.request.content.type).toBe("RequestDVO");
+        expect(dvo.request.content.items).toHaveLength(1);
+        expect(dvo.request.isDecidable).toBe(false);
+        const requestItemDVO = dvo.request.content.items[0] as ReadAttributeRequestItemDVO;
+        expect(requestItemDVO.type).toBe("ReadAttributeRequestItemDVO");
+        expect(requestItemDVO.isDecidable).toBe(false);
+        expect(requestItemDVO.mustBeAccepted).toBe(true);
+        expect(requestItemDVO.query).toBeDefined();
+        expect(requestItemDVO.query.type).toBe("RelationshipAttributeQueryDVO");
+        const relationshipAttributeQueryDVO = requestItemDVO.query as ProcessedRelationshipAttributeQueryDVO;
+        expect(relationshipAttributeQueryDVO.owner.id).toBe("");
+        const response = dvo.request.response;
+        expect(response).toBeDefined();
+        expect(response!.type).toBe("LocalResponseDVO");
+        expect(response!.name).toBe("i18n://dvo.localResponse.name");
+        expect(response!.date).toBeDefined();
+        expect(response!.content.result).toBe("Accepted");
+        expect(response!.content.items).toHaveLength(1);
+        const responseItem = response!.content.items[0] as ReadAttributeAcceptResponseItemDVO;
+        expect(responseItem.result).toBe("Accepted");
+        expect(responseItem.type).toBe("ReadAttributeAcceptResponseItemDVO");
+        expect(responseItem.attributeId).toBeDefined();
         expect(requestItemDVO.response).toStrictEqual(responseItem);
     });
 });
