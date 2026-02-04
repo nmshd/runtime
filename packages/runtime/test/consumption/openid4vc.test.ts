@@ -583,8 +583,8 @@ describe("custom openid4vc service", () => {
 });
 
 describe.only("EUDIPLO", () => {
-    const eudiploUser = "test-admin";
-    const eudiploPassword = "57c9cd444bf402b2cc1f5a0d2dafd3955bd9042c0372db17a4ede2d5fbda88e5";
+    const eudiploUser = "test2-admin";
+    const eudiploPassword = "7e0ebd1f1ac18fce2d101b785dd8bf2891f83c4a8ac3df8f3807d7969170edd9";
 
     const eudiploPresentationConfigurationId = "test";
     const eudiploCredentialConfigurationId = "test";
