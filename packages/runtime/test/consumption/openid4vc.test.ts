@@ -1,13 +1,27 @@
+import { ApiKeyAuthenticator, ConnectorClient } from "@nmshd/connector-sdk";
 import { AcceptShareAuthorizationRequestRequestItemParametersJSON } from "@nmshd/consumption";
 import { RequestJSON, ResponseItemResult, VerifiableCredential, VerifiableCredentialJSON, VerifiablePresentationJSON } from "@nmshd/content";
 import axios, { AxiosInstance } from "axios";
 import { jwtDecode } from "jwt-decode";
 import * as client from "openid-client";
 import path from "path";
-import { DockerComposeEnvironment, GenericContainer, StartedDockerComposeEnvironment, StartedTestContainer, Wait } from "testcontainers";
+import { DockerComposeEnvironment, StartedDockerComposeEnvironment, StartedTestContainer, Wait } from "testcontainers";
 import { Agent as UndiciAgent, fetch as undiciFetch } from "undici";
-import { ShareCredentialOfferRequestItemProcessedByRecipientEvent } from "../../src";
-import { ensureActiveRelationship, exchangeAndAcceptRequestByMessage, exchangeMessageWithRequest, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
+import { ShareCredentialOfferRequestItemProcessedByRecipientEvent, TransportServices } from "../../src";
+import {
+    emptyRelationshipCreationContent,
+    emptyRelationshipTemplateContent,
+    ensureActiveRelationship,
+    exchangeAndAcceptRequestByMessage,
+    exchangeMessageWithRequest,
+    RuntimeServiceProvider,
+    syncUntilHasMessageWithRequest,
+    syncUntilHasRelationships,
+    TestRuntimeServices
+} from "../lib";
+
+const connectorBaseUrl = "http://localhost:8080";
+const eudiploPort = 3000; // CAUTION: don't change this. The DCQL query has this port hardcoded in its configuration. The presentation test will fail if we change this.
 
 const fetchInstance: typeof fetch = (async (input: any, init: any) => {
     const response = await undiciFetch(input, { ...init, dispatcher: new UndiciAgent({}) });
@@ -51,50 +65,52 @@ const runtimeServiceProvider = new RuntimeServiceProvider(fetchInstance);
 let runtimeServices1: TestRuntimeServices;
 let runtimeServices2: TestRuntimeServices;
 
+let serviceAxiosInstance: AxiosInstance;
+
+let dockerComposeStack: StartedDockerComposeEnvironment | undefined;
+
 beforeAll(async () => {
     const runtimeServices = await runtimeServiceProvider.launch(2, { enableDeciderModule: true, enableRequestModule: true });
     runtimeServices1 = runtimeServices[0];
     runtimeServices2 = runtimeServices[1];
 
     await ensureActiveRelationship(runtimeServices1.transport, runtimeServices2.transport);
+
+    const connectorClient = ConnectorClient.create({
+        baseUrl: connectorBaseUrl,
+        authenticator: new ApiKeyAuthenticator("aVeryCoolApiKeyWith30CharactersOr+")
+    });
+    await createActiveRelationshipToConnector(runtimeServices1.transport, connectorClient);
+
+    let oid4vcServiceBaseUrl = process.env.OPENID4VC_SERVICE_BASEURL!;
+    if (!oid4vcServiceBaseUrl) {
+        dockerComposeStack = await startOid4VcComposeStack();
+        const mappedPort = dockerComposeStack.getContainer("oid4vc-service-1").getMappedPort(9000);
+        oid4vcServiceBaseUrl = `http://localhost:${mappedPort}`;
+    }
+    serviceAxiosInstance = axios.create({
+        baseURL: oid4vcServiceBaseUrl,
+        headers: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            "Content-Type": "application/json"
+        }
+    });
 }, 120000);
 
 afterAll(async () => {
     await runtimeServiceProvider.stop();
+
+    if (dockerComposeStack) await dockerComposeStack.down();
 });
 
 describe("custom openid4vc service", () => {
-    let axiosInstance: AxiosInstance;
-    let dockerComposeStack: StartedDockerComposeEnvironment | undefined;
-
-    beforeAll(async () => {
-        let oid4vcServiceBaseUrl = process.env.OPENID4VC_SERVICE_BASEURL!;
-        if (!oid4vcServiceBaseUrl) {
-            dockerComposeStack = await startOid4VcComposeStack();
-            const mappedPort = dockerComposeStack.getContainer("oid4vc-service-1").getMappedPort(9000);
-            oid4vcServiceBaseUrl = `http://localhost:${mappedPort}`;
-        }
-
-        axiosInstance = axios.create({
-            baseURL: oid4vcServiceBaseUrl,
-            headers: {
-                // eslint-disable-next-line @typescript-eslint/naming-convention
-                "Content-Type": "application/json"
-            }
-        });
-    }, 120000);
-
-    afterAll(async () => {
-        if (dockerComposeStack) await dockerComposeStack.down();
-    });
-
     let credentialOfferUrl: string;
 
     describe("sd-jwt", () => {
         let attributeId: string;
 
         test("should process a given sd-jwt credential offer", async () => {
-            const response = await axiosInstance.post("/issuance/credentialOffers", {
+            const response = await serviceAxiosInstance.post("/issuance/credentialOffers", {
                 credentialConfigurationIds: ["EmployeeIdCard-sdjwt"]
             });
             expect(response.status).toBe(200);
@@ -126,7 +142,7 @@ describe("custom openid4vc service", () => {
         });
 
         test("should be able to process a credential offer with pin authentication", async () => {
-            const response = await axiosInstance.post("/issuance/credentialOffers", {
+            const response = await serviceAxiosInstance.post("/issuance/credentialOffers", {
                 credentialConfigurationIds: ["EmployeeIdCard-sdjwt"],
                 authentication: "pin"
             });
@@ -164,7 +180,7 @@ describe("custom openid4vc service", () => {
         });
 
         test("should be able to process a credential offer with external authentication", async () => {
-            const response = await axiosInstance.post("/issuance/credentialOffers", {
+            const response = await serviceAxiosInstance.post("/issuance/credentialOffers", {
                 credentialConfigurationIds: ["EmployeeIdCard-sdjwt"],
 
                 authentication: "externalAuthentication"
@@ -219,7 +235,7 @@ describe("custom openid4vc service", () => {
             // Ensure the first test has completed
             expect(credentialOfferUrl).toBeDefined();
 
-            const response = await axiosInstance.post("/presentation/presentationRequests", sdJwtPresentationRequestForPex);
+            const response = await serviceAxiosInstance.post("/presentation/presentationRequests", sdJwtPresentationRequestForPex);
             expect(response.status).toBe(200);
             const responseData = await response.data;
 
@@ -242,7 +258,7 @@ describe("custom openid4vc service", () => {
             // Ensure the first test has completed
             expect(credentialOfferUrl).toBeDefined();
 
-            const response = await axiosInstance.post("/presentation/presentationRequests", {
+            const response = await serviceAxiosInstance.post("/presentation/presentationRequests", {
                 dcql: {
                     credentials: [
                         {
@@ -299,7 +315,7 @@ describe("custom openid4vc service", () => {
             expect(presentation.substring(0, credential.length)).toBe(credential);
             expect(presentation.substring(credential.length, credential.length + 2)).toBe("ey");
 
-            const verificationResult = await axiosInstance.post("/presentation/verify", {
+            const verificationResult = await serviceAxiosInstance.post("/presentation/verify", {
                 credential: presentation,
                 format: "dc+sd-jwt",
                 nonce: "defaultPresentationNonce",
@@ -311,7 +327,7 @@ describe("custom openid4vc service", () => {
 
     describe("mdoc", () => {
         test("should process a given mdoc credential offer", async () => {
-            const response = await axiosInstance.post("/issuance/credentialOffers", {
+            const response = await serviceAxiosInstance.post("/issuance/credentialOffers", {
                 credentialConfigurationIds: ["EmployeeIdCard-mdoc"]
             });
             expect(response.status).toBe(200);
@@ -345,7 +361,7 @@ describe("custom openid4vc service", () => {
             // Ensure the first test has completed
             expect(credentialOfferUrl).toBeDefined();
 
-            const response = await axiosInstance.post("/presentation/presentationRequests", {
+            const response = await serviceAxiosInstance.post("/presentation/presentationRequests", {
                 pex: {
                     // see openid4vp-draft21.e2e.test.ts of credo for a more detailed example how to build a query
                     id: "anId",
@@ -402,7 +418,7 @@ describe("custom openid4vc service", () => {
             // Ensure the first test has completed
             expect(credentialOfferUrl).toBeDefined();
 
-            const response = await axiosInstance.post("/presentation/presentationRequests", {
+            const response = await serviceAxiosInstance.post("/presentation/presentationRequests", {
                 dcql: {
                     credentials: [
                         {
@@ -435,7 +451,7 @@ describe("custom openid4vc service", () => {
     });
 
     test("transfer offer using requests", async () => {
-        const response = await axiosInstance.post("/issuance/credentialOffers", {
+        const response = await serviceAxiosInstance.post("/issuance/credentialOffers", {
             credentialConfigurationIds: ["EmployeeIdCard-sdjwt"]
         });
         expect(response.status).toBe(200);
@@ -467,7 +483,7 @@ describe("custom openid4vc service", () => {
         expect(attributes).toBeSuccessful();
         expect(attributes.value.length).toBeGreaterThan(0);
 
-        const createPresentationResponse = await axiosInstance.post("/presentation/presentationRequests", sdJwtPresentationRequestForPex);
+        const createPresentationResponse = await serviceAxiosInstance.post("/presentation/presentationRequests", sdJwtPresentationRequestForPex);
         expect(createPresentationResponse.status).toBe(200);
         const createPresentationResponseData = await createPresentationResponse.data;
 
@@ -490,7 +506,7 @@ describe("custom openid4vc service", () => {
 
     describe("request presentation using requests", () => {
         test("happy path", async () => {
-            const response = await axiosInstance.post("/presentation/presentationRequests", sdJwtPresentationRequestForPex);
+            const response = await serviceAxiosInstance.post("/presentation/presentationRequests", sdJwtPresentationRequestForPex);
             expect(response.status).toBe(200);
             const authorizationRequestUrl = response.data.result.presentationRequest as string;
             const authorizationRequestId = authorizationRequestUrl.split("%2F").at(-1)?.slice(0, 36);
@@ -519,7 +535,7 @@ describe("custom openid4vc service", () => {
             const request = (await runtimeServices2.consumption.incomingRequests.getRequest({ id: requestId })).value;
             expect(request.response?.content.items[0]).toStrictEqual({ "@type": "AcceptResponseItem", result: ResponseItemResult.Accepted });
 
-            const verificationStatus = (await axiosInstance.get(`/presentation/presentationRequests/${authorizationRequestId}/verificationSessionState`)).data.result;
+            const verificationStatus = (await serviceAxiosInstance.get(`/presentation/presentationRequests/${authorizationRequestId}/verificationSessionState`)).data.result;
             expect(verificationStatus).toBe("ResponseVerified");
         });
 
@@ -535,7 +551,7 @@ describe("custom openid4vc service", () => {
                 })
             ).value.id;
 
-            const response = await axiosInstance.post("/presentation/presentationRequests", sdJwtPresentationRequestForPex);
+            const response = await serviceAxiosInstance.post("/presentation/presentationRequests", sdJwtPresentationRequestForPex);
             expect(response.status).toBe(200);
             const authorizationRequestUrl = response.data.result.presentationRequest as string;
 
@@ -564,48 +580,19 @@ describe("custom openid4vc service", () => {
             expect(canAcceptResult.items[0].message).toBe("The credential selected for presentation doesn't match the query.");
         });
     });
-
-    async function startOid4VcComposeStack() {
-        let baseUrl = process.env.NMSHD_TEST_BASEURL!;
-        let addressGenerationHostnameOverride: string | undefined;
-
-        if (baseUrl.includes("localhost")) {
-            addressGenerationHostnameOverride = "localhost";
-            baseUrl = baseUrl.replace("localhost", "host.docker.internal");
-        }
-
-        const composeFolder = path.resolve(path.join(__dirname, "..", "..", "..", "..", ".dev"));
-        const composeStack = await new DockerComposeEnvironment(composeFolder, "compose.openid4vc.yml")
-            .withProjectName("runtime-oid4vc-tests")
-            .withEnvironment({
-                // eslint-disable-next-line @typescript-eslint/naming-convention
-                NMSHD_TEST_BASEURL: baseUrl,
-
-                // eslint-disable-next-line @typescript-eslint/naming-convention
-                NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE: addressGenerationHostnameOverride
-            } as Record<string, string>)
-            .withStartupTimeout(60000)
-            .withWaitStrategy("oid4vc-service", Wait.forHealthCheck())
-            .up();
-
-        return composeStack;
-    }
 });
 
-describe("EUDIPLO", () => {
+describe.only("EUDIPLO", () => {
     const eudiploUser = "test-admin";
-    const eudiploPassword = "test";
-    const eudiploIssuanceConfigurationId = "Employee ID Card";
-    const eudiploPresentationConfigurationId = "Employee ID Card";
-    const eudiploCredentialIdInConfiguration = "EmployeeIdCard";
-    const eudiploPort = 3000; // CAUTION: don't change this. The DCQL query has this port hardcoded in its configuration. The presentation test will fail if we change this.
+    const eudiploPassword = "57c9cd444bf402b2cc1f5a0d2dafd3955bd9042c0372db17a4ede2d5fbda88e5";
+
+    const eudiploPresentationConfigurationId = "test";
+    const eudiploCredentialConfigurationId = "test";
 
     let eudiploContainer: StartedTestContainer | undefined;
     let axiosInstance: AxiosInstance;
 
     beforeAll(async () => {
-        eudiploContainer = await startEudiplo();
-
         const baseUrl = `http://localhost:${eudiploPort}`;
 
         const accessTokenResponse = await axios.post(
@@ -641,9 +628,10 @@ describe("EUDIPLO", () => {
 
     test("issuance", async () => {
         const credentialOfferUrl = (
-            await axiosInstance.post("/issuer-management/offer", {
+            await axiosInstance.post("/issuer/offer", {
                 response_type: "uri", // eslint-disable-line @typescript-eslint/naming-convention
-                issuanceId: eudiploIssuanceConfigurationId
+                credentialConfigurationIds: [eudiploCredentialConfigurationId],
+                flow: "pre_authorized_code"
             })
         ).data.uri;
 
@@ -652,21 +640,19 @@ describe("EUDIPLO", () => {
 
         const credentialResponsesResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
             credentialOffer: resolveCredentialOfferResult.value.credentialOffer,
-            credentialConfigurationIds: [eudiploCredentialIdInConfiguration]
+            credentialConfigurationIds: [eudiploCredentialConfigurationId]
         });
         const storeCredentialsResponse = await runtimeServices1.consumption.openId4Vc.storeCredentials({
             credentialResponses: credentialResponsesResult.value.credentialResponses
         });
         expect(storeCredentialsResponse).toBeSuccessful();
 
-        expect((storeCredentialsResponse.value.content.value as VerifiableCredentialJSON).displayInformation?.[0].name).toBe("Employee ID Card");
+        expect((storeCredentialsResponse.value.content.value as VerifiableCredentialJSON).displayInformation?.[0].name).toBe("test");
     });
 
-    // TODO: un-skip this test once a workable EUDIPLO version is available - the current version 1.9 doesn't work with credo because the exchange key for presentation encryption doesn't have a kid, and the currently latest version 1.13 can't be easily configured with the UI because the issuer display can't be configured
-    // eslint-disable-next-line jest/no-disabled-tests
-    test.skip("presentation", async () => {
+    test("presentation", async () => {
         const authorizationRequestUrl = (
-            await axiosInstance.post(`/presentation-management/request`, {
+            await axiosInstance.post("/verifier/offer", {
                 response_type: "uri", // eslint-disable-line @typescript-eslint/naming-convention
                 requestId: eudiploPresentationConfigurationId
             })
@@ -687,24 +673,106 @@ describe("EUDIPLO", () => {
         expect(presentationResult.value.status).toBe(200);
     });
 
-    function startEudiplo() {
-        const eudiploContainer = new GenericContainer("ghcr.io/openwallet-foundation-labs/eudiplo:1.9")
-            .withCopyDirectoriesToContainer([
-                {
-                    source: path.resolve(path.join(__dirname, "..", "..", "..", "..", ".dev", "eudiplo-assets")),
-                    target: "/app/config"
+    test.skip("issuance with request", async () => {
+        const oldCredentials = (
+            await runtimeServices1.consumption.attributes.getAttributes({
+                query: {
+                    "content.value.@type": "VerifiableCredential"
                 }
-            ])
-            .withEnvironment({
-                JWT_SECRET: "OgwrDcgVQQ2yZwcFt7kPxQm3nUF+X3etF6MdLTstZAY=", // eslint-disable-line @typescript-eslint/naming-convention
-                AUTH_CLIENT_ID: "root", // eslint-disable-line @typescript-eslint/naming-convention
-                AUTH_CLIENT_SECRET: "test", // eslint-disable-line @typescript-eslint/naming-convention
-                PUBLIC_URL: `http://localhost:${eudiploPort}`, // eslint-disable-line @typescript-eslint/naming-convention
-                PORT: eudiploPort.toString() // eslint-disable-line @typescript-eslint/naming-convention
             })
-            .withExposedPorts({ container: eudiploPort, host: eudiploPort })
-            .start();
+        ).value;
 
-        return eudiploContainer;
-    }
+        const sentMessage = (
+            await serviceAxiosInstance.post("/enmeshed-demo/eudiplo/credential", {
+                recipient: runtimeServices1.address,
+                credentialConfigurationId: eudiploCredentialConfigurationId
+            })
+        ).data.result;
+
+        const requestId = (sentMessage.content as RequestJSON).id!;
+        await syncUntilHasMessageWithRequest(runtimeServices1.transport, requestId);
+        await runtimeServices1.consumption.incomingRequests.accept({
+            requestId,
+            items: [{ accept: true }]
+        });
+
+        const createdCredentials = (
+            await runtimeServices1.consumption.attributes.getAttributes({
+                query: {
+                    "content.value.@type": "VerifiableCredential"
+                }
+            })
+        ).value;
+        expect(createdCredentials).toHaveLength(oldCredentials.length + 1);
+    });
+
+    test("presentation with request", async () => {
+        const sentMessage = (
+            await serviceAxiosInstance.post("/enmeshed-demo/eudiplo/presentation", {
+                recipient: runtimeServices1.address,
+                requestId: eudiploCredentialConfigurationId
+            })
+        ).data.result;
+
+        const requestId = (sentMessage.enmeshedMessage.content as RequestJSON).id!;
+        await syncUntilHasMessageWithRequest(runtimeServices1.transport, requestId);
+        await runtimeServices1.consumption.incomingRequests.accept({
+            requestId,
+            items: [{ accept: true }]
+        });
+
+        const sessionStatus = (await axiosInstance.get(`/session/${sentMessage.eudiploSessionId}`)).data.status;
+        expect(sessionStatus).toBe("Completed");
+    });
 });
+
+async function startOid4VcComposeStack() {
+    let baseUrl = process.env.NMSHD_TEST_BASEURL!;
+    let addressGenerationHostnameOverride: string | undefined;
+
+    if (baseUrl.includes("localhost")) {
+        addressGenerationHostnameOverride = "localhost";
+        baseUrl = baseUrl.replace("localhost", "host.docker.internal");
+    }
+
+    const composeFolder = path.resolve(path.join(__dirname, "..", "..", "..", "..", ".dev"));
+    const composeStack = await new DockerComposeEnvironment(composeFolder, "compose.openid4vc.yml")
+        .withProjectName("runtime-oid4vc-tests")
+        .withEnvironment({
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            NMSHD_TEST_BASEURL: baseUrl,
+
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE: addressGenerationHostnameOverride,
+            JWT_SECRET: "OgwrDcgVQQ2yZwcFt7kPxQm3nUF+X3etF6MdLTstZAY=", // eslint-disable-line @typescript-eslint/naming-convention
+            AUTH_CLIENT_ID: "root", // eslint-disable-line @typescript-eslint/naming-convention
+            AUTH_CLIENT_SECRET: "root", // eslint-disable-line @typescript-eslint/naming-convention
+            PUBLIC_URL: `http://host.docker.internal:${eudiploPort}`, // eslint-disable-line @typescript-eslint/naming-convention
+            PORT: eudiploPort.toString() // eslint-disable-line @typescript-eslint/naming-convention
+        } as Record<string, string>)
+        .withStartupTimeout(60000)
+        .withWaitStrategy("oid4vc-service", Wait.forHealthCheck())
+        .up();
+
+    return composeStack;
+}
+
+async function createActiveRelationshipToConnector(transport: TransportServices, connectorClient: ConnectorClient) {
+    const relationshipTemplate = (
+        await connectorClient.relationshipTemplates.createOwnRelationshipTemplate({
+            content: emptyRelationshipTemplateContent,
+            expiresAt: "2099"
+        })
+    ).result;
+
+    await transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: relationshipTemplate.reference.truncated });
+    const relationshipId = (
+        await transport.relationships.createRelationship({
+            templateId: relationshipTemplate.id,
+            creationContent: emptyRelationshipCreationContent
+        })
+    ).value.id;
+
+    await connectorClient.relationships.acceptRelationship(relationshipId);
+    await syncUntilHasRelationships(transport);
+}
