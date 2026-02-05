@@ -1,6 +1,13 @@
 import { ApiKeyAuthenticator, ConnectorClient } from "@nmshd/connector-sdk";
 import { AcceptShareAuthorizationRequestRequestItemParametersJSON } from "@nmshd/consumption";
-import { RequestJSON, ResponseItemResult, VerifiableCredential, VerifiableCredentialJSON, VerifiablePresentationJSON } from "@nmshd/content";
+import {
+    RequestJSON,
+    ResponseItemResult,
+    ShareAuthorizationRequestRequestItemJSON,
+    VerifiableCredential,
+    VerifiableCredentialJSON,
+    VerifiablePresentationJSON
+} from "@nmshd/content";
 import axios, { AxiosInstance } from "axios";
 import { jwtDecode } from "jwt-decode";
 import * as client from "openid-client";
@@ -582,9 +589,9 @@ describe("custom openid4vc service", () => {
     });
 });
 
-describe.only("EUDIPLO", () => {
-    const eudiploUser = "test2-admin";
-    const eudiploPassword = "7e0ebd1f1ac18fce2d101b785dd8bf2891f83c4a8ac3df8f3807d7969170edd9";
+describe("EUDIPLO", () => {
+    const eudiploUser = "test-admin";
+    const eudiploPassword = "57c9cd444bf402b2cc1f5a0d2dafd3955bd9042c0372db17a4ede2d5fbda88e5";
 
     const eudiploPresentationConfigurationId = "test";
     const eudiploCredentialConfigurationId = "test";
@@ -673,7 +680,7 @@ describe.only("EUDIPLO", () => {
         expect(presentationResult.value.status).toBe(200);
     });
 
-    test.skip("issuance with request", async () => {
+    test("issuance with request", async () => {
         const oldCredentials = (
             await runtimeServices1.consumption.attributes.getAttributes({
                 query: {
@@ -715,14 +722,20 @@ describe.only("EUDIPLO", () => {
         ).data.result;
 
         const requestId = (sentMessage.enmeshedMessage.content as RequestJSON).id!;
-        await syncUntilHasMessageWithRequest(runtimeServices1.transport, requestId);
+        const receivedMessage = await syncUntilHasMessageWithRequest(runtimeServices1.transport, requestId);
+
+        const matchingAttribute = (
+            await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({
+                authorizationRequestUrl: (receivedMessage.content.items[0] as ShareAuthorizationRequestRequestItemJSON).authorizationRequestUrl
+            })
+        ).value.matchingCredentials[0];
         await runtimeServices1.consumption.incomingRequests.accept({
             requestId,
-            items: [{ accept: true }]
+            items: [{ accept: true, attributeId: matchingAttribute.id } as AcceptShareAuthorizationRequestRequestItemParametersJSON]
         });
 
         const sessionStatus = (await axiosInstance.get(`/session/${sentMessage.eudiploSessionId}`)).data.status;
-        expect(sessionStatus).toBe("Completed");
+        expect(sessionStatus).toBe("completed");
     });
 });
 
