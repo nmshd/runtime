@@ -1,5 +1,5 @@
-import { ApiKeyAuthenticator, ConnectorClient } from "@nmshd/connector-sdk";
-import { AcceptShareAuthorizationRequestRequestItemParametersJSON } from "@nmshd/consumption";
+import { SdJwtVcRecord } from "@credo-ts/core";
+import { AcceptProposeAttributeRequestItemParametersWithNewAttributeJSON, AcceptShareAuthorizationRequestRequestItemParametersJSON, decodeRecord } from "@nmshd/consumption";
 import {
     RequestJSON,
     ResponseItemResult,
@@ -14,20 +14,16 @@ import * as client from "openid-client";
 import path from "path";
 import { DockerComposeEnvironment, StartedDockerComposeEnvironment, StartedTestContainer, Wait } from "testcontainers";
 import { Agent as UndiciAgent, fetch as undiciFetch } from "undici";
-import { ShareCredentialOfferRequestItemProcessedByRecipientEvent, TransportServices } from "../../src";
+import { IncomingRequestStatusChangedEvent, ShareCredentialOfferRequestItemProcessedByRecipientEvent } from "../../src";
 import {
-    emptyRelationshipCreationContent,
-    emptyRelationshipTemplateContent,
     ensureActiveRelationship,
     exchangeAndAcceptRequestByMessage,
     exchangeMessageWithRequest,
     RuntimeServiceProvider,
     syncUntilHasMessageWithRequest,
-    syncUntilHasRelationships,
     TestRuntimeServices
 } from "../lib";
 
-const connectorBaseUrl = "http://localhost:8080";
 const eudiploPort = 3000; // CAUTION: don't change this. The DCQL query has this port hardcoded in its configuration. The presentation test will fail if we change this.
 
 const fetchInstance: typeof fetch = (async (input: any, init: any) => {
@@ -83,12 +79,6 @@ beforeAll(async () => {
 
     await ensureActiveRelationship(runtimeServices1.transport, runtimeServices2.transport);
 
-    const connectorClient = ConnectorClient.create({
-        baseUrl: connectorBaseUrl,
-        authenticator: new ApiKeyAuthenticator("aVeryCoolApiKeyWith30CharactersOr+")
-    });
-    await createActiveRelationshipToConnector(runtimeServices1.transport, connectorClient);
-
     let oid4vcServiceBaseUrl = process.env.OPENID4VC_SERVICE_BASEURL!;
     if (!oid4vcServiceBaseUrl) {
         dockerComposeStack = await startOid4VcComposeStack();
@@ -102,6 +92,7 @@ beforeAll(async () => {
             "Content-Type": "application/json"
         }
     });
+    await createActiveRelationshipToService(runtimeServices1, serviceAxiosInstance);
 }, 120000);
 
 afterAll(async () => {
@@ -593,8 +584,8 @@ describe("EUDIPLO", () => {
     const eudiploUser = "test-admin";
     const eudiploPassword = "57c9cd444bf402b2cc1f5a0d2dafd3955bd9042c0372db17a4ede2d5fbda88e5";
 
-    const eudiploPresentationConfigurationId = "test";
-    const eudiploCredentialConfigurationId = "test";
+    const eudiploPresentationConfigurationId = "testPresentationConfiguration";
+    const eudiploCredentialConfigurationId = "testCredentialConfiguration";
 
     let eudiploContainer: StartedTestContainer | undefined;
     let axiosInstance: AxiosInstance;
@@ -654,7 +645,7 @@ describe("EUDIPLO", () => {
         });
         expect(storeCredentialsResponse).toBeSuccessful();
 
-        expect((storeCredentialsResponse.value.content.value as VerifiableCredentialJSON).displayInformation?.[0].name).toBe("test");
+        expect((storeCredentialsResponse.value.content.value as VerifiableCredentialJSON).displayInformation?.[0].name).toBe("testName");
     });
 
     test("presentation", async () => {
@@ -703,14 +694,22 @@ describe("EUDIPLO", () => {
             items: [{ accept: true }]
         });
 
-        const createdCredentials = (
+        const currentCredentials = (
             await runtimeServices1.consumption.attributes.getAttributes({
                 query: {
                     "content.value.@type": "VerifiableCredential"
                 }
             })
         ).value;
-        expect(createdCredentials).toHaveLength(oldCredentials.length + 1);
+        expect(currentCredentials).toHaveLength(oldCredentials.length + 1);
+
+        const oldCredentialIds = oldCredentials.map((c) => c.id);
+        const createdCredential = currentCredentials.find((c) => !oldCredentialIds.includes(c.id));
+        expect(createdCredential).toBeDefined();
+
+        const credentialContent = createdCredential!.content.value as VerifiableCredentialJSON;
+        const decodedCredential = decodeRecord(credentialContent.type, credentialContent.value) as SdJwtVcRecord;
+        expect(decodedCredential.firstCredential.payload.givenName).toBe("aGivenName");
     });
 
     test("presentation with request", async () => {
@@ -770,22 +769,54 @@ async function startOid4VcComposeStack() {
     return composeStack;
 }
 
-async function createActiveRelationshipToConnector(transport: TransportServices, connectorClient: ConnectorClient) {
+async function createActiveRelationshipToService(runtime: TestRuntimeServices, serviceAxiosInstance: AxiosInstance) {
     const relationshipTemplate = (
-        await connectorClient.relationshipTemplates.createOwnRelationshipTemplate({
-            content: emptyRelationshipTemplateContent,
-            expiresAt: "2099"
+        await serviceAxiosInstance.post("/enmeshed-demo/relationshipTemplates", {
+            givenName: "aGivenName",
+            familyName: "aFamilyName",
+            city: "aCity",
+            zipCode: "aZipCode",
+            country: "aCountry",
+            houseNo: "aHouseNo",
+            street: "aStreet",
+            recipient: "aRecipient",
+            birthDay: 1,
+            birthMonth: 1,
+            birthYear: 2000
         })
-    ).result;
+    ).data.result;
 
-    await transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: relationshipTemplate.reference.truncated });
-    const relationshipId = (
-        await transport.relationships.createRelationship({
-            templateId: relationshipTemplate.id,
-            creationContent: emptyRelationshipCreationContent
-        })
-    ).value.id;
+    await runtime.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: relationshipTemplate.reference.truncated });
+    const requestId = (await runtimeServices2.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.request.source!.reference === relationshipTemplate.id)).data
+        .request.id;
 
-    await connectorClient.relationships.acceptRelationship(relationshipId);
-    await syncUntilHasRelationships(transport);
+    await runtimeServices2.consumption.incomingRequests.accept({
+        requestId,
+        items: [
+            { items: [{ accept: true }] },
+            {
+                items: [
+                    { accept: true, attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "GivenName", value: "aGivenName" } } },
+                    { accept: true, attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "Surname", value: "aFamilyName" } } },
+                    {
+                        accept: true,
+                        attribute: {
+                            "@type": "IdentityAttribute",
+                            owner: "",
+                            value: {
+                                "@type": "StreetAddress",
+                                city: "aCity",
+                                country: "aCountry",
+                                houseNo: "aHouseNo",
+                                street: "aStreet",
+                                zipCode: "aZipCode",
+                                recipient: "aRecipient"
+                            }
+                        }
+                    },
+                    { accept: true, attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "BirthDate", day: 1, month: 1, year: 2000 } } }
+                ] as AcceptProposeAttributeRequestItemParametersWithNewAttributeJSON[]
+            }
+        ]
+    });
 }
