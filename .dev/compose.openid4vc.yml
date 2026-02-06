@@ -19,6 +19,8 @@ services:
 
   connector:
     image: ghcr.io/nmshd/connector:7.3.0-openid4vc.1@sha256:4be31417d10d67454d7732949601a2136417fefc78107e3751eccea7946a7aca
+    ports:
+      - "8080:80"
     environment:
       CUSTOM_CONFIG_LOCATION: "/config.json"
       transportLibrary__baseUrl: "http://consumer-api:8080"

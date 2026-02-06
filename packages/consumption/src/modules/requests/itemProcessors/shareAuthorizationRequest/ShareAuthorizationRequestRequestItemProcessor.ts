@@ -60,7 +60,10 @@ export class ShareAuthorizationRequestRequestItemProcessor extends GenericReques
         const attribute = (await this.consumptionController.attributes.getLocalAttribute(parsedParams.attributeId)) as OwnIdentityAttribute | undefined;
         if (!attribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, parsedParams.attributeId.toString());
 
-        await this.consumptionController.openId4Vc.acceptAuthorizationRequest(resolvedAuthorizationRequest.authorizationRequest, attribute);
+        const acceptResult = await this.consumptionController.openId4Vc.acceptAuthorizationRequest(resolvedAuthorizationRequest.authorizationRequest, attribute);
+        if (acceptResult.status !== 200) {
+            throw ConsumptionCoreErrors.requests.invalidAcceptParameters("The presentation was not successful. Try again later or select a different credential.");
+        }
 
         return AcceptResponseItem.from({ result: ResponseItemResult.Accepted });
     }
