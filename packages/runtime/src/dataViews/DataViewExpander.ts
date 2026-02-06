@@ -463,7 +463,7 @@ export class DataViewExpander {
             case "ReadAttributeRequestItem":
                 const readAttributeRequestItem = requestItem as ReadAttributeRequestItemJSON;
                 if (isDecidable) {
-                    const processedQuery = await this.processAttributeQuery(readAttributeRequestItem.query);
+                    const processedQuery = await this.processAttributeQuery(readAttributeRequestItem.query, localRequestDTO?.isOwn);
                     // ThirdPartyAttributeQueries without results cannot be changed.
                     if (processedQuery.type === "ProcessedThirdPartyRelationshipAttributeQueryDVO" && processedQuery.results.length === 0) {
                         error = {
@@ -501,7 +501,7 @@ export class DataViewExpander {
                     type: "ReadAttributeRequestItemDVO",
                     id: "",
                     name: this.generateRequestItemName(requestItem["@type"], isDecidable),
-                    query: await this.expandAttributeQuery(readAttributeRequestItem.query),
+                    query: await this.expandAttributeQuery(readAttributeRequestItem.query, localRequestDTO?.isOwn),
                     isDecidable,
                     response: responseItemDVO
                 } as ReadAttributeRequestItemDVO;
@@ -561,7 +561,9 @@ export class DataViewExpander {
                     id: "",
                     name: this.generateRequestItemName(requestItem["@type"], isDecidable),
                     attribute: await this.expandAttribute(proposeAttributeRequestItem.attribute),
-                    query: isDecidable ? await this.processAttributeQuery(proposeAttributeRequestItem.query) : await this.expandAttributeQuery(proposeAttributeRequestItem.query),
+                    query: isDecidable
+                        ? await this.processAttributeQuery(proposeAttributeRequestItem.query, localRequestDTO?.isOwn)
+                        : await this.expandAttributeQuery(proposeAttributeRequestItem.query, localRequestDTO?.isOwn),
                     isDecidable,
                     response: responseItemDVO,
                     proposedValueOverruled
@@ -1222,13 +1224,14 @@ export class DataViewExpander {
     }
 
     public async expandAttributeQuery(
-        query: IdentityAttributeQueryJSON | RelationshipAttributeQueryJSON | ThirdPartyRelationshipAttributeQueryJSON | IQLQueryJSON
+        query: IdentityAttributeQueryJSON | RelationshipAttributeQueryJSON | ThirdPartyRelationshipAttributeQueryJSON | IQLQueryJSON,
+        isOwnRequest?: boolean
     ): Promise<AttributeQueryDVO> {
         switch (query["@type"]) {
             case "IdentityAttributeQuery":
                 return this.expandIdentityAttributeQuery(query);
             case "RelationshipAttributeQuery":
-                return await this.expandRelationshipAttributeQuery(query);
+                return await this.expandRelationshipAttributeQuery(query, isOwnRequest);
             case "ThirdPartyRelationshipAttributeQuery":
                 return await this.expandThirdPartyRelationshipAttributeQuery(query);
             case "IQLQuery":
@@ -1257,7 +1260,7 @@ export class DataViewExpander {
         };
     }
 
-    public async expandRelationshipAttributeQuery(query: RelationshipAttributeQueryJSON): Promise<RelationshipAttributeQueryDVO> {
+    public async expandRelationshipAttributeQuery(query: RelationshipAttributeQueryJSON, isOwnRequest?: boolean): Promise<RelationshipAttributeQueryDVO> {
         const valueType = query.attributeCreationHints.valueType;
         let name = "i18n://dvo.attributeQuery.name.RelationshipAttributeQuery";
         let description = "i18n://dvo.attributeQuery.description.RelationshipAttributeQuery";
@@ -1273,12 +1276,14 @@ export class DataViewExpander {
             hints.valueHints = query.attributeCreationHints.valueHints;
         }
 
+        const owner = query.owner !== "" ? await this.expandAddress(query.owner) : isOwnRequest ? this.expandUnknown("") : this.expandSelf();
+
         return {
             type: "RelationshipAttributeQueryDVO",
             id: "",
             name,
             description,
-            owner: await this.expandAddress(query.owner),
+            owner,
             key: query.key,
             attributeCreationHints: query.attributeCreationHints,
             renderHints: hints.renderHints,
@@ -1367,13 +1372,14 @@ export class DataViewExpander {
     }
 
     public async processAttributeQuery(
-        attributeQuery: IdentityAttributeQueryJSON | RelationshipAttributeQueryJSON | ThirdPartyRelationshipAttributeQueryJSON | IQLQueryJSON
+        attributeQuery: IdentityAttributeQueryJSON | RelationshipAttributeQueryJSON | ThirdPartyRelationshipAttributeQueryJSON | IQLQueryJSON,
+        isOwnRequest?: boolean
     ): Promise<ProcessedAttributeQueryDVO> {
         switch (attributeQuery["@type"]) {
             case "IdentityAttributeQuery":
                 return await this.processIdentityAttributeQuery(attributeQuery);
             case "RelationshipAttributeQuery":
-                return await this.processRelationshipAttributeQuery(attributeQuery);
+                return await this.processRelationshipAttributeQuery(attributeQuery, isOwnRequest);
             case "ThirdPartyRelationshipAttributeQuery":
                 return await this.processThirdPartyRelationshipAttributeQuery(attributeQuery);
             case "IQLQuery":
@@ -1402,24 +1408,23 @@ export class DataViewExpander {
         };
     }
 
-    public async processRelationshipAttributeQuery(query: RelationshipAttributeQueryJSON): Promise<ProcessedRelationshipAttributeQueryDVO> {
-        const matchedAttributeDTOResult = await this.consumption.attributes.executeRelationshipAttributeQuery({
-            query
-        });
+    public async processRelationshipAttributeQuery(query: RelationshipAttributeQueryJSON, isOwnRequest?: boolean): Promise<ProcessedRelationshipAttributeQueryDVO> {
+        const matchedAttributeDTOResult = await this.consumption.attributes.executeRelationshipAttributeQuery({ query });
+
         if (matchedAttributeDTOResult.isError) {
             if (matchedAttributeDTOResult.error.code !== "error.runtime.recordNotFound") throw matchedAttributeDTOResult.error;
 
             return {
-                ...(await this.expandRelationshipAttributeQuery(query)),
+                ...(await this.expandRelationshipAttributeQuery(query, isOwnRequest)),
                 type: "ProcessedRelationshipAttributeQueryDVO",
                 results: [],
                 isProcessed: true
             };
         }
-        const matchedAttributeDVOs = await this.expandLocalAttributeDTO(matchedAttributeDTOResult.value);
 
+        const matchedAttributeDVOs = await this.expandLocalAttributeDTO(matchedAttributeDTOResult.value);
         return {
-            ...(await this.expandRelationshipAttributeQuery(query)),
+            ...(await this.expandRelationshipAttributeQuery(query, isOwnRequest)),
             type: "ProcessedRelationshipAttributeQueryDVO",
             results: [matchedAttributeDVOs as OwnRelationshipAttributeDVO | PeerRelationshipAttributeDVO],
             isProcessed: true
