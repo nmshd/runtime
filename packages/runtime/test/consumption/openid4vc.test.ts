@@ -584,8 +584,8 @@ describe("EUDIPLO", () => {
     const eudiploUser = "test-admin";
     const eudiploPassword = "57c9cd444bf402b2cc1f5a0d2dafd3955bd9042c0372db17a4ede2d5fbda88e5";
 
-    const eudiploPresentationConfigurationId = "testPresentationConfiguration";
-    const eudiploCredentialConfigurationId = "testCredentialConfiguration";
+    const eudiploPresentationConfigurationId = "test";
+    const eudiploCredentialConfigurationId = "test";
 
     let eudiploContainer: StartedTestContainer | undefined;
     let axiosInstance: AxiosInstance;
@@ -645,7 +645,7 @@ describe("EUDIPLO", () => {
         });
         expect(storeCredentialsResponse).toBeSuccessful();
 
-        expect((storeCredentialsResponse.value.content.value as VerifiableCredentialJSON).displayInformation?.[0].name).toBe("testName");
+        expect((storeCredentialsResponse.value.content.value as VerifiableCredentialJSON).displayInformation?.[0].name).toBe("test");
     });
 
     test("presentation", async () => {
@@ -770,13 +770,13 @@ async function startOid4VcComposeStack() {
 }
 
 async function createActiveRelationshipToService(runtime: TestRuntimeServices, serviceAxiosInstance: AxiosInstance) {
-    const relationshipTemplate = (
+    const relationshipTemplateReference = (
         await serviceAxiosInstance.post("/enmeshed-demo/relationshipTemplates", {
             givenName: "aGivenName",
             familyName: "aFamilyName",
             city: "aCity",
             zipCode: "aZipCode",
-            country: "aCountry",
+            country: "DE",
             houseNo: "aHouseNo",
             street: "aStreet",
             recipient: "aRecipient",
@@ -786,11 +786,12 @@ async function createActiveRelationshipToService(runtime: TestRuntimeServices, s
         })
     ).data.result;
 
-    await runtime.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: relationshipTemplate.reference.truncated });
-    const requestId = (await runtimeServices2.eventBus.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.request.source!.reference === relationshipTemplate.id)).data
-        .request.id;
+    const loadTemplateResult = await runtime.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: relationshipTemplateReference });
+    expect(loadTemplateResult).toBeSuccessful();
 
-    await runtimeServices2.consumption.incomingRequests.accept({
+    const requestId = (await runtime.eventBus.waitForEvent(IncomingRequestStatusChangedEvent)).data.request.id;
+
+    const acceptRequestResult = await runtime.consumption.incomingRequests.accept({
         requestId,
         items: [
             { items: [{ accept: true }] },
@@ -806,7 +807,7 @@ async function createActiveRelationshipToService(runtime: TestRuntimeServices, s
                             value: {
                                 "@type": "StreetAddress",
                                 city: "aCity",
-                                country: "aCountry",
+                                country: "DE",
                                 houseNo: "aHouseNo",
                                 street: "aStreet",
                                 zipCode: "aZipCode",
@@ -819,4 +820,6 @@ async function createActiveRelationshipToService(runtime: TestRuntimeServices, s
             }
         ]
     });
+
+    expect(acceptRequestResult).toBeSuccessful();
 }
