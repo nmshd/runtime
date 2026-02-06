@@ -51,7 +51,7 @@
         }
     },
     "dependencies": {
-        "@js-soft/ts-serval": "2.0.14",
+        "@js-soft/ts-serval": "2.0.15",
         "@nmshd/core-types": "*",
         "@nmshd/iql": "^1.0.4",
         "ibantools": "^4.5.1",
