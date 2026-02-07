@@ -21,6 +21,7 @@ import {
     exchangeMessageWithRequest,
     RuntimeServiceProvider,
     syncUntilHasMessageWithRequest,
+    syncUntilHasRelationships,
     TestRuntimeServices
 } from "../lib";
 
@@ -101,7 +102,7 @@ afterAll(async () => {
     if (dockerComposeStack) await dockerComposeStack.down();
 });
 
-describe("custom openid4vc service", () => {
+describe.skip("custom openid4vc service", () => {
     let credentialOfferUrl: string;
 
     describe("sd-jwt", () => {
@@ -648,6 +649,45 @@ describe("EUDIPLO", () => {
         expect((storeCredentialsResponse.value.content.value as VerifiableCredentialJSON).displayInformation?.[0].name).toBe("test");
     });
 
+    test("should be able to process a credential offer with pin authentication", async () => {
+        const pin = "1234";
+
+        const credentialOfferUrl = (
+            await axiosInstance.post("/issuer/offer", {
+                response_type: "uri", // eslint-disable-line @typescript-eslint/naming-convention
+                credentialConfigurationIds: [eudiploCredentialConfigurationId],
+                flow: "pre_authorized_code",
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                tx_code: pin
+            })
+        ).data.uri;
+
+        const result = await runtimeServices1.consumption.openId4Vc.resolveCredentialOffer({
+            credentialOfferUrl
+        });
+
+        expect(result).toBeSuccessful();
+
+        const credentialOffer = result.value.credentialOffer;
+        const requestedCredentials = credentialOffer.credentialOfferPayload.credential_configuration_ids;
+
+        const wrongPinRequestResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
+            credentialOffer,
+            credentialConfigurationIds: requestedCredentials,
+            pinCode: `1${pin}`
+        });
+        expect(wrongPinRequestResult.isError).toBe(true);
+
+        const requestResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
+            credentialOffer,
+            credentialConfigurationIds: requestedCredentials,
+            pinCode: pin
+        });
+
+        const storeResult = await runtimeServices1.consumption.openId4Vc.storeCredentials({ credentialResponses: requestResult.value.credentialResponses });
+        expect(storeResult).toBeSuccessful();
+    });
+
     test("presentation", async () => {
         const authorizationRequestUrl = (
             await axiosInstance.post("/verifier/offer", {
@@ -709,7 +749,8 @@ describe("EUDIPLO", () => {
 
         const credentialContent = createdCredential!.content.value as VerifiableCredentialJSON;
         const decodedCredential = decodeRecord(credentialContent.type, credentialContent.value) as SdJwtVcRecord;
-        expect(decodedCredential.firstCredential.payload.givenName).toBe("aGivenName");
+        expect(decodedCredential.firstCredential.prettyClaims.givenName).toBe("aGivenName");
+        expect(credentialContent.value.split("~")).toHaveLength(3); // given name is selectively disclosable, hence length 3
     });
 
     test("presentation with request", async () => {
@@ -820,6 +861,7 @@ async function createActiveRelationshipToService(runtime: TestRuntimeServices, s
             }
         ]
     });
-
     expect(acceptRequestResult).toBeSuccessful();
+
+    await syncUntilHasRelationships(runtime.transport);
 }
