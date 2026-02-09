@@ -645,7 +645,7 @@ describe("EUDIPLO", () => {
             credentialResponses: credentialResponsesResult.value.credentialResponses
         });
         expect(storeCredentialsResponse).toBeSuccessful();
-
+        expect((storeCredentialsResponse.value.content.value as VerifiableCredentialJSON).displayInformation?.[0].logo).toBeDefined();
         expect((storeCredentialsResponse.value.content.value as VerifiableCredentialJSON).displayInformation?.[0].name).toBe("test");
     });
 
