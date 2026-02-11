@@ -4,6 +4,7 @@ import { CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
 import { CoreCrypto, IConfig, ICorrelator, TransportCoreErrors } from "../../core";
 import { PasswordProtection } from "../../core/types/PasswordProtection";
 import { AnonymousTokenClient } from "./backbone/AnonymousTokenClient";
+import { CreateEmptyTokenParameters, ICreateEmptyTokenParameters } from "./local/CreateEmptyTokenParameters";
 import { EmptyToken } from "./local/EmptyToken";
 import { Token } from "./local/Token";
 import { TokenReference } from "./transmission/TokenReference";
@@ -14,19 +15,21 @@ export class AnonymousTokenController {
         this.client = new AnonymousTokenClient(config, correlator);
     }
 
-    public async createEmptyToken(): Promise<EmptyToken> {
+    public async createEmptyToken(parameters?: ICreateEmptyTokenParameters): Promise<EmptyToken> {
+        const parsedParameters = parameters ? CreateEmptyTokenParameters.from(parameters) : CreateEmptyTokenParameters.from({});
+
         const secretKey = await CoreCrypto.generateSecretKey();
         const password = await Random.string(16, RandomCharacterRange.Alphanumeric + RandomCharacterRange.SpecialCharacters);
 
         const salt = await CoreCrypto.random(16);
         const passwordProtection = PasswordProtection.from({ password, passwordType: "pw", salt });
 
-        const expiresAt = CoreDate.utc().add({ minutes: 2 });
+        parsedParameters.expiresAt ??= CoreDate.utc().add({ minutes: 2 });
 
         const hashedPassword = (await CoreCrypto.deriveHashOutOfPassword(password, salt)).toBase64();
-        const response = (await this.client.createToken({ password: hashedPassword, expiresAt: expiresAt.toISOString() })).value;
+        const response = (await this.client.createToken({ password: hashedPassword, expiresAt: parsedParameters.expiresAt.toISOString() })).value;
 
-        return EmptyToken.from({ id: CoreId.from(response.id), secretKey: secretKey, expiresAt, passwordProtection });
+        return EmptyToken.from({ id: CoreId.from(response.id), secretKey: secretKey, expiresAt: parsedParameters.expiresAt, passwordProtection });
     }
 
     public async loadPeerTokenByReference(reference: TokenReference, password?: string): Promise<Token> {
