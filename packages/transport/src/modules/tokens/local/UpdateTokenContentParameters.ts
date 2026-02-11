@@ -6,7 +6,7 @@ export interface IUpdateTokenContentParameters extends ISerializable {
     id: ICoreId;
     secretKey: ICryptoSecretKey;
     content: ISerializable;
-    passwordProtection: ISharedPasswordProtection;
+    passwordProtection?: ISharedPasswordProtection;
 }
 
 @type("UpdateTokenContentParameters")
@@ -25,7 +25,7 @@ export class UpdateTokenContentParameters extends Serializable implements IUpdat
 
     @validate({ nullable: true })
     @serialize()
-    public passwordProtection: SharedPasswordProtection;
+    public passwordProtection?: SharedPasswordProtection;
 
     public static from(value: IUpdateTokenContentParameters): UpdateTokenContentParameters {
         return this.fromAny(value);

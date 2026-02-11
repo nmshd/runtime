@@ -4,6 +4,10 @@ import { CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
 import { CoreCrypto, IConfig, ICorrelator, TransportCoreErrors } from "../../core";
 import { PasswordProtection } from "../../core/types/PasswordProtection";
 import { AnonymousTokenClient } from "./backbone/AnonymousTokenClient";
+import {
+    CreateEmptyTokenWithoutPasswordProtectionParameters,
+    ICreateEmptyTokenWithoutPasswordProtectionParameters
+} from "./local/CreateEmptyTokenWithoutPasswordProtectionParameters";
 import { EmptyToken } from "./local/EmptyToken";
 import { Token } from "./local/Token";
 import { TokenReference } from "./transmission/TokenReference";
@@ -27,6 +31,17 @@ export class AnonymousTokenController {
         const response = (await this.client.createToken({ password: hashedPassword, expiresAt: expiresAt.toISOString() })).value;
 
         return EmptyToken.from({ id: CoreId.from(response.id), secretKey: secretKey, expiresAt, passwordProtection });
+    }
+
+    public async createEmptyTokenWithoutPasswordProtection(parameters: ICreateEmptyTokenWithoutPasswordProtectionParameters): Promise<EmptyToken> {
+        const parsedParameters = CreateEmptyTokenWithoutPasswordProtectionParameters.from(parameters);
+        const secretKey = await CoreCrypto.generateSecretKey();
+
+        parsedParameters.expiresAt ??= CoreDate.utc().add({ minutes: 2 });
+
+        const response = (await this.client.createToken({ expiresAt: parsedParameters.expiresAt.toISOString() })).value;
+
+        return EmptyToken.from({ id: CoreId.from(response.id), secretKey: secretKey, expiresAt: parsedParameters.expiresAt });
     }
 
     public async loadPeerTokenByReference(reference: TokenReference, password?: string): Promise<Token> {

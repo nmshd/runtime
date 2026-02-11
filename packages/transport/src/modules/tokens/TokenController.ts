@@ -206,19 +206,24 @@ export class TokenController extends TransportController {
 
         const cipher = await CoreCrypto.encrypt(serializedTokenBuffer, input.secretKey);
 
-        const password = parameters.passwordProtection.password;
-        if (!password) throw TransportCoreErrors.general.noPasswordProvided();
+        let passwordProtection: PasswordProtection | undefined;
+        let hashedPassword: string | undefined;
 
-        const hashedPassword = (await CoreCrypto.deriveHashOutOfPassword(password, input.passwordProtection.salt)).toBase64();
+        if (input.passwordProtection) {
+            const password = input.passwordProtection.password;
+            if (!password) throw TransportCoreErrors.general.noPasswordProvided();
 
-        const response = (await this.client.updateTokenContent({ id: parameters.id.toString(), newContent: cipher.toBase64(), password: hashedPassword })).value;
+            hashedPassword = (await CoreCrypto.deriveHashOutOfPassword(password, input.passwordProtection.salt)).toBase64();
 
-        const passwordProtection = PasswordProtection.from({
-            password,
-            passwordType: parameters.passwordProtection.passwordType,
-            salt: parameters.passwordProtection.salt,
-            passwordLocationIndicator: parameters.passwordProtection.passwordLocationIndicator
-        });
+            passwordProtection = PasswordProtection.from({
+                password,
+                passwordType: input.passwordProtection.passwordType,
+                salt: input.passwordProtection.salt,
+                passwordLocationIndicator: input.passwordProtection.passwordLocationIndicator
+            });
+        }
+
+        const response = (await this.client.updateTokenContent({ id: input.id.toString(), newContent: cipher.toBase64(), password: hashedPassword })).value;
 
         const token = Token.from({
             id: CoreId.from(response.id),
