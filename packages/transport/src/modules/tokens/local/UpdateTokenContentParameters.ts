@@ -9,7 +9,7 @@ export interface IUpdateTokenContentParameters extends ISerializable {
     passwordProtection: ISharedPasswordProtection;
 }
 
-@type("SendTokenParameters")
+@type("UpdateTokenContentParameters")
 export class UpdateTokenContentParameters extends Serializable implements IUpdateTokenContentParameters {
     @validate()
     @serialize()
