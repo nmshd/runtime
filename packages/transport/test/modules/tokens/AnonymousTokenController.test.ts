@@ -133,8 +133,9 @@ describe("AnonymousTokenController", function () {
     test("should create an empty token", async () => {
         const token = await anonymousTokenController.createEmptyToken();
 
-        expect(token.passwordProtection.password).toBeDefined();
-        expect(token.passwordProtection.passwordLocationIndicator).toBeUndefined();
+        expect(token.passwordProtection).toBeDefined();
+        expect(token.passwordProtection!.password).toBeDefined();
+        expect(token.passwordProtection!.passwordLocationIndicator).toBeUndefined();
     });
 
     test("should get a proper error when trying to load an empty token", async () => {

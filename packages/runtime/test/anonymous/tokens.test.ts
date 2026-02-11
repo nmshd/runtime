@@ -52,9 +52,10 @@ describe("Anonymous tokens", () => {
         expect(result).toBeSuccessful();
 
         const token = result.value;
-        expect(token.passwordProtection.password).toBeDefined();
-        expect(token.passwordProtection.passwordIsPin).toBeUndefined();
-        expect(token.passwordProtection.passwordLocationIndicator).toBeUndefined();
+        expect(token.passwordProtection).toBeDefined();
+        expect(token.passwordProtection!.password).toBeDefined();
+        expect(token.passwordProtection!.passwordIsPin).toBeUndefined();
+        expect(token.passwordProtection!.passwordLocationIndicator).toBeUndefined();
     });
 
     test("should get a proper error when trying to load an empty token", async () => {
