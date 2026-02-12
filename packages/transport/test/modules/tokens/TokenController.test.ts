@@ -67,6 +67,23 @@ describe("TokenController", function () {
         expect((receivedToken.content as any).content).toBe((sentToken.content as any).content);
     });
 
+    
+    test("should send a token without content", async function () {
+        tempDate = CoreDate.utc().subtract(TestUtil.tempDateThreshold);
+        const expiresAt = CoreDate.utc().add({ hours: 1 });
+        const sentToken = await sender.tokens.sendToken({
+            expiresAt,
+            ephemeral: false
+        });
+
+        expect(sentToken.expiresAt.toISOString()).toBe(expiresAt.toISOString());
+        expect(sentToken.content).toBeInstanceOf(Serializable);
+        expect(receivedToken.content).toBeInstanceOf(JSONWrapper);
+        expect((sentToken.content.toJSON() as any).content).toBe("TestToken");
+        expect((receivedToken.content as any).content).toBe((sentToken.content as any).content);
+    });
+
+
     test("should get the stored token", async function () {
         const sentToken = await sender.tokens.getToken(tempId1);
         const receivedToken = await recipient.tokens.getToken(tempId1);
