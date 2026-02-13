@@ -68,7 +68,6 @@ describe("TokenController", function () {
     });
 
     test("should send an empty token", async function () {
-        tempDate = CoreDate.utc().subtract(TestUtil.tempDateThreshold);
         const expiresAt = CoreDate.utc().add({ hours: 1 });
         const sentToken = await sender.tokens.sendEmptyToken({
             expiresAt
