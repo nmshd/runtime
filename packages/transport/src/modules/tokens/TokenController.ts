@@ -95,7 +95,7 @@ export class TokenController extends TransportController {
 
         const password = await Random.string(16, RandomCharacterRange.Alphanumeric + RandomCharacterRange.SpecialCharacters);
         const salt = await CoreCrypto.random(16);
-        const hashedPassword = password ? (await CoreCrypto.deriveHashOutOfPassword(password, salt)).toBase64() : undefined;
+        const hashedPassword = (await CoreCrypto.deriveHashOutOfPassword(password, salt)).toBase64();
         const passwordProtection = PasswordProtection.from({ password, passwordType: "pw", salt });
 
         const response = (await this.client.createEmptyToken({ password: hashedPassword, expiresAt: input.expiresAt.toISOString() })).value;
