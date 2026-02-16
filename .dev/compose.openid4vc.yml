@@ -45,6 +45,23 @@ services:
     networks:
       - default
 
+  eudiplo:
+    image: ghcr.io/openwallet-foundation-labs/eudiplo:1.16.0
+    environment:
+      - PUBLIC_URL=http://host.docker.internal:3000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./eudiplo-assets:/app/config
+
+  eudiplo-client:
+    image: ghcr.io/openwallet-foundation-labs/eudiplo-client:1.16.0
+    ports:
+      - "4200:80"
+    depends_on:
+      eudiplo:
+        condition: service_healthy
+
 networks:
   default:
     name: runtime-oid4vc-tests-network
