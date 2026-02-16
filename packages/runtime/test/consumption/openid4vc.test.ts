@@ -139,6 +139,7 @@ describe("EUDIPLO", () => {
     });
 
     // external authentication buggy in the latest release (1.16.0)
+    // eslint-disable-next-line jest/no-disabled-tests
     test.skip("issuance with external authentication", async () => {
         const credentialOfferUrl = (
             await eudiploClient.createIssuanceOffer({
