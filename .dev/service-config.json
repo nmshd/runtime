@@ -22,7 +22,7 @@
     },
     "eudiplo": {
         "baseUrl": "http://127.0.0.1:3000",
-        "user": "test-admin",
-        "password": "57c9cd444bf402b2cc1f5a0d2dafd3955bd9042c0372db17a4ede2d5fbda88e5"
+        "clientId": "test-admin",
+        "clientSecret": "57c9cd444bf402b2cc1f5a0d2dafd3955bd9042c0372db17a4ede2d5fbda88e5"
     }
 }
