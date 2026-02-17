@@ -26,6 +26,9 @@ services:
       transportLibrary__addressGenerationHostnameOverride: ${NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE}
       database__connectionString: mongodb://root:example@mongodb:27017
       infrastructure__httpServer__authentication__apiKey__keys__default__key: aVeryCoolApiKeyWith30CharactersOr+
+      modules__autoAcceptPendingRelationships__enabled: true
+      modules__sync__enabled: true
+      modules__sync__interval: 1
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
