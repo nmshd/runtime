@@ -61,21 +61,16 @@ describe("EUDIPLO", () => {
     const eudiploPresentationConfigurationId = "test";
     const eudiploCredentialConfigurationId = "test";
 
-    let eudiploContainer: StartedTestContainer | undefined;
     let eudiploClient: EudiploClient;
 
     beforeAll(() => {
-        const baseUrl = `http://localhost:${eudiploPort}`;
+        const baseUrl = `http://localhost:3000`;
 
         eudiploClient = new EudiploClient({
             baseUrl,
             clientId,
             clientSecret
         });
-    });
-
-    afterAll(async () => {
-        await eudiploContainer?.stop();
     });
 
     test("issuance", async () => {
