@@ -272,7 +272,7 @@ async function startOid4VcComposeStack() {
             NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE: addressGenerationHostnameOverride
         } as Record<string, string>)
         .withStartupTimeout(60000)
-        .withWaitStrategy("oid4vc-service", Wait.forAll([Wait.forHealthCheck(), Wait.forLogMessage(/Publicly available/)]))
+        .withWaitStrategy("oid4vc-service-1", Wait.forHealthCheck())
         .up();
 
     return composeStack;
