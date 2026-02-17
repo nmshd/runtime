@@ -10,6 +10,9 @@ services:
       - ./oid4vc-service-config.json:/usr/app/config.json
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    depends_on:
+      - connector
+      - eudiplo
     networks:
       - default
 
