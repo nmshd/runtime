@@ -46,6 +46,12 @@ services:
     image: ghcr.io/openwallet-foundation-labs/eudiplo:1.16.0
     environment:
       - PUBLIC_URL=http://host.docker.internal:3000
+      - JWT_SECRET="OgwrDcgVQQ2yZwcFt7kPxQm3nUF+X3etF6MdLTstZAY="
+      - AUTH_CLIENT_ID="root"
+      - AUTH_CLIENT_SECRET="test"
+      - PORT=3000
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "3000:3000"
     volumes:
