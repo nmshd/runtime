@@ -20,10 +20,10 @@ services:
     image: ghcr.io/nmshd/connector:7.4.0-openid4vc.2@sha256:d121f97ce2e4506a7ff58de0012b3445f6d0aeb8dd4d765c09da7f34d8a22b5b
     environment:
       CUSTOM_CONFIG_LOCATION: "/config.json"
-      transportLibrary__baseUrl: "http://consumer-api:8080"
-      transportLibrary__platformClientId: test
-      transportLibrary__platformClientSecret: test
-      transportLibrary__addressGenerationHostnameOverride: localhost
+      transportLibrary__baseUrl: ${NMSHD_TEST_BASEURL}
+      transportLibrary__platformClientId: ${NMSHD_TEST_CLIENTID}
+      transportLibrary__platformClientSecret: ${NMSHD_TEST_CLIENTSECRET}
+      transportLibrary__addressGenerationHostnameOverride: ${NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE}
       database__connectionString: mongodb://root:example@mongodb:27017
       infrastructure__httpServer__authentication__apiKey__keys__default__key: aVeryCoolApiKeyWith30CharactersOr+
     extra_hosts:
