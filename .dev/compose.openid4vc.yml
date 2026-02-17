@@ -10,8 +10,6 @@ services:
       - ./service-config.json:/usr/app/config.json
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    depends_on:
-      - mongodb
     networks:
       - default
 
