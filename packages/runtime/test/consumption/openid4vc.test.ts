@@ -8,7 +8,7 @@ import path from "path";
 import { DockerComposeEnvironment, StartedDockerComposeEnvironment, StartedTestContainer, Wait } from "testcontainers";
 import { Agent as UndiciAgent, fetch as undiciFetch } from "undici";
 import { IncomingRequestStatusChangedEvent } from "../../src";
-import { ensureActiveRelationship, RuntimeServiceProvider, syncUntilHasMessageWithRequest, syncUntilHasRelationships, TestRuntimeServices } from "../lib";
+import { RuntimeServiceProvider, syncUntilHasMessageWithRequest, syncUntilHasRelationships, TestRuntimeServices } from "../lib";
 
 const eudiploPort = 3000; // CAUTION: don't change this. The DCQL query has this port hardcoded in its configuration. The presentation test will fail if we change this.
 
@@ -19,18 +19,14 @@ const fetchInstance: typeof fetch = (async (input: any, init: any) => {
 
 const runtimeServiceProvider = new RuntimeServiceProvider(fetchInstance);
 let runtimeServices1: TestRuntimeServices;
-let runtimeServices2: TestRuntimeServices;
 
 let serviceAxiosInstance: AxiosInstance;
 
 let dockerComposeStack: StartedDockerComposeEnvironment | undefined;
 
 beforeAll(async () => {
-    const runtimeServices = await runtimeServiceProvider.launch(2, { enableDeciderModule: true, enableRequestModule: true });
+    const runtimeServices = await runtimeServiceProvider.launch(1, { enableDeciderModule: true, enableRequestModule: true });
     runtimeServices1 = runtimeServices[0];
-    runtimeServices2 = runtimeServices[1];
-
-    await ensureActiveRelationship(runtimeServices1.transport, runtimeServices2.transport);
 
     let oid4vcServiceBaseUrl = process.env.OPENID4VC_SERVICE_BASEURL!;
     if (!oid4vcServiceBaseUrl) {
@@ -288,7 +284,7 @@ async function startOid4VcComposeStack() {
             PORT: eudiploPort.toString() // eslint-disable-line @typescript-eslint/naming-convention
         } as Record<string, string>)
         .withStartupTimeout(60000)
-        .withWaitStrategy("oid4vc-service", Wait.forHealthCheck())
+        .withWaitStrategy("oid4vc-service", Wait.forAll([Wait.forHealthCheck(), Wait.forLogMessage(/Publicly available/)]))
         .up();
 
     return composeStack;
