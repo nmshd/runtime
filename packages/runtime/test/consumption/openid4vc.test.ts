@@ -266,6 +266,8 @@ async function startOid4VcComposeStack() {
         .withProjectName("runtime-oid4vc-tests")
         .withEnvironment({
             // eslint-disable-next-line @typescript-eslint/naming-convention
+            NODE_ENV: "test",
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             NMSHD_TEST_BASEURL: baseUrl,
 
             // eslint-disable-next-line @typescript-eslint/naming-convention

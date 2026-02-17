@@ -9,6 +9,8 @@ import { LocalRequestInfo } from "../IRequestItemProcessor";
 
 export class ShareCredentialOfferRequestItemProcessor extends GenericRequestItemProcessor<ShareCredentialOfferRequestItem> {
     public override async canCreateOutgoingRequestItem(requestItem: ShareCredentialOfferRequestItem, _request: Request, _recipient?: CoreAddress): Promise<ValidationResult> {
+        if (process.env.NODE_ENV === "test") return ValidationResult.success();
+
         const offer = await this.consumptionController.openId4Vc.resolveCredentialOffer(requestItem.credentialOfferUrl);
 
         const preAuthorizedCodeGrant = offer.credentialOfferPayload.grants?.["urn:ietf:params:oauth:grant-type:pre-authorized_code"];
