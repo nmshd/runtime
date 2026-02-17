@@ -5,12 +5,10 @@ import { RequestJSON, ShareAuthorizationRequestRequestItemJSON, VerifiableCreden
 import axios, { AxiosInstance } from "axios";
 import * as client from "openid-client";
 import path from "path";
-import { DockerComposeEnvironment, StartedDockerComposeEnvironment, StartedTestContainer, Wait } from "testcontainers";
+import { DockerComposeEnvironment, StartedDockerComposeEnvironment, Wait } from "testcontainers";
 import { Agent as UndiciAgent, fetch as undiciFetch } from "undici";
 import { IncomingRequestStatusChangedEvent } from "../../src";
 import { RuntimeServiceProvider, syncUntilHasMessageWithRequest, syncUntilHasRelationships, TestRuntimeServices } from "../lib";
-
-const eudiploPort = 3000; // CAUTION: don't change this. The DCQL query has this port hardcoded in its configuration. The presentation test will fail if we change this.
 
 const fetchInstance: typeof fetch = (async (input: any, init: any) => {
     const response = await undiciFetch(input, { ...init, dispatcher: new UndiciAgent({}) });
@@ -57,21 +55,16 @@ describe("EUDIPLO", () => {
     const eudiploPresentationConfigurationId = "test";
     const eudiploCredentialConfigurationId = "test";
 
-    let eudiploContainer: StartedTestContainer | undefined;
     let eudiploClient: EudiploClient;
 
     beforeAll(() => {
-        const baseUrl = `http://localhost:${eudiploPort}`;
+        const baseUrl = `http://localhost:3000`;
 
         eudiploClient = new EudiploClient({
             baseUrl,
             clientId,
             clientSecret
         });
-    });
-
-    afterAll(async () => {
-        await eudiploContainer?.stop();
     });
 
     test("issuance", async () => {
@@ -276,12 +269,7 @@ async function startOid4VcComposeStack() {
             NMSHD_TEST_BASEURL: baseUrl,
 
             // eslint-disable-next-line @typescript-eslint/naming-convention
-            NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE: addressGenerationHostnameOverride,
-            JWT_SECRET: "OgwrDcgVQQ2yZwcFt7kPxQm3nUF+X3etF6MdLTstZAY=", // eslint-disable-line @typescript-eslint/naming-convention
-            AUTH_CLIENT_ID: "root", // eslint-disable-line @typescript-eslint/naming-convention
-            AUTH_CLIENT_SECRET: "root", // eslint-disable-line @typescript-eslint/naming-convention
-            PUBLIC_URL: `http://host.docker.internal:${eudiploPort}`, // eslint-disable-line @typescript-eslint/naming-convention
-            PORT: eudiploPort.toString() // eslint-disable-line @typescript-eslint/naming-convention
+            NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE: addressGenerationHostnameOverride
         } as Record<string, string>)
         .withStartupTimeout(60000)
         .withWaitStrategy("oid4vc-service", Wait.forAll([Wait.forHealthCheck(), Wait.forLogMessage(/Publicly available/)]))
