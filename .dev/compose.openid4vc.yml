@@ -7,7 +7,7 @@ services:
       - "9000:9000"
     platform: linux/amd64
     volumes:
-      - ./service-config.json:/usr/app/config.json
+      - ./oid4vc-service-config.json:/usr/app/config.json
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
