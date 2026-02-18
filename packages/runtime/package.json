@@ -88,7 +88,7 @@
         "@nmshd/runtime-types": "*",
         "@nmshd/transport": "*",
         "@nmshd/typescript-ioc": "3.2.5",
-        "ajv": "^8.17.1",
+        "ajv": "^8.18.0",
         "ajv-errors": "^3.0.0",
         "ajv-formats": "^3.0.1",
         "elliptic": "^6.6.1",
