@@ -1,6 +1,6 @@
 import { ISerializable, Serializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
-import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId, Random, RandomCharacterRange } from "@nmshd/core-types";
 import { CoreBuffer, CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
 import { CoreCrypto, TransportCoreErrors } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
@@ -10,6 +10,8 @@ import { AccountController } from "../accounts/AccountController";
 import { SynchronizedCollection } from "../sync/SynchronizedCollection";
 import { BackboneGetTokensResponse } from "./backbone/BackboneGetTokens";
 import { TokenClient } from "./backbone/TokenClient";
+import { EmptyToken } from "./local/EmptyToken";
+import { ISendEmptyTokenParameters, SendEmptyTokenParameters } from "./local/SendEmptyTokenParameters";
 import { ISendTokenParameters, SendTokenParameters } from "./local/SendTokenParameters";
 import { Token } from "./local/Token";
 import { IUpdateTokenContentParameters, UpdateTokenContentParameters } from "./local/UpdateTokenContentParameters";
@@ -83,6 +85,27 @@ export class TokenController extends TransportController {
         if (!input.ephemeral) {
             await this.tokens.create(token);
         }
+
+        return token;
+    }
+
+    public async sendEmptyToken(parameters: ISendEmptyTokenParameters): Promise<EmptyToken> {
+        const input = SendEmptyTokenParameters.from(parameters);
+        const secretKey = await CoreCrypto.generateSecretKey();
+
+        const password = await Random.string(16, RandomCharacterRange.Alphanumeric + RandomCharacterRange.SpecialCharacters);
+        const salt = await CoreCrypto.random(16);
+        const hashedPassword = (await CoreCrypto.deriveHashOutOfPassword(password, salt)).toBase64();
+        const passwordProtection = PasswordProtection.from({ password, passwordType: "pw", salt });
+
+        const response = (await this.client.createEmptyToken({ password: hashedPassword, expiresAt: input.expiresAt.toISOString() })).value;
+
+        const token = EmptyToken.from({
+            id: CoreId.from(response.id),
+            secretKey: secretKey,
+            expiresAt: input.expiresAt,
+            passwordProtection
+        });
 
         return token;
     }
