@@ -119,10 +119,10 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
         for (const recipient of recipients) {
             const relationship = await this.relationshipsController.getRelationshipToIdentity(CoreAddress.from(recipient));
 
-            if (!relationship || relationship.status !== RelationshipStatus.Active) {
+            if (relationship?.status !== RelationshipStatus.Active) {
                 peersWithNoActiveRelationship.push(recipient);
 
-                if (!relationship || relationship.status !== RelationshipStatus.Terminated) {
+                if (relationship?.status !== RelationshipStatus.Terminated) {
                     peersWithNeitherActiveNorTerminatedRelationship.push(recipient);
                 }
 
