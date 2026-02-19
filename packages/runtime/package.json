@@ -78,7 +78,7 @@
     "dependencies": {
         "@js-soft/docdb-querytranslator": "^1.1.6",
         "@js-soft/logging-abstractions": "^1.0.2",
-        "@js-soft/ts-serval": "2.0.15",
+        "@js-soft/ts-serval": "2.0.16",
         "@js-soft/ts-utils": "^2.3.5",
         "@nmshd/consumption": "*",
         "@nmshd/content": "*",
@@ -88,7 +88,7 @@
         "@nmshd/runtime-types": "*",
         "@nmshd/transport": "*",
         "@nmshd/typescript-ioc": "3.2.5",
-        "ajv": "^8.17.1",
+        "ajv": "^8.18.0",
         "ajv-errors": "^3.0.0",
         "ajv-formats": "^3.0.1",
         "elliptic": "^6.6.1",
@@ -110,6 +110,11 @@
         "openid-client": "^6.8.1",
         "ts-json-schema-generator": "2.5.0",
         "ts-mockito": "^2.6.1"
+    },
+    "overrides": {
+        "ajv-formats@3.0.1": {
+            "ajv": "8.18.0"
+        }
     },
     "publishConfig": {
         "access": "public",
