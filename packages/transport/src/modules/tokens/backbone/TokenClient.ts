@@ -9,6 +9,10 @@ export class TokenClient extends RESTClientAuthenticate {
         return await this.post<BackbonePostTokensResponse>("/api/v2/Tokens", token);
     }
 
+    public async createEmptyToken(request: Omit<BackbonePostTokensRequest, "content">): Promise<ClientResult<BackbonePostTokensResponse>> {
+        return await this.post<BackbonePostTokensResponse>("/api/v2/Tokens", request);
+    }
+
     public async updateTokenContent(request: BackboneUpdateTokenContentRequest): Promise<ClientResult<BackboneUpdateTokenContentResponse>> {
         return await this.post<BackboneUpdateTokenContentResponse>(`/api/v2/Tokens/${request.id}/UpdateContent`, request);
     }
