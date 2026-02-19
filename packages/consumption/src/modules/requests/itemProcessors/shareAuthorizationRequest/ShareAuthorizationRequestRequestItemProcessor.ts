@@ -1,6 +1,6 @@
 import { AcceptResponseItem, Request, ResponseItemResult, ShareAuthorizationRequestRequestItem } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
-import { TransportCoreErrors } from "@nmshd/transport";
+import { TransportCoreErrors, TransportLoggerFactory } from "@nmshd/transport";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import { LocalAttribute, OwnIdentityAttribute } from "../../../attributes";
 import { ValidationResult } from "../../../common/ValidationResult";
@@ -60,7 +60,15 @@ export class ShareAuthorizationRequestRequestItemProcessor extends GenericReques
         const attribute = (await this.consumptionController.attributes.getLocalAttribute(parsedParams.attributeId)) as OwnIdentityAttribute | undefined;
         if (!attribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, parsedParams.attributeId.toString());
 
-        await this.consumptionController.openId4Vc.acceptAuthorizationRequest(resolvedAuthorizationRequest.authorizationRequest, attribute);
+        const acceptResult = await this.consumptionController.openId4Vc.acceptAuthorizationRequest(resolvedAuthorizationRequest.authorizationRequest, attribute);
+        if (acceptResult.status !== 200) {
+            TransportLoggerFactory.getLogger(ShareAuthorizationRequestRequestItemProcessor).error(
+                "Failed to accept ShareAuthorizationRequestRequestItem. Error message:",
+                JSON.stringify(acceptResult.message)
+            );
+
+            throw ConsumptionCoreErrors.requests.invalidAcceptParameters("The presentation was not successful. Try again later or select a different credential.");
+        }
 
         return AcceptResponseItem.from({ result: ResponseItemResult.Accepted });
     }

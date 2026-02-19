@@ -59,7 +59,7 @@ export class EnmshedHolderKeyManagmentService implements Kms.KeyManagementServic
         if (operation.operation === "deleteKey") {
             return true;
         }
-        if (operation.operation === "encrypt") {
+        if (operation.operation === "encrypt" && ["A128GCM", "A256GCM"].includes(operation.encryption.algorithm)) {
             return true;
         }
         return false;
@@ -342,7 +342,7 @@ export class EnmshedHolderKeyManagmentService implements Kms.KeyManagementServic
 
     public async encrypt(agentContext: AgentContext, options: Kms.KmsEncryptOptions): Promise<Kms.KmsEncryptReturn> {
         try {
-            // encryption via A-256-GCM
+            // encryption via A-128-GCM/A-256-GCM
             // we will call the services side bob and the incoming side alice
             if (options.key.keyAgreement === undefined) {
                 throw new Error("Key agreement is undefined");
@@ -351,11 +351,14 @@ export class EnmshedHolderKeyManagmentService implements Kms.KeyManagementServic
                 throw new Error("Key agreement keyId is undefined");
             }
 
+            const algorithm = options.encryption.algorithm;
+            const keyLength = options.encryption.algorithm === "A128GCM" ? 128 : 256;
+
             // 1. derive the shared secret via ECDH-ES
             const sharedSecret = await this.ecdhEs(options.key.keyAgreement.keyId, options.key.keyAgreement.externalPublicJwk);
             agentContext.config.logger.debug(`EKM: Derived shared secret for encryption using ECDH-ES`);
             // 2. Concat KDF to form the final key
-            const derivedKey = this.concatKdf(sharedSecret, 256, "A256GCM", options.key.keyAgreement);
+            const derivedKey = this.concatKdf(sharedSecret, keyLength, algorithm, options.key.keyAgreement);
             // 3. Encrypt the data via AES-256-GCM using libsodium
 
             // create nonce
