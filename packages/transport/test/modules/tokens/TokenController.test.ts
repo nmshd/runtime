@@ -67,6 +67,15 @@ describe("TokenController", function () {
         expect((receivedToken.content as any).content).toBe((sentToken.content as any).content);
     });
 
+    test("should send an empty token", async function () {
+        const expiresAt = CoreDate.utc().add({ hours: 1 });
+        const sentToken = await sender.tokens.sendEmptyToken({
+            expiresAt
+        });
+
+        expect(sentToken).toBeDefined();
+    });
+
     test("should get the stored token", async function () {
         const sentToken = await sender.tokens.getToken(tempId1);
         const receivedToken = await recipient.tokens.getToken(tempId1);
