@@ -10,6 +10,7 @@ import { LocalRequestInfo } from "../IRequestItemProcessor";
 export class ShareCredentialOfferRequestItemProcessor extends GenericRequestItemProcessor<ShareCredentialOfferRequestItem> {
     public override async canCreateOutgoingRequestItem(requestItem: ShareCredentialOfferRequestItem, _request: Request, _recipient?: CoreAddress): Promise<ValidationResult> {
         if (process.env.TEST_ENVIRONMENT === "container") return ValidationResult.success(); // for the test scenario that this runs inside a container which can't resolve a localhost credential offer
+        // TODO: look for alternative approaches
 
         const offer = await this.consumptionController.openId4Vc.resolveCredentialOffer(requestItem.credentialOfferUrl);
 
