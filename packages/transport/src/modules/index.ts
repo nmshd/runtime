@@ -103,6 +103,7 @@ export * from "./tokens/backbone/BackboneGetTokens";
 export * from "./tokens/backbone/BackbonePostTokens";
 export * from "./tokens/backbone/TokenClient";
 export * from "./tokens/local/EmptyToken";
+export * from "./tokens/local/SendEmptyTokenParameters";
 export * from "./tokens/local/SendTokenParameters";
 export * from "./tokens/local/Token";
 export * from "./tokens/TokenController";

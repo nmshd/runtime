@@ -544,7 +544,7 @@ export class DataViewExpander {
                 }
 
                 let proposedValueOverruled = false;
-                if (responseItemDVO && responseItemDVO.result === ResponseItemResult.Accepted) {
+                if (responseItemDVO?.result === ResponseItemResult.Accepted) {
                     if (responseItemDVO.type === "AttributeSuccessionAcceptResponseItemDVO") {
                         const attributeSuccessionResponseItem = responseItemDVO as AttributeSuccessionAcceptResponseItemDVO;
                         proposedValueOverruled = !_.isEqual(attributeSuccessionResponseItem.successor.content.value, proposeAttributeRequestItem.attribute.value);
