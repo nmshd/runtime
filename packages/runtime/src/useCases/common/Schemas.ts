@@ -2169,9 +2169,7 @@ export const CanCreateOutgoingRequestRequest: any = {
         },
         "AttributeValues.Identity.Uneditable.TypeName": {
             "type": "string",
-            "enum": [
-                "SchematizedXML"
-            ]
+            "const": "SchematizedXML"
         },
         "RelationshipAttributeQueryJSON": {
             "type": "object",
@@ -9083,9 +9081,7 @@ export const CreateOutgoingRequestRequest: any = {
         },
         "AttributeValues.Identity.Uneditable.TypeName": {
             "type": "string",
-            "enum": [
-                "SchematizedXML"
-            ]
+            "const": "SchematizedXML"
         },
         "RelationshipAttributeQueryJSON": {
             "type": "object",
@@ -12250,9 +12246,7 @@ export const ReceivedIncomingRequestRequest: any = {
         },
         "AttributeValues.Identity.Uneditable.TypeName": {
             "type": "string",
-            "enum": [
-                "SchematizedXML"
-            ]
+            "const": "SchematizedXML"
         },
         "RelationshipAttributeQueryJSON": {
             "type": "object",
@@ -13845,9 +13839,7 @@ export const ExecuteIdentityAttributeQueryRequest: any = {
         },
         "AttributeValues.Identity.Uneditable.TypeName": {
             "type": "string",
-            "enum": [
-                "SchematizedXML"
-            ]
+            "const": "SchematizedXML"
         }
     }
 }
@@ -13952,9 +13944,7 @@ export const ExecuteIQLQueryRequest: any = {
         },
         "AttributeValues.Identity.Uneditable.TypeName": {
             "type": "string",
-            "enum": [
-                "SchematizedXML"
-            ]
+            "const": "SchematizedXML"
         }
     }
 }
@@ -16954,9 +16944,7 @@ export const ValidateIQLQueryRequest: any = {
         },
         "AttributeValues.Identity.Uneditable.TypeName": {
             "type": "string",
-            "enum": [
-                "SchematizedXML"
-            ]
+            "const": "SchematizedXML"
         }
     }
 }
