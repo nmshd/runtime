@@ -86,7 +86,7 @@
         "@js-soft/docdb-access-mongo": "1.4.0",
         "@js-soft/node-logger": "1.2.1",
         "@types/json-stringify-safe": "^5.0.3",
-        "@types/lodash": "^4.17.23",
+        "@types/lodash": "^4.17.24",
         "@types/luxon": "^3.7.1",
         "ts-json-schema-generator": "2.5.0",
         "ts-mockito": "^2.6.1"
