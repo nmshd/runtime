@@ -30,7 +30,7 @@
         "test:teardown": "docker compose -f .dev/compose.yml down -fsv"
     },
     "devDependencies": {
-        "@babel/preset-env": "^7.28.5",
+        "@babel/preset-env": "^7.29.0",
         "@babel/preset-typescript": "^7.28.5",
         "@js-soft/eslint-config-ts": "^2.0.4",
         "@js-soft/license-check": "^1.0.10",
