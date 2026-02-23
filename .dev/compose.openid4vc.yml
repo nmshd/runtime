@@ -1,0 +1,68 @@
+name: runtime-oid4vc-tests
+
+services:
+  oid4vc-service:
+    image: ghcr.io/js-soft/openid4vc-service:3.0.1@sha256:17d35ee82a5c65c700e5b6f7922ea833717f1c16a515f60cf1ee7b36b524b32b
+    ports:
+      - "9000:9000"
+    platform: linux/amd64
+    volumes:
+      - ./oid4vc-service-config.json:/usr/app/config.json
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - connector
+      - eudiplo
+    networks:
+      - default
+
+  connector:
+    image: ghcr.io/nmshd/connector:7.4.0-openid4vc.2@sha256:d121f97ce2e4506a7ff58de0012b3445f6d0aeb8dd4d765c09da7f34d8a22b5b
+    environment:
+      CUSTOM_CONFIG_LOCATION: "/config.json"
+      transportLibrary__baseUrl: ${NMSHD_TEST_BASEURL}
+      transportLibrary__platformClientId: ${NMSHD_TEST_CLIENTID}
+      transportLibrary__platformClientSecret: ${NMSHD_TEST_CLIENTSECRET}
+      transportLibrary__addressGenerationHostnameOverride: ${NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE}
+      database__connectionString: mongodb://root:example@mongodb:27017
+      infrastructure__httpServer__authentication__apiKey__keys__default__key: aVeryCoolApiKeyWith30CharactersOr+
+      modules__autoAcceptPendingRelationships__enabled: true
+      modules__sync__enabled: true
+      modules__sync__interval: 1
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - mongodb
+    networks:
+      - default
+      - local-test-backbone
+
+  mongodb:
+    image: mongo@sha256:c23684919810f0341e58744987e4b1c510fb8becdae850217d2d04b6fa7605e7
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    networks:
+      - default
+
+  eudiplo:
+    image: ghcr.io/openwallet-foundation-labs/eudiplo:1.16.0
+    environment:
+      - PUBLIC_URL=http://localhost:3000
+      - JWT_SECRET="OgwrDcgVQQ2yZwcFt7kPxQm3nUF+X3etF6MdLTstZAY="
+      - AUTH_CLIENT_ID="root"
+      - AUTH_CLIENT_SECRET="test"
+      - PORT=3000
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./eudiplo-assets:/app/config
+
+networks:
+  default:
+    name: runtime-oid4vc-tests-network
+  local-test-backbone:
+    name: local-test-backbone
+    external: true

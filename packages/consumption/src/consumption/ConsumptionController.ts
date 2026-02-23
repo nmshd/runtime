@@ -11,6 +11,8 @@ import {
     ProposeAttributeRequestItem,
     ReadAttributeRequestItem,
     ShareAttributeRequestItem,
+    ShareAuthorizationRequestRequestItem,
+    ShareCredentialOfferRequestItem,
     TransferFileOwnershipRequestItem
 } from "@nmshd/content";
 import { CoreAddress, CoreId } from "@nmshd/core-types";
@@ -29,6 +31,7 @@ import {
     NotificationItemProcessorConstructor,
     NotificationItemProcessorRegistry,
     NotificationsController,
+    OpenId4VcController,
     OutgoingRequestsController,
     OwnAttributeDeletedByOwnerNotificationItemProcessor,
     PeerAttributeSucceededNotificationItemProcessor,
@@ -40,6 +43,8 @@ import {
     RequestItemProcessorRegistry,
     SettingsController,
     ShareAttributeRequestItemProcessor,
+    ShareAuthorizationRequestRequestItemProcessor,
+    ShareCredentialOfferRequestItemProcessor,
     TransferFileOwnershipRequestItemProcessor
 } from "../modules";
 import { ConsumptionConfig } from "./ConsumptionConfig";
@@ -79,6 +84,11 @@ export class ConsumptionController {
     private _notifications: NotificationsController;
     public get notifications(): NotificationsController {
         return this._notifications;
+    }
+
+    private _openId4Vc: OpenId4VcController;
+    public get openId4Vc(): OpenId4VcController {
+        return this._openId4Vc;
     }
 
     private _identityMetadata: IdentityMetadataController;
@@ -138,6 +148,9 @@ export class ConsumptionController {
         this._identityMetadata = await new IdentityMetadataController(this).init();
 
         this._settings = await new SettingsController(this).init();
+
+        this._openId4Vc = await new OpenId4VcController(this).init();
+
         return this;
     }
 
@@ -151,7 +164,9 @@ export class ConsumptionController {
             [ConsentRequestItem, GenericRequestItemProcessor],
             [AuthenticationRequestItem, GenericRequestItemProcessor],
             [FormFieldRequestItem, FormFieldRequestItemProcessor],
-            [TransferFileOwnershipRequestItem, TransferFileOwnershipRequestItemProcessor]
+            [TransferFileOwnershipRequestItem, TransferFileOwnershipRequestItemProcessor],
+            [ShareCredentialOfferRequestItem, ShareCredentialOfferRequestItemProcessor],
+            [ShareAuthorizationRequestRequestItem, ShareAuthorizationRequestRequestItemProcessor]
         ]);
     }
 

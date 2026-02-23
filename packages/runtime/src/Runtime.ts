@@ -8,6 +8,7 @@ import {
     IdentityMetadataController,
     IncomingRequestsController,
     NotificationsController,
+    OpenId4VcController,
     OutgoingRequestsController,
     SettingsController
 } from "@nmshd/consumption";
@@ -312,6 +313,10 @@ export abstract class Runtime<TConfig extends RuntimeConfig = RuntimeConfig> {
 
         Container.bind(NotificationsController)
             .factory(() => this.getConsumptionController().notifications)
+            .scope(Scope.Request);
+
+        Container.bind(OpenId4VcController)
+            .factory(() => this.getConsumptionController().openId4Vc)
             .scope(Scope.Request);
 
         Container.bind(AnonymousTokenController)

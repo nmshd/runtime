@@ -16,3 +16,5 @@ export * from "./proprietary";
 export * from "./relationship";
 export * from "./statement";
 export * from "./strings";
+export * from "./VerifiableCredential";
+export * from "./VerifiablePresentation";
