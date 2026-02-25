@@ -87,7 +87,7 @@
         "@js-soft/node-logger": "1.2.1",
         "@js-soft/ts-serval": "2.0.16",
         "@types/json-stringify-safe": "^5.0.3",
-        "@types/lodash": "^4.17.23",
+        "@types/lodash": "^4.17.24",
         "@types/luxon": "^3.7.1",
         "@types/qs": "^6.14.0",
         "correlation-id": "^5.2.0",
