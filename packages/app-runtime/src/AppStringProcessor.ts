@@ -100,8 +100,13 @@ export class AppStringProcessor {
             return Result.ok(undefined);
         }
 
-        // TODO: Multiple authorization servers not supported yet
-        const tokenResult = await uiBridge.performOauthAuthentication(credentialOffer.metadata.authorizationServers[0].issuer);
+        const authorizationServer = credentialOffer.credentialOfferPayload.grants!.authorization_code!.authorization_server!;
+        if (!authorizationServer) {
+            await uiBridge.showError(AppRuntimeErrors.appStringProcessor.invalidCredentialOffer());
+            this.logger.error("Credential offer does not contain an authorization server", credentialOffer);
+        }
+
+        const tokenResult = await uiBridge.performOauthAuthentication(authorizationServer);
         if (tokenResult.isError) {
             this.logger.error("Could not perform OAuth authentication", tokenResult.error);
             return Result.ok(undefined);
