@@ -98,7 +98,3 @@ Or deserialize-/fromUnknown doesn't find your class.
 
 - Check if all (parent) classes up to Serializable(-Async) inclulde a `@schema` declaration with a type.
 - You might have several different Serializable(-Async) instances up- and running. This usually happens if ts-serval/crypto/transport are not correctly imported.
-
-### TODO
-
-Remove this
