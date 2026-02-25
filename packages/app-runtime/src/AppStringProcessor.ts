@@ -104,6 +104,7 @@ export class AppStringProcessor {
         if (!authorizationServer) {
             await uiBridge.showError(AppRuntimeErrors.appStringProcessor.invalidCredentialOffer());
             this.logger.error("Credential offer does not contain an authorization server", credentialOffer);
+            return Result.ok(undefined);
         }
 
         const tokenResult = await uiBridge.performOauthAuthentication(authorizationServer);
