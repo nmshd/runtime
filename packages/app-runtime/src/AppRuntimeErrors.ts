@@ -28,6 +28,10 @@ class AppStringProcessor {
         return new ApplicationError("error.appruntime.appStringProcessor.passwordNotProvided", "No password was provided.");
     }
 
+    public invalidCredentialOffer(): ApplicationError {
+        return new ApplicationError("error.appruntime.appStringProcessor.invalidCredentialOffer", "The scanned code contains an invalid credential offer.");
+    }
+
     public externalOauthRegistrationNotProvided(): ApplicationError {
         return new ApplicationError("error.appruntime.appStringProcessor.externalOauthRegistrationNotProvided", "No external OAuth registration was provided.");
     }
