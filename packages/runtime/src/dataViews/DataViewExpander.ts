@@ -2,6 +2,7 @@ import { Serializable, SerializableBase } from "@js-soft/ts-serval";
 import {
     ConsumptionController,
     LocalRequestStatus,
+    OpenId4VciCredentialResponseJSON,
     OwnIdentityAttribute,
     OwnRelationshipAttribute,
     PeerIdentityAttribute,
@@ -49,6 +50,7 @@ import {
     ResponseJSON,
     SexJSON,
     ShareAttributeRequestItemJSON,
+    ShareCredentialOfferRequestItemJSON,
     SurnameJSON,
     ThirdPartyRelationshipAttributeQueryJSON,
     TransferFileOwnershipAcceptResponseItemJSON,
@@ -132,6 +134,7 @@ import {
     ResponseItemDVO,
     ResponseItemGroupDVO,
     ShareAttributeRequestItemDVO,
+    ShareCredentialOfferRequestItemDVO,
     ThirdPartyRelationshipAttributeQueryDVO,
     TransferFileOwnershipAcceptResponseItemDVO,
     TransferFileOwnershipRequestItemDVO
@@ -139,6 +142,7 @@ import {
 import { FileDVO, IdentityDVO, MessageDVO, MessageStatus, RecipientDVO, RelationshipDVO, RelationshipDirection, RelationshipTemplateDVO } from "./transport";
 
 export class DataViewExpander {
+    private readonly credentialOfferCache = new Map<string, Promise<OpenId4VciCredentialResponseJSON[] | undefined>>();
     public constructor(
         @Inject private readonly transport: TransportServices,
         @Inject private readonly consumption: ConsumptionServices,
@@ -633,6 +637,40 @@ export class DataViewExpander {
                     response: responseItemDVO,
                     file
                 } as TransferFileOwnershipRequestItemDVO;
+
+            case "ShareCredentialOfferRequestItem":
+                const shareCredentialOfferRequestItem = requestItem as ShareCredentialOfferRequestItemJSON;
+
+                // Use cache to avoid duplication of requests for the same URL
+                let credentialResponsesPromise = this.credentialOfferCache.get(shareCredentialOfferRequestItem.credentialOfferUrl);
+
+                if (!credentialResponsesPromise) {
+                    credentialResponsesPromise = (async () => {
+                        try {
+                            return await this.consumptionController.openId4Vc.requestAllCredentialsFromCredentialOfferUrl(shareCredentialOfferRequestItem.credentialOfferUrl);
+                        } catch {
+                            this.credentialOfferCache.delete(shareCredentialOfferRequestItem.credentialOfferUrl);
+                            return undefined;
+                        }
+                    })();
+
+                    this.credentialOfferCache.set(shareCredentialOfferRequestItem.credentialOfferUrl, credentialResponsesPromise);
+                }
+                const credentialResponses = await credentialResponsesPromise;
+
+                if (credentialResponses === undefined) {
+                    throw new Error("A credential offer could not be retrieved.");
+                }
+
+                return {
+                    ...shareCredentialOfferRequestItem,
+                    type: "ShareCredentialOfferRequestItemDVO",
+                    id: "",
+                    name: this.generateRequestItemName(requestItem["@type"], isDecidable),
+                    isDecidable: isDecidable && credentialResponses.length > 0,
+                    response: responseItemDVO,
+                    credentialResponses
+                } as ShareCredentialOfferRequestItemDVO;
 
             default:
                 return {

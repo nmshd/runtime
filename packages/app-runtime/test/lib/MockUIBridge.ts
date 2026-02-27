@@ -1,5 +1,5 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
-import { DeviceOnboardingInfoDTO, FileDVO, IdentityDVO, LocalRequestDVO, MailDVO, MessageDVO, RequestMessageDVO } from "@nmshd/runtime";
+import { DeviceOnboardingInfoDTO, FileDVO, IdentityDVO, LocalRequestDVO, MailDVO, MessageDVO, RequestMessageDVO, ResolveAuthorizationRequestResponse } from "@nmshd/runtime";
 import { IUIBridge, LocalAccountDTO } from "../../src";
 
 export type MockUIBridgeCall =
@@ -8,6 +8,7 @@ export type MockUIBridgeCall =
     | { method: "showFile"; account: LocalAccountDTO; file: FileDVO }
     | { method: "showDeviceOnboarding"; deviceOnboardingInfo: DeviceOnboardingInfoDTO }
     | { method: "showRequest"; account: LocalAccountDTO; request: LocalRequestDVO }
+    | { method: "showResolvedAuthorizationRequest"; account: LocalAccountDTO; response: ResolveAuthorizationRequestResponse }
     | { method: "showError"; error: ApplicationError; account?: LocalAccountDTO }
     | { method: "requestAccountSelection"; possibleAccounts: LocalAccountDTO[]; title?: string; description?: string }
     | { method: "enterPassword"; passwordType: "pw" | "pin"; pinLength?: number; attempt?: number; passwordLocationIndicator?: number };
@@ -61,6 +62,12 @@ export class MockUIBridge implements IUIBridge {
 
     public showRequest(account: LocalAccountDTO, request: LocalRequestDVO): Promise<Result<void>> {
         this._calls.push({ method: "showRequest", account, request });
+
+        return Promise.resolve(Result.ok(undefined));
+    }
+
+    public showResolvedAuthorizationRequest(account: LocalAccountDTO, response: ResolveAuthorizationRequestResponse): Promise<Result<void>> {
+        this._calls.push({ method: "showResolvedAuthorizationRequest", account, response });
 
         return Promise.resolve(Result.ok(undefined));
     }

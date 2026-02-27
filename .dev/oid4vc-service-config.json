@@ -1,0 +1,19 @@
+{
+    "port": 9000,
+    "baseUrl": "http://127.0.0.1:9000",
+    "mongodb": {
+        "host": "mongodb",
+        "port": 27017,
+        "user": "root",
+        "password": "example"
+    },
+    "connector": {
+        "baseUrl": "http://connector:80",
+        "apiKey": "aVeryCoolApiKeyWith30CharactersOr+"
+    },
+    "eudiplo": {
+        "baseUrl": "http://eudiplo:3000",
+        "clientId": "test-admin",
+        "clientSecret": "57c9cd444bf402b2cc1f5a0d2dafd3955bd9042c0372db17a4ede2d5fbda88e5"
+    }
+}

@@ -14,5 +14,6 @@ export * from "./proposeAttribute/ProposeAttributeRequestItem";
 export * from "./readAttribute/ReadAttributeAcceptResponseItem";
 export * from "./readAttribute/ReadAttributeRequestItem";
 export * from "./shareAttribute/ShareAttributeRequestItem";
+export * from "./shareCredentialOffer/ShareCredentialOfferRequestItem";
 export * from "./transferFileOwnership/TransferFileOwnershipAcceptResponseItem";
 export * from "./transferFileOwnership/TransferFileOwnershipRequestItem";
