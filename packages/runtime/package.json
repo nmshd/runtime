@@ -51,13 +51,29 @@
         "testEnvironment": "node",
         "testTimeout": 60000,
         "transform": {
-            "^.+\\.ts$": [
+            "^.+\\.(t|j)s$": [
                 "ts-jest",
                 {
                     "tsconfig": "test/tsconfig.json"
                 }
+            ],
+            "^.+\\.mjs$": [
+                "babel-jest",
+                {
+                    "presets": [
+                        [
+                            "@babel/preset-env",
+                            {
+                                "modules": "commonjs"
+                            }
+                        ]
+                    ]
+                }
             ]
-        }
+        },
+        "transformIgnorePatterns": [
+            "<rootDir>/node_modules/(?!(@noble|@stablelib|@credo\\-ts)/)"
+        ]
     },
     "dependencies": {
         "@js-soft/docdb-querytranslator": "^1.1.6",
@@ -75,6 +91,7 @@
         "ajv": "^8.18.0",
         "ajv-errors": "^3.0.0",
         "ajv-formats": "^3.0.1",
+        "elliptic": "^6.6.1",
         "json-stringify-safe": "^5.0.1",
         "lodash": "^4.17.23",
         "luxon": "^3.7.2",
@@ -85,9 +102,14 @@
         "@js-soft/docdb-access-loki": "1.4.0",
         "@js-soft/docdb-access-mongo": "1.4.0",
         "@js-soft/node-logger": "1.2.1",
+        "@nmshd/connector-sdk": "^7.3.0",
+        "@types/elliptic": "^6.4.18",
         "@types/json-stringify-safe": "^5.0.3",
         "@types/lodash": "^4.17.24",
         "@types/luxon": "^3.7.1",
+        "jwt-decode": "^4.0.0",
+        "@eudiplo/sdk-core": "^1.16.0",
+        "openid-client": "^6.8.1",
         "ts-json-schema-generator": "2.5.0",
         "ts-mockito": "^2.6.1"
     },

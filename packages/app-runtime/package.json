@@ -43,13 +43,29 @@
         "testEnvironment": "node",
         "testTimeout": 60000,
         "transform": {
-            "^.+\\.ts$": [
+            "^.+\\.(t|j)s$": [
                 "ts-jest",
                 {
                     "tsconfig": "test/tsconfig.json"
                 }
+            ],
+            "^.+\\.mjs$": [
+                "babel-jest",
+                {
+                    "presets": [
+                        [
+                            "@babel/preset-env",
+                            {
+                                "modules": "commonjs"
+                            }
+                        ]
+                    ]
+                }
             ]
-        }
+        },
+        "transformIgnorePatterns": [
+            "<rootDir>/node_modules/(?!(@noble|@stablelib|@credo\\-ts)/)"
+        ]
     },
     "dependencies": {
         "@js-soft/docdb-access-loki": "^1.4.0",
