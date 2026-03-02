@@ -186,6 +186,18 @@ expect.extend({
 
         return { pass: true, message: () => "" };
     },
+    showTokenNotCalled(mockUIBridge: unknown) {
+        if (!(mockUIBridge instanceof MockUIBridge)) {
+            throw new Error("This method can only be used with expect(MockUIBridge).");
+        }
+
+        const calls = mockUIBridge.calls.filter((x) => x.method === "showToken");
+        if (calls.length > 0) {
+            return { pass: false, message: () => `The method showToken called: ${calls.map((c) => `'account id: ${c.account.id} - tokenId: ${c.token.id}'`)}` };
+        }
+
+        return { pass: true, message: () => "" };
+    },
     showErrorCalled(mockUIBridge: unknown, code: string) {
         if (!(mockUIBridge instanceof MockUIBridge)) {
             throw new Error("This method can only be used with expect(MockUIBridge).");
