@@ -377,6 +377,22 @@ describe("AppStringProcessor", function () {
             expect(runtime4MockUiBridge).showFileCalled(file.id);
         });
 
+        test("get a token using a url", async function () {
+            const tokenResult = await runtime1Session.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
+                content: RelationshipTemplateContent.from({
+                    onNewRelationship: { items: [AuthenticationRequestItem.from({ mustBeAccepted: false, title: "anAuthentication" })] }
+                }).toJSON(),
+                expiresAt: CoreDate.utc().add({ days: 1 }).toISOString()
+            });
+            const token = tokenResult.value;
+
+            const result = await runtime4.stringProcessor.processURL(token.reference.url, runtime4Session.account);
+            expect(result).toBeSuccessful();
+            expect(result.value).toBeUndefined();
+
+            expect(runtime4MockUiBridge).showTokenCalled(token.id);
+        });
+
         test("get a template using a url", async function () {
             const templateResult = await runtime1Session.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
                 content: RelationshipTemplateContent.from({
