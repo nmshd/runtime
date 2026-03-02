@@ -134,7 +134,8 @@ export class AppStringProcessor {
                 // RelationshipTemplates are processed by the RequestModule
                 break;
             case "Token":
-                return Result.fail(AppRuntimeErrors.appStringProcessor.notSupportedTokenContent());
+                await uiBridge.showToken(account, result.value.value);
+                break;
             case "DeviceOnboardingInfo":
                 return Result.fail(AppRuntimeErrors.appStringProcessor.deviceOnboardingNotAllowed());
         }

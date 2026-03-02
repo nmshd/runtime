@@ -1,11 +1,12 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
-import { DeviceOnboardingInfoDTO, FileDVO, IdentityDVO, LocalRequestDVO, MailDVO, MessageDVO, RequestMessageDVO } from "@nmshd/runtime";
+import { DeviceOnboardingInfoDTO, FileDVO, IdentityDVO, LocalRequestDVO, MailDVO, MessageDVO, RequestMessageDVO, TokenDTO } from "@nmshd/runtime";
 import { LocalAccountDTO } from "../../multiAccount";
 
 export interface IUIBridge {
     showMessage(account: LocalAccountDTO, relationship: IdentityDVO, message: MessageDVO | MailDVO | RequestMessageDVO): Promise<Result<void>>;
     showRelationship(account: LocalAccountDTO, relationship: IdentityDVO): Promise<Result<void>>;
     showFile(account: LocalAccountDTO, file: FileDVO): Promise<Result<void>>;
+    showToken(account: LocalAccountDTO, token: TokenDTO): Promise<Result<void>>;
     showDeviceOnboarding(deviceOnboardingInfo: DeviceOnboardingInfoDTO): Promise<Result<void>>;
     showRequest(account: LocalAccountDTO, request: LocalRequestDVO): Promise<Result<void>>;
     showError(error: ApplicationError, account?: LocalAccountDTO): Promise<Result<void>>;

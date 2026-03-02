@@ -14,6 +14,10 @@ export class FakeUIBridge implements IUIBridge {
         return Promise.resolve(Result.ok(undefined));
     }
 
+    public showToken(): Promise<Result<void, ApplicationError>> {
+        return Promise.resolve(Result.ok(undefined));
+    }
+
     public showDeviceOnboarding(): Promise<Result<void, ApplicationError>> {
         return Promise.resolve(Result.ok(undefined));
     }

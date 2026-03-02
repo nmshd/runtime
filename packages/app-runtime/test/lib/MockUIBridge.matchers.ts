@@ -166,6 +166,26 @@ expect.extend({
 
         return { pass: true, message: () => "" };
     },
+    showTokenCalled(mockUIBridge: unknown, id: string) {
+        if (!(mockUIBridge instanceof MockUIBridge)) {
+            throw new Error("This method can only be used with expect(MockUIBridge).");
+        }
+
+        const calls = mockUIBridge.calls.filter((x) => x.method === "showToken");
+        if (calls.length === 0) {
+            return { pass: false, message: () => "The method showToken was not called." };
+        }
+
+        const matchingCalls = calls.filter((x) => x.token.id === id);
+        if (matchingCalls.length === 0) {
+            return {
+                pass: false,
+                message: () => `The method showToken was called, but not with the specified token id '${id}', instead with ids '${calls.map((e) => e.token.id).join(", ")}'.`
+            };
+        }
+
+        return { pass: true, message: () => "" };
+    },
     showErrorCalled(mockUIBridge: unknown, code: string) {
         if (!(mockUIBridge instanceof MockUIBridge)) {
             throw new Error("This method can only be used with expect(MockUIBridge).");
@@ -201,6 +221,7 @@ declare global {
             showRequestNotCalled(): R;
             showFileCalled(id: string): R;
             showFileNotCalled(): R;
+            showTokenCalled(id: string): R;
             showErrorCalled(code: string): R;
         }
     }
