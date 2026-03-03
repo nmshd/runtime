@@ -378,11 +378,10 @@ describe("AppStringProcessor", function () {
         });
 
         test("get a token using a url", async function () {
-            const tokenResult = await runtime1Session.transportServices.relationshipTemplates.createOwnRelationshipTemplate({
-                content: RelationshipTemplateContent.from({
-                    onNewRelationship: { items: [AuthenticationRequestItem.from({ mustBeAccepted: false, title: "anAuthentication" })] }
-                }).toJSON(),
-                expiresAt: CoreDate.utc().add({ days: 1 }).toISOString()
+            const tokenResult = await runtime1Session.transportServices.tokens.createOwnToken({
+                content: { custom: "tokenContent" },
+                expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
+                ephemeral: true
             });
             const token = tokenResult.value;
 
