@@ -12,8 +12,7 @@ import {
     SettingsController
 } from "@nmshd/consumption";
 import { ICoreAddress } from "@nmshd/core-types";
-import { RuntimeHealth } from "@nmshd/runtime-types";
-import { ModulesInitializedEvent, ModulesLoadedEvent, ModulesStartedEvent, RuntimeInitializedEvent, RuntimeInitializingEvent } from "@nmshd/runtime-types/src/events";
+import { ModulesInitializedEvent, ModulesLoadedEvent, ModulesStartedEvent, RuntimeHealth, RuntimeInitializedEvent, RuntimeInitializingEvent } from "@nmshd/runtime-types";
 import {
     AccountController,
     AnnouncementController,

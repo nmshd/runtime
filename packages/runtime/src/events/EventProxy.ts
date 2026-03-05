@@ -32,7 +32,7 @@ import {
     RelationshipReactivationCompletedEvent,
     RelationshipReactivationRequestedEvent,
     RelationshipTemplateAllocationsExhaustedEvent
-} from "@nmshd/runtime-types/src/events";
+} from "@nmshd/runtime-types";
 import * as transport from "@nmshd/transport";
 import { AttributeMapper, FileMapper, IdentityDeletionProcessMapper, MessageMapper, RelationshipMapper, RelationshipTemplateMapper, RequestMapper } from "../useCases";
 

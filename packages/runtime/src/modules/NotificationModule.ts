@@ -1,4 +1,4 @@
-import { MessageReceivedEvent, MessageSentEvent } from "@nmshd/runtime-types/src/events";
+import { MessageReceivedEvent, MessageSentEvent } from "@nmshd/runtime-types";
 import { RuntimeModule } from "../extensibility/modules/RuntimeModule";
 
 export class NotificationModule extends RuntimeModule {
