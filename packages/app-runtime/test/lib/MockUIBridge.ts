@@ -1,6 +1,16 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { OpenId4VciCredentialResponseJSON } from "@nmshd/consumption";
-import { DeviceOnboardingInfoDTO, FileDVO, IdentityDVO, LocalRequestDVO, MailDVO, MessageDVO, RequestMessageDVO, ResolveAuthorizationRequestResponse, TokenDTO } from "@nmshd/runtime";
+import {
+    DeviceOnboardingInfoDTO,
+    FileDVO,
+    IdentityDVO,
+    LocalRequestDVO,
+    MailDVO,
+    MessageDVO,
+    RequestMessageDVO,
+    ResolveAuthorizationRequestResponse,
+    TokenDTO
+} from "@nmshd/runtime";
 import { IUIBridge, LocalAccountDTO } from "../../src";
 
 export type MockUIBridgeCall =

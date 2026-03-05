@@ -228,7 +228,8 @@ expect.extend({
         if (matchingCalls.length === 0) {
             return {
                 pass: false,
-                message: () => `The method showVerifiablePresentation was called, but not with the specified token id '${id}', instead with ids '${calls.map((e) => e.token.id).join(", ")}'.`
+                message: () =>
+                    `The method showVerifiablePresentation was called, but not with the specified token id '${id}', instead with ids '${calls.map((e) => e.token.id).join(", ")}'.`
             };
         }
 
