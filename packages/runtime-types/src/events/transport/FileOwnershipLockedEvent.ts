@@ -1,6 +1,5 @@
-import { FileDTO } from "@nmshd/runtime-types";
-import { DataEvent } from "@nmshd/runtime-types/src/events/DataEvent";
-
+import { FileDTO } from "../../dtos";
+import { DataEvent } from "../DataEvent";
 export class FileOwnershipLockedEvent extends DataEvent<FileDTO> {
     public static readonly namespace = "transport.fileOwnershipLocked";
 

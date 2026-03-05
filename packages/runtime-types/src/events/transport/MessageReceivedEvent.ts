@@ -1,5 +1,5 @@
-import { MessageDTO } from "@nmshd/runtime-types";
-import { DataEvent } from "@nmshd/runtime-types/src/events/DataEvent";
+import { MessageDTO } from "../../dtos";
+import { DataEvent } from "../DataEvent";
 
 export class MessageReceivedEvent extends DataEvent<MessageDTO> {
     public static readonly namespace = "transport.messageReceived";

@@ -1,5 +1,5 @@
-import { RelationshipTemplateDTO } from "@nmshd/runtime-types";
-import { DataEvent } from "@nmshd/runtime-types/src/events/DataEvent";
+import { RelationshipTemplateDTO } from "../../dtos";
+import { DataEvent } from "../DataEvent";
 
 export class RelationshipTemplateAllocationsExhaustedEvent extends DataEvent<RelationshipTemplateDTO> {
     public static readonly namespace = "transport.relationshipTemplateAllocationsExhausted";

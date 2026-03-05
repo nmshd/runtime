@@ -1,4 +1,4 @@
-import { LocalAttributeDTO } from "@nmshd/runtime-types";
+import { LocalAttributeDTO } from "../../dtos";
 import { DataEvent } from "../DataEvent";
 
 export class AttributeWasViewedAtChangedEvent extends DataEvent<LocalAttributeDTO> {

@@ -1,4 +1,4 @@
-import { DataEvent } from "@nmshd/runtime-types/src/events/DataEvent";
+import { DataEvent } from "../DataEvent";
 
 export interface RelationshipDecomposedBySelfEventData {
     relationshipId: string;

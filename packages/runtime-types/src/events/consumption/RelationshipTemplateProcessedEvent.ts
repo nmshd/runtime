@@ -1,4 +1,4 @@
-import { RelationshipTemplateDTO } from "@nmshd/runtime-types";
+import { RelationshipTemplateDTO } from "../../dtos";
 import { DataEvent } from "../DataEvent";
 
 export class RelationshipTemplateProcessedEvent extends DataEvent<RelationshipTemplateProcessedEventData> {

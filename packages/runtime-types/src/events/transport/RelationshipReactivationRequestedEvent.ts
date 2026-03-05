@@ -1,5 +1,5 @@
-import { RelationshipDTO } from "@nmshd/runtime-types";
-import { DataEvent } from "@nmshd/runtime-types/src/events/DataEvent";
+import { RelationshipDTO } from "../../dtos";
+import { DataEvent } from "../DataEvent";
 
 export class RelationshipReactivationRequestedEvent extends DataEvent<RelationshipDTO> {
     public static readonly namespace = "transport.relationshipReactivationRequested";

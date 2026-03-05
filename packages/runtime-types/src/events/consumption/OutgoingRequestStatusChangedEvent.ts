@@ -1,5 +1,5 @@
 import { LocalRequestStatus } from "@nmshd/consumption";
-import { LocalRequestDTO } from "@nmshd/runtime-types";
+import { LocalRequestDTO } from "../../dtos";
 import { DataEvent } from "../DataEvent";
 
 export interface OutgoingRequestStatusChangedEventData {

@@ -1,5 +1,5 @@
 import { Event } from "@js-soft/ts-utils";
-import { RelationshipDTO } from "@nmshd/runtime-types";
+import { RelationshipDTO } from "../../dtos";
 import { DataEvent } from "../DataEvent";
 
 export class RelationshipEvent extends DataEvent<RelationshipDTO> {

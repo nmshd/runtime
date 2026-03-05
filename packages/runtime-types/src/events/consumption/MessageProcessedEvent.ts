@@ -1,4 +1,4 @@
-import { MessageDTO } from "@nmshd/runtime-types";
+import { MessageDTO } from "../../dtos";
 import { DataEvent } from "../DataEvent";
 
 export class MessageProcessedEvent extends DataEvent<MessageProcessedEventData> {
