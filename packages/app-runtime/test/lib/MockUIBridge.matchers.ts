@@ -214,7 +214,7 @@ expect.extend({
 
         return { pass: true, message: () => "" };
     },
-    showVerifiablePresentationCalled(mockUIBridge: unknown, id: string) {
+    showVerifiablePresentationCalled(mockUIBridge: unknown, id: string, isTechnicallyValid?: boolean) {
         if (!(mockUIBridge instanceof MockUIBridge)) {
             throw new Error("This method can only be used with expect(MockUIBridge).");
         }
@@ -224,12 +224,13 @@ expect.extend({
             return { pass: false, message: () => "The method showVerifiablePresentation was not called." };
         }
 
-        const matchingCalls = calls.filter((x) => x.token.id === id);
+        const matchingCalls = calls.filter((x) => x.token.id === id && (isTechnicallyValid === undefined || x.isTechnicallyValid === isTechnicallyValid));
         if (matchingCalls.length === 0) {
+            const callsWithData = calls.map((e) => `'${e.token.id}' (isTechnicallyValid: ${e.isTechnicallyValid})`).join(", ");
             return {
                 pass: false,
                 message: () =>
-                    `The method showVerifiablePresentation was called, but not with the specified token id '${id}', instead with ids '${calls.map((e) => e.token.id).join(", ")}'.`
+                    `The method showVerifiablePresentation was called, but not with token id '${id}' and isTechnicallyValid '${isTechnicallyValid}', instead with calls ${callsWithData}.`
             };
         }
 
@@ -286,7 +287,7 @@ declare global {
             showResolvedCredentialOfferNotCalled(): R;
             showFileCalled(id: string): R;
             showFileNotCalled(): R;
-            showVerifiablePresentationCalled(id: string): R;
+            showVerifiablePresentationCalled(id: string, isTechnicallyValid?: boolean): R;
             showVerifiablePresentationNotCalled(): R;
             showErrorCalled(code: string): R;
         }

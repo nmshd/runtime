@@ -17,7 +17,7 @@ export interface IUIBridge {
     showMessage(account: LocalAccountDTO, relationship: IdentityDVO, message: MessageDVO | MailDVO | RequestMessageDVO): Promise<Result<void>>;
     showRelationship(account: LocalAccountDTO, relationship: IdentityDVO): Promise<Result<void>>;
     showFile(account: LocalAccountDTO, file: FileDVO): Promise<Result<void>>;
-    showVerifiablePresentation(account: LocalAccountDTO, token: TokenDTO): Promise<Result<void>>;
+    showVerifiablePresentation(account: LocalAccountDTO, token: TokenDTO, isTechnicallyValid: boolean): Promise<Result<void>>;
     showDeviceOnboarding(deviceOnboardingInfo: DeviceOnboardingInfoDTO): Promise<Result<void>>;
     showRequest(account: LocalAccountDTO, request: LocalRequestDVO): Promise<Result<void>>;
     showResolvedAuthorizationRequest(account: LocalAccountDTO, response: ResolveAuthorizationRequestResponse): Promise<Result<void>>;

@@ -392,7 +392,7 @@ describe("AppStringProcessor", function () {
             expect(result).toBeSuccessful();
             expect(result.value).toBeUndefined();
 
-            expect(runtime4MockUiBridge).showVerifiablePresentationCalled(token.id);
+            expect(runtime4MockUiBridge).showVerifiablePresentationCalled(token.id, true);
         });
 
         test("get a template using a url", async function () {

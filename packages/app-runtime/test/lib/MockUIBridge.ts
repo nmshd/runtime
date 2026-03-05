@@ -17,7 +17,7 @@ export type MockUIBridgeCall =
     | { method: "showMessage"; account: LocalAccountDTO; relationship: IdentityDVO; message: MessageDVO | MailDVO | RequestMessageDVO }
     | { method: "showRelationship"; account: LocalAccountDTO; relationship: IdentityDVO }
     | { method: "showFile"; account: LocalAccountDTO; file: FileDVO }
-    | { method: "showVerifiablePresentation"; account: LocalAccountDTO; token: TokenDTO }
+    | { method: "showVerifiablePresentation"; account: LocalAccountDTO; token: TokenDTO; isTechnicallyValid: boolean }
     | { method: "showDeviceOnboarding"; deviceOnboardingInfo: DeviceOnboardingInfoDTO }
     | { method: "showRequest"; account: LocalAccountDTO; request: LocalRequestDVO }
     | { method: "showResolvedAuthorizationRequest"; account: LocalAccountDTO; response: ResolveAuthorizationRequestResponse }
@@ -68,8 +68,8 @@ export class MockUIBridge implements IUIBridge {
         return Promise.resolve(Result.ok(undefined));
     }
 
-    public showVerifiablePresentation(account: LocalAccountDTO, token: TokenDTO): Promise<Result<void>> {
-        this._calls.push({ method: "showVerifiablePresentation", account, token });
+    public showVerifiablePresentation(account: LocalAccountDTO, token: TokenDTO, isTechnicallyValid: boolean): Promise<Result<void>> {
+        this._calls.push({ method: "showVerifiablePresentation", account, token, isTechnicallyValid });
 
         return Promise.resolve(Result.ok(undefined));
     }
