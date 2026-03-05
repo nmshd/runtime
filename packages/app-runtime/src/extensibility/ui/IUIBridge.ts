@@ -1,12 +1,13 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { OpenId4VciCredentialResponseJSON } from "@nmshd/consumption";
-import { DeviceOnboardingInfoDTO, FileDVO, IdentityDVO, LocalRequestDVO, MailDVO, MessageDVO, RequestMessageDVO, ResolveAuthorizationRequestResponse } from "@nmshd/runtime";
+import { DeviceOnboardingInfoDTO, FileDVO, IdentityDVO, LocalRequestDVO, MailDVO, MessageDVO, RequestMessageDVO, ResolveAuthorizationRequestResponse, TokenDTO } from "@nmshd/runtime";
 import { LocalAccountDTO } from "../../multiAccount";
 
 export interface IUIBridge {
     showMessage(account: LocalAccountDTO, relationship: IdentityDVO, message: MessageDVO | MailDVO | RequestMessageDVO): Promise<Result<void>>;
     showRelationship(account: LocalAccountDTO, relationship: IdentityDVO): Promise<Result<void>>;
     showFile(account: LocalAccountDTO, file: FileDVO): Promise<Result<void>>;
+    showVerifiablePresentation(account: LocalAccountDTO, token: TokenDTO): Promise<Result<void>>;
     showDeviceOnboarding(deviceOnboardingInfo: DeviceOnboardingInfoDTO): Promise<Result<void>>;
     showRequest(account: LocalAccountDTO, request: LocalRequestDVO): Promise<Result<void>>;
     showResolvedAuthorizationRequest(account: LocalAccountDTO, response: ResolveAuthorizationRequestResponse): Promise<Result<void>>;

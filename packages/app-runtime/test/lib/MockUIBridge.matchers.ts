@@ -214,6 +214,38 @@ expect.extend({
 
         return { pass: true, message: () => "" };
     },
+    showVerifiablePresentationCalled(mockUIBridge: unknown, id: string) {
+        if (!(mockUIBridge instanceof MockUIBridge)) {
+            throw new Error("This method can only be used with expect(MockUIBridge).");
+        }
+
+        const calls = mockUIBridge.calls.filter((x) => x.method === "showVerifiablePresentation");
+        if (calls.length === 0) {
+            return { pass: false, message: () => "The method showVerifiablePresentation was not called." };
+        }
+
+        const matchingCalls = calls.filter((x) => x.token.id === id);
+        if (matchingCalls.length === 0) {
+            return {
+                pass: false,
+                message: () => `The method showVerifiablePresentation was called, but not with the specified token id '${id}', instead with ids '${calls.map((e) => e.token.id).join(", ")}'.`
+            };
+        }
+
+        return { pass: true, message: () => "" };
+    },
+    showVerifiablePresentationNotCalled(mockUIBridge: unknown) {
+        if (!(mockUIBridge instanceof MockUIBridge)) {
+            throw new Error("This method can only be used with expect(MockUIBridge).");
+        }
+
+        const calls = mockUIBridge.calls.filter((x) => x.method === "showVerifiablePresentation");
+        if (calls.length > 0) {
+            return { pass: false, message: () => `The method showVerifiablePresentation called: ${calls.map((c) => `'account id: ${c.account.id} - tokenId: ${c.token.id}'`)}` };
+        }
+
+        return { pass: true, message: () => "" };
+    },
     showErrorCalled(mockUIBridge: unknown, code: string) {
         if (!(mockUIBridge instanceof MockUIBridge)) {
             throw new Error("This method can only be used with expect(MockUIBridge).");
@@ -253,6 +285,8 @@ declare global {
             showResolvedCredentialOfferNotCalled(): R;
             showFileCalled(id: string): R;
             showFileNotCalled(): R;
+            showVerifiablePresentationCalled(id: string): R;
+            showVerifiablePresentationNotCalled(): R;
             showErrorCalled(code: string): R;
         }
     }

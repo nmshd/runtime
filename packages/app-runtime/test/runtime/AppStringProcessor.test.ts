@@ -1,4 +1,4 @@
-import { ArbitraryRelationshipTemplateContentJSON, AuthenticationRequestItem, RelationshipTemplateContent } from "@nmshd/content";
+import { ArbitraryRelationshipTemplateContentJSON, AuthenticationRequestItem, RelationshipTemplateContent, VerifiablePresentation } from "@nmshd/content";
 import { CoreDate, PasswordLocationIndicatorOptions } from "@nmshd/core-types";
 import { DeviceOnboardingInfoDTO, PeerRelationshipTemplateLoadedEvent } from "@nmshd/runtime";
 import assert from "assert";
@@ -375,6 +375,24 @@ describe("AppStringProcessor", function () {
             expect(result.value).toBeUndefined();
 
             expect(runtime4MockUiBridge).showFileCalled(file.id);
+        });
+
+        test("get a token with verifiable presentation content using a url", async function () {
+            const tokenResult = await runtime1Session.transportServices.tokens.createOwnToken({
+                content: VerifiablePresentation.from({
+                    value: { tokenContent: "test" },
+                    type: "VerifiablePresentation"
+                }).toJSON(),
+                expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
+                ephemeral: true
+            });
+            const token = tokenResult.value;
+
+            const result = await runtime4.stringProcessor.processURL(token.reference.url, runtime4Session.account);
+            expect(result).toBeSuccessful();
+            expect(result.value).toBeUndefined();
+
+            expect(runtime4MockUiBridge).showVerifiablePresentationCalled(token.id);
         });
 
         test("get a template using a url", async function () {
