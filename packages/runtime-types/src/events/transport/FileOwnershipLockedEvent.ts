@@ -1,5 +1,6 @@
 import { FileDTO } from "../../dtos";
 import { DataEvent } from "../DataEvent";
+
 export class FileOwnershipLockedEvent extends DataEvent<FileDTO> {
     public static readonly namespace = "transport.fileOwnershipLocked";
 
