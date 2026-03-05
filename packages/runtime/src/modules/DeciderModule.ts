@@ -9,7 +9,7 @@ import {
     MessageProcessedResult,
     RelationshipTemplateProcessedEvent,
     RelationshipTemplateProcessedResult
-} from "../events";
+} from "@nmshd/runtime-types/src/events";
 import { ModuleConfiguration, RuntimeModule } from "../extensibility";
 import { RuntimeServices } from "../Runtime";
 import { RuntimeErrors } from "../useCases/common/RuntimeErrors";

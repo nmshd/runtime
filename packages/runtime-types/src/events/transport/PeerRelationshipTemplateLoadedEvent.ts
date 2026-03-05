@@ -1,5 +1,5 @@
 import { RelationshipTemplateDTO } from "@nmshd/runtime-types";
-import { DataEvent } from "../DataEvent";
+import { DataEvent } from "@nmshd/runtime-types/src/events/DataEvent";
 
 export class PeerRelationshipTemplateLoadedEvent extends DataEvent<RelationshipTemplateDTO> {
     public static readonly namespace = "transport.peerRelationshipTemplateLoaded";

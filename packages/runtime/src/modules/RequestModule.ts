@@ -10,7 +10,7 @@ import {
     MessageSentEvent,
     PeerRelationshipTemplateLoadedEvent,
     RelationshipChangedEvent
-} from "../events";
+} from "@nmshd/runtime-types/src/events";
 import { RelationshipTemplateProcessedEvent, RelationshipTemplateProcessedResult } from "../events/consumption/RelationshipTemplateProcessedEvent";
 import { RuntimeModule } from "../extensibility/modules/RuntimeModule";
 import { RuntimeServices } from "../Runtime";
