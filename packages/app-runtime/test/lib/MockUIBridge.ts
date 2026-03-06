@@ -1,11 +1,22 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
-import { DeviceOnboardingInfoDTO, FileDVO, IdentityDVO, LocalRequestDVO, MailDVO, MessageDVO, RequestMessageDVO, ResolveAuthorizationRequestResponse } from "@nmshd/runtime";
+import {
+    DeviceOnboardingInfoDTO,
+    FileDVO,
+    IdentityDVO,
+    LocalRequestDVO,
+    MailDVO,
+    MessageDVO,
+    RequestMessageDVO,
+    ResolveAuthorizationRequestResponse,
+    TokenDTO
+} from "@nmshd/runtime";
 import { IUIBridge, LocalAccountDTO } from "../../src";
 
 export type MockUIBridgeCall =
     | { method: "showMessage"; account: LocalAccountDTO; relationship: IdentityDVO; message: MessageDVO | MailDVO | RequestMessageDVO }
     | { method: "showRelationship"; account: LocalAccountDTO; relationship: IdentityDVO }
     | { method: "showFile"; account: LocalAccountDTO; file: FileDVO }
+    | { method: "showVerifiablePresentation"; account: LocalAccountDTO; token: TokenDTO; isTechnicallyValid: boolean }
     | { method: "showDeviceOnboarding"; deviceOnboardingInfo: DeviceOnboardingInfoDTO }
     | { method: "showRequest"; account: LocalAccountDTO; request: LocalRequestDVO }
     | { method: "showResolvedAuthorizationRequest"; account: LocalAccountDTO; response: ResolveAuthorizationRequestResponse }
@@ -50,6 +61,12 @@ export class MockUIBridge implements IUIBridge {
 
     public showFile(account: LocalAccountDTO, file: FileDVO): Promise<Result<void>> {
         this._calls.push({ method: "showFile", account, file });
+
+        return Promise.resolve(Result.ok(undefined));
+    }
+
+    public showVerifiablePresentation(account: LocalAccountDTO, token: TokenDTO, isTechnicallyValid: boolean): Promise<Result<void>> {
+        this._calls.push({ method: "showVerifiablePresentation", account, token, isTechnicallyValid });
 
         return Promise.resolve(Result.ok(undefined));
     }

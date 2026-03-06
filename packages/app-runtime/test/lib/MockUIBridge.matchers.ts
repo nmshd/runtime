@@ -191,6 +191,44 @@ expect.extend({
 
         return { pass: true, message: () => "" };
     },
+    showVerifiablePresentationCalled(mockUIBridge: unknown, id: string, isTechnicallyValid: boolean) {
+        if (!(mockUIBridge instanceof MockUIBridge)) {
+            throw new Error("This method can only be used with expect(MockUIBridge).");
+        }
+
+        const calls = mockUIBridge.calls.filter((x) => x.method === "showVerifiablePresentation");
+        if (calls.length === 0) {
+            return { pass: false, message: () => "The method showVerifiablePresentation was not called." };
+        }
+
+        const matchingCalls = calls.filter((x) => x.token.id === id && x.isTechnicallyValid === isTechnicallyValid);
+        if (matchingCalls.length === 0) {
+            const callsWithData = calls.map((e) => `'${e.token.id}' (isTechnicallyValid: ${e.isTechnicallyValid})`).join(", ");
+            return {
+                pass: false,
+                message: () =>
+                    `The method showVerifiablePresentation was called, but not with token id '${id}' and isTechnicallyValid '${isTechnicallyValid}', instead with calls ${callsWithData}.`
+            };
+        }
+
+        return { pass: true, message: () => "" };
+    },
+    showVerifiablePresentationNotCalled(mockUIBridge: unknown) {
+        if (!(mockUIBridge instanceof MockUIBridge)) {
+            throw new Error("This method can only be used with expect(MockUIBridge).");
+        }
+
+        const calls = mockUIBridge.calls.filter((x) => x.method === "showVerifiablePresentation");
+        if (calls.length > 0) {
+            return {
+                pass: false,
+                message: () =>
+                    `The method showVerifiablePresentation called: ${calls.map((c) => `'account id: ${c.account.id} - tokenId: ${c.token.id} - isTechnicallyValid: ${c.isTechnicallyValid}'`)}`
+            };
+        }
+
+        return { pass: true, message: () => "" };
+    },
     showErrorCalled(mockUIBridge: unknown, code: string) {
         if (!(mockUIBridge instanceof MockUIBridge)) {
             throw new Error("This method can only be used with expect(MockUIBridge).");
@@ -230,6 +268,8 @@ declare global {
             showResolvedCredentialOfferNotCalled(): R;
             showFileCalled(id: string): R;
             showFileNotCalled(): R;
+            showVerifiablePresentationCalled(id: string, isTechnicallyValid: boolean): R;
+            showVerifiablePresentationNotCalled(): R;
             showErrorCalled(code: string): R;
         }
     }
