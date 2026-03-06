@@ -293,7 +293,7 @@ export class AppStringProcessor {
                 const tokenContent = this.parseTokenContent(result.value.value.content);
 
                 if (tokenContent instanceof VerifiablePresentation) {
-                    // TODO: replace with real validation once implemented
+                    // TODO: add technical validation
                     await uiBridge.showVerifiablePresentation(account, result.value.value, true);
                     break;
                 }

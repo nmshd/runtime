@@ -380,8 +380,8 @@ describe("AppStringProcessor", function () {
         test("get a token with verifiable presentation content using a url", async function () {
             const tokenResult = await runtime1Session.transportServices.tokens.createOwnToken({
                 content: VerifiablePresentation.from({
-                    value: { tokenContent: "test" },
-                    type: "VerifiablePresentation"
+                    value: { claim: "test" },
+                    type: "dc+sd-jwt"
                 }).toJSON(),
                 expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
                 ephemeral: true

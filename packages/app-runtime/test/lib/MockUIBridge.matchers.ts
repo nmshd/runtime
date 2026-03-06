@@ -214,7 +214,7 @@ expect.extend({
 
         return { pass: true, message: () => "" };
     },
-    showVerifiablePresentationCalled(mockUIBridge: unknown, id: string, isTechnicallyValid?: boolean) {
+    showVerifiablePresentationCalled(mockUIBridge: unknown, id: string, isTechnicallyValid: boolean) {
         if (!(mockUIBridge instanceof MockUIBridge)) {
             throw new Error("This method can only be used with expect(MockUIBridge).");
         }
@@ -224,7 +224,7 @@ expect.extend({
             return { pass: false, message: () => "The method showVerifiablePresentation was not called." };
         }
 
-        const matchingCalls = calls.filter((x) => x.token.id === id && (isTechnicallyValid === undefined || x.isTechnicallyValid === isTechnicallyValid));
+        const matchingCalls = calls.filter((x) => x.token.id === id && x.isTechnicallyValid === isTechnicallyValid);
         if (matchingCalls.length === 0) {
             const callsWithData = calls.map((e) => `'${e.token.id}' (isTechnicallyValid: ${e.isTechnicallyValid})`).join(", ");
             return {
@@ -243,7 +243,11 @@ expect.extend({
 
         const calls = mockUIBridge.calls.filter((x) => x.method === "showVerifiablePresentation");
         if (calls.length > 0) {
-            return { pass: false, message: () => `The method showVerifiablePresentation called: ${calls.map((c) => `'account id: ${c.account.id} - tokenId: ${c.token.id}'`)}` };
+            return {
+                pass: false,
+                message: () =>
+                    `The method showVerifiablePresentation called: ${calls.map((c) => `'account id: ${c.account.id} - tokenId: ${c.token.id} - isTechnicallyValid: ${c.isTechnicallyValid}'`)}`
+            };
         }
 
         return { pass: true, message: () => "" };
@@ -287,7 +291,7 @@ declare global {
             showResolvedCredentialOfferNotCalled(): R;
             showFileCalled(id: string): R;
             showFileNotCalled(): R;
-            showVerifiablePresentationCalled(id: string, isTechnicallyValid?: boolean): R;
+            showVerifiablePresentationCalled(id: string, isTechnicallyValid: boolean): R;
             showVerifiablePresentationNotCalled(): R;
             showErrorCalled(code: string): R;
         }
