@@ -20,7 +20,10 @@
         "cdep": "tsc && madge --circular dist",
         "lint:tsc": "tsc --noEmit"
     },
-    "dependencies": {},
+    "dependencies": {
+        "@js-soft/ts-utils": "2.3.5",
+        "@nmshd/content": "*"
+    },
     "devDependencies": {},
     "publishConfig": {
         "access": "public",
