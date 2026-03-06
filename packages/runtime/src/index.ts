@@ -1,7 +1,6 @@
 export * from "@nmshd/runtime-types";
 export * from "./buildInformation";
 export * from "./dataViews";
-export * from "./events";
 export * from "./extensibility";
 export * from "./modules";
 export * from "./Runtime";
