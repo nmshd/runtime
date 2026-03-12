@@ -171,6 +171,28 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         return submissionResult.serverResponse;
     }
 
+    // hacky solution because credo doesn't support credentials without key binding
+    // TODO: use credentials without key binding once supported
+    public async createPresentationTokenContent(credential: VerifiableCredential): Promise<VerifiablePresentation> {
+        if (credential.type !== ClaimFormat.SdJwtDc) throw new Error("Only SD-JWT credentials have been tested so far with token presentation");
+
+        const sdJwtVcApi = this.agent.dependencyManager.resolve(SdJwtVcApi);
+        const presentation = await sdJwtVcApi.present({
+            sdJwtVc: sdJwtVcApi.fromCompact(credential.value as string),
+            verifierMetadata: {
+                audience: "defaultPresentationAudience",
+                issuedAt: Date.now() / 1000,
+                nonce: "defaultPresentationNonce"
+            }
+        });
+
+        return VerifiablePresentation.from({
+            value: presentation,
+            type: credential.type,
+            displayInformation: credential.displayInformation
+        });
+    }
+
     public async exit(): Promise<void> {
         await this.shutdown();
     }
