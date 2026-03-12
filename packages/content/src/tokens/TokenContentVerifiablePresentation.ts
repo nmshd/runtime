@@ -1,6 +1,6 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH } from "../attributes/types/proprietary/ProprietaryAttributeValue";
 import { ContentJSON } from "../ContentJSON";
+import { PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH } from "../attributes";
 
 export interface TokenContentVerifiablePresentationJSON extends ContentJSON {
     "@type": "TokenContentVerifiablePresentation";
