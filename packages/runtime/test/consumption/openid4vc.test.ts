@@ -279,7 +279,7 @@ describe("EUDIPLO", () => {
 
         const presentationTokenContent = presentationTokenResult.value.content;
         expect(presentationTokenContent).toBeDefined();
-        expect(presentationTokenContent["@type"]).toBe("VerifiablePresentation");
+        expect(presentationTokenContent["@type"]).toBe("TokenContentVerifiablePresentation");
         expect((presentationTokenContent as TokenContentVerifiablePresentation).value).toBeDefined();
         expect((presentationTokenContent as TokenContentVerifiablePresentation).displayInformation).toBeDefined();
         expect((presentationTokenContent as TokenContentVerifiablePresentation).displayInformation![0].name).toBe("test");
