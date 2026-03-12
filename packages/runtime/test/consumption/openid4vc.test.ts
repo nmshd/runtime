@@ -1,7 +1,7 @@
 import { SdJwtVcRecord } from "@credo-ts/core";
 import { EudiploClient } from "@eudiplo/sdk-core";
 import { AcceptProposeAttributeRequestItemParametersWithNewAttributeJSON, AcceptShareAuthorizationRequestRequestItemParametersJSON, decodeRecord } from "@nmshd/consumption";
-import { RequestJSON, ShareAuthorizationRequestRequestItemJSON, VerifiableCredentialJSON, VerifiablePresentation } from "@nmshd/content";
+import { RequestJSON, ShareAuthorizationRequestRequestItemJSON, TokenContentVerifiablePresentation, VerifiableCredentialJSON } from "@nmshd/content";
 import axios, { AxiosInstance } from "axios";
 import * as client from "openid-client";
 import path from "path";
@@ -280,9 +280,9 @@ describe("EUDIPLO", () => {
         const presentationTokenContent = presentationTokenResult.value.content;
         expect(presentationTokenContent).toBeDefined();
         expect(presentationTokenContent["@type"]).toBe("VerifiablePresentation");
-        expect((presentationTokenContent as VerifiablePresentation).value).toBeDefined();
-        expect((presentationTokenContent as VerifiablePresentation).displayInformation).toBeDefined();
-        expect((presentationTokenContent as VerifiablePresentation).displayInformation![0].name).toBe("test");
+        expect((presentationTokenContent as TokenContentVerifiablePresentation).value).toBeDefined();
+        expect((presentationTokenContent as TokenContentVerifiablePresentation).displayInformation).toBeDefined();
+        expect((presentationTokenContent as TokenContentVerifiablePresentation).displayInformation![0].name).toBe("test");
     });
 });
 

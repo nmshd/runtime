@@ -2,7 +2,7 @@ import { OpenId4VciResolvedCredentialOffer } from "@credo-ts/openid4vc";
 import { ILogger, ILoggerFactory } from "@js-soft/logging-abstractions";
 import { Serializable } from "@js-soft/ts-serval";
 import { EventBus, Result } from "@js-soft/ts-utils";
-import { VerifiablePresentation } from "@nmshd/content";
+import { TokenContentVerifiablePresentation } from "@nmshd/content";
 import { ICoreAddress, Reference } from "@nmshd/core-types";
 import { AnonymousServices, DeviceMapper, RuntimeServices } from "@nmshd/runtime";
 import { BackboneIds, TokenContentDeviceSharedSecret } from "@nmshd/transport";
@@ -292,7 +292,7 @@ export class AppStringProcessor {
             case "Token":
                 const tokenContent = this.parseTokenContent(result.value.value.content);
 
-                if (tokenContent instanceof VerifiablePresentation) {
+                if (tokenContent instanceof TokenContentVerifiablePresentation) {
                     // TODO: add technical validation
                     await uiBridge.showVerifiablePresentation(account, result.value.value, true);
                     break;
