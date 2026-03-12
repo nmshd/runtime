@@ -5,11 +5,13 @@ import { CoreDate, CoreId } from "@nmshd/core-types";
 import { TokenDTO } from "@nmshd/runtime-types";
 import { TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { TokenMapper } from "../../transport/tokens/TokenMapper";
 
 export interface CreatePresentationTokenRequest {
     attributeId: string;
+    expiresAt: ISO8601DateTimeString;
+    ephemeral: boolean;
 }
 
 class Validator extends SchemaValidator<CreatePresentationTokenRequest> {
@@ -36,8 +38,8 @@ export class CreatePresentationTokenUseCase extends UseCase<CreatePresentationTo
 
         const token = await this.tokenController.sendToken({
             content: presentationTokenContent.toJSON(),
-            expiresAt: CoreDate.utc().add({ minutes: 1 }),
-            ephemeral: true
+            expiresAt: CoreDate.from(request.expiresAt),
+            ephemeral: request.ephemeral
         });
 
         return Result.ok(TokenMapper.toTokenDTO(token, true));
