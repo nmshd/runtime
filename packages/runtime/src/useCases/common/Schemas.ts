@@ -17337,10 +17337,18 @@ export const CreatePresentationTokenRequest: any = {
             "properties": {
                 "attributeId": {
                     "type": "string"
+                },
+                "expiresAt": {
+                    "type": "string"
+                },
+                "ephemeral": {
+                    "type": "boolean"
                 }
             },
             "required": [
-                "attributeId"
+                "attributeId",
+                "expiresAt",
+                "ephemeral"
             ],
             "additionalProperties": false
         }

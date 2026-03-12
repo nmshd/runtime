@@ -10,6 +10,8 @@ import { TokenMapper } from "../../transport/tokens/TokenMapper";
 
 export interface CreatePresentationTokenRequest {
     attributeId: string;
+    expiresAt: string;
+    ephemeral: boolean;
 }
 
 class Validator extends SchemaValidator<CreatePresentationTokenRequest> {
@@ -36,8 +38,8 @@ export class CreatePresentationTokenUseCase extends UseCase<CreatePresentationTo
 
         const token = await this.tokenController.sendToken({
             content: presentationTokenContent.toJSON(),
-            expiresAt: CoreDate.utc().add({ minutes: 1 }),
-            ephemeral: true
+            expiresAt: CoreDate.from(request.expiresAt),
+            ephemeral: request.ephemeral
         });
 
         return Result.ok(TokenMapper.toTokenDTO(token, true));
