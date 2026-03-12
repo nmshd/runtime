@@ -1,4 +1,4 @@
-import { ArbitraryRelationshipTemplateContentJSON, AuthenticationRequestItem, RelationshipTemplateContent, VerifiablePresentation } from "@nmshd/content";
+import { ArbitraryRelationshipTemplateContentJSON, AuthenticationRequestItem, RelationshipTemplateContent, TokenContentVerifiablePresentation } from "@nmshd/content";
 import { CoreDate, PasswordLocationIndicatorOptions } from "@nmshd/core-types";
 import { DeviceOnboardingInfoDTO, PeerRelationshipTemplateLoadedEvent } from "@nmshd/runtime";
 import assert from "assert";
@@ -379,7 +379,7 @@ describe("AppStringProcessor", function () {
 
         test("get a token with verifiable presentation content using a url", async function () {
             const tokenResult = await runtime1Session.transportServices.tokens.createOwnToken({
-                content: VerifiablePresentation.from({
+                content: TokenContentVerifiablePresentation.from({
                     value: { claim: "test" },
                     type: "dc+sd-jwt"
                 }).toJSON(),
