@@ -1,7 +1,7 @@
 import { SdJwtVcRecord } from "@credo-ts/core";
 import { EudiploClient } from "@eudiplo/sdk-core";
 import { AcceptProposeAttributeRequestItemParametersWithNewAttributeJSON, AcceptShareAuthorizationRequestRequestItemParametersJSON, decodeRecord } from "@nmshd/consumption";
-import { RequestJSON, ShareAuthorizationRequestRequestItemJSON, VerifiableCredentialJSON } from "@nmshd/content";
+import { RequestJSON, ShareAuthorizationRequestRequestItemJSON, VerifiableCredentialJSON, VerifiablePresentation } from "@nmshd/content";
 import axios, { AxiosInstance } from "axios";
 import * as client from "openid-client";
 import path from "path";
@@ -251,6 +251,38 @@ describe("EUDIPLO", () => {
 
         const sessionStatus = (await eudiploClient.getSession(sessionId)).status;
         expect(sessionStatus).toBe("completed"); // in case of failed presentation: Status remains "active"
+    });
+
+    test("create presentation token", async () => {
+        const credentialOfferUrl = (
+            await eudiploClient.createIssuanceOffer({
+                responseType: "uri",
+                credentialConfigurationIds: [eudiploCredentialConfigurationId],
+                flow: "pre_authorized_code"
+            })
+        ).uri;
+
+        const resolveCredentialOfferResult = await runtimeServices1.consumption.openId4Vc.resolveCredentialOffer({ credentialOfferUrl });
+        const credentialResponsesResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
+            credentialOffer: resolveCredentialOfferResult.value.credentialOffer,
+            credentialConfigurationIds: [eudiploCredentialConfigurationId]
+        });
+        const storedCredential = (
+            await runtimeServices1.consumption.openId4Vc.storeCredentials({
+                credentialResponses: credentialResponsesResult.value.credentialResponses
+            })
+        ).value;
+        expect((storedCredential.content.value as VerifiableCredentialJSON).displayInformation?.[0].name).toBe("test");
+
+        const presentationTokenResult = await runtimeServices1.consumption.openId4Vc.createPresentationToken({ attributeId: storedCredential.id });
+        expect(presentationTokenResult).toBeSuccessful();
+
+        const presentationTokenContent = presentationTokenResult.value.content;
+        expect(presentationTokenContent).toBeDefined();
+        expect(presentationTokenContent["@type"]).toBe("VerifiablePresentation");
+        expect((presentationTokenContent as VerifiablePresentation).value).toBeDefined();
+        expect((presentationTokenContent as VerifiablePresentation).displayInformation).toBeDefined();
+        expect((presentationTokenContent as VerifiablePresentation).displayInformation![0].name).toBe("test");
     });
 });
 

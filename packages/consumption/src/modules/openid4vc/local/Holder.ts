@@ -218,8 +218,9 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         });
 
         return VerifiablePresentation.from({
-            ...credential,
-            value: presentation
+            value: presentation,
+            type: credential.type,
+            displayInformation: credential.displayInformation
         });
     }
 
