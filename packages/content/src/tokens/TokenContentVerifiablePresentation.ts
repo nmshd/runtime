@@ -41,7 +41,7 @@ export class TokenContentVerifiablePresentation extends Serializable implements 
 function validateValue(value: any) {
     try {
         const string = JSON.stringify(value);
-        // the length correspondes to 50MB - maybe this needs to be restricted further in the future
+        // the length corresponds to 50MB - maybe this needs to be restricted further in the future
         if (string.length > 52428800) {
             return "stringified value must not be longer than 52428800 characters";
         }
