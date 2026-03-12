@@ -2,6 +2,7 @@ import { SdJwtVcRecord } from "@credo-ts/core";
 import { EudiploClient } from "@eudiplo/sdk-core";
 import { AcceptProposeAttributeRequestItemParametersWithNewAttributeJSON, AcceptShareAuthorizationRequestRequestItemParametersJSON, decodeRecord } from "@nmshd/consumption";
 import { RequestJSON, ShareAuthorizationRequestRequestItemJSON, TokenContentVerifiablePresentation, VerifiableCredentialJSON } from "@nmshd/content";
+import { CoreDate } from "@nmshd/core-types";
 import axios, { AxiosInstance } from "axios";
 import * as client from "openid-client";
 import path from "path";
@@ -274,7 +275,11 @@ describe("EUDIPLO", () => {
         ).value;
         expect((storedCredential.content.value as VerifiableCredentialJSON).displayInformation?.[0].name).toBe("test");
 
-        const presentationTokenResult = await runtimeServices1.consumption.openId4Vc.createPresentationToken({ attributeId: storedCredential.id });
+        const presentationTokenResult = await runtimeServices1.consumption.openId4Vc.createPresentationToken({
+            attributeId: storedCredential.id,
+            expiresAt: CoreDate.utc().add({ minutes: 1 }).toString(),
+            ephemeral: true
+        });
         expect(presentationTokenResult).toBeSuccessful();
 
         const presentationTokenContent = presentationTokenResult.value.content;
