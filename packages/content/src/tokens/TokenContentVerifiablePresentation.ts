@@ -1,5 +1,13 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH } from "../attributes/types/proprietary/ProprietaryAttributeValue";
+import { ContentJSON } from "../ContentJSON";
+
+export interface TokenContentVerifiablePresentationJSON extends ContentJSON {
+    "@type": "TokenContentVerifiablePresentation";
+    value: string | Record<string, any>;
+    type: string;
+    displayInformation?: Record<string, any>[];
+}
 
 export interface ITokenContentVerifiablePresentation extends ISerializable {
     value: string | Record<string, any>;
@@ -21,8 +29,12 @@ export class TokenContentVerifiablePresentation extends Serializable implements 
     @validate({ nullable: true, max: PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH })
     public displayInformation?: Record<string, any>[];
 
-    public static from(value: ITokenContentVerifiablePresentation): TokenContentVerifiablePresentation {
+    public static from(value: ITokenContentVerifiablePresentation | Omit<TokenContentVerifiablePresentationJSON, "@type">): TokenContentVerifiablePresentation {
         return this.fromAny(value);
+    }
+
+    public override toJSON(verbose?: boolean | undefined, serializeAsString?: boolean | undefined): TokenContentVerifiablePresentationJSON {
+        return super.toJSON(verbose, serializeAsString) as TokenContentVerifiablePresentationJSON;
     }
 }
 
