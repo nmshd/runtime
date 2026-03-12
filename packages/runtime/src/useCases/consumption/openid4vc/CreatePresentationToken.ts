@@ -5,12 +5,12 @@ import { CoreDate, CoreId } from "@nmshd/core-types";
 import { TokenDTO } from "@nmshd/runtime-types";
 import { TokenController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
-import { RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { TokenMapper } from "../../transport/tokens/TokenMapper";
 
 export interface CreatePresentationTokenRequest {
     attributeId: string;
-    expiresAt: string;
+    expiresAt: ISO8601DateTimeString;
     ephemeral: boolean;
 }
 
