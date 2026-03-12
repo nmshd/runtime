@@ -1,6 +1,6 @@
 import { DcqlValidCredential, W3cJsonCredential } from "@credo-ts/core";
 import { OpenId4VciResolvedCredentialOffer, OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
-import { VerifiableCredential } from "@nmshd/content";
+import { TokenContentVerifiablePresentation, VerifiableCredential } from "@nmshd/content";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../consumption/ConsumptionController";
 import { ConsumptionControllerName } from "../../consumption/ConsumptionControllerName";
@@ -128,5 +128,9 @@ export class OpenId4VcController extends ConsumptionBaseController {
         if (!serverResponse) throw new Error("No response from server");
 
         return { status: serverResponse.status, message: serverResponse.body };
+    }
+
+    public async createPresentationTokenContent(credential: VerifiableCredential): Promise<TokenContentVerifiablePresentation> {
+        return await this.holder.createPresentationTokenContent(credential);
     }
 }
