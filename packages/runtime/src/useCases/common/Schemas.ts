@@ -17317,13 +17317,17 @@ export const AcceptAuthorizationRequestRequest: any = {
                     "type": "object"
                 },
                 "attributeId": {
-                    "type": "string"
+                    "$ref": "#/definitions/AttributeIdString"
                 }
             },
             "required": [
                 "attributeId",
                 "authorizationRequest"
             ]
+        },
+        "AttributeIdString": {
+            "type": "string",
+            "pattern": "ATT[A-Za-z0-9]{17}"
         }
     }
 }
@@ -17336,7 +17340,7 @@ export const CreatePresentationTokenRequest: any = {
             "type": "object",
             "properties": {
                 "attributeId": {
-                    "type": "string"
+                    "$ref": "#/definitions/AttributeIdString"
                 },
                 "expiresAt": {
                     "$ref": "#/definitions/ISO8601DateTimeString"
@@ -17351,6 +17355,10 @@ export const CreatePresentationTokenRequest: any = {
                 "ephemeral"
             ],
             "additionalProperties": false
+        },
+        "AttributeIdString": {
+            "type": "string",
+            "pattern": "ATT[A-Za-z0-9]{17}"
         },
         "ISO8601DateTimeString": {
             "type": "string",
