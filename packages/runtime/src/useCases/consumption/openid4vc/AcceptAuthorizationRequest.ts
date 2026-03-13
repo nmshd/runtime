@@ -3,11 +3,11 @@ import { Result } from "@js-soft/ts-utils";
 import { AttributesController, LocalAttribute, OpenId4VcController, OwnIdentityAttribute } from "@nmshd/consumption";
 import { CoreId } from "@nmshd/core-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import { RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
+import { AttributeIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
 export interface AbstractAcceptAuthorizationRequestRequest<T> {
     authorizationRequest: T;
-    attributeId: string;
+    attributeId: AttributeIdString;
 }
 
 export interface AcceptAuthorizationRequestRequest extends AbstractAcceptAuthorizationRequestRequest<OpenId4VpResolvedAuthorizationRequest> {}
