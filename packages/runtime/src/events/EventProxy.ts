@@ -31,7 +31,8 @@ import {
     RelationshipDecomposedBySelfEvent,
     RelationshipReactivationCompletedEvent,
     RelationshipReactivationRequestedEvent,
-    RelationshipTemplateAllocationsExhaustedEvent
+    RelationshipTemplateAllocationsExhaustedEvent,
+    ShareCredentialOfferRequestItemProcessedByRecipientEvent
 } from "@nmshd/runtime-types";
 import * as transport from "@nmshd/transport";
 import { AttributeMapper, FileMapper, IdentityDeletionProcessMapper, MessageMapper, RelationshipMapper, RelationshipTemplateMapper, RequestMapper } from "../useCases";
@@ -201,6 +202,16 @@ export class EventProxy {
                     request: RequestMapper.toLocalRequestDTO(event.data.request),
                     oldStatus: event.data.oldStatus,
                     newStatus: event.data.newStatus
+                })
+            );
+        });
+
+        this.subscribeToSourceEvent(consumption.ShareCredentialOfferRequestItemProcessedByRecipientEvent, (event) => {
+            this.targetEventBus.publish(
+                new ShareCredentialOfferRequestItemProcessedByRecipientEvent(event.eventTargetAddress, {
+                    credentialOfferUrl: event.data.credentialOfferUrl,
+                    accepted: event.data.accepted,
+                    peer: event.data.peer.toString()
                 })
             );
         });
