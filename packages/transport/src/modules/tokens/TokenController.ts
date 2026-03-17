@@ -107,6 +107,10 @@ export class TokenController extends TransportController {
             passwordProtection
         });
 
+        if (!input.ephemeral) {
+            await this.tokens.create(token);
+        }
+
         return token;
     }
 
