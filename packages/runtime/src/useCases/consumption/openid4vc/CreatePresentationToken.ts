@@ -34,8 +34,7 @@ export class CreatePresentationTokenUseCase extends UseCase<CreatePresentationTo
         const attribute = await this.attributesController.getLocalAttribute(CoreId.from(request.attributeId));
         if (!(attribute?.content.value instanceof VerifiableCredential)) return Result.fail(RuntimeErrors.general.recordNotFound("Attribute with Verifiable Credential"));
 
-        // TODO: use ephemeral
-        const emptyToken = await this.tokenController.sendEmptyToken({ expiresAt: CoreDate.from(request.expiresAt) });
+        const emptyToken = await this.tokenController.sendEmptyToken({ expiresAt: CoreDate.from(request.expiresAt), ephemeral: request.ephemeral });
 
         const presentationTokenContent = await this.openId4VcController.createPresentationTokenContent(attribute.content.value, emptyToken.id.toString());
 
