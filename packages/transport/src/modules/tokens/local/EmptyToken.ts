@@ -1,21 +1,21 @@
-import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
-import { CoreDate, CoreId, ICoreDate, ICoreId } from "@nmshd/core-types";
+import { serialize, type, validate } from "@js-soft/ts-serval";
+import { CoreDate, ICoreDate } from "@nmshd/core-types";
 import { CryptoSecretKey, ICryptoSecretKey } from "@nmshd/crypto";
+import { nameof } from "ts-simple-nameof";
+import { CoreSynchronizable, ICoreSynchronizable } from "../../../core";
 import { IPasswordProtection, PasswordProtection } from "../../../core/types/PasswordProtection";
 import { TokenReference } from "../transmission/TokenReference";
 
-export interface IEmptyToken extends ISerializable {
-    id: ICoreId;
+export interface IEmptyToken extends ICoreSynchronizable {
     secretKey: ICryptoSecretKey;
     expiresAt: ICoreDate;
     passwordProtection: IPasswordProtection;
 }
 
 @type("EmptyToken")
-export class EmptyToken extends Serializable implements IEmptyToken {
-    @validate()
-    @serialize()
-    public id: CoreId;
+export class EmptyToken extends CoreSynchronizable implements IEmptyToken {
+    public override readonly technicalProperties = ["@type", "@context", nameof<EmptyToken>((r) => r.secretKey), nameof<EmptyToken>((r) => r.expiresAt)];
+    public override readonly userdataProperties = [nameof<EmptyToken>((r) => r.passwordProtection)];
 
     @validate()
     @serialize()
