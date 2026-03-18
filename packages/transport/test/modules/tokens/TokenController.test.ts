@@ -69,9 +69,7 @@ describe("TokenController", function () {
 
     test("should send an empty token", async function () {
         const expiresAt = CoreDate.utc().add({ hours: 1 });
-        const sentToken = await sender.tokens.sendEmptyToken({
-            expiresAt
-        });
+        const sentToken = await sender.tokens.sendEmptyToken({ expiresAt, ephemeral: true });
 
         expect(sentToken).toBeDefined();
     });
