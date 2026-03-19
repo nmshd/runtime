@@ -34,14 +34,17 @@ export class CreatePresentationTokenUseCase extends UseCase<CreatePresentationTo
         const attribute = await this.attributesController.getLocalAttribute(CoreId.from(request.attributeId));
         if (!(attribute?.content.value instanceof VerifiableCredential)) return Result.fail(RuntimeErrors.general.recordNotFound("Attribute with Verifiable Credential"));
 
-        const presentationTokenContent = await this.openId4VcController.createPresentationTokenContent(attribute.content.value);
+        const emptyToken = await this.tokenController.sendEmptyToken({ expiresAt: CoreDate.from(request.expiresAt), ephemeral: request.ephemeral });
 
-        const token = await this.tokenController.sendToken({
-            content: presentationTokenContent.toJSON(),
-            expiresAt: CoreDate.from(request.expiresAt),
-            ephemeral: request.ephemeral
+        const presentationTokenContent = await this.openId4VcController.createPresentationTokenContent(attribute.content.value, emptyToken.id.toString());
+
+        const presentationToken = await this.tokenController.updateTokenContent({
+            id: emptyToken.id,
+            secretKey: emptyToken.secretKey,
+            content: presentationTokenContent,
+            passwordProtection: emptyToken.passwordProtection
         });
 
-        return Result.ok(TokenMapper.toTokenDTO(token, true));
+        return Result.ok(TokenMapper.toTokenDTO(presentationToken, true));
     }
 }
