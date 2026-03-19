@@ -133,4 +133,8 @@ export class OpenId4VcController extends ConsumptionBaseController {
     public async createPresentationTokenContent(credential: VerifiableCredential, nonce: string): Promise<TokenContentVerifiablePresentation> {
         return await this.holder.createPresentationTokenContent(credential, nonce);
     }
+
+    public async verifyPresentationTokenContent(tokenContent: TokenContentVerifiablePresentation, expectedNonce: string): Promise<{ isValid: boolean; error?: Error }> {
+        return await this.holder.verifyPresentationTokenContent(tokenContent, expectedNonce);
+    }
 }

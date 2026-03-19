@@ -224,6 +224,21 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         });
     }
 
+    public async verifyPresentationTokenContent(tokenContent: TokenContentVerifiablePresentation, expectedNonce: string): Promise<{ isValid: boolean; error?: Error }> {
+        if (tokenContent.type !== ClaimFormat.SdJwtDc) throw new Error("Only SD-JWT credentials have been tested so far with token presentation");
+
+        const sdJwtVcApi = this.agent.dependencyManager.resolve(SdJwtVcApi);
+        const verificationResult = await sdJwtVcApi.verify({
+            compactSdJwtVc: tokenContent.value as string,
+            keyBinding: {
+                audience: "defaultPresentationAudience",
+                nonce: expectedNonce
+            }
+        });
+
+        return { isValid: verificationResult.isValid, error: "error" in verificationResult ? verificationResult.error : undefined };
+    }
+
     public async exit(): Promise<void> {
         await this.shutdown();
     }

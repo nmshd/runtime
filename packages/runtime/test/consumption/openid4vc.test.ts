@@ -1,4 +1,4 @@
-import { SdJwtVcRecord } from "@credo-ts/core";
+import { ClaimFormat, SdJwtVcRecord } from "@credo-ts/core";
 import { EudiploClient } from "@eudiplo/sdk-core";
 import { AcceptProposeAttributeRequestItemParametersWithNewAttributeJSON, AcceptShareAuthorizationRequestRequestItemParametersJSON, decodeRecord } from "@nmshd/consumption";
 import { RequestJSON, ShareAuthorizationRequestRequestItemJSON, TokenContentVerifiablePresentation, VerifiableCredentialJSON } from "@nmshd/content";
@@ -182,9 +182,7 @@ describe("EUDIPLO", () => {
         expect(presentationResult.value.status).toBe(200);
     });
 
-    // TODO: unskip once fix to CanCreateShareCredentialOffer has been deployed to the connector
-    // eslint-disable-next-line jest/no-disabled-tests
-    test.skip("issuance with request", async () => {
+    test("issuance with request", async () => {
         const oldCredentials = (
             await runtimeServices1.consumption.attributes.getAttributes({
                 query: {
@@ -288,6 +286,44 @@ describe("EUDIPLO", () => {
         expect((presentationTokenContent as TokenContentVerifiablePresentation).value).toBeDefined();
         expect((presentationTokenContent as TokenContentVerifiablePresentation).displayInformation).toBeDefined();
         expect((presentationTokenContent as TokenContentVerifiablePresentation).displayInformation![0].name).toBe("test");
+
+        const verificationResult = await runtimeServices1.consumption.openId4Vc.verifyPresentationToken({
+            tokenContent: presentationTokenContent,
+            expectedNonce: presentationTokenResult.value.id
+        });
+
+        expect(verificationResult).toBeSuccessful();
+        expect(verificationResult.value.isValid).toBe(true);
+    });
+
+    test.only("successful token verification", async () => {
+        // Problem: Credential zu kurzlebig
+        const verificationResult = await runtimeServices1.consumption.openId4Vc.verifyPresentationToken({
+            tokenContent: {
+                "@type": "TokenContentVerifiablePresentation",
+                type: ClaimFormat.SdJwtDc,
+                value: "eyJ0eXAiOiJkYytzZC1qd3QiLCJ4NWMiOlsiTUlJQmdEQ0NBU1dnQXdJQkFnSUJBVEFLQmdncWhrak9QUVFEQWpBY01Rc3dDUVlEVlFRR0V3SkVSVEVOTUFzR0ExVUVBeE1FZEdWemREQWVGdzB5TmpBeU1UY3hNelU1TVRaYUZ3MHlOekF5TVRjeE16VTVNVFphTUJ3eEN6QUpCZ05WQkFZVEFrUkZNUTB3Q3dZRFZRUURFd1IwWlhOME1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRWRpaTNZRDd1bTNnRmF3MlJuL0FENmczU3J4V0dGQVFOR2p0NzR3VW5DSUNLSzBzNllHUk9GdnliTWhueWNOZkRnL24rZWdTeEllbXo5Q1QyT1hlTmY2TllNRll3RkFZRFZSMFJCQTB3QzRJSmJHOWpZV3hvYjNOME1BOEdBMVVkRXdFQi93UUZNQU1CQWY4d0RnWURWUjBQQVFIL0JBUURBZ0trTUIwR0ExVWREZ1FXQkJRVlB3YitISUNsOEFmZkVNSFRoTWZUblJNbGpqQUtCZ2dxaGtqT1BRUURBZ05KQURCR0FpRUE3RTNia2VNZFF2bmRnQ2thenh1SzhjemxhRklJNmtoNVMyM3ZNOGFwa0h3Q0lRQzh6VDNqbHNlTHVHZjVNREZpbCtBbUM0MzV2eVBNQ2tBV3pkK3VBeXZJUmc9PSJdLCJhbGciOiJFUzI1NiJ9.eyJpYXQiOjE3NzM5MTgyNDksImV4cCI6MTc3MzkyMTg0OSwidmN0IjoidGVzdCIsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC90ZXN0IiwiY25mIjp7Imp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Ik9URWttWHpiZXBFMThnVG8tMUxHcjE2bDVHNWdtbGtnSjZTM251N1ZSTWsiLCJ5IjoiejhHWkd3M1o3bVpHZ1oyZUE3LTMxVUdoZi1Sak5GVjc2Q2Rta1N4ZlAzQSIsImtpZCI6IjQ3MDFhNTQ2LTc5YmItNDJjMy05YTQ1LTQzNmIzYTU0MDMzYyJ9fSwiX3NkX2FsZyI6InNoYS0yNTYifQ.OYnl0hPesabuQ_XDuKFERwSeOFCtb9GHG0zaEuvAsFsH-srW9-A8npruZDpXlzhWsW85X-SNzNNsCBzJqBPfLA~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJpYXQiOjE3NzM5MTgyNTMuMjYzLCJub25jZSI6IlRPS2pRSENOZjlvWFBCMGYzU05QIiwiYXVkIjoiZGVmYXVsdFByZXNlbnRhdGlvbkF1ZGllbmNlIiwic2RfaGFzaCI6ImJaS042NkhhblBZWkRDaF91RjhiUHRUbjBuekwxeXlURGNLZjRXYWN6dEkifQ.PcIF1cmsi71-qNP23A6nnu-SL6D_QLalUsZ9dJKzI7H8mLF9TdN2-J94VNVfoTfs6ejL1F1_6C3z2kKKTe3PRA"
+            },
+            expectedNonce: "TOKjQHCNf9oXPB0f3SNP"
+        });
+
+        expect(verificationResult).toBeSuccessful();
+        console.log(verificationResult);
+        expect(verificationResult.value.isValid).toBe(true);
+    });
+
+    test("fail token verification in case of invalid signature", async () => {
+        const verificationResult = await runtimeServices1.consumption.openId4Vc.verifyPresentationToken({
+            tokenContent: {
+                "@type": "TokenContentVerifiablePresentation",
+                type: ClaimFormat.SdJwtDc,
+                value: "eyJ0eXAiOiJkYytzZC1qd3QiLCJ4NWMiOlsiTUlJQmdEQ0NBU1dnQXdJQkFnSUJBVEFLQmdncWhrak9QUVFEQWpBY01Rc3dDUVlEVlFRR0V3SkVSVEVOTUFzR0ExVUVBeE1FZEdWemREQWVGdzB5TmpBeU1UY3hNelU1TVRaYUZ3MHlOekF5TVRjeE16VTVNVFphTUJ3eEN6QUpCZ05WQkFZVEFrUkZNUTB3Q3dZRFZRUURFd1IwWlhOME1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRWRpaTNZRDd1bTNnRmF3MlJuL0FENmczU3J4V0dGQVFOR2p0NzR3VW5DSUNLSzBzNllHUk9GdnliTWhueWNOZkRnL24rZWdTeEllbXo5Q1QyT1hlTmY2TllNRll3RkFZRFZSMFJCQTB3QzRJSmJHOWpZV3hvYjNOME1BOEdBMVVkRXdFQi93UUZNQU1CQWY4d0RnWURWUjBQQVFIL0JBUURBZ0trTUIwR0ExVWREZ1FXQkJRVlB3YitISUNsOEFmZkVNSFRoTWZUblJNbGpqQUtCZ2dxaGtqT1BRUURBZ05KQURCR0FpRUE3RTNia2VNZFF2bmRnQ2thenh1SzhjemxhRklJNmtoNVMyM3ZNOGFwa0h3Q0lRQzh6VDNqbHNlTHVHZjVNREZpbCtBbUM0MzV2eVBNQ2tBV3pkK3VBeXZJUmc9PSJdLCJhbGciOiJFUzI1NiJ9.eyJpYXQiOjE3NzM5MTgyNDksImV4cCI6MTc3MzkyMTg0OSwidmN0IjoidGVzdCIsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC90ZXN0IiwiY25mIjp7Imp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Ik9URWttWHpiZXBFMThnVG8tMUxHcjE2bDVHNWdtbGtnSjZTM251N1ZSTWsiLCJ5IjoiejhHWkd3M1o3bVpHZ1oyZUE3LTMxVUdoZi1Sak5GVjc2Q2Rta1N4ZlAzQSIsImtpZCI6IjQ3MDFhNTQ2LTc5YmItNDJjMy05YTQ1LTQzNmIzYTU0MDMzYyJ9fSwiX3NkX2FsZyI6InNoYS0yNTYifQ.OYnl0hPesabuQ_XDuKFERwSeOFCtb9GHG0zaEuvAsFsH-srW9-A8npruZDpXlzhWsW85X-SNzNNsCBzJqBPfL~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJpYXQiOjE3NzM5MTgyNTMuMjYzLCJub25jZSI6IlRPS2pRSENOZjlvWFBCMGYzU05QIiwiYXVkIjoiZGVmYXVsdFByZXNlbnRhdGlvbkF1ZGllbmNlIiwic2RfaGFzaCI6ImJaS042NkhhblBZWkRDaF91RjhiUHRUbjBuekwxeXlURGNLZjRXYWN6dEkifQ.PcIF1cmsi71-qNP23A6nnu-SL6D_QLalUsZ9dJKzI7H8mLF9TdN2-J94VNVfoTfs6ejL1F1_6C3z2kKKTe3PRA"
+            },
+            expectedNonce: "TOKjQHCNf9oXPB0f3SNP"
+        });
+
+        expect(verificationResult).toBeSuccessful();
+        expect(verificationResult.value.isValid).toBe(false);
     });
 });
 
@@ -298,6 +334,8 @@ async function startOid4VcComposeStack() {
     if (baseUrl.includes("localhost")) {
         addressGenerationHostnameOverride = "localhost";
         baseUrl = baseUrl.replace("localhost", "host.docker.internal");
+    } else {
+        addressGenerationHostnameOverride = process.env.NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE;
     }
 
     const composeFolder = path.resolve(path.join(__dirname, "..", "..", "..", "..", ".dev"));

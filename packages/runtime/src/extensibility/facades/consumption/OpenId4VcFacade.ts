@@ -19,6 +19,7 @@ import {
     StoreCredentialsRequest,
     StoreCredentialsUseCase
 } from "../../../useCases";
+import { VerifyPresentationTokenRequest, VerifyPresentationTokenResponse, VerifyPresentationTokenUseCase } from "../../../useCases/consumption/openid4vc/VerifyPresentationToken";
 
 export class OpenId4VcFacade {
     public constructor(
@@ -27,7 +28,8 @@ export class OpenId4VcFacade {
         @Inject private readonly storeCredentialsUseCase: StoreCredentialsUseCase,
         @Inject private readonly resolveAuthorizationRequestUseCase: ResolveAuthorizationRequestUseCase,
         @Inject private readonly acceptAuthorizationRequestUseCase: AcceptAuthorizationRequestUseCase,
-        @Inject private readonly createPresentationTokenUseCase: CreatePresentationTokenUseCase
+        @Inject private readonly createPresentationTokenUseCase: CreatePresentationTokenUseCase,
+        @Inject private readonly verifyPresentationTokenUseCase: VerifyPresentationTokenUseCase
     ) {}
 
     public async resolveCredentialOffer(request: ResolveCredentialOfferRequest): Promise<Result<ResolveCredentialOfferResponse>> {
@@ -52,5 +54,9 @@ export class OpenId4VcFacade {
 
     public async createPresentationToken(request: CreatePresentationTokenRequest): Promise<Result<TokenDTO>> {
         return await this.createPresentationTokenUseCase.execute(request);
+    }
+
+    public async verifyPresentationToken(request: VerifyPresentationTokenRequest): Promise<Result<VerifyPresentationTokenResponse>> {
+        return await this.verifyPresentationTokenUseCase.execute(request);
     }
 }

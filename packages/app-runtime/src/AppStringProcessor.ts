@@ -290,11 +290,15 @@ export class AppStringProcessor {
                 // RelationshipTemplates are processed by the RequestModule
                 break;
             case "Token":
-                const tokenContent = this.parseTokenContent(result.value.value.content);
+                const token = result.value.value;
+                const tokenContent = this.parseTokenContent(token.content);
 
                 if (tokenContent instanceof TokenContentVerifiablePresentation) {
-                    // TODO: add technical validation
-                    await uiBridge.showVerifiablePresentation(account, result.value.value, true);
+                    const verificationResult = await services.consumptionServices.openId4Vc.verifyPresentationToken({
+                        tokenContent: tokenContent.toJSON(),
+                        expectedNonce: token.id
+                    });
+                    await uiBridge.showVerifiablePresentation(account, result.value.value, verificationResult.value.isValid);
                     break;
                 }
                 return Result.fail(AppRuntimeErrors.appStringProcessor.notSupportedTokenContent());
