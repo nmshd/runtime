@@ -93,10 +93,7 @@ export class TokenController extends TransportController {
         const input = SendEmptyTokenParameters.from(parameters);
         const secretKey = await CoreCrypto.generateSecretKey();
 
-        const password = await Random.string(16, RandomCharacterRange.Alphanumeric + RandomCharacterRange.SpecialCharacters);
-        const salt = await CoreCrypto.random(16);
-        const hashedPassword = (await CoreCrypto.deriveHashOutOfPassword(password, salt)).toBase64();
-        const passwordProtection = PasswordProtection.from({ password, passwordType: "pw", salt });
+        const { hashedPassword, passwordProtection } = await this.generatePasswordProtection(input.withPassword);
 
         const response = (await this.client.createEmptyToken({ password: hashedPassword, expiresAt: input.expiresAt.toISOString() })).value;
 
@@ -112,6 +109,17 @@ export class TokenController extends TransportController {
         }
 
         return token;
+    }
+
+    private async generatePasswordProtection(passwordDesired?: boolean): Promise<{ hashedPassword: string | undefined; passwordProtection: PasswordProtection | undefined }> {
+        if (!passwordDesired) return { hashedPassword: undefined, passwordProtection: undefined };
+
+        const password = await Random.string(16, RandomCharacterRange.Alphanumeric + RandomCharacterRange.SpecialCharacters);
+        const salt = await CoreCrypto.random(16);
+        const hashedPassword = (await CoreCrypto.deriveHashOutOfPassword(password, salt)).toBase64();
+        const passwordProtection = PasswordProtection.from({ password, passwordType: "pw", salt });
+
+        return { hashedPassword, passwordProtection };
     }
 
     @log()
@@ -233,19 +241,20 @@ export class TokenController extends TransportController {
 
         const cipher = await CoreCrypto.encrypt(serializedTokenBuffer, input.secretKey);
 
-        const password = parameters.passwordProtection.password;
-        if (!password) throw TransportCoreErrors.general.noPasswordProvided();
-
-        const hashedPassword = (await CoreCrypto.deriveHashOutOfPassword(password, input.passwordProtection.salt)).toBase64();
+        const hashedPassword = input.passwordProtection?.password
+            ? (await CoreCrypto.deriveHashOutOfPassword(input.passwordProtection.password, input.passwordProtection.salt)).toBase64()
+            : undefined;
 
         const response = (await this.client.updateTokenContent({ id: parameters.id.toString(), newContent: cipher.toBase64(), password: hashedPassword })).value;
 
-        const passwordProtection = PasswordProtection.from({
-            password,
-            passwordType: parameters.passwordProtection.passwordType,
-            salt: parameters.passwordProtection.salt,
-            passwordLocationIndicator: parameters.passwordProtection.passwordLocationIndicator
-        });
+        const passwordProtection = input.passwordProtection?.password
+            ? PasswordProtection.from({
+                  password: input.passwordProtection.password,
+                  passwordType: input.passwordProtection.passwordType,
+                  salt: input.passwordProtection.salt,
+                  passwordLocationIndicator: input.passwordProtection.passwordLocationIndicator
+              })
+            : undefined;
 
         const token = Token.from({
             id: CoreId.from(response.id),
