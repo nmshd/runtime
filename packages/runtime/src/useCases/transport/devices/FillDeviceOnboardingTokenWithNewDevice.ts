@@ -30,9 +30,6 @@ export class FillDeviceOnboardingTokenWithNewDeviceUseCase extends UseCase<FillD
     protected async executeInternal(request: FillDeviceOnboardingTokenWithNewDeviceRequest): Promise<Result<TokenDTO>> {
         const reference = TokenReference.from(request.reference);
 
-        const passwordProtection = reference.passwordProtection;
-        if (!passwordProtection?.password) throw RuntimeErrors.devices.referenceNotPointingToAnEmptyToken();
-
         const isEmptyToken = await this.tokenController.isEmptyToken(reference);
         if (!isEmptyToken) throw RuntimeErrors.devices.referenceNotPointingToAnEmptyToken();
 
@@ -46,7 +43,7 @@ export class FillDeviceOnboardingTokenWithNewDeviceUseCase extends UseCase<FillD
                 id: reference.id,
                 content: TokenContentDeviceSharedSecret.from({ sharedSecret }),
                 secretKey: reference.key,
-                passwordProtection: reference.passwordProtection!
+                passwordProtection: reference.passwordProtection
             });
 
             return Result.ok(TokenMapper.toTokenDTO(response, true));

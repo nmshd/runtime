@@ -1,7 +1,10 @@
-import { ArbitraryRelationshipTemplateContentJSON, AuthenticationRequestItem, RelationshipTemplateContent, TokenContentVerifiablePresentation } from "@nmshd/content";
+import { EudiploClient } from "@eudiplo/sdk-core";
+import { ArbitraryRelationshipTemplateContentJSON, AuthenticationRequestItem, RelationshipTemplateContent } from "@nmshd/content";
 import { CoreDate, PasswordLocationIndicatorOptions } from "@nmshd/core-types";
 import { DeviceOnboardingInfoDTO, PeerRelationshipTemplateLoadedEvent } from "@nmshd/runtime";
 import assert from "assert";
+import path from "path";
+import { GenericContainer, Wait } from "testcontainers";
 import { AppRuntime, LocalAccountSession } from "../../src";
 import { MockEventBus, MockUIBridge, TestUtil } from "../lib";
 
@@ -378,11 +381,40 @@ describe("AppStringProcessor", function () {
         });
 
         test("get a token with verifiable presentation content using a url", async function () {
-            const tokenResult = await runtime1Session.transportServices.tokens.createOwnToken({
-                content: TokenContentVerifiablePresentation.from({
-                    value: { claim: "test" },
-                    type: "dc+sd-jwt"
-                }).toJSON(),
+            const eudiploClientId = "test-admin";
+            const eudiploClientSecret = "57c9cd444bf402b2cc1f5a0d2dafd3955bd9042c0372db17a4ede2d5fbda88e5";
+            const eudiploCredentialConfigurationId = "test";
+            const eudiploBaseUrl = `http://localhost:3000`;
+
+            const eudiploContainer = await startEudiplo();
+
+            const eudiploClient = new EudiploClient({
+                baseUrl: eudiploBaseUrl,
+                clientId: eudiploClientId,
+                clientSecret: eudiploClientSecret
+            });
+
+            const credentialOfferUrl = (
+                await eudiploClient.createIssuanceOffer({
+                    responseType: "uri",
+                    credentialConfigurationIds: [eudiploCredentialConfigurationId],
+                    flow: "pre_authorized_code"
+                })
+            ).uri;
+
+            const resolveCredentialOfferResult = await runtime1Session.consumptionServices.openId4Vc.resolveCredentialOffer({ credentialOfferUrl });
+            const credentialResponsesResult = await runtime1Session.consumptionServices.openId4Vc.requestCredentials({
+                credentialOffer: resolveCredentialOfferResult.value.credentialOffer,
+                credentialConfigurationIds: [eudiploCredentialConfigurationId]
+            });
+            const storedCredential = (
+                await runtime1Session.consumptionServices.openId4Vc.storeCredentials({
+                    credentialResponses: credentialResponsesResult.value.credentialResponses
+                })
+            ).value;
+
+            const tokenResult = await runtime1Session.consumptionServices.openId4Vc.createPresentationToken({
+                attributeId: storedCredential.id,
                 expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
                 ephemeral: true
             });
@@ -393,6 +425,8 @@ describe("AppStringProcessor", function () {
             expect(result.value).toBeUndefined();
 
             expect(runtime4MockUiBridge).showVerifiablePresentationCalled(token.id, true);
+
+            await eudiploContainer.stop();
         });
 
         test("get a template using a url", async function () {
@@ -481,4 +515,27 @@ describe("AppStringProcessor", function () {
             expect(runtime4MockUiBridge).showFileCalled(file.id);
         });
     });
+
+    async function startEudiplo() {
+        return await new GenericContainer("ghcr.io/openwallet-foundation-labs/eudiplo:3.1.2@sha256:0ea3a73d42a1eb10a6edc45e3289478b08b09064bd75563c503ed12be2ed2dc6")
+            .withEnvironment({
+                PUBLIC_URL: "http://localhost:3000", // eslint-disable-line @typescript-eslint/naming-convention
+                MASTER_SECRET: "OgwrDcgVQQ2yZwcFt7kPxQm3nUF+X3etF6MdLTstZAY=", // eslint-disable-line @typescript-eslint/naming-convention
+                AUTH_CLIENT_ID: "root", // eslint-disable-line @typescript-eslint/naming-convention
+                AUTH_CLIENT_SECRET: "test", // eslint-disable-line @typescript-eslint/naming-convention
+                CONFIG_IMPORT: "true", // eslint-disable-line @typescript-eslint/naming-convention
+                CONFIG_FOLDER: "/app/assets/config", // eslint-disable-line @typescript-eslint/naming-convention
+                PORT: "3000" // eslint-disable-line @typescript-eslint/naming-convention
+            } as Record<string, string>)
+            .withExposedPorts({ container: 3000, host: 3000 })
+            .withCopyDirectoriesToContainer([
+                {
+                    source: path.resolve(path.join(__dirname, "..", "..", "..", "..", ".dev", "eudiplo-assets")),
+                    target: "/app/assets/config"
+                }
+            ])
+            .withStartupTimeout(60000)
+            .withWaitStrategy(Wait.forHealthCheck())
+            .start();
+    }
 });
