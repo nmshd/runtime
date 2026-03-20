@@ -17,9 +17,11 @@ import {
     ResolveCredentialOfferResponse,
     ResolveCredentialOfferUseCase,
     StoreCredentialsRequest,
-    StoreCredentialsUseCase
+    StoreCredentialsUseCase,
+    VerifyPresentationTokenRequest,
+    VerifyPresentationTokenResponse,
+    VerifyPresentationTokenUseCase
 } from "../../../useCases";
-import { VerifyPresentationTokenRequest, VerifyPresentationTokenResponse, VerifyPresentationTokenUseCase } from "../../../useCases/consumption/openid4vc/VerifyPresentationToken";
 
 export class OpenId4VcFacade {
     public constructor(

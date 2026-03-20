@@ -4,3 +4,4 @@ export * from "./RequestCredentials";
 export * from "./ResolveAuthorizationRequest";
 export * from "./ResolveCredentialOffer";
 export * from "./StoreCredentials";
+export * from "./VerifyPresentationToken";
