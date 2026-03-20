@@ -528,7 +528,7 @@ describe("AppStringProcessor", function () {
                 PORT: "3000" // eslint-disable-line @typescript-eslint/naming-convention
             } as Record<string, string>)
             .withExposedPorts({ container: 3000, host: 3000 })
-            .withBindMounts([
+            .withCopyDirectoriesToContainer([
                 {
                     source: path.resolve(path.join(__dirname, "..", "..", "..", "..", ".dev", "eudiplo-assets")),
                     target: "/app/assets/config"
