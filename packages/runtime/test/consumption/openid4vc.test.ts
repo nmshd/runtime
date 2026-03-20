@@ -252,7 +252,7 @@ describe("EUDIPLO", () => {
         expect(sessionStatus).toBe("completed"); // in case of failed presentation: Status remains "active"
     });
 
-    test("create presentation token", async () => {
+    test("presentation with token", async () => {
         const credentialOfferUrl = (
             await eudiploClient.createIssuanceOffer({
                 responseType: "uri",
@@ -296,18 +296,34 @@ describe("EUDIPLO", () => {
         expect(verificationResult.value.isValid).toBe(true);
     });
 
+    test("fail token verification in case of invalid nonce", async () => {
+        const verificationResult = await runtimeServices1.consumption.openId4Vc.verifyPresentationToken({
+            tokenContent: {
+                "@type": "TokenContentVerifiablePresentation",
+                type: ClaimFormat.SdJwtDc,
+                value: "eyJ0eXAiOiJkYytzZC1qd3QiLCJ4NWMiOlsiTUlJQmZ6Q0NBU1dnQXdJQkFnSUJBVEFLQmdncWhrak9QUVFEQWpBY01Rc3dDUVlEVlFRR0V3SkVSVEVOTUFzR0ExVUVBeE1FZEdWemREQWVGdzB5TmpBek1EVXhNVEF4TlRGYUZ3MHlOekF6TURVeE1UQXhOVEZhTUJ3eEN6QUpCZ05WQkFZVEFrUkZNUTB3Q3dZRFZRUURFd1IwWlhOME1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRWRpaTNZRDd1bTNnRmF3MlJuL0FENmczU3J4V0dGQVFOR2p0NzR3VW5DSUNLSzBzNllHUk9GdnliTWhueWNOZkRnL24rZWdTeEllbXo5Q1QyT1hlTmY2TllNRll3RkFZRFZSMFJCQTB3QzRJSmJHOWpZV3hvYjNOME1BOEdBMVVkRXdFQi93UUZNQU1CQWY4d0RnWURWUjBQQVFIL0JBUURBZ0trTUIwR0ExVWREZ1FXQkJRVlB3YitISUNsOEFmZkVNSFRoTWZUblJNbGpqQUtCZ2dxaGtqT1BRUURBZ05JQURCRkFpRUEwc1A3MWJXdzhYTTl0czZFT29JSE9Cb1V4V21EbHFVR1dESGp0SDU3S0cwQ0lGTU1sQUdHNElxcloxQ0pGMUJ1eWhWVTNaRWc0ck1acDNHdlgwNkt1UjhyIl0sImFsZyI6IkVTMjU2In0.eyJpYXQiOjE3NzQwMTAwNzgsImV4cCI6MTA0MTQwMTAwNzgsInZjdCI6InRlc3QiLCJjbmYiOnsiandrIjp7Imt0eSI6IkVDIiwiY3J2IjoiUC0yNTYiLCJ4IjoiZlVKTEJZd1Bnb0RTOWRNWDh1TUVLYmpIVXNabGdHYTY2RUdpOEtoSDY1QSIsInkiOiJ4Q3Z1ZENfVDBsOVM5VnRGOGRXVHZrdkl2NUxDcmxWYlM1bDlZYTFQQVh3Iiwia2lkIjoiOTA1N2E5ZGMtMWRiMC00MWI3LWJmMDEtYmM3ODFkOThjMTA3In19LCJfc2RfYWxnIjoic2hhLTI1NiJ9.2u6b8GxPo2uvFHYHrDxfGnR25pgpmo1BZ2VEbb8pLJmPM_oJ9LmcrKpQut2GDi-tCkU6SvEQ7koG4VHPpFgYEA~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJpYXQiOjE3NzQwMTAwODEuNDgzLCJub25jZSI6IlRPS3VFdWdTWWw2VFlEcmFmUngwIiwiYXVkIjoiZGVmYXVsdFByZXNlbnRhdGlvbkF1ZGllbmNlIiwic2RfaGFzaCI6InRuVDdWNk9DUGVKeEkyN3JrVnRtcDBtMFAyaUxFMHpVSEN5dk8yNFNhVkUifQ.TloaQCqVBw-u6Zg7hfWnaMPB1od6YN3zqKokQF280SdF1d4H_h6IXvIVj7r89yROEMhl1eFf8zU02CHbkBNfpg"
+            },
+            expectedNonce: "wrong-nonce"
+        });
+
+        expect(verificationResult).toBeSuccessful();
+        expect(verificationResult.value.isValid).toBe(false);
+        expect(verificationResult.value.error?.message).toBe("Verify Error: Invalid Nonce");
+    });
+
     test("fail token verification in case of invalid signature", async () => {
         const verificationResult = await runtimeServices1.consumption.openId4Vc.verifyPresentationToken({
             tokenContent: {
                 "@type": "TokenContentVerifiablePresentation",
                 type: ClaimFormat.SdJwtDc,
-                value: "eyJ0eXAiOiJkYytzZC1qd3QiLCJ4NWMiOlsiTUlJQmdEQ0NBU1dnQXdJQkFnSUJBVEFLQmdncWhrak9QUVFEQWpBY01Rc3dDUVlEVlFRR0V3SkVSVEVOTUFzR0ExVUVBeE1FZEdWemREQWVGdzB5TmpBeU1UY3hNelU1TVRaYUZ3MHlOekF5TVRjeE16VTVNVFphTUJ3eEN6QUpCZ05WQkFZVEFrUkZNUTB3Q3dZRFZRUURFd1IwWlhOME1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRWRpaTNZRDd1bTNnRmF3MlJuL0FENmczU3J4V0dGQVFOR2p0NzR3VW5DSUNLSzBzNllHUk9GdnliTWhueWNOZkRnL24rZWdTeEllbXo5Q1QyT1hlTmY2TllNRll3RkFZRFZSMFJCQTB3QzRJSmJHOWpZV3hvYjNOME1BOEdBMVVkRXdFQi93UUZNQU1CQWY4d0RnWURWUjBQQVFIL0JBUURBZ0trTUIwR0ExVWREZ1FXQkJRVlB3YitISUNsOEFmZkVNSFRoTWZUblJNbGpqQUtCZ2dxaGtqT1BRUURBZ05KQURCR0FpRUE3RTNia2VNZFF2bmRnQ2thenh1SzhjemxhRklJNmtoNVMyM3ZNOGFwa0h3Q0lRQzh6VDNqbHNlTHVHZjVNREZpbCtBbUM0MzV2eVBNQ2tBV3pkK3VBeXZJUmc9PSJdLCJhbGciOiJFUzI1NiJ9.eyJpYXQiOjE3NzM5MTgyNDksImV4cCI6MTc3MzkyMTg0OSwidmN0IjoidGVzdCIsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC90ZXN0IiwiY25mIjp7Imp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Ik9URWttWHpiZXBFMThnVG8tMUxHcjE2bDVHNWdtbGtnSjZTM251N1ZSTWsiLCJ5IjoiejhHWkd3M1o3bVpHZ1oyZUE3LTMxVUdoZi1Sak5GVjc2Q2Rta1N4ZlAzQSIsImtpZCI6IjQ3MDFhNTQ2LTc5YmItNDJjMy05YTQ1LTQzNmIzYTU0MDMzYyJ9fSwiX3NkX2FsZyI6InNoYS0yNTYifQ.OYnl0hPesabuQ_XDuKFERwSeOFCtb9GHG0zaEuvAsFsH-srW9-A8npruZDpXlzhWsW85X-SNzNNsCBzJqBPfL~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJpYXQiOjE3NzM5MTgyNTMuMjYzLCJub25jZSI6IlRPS2pRSENOZjlvWFBCMGYzU05QIiwiYXVkIjoiZGVmYXVsdFByZXNlbnRhdGlvbkF1ZGllbmNlIiwic2RfaGFzaCI6ImJaS042NkhhblBZWkRDaF91RjhiUHRUbjBuekwxeXlURGNLZjRXYWN6dEkifQ.PcIF1cmsi71-qNP23A6nnu-SL6D_QLalUsZ9dJKzI7H8mLF9TdN2-J94VNVfoTfs6ejL1F1_6C3z2kKKTe3PRA"
+                value: "eyJ0eXAiOiJkYytzZC1qd3QiLCJ4NWMiOlsiTUlJQmZ6Q0NBU1dnQXdJQkFnSUJBVEFLQmdncWhrak9QUVFEQWpBY01Rc3dDUVlEVlFRR0V3SkVSVEVOTUFzR0ExVUVBeE1FZEdWemREQWVGdzB5TmpBek1EVXhNVEF4TlRGYUZ3MHlOekF6TURVeE1UQXhOVEZhTUJ3eEN6QUpCZ05WQkFZVEFrUkZNUTB3Q3dZRFZRUURFd1IwWlhOME1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRWRpaTNZRDd1bTNnRmF3MlJuL0FENmczU3J4V0dGQVFOR2p0NzR3VW5DSUNLSzBzNllHUk9GdnliTWhueWNOZkRnL24rZWdTeEllbXo5Q1QyT1hlTmY2TllNRll3RkFZRFZSMFJCQTB3QzRJSmJHOWpZV3hvYjNOME1BOEdBMVVkRXdFQi93UUZNQU1CQWY4d0RnWURWUjBQQVFIL0JBUURBZ0trTUIwR0ExVWREZ1FXQkJRVlB3YitISUNsOEFmZkVNSFRoTWZUblJNbGpqQUtCZ2dxaGtqT1BRUURBZ05JQURCRkFpRUEwc1A3MWJXdzhYTTl0czZFT29JSE9Cb1V4V21EbHFVR1dESGp0SDU3S0cwQ0lGTU1sQUdHNElxcloxQ0pGMUJ1eWhWVTNaRWc0ck1acDNHdlgwNkt1UjhyIl0sImFsZyI6IkVTMjU2In0.eyJpYXQiOjE3NzQwMTAwNzgsImV4cCI6MTA0MTQwMTAwNzgsInZjdCI6InRlc3QiLCJjbmYiOnsiandrIjp7Imt0eSI6IkVDIiwiY3J2IjoiUC0yNTYiLCJ4IjoiZlVKTEJZd1Bnb0RTOWRNWDh1TUVLYmpIVXNabGdHYTY2RUdpOEtoSDY1QSIsInkiOiJ4Q3Z1ZENfVDBsOVM5VnRGOGRXVHZrdkl2NUxDcmxWYlM1bDlZYTFQQVh3Iiwia2lkIjoiOTA1N2E5ZGMtMWRiMC00MWI3LWJmMDEtYmM3ODFkOThjMTA3In19LCJfc2RfYWxnIjoic2hhLTI1NiJ9.2u6b8GxPo2uvFHYHrDxfGnR25pgpmo1BZ2VEbb8pLJmPM_oJ9LmcrKpQut2GDi-tCkU6SvEQ7koG4VHPpFgYE~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJpYXQiOjE3NzQwMTAwODEuNDgzLCJub25jZSI6IlRPS3VFdWdTWWw2VFlEcmFmUngwIiwiYXVkIjoiZGVmYXVsdFByZXNlbnRhdGlvbkF1ZGllbmNlIiwic2RfaGFzaCI6InRuVDdWNk9DUGVKeEkyN3JrVnRtcDBtMFAyaUxFMHpVSEN5dk8yNFNhVkUifQ.TloaQCqVBw-u6Zg7hfWnaMPB1od6YN3zqKokQF280SdF1d4H_h6IXvIVj7r89yROEMhl1eFf8zU02CHbkBNfpg"
             },
             expectedNonce: "TOKjQHCNf9oXPB0f3SNP"
         });
 
         expect(verificationResult).toBeSuccessful();
         expect(verificationResult.value.isValid).toBe(false);
+        expect(verificationResult.value.error?.message).toBe("Verify Error: Invalid JWT Signature");
     });
 });
 
