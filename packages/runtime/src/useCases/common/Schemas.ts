@@ -17507,6 +17507,69 @@ export const StoreCredentialsRequest: any = {
     }
 }
 
+export const VerifyPresentationTokenRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/VerifyPresentationTokenRequest",
+    "definitions": {
+        "VerifyPresentationTokenRequest": {
+            "type": "object",
+            "properties": {
+                "tokenContent": {
+                    "$ref": "#/definitions/TokenContentVerifiablePresentationJSON"
+                },
+                "expectedNonce": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "tokenContent",
+                "expectedNonce"
+            ],
+            "additionalProperties": false
+        },
+        "TokenContentVerifiablePresentationJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "TokenContentVerifiablePresentation"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object"
+                        }
+                    ]
+                },
+                "type": {
+                    "type": "string"
+                },
+                "displayInformation": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                }
+            },
+            "required": [
+                "@type",
+                "type",
+                "value"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
 export const CreateSettingRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/CreateSettingRequest",
@@ -20708,69 +20771,6 @@ export const LoadPeerTokenRequest: any = {
         "URLTokenReferenceString": {
             "type": "string",
             "pattern": "^https?:\\/\\/.*\\/r\\/TOK[a-zA-Z0-9]+(\\?app=.+)?#[a-zA-Z0-9-_]+$"
-        }
-    }
-}
-
-export const VerifyPresentationTokenRequest: any = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/VerifyPresentationTokenRequest",
-    "definitions": {
-        "VerifyPresentationTokenRequest": {
-            "type": "object",
-            "properties": {
-                "tokenContent": {
-                    "$ref": "#/definitions/TokenContentVerifiablePresentationJSON"
-                },
-                "expectedNonce": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "tokenContent",
-                "expectedNonce"
-            ],
-            "additionalProperties": false
-        },
-        "TokenContentVerifiablePresentationJSON": {
-            "type": "object",
-            "properties": {
-                "@type": {
-                    "type": "string",
-                    "const": "TokenContentVerifiablePresentation"
-                },
-                "@context": {
-                    "type": "string"
-                },
-                "@version": {
-                    "type": "string"
-                },
-                "value": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "object"
-                        }
-                    ]
-                },
-                "type": {
-                    "type": "string"
-                },
-                "displayInformation": {
-                    "type": "array",
-                    "items": {
-                        "type": "object"
-                    }
-                }
-            },
-            "required": [
-                "@type",
-                "type",
-                "value"
-            ],
-            "additionalProperties": false
         }
     }
 }
