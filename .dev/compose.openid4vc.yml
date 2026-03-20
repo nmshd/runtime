@@ -46,19 +46,21 @@ services:
       - default
 
   eudiplo:
-    image: ghcr.io/openwallet-foundation-labs/eudiplo:1.16.0
+    image: ghcr.io/openwallet-foundation-labs/eudiplo:3.1.2@sha256:0ea3a73d42a1eb10a6edc45e3289478b08b09064bd75563c503ed12be2ed2dc6
     environment:
       - PUBLIC_URL=http://localhost:3000
-      - JWT_SECRET="OgwrDcgVQQ2yZwcFt7kPxQm3nUF+X3etF6MdLTstZAY="
+      - MASTER_SECRET="OgwrDcgVQQ2yZwcFt7kPxQm3nUF+X3etF6MdLTstZAY="
       - AUTH_CLIENT_ID="root"
       - AUTH_CLIENT_SECRET="test"
+      - CONFIG_IMPORT=true
+      - CONFIG_FOLDER=/app/assets/config
       - PORT=3000
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:
       - "3000:3000"
     volumes:
-      - ./eudiplo-assets:/app/config
+      - ./eudiplo-assets:/app/assets/config
 
 networks:
   default:
