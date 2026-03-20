@@ -93,7 +93,7 @@ export class TokenController extends TransportController {
         const input = SendEmptyTokenParameters.from(parameters);
         const secretKey = await CoreCrypto.generateSecretKey();
 
-        const { hashedPassword, passwordProtection } = await this.generatePasswordProtection(input.withPassword);
+        const { hashedPassword, passwordProtection } = await this.generatePasswordProtection(input.usePasswordProtection);
 
         const response = (await this.client.createEmptyToken({ password: hashedPassword, expiresAt: input.expiresAt.toISOString() })).value;
 
@@ -111,8 +111,8 @@ export class TokenController extends TransportController {
         return token;
     }
 
-    private async generatePasswordProtection(passwordDesired?: boolean): Promise<{ hashedPassword: string | undefined; passwordProtection: PasswordProtection | undefined }> {
-        if (!passwordDesired) return { hashedPassword: undefined, passwordProtection: undefined };
+    private async generatePasswordProtection(usePasswordProtection?: boolean): Promise<{ hashedPassword: string | undefined; passwordProtection: PasswordProtection | undefined }> {
+        if (!usePasswordProtection) return { hashedPassword: undefined, passwordProtection: undefined };
 
         const password = await Random.string(16, RandomCharacterRange.Alphanumeric + RandomCharacterRange.SpecialCharacters);
         const salt = await CoreCrypto.random(16);
@@ -272,9 +272,9 @@ export class TokenController extends TransportController {
     }
 
     public async isEmptyToken(reference: TokenReference): Promise<boolean> {
-        if (!reference.passwordProtection?.password) throw TransportCoreErrors.general.noPasswordProvided();
-
-        const hashedPassword = (await CoreCrypto.deriveHashOutOfPassword(reference.passwordProtection.password, reference.passwordProtection.salt)).toBase64();
+        const hashedPassword = reference.passwordProtection?.password
+            ? (await CoreCrypto.deriveHashOutOfPassword(reference.passwordProtection.password, reference.passwordProtection.salt)).toBase64()
+            : undefined;
         const response = (await this.client.getToken(reference.id.toString(), hashedPassword)).value;
 
         return !response.content;
