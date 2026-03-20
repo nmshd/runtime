@@ -11,7 +11,11 @@ export interface VerifyPresentationTokenRequest {
 
 export interface VerifyPresentationTokenResponse {
     isValid: boolean;
-    error?: Error;
+    error?: {
+        name: string;
+        message: string;
+        stack?: string;
+    };
 }
 
 class Validator extends SchemaValidator<VerifyPresentationTokenRequest> {
@@ -34,6 +38,9 @@ export class VerifyPresentationTokenUseCase extends UseCase<VerifyPresentationTo
             request.expectedNonce
         );
 
-        return Result.ok(verificationResult);
+        return Result.ok({
+            isValid: verificationResult.isValid,
+            error: verificationResult.error ? { name: verificationResult.error.name, message: verificationResult.error.message, stack: verificationResult.error.stack } : undefined
+        });
     }
 }
