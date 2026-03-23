@@ -3,8 +3,7 @@ import { ArbitraryRelationshipTemplateContentJSON, AuthenticationRequestItem, Re
 import { CoreDate, PasswordLocationIndicatorOptions } from "@nmshd/core-types";
 import { DeviceOnboardingInfoDTO, PeerRelationshipTemplateLoadedEvent } from "@nmshd/runtime";
 import assert from "assert";
-import path from "path";
-import { GenericContainer, Wait } from "testcontainers";
+import { startEudiplo } from "../../../../.dev/eudiplo/startEudiplo";
 import { AppRuntime, LocalAccountSession } from "../../src";
 import { MockEventBus, MockUIBridge, TestUtil } from "../lib";
 
@@ -515,27 +514,4 @@ describe("AppStringProcessor", function () {
             expect(runtime4MockUiBridge).showFileCalled(file.id);
         });
     });
-
-    async function startEudiplo() {
-        return await new GenericContainer("ghcr.io/openwallet-foundation-labs/eudiplo:3.1.2@sha256:0ea3a73d42a1eb10a6edc45e3289478b08b09064bd75563c503ed12be2ed2dc6")
-            .withEnvironment({
-                PUBLIC_URL: "http://localhost:3000", // eslint-disable-line @typescript-eslint/naming-convention
-                MASTER_SECRET: "OgwrDcgVQQ2yZwcFt7kPxQm3nUF+X3etF6MdLTstZAY=", // eslint-disable-line @typescript-eslint/naming-convention
-                AUTH_CLIENT_ID: "root", // eslint-disable-line @typescript-eslint/naming-convention
-                AUTH_CLIENT_SECRET: "test", // eslint-disable-line @typescript-eslint/naming-convention
-                CONFIG_IMPORT: "true", // eslint-disable-line @typescript-eslint/naming-convention
-                CONFIG_FOLDER: "/app/assets/config", // eslint-disable-line @typescript-eslint/naming-convention
-                PORT: "3000" // eslint-disable-line @typescript-eslint/naming-convention
-            } as Record<string, string>)
-            .withExposedPorts({ container: 3000, host: 3000 })
-            .withCopyDirectoriesToContainer([
-                {
-                    source: path.resolve(path.join(__dirname, "..", "..", "..", "..", ".dev", "eudiplo-assets")),
-                    target: "/app/assets/config"
-                }
-            ])
-            .withStartupTimeout(60000)
-            .withWaitStrategy(Wait.forHealthCheck())
-            .start();
-    }
 });
