@@ -8,7 +8,7 @@ import * as client from "openid-client";
 import path from "path";
 import { DockerComposeEnvironment, StartedDockerComposeEnvironment, Wait } from "testcontainers";
 import { Agent as UndiciAgent, fetch as undiciFetch } from "undici";
-import { IncomingRequestStatusChangedEvent } from "../../src";
+import { IncomingRequestStatusChangedEvent, TokenDTO } from "../../src";
 import { RuntimeServiceProvider, syncUntilHasMessageWithRequest, syncUntilHasRelationships, TestRuntimeServices } from "../lib";
 
 const fetchInstance: typeof fetch = (async (input: any, init: any) => {
@@ -255,7 +255,7 @@ describe("EUDIPLO", () => {
     });
 
     describe("presentation token", () => {
-        let presentationTokenId: string;
+        let presentationToken: TokenDTO;
 
         test("create presentation token", async () => {
             const credentialOfferUrl = (
@@ -285,7 +285,7 @@ describe("EUDIPLO", () => {
             });
 
             expect(presentationTokenResult).toBeSuccessful();
-            presentationTokenId = presentationTokenResult.value.id;
+            presentationToken = presentationTokenResult.value;
 
             const presentationTokenContent = presentationTokenResult.value.content;
             expect(presentationTokenContent).toBeDefined();
@@ -293,16 +293,16 @@ describe("EUDIPLO", () => {
             expect((presentationTokenContent as TokenContentVerifiablePresentation).value).toBeDefined();
             expect((presentationTokenContent as TokenContentVerifiablePresentation).displayInformation).toBeDefined();
             expect((presentationTokenContent as TokenContentVerifiablePresentation).displayInformation![0].name).toBe("test");
+        });
 
-            test("verify presentation token", async () => {
-                const verificationResult = await runtimeServices1.consumption.openId4Vc.verifyPresentationToken({
-                    tokenContent: presentationTokenContent,
-                    expectedNonce: presentationTokenId
-                });
-
-                expect(verificationResult).toBeSuccessful();
-                expect(verificationResult.value.isValid).toBe(true);
+        test("verify presentation token", async () => {
+            const verificationResult = await runtimeServices1.consumption.openId4Vc.verifyPresentationToken({
+                tokenContent: presentationToken.content,
+                expectedNonce: presentationToken.id
             });
+
+            expect(verificationResult).toBeSuccessful();
+            expect(verificationResult.value.isValid).toBe(true);
         });
 
         test("fail token verification in case of invalid nonce", async () => {
