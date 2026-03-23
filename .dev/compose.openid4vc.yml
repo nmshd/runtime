@@ -60,7 +60,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./eudiplo-assets:/app/assets/config
+      - ./eudiplo/config:/app/assets/config
 
 networks:
   default:
