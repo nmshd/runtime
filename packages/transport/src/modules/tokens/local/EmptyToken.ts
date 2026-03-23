@@ -9,7 +9,7 @@ import { TokenReference } from "../transmission/TokenReference";
 export interface IEmptyToken extends ICoreSynchronizable {
     secretKey: ICryptoSecretKey;
     expiresAt: ICoreDate;
-    passwordProtection: IPasswordProtection;
+    passwordProtection?: IPasswordProtection;
 }
 
 @type("EmptyToken")
@@ -25,9 +25,9 @@ export class EmptyToken extends CoreSynchronizable implements IEmptyToken {
     @serialize()
     public expiresAt: CoreDate;
 
-    @validate()
+    @validate({ nullable: true })
     @serialize()
-    public passwordProtection: PasswordProtection;
+    public passwordProtection?: PasswordProtection;
 
     public static from(value: IEmptyToken): EmptyToken {
         return this.fromAny(value);
@@ -38,7 +38,7 @@ export class EmptyToken extends CoreSynchronizable implements IEmptyToken {
             id: this.id,
             backboneBaseUrl,
             key: this.secretKey,
-            passwordProtection: this.passwordProtection.toSharedPasswordProtection(true)
+            passwordProtection: this.passwordProtection?.toSharedPasswordProtection(true)
         });
     }
 }
