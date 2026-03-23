@@ -254,78 +254,86 @@ describe("EUDIPLO", () => {
         expect(sessionStatus).toBe("completed"); // in case of failed presentation: Status remains "active"
     });
 
-    test("presentation with token", async () => {
-        const credentialOfferUrl = (
-            await eudiploClient.createIssuanceOffer({
-                responseType: "uri",
-                credentialConfigurationIds: [eudiploCredentialConfigurationId],
-                flow: "pre_authorized_code"
-            })
-        ).uri;
+    describe("presentation token", () => {
+        let presentationTokenId: string;
 
-        const resolveCredentialOfferResult = await runtimeServices1.consumption.openId4Vc.resolveCredentialOffer({ credentialOfferUrl });
-        const credentialResponsesResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
-            credentialOffer: resolveCredentialOfferResult.value.credentialOffer,
-            credentialConfigurationIds: [eudiploCredentialConfigurationId]
-        });
-        const storedCredential = (
-            await runtimeServices1.consumption.openId4Vc.storeCredentials({
-                credentialResponses: credentialResponsesResult.value.credentialResponses
-            })
-        ).value;
-        expect((storedCredential.content.value as VerifiableCredentialJSON).displayInformation?.[0].name).toBe("test");
+        test("create presentation token", async () => {
+            const credentialOfferUrl = (
+                await eudiploClient.createIssuanceOffer({
+                    responseType: "uri",
+                    credentialConfigurationIds: [eudiploCredentialConfigurationId],
+                    flow: "pre_authorized_code"
+                })
+            ).uri;
 
-        const presentationTokenResult = await runtimeServices1.consumption.openId4Vc.createPresentationToken({
-            attributeId: storedCredential.id,
-            expiresAt: CoreDate.utc().add({ minutes: 1 }).toString(),
-            ephemeral: true
-        });
-        expect(presentationTokenResult).toBeSuccessful();
+            const resolveCredentialOfferResult = await runtimeServices1.consumption.openId4Vc.resolveCredentialOffer({ credentialOfferUrl });
+            const credentialResponsesResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
+                credentialOffer: resolveCredentialOfferResult.value.credentialOffer,
+                credentialConfigurationIds: [eudiploCredentialConfigurationId]
+            });
+            const storedCredential = (
+                await runtimeServices1.consumption.openId4Vc.storeCredentials({
+                    credentialResponses: credentialResponsesResult.value.credentialResponses
+                })
+            ).value;
+            expect((storedCredential.content.value as VerifiableCredentialJSON).displayInformation?.[0].name).toBe("test");
 
-        const presentationTokenContent = presentationTokenResult.value.content;
-        expect(presentationTokenContent).toBeDefined();
-        expect(presentationTokenContent["@type"]).toBe("TokenContentVerifiablePresentation");
-        expect((presentationTokenContent as TokenContentVerifiablePresentation).value).toBeDefined();
-        expect((presentationTokenContent as TokenContentVerifiablePresentation).displayInformation).toBeDefined();
-        expect((presentationTokenContent as TokenContentVerifiablePresentation).displayInformation![0].name).toBe("test");
+            const presentationTokenResult = await runtimeServices1.consumption.openId4Vc.createPresentationToken({
+                attributeId: storedCredential.id,
+                expiresAt: CoreDate.utc().add({ minutes: 1 }).toString(),
+                ephemeral: true
+            });
 
-        const verificationResult = await runtimeServices1.consumption.openId4Vc.verifyPresentationToken({
-            tokenContent: presentationTokenContent,
-            expectedNonce: presentationTokenResult.value.id
-        });
+            expect(presentationTokenResult).toBeSuccessful();
+            presentationTokenId = presentationTokenResult.value.id;
 
-        expect(verificationResult).toBeSuccessful();
-        expect(verificationResult.value.isValid).toBe(true);
-    });
+            const presentationTokenContent = presentationTokenResult.value.content;
+            expect(presentationTokenContent).toBeDefined();
+            expect(presentationTokenContent["@type"]).toBe("TokenContentVerifiablePresentation");
+            expect((presentationTokenContent as TokenContentVerifiablePresentation).value).toBeDefined();
+            expect((presentationTokenContent as TokenContentVerifiablePresentation).displayInformation).toBeDefined();
+            expect((presentationTokenContent as TokenContentVerifiablePresentation).displayInformation![0].name).toBe("test");
 
-    test("fail token verification in case of invalid nonce", async () => {
-        const verificationResult = await runtimeServices1.consumption.openId4Vc.verifyPresentationToken({
-            tokenContent: {
-                "@type": "TokenContentVerifiablePresentation",
-                type: ClaimFormat.SdJwtDc,
-                value: "eyJ0eXAiOiJkYytzZC1qd3QiLCJ4NWMiOlsiTUlJQmZ6Q0NBU1dnQXdJQkFnSUJBVEFLQmdncWhrak9QUVFEQWpBY01Rc3dDUVlEVlFRR0V3SkVSVEVOTUFzR0ExVUVBeE1FZEdWemREQWVGdzB5TmpBek1EVXhNVEF4TlRGYUZ3MHlOekF6TURVeE1UQXhOVEZhTUJ3eEN6QUpCZ05WQkFZVEFrUkZNUTB3Q3dZRFZRUURFd1IwWlhOME1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRWRpaTNZRDd1bTNnRmF3MlJuL0FENmczU3J4V0dGQVFOR2p0NzR3VW5DSUNLSzBzNllHUk9GdnliTWhueWNOZkRnL24rZWdTeEllbXo5Q1QyT1hlTmY2TllNRll3RkFZRFZSMFJCQTB3QzRJSmJHOWpZV3hvYjNOME1BOEdBMVVkRXdFQi93UUZNQU1CQWY4d0RnWURWUjBQQVFIL0JBUURBZ0trTUIwR0ExVWREZ1FXQkJRVlB3YitISUNsOEFmZkVNSFRoTWZUblJNbGpqQUtCZ2dxaGtqT1BRUURBZ05JQURCRkFpRUEwc1A3MWJXdzhYTTl0czZFT29JSE9Cb1V4V21EbHFVR1dESGp0SDU3S0cwQ0lGTU1sQUdHNElxcloxQ0pGMUJ1eWhWVTNaRWc0ck1acDNHdlgwNkt1UjhyIl0sImFsZyI6IkVTMjU2In0.eyJpYXQiOjE3NzQwMTAwNzgsImV4cCI6MTA0MTQwMTAwNzgsInZjdCI6InRlc3QiLCJjbmYiOnsiandrIjp7Imt0eSI6IkVDIiwiY3J2IjoiUC0yNTYiLCJ4IjoiZlVKTEJZd1Bnb0RTOWRNWDh1TUVLYmpIVXNabGdHYTY2RUdpOEtoSDY1QSIsInkiOiJ4Q3Z1ZENfVDBsOVM5VnRGOGRXVHZrdkl2NUxDcmxWYlM1bDlZYTFQQVh3Iiwia2lkIjoiOTA1N2E5ZGMtMWRiMC00MWI3LWJmMDEtYmM3ODFkOThjMTA3In19LCJfc2RfYWxnIjoic2hhLTI1NiJ9.2u6b8GxPo2uvFHYHrDxfGnR25pgpmo1BZ2VEbb8pLJmPM_oJ9LmcrKpQut2GDi-tCkU6SvEQ7koG4VHPpFgYEA~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJpYXQiOjE3NzQwMTAwODEuNDgzLCJub25jZSI6IlRPS3VFdWdTWWw2VFlEcmFmUngwIiwiYXVkIjoiZGVmYXVsdFByZXNlbnRhdGlvbkF1ZGllbmNlIiwic2RfaGFzaCI6InRuVDdWNk9DUGVKeEkyN3JrVnRtcDBtMFAyaUxFMHpVSEN5dk8yNFNhVkUifQ.TloaQCqVBw-u6Zg7hfWnaMPB1od6YN3zqKokQF280SdF1d4H_h6IXvIVj7r89yROEMhl1eFf8zU02CHbkBNfpg"
-            },
-            expectedNonce: "wrong-nonce"
+            test("verify presentation token", async () => {
+                const verificationResult = await runtimeServices1.consumption.openId4Vc.verifyPresentationToken({
+                    tokenContent: presentationTokenContent,
+                    expectedNonce: presentationTokenId
+                });
+
+                expect(verificationResult).toBeSuccessful();
+                expect(verificationResult.value.isValid).toBe(true);
+            });
         });
 
-        expect(verificationResult).toBeSuccessful();
-        expect(verificationResult.value.isValid).toBe(false);
-        expect(verificationResult.value.error?.message).toBe("Verify Error: Invalid Nonce");
-    });
+        test("fail token verification in case of invalid nonce", async () => {
+            const verificationResult = await runtimeServices1.consumption.openId4Vc.verifyPresentationToken({
+                tokenContent: {
+                    "@type": "TokenContentVerifiablePresentation",
+                    type: ClaimFormat.SdJwtDc,
+                    value: "eyJ0eXAiOiJkYytzZC1qd3QiLCJ4NWMiOlsiTUlJQmZ6Q0NBU1dnQXdJQkFnSUJBVEFLQmdncWhrak9QUVFEQWpBY01Rc3dDUVlEVlFRR0V3SkVSVEVOTUFzR0ExVUVBeE1FZEdWemREQWVGdzB5TmpBek1EVXhNVEF4TlRGYUZ3MHlOekF6TURVeE1UQXhOVEZhTUJ3eEN6QUpCZ05WQkFZVEFrUkZNUTB3Q3dZRFZRUURFd1IwWlhOME1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRWRpaTNZRDd1bTNnRmF3MlJuL0FENmczU3J4V0dGQVFOR2p0NzR3VW5DSUNLSzBzNllHUk9GdnliTWhueWNOZkRnL24rZWdTeEllbXo5Q1QyT1hlTmY2TllNRll3RkFZRFZSMFJCQTB3QzRJSmJHOWpZV3hvYjNOME1BOEdBMVVkRXdFQi93UUZNQU1CQWY4d0RnWURWUjBQQVFIL0JBUURBZ0trTUIwR0ExVWREZ1FXQkJRVlB3YitISUNsOEFmZkVNSFRoTWZUblJNbGpqQUtCZ2dxaGtqT1BRUURBZ05JQURCRkFpRUEwc1A3MWJXdzhYTTl0czZFT29JSE9Cb1V4V21EbHFVR1dESGp0SDU3S0cwQ0lGTU1sQUdHNElxcloxQ0pGMUJ1eWhWVTNaRWc0ck1acDNHdlgwNkt1UjhyIl0sImFsZyI6IkVTMjU2In0.eyJpYXQiOjE3NzQwMTAwNzgsImV4cCI6MTA0MTQwMTAwNzgsInZjdCI6InRlc3QiLCJjbmYiOnsiandrIjp7Imt0eSI6IkVDIiwiY3J2IjoiUC0yNTYiLCJ4IjoiZlVKTEJZd1Bnb0RTOWRNWDh1TUVLYmpIVXNabGdHYTY2RUdpOEtoSDY1QSIsInkiOiJ4Q3Z1ZENfVDBsOVM5VnRGOGRXVHZrdkl2NUxDcmxWYlM1bDlZYTFQQVh3Iiwia2lkIjoiOTA1N2E5ZGMtMWRiMC00MWI3LWJmMDEtYmM3ODFkOThjMTA3In19LCJfc2RfYWxnIjoic2hhLTI1NiJ9.2u6b8GxPo2uvFHYHrDxfGnR25pgpmo1BZ2VEbb8pLJmPM_oJ9LmcrKpQut2GDi-tCkU6SvEQ7koG4VHPpFgYEA~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJpYXQiOjE3NzQwMTAwODEuNDgzLCJub25jZSI6IlRPS3VFdWdTWWw2VFlEcmFmUngwIiwiYXVkIjoiZGVmYXVsdFByZXNlbnRhdGlvbkF1ZGllbmNlIiwic2RfaGFzaCI6InRuVDdWNk9DUGVKeEkyN3JrVnRtcDBtMFAyaUxFMHpVSEN5dk8yNFNhVkUifQ.TloaQCqVBw-u6Zg7hfWnaMPB1od6YN3zqKokQF280SdF1d4H_h6IXvIVj7r89yROEMhl1eFf8zU02CHbkBNfpg"
+                },
+                expectedNonce: "wrong-nonce"
+            });
 
-    test("fail token verification in case of invalid signature", async () => {
-        const verificationResult = await runtimeServices1.consumption.openId4Vc.verifyPresentationToken({
-            tokenContent: {
-                "@type": "TokenContentVerifiablePresentation",
-                type: ClaimFormat.SdJwtDc,
-                value: "eyJ0eXAiOiJkYytzZC1qd3QiLCJ4NWMiOlsiTUlJQmZ6Q0NBU1dnQXdJQkFnSUJBVEFLQmdncWhrak9QUVFEQWpBY01Rc3dDUVlEVlFRR0V3SkVSVEVOTUFzR0ExVUVBeE1FZEdWemREQWVGdzB5TmpBek1EVXhNVEF4TlRGYUZ3MHlOekF6TURVeE1UQXhOVEZhTUJ3eEN6QUpCZ05WQkFZVEFrUkZNUTB3Q3dZRFZRUURFd1IwWlhOME1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRWRpaTNZRDd1bTNnRmF3MlJuL0FENmczU3J4V0dGQVFOR2p0NzR3VW5DSUNLSzBzNllHUk9GdnliTWhueWNOZkRnL24rZWdTeEllbXo5Q1QyT1hlTmY2TllNRll3RkFZRFZSMFJCQTB3QzRJSmJHOWpZV3hvYjNOME1BOEdBMVVkRXdFQi93UUZNQU1CQWY4d0RnWURWUjBQQVFIL0JBUURBZ0trTUIwR0ExVWREZ1FXQkJRVlB3YitISUNsOEFmZkVNSFRoTWZUblJNbGpqQUtCZ2dxaGtqT1BRUURBZ05JQURCRkFpRUEwc1A3MWJXdzhYTTl0czZFT29JSE9Cb1V4V21EbHFVR1dESGp0SDU3S0cwQ0lGTU1sQUdHNElxcloxQ0pGMUJ1eWhWVTNaRWc0ck1acDNHdlgwNkt1UjhyIl0sImFsZyI6IkVTMjU2In0.eyJpYXQiOjE3NzQwMTAwNzgsImV4cCI6MTA0MTQwMTAwNzgsInZjdCI6InRlc3QiLCJjbmYiOnsiandrIjp7Imt0eSI6IkVDIiwiY3J2IjoiUC0yNTYiLCJ4IjoiZlVKTEJZd1Bnb0RTOWRNWDh1TUVLYmpIVXNabGdHYTY2RUdpOEtoSDY1QSIsInkiOiJ4Q3Z1ZENfVDBsOVM5VnRGOGRXVHZrdkl2NUxDcmxWYlM1bDlZYTFQQVh3Iiwia2lkIjoiOTA1N2E5ZGMtMWRiMC00MWI3LWJmMDEtYmM3ODFkOThjMTA3In19LCJfc2RfYWxnIjoic2hhLTI1NiJ9.2u6b8GxPo2uvFHYHrDxfGnR25pgpmo1BZ2VEbb8pLJmPM_oJ9LmcrKpQut2GDi-tCkU6SvEQ7koG4VHPpFgYE~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJpYXQiOjE3NzQwMTAwODEuNDgzLCJub25jZSI6IlRPS3VFdWdTWWw2VFlEcmFmUngwIiwiYXVkIjoiZGVmYXVsdFByZXNlbnRhdGlvbkF1ZGllbmNlIiwic2RfaGFzaCI6InRuVDdWNk9DUGVKeEkyN3JrVnRtcDBtMFAyaUxFMHpVSEN5dk8yNFNhVkUifQ.TloaQCqVBw-u6Zg7hfWnaMPB1od6YN3zqKokQF280SdF1d4H_h6IXvIVj7r89yROEMhl1eFf8zU02CHbkBNfpg"
-            },
-            expectedNonce: "TOKjQHCNf9oXPB0f3SNP"
+            expect(verificationResult).toBeSuccessful();
+            expect(verificationResult.value.isValid).toBe(false);
+            expect(verificationResult.value.error?.message).toBe("Verify Error: Invalid Nonce");
         });
 
-        expect(verificationResult).toBeSuccessful();
-        expect(verificationResult.value.isValid).toBe(false);
-        expect(verificationResult.value.error?.message).toBe("Verify Error: Invalid JWT Signature");
+        test("fail token verification in case of invalid signature", async () => {
+            const verificationResult = await runtimeServices1.consumption.openId4Vc.verifyPresentationToken({
+                tokenContent: {
+                    "@type": "TokenContentVerifiablePresentation",
+                    type: ClaimFormat.SdJwtDc,
+                    value: "eyJ0eXAiOiJkYytzZC1qd3QiLCJ4NWMiOlsiTUlJQmZ6Q0NBU1dnQXdJQkFnSUJBVEFLQmdncWhrak9QUVFEQWpBY01Rc3dDUVlEVlFRR0V3SkVSVEVOTUFzR0ExVUVBeE1FZEdWemREQWVGdzB5TmpBek1EVXhNVEF4TlRGYUZ3MHlOekF6TURVeE1UQXhOVEZhTUJ3eEN6QUpCZ05WQkFZVEFrUkZNUTB3Q3dZRFZRUURFd1IwWlhOME1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRWRpaTNZRDd1bTNnRmF3MlJuL0FENmczU3J4V0dGQVFOR2p0NzR3VW5DSUNLSzBzNllHUk9GdnliTWhueWNOZkRnL24rZWdTeEllbXo5Q1QyT1hlTmY2TllNRll3RkFZRFZSMFJCQTB3QzRJSmJHOWpZV3hvYjNOME1BOEdBMVVkRXdFQi93UUZNQU1CQWY4d0RnWURWUjBQQVFIL0JBUURBZ0trTUIwR0ExVWREZ1FXQkJRVlB3YitISUNsOEFmZkVNSFRoTWZUblJNbGpqQUtCZ2dxaGtqT1BRUURBZ05JQURCRkFpRUEwc1A3MWJXdzhYTTl0czZFT29JSE9Cb1V4V21EbHFVR1dESGp0SDU3S0cwQ0lGTU1sQUdHNElxcloxQ0pGMUJ1eWhWVTNaRWc0ck1acDNHdlgwNkt1UjhyIl0sImFsZyI6IkVTMjU2In0.eyJpYXQiOjE3NzQwMTAwNzgsImV4cCI6MTA0MTQwMTAwNzgsInZjdCI6InRlc3QiLCJjbmYiOnsiandrIjp7Imt0eSI6IkVDIiwiY3J2IjoiUC0yNTYiLCJ4IjoiZlVKTEJZd1Bnb0RTOWRNWDh1TUVLYmpIVXNabGdHYTY2RUdpOEtoSDY1QSIsInkiOiJ4Q3Z1ZENfVDBsOVM5VnRGOGRXVHZrdkl2NUxDcmxWYlM1bDlZYTFQQVh3Iiwia2lkIjoiOTA1N2E5ZGMtMWRiMC00MWI3LWJmMDEtYmM3ODFkOThjMTA3In19LCJfc2RfYWxnIjoic2hhLTI1NiJ9.2u6b8GxPo2uvFHYHrDxfGnR25pgpmo1BZ2VEbb8pLJmPM_oJ9LmcrKpQut2GDi-tCkU6SvEQ7koG4VHPpFgYE~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJpYXQiOjE3NzQwMTAwODEuNDgzLCJub25jZSI6IlRPS3VFdWdTWWw2VFlEcmFmUngwIiwiYXVkIjoiZGVmYXVsdFByZXNlbnRhdGlvbkF1ZGllbmNlIiwic2RfaGFzaCI6InRuVDdWNk9DUGVKeEkyN3JrVnRtcDBtMFAyaUxFMHpVSEN5dk8yNFNhVkUifQ.TloaQCqVBw-u6Zg7hfWnaMPB1od6YN3zqKokQF280SdF1d4H_h6IXvIVj7r89yROEMhl1eFf8zU02CHbkBNfpg"
+                },
+                expectedNonce: "TOKjQHCNf9oXPB0f3SNP"
+            });
+
+            expect(verificationResult).toBeSuccessful();
+            expect(verificationResult.value.isValid).toBe(false);
+            expect(verificationResult.value.error?.message).toBe("Verify Error: Invalid JWT Signature");
+        });
     });
 });
 
