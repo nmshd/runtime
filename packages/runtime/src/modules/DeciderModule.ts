@@ -2,14 +2,14 @@ import { ApplicationError } from "@js-soft/ts-utils";
 import { DecideRequestItemGroupParametersJSON, DecideRequestItemParametersJSON, LocalRequestStatus } from "@nmshd/consumption";
 import { isRequestItemDerivation, RequestItemGroupJSON, RequestItemJSONDerivations } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
-import { LocalRequestDTO } from "@nmshd/runtime-types";
 import {
     IncomingRequestStatusChangedEvent,
+    LocalRequestDTO,
     MessageProcessedEvent,
     MessageProcessedResult,
     RelationshipTemplateProcessedEvent,
     RelationshipTemplateProcessedResult
-} from "../events";
+} from "@nmshd/runtime-types";
 import { ModuleConfiguration, RuntimeModule } from "../extensibility";
 import { RuntimeServices } from "../Runtime";
 import { RuntimeErrors } from "../useCases/common/RuntimeErrors";

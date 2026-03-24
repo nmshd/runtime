@@ -5,12 +5,13 @@ import { DateTime } from "luxon";
 import {
     ConsumptionServices,
     CreateOutgoingRequestRequest,
+    IncomingRequestReceivedEvent,
+    IncomingRequestStatusChangedEvent,
     LocalRequestStatus,
     OutgoingRequestCreatedEvent,
     OutgoingRequestStatusChangedEvent,
     TransportServices
 } from "../../src";
-import { IncomingRequestReceivedEvent, IncomingRequestStatusChangedEvent } from "../../src/events";
 import {
     establishRelationship,
     exchangeMessageWithRequest,

@@ -1,0 +1,56 @@
+import { RelationshipTemplateDTO } from "../../dtos";
+import { DataEvent } from "../DataEvent";
+
+export class RelationshipTemplateProcessedEvent extends DataEvent<RelationshipTemplateProcessedEventData> {
+    public static readonly namespace = "consumption.relationshipTemplateProcessed";
+
+    public constructor(eventTargetAddress: string, data: RelationshipTemplateProcessedEventData) {
+        super(RelationshipTemplateProcessedEvent.namespace, eventTargetAddress, data);
+
+        if (data.template.isOwn) throw new Error("Cannot create this event for an own Relationship Template.");
+    }
+}
+
+export enum RelationshipTemplateProcessedResult {
+    RequestAutomaticallyDecided = "RequestAutomaticallyDecided",
+    ManualRequestDecisionRequired = "ManualRequestDecisionRequired",
+    NonCompletedRequestExists = "NonCompletedRequestExists",
+    RelationshipExists = "RelationshipExists",
+    NoRequest = "NoRequest",
+    Error = "Error",
+    RequestExpired = "RequestExpired"
+}
+
+export type RelationshipTemplateProcessedEventData =
+    | {
+          template: RelationshipTemplateDTO;
+          result: RelationshipTemplateProcessedResult.RequestAutomaticallyDecided;
+          requestId: string;
+      }
+    | {
+          template: RelationshipTemplateDTO;
+          result: RelationshipTemplateProcessedResult.ManualRequestDecisionRequired;
+          requestId: string;
+      }
+    | {
+          template: RelationshipTemplateDTO;
+          result: RelationshipTemplateProcessedResult.NonCompletedRequestExists;
+          requestId: string;
+      }
+    | {
+          template: RelationshipTemplateDTO;
+          result: RelationshipTemplateProcessedResult.RelationshipExists;
+          relationshipId: string;
+      }
+    | {
+          template: RelationshipTemplateDTO;
+          result: RelationshipTemplateProcessedResult.NoRequest;
+      }
+    | {
+          template: RelationshipTemplateDTO;
+          result: RelationshipTemplateProcessedResult.Error;
+      }
+    | {
+          template: RelationshipTemplateDTO;
+          result: RelationshipTemplateProcessedResult.RequestExpired;
+      };
