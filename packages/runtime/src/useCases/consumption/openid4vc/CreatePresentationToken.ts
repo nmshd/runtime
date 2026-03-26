@@ -41,8 +41,7 @@ export class CreatePresentationTokenUseCase extends UseCase<CreatePresentationTo
         const presentationToken = await this.tokenController.updateTokenContent({
             id: emptyToken.id,
             secretKey: emptyToken.secretKey,
-            content: presentationTokenContent,
-            passwordProtection: emptyToken.passwordProtection
+            content: presentationTokenContent
         });
 
         return Result.ok(TokenMapper.toTokenDTO(presentationToken, true));
