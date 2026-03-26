@@ -1,6 +1,6 @@
 import { ISerializable, Serializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
-import { CoreAddress, CoreDate, CoreId, Random, RandomCharacterRange } from "@nmshd/core-types";
+import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer, CryptoCipher, CryptoSecretKey } from "@nmshd/crypto";
 import { CoreCrypto, TransportCoreErrors } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
@@ -93,15 +93,12 @@ export class TokenController extends TransportController {
         const input = SendEmptyTokenParameters.from(parameters);
         const secretKey = await CoreCrypto.generateSecretKey();
 
-        const { hashedPassword, passwordProtection } = await this.generatePasswordProtection(input.usePasswordProtection);
-
-        const response = (await this.client.createEmptyToken({ password: hashedPassword, expiresAt: input.expiresAt.toISOString() })).value;
+        const response = (await this.client.createEmptyToken({ expiresAt: input.expiresAt.toISOString() })).value;
 
         const token = EmptyToken.from({
             id: CoreId.from(response.id),
             secretKey: secretKey,
-            expiresAt: input.expiresAt,
-            passwordProtection
+            expiresAt: input.expiresAt
         });
 
         if (!input.ephemeral) {
@@ -109,17 +106,6 @@ export class TokenController extends TransportController {
         }
 
         return token;
-    }
-
-    private async generatePasswordProtection(usePasswordProtection?: boolean): Promise<{ hashedPassword: string | undefined; passwordProtection: PasswordProtection | undefined }> {
-        if (!usePasswordProtection) return { hashedPassword: undefined, passwordProtection: undefined };
-
-        const password = await Random.string(16, RandomCharacterRange.Alphanumeric + RandomCharacterRange.SpecialCharacters);
-        const salt = await CoreCrypto.random(16);
-        const hashedPassword = (await CoreCrypto.deriveHashOutOfPassword(password, salt)).toBase64();
-        const passwordProtection = PasswordProtection.from({ password, passwordType: "pw", salt });
-
-        return { hashedPassword, passwordProtection };
     }
 
     @log()
@@ -143,12 +129,12 @@ export class TokenController extends TransportController {
     }
 
     public async loadPeerTokenByReference(reference: TokenReference, ephemeral: boolean, password?: string): Promise<Token> {
-        if (reference.passwordProtection && !reference.passwordProtection.password && !password) throw TransportCoreErrors.general.noPasswordProvided();
+        if (reference.passwordProtection && !password) throw TransportCoreErrors.general.noPasswordProvided();
         const passwordProtection = reference.passwordProtection
             ? PasswordProtection.from({
                   salt: reference.passwordProtection.salt,
                   passwordType: reference.passwordProtection.passwordType,
-                  password: (password ?? reference.passwordProtection.password)!,
+                  password: password!,
                   passwordLocationIndicator: reference.passwordProtection.passwordLocationIndicator
               })
             : undefined;
@@ -241,26 +227,12 @@ export class TokenController extends TransportController {
 
         const cipher = await CoreCrypto.encrypt(serializedTokenBuffer, input.secretKey);
 
-        const hashedPassword = input.passwordProtection?.password
-            ? (await CoreCrypto.deriveHashOutOfPassword(input.passwordProtection.password, input.passwordProtection.salt)).toBase64()
-            : undefined;
-
-        const response = (await this.client.updateTokenContent({ id: parameters.id.toString(), newContent: cipher.toBase64(), password: hashedPassword })).value;
-
-        const passwordProtection = input.passwordProtection?.password
-            ? PasswordProtection.from({
-                  password: input.passwordProtection.password,
-                  passwordType: input.passwordProtection.passwordType,
-                  salt: input.passwordProtection.salt,
-                  passwordLocationIndicator: input.passwordProtection.passwordLocationIndicator
-              })
-            : undefined;
+        const response = (await this.client.updateTokenContent({ id: parameters.id.toString(), newContent: cipher.toBase64() })).value;
 
         const token = Token.from({
             id: CoreId.from(response.id),
             secretKey: input.secretKey,
             isOwn: true,
-            passwordProtection,
             createdAt: CoreDate.from(response.createdAt),
             expiresAt: CoreDate.from(response.expiresAt),
             createdBy: this.parent.identity.address,
@@ -272,10 +244,9 @@ export class TokenController extends TransportController {
     }
 
     public async isEmptyToken(reference: TokenReference): Promise<boolean> {
-        const hashedPassword = reference.passwordProtection?.password
-            ? (await CoreCrypto.deriveHashOutOfPassword(reference.passwordProtection.password, reference.passwordProtection.salt)).toBase64()
-            : undefined;
-        const response = (await this.client.getToken(reference.id.toString(), hashedPassword)).value;
+        if (reference.passwordProtection) return false;
+
+        const response = (await this.client.getToken(reference.id.toString())).value;
 
         return !response.content;
     }

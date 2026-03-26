@@ -42,8 +42,7 @@ export class FillDeviceOnboardingTokenWithNewDeviceUseCase extends UseCase<FillD
             const response = await this.tokenController.updateTokenContent({
                 id: reference.id,
                 content: TokenContentDeviceSharedSecret.from({ sharedSecret }),
-                secretKey: reference.key,
-                passwordProtection: reference.passwordProtection
+                secretKey: reference.key
             });
 
             return Result.ok(TokenMapper.toTokenDTO(response, true));
