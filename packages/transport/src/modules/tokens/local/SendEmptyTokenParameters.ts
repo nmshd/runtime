@@ -4,7 +4,6 @@ import { CoreDate, ICoreDate } from "@nmshd/core-types";
 export interface ISendEmptyTokenParameters extends ISerializable {
     expiresAt: ICoreDate;
     ephemeral: boolean;
-    usePasswordProtection?: boolean;
 }
 
 @type("SendEmptyTokenParameters")
@@ -16,10 +15,6 @@ export class SendEmptyTokenParameters extends Serializable implements ISendEmpty
     @validate()
     @serialize()
     public ephemeral: boolean;
-
-    @validate({ nullable: true })
-    @serialize()
-    public usePasswordProtection?: boolean;
 
     public static from(value: ISendEmptyTokenParameters): SendEmptyTokenParameters {
         return this.fromAny(value);
