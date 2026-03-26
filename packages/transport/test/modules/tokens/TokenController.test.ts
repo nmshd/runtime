@@ -389,7 +389,6 @@ describe("TokenController", function () {
         const updatedSentToken = await sender.tokens.updateTokenContent({
             content: content,
             id: reference.id,
-            passwordProtection: reference.passwordProtection!,
             secretKey: reference.key
         });
 

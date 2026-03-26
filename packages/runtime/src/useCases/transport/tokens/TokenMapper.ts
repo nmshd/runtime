@@ -34,7 +34,6 @@ export class TokenMapper {
         return {
             id: token.id.toString(),
             expiresAt: token.expiresAt.toString(),
-            passwordProtection: PasswordProtectionMapper.toPasswordProtectionDTO(token.passwordProtection),
             reference: {
                 truncated: reference.truncate(),
                 url: reference.toUrl()
