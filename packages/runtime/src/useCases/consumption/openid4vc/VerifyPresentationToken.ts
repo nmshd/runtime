@@ -14,7 +14,6 @@ export interface VerifyPresentationTokenResponse {
     error?: {
         name: string;
         message: string;
-        stack?: string;
     };
 }
 
@@ -37,7 +36,7 @@ export class VerifyPresentationTokenUseCase extends UseCase<VerifyPresentationTo
 
         return Result.ok({
             isValid: verificationResult.isValid,
-            error: verificationResult.error ? { name: verificationResult.error.name, message: verificationResult.error.message, stack: verificationResult.error.stack } : undefined
+            error: verificationResult.error ? { name: verificationResult.error.name, message: verificationResult.error.message } : undefined
         });
     }
 }
