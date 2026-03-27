@@ -16,6 +16,14 @@ const fetchInstance: typeof fetch = (async (input: any, init: any) => {
     return response;
 }) as unknown as typeof fetch;
 
+const eudiploClientId = "test-admin";
+const eudiploClientSecret = "57c9cd444bf402b2cc1f5a0d2dafd3955bd9042c0372db17a4ede2d5fbda88e5";
+
+const eudiploPresentationConfigurationId = "test";
+const eudiploCredentialConfigurationId = "test";
+
+let eudiploClient: EudiploClient;
+
 const runtimeServiceProvider = new RuntimeServiceProvider(fetchInstance);
 let runtimeServices1: TestRuntimeServices;
 
@@ -41,6 +49,14 @@ beforeAll(async () => {
         }
     });
     await createActiveRelationshipToService(runtimeServices1, serviceAxiosInstance);
+
+    const eudiploBaseUrl = "http://localhost:3000";
+
+    eudiploClient = new EudiploClient({
+        baseUrl: eudiploBaseUrl,
+        clientId: eudiploClientId,
+        clientSecret: eudiploClientSecret
+    });
 }, 120000);
 
 afterAll(async () => {
@@ -49,117 +65,149 @@ afterAll(async () => {
     if (dockerComposeStack) await dockerComposeStack.down();
 });
 
-describe("EUDIPLO", () => {
-    const clientId = "test-admin";
-    const clientSecret = "57c9cd444bf402b2cc1f5a0d2dafd3955bd9042c0372db17a4ede2d5fbda88e5";
-
-    const eudiploPresentationConfigurationId = "test";
-    const eudiploCredentialConfigurationId = "test";
-
-    let eudiploClient: EudiploClient;
-
-    beforeAll(() => {
-        const baseUrl = `http://localhost:3000`;
-
-        eudiploClient = new EudiploClient({
-            baseUrl,
-            clientId,
-            clientSecret
-        });
-    });
-
-    test("issuance", async () => {
-        const credentialOfferUrl = (
-            await eudiploClient.createIssuanceOffer({
-                responseType: "uri",
-                credentialConfigurationIds: [eudiploCredentialConfigurationId],
-                flow: "pre_authorized_code"
-            })
-        ).uri;
-
-        const resolveCredentialOfferResult = await runtimeServices1.consumption.openId4Vc.resolveCredentialOffer({ credentialOfferUrl });
-        expect(resolveCredentialOfferResult).toBeSuccessful();
-
-        const credentialResponsesResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
-            credentialOffer: resolveCredentialOfferResult.value.credentialOffer,
-            credentialConfigurationIds: [eudiploCredentialConfigurationId]
-        });
-        const storeCredentialsResponse = await runtimeServices1.consumption.openId4Vc.storeCredentials({
-            credentialResponses: credentialResponsesResult.value.credentialResponses
-        });
-        expect(storeCredentialsResponse).toBeSuccessful();
-        expect((storeCredentialsResponse.value.content.value as VerifiableCredentialJSON).displayInformation?.[0].logo).toBeDefined();
-        expect((storeCredentialsResponse.value.content.value as VerifiableCredentialJSON).displayInformation?.[0].name).toBe("test");
-    });
-
-    test("issuance with pin authentication", async () => {
-        const pin = "1234";
-
-        const credentialOfferUrl = (
-            await eudiploClient.createIssuanceOffer({
-                responseType: "uri",
-                credentialConfigurationIds: [eudiploCredentialConfigurationId],
-                flow: "pre_authorized_code",
-                txCode: pin
-            })
-        ).uri;
-
-        const result = await runtimeServices1.consumption.openId4Vc.resolveCredentialOffer({
-            credentialOfferUrl
-        });
-
-        expect(result).toBeSuccessful();
-
-        const credentialOffer = result.value.credentialOffer;
-        const requestedCredentials = credentialOffer.credentialOfferPayload.credential_configuration_ids;
-
-        const wrongPinRequestResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
-            credentialOffer,
-            credentialConfigurationIds: requestedCredentials,
-            pinCode: `1${pin}`
-        });
-        expect(wrongPinRequestResult.isError).toBe(true);
-
-        const requestResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
-            credentialOffer,
-            credentialConfigurationIds: requestedCredentials,
-            pinCode: pin
-        });
-        expect(requestResult).toBeSuccessful();
-    });
-
-    // external authentication buggy in the latest release (1.16.0)
-    // eslint-disable-next-line jest/no-disabled-tests
-    test.skip("issuance with external authentication", async () => {
-        const credentialOfferUrl = (
-            await eudiploClient.createIssuanceOffer({
-                responseType: "uri",
-                credentialConfigurationIds: [eudiploCredentialConfigurationId],
-                flow: "authorization_code"
-            })
-        ).uri;
-
-        const resolveCredentialOfferResult = await runtimeServices1.consumption.openId4Vc.resolveCredentialOffer({ credentialOfferUrl });
-        expect(resolveCredentialOfferResult).toBeSuccessful();
-
-        const server = URL.parse("https://kc-openid4vc.is.enmeshed.eu/realms/enmeshed-openid4vci")!;
-        const clientId = "wallet";
-        const config: client.Configuration = await client.discovery(server, clientId);
-        const grantReq = await client.genericGrantRequest(config, "password", {
-            username: "test",
-            password: "test",
-            scope: "wallet-demo"
-        });
-
-        const credentialResponsesResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
-            credentialOffer: resolveCredentialOfferResult.value.credentialOffer,
+test("issuance", async () => {
+    const credentialOfferUrl = (
+        await eudiploClient.createIssuanceOffer({
+            responseType: "uri",
             credentialConfigurationIds: [eudiploCredentialConfigurationId],
-            accessToken: grantReq.access_token
-        });
-        expect(credentialResponsesResult).toBeSuccessful();
+            flow: "pre_authorized_code"
+        })
+    ).uri;
+
+    const resolveCredentialOfferResult = await runtimeServices1.consumption.openId4Vc.resolveCredentialOffer({ credentialOfferUrl });
+    expect(resolveCredentialOfferResult).toBeSuccessful();
+
+    const credentialResponsesResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
+        credentialOffer: resolveCredentialOfferResult.value.credentialOffer,
+        credentialConfigurationIds: [eudiploCredentialConfigurationId]
+    });
+    const storeCredentialsResponse = await runtimeServices1.consumption.openId4Vc.storeCredentials({
+        credentialResponses: credentialResponsesResult.value.credentialResponses
+    });
+    expect(storeCredentialsResponse).toBeSuccessful();
+    expect((storeCredentialsResponse.value.content.value as VerifiableCredentialJSON).displayInformation?.[0].logo).toBeDefined();
+    expect((storeCredentialsResponse.value.content.value as VerifiableCredentialJSON).displayInformation?.[0].name).toBe("test");
+});
+
+test("issuance with pin authentication", async () => {
+    const pin = "1234";
+
+    const credentialOfferUrl = (
+        await eudiploClient.createIssuanceOffer({
+            responseType: "uri",
+            credentialConfigurationIds: [eudiploCredentialConfigurationId],
+            flow: "pre_authorized_code",
+            txCode: pin
+        })
+    ).uri;
+
+    const result = await runtimeServices1.consumption.openId4Vc.resolveCredentialOffer({
+        credentialOfferUrl
     });
 
-    test("presentation", async () => {
+    expect(result).toBeSuccessful();
+
+    const credentialOffer = result.value.credentialOffer;
+    const requestedCredentials = credentialOffer.credentialOfferPayload.credential_configuration_ids;
+
+    const wrongPinRequestResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
+        credentialOffer,
+        credentialConfigurationIds: requestedCredentials,
+        pinCode: `1${pin}`
+    });
+    expect(wrongPinRequestResult.isError).toBe(true);
+
+    const requestResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
+        credentialOffer,
+        credentialConfigurationIds: requestedCredentials,
+        pinCode: pin
+    });
+    expect(requestResult).toBeSuccessful();
+});
+
+// external authentication buggy in the latest release (1.16.0)
+// eslint-disable-next-line jest/no-disabled-tests
+test.skip("issuance with external authentication", async () => {
+    const credentialOfferUrl = (
+        await eudiploClient.createIssuanceOffer({
+            responseType: "uri",
+            credentialConfigurationIds: [eudiploCredentialConfigurationId],
+            flow: "authorization_code"
+        })
+    ).uri;
+
+    const resolveCredentialOfferResult = await runtimeServices1.consumption.openId4Vc.resolveCredentialOffer({ credentialOfferUrl });
+    expect(resolveCredentialOfferResult).toBeSuccessful();
+
+    const server = URL.parse("https://kc-openid4vc.is.enmeshed.eu/realms/enmeshed-openid4vci")!;
+    const clientId = "wallet";
+    const config: client.Configuration = await client.discovery(server, clientId);
+    const grantReq = await client.genericGrantRequest(config, "password", {
+        username: "test",
+        password: "test",
+        scope: "wallet-demo"
+    });
+
+    const credentialResponsesResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
+        credentialOffer: resolveCredentialOfferResult.value.credentialOffer,
+        credentialConfigurationIds: [eudiploCredentialConfigurationId],
+        accessToken: grantReq.access_token
+    });
+    expect(credentialResponsesResult).toBeSuccessful();
+});
+
+// TODO: unskip once fix to CanCreateShareCredentialOffer has been deployed to the connector
+// eslint-disable-next-line jest/no-disabled-tests
+test.skip("issuance with request", async () => {
+    const oldCredentials = (
+        await runtimeServices1.consumption.attributes.getAttributes({
+            query: {
+                "content.value.@type": "VerifiableCredential"
+            }
+        })
+    ).value;
+
+    const sentMessage = (
+        await serviceAxiosInstance.post("/enmeshed-demo/credential", {
+            recipient: runtimeServices1.address,
+            credentialConfigurationId: eudiploCredentialConfigurationId
+        })
+    ).data.result;
+
+    const requestId = (sentMessage.content as RequestJSON).id!;
+    await syncUntilHasMessageWithRequest(runtimeServices1.transport, requestId);
+    await runtimeServices1.consumption.incomingRequests.accept({
+        requestId,
+        items: [{ accept: true }]
+    });
+
+    const currentCredentials = (
+        await runtimeServices1.consumption.attributes.getAttributes({
+            query: {
+                "content.value.@type": "VerifiableCredential"
+            }
+        })
+    ).value;
+    expect(currentCredentials).toHaveLength(oldCredentials.length + 1);
+
+    const oldCredentialIds = oldCredentials.map((c) => c.id);
+    const createdCredential = currentCredentials.find((c) => !oldCredentialIds.includes(c.id));
+    expect(createdCredential).toBeDefined();
+
+    const credentialContent = createdCredential!.content.value as VerifiableCredentialJSON;
+    const decodedCredential = decodeRecord(credentialContent.type, credentialContent.value) as SdJwtVcRecord;
+    expect(decodedCredential.firstCredential.prettyClaims.givenName).toBe("aGivenName");
+    expect(credentialContent.value.split("~")).toHaveLength(3); // given name is selectively disclosable, hence length 3
+});
+
+describe("presentation", () => {
+    let storedCredential: LocalAttributeDTO;
+
+    beforeAll(async () => {
+        storedCredential = await createAndStoreCredential(eudiploClient, eudiploCredentialConfigurationId);
+    });
+
+    test("standard presentation", async () => {
         const authorizationRequestUrl = (
             await eudiploClient.createPresentationRequest({
                 responseType: "uri",
@@ -169,7 +217,15 @@ describe("EUDIPLO", () => {
 
         const loadResult = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl });
         const matchingCredentials = loadResult.value.matchingCredentials;
-        expect(matchingCredentials).toHaveLength(1);
+
+        const currentCredentials = (
+            await runtimeServices1.consumption.attributes.getAttributes({
+                query: {
+                    "content.value.@type": "VerifiableCredential"
+                }
+            })
+        ).value;
+        expect(matchingCredentials).toHaveLength(currentCredentials.length);
 
         const queryResult = loadResult.value.authorizationRequest.dcql!.queryResult;
         expect(queryResult.can_be_satisfied).toBe(true);
@@ -180,50 +236,6 @@ describe("EUDIPLO", () => {
         });
         expect(presentationResult).toBeSuccessful();
         expect(presentationResult.value.status).toBe(200);
-    });
-
-    // TODO: unskip once fix to CanCreateShareCredentialOffer has been deployed to the connector
-    // eslint-disable-next-line jest/no-disabled-tests
-    test.skip("issuance with request", async () => {
-        const oldCredentials = (
-            await runtimeServices1.consumption.attributes.getAttributes({
-                query: {
-                    "content.value.@type": "VerifiableCredential"
-                }
-            })
-        ).value;
-
-        const sentMessage = (
-            await serviceAxiosInstance.post("/enmeshed-demo/credential", {
-                recipient: runtimeServices1.address,
-                credentialConfigurationId: eudiploCredentialConfigurationId
-            })
-        ).data.result;
-
-        const requestId = (sentMessage.content as RequestJSON).id!;
-        await syncUntilHasMessageWithRequest(runtimeServices1.transport, requestId);
-        await runtimeServices1.consumption.incomingRequests.accept({
-            requestId,
-            items: [{ accept: true }]
-        });
-
-        const currentCredentials = (
-            await runtimeServices1.consumption.attributes.getAttributes({
-                query: {
-                    "content.value.@type": "VerifiableCredential"
-                }
-            })
-        ).value;
-        expect(currentCredentials).toHaveLength(oldCredentials.length + 1);
-
-        const oldCredentialIds = oldCredentials.map((c) => c.id);
-        const createdCredential = currentCredentials.find((c) => !oldCredentialIds.includes(c.id));
-        expect(createdCredential).toBeDefined();
-
-        const credentialContent = createdCredential!.content.value as VerifiableCredentialJSON;
-        const decodedCredential = decodeRecord(credentialContent.type, credentialContent.value) as SdJwtVcRecord;
-        expect(decodedCredential.firstCredential.prettyClaims.givenName).toBe("aGivenName");
-        expect(credentialContent.value.split("~")).toHaveLength(3); // given name is selectively disclosable, hence length 3
     });
 
     test("presentation with request", async () => {
@@ -256,8 +268,6 @@ describe("EUDIPLO", () => {
 
     describe("presentation token", () => {
         test("create presentation token", async () => {
-            const storedCredential = await createAndStoreCredential(eudiploClient, eudiploCredentialConfigurationId);
-
             const createPresentationTokenResult = await runtimeServices1.consumption.openId4Vc.createPresentationToken({
                 attributeId: storedCredential.id,
                 expiresAt: CoreDate.utc().add({ minutes: 1 }).toString(),
@@ -275,7 +285,6 @@ describe("EUDIPLO", () => {
         });
 
         test("verify presentation token", async () => {
-            const storedCredential = await createAndStoreCredential(eudiploClient, eudiploCredentialConfigurationId);
             const presentationToken = await createPresentationToken(storedCredential);
 
             const verificationResult = await runtimeServices1.consumption.openId4Vc.verifyPresentationToken({
@@ -287,7 +296,6 @@ describe("EUDIPLO", () => {
         });
 
         test("fail token verification in case of invalid nonce", async () => {
-            const storedCredential = await createAndStoreCredential(eudiploClient, eudiploCredentialConfigurationId);
             const presentationToken = await createPresentationToken(storedCredential);
 
             const verificationResult = await runtimeServices1.consumption.openId4Vc.verifyPresentationToken({
@@ -300,7 +308,6 @@ describe("EUDIPLO", () => {
         });
 
         test("fail token verification in case of invalid signature", async () => {
-            const storedCredential = await createAndStoreCredential(eudiploClient, eudiploCredentialConfigurationId);
             const presentationToken = await createPresentationToken(storedCredential);
 
             const tokenContentWithTamperedSignature = tamperSignatureOfTokenContent(presentationToken.content as TokenContentVerifiablePresentationJSON);
