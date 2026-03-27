@@ -371,7 +371,7 @@ function tamperSignatureOfTokenContent(tokenContent: TokenContentVerifiablePrese
 }
 
 async function startOid4VcComposeStack() {
-    let baseUrl = process.env.NMSHD_TEST_BASEURL!;
+    const baseUrl = process.env.NMSHD_TEST_BASEURL!;
 
     const composeEnvironment = {
         // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -382,7 +382,7 @@ async function startOid4VcComposeStack() {
 
     if (baseUrl.includes("localhost")) {
         composeEnvironment.NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE = "localhost";
-        baseUrl = baseUrl.replace("localhost", "host.docker.internal");
+        composeEnvironment.NMSHD_TEST_BASEURL = baseUrl.replace("localhost", "host.docker.internal");
     } else if (process.env.NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE) {
         composeEnvironment.NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE = process.env.NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE;
     }
