@@ -1,43 +1,41 @@
 import { EventBus, EventHandler, SubscriptionTarget } from "@js-soft/ts-utils";
 import * as consumption from "@nmshd/consumption";
-import * as transport from "@nmshd/transport";
-import { AttributeMapper, FileMapper, IdentityDeletionProcessMapper, MessageMapper, RelationshipMapper, RelationshipTemplateMapper, RequestMapper } from "../useCases";
 import {
     AttributeCreatedEvent,
     AttributeDeletedEvent,
     AttributeForwardingDetailsChangedEvent,
     AttributeSucceededEvent,
     AttributeWasViewedAtChangedEvent,
+    DatawalletSynchronizedEvent,
+    FileOwnershipClaimedEvent,
+    FileOwnershipLockedEvent,
     ForwardedAttributeDeletedByPeerEvent,
+    IdentityDeletionProcessStatusChangedEvent,
     IncomingRequestReceivedEvent,
     IncomingRequestStatusChangedEvent,
+    MessageDeliveredEvent,
+    MessageReceivedEvent,
+    MessageSentEvent,
+    MessageWasReadAtChangedEvent,
     OutgoingRequestCreatedAndCompletedEvent,
     OutgoingRequestCreatedEvent,
     OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent,
     OutgoingRequestStatusChangedEvent,
     OwnAttributeDeletedByOwnerEvent,
-    PeerRelationshipAttributeDeletedByPeerEvent,
-    ShareCredentialOfferRequestItemProcessedByRecipientEvent
-} from "./consumption";
-import {
-    DatawalletSynchronizedEvent,
-    FileOwnershipClaimedEvent,
-    FileOwnershipLockedEvent,
-    IdentityDeletionProcessStatusChangedEvent,
-    MessageDeliveredEvent,
-    MessageReceivedEvent,
-    MessageSentEvent,
-    MessageWasReadAtChangedEvent,
     PeerDeletedEvent,
     PeerDeletionCancelledEvent,
+    PeerRelationshipAttributeDeletedByPeerEvent,
     PeerRelationshipTemplateLoadedEvent,
     PeerToBeDeletedEvent,
     RelationshipChangedEvent,
     RelationshipDecomposedBySelfEvent,
     RelationshipReactivationCompletedEvent,
     RelationshipReactivationRequestedEvent,
-    RelationshipTemplateAllocationsExhaustedEvent
-} from "./transport";
+    RelationshipTemplateAllocationsExhaustedEvent,
+    ShareCredentialOfferRequestItemProcessedByRecipientEvent
+} from "@nmshd/runtime-types";
+import * as transport from "@nmshd/transport";
+import { AttributeMapper, FileMapper, IdentityDeletionProcessMapper, MessageMapper, RelationshipMapper, RelationshipTemplateMapper, RequestMapper } from "../useCases";
 
 export class EventProxy {
     private readonly subscriptionIds: number[] = [];

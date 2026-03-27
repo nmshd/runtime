@@ -4,13 +4,14 @@ import { DateTime } from "luxon";
 import {
     ConsumptionServices,
     CreateOutgoingRequestRequest,
+    IncomingRequestReceivedEvent,
+    IncomingRequestStatusChangedEvent,
     LocalAttributeDTO,
     LocalRequestStatus,
     OutgoingRequestCreatedEvent,
     OutgoingRequestStatusChangedEvent,
     TransportServices
 } from "../../src";
-import { IncomingRequestReceivedEvent, IncomingRequestStatusChangedEvent } from "../../src/events";
 import { RuntimeServiceProvider, TestRuntimeServices, establishRelationship, exchangeMessageWithRequest, sendMessageWithRequest } from "../lib";
 import { exchangeMessageWithRequestAndRequireManualDecision, exchangeMessageWithRequestAndSendResponse } from "../lib/testUtilsWithInactiveModules";
 

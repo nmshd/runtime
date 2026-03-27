@@ -6,7 +6,6 @@ export interface ISharedPasswordProtection extends ISerializable {
     passwordType: "pw" | `pin${number}`;
     salt: ICoreBuffer;
     passwordLocationIndicator?: number;
-    password?: string;
 }
 
 export class SharedPasswordProtection extends Serializable implements ISharedPasswordProtection {
@@ -22,10 +21,6 @@ export class SharedPasswordProtection extends Serializable implements ISharedPas
     @serialize({ any: true })
     public passwordLocationIndicator?: number;
 
-    @validate({ nullable: true })
-    @serialize()
-    public password?: string;
-
     public static from(value: ISharedPasswordProtection): SharedPasswordProtection {
         return this.fromAny(value);
     }
@@ -34,8 +29,8 @@ export class SharedPasswordProtection extends Serializable implements ISharedPas
         if (value === undefined || value === "") return undefined;
 
         const splittedPasswordParts = value.split("&");
-        if (![2, 3, 4].includes(splittedPasswordParts.length)) {
-            throw new CoreError("error.core-types.invalidTruncatedReference", "The password part of a TruncatedReference must consist of 2, 3 or 4 components.");
+        if (![2, 3].includes(splittedPasswordParts.length)) {
+            throw new CoreError("error.core-types.invalidTruncatedReference", "The password part of a TruncatedReference must consist of 2 or 3 components.");
         }
 
         const passwordType = splittedPasswordParts[0] as "pw" | `pin${number}`;
@@ -43,9 +38,7 @@ export class SharedPasswordProtection extends Serializable implements ISharedPas
 
         const salt = this.parseSalt(splittedPasswordParts[1]);
 
-        const password = splittedPasswordParts.length > 3 && splittedPasswordParts[3] ? splittedPasswordParts[3] : undefined;
-
-        return SharedPasswordProtection.from({ passwordType, salt, passwordLocationIndicator, password });
+        return SharedPasswordProtection.from({ passwordType, salt, passwordLocationIndicator });
     }
 
     private static parseSalt(value: string): CoreBuffer {
@@ -60,8 +53,8 @@ export class SharedPasswordProtection extends Serializable implements ISharedPas
     public truncate(): string {
         const base = `${this.passwordType}&${this.salt.toBase64()}`;
 
-        if (this.passwordLocationIndicator === undefined && this.password === undefined) return base;
+        if (this.passwordLocationIndicator === undefined) return base;
 
-        return `${base}&${this.passwordLocationIndicator ?? ""}${this.password ? `&${this.password}` : ""}`;
+        return `${base}&${this.passwordLocationIndicator ?? ""}`;
     }
 }

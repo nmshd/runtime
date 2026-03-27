@@ -13,7 +13,7 @@ import {
     SettingsController
 } from "@nmshd/consumption";
 import { ICoreAddress } from "@nmshd/core-types";
-import { RuntimeHealth } from "@nmshd/runtime-types";
+import { ModulesInitializedEvent, ModulesLoadedEvent, ModulesStartedEvent, RuntimeHealth, RuntimeInitializedEvent, RuntimeInitializingEvent } from "@nmshd/runtime-types";
 import {
     AccountController,
     AnnouncementController,
@@ -39,7 +39,6 @@ import { buildInformation } from "./buildInformation";
 import { ConfigHolder } from "./ConfigHolder";
 import { DatabaseSchemaUpgrader } from "./DatabaseSchemaUpgrader";
 import { DataViewExpander } from "./dataViews";
-import { ModulesInitializedEvent, ModulesLoadedEvent, ModulesStartedEvent, RuntimeInitializedEvent, RuntimeInitializingEvent } from "./events";
 import { EventProxy } from "./events/EventProxy";
 import { AnonymousServices, ConsumptionServices, ModuleConfiguration, RuntimeModuleRegistry, TransportServices } from "./extensibility";
 import { DeciderModule, MessageModule, NotificationModule, RequestModule } from "./modules";

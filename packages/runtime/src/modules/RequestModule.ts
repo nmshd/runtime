@@ -1,17 +1,19 @@
 import { LocalRequestStatus } from "@nmshd/consumption";
 import { RelationshipCreationContent, RequestJSON, ResponseJSON, ResponseResult, ResponseWrapper } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
-import { LocalRequestDTO, RelationshipStatus } from "@nmshd/runtime-types";
 import {
     IncomingRequestStatusChangedEvent,
+    LocalRequestDTO,
     MessageProcessedEvent,
     MessageProcessedResult,
     MessageReceivedEvent,
     MessageSentEvent,
     PeerRelationshipTemplateLoadedEvent,
-    RelationshipChangedEvent
-} from "../events";
-import { RelationshipTemplateProcessedEvent, RelationshipTemplateProcessedResult } from "../events/consumption/RelationshipTemplateProcessedEvent";
+    RelationshipChangedEvent,
+    RelationshipStatus,
+    RelationshipTemplateProcessedEvent,
+    RelationshipTemplateProcessedResult
+} from "@nmshd/runtime-types";
 import { RuntimeModule } from "../extensibility/modules/RuntimeModule";
 import { RuntimeServices } from "../Runtime";
 
