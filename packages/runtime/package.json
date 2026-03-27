@@ -77,7 +77,7 @@
     },
     "dependencies": {
         "@js-soft/docdb-querytranslator": "^1.1.6",
-        "@js-soft/logging-abstractions": "^1.0.2",
+        "@js-soft/logging-abstractions": "^1.2.2",
         "@js-soft/ts-serval": "2.0.16",
         "@js-soft/ts-utils": "^2.3.5",
         "@nmshd/consumption": "*",
@@ -101,7 +101,7 @@
     "devDependencies": {
         "@js-soft/docdb-access-loki": "1.4.0",
         "@js-soft/docdb-access-mongo": "1.4.0",
-        "@js-soft/node-logger": "1.2.1",
+        "@js-soft/node-logger": "1.2.2",
         "@nmshd/connector-sdk": "^7.3.0",
         "@types/elliptic": "^6.4.18",
         "@types/json-stringify-safe": "^5.0.3",
