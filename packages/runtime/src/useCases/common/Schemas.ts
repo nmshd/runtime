@@ -17507,6 +17507,176 @@ export const StoreCredentialsRequest: any = {
     }
 }
 
+export const VerifyPresentationTokenRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/VerifyPresentationTokenRequest",
+    "definitions": {
+        "VerifyPresentationTokenRequest": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "content": {
+                            "$ref": "#/definitions/TokenContentVerifiablePresentationJSON"
+                        },
+                        "id": {
+                            "type": "string"
+                        },
+                        "isOwn": {
+                            "type": "boolean"
+                        },
+                        "createdBy": {
+                            "type": "string"
+                        },
+                        "createdByDevice": {
+                            "type": "string"
+                        },
+                        "createdAt": {
+                            "type": "string"
+                        },
+                        "expiresAt": {
+                            "type": "string"
+                        },
+                        "forIdentity": {
+                            "type": "string"
+                        },
+                        "passwordProtection": {
+                            "$ref": "#/definitions/PasswordProtectionDTO"
+                        },
+                        "reference": {
+                            "type": "object",
+                            "properties": {
+                                "truncated": {
+                                    "type": "string"
+                                },
+                                "url": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "truncated",
+                                "url"
+                            ],
+                            "additionalProperties": false
+                        },
+                        "isEphemeral": {
+                            "type": "boolean"
+                        }
+                    },
+                    "required": [
+                        "content",
+                        "createdAt",
+                        "createdBy",
+                        "createdByDevice",
+                        "expiresAt",
+                        "id",
+                        "isEphemeral",
+                        "isOwn",
+                        "reference"
+                    ]
+                }
+            },
+            "required": [
+                "token"
+            ],
+            "additionalProperties": false
+        },
+        "TokenContentVerifiablePresentationJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "TokenContentVerifiablePresentation"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object"
+                        }
+                    ]
+                },
+                "type": {
+                    "type": "string"
+                },
+                "displayInformation": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                }
+            },
+            "required": [
+                "@type",
+                "type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "PasswordProtectionDTO": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "passwordIsPin": {
+                    "type": "boolean",
+                    "const": true
+                },
+                "passwordLocationIndicator": {
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "const": "RecoveryKit"
+                        },
+                        {
+                            "type": "string",
+                            "const": "Self"
+                        },
+                        {
+                            "type": "string",
+                            "const": "Letter"
+                        },
+                        {
+                            "type": "string",
+                            "const": "RegistrationLetter"
+                        },
+                        {
+                            "type": "string",
+                            "const": "Email"
+                        },
+                        {
+                            "type": "string",
+                            "const": "SMS"
+                        },
+                        {
+                            "type": "string",
+                            "const": "Website"
+                        },
+                        {
+                            "type": "number"
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "password"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
 export const CreateSettingRequest: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$ref": "#/definitions/CreateSettingRequest",

@@ -205,7 +205,7 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
     // hacky solution because credo doesn't support credentials without key binding
     // TODO: use credentials without key binding once supported
     public async createPresentationTokenContent(credential: VerifiableCredential, nonce: string): Promise<TokenContentVerifiablePresentation> {
-        if (credential.type !== ClaimFormat.SdJwtDc) throw new Error("Only SD-JWT credentials have been tested so far with token presentation");
+        if (credential.type !== ClaimFormat.SdJwtDc) throw new Error("Only SD-JWT credentials are supported for token presentation");
 
         const sdJwtVcApi = this.agent.dependencyManager.resolve(SdJwtVcApi);
         const presentation = await sdJwtVcApi.present({
@@ -222,6 +222,21 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
             type: credential.type,
             displayInformation: credential.displayInformation
         });
+    }
+
+    public async verifyPresentationTokenContent(tokenContent: TokenContentVerifiablePresentation, expectedNonce: string): Promise<{ isValid: boolean; error?: Error }> {
+        if (tokenContent.type !== ClaimFormat.SdJwtDc) throw new Error("Only SD-JWT credentials are supported for token presentation");
+
+        const sdJwtVcApi = this.agent.dependencyManager.resolve(SdJwtVcApi);
+        const verificationResult = await sdJwtVcApi.verify({
+            compactSdJwtVc: tokenContent.value as string,
+            keyBinding: {
+                audience: "defaultPresentationAudience",
+                nonce: expectedNonce
+            }
+        });
+
+        return { isValid: verificationResult.isValid, error: "error" in verificationResult ? verificationResult.error : undefined };
     }
 
     public async exit(): Promise<void> {
