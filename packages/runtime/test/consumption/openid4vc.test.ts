@@ -372,27 +372,25 @@ function tamperSignatureOfTokenContent(tokenContent: TokenContentVerifiablePrese
 
 async function startOid4VcComposeStack() {
     let baseUrl = process.env.NMSHD_TEST_BASEURL!;
-    let addressGenerationHostnameOverride: string | undefined;
+
+    const composeEnvironment = {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        TEST_ENVIRONMENT: "container",
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        NMSHD_TEST_BASEURL: baseUrl
+    } as Record<string, string>;
 
     if (baseUrl.includes("localhost")) {
-        addressGenerationHostnameOverride = "localhost";
+        composeEnvironment.NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE = "localhost";
         baseUrl = baseUrl.replace("localhost", "host.docker.internal");
-    } else {
-        addressGenerationHostnameOverride = process.env.NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE;
+    } else if (process.env.NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE) {
+        composeEnvironment.NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE = process.env.NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE;
     }
 
     const composeFolder = path.resolve(path.join(__dirname, "..", "..", "..", "..", ".dev"));
     const composeStack = await new DockerComposeEnvironment(composeFolder, "compose.openid4vc.yml")
         .withProjectName("runtime-oid4vc-tests")
-        .withEnvironment({
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            TEST_ENVIRONMENT: "container",
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            NMSHD_TEST_BASEURL: baseUrl,
-
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE: addressGenerationHostnameOverride
-        } as Record<string, string>)
+        .withEnvironment(composeEnvironment)
         .withStartupTimeout(60000)
         .withWaitStrategy("oid4vc-service-1", Wait.forHealthCheck())
         .up();
