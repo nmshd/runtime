@@ -383,7 +383,7 @@ describe("AppStringProcessor", function () {
             const eudiploClientId = "test-admin";
             const eudiploClientSecret = "57c9cd444bf402b2cc1f5a0d2dafd3955bd9042c0372db17a4ede2d5fbda88e5";
             const eudiploCredentialConfigurationId = "test";
-            const eudiploBaseUrl = `http://localhost:3000`;
+            const eudiploBaseUrl = "http://localhost:3000";
 
             const eudiploContainer = await startEudiplo();
 
@@ -402,22 +402,22 @@ describe("AppStringProcessor", function () {
             ).uri;
 
             const resolveCredentialOfferResult = await runtime1Session.consumptionServices.openId4Vc.resolveCredentialOffer({ credentialOfferUrl });
-            const credentialResponsesResult = await runtime1Session.consumptionServices.openId4Vc.requestCredentials({
+            const requestCredentialsResult = await runtime1Session.consumptionServices.openId4Vc.requestCredentials({
                 credentialOffer: resolveCredentialOfferResult.value.credentialOffer,
                 credentialConfigurationIds: [eudiploCredentialConfigurationId]
             });
             const storedCredential = (
                 await runtime1Session.consumptionServices.openId4Vc.storeCredentials({
-                    credentialResponses: credentialResponsesResult.value.credentialResponses
+                    credentialResponses: requestCredentialsResult.value.credentialResponses
                 })
             ).value;
 
-            const tokenResult = await runtime1Session.consumptionServices.openId4Vc.createPresentationToken({
+            const createPresentationTokenResult = await runtime1Session.consumptionServices.openId4Vc.createPresentationToken({
                 attributeId: storedCredential.id,
                 expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
                 ephemeral: true
             });
-            const token = tokenResult.value;
+            const token = createPresentationTokenResult.value;
 
             const result = await runtime4.stringProcessor.processURL(token.reference.url, runtime4Session.account);
             expect(result).toBeSuccessful();
