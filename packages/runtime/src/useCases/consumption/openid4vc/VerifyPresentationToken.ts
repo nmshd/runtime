@@ -1,12 +1,12 @@
 import { Result } from "@js-soft/ts-utils";
 import { OpenId4VcController } from "@nmshd/consumption";
 import { TokenContentVerifiablePresentation, TokenContentVerifiablePresentationJSON } from "@nmshd/content";
+import { TokenDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
 export interface VerifyPresentationTokenRequest {
-    tokenContent: TokenContentVerifiablePresentationJSON;
-    expectedNonce: string;
+    token: Omit<TokenDTO, "content"> & { content: TokenContentVerifiablePresentationJSON };
 }
 
 export interface VerifyPresentationTokenResponse {
@@ -33,10 +33,7 @@ export class VerifyPresentationTokenUseCase extends UseCase<VerifyPresentationTo
     }
 
     protected override async executeInternal(request: VerifyPresentationTokenRequest): Promise<Result<VerifyPresentationTokenResponse>> {
-        const verificationResult = await this.openId4VcController.verifyPresentationTokenContent(
-            TokenContentVerifiablePresentation.from(request.tokenContent),
-            request.expectedNonce
-        );
+        const verificationResult = await this.openId4VcController.verifyPresentationTokenContent(TokenContentVerifiablePresentation.from(request.token.content), request.token.id);
 
         return Result.ok({
             isValid: verificationResult.isValid,

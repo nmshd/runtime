@@ -294,10 +294,7 @@ export class AppStringProcessor {
                 const tokenContent = this.parseTokenContent(token.content);
 
                 if (tokenContent instanceof TokenContentVerifiablePresentation) {
-                    const verificationResult = await services.consumptionServices.openId4Vc.verifyPresentationToken({
-                        tokenContent: tokenContent.toJSON(),
-                        expectedNonce: token.id
-                    });
+                    const verificationResult = await services.consumptionServices.openId4Vc.verifyPresentationToken({ token });
                     await uiBridge.showVerifiablePresentation(account, result.value.value, verificationResult.value.isValid);
                     break;
                 }

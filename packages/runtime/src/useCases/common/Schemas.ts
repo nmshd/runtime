@@ -17514,16 +17514,72 @@ export const VerifyPresentationTokenRequest: any = {
         "VerifyPresentationTokenRequest": {
             "type": "object",
             "properties": {
-                "tokenContent": {
-                    "$ref": "#/definitions/TokenContentVerifiablePresentationJSON"
-                },
-                "expectedNonce": {
-                    "type": "string"
+                "token": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "content": {
+                            "$ref": "#/definitions/TokenContentVerifiablePresentationJSON"
+                        },
+                        "id": {
+                            "type": "string"
+                        },
+                        "isOwn": {
+                            "type": "boolean"
+                        },
+                        "createdBy": {
+                            "type": "string"
+                        },
+                        "createdByDevice": {
+                            "type": "string"
+                        },
+                        "createdAt": {
+                            "type": "string"
+                        },
+                        "expiresAt": {
+                            "type": "string"
+                        },
+                        "forIdentity": {
+                            "type": "string"
+                        },
+                        "passwordProtection": {
+                            "$ref": "#/definitions/PasswordProtectionDTO"
+                        },
+                        "reference": {
+                            "type": "object",
+                            "properties": {
+                                "truncated": {
+                                    "type": "string"
+                                },
+                                "url": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "truncated",
+                                "url"
+                            ],
+                            "additionalProperties": false
+                        },
+                        "isEphemeral": {
+                            "type": "boolean"
+                        }
+                    },
+                    "required": [
+                        "content",
+                        "createdAt",
+                        "createdBy",
+                        "createdByDevice",
+                        "expiresAt",
+                        "id",
+                        "isEphemeral",
+                        "isOwn",
+                        "reference"
+                    ]
                 }
             },
             "required": [
-                "tokenContent",
-                "expectedNonce"
+                "token"
             ],
             "additionalProperties": false
         },
@@ -17564,6 +17620,57 @@ export const VerifyPresentationTokenRequest: any = {
                 "@type",
                 "type",
                 "value"
+            ],
+            "additionalProperties": false
+        },
+        "PasswordProtectionDTO": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "passwordIsPin": {
+                    "type": "boolean",
+                    "const": true
+                },
+                "passwordLocationIndicator": {
+                    "anyOf": [
+                        {
+                            "type": "string",
+                            "const": "RecoveryKit"
+                        },
+                        {
+                            "type": "string",
+                            "const": "Self"
+                        },
+                        {
+                            "type": "string",
+                            "const": "Letter"
+                        },
+                        {
+                            "type": "string",
+                            "const": "RegistrationLetter"
+                        },
+                        {
+                            "type": "string",
+                            "const": "Email"
+                        },
+                        {
+                            "type": "string",
+                            "const": "SMS"
+                        },
+                        {
+                            "type": "string",
+                            "const": "Website"
+                        },
+                        {
+                            "type": "number"
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "password"
             ],
             "additionalProperties": false
         }
