@@ -1,4 +1,17 @@
-import { BaseRecord, ClaimFormat, DidJwk, DidKey, InjectionSymbols, JwkDidCreateOptions, KeyDidCreateOptions, Kms, X509Module } from "@credo-ts/core";
+import {
+    BaseRecord,
+    ClaimFormat,
+    DcqlCredentialsForRequest,
+    DidJwk,
+    DidKey,
+    DifPexInputDescriptorToCredentials,
+    InjectionSymbols,
+    JwkDidCreateOptions,
+    KeyDidCreateOptions,
+    Kms,
+    SdJwtVcApi,
+    X509Module
+} from "@credo-ts/core";
 import { OpenId4VciCredentialResponse, OpenId4VcModule, type OpenId4VciResolvedCredentialOffer, type OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
 import { TokenContentVerifiablePresentation, VerifiableCredential } from "@nmshd/content";
 import { AccountController } from "@nmshd/transport";
@@ -146,27 +159,45 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
           }
         | undefined
     > {
-        if (!resolvedAuthorizationRequest.dcql) {
-            throw new Error("Missing dcql on resolved authorization request");
+        if (!resolvedAuthorizationRequest.presentationExchange && !resolvedAuthorizationRequest.dcql) {
+            throw new Error("Missing presentation exchange or dcql on resolved authorization request");
         }
 
         const credentialContent = credential.content.value as VerifiableCredential;
         const credentialRecord = decodeRecord(credentialContent.type, credentialContent.value);
 
-        const queryId = resolvedAuthorizationRequest.dcql.queryResult.credentials[0].id;
-        const credentialForDcql = {
-            [queryId]: [
-                {
-                    credentialRecord,
-                    claimFormat: credentialContent.type as any,
-                    disclosedPayload: {} // TODO: implement SD properly
-                }
-            ]
-        } as any;
+        let credentialForPex: DifPexInputDescriptorToCredentials | undefined;
+        if (resolvedAuthorizationRequest.presentationExchange) {
+            const inputDescriptor = resolvedAuthorizationRequest.presentationExchange.credentialsForRequest.requirements[0].submissionEntry[0].inputDescriptorId;
+            credentialForPex = {
+                [inputDescriptor]: [
+                    {
+                        credentialRecord,
+                        claimFormat: credentialContent.type as any,
+                        disclosedPayload: {} // TODO: implement SD properly
+                    }
+                ]
+            } as any;
+        }
+
+        let credentialForDcql: DcqlCredentialsForRequest | undefined;
+        if (resolvedAuthorizationRequest.dcql) {
+            const queryId = resolvedAuthorizationRequest.dcql.queryResult.credentials[0].id;
+            credentialForDcql = {
+                [queryId]: [
+                    {
+                        credentialRecord,
+                        claimFormat: credentialContent.type as any,
+                        disclosedPayload: {} // TODO: implement SD properly
+                    }
+                ]
+            } as any;
+        }
 
         const submissionResult = await this.agent.openid4vc.holder.acceptOpenId4VpAuthorizationRequest({
             authorizationRequestPayload: resolvedAuthorizationRequest.authorizationRequestPayload,
-            dcql: { credentials: credentialForDcql }
+            presentationExchange: credentialForPex ? { credentials: credentialForPex } : undefined,
+            dcql: credentialForDcql ? { credentials: credentialForDcql } : undefined
         });
         return submissionResult.serverResponse;
     }
