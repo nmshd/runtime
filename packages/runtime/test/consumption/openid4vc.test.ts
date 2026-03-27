@@ -286,6 +286,19 @@ describe("EUDIPLO", () => {
             expect(verificationResult.value.isValid).toBe(true);
         });
 
+        test("fail token verification in case of invalid nonce", async () => {
+            const storedCredential = await createAndStoreCredential(eudiploClient, eudiploCredentialConfigurationId);
+            const presentationToken = await createPresentationToken(storedCredential);
+
+            const verificationResult = await runtimeServices1.consumption.openId4Vc.verifyPresentationToken({
+                token: { ...presentationToken, id: "TOKXXXXXXXXXXXXXXXXX" }
+            });
+
+            expect(verificationResult).toBeSuccessful();
+            expect(verificationResult.value.isValid).toBe(false);
+            expect(verificationResult.value.error?.message).toBe("Verify Error: Invalid Nonce");
+        });
+
         test("fail token verification in case of invalid signature", async () => {
             const storedCredential = await createAndStoreCredential(eudiploClient, eudiploCredentialConfigurationId);
             const presentationToken = await createPresentationToken(storedCredential);
