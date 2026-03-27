@@ -279,26 +279,11 @@ describe("EUDIPLO", () => {
             const presentationToken = await createPresentationToken(storedCredential);
 
             const verificationResult = await runtimeServices1.consumption.openId4Vc.verifyPresentationToken({
-                tokenContent: presentationToken.content,
-                expectedNonce: presentationToken.id
+                token: presentationToken
             });
 
             expect(verificationResult).toBeSuccessful();
             expect(verificationResult.value.isValid).toBe(true);
-        });
-
-        test("fail token verification in case of invalid nonce", async () => {
-            const storedCredential = await createAndStoreCredential(eudiploClient, eudiploCredentialConfigurationId);
-            const presentationToken = await createPresentationToken(storedCredential);
-
-            const verificationResult = await runtimeServices1.consumption.openId4Vc.verifyPresentationToken({
-                tokenContent: presentationToken.content,
-                expectedNonce: "wrong-nonce"
-            });
-
-            expect(verificationResult).toBeSuccessful();
-            expect(verificationResult.value.isValid).toBe(false);
-            expect(verificationResult.value.error?.message).toBe("Verify Error: Invalid Nonce");
         });
 
         test("fail token verification in case of invalid signature", async () => {
@@ -308,8 +293,7 @@ describe("EUDIPLO", () => {
             const tokenContentWithTamperedSignature = tamperSignatureOfTokenContent(presentationToken.content as TokenContentVerifiablePresentationJSON);
 
             const verificationResult = await runtimeServices1.consumption.openId4Vc.verifyPresentationToken({
-                tokenContent: tokenContentWithTamperedSignature,
-                expectedNonce: presentationToken.id
+                token: { ...presentationToken, content: tokenContentWithTamperedSignature }
             });
 
             expect(verificationResult).toBeSuccessful();
