@@ -1168,6 +1168,9 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/PseudonymJSON"
                 },
                 {
+                    "$ref": "#/definitions/SchematizedJSONJSON"
+                },
+                {
                     "$ref": "#/definitions/SexJSON"
                 },
                 {
@@ -1760,6 +1763,30 @@ export const CanCreateOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+        "SchematizedJSONJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "SchematizedJSON"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {},
+                "schemaURL": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
         "SexJSON": {
             "type": "object",
             "properties": {
@@ -2111,6 +2138,7 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "PhoneNumber",
                 "PostOfficeBoxAddress",
                 "Pseudonym",
+                "SchematizedJSON",
                 "Sex",
                 "StreetAddress",
                 "Surname",
@@ -3205,6 +3233,9 @@ export const CompleteOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/PseudonymJSON"
                 },
                 {
+                    "$ref": "#/definitions/SchematizedJSONJSON"
+                },
+                {
                     "$ref": "#/definitions/SexJSON"
                 },
                 {
@@ -3788,6 +3819,30 @@ export const CompleteOutgoingRequestRequest: any = {
                     "type": "string"
                 },
                 "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "SchematizedJSONJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "SchematizedJSON"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {},
+                "schemaURL": {
                     "type": "string"
                 }
             },
@@ -5230,6 +5285,9 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "$ref": "#/definitions/PseudonymJSON"
                 },
                 {
+                    "$ref": "#/definitions/SchematizedJSONJSON"
+                },
+                {
                     "$ref": "#/definitions/SexJSON"
                 },
                 {
@@ -5813,6 +5871,30 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "type": "string"
                 },
                 "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "SchematizedJSONJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "SchematizedJSON"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {},
+                "schemaURL": {
                     "type": "string"
                 }
             },
@@ -7872,6 +7954,9 @@ export const CreateOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/PseudonymJSON"
                 },
                 {
+                    "$ref": "#/definitions/SchematizedJSONJSON"
+                },
+                {
                     "$ref": "#/definitions/SexJSON"
                 },
                 {
@@ -8464,6 +8549,30 @@ export const CreateOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+        "SchematizedJSONJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "SchematizedJSON"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {},
+                "schemaURL": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
         "SexJSON": {
             "type": "object",
             "properties": {
@@ -8815,6 +8924,7 @@ export const CreateOutgoingRequestRequest: any = {
                 "PhoneNumber",
                 "PostOfficeBoxAddress",
                 "Pseudonym",
+                "SchematizedJSON",
                 "Sex",
                 "StreetAddress",
                 "Surname",
@@ -10915,6 +11025,9 @@ export const ReceivedIncomingRequestRequest: any = {
                     "$ref": "#/definitions/PseudonymJSON"
                 },
                 {
+                    "$ref": "#/definitions/SchematizedJSONJSON"
+                },
+                {
                     "$ref": "#/definitions/SexJSON"
                 },
                 {
@@ -11507,6 +11620,30 @@ export const ReceivedIncomingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+        "SchematizedJSONJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "SchematizedJSON"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {},
+                "schemaURL": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
         "SexJSON": {
             "type": "object",
             "properties": {
@@ -11858,6 +11995,7 @@ export const ReceivedIncomingRequestRequest: any = {
                 "PhoneNumber",
                 "PostOfficeBoxAddress",
                 "Pseudonym",
+                "SchematizedJSON",
                 "Sex",
                 "StreetAddress",
                 "Surname",
@@ -13378,6 +13516,7 @@ export const ExecuteIdentityAttributeQueryRequest: any = {
                 "PhoneNumber",
                 "PostOfficeBoxAddress",
                 "Pseudonym",
+                "SchematizedJSON",
                 "Sex",
                 "StreetAddress",
                 "Surname",
@@ -13482,6 +13621,7 @@ export const ExecuteIQLQueryRequest: any = {
                 "PhoneNumber",
                 "PostOfficeBoxAddress",
                 "Pseudonym",
+                "SchematizedJSON",
                 "Sex",
                 "StreetAddress",
                 "Surname",
@@ -14949,6 +15089,9 @@ export const SucceedOwnIdentityAttributeRequest: any = {
                     "$ref": "#/definitions/PseudonymJSON"
                 },
                 {
+                    "$ref": "#/definitions/SchematizedJSONJSON"
+                },
+                {
                     "$ref": "#/definitions/SexJSON"
                 },
                 {
@@ -15532,6 +15675,30 @@ export const SucceedOwnIdentityAttributeRequest: any = {
                     "type": "string"
                 },
                 "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "SchematizedJSONJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "SchematizedJSON"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {},
+                "schemaURL": {
                     "type": "string"
                 }
             },
@@ -16438,6 +16605,7 @@ export const ValidateIQLQueryRequest: any = {
                 "PhoneNumber",
                 "PostOfficeBoxAddress",
                 "Pseudonym",
+                "SchematizedJSON",
                 "Sex",
                 "StreetAddress",
                 "Surname",
@@ -20516,6 +20684,37 @@ export const IdentityFileReference: any = {
                     "type": "string"
                 },
                 "value": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
+export const Schematized: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/Schematized",
+    "definitions": {
+        "Schematized": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "Schematized"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {},
+                "schemaURL": {
                     "type": "string"
                 }
             },
