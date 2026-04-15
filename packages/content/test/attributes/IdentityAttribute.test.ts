@@ -108,10 +108,10 @@ describe("IdentityAttribute", function () {
         ).toThrow("Nationality.value :: Value is not a string");
 
         expect(() =>
+            // @ts-expect-error
             IdentityAttribute.from({
                 value: {
                     "@type": "Nationality",
-                    // @ts-expect-error
                     value: undefined
                 },
                 owner: "address"
