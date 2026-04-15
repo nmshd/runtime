@@ -16,7 +16,7 @@ const contentConfig = {
 };
 const attributeValues = content.AttributeValues.Identity.TYPE_NAMES.map((x) => `${x}JSON`);
 const attributeSchemaDeclarations = getSchemaDeclarations(contentConfig, (x) => attributeValues.includes(x));
-const cleanAttributeSchemaDeclarations = attributeSchemaDeclarations.replaceAll("JSON", "");
+const cleanAttributeSchemaDeclarations = attributeSchemaDeclarations.replace(/JSON(?![a-zA-Z])/g, "");
 
 const outputPath = new URL("../src/useCases/common/Schemas.ts", import.meta.url).pathname;
 fs.writeFile(outputPath, `${schemaDeclarations}\n\n${cleanAttributeSchemaDeclarations}`, (err) => {

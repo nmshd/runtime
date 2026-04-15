@@ -20696,11 +20696,11 @@ export const IdentityFileReference: any = {
     }
 }
 
-export const Schematized: any = {
+export const SchematizedJSON: any = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$ref": "#/definitions/Schematized",
+    "$ref": "#/definitions/SchematizedJSON",
     "definitions": {
-        "Schematized": {
+        "SchematizedJSON": {
             "type": "object",
             "properties": {
                 "@type": {
