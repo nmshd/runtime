@@ -16,10 +16,11 @@ const contentConfig = {
 };
 const attributeValues = content.AttributeValues.Identity.TYPE_NAMES.map((x) => `${x}JSON`);
 const attributeSchemaDeclarations = getSchemaDeclarations(contentConfig, (x) => attributeValues.includes(x));
-const cleanAttributeSchemaDeclarations = attributeSchemaDeclarations.replace(/JSON(?![a-zA-Z])/g, "");
+const cleanAttributeSchemaDeclarations = attributeSchemaDeclarations.replace(/\b(?!SchematizedJSON)(\w*?)JSON\b/g, "$1");
+const finalAttributeSchemaDeclarations = cleanAttributeSchemaDeclarations.replace(/SchematizedJSONJSON/g, "SchematizedJSON");
 
 const outputPath = new URL("../src/useCases/common/Schemas.ts", import.meta.url).pathname;
-fs.writeFile(outputPath, `${schemaDeclarations}\n\n${cleanAttributeSchemaDeclarations}`, (err) => {
+fs.writeFile(outputPath, `${schemaDeclarations}\n\n${finalAttributeSchemaDeclarations}`, (err) => {
     if (err) throw err;
 });
 

@@ -20705,7 +20705,7 @@ export const SchematizedJSON: any = {
             "properties": {
                 "@type": {
                     "type": "string",
-                    "const": "Schematized"
+                    "const": "SchematizedJSON"
                 },
                 "@context": {
                     "type": "string"
