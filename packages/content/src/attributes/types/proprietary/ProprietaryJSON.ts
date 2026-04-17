@@ -1,6 +1,7 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { AbstractAttributeValue, AbstractAttributeValueJSON, IAbstractAttributeValue } from "../../AbstractAttributeValue";
 import { RenderHints, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../../hints";
+import { validateJSON } from "../utils";
 import { PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH, PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH } from "./ProprietaryAttributeValue";
 
 export interface ProprietaryJSONJSON extends AbstractAttributeValueJSON {
@@ -27,7 +28,7 @@ export class ProprietaryJSON extends AbstractAttributeValue {
     public description?: string;
 
     @serialize({ any: true })
-    @validate({ customValidator: validateValue })
+    @validate({ customValidator: validateJSON })
     public value: unknown;
 
     public static get valueHints(): ValueHints {
@@ -48,21 +49,4 @@ export class ProprietaryJSON extends AbstractAttributeValue {
     public override toJSON(verbose?: boolean | undefined, serializeAsString?: boolean | undefined): ProprietaryJSONJSON {
         return super.toJSON(verbose, serializeAsString) as ProprietaryJSONJSON;
     }
-}
-
-function validateValue(value: any) {
-    try {
-        const string = JSON.stringify(value);
-        if (string.length > 4096) {
-            return "stringified value must not be longer than 4096 characters";
-        }
-    } catch (e) {
-        if (e instanceof SyntaxError) {
-            return "must be a valid JSON object";
-        }
-
-        return "could not validate value";
-    }
-
-    return undefined;
 }
