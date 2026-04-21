@@ -1,13 +1,25 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
-import { DeviceOnboardingInfoDTO, FileDVO, IdentityDVO, LocalRequestDVO, MailDVO, MessageDVO, RequestMessageDVO } from "@nmshd/runtime";
+import {
+    DeviceOnboardingInfoDTO,
+    FileDVO,
+    IdentityDVO,
+    LocalRequestDVO,
+    MailDVO,
+    MessageDVO,
+    RequestMessageDVO,
+    ResolveAuthorizationRequestResponse,
+    TokenDTO
+} from "@nmshd/runtime";
 import { IUIBridge, LocalAccountDTO } from "../../src";
 
 export type MockUIBridgeCall =
     | { method: "showMessage"; account: LocalAccountDTO; relationship: IdentityDVO; message: MessageDVO | MailDVO | RequestMessageDVO }
     | { method: "showRelationship"; account: LocalAccountDTO; relationship: IdentityDVO }
     | { method: "showFile"; account: LocalAccountDTO; file: FileDVO }
+    | { method: "showVerifiablePresentation"; account: LocalAccountDTO; token: TokenDTO; isTechnicallyValid: boolean }
     | { method: "showDeviceOnboarding"; deviceOnboardingInfo: DeviceOnboardingInfoDTO }
     | { method: "showRequest"; account: LocalAccountDTO; request: LocalRequestDVO }
+    | { method: "showResolvedAuthorizationRequest"; account: LocalAccountDTO; response: ResolveAuthorizationRequestResponse }
     | { method: "showError"; error: ApplicationError; account?: LocalAccountDTO }
     | { method: "requestAccountSelection"; possibleAccounts: LocalAccountDTO[]; title?: string; description?: string }
     | { method: "enterPassword"; passwordType: "pw" | "pin"; pinLength?: number; attempt?: number; passwordLocationIndicator?: number };
@@ -53,6 +65,12 @@ export class MockUIBridge implements IUIBridge {
         return Promise.resolve(Result.ok(undefined));
     }
 
+    public showVerifiablePresentation(account: LocalAccountDTO, token: TokenDTO, isTechnicallyValid: boolean): Promise<Result<void>> {
+        this._calls.push({ method: "showVerifiablePresentation", account, token, isTechnicallyValid });
+
+        return Promise.resolve(Result.ok(undefined));
+    }
+
     public showDeviceOnboarding(deviceOnboardingInfo: DeviceOnboardingInfoDTO): Promise<Result<void>> {
         this._calls.push({ method: "showDeviceOnboarding", deviceOnboardingInfo });
 
@@ -61,6 +79,12 @@ export class MockUIBridge implements IUIBridge {
 
     public showRequest(account: LocalAccountDTO, request: LocalRequestDVO): Promise<Result<void>> {
         this._calls.push({ method: "showRequest", account, request });
+
+        return Promise.resolve(Result.ok(undefined));
+    }
+
+    public showResolvedAuthorizationRequest(account: LocalAccountDTO, response: ResolveAuthorizationRequestResponse): Promise<Result<void>> {
+        this._calls.push({ method: "showResolvedAuthorizationRequest", account, response });
 
         return Promise.resolve(Result.ok(undefined));
     }

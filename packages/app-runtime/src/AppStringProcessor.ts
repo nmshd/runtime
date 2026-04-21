@@ -1,6 +1,7 @@
 import { ILogger, ILoggerFactory } from "@js-soft/logging-abstractions";
 import { Serializable } from "@js-soft/ts-serval";
 import { EventBus, Result } from "@js-soft/ts-utils";
+import { TokenContentVerifiablePresentation } from "@nmshd/content";
 import { ICoreAddress, Reference, SharedPasswordProtection } from "@nmshd/core-types";
 import { AnonymousServices, DeviceMapper, RuntimeServices } from "@nmshd/runtime";
 import { BackboneIds, TokenContentDeviceSharedSecret } from "@nmshd/transport";
@@ -29,8 +30,11 @@ export class AppStringProcessor {
         url = url.trim();
 
         const parsed = new URL(url);
-        const allowedProtocols = ["http:", "https:"];
+
+        const allowedProtocols = ["http:", "https:", "openid4vp:"];
         if (!allowedProtocols.includes(parsed.protocol)) return Result.fail(AppRuntimeErrors.appStringProcessor.wrongURL());
+
+        if (parsed.protocol === "openid4vp:") return await this.processOpenID4VPURL(url, account);
 
         return await this.processReference(url, account);
     }
@@ -42,6 +46,36 @@ export class AppStringProcessor {
         } catch (_) {
             return Result.fail(AppRuntimeErrors.appStringProcessor.invalidReference());
         }
+    }
+
+    private async processOpenID4VPURL(url: string, account?: LocalAccountDTO): Promise<Result<void>> {
+        if (!account) {
+            const result = await this.selectAccount();
+            if (result.isError) {
+                this.logger.info("Could not query account", result.error);
+                return Result.fail(result.error);
+            }
+
+            if (!result.value) {
+                this.logger.info("User cancelled account selection");
+                return Result.ok(undefined);
+            }
+
+            account = result.value;
+        }
+
+        const session = await this.runtime.getServices(account.id);
+        const result = await session.consumptionServices.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl: url });
+
+        const uiBridge = await this.runtime.uiBridge();
+        if (result.isError) {
+            this.logger.error("Could not resolve authorization request", result.error);
+            await uiBridge.showError(result.error);
+
+            return Result.ok(undefined);
+        }
+
+        return await uiBridge.showResolvedAuthorizationRequest(account, result.value);
     }
 
     private async _processReference(reference: Reference, account?: LocalAccountDTO): Promise<Result<void>> {
@@ -134,6 +168,13 @@ export class AppStringProcessor {
                 // RelationshipTemplates are processed by the RequestModule
                 break;
             case "Token":
+                const tokenContent = this.parseTokenContent(result.value.value.content);
+
+                if (tokenContent instanceof TokenContentVerifiablePresentation) {
+                    // TODO: add technical validation
+                    await uiBridge.showVerifiablePresentation(account, result.value.value, true);
+                    break;
+                }
                 return Result.fail(AppRuntimeErrors.appStringProcessor.notSupportedTokenContent());
             case "DeviceOnboardingInfo":
                 return Result.fail(AppRuntimeErrors.appStringProcessor.deviceOnboardingNotAllowed());

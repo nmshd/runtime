@@ -50,15 +50,33 @@
         "testEnvironment": "node",
         "testTimeout": 60000,
         "transform": {
-            "^.+\\.ts$": [
+            "^.+\\.(t|j)s$": [
                 "ts-jest",
                 {
                     "tsconfig": "test/tsconfig.json"
                 }
+            ],
+            "^.+\\.mjs$": [
+                "babel-jest",
+                {
+                    "presets": [
+                        [
+                            "@babel/preset-env",
+                            {
+                                "modules": "commonjs"
+                            }
+                        ]
+                    ]
+                }
             ]
-        }
+        },
+        "transformIgnorePatterns": [
+            "<rootDir>/node_modules/(?!(@noble|@stablelib|@credo\\-ts)/)"
+        ]
     },
     "dependencies": {
+        "@credo-ts/core": "^0.6.1",
+        "@credo-ts/openid4vc": "^0.6.1",
         "@js-soft/docdb-querytranslator": "^1.1.7",
         "@js-soft/logging-abstractions": "^1.2.4",
         "@js-soft/ts-serval": "2.0.17",
@@ -67,8 +85,12 @@
         "@nmshd/core-types": "*",
         "@nmshd/iql": "^1.0.5",
         "@nmshd/transport": "*",
+        "@noble/ciphers": "^2.0.1",
+        "jose": "^6.1.1",
         "lodash": "^4.18.1",
-        "ts-simple-nameof": "^1.3.3"
+        "sjcl": "^1.0.8",
+        "ts-simple-nameof": "^1.3.3",
+        "ws": "^8.18.3"
     },
     "devDependencies": {
         "@js-soft/docdb-access-loki": "1.4.1",
@@ -76,6 +98,7 @@
         "@js-soft/node-logger": "1.2.4",
         "@nmshd/crypto": "2.1.3",
         "@types/lodash": "^4.17.24",
+        "@types/sjcl": "^1.0.34",
         "ts-mockito": "^2.6.1"
     },
     "publishConfig": {

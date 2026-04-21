@@ -314,6 +314,9 @@ export const CanCreateOutgoingRequestRequest: any = {
                 },
                 {
                     "$ref": "#/definitions/TransferFileOwnershipRequestItemJSON"
+                },
+                {
+                    "$ref": "#/definitions/ShareCredentialOfferRequestItemJSON"
                 }
             ]
         },
@@ -1180,6 +1183,9 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/SurnameJSON"
                 },
                 {
+                    "$ref": "#/definitions/VerifiableCredentialJSON"
+                },
+                {
                     "$ref": "#/definitions/WebsiteJSON"
                 }
             ]
@@ -1879,6 +1885,46 @@ export const CanCreateOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+        "VerifiableCredentialJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "VerifiableCredential"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object"
+                        }
+                    ]
+                },
+                "type": {
+                    "type": "string"
+                },
+                "displayInformation": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                }
+            },
+            "required": [
+                "@type",
+                "type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
         "WebsiteJSON": {
             "type": "object",
             "properties": {
@@ -2142,6 +2188,7 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "Sex",
                 "StreetAddress",
                 "Surname",
+                "VerifiableCredential",
                 "Website"
             ]
         },
@@ -2727,6 +2774,42 @@ export const CanCreateOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+        "ShareCredentialOfferRequestItemJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ShareCredentialOfferRequestItem"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "credentialOfferUrl": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "credentialOfferUrl",
+                "mustBeAccepted"
+            ],
+            "additionalProperties": false
+        },
         "AddressString": {
             "type": "string",
             "pattern": "did:e:((([A-Za-z0-9]+(-[A-Za-z0-9]+)*)\\.)+[a-z]{2,}|localhost):dids:[0-9a-f]{22}"
@@ -3243,6 +3326,9 @@ export const CompleteOutgoingRequestRequest: any = {
                 },
                 {
                     "$ref": "#/definitions/SurnameJSON"
+                },
+                {
+                    "$ref": "#/definitions/VerifiableCredentialJSON"
                 },
                 {
                     "$ref": "#/definitions/WebsiteJSON"
@@ -3940,6 +4026,46 @@ export const CompleteOutgoingRequestRequest: any = {
             },
             "required": [
                 "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "VerifiableCredentialJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "VerifiableCredential"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object"
+                        }
+                    ]
+                },
+                "type": {
+                    "type": "string"
+                },
+                "displayInformation": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                }
+            },
+            "required": [
+                "@type",
+                "type",
                 "value"
             ],
             "additionalProperties": false
@@ -5297,6 +5423,9 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "$ref": "#/definitions/SurnameJSON"
                 },
                 {
+                    "$ref": "#/definitions/VerifiableCredentialJSON"
+                },
+                {
                     "$ref": "#/definitions/WebsiteJSON"
                 }
             ]
@@ -5992,6 +6121,46 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
             },
             "required": [
                 "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "VerifiableCredentialJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "VerifiableCredential"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object"
+                        }
+                    ]
+                },
+                "type": {
+                    "type": "string"
+                },
+                "displayInformation": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                }
+            },
+            "required": [
+                "@type",
+                "type",
                 "value"
             ],
             "additionalProperties": false
@@ -7100,6 +7269,9 @@ export const CreateOutgoingRequestRequest: any = {
                 },
                 {
                     "$ref": "#/definitions/TransferFileOwnershipRequestItemJSON"
+                },
+                {
+                    "$ref": "#/definitions/ShareCredentialOfferRequestItemJSON"
                 }
             ]
         },
@@ -7966,6 +8138,9 @@ export const CreateOutgoingRequestRequest: any = {
                     "$ref": "#/definitions/SurnameJSON"
                 },
                 {
+                    "$ref": "#/definitions/VerifiableCredentialJSON"
+                },
+                {
                     "$ref": "#/definitions/WebsiteJSON"
                 }
             ]
@@ -8665,6 +8840,46 @@ export const CreateOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+        "VerifiableCredentialJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "VerifiableCredential"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object"
+                        }
+                    ]
+                },
+                "type": {
+                    "type": "string"
+                },
+                "displayInformation": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                }
+            },
+            "required": [
+                "@type",
+                "type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
         "WebsiteJSON": {
             "type": "object",
             "properties": {
@@ -8928,6 +9143,7 @@ export const CreateOutgoingRequestRequest: any = {
                 "Sex",
                 "StreetAddress",
                 "Surname",
+                "VerifiableCredential",
                 "Website"
             ]
         },
@@ -9510,6 +9726,42 @@ export const CreateOutgoingRequestRequest: any = {
                 "fileReference",
                 "mustBeAccepted",
                 "ownershipToken"
+            ],
+            "additionalProperties": false
+        },
+        "ShareCredentialOfferRequestItemJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ShareCredentialOfferRequestItem"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "credentialOfferUrl": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "credentialOfferUrl",
+                "mustBeAccepted"
             ],
             "additionalProperties": false
         },
@@ -10171,6 +10423,9 @@ export const ReceivedIncomingRequestRequest: any = {
                 },
                 {
                     "$ref": "#/definitions/TransferFileOwnershipRequestItemJSON"
+                },
+                {
+                    "$ref": "#/definitions/ShareCredentialOfferRequestItemJSON"
                 }
             ]
         },
@@ -11037,6 +11292,9 @@ export const ReceivedIncomingRequestRequest: any = {
                     "$ref": "#/definitions/SurnameJSON"
                 },
                 {
+                    "$ref": "#/definitions/VerifiableCredentialJSON"
+                },
+                {
                     "$ref": "#/definitions/WebsiteJSON"
                 }
             ]
@@ -11736,6 +11994,46 @@ export const ReceivedIncomingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
+        "VerifiableCredentialJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "VerifiableCredential"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object"
+                        }
+                    ]
+                },
+                "type": {
+                    "type": "string"
+                },
+                "displayInformation": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                }
+            },
+            "required": [
+                "@type",
+                "type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
         "WebsiteJSON": {
             "type": "object",
             "properties": {
@@ -11999,6 +12297,7 @@ export const ReceivedIncomingRequestRequest: any = {
                 "Sex",
                 "StreetAddress",
                 "Surname",
+                "VerifiableCredential",
                 "Website"
             ]
         },
@@ -12581,6 +12880,42 @@ export const ReceivedIncomingRequestRequest: any = {
                 "fileReference",
                 "mustBeAccepted",
                 "ownershipToken"
+            ],
+            "additionalProperties": false
+        },
+        "ShareCredentialOfferRequestItemJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "ShareCredentialOfferRequestItem"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "The human-readable description of this item."
+                },
+                "metadata": {
+                    "type": "object",
+                    "description": "This property can be used to add some arbitrary metadata to this item. The content of this property will be copied into the response on the side of the recipient, so the sender can use it to identify the item as they receive the response."
+                },
+                "mustBeAccepted": {
+                    "type": "boolean",
+                    "description": "If set to `true`, the recipient has to accept this item if they want to accept the Request. If set to `false`, the recipient can decide whether they want to accept it or not."
+                },
+                "credentialOfferUrl": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type",
+                "credentialOfferUrl",
+                "mustBeAccepted"
             ],
             "additionalProperties": false
         },
@@ -13520,6 +13855,7 @@ export const ExecuteIdentityAttributeQueryRequest: any = {
                 "Sex",
                 "StreetAddress",
                 "Surname",
+                "VerifiableCredential",
                 "Website"
             ]
         },
@@ -13625,6 +13961,7 @@ export const ExecuteIQLQueryRequest: any = {
                 "Sex",
                 "StreetAddress",
                 "Surname",
+                "VerifiableCredential",
                 "Website"
             ]
         },
@@ -15101,6 +15438,9 @@ export const SucceedOwnIdentityAttributeRequest: any = {
                     "$ref": "#/definitions/SurnameJSON"
                 },
                 {
+                    "$ref": "#/definitions/VerifiableCredentialJSON"
+                },
+                {
                     "$ref": "#/definitions/WebsiteJSON"
                 }
             ]
@@ -15796,6 +16136,46 @@ export const SucceedOwnIdentityAttributeRequest: any = {
             },
             "required": [
                 "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "VerifiableCredentialJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "VerifiableCredential"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object"
+                        }
+                    ]
+                },
+                "type": {
+                    "type": "string"
+                },
+                "displayInformation": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                }
+            },
+            "required": [
+                "@type",
+                "type",
                 "value"
             ],
             "additionalProperties": false
@@ -16609,6 +16989,7 @@ export const ValidateIQLQueryRequest: any = {
                 "Sex",
                 "StreetAddress",
                 "Surname",
+                "VerifiableCredential",
                 "Website"
             ]
         },
@@ -16971,6 +17352,88 @@ export const SentNotificationRequest: any = {
         "MessageIdString": {
             "type": "string",
             "pattern": "MSG[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const AcceptAuthorizationRequestRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/AcceptAuthorizationRequestRequest",
+    "definitions": {
+        "AcceptAuthorizationRequestRequest": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "authorizationRequest": {
+                    "type": "object"
+                },
+                "attributeId": {
+                    "$ref": "#/definitions/AttributeIdString"
+                }
+            },
+            "required": [
+                "attributeId",
+                "authorizationRequest"
+            ]
+        },
+        "AttributeIdString": {
+            "type": "string",
+            "pattern": "ATT[A-Za-z0-9]{17}"
+        }
+    }
+}
+
+export const CreatePresentationTokenRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/CreatePresentationTokenRequest",
+    "definitions": {
+        "CreatePresentationTokenRequest": {
+            "type": "object",
+            "properties": {
+                "attributeId": {
+                    "$ref": "#/definitions/AttributeIdString"
+                },
+                "expiresAt": {
+                    "$ref": "#/definitions/ISO8601DateTimeString"
+                },
+                "ephemeral": {
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "attributeId",
+                "expiresAt",
+                "ephemeral"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeIdString": {
+            "type": "string",
+            "pattern": "ATT[A-Za-z0-9]{17}"
+        },
+        "ISO8601DateTimeString": {
+            "type": "string",
+            "errorMessage": "must match ISO8601 datetime format",
+            "pattern": "^([+-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24:?00)([.,]\\d+(?!:))?)?(\\17[0-5]\\d([.,]\\d+)?)?([zZ]|([+-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$"
+        }
+    }
+}
+
+export const ResolveAuthorizationRequestRequest: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/ResolveAuthorizationRequestRequest",
+    "definitions": {
+        "ResolveAuthorizationRequestRequest": {
+            "type": "object",
+            "properties": {
+                "authorizationRequestUrl": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "authorizationRequestUrl"
+            ],
+            "additionalProperties": false
         }
     }
 }
@@ -21113,6 +21576,53 @@ export const Sex: any = {
             },
             "required": [
                 "@type",
+                "value"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
+
+export const VerifiableCredential: any = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/VerifiableCredential",
+    "definitions": {
+        "VerifiableCredential": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "VerifiableCredential"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "value": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object"
+                        }
+                    ]
+                },
+                "type": {
+                    "type": "string"
+                },
+                "displayInformation": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                }
+            },
+            "required": [
+                "@type",
+                "type",
                 "value"
             ],
             "additionalProperties": false

@@ -30,6 +30,7 @@ export * from "./itemProcessors/RequestItemConstructor";
 export * from "./itemProcessors/RequestItemProcessorConstructor";
 export * from "./itemProcessors/RequestItemProcessorRegistry";
 export * from "./itemProcessors/shareAttribute/ShareAttributeRequestItemProcessor";
+export * from "./itemProcessors/shareCredentialOffer/ShareCredentialOfferRequestItemProcessor";
 export * from "./itemProcessors/transferFileOwnership/TransferFileOwnershipRequestItemProcessor";
 export * from "./local/LocalRequest";
 export * from "./local/LocalRequestStatus";
