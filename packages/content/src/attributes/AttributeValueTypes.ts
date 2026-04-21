@@ -67,6 +67,7 @@ import {
     IProprietaryURL,
     IProprietaryXML,
     IPseudonym,
+    ISchematizedJSON,
     ISchematizedXML,
     ISex,
     IStreetAddress,
@@ -113,6 +114,8 @@ import {
     ProprietaryXMLJSON,
     Pseudonym,
     PseudonymJSON,
+    SchematizedJSON,
+    SchematizedJSONJSON,
     SchematizedXML,
     SchematizedXMLJSON,
     Sex,
@@ -155,6 +158,7 @@ export namespace AttributeValues {
                 | PhoneNumberJSON
                 | PostOfficeBoxAddressJSON
                 | PseudonymJSON
+                | SchematizedJSONJSON
                 | SexJSON
                 | StreetAddressJSON
                 | SurnameJSON
@@ -184,6 +188,7 @@ export namespace AttributeValues {
                 | IPhoneNumber
                 | IPostOfficeBoxAddress
                 | IPseudonym
+                | ISchematizedJSON
                 | ISex
                 | IStreetAddress
                 | ISurname
@@ -213,6 +218,7 @@ export namespace AttributeValues {
                 | PhoneNumber
                 | PostOfficeBoxAddress
                 | Pseudonym
+                | SchematizedJSON
                 | Sex
                 | StreetAddress
                 | Surname
@@ -242,6 +248,7 @@ export namespace AttributeValues {
                 PhoneNumber,
                 PostOfficeBoxAddress,
                 Pseudonym,
+                SchematizedJSON,
                 Sex,
                 StreetAddress,
                 Surname,
@@ -272,6 +279,7 @@ export namespace AttributeValues {
                 "PhoneNumber",
                 "PostOfficeBoxAddress",
                 "Pseudonym",
+                "SchematizedJSON",
                 "Sex",
                 "StreetAddress",
                 "Surname",
