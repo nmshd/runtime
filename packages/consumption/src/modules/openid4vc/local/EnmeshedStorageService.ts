@@ -20,6 +20,7 @@ import { KeyStorage } from "./KeyStorage";
 @injectable()
 export class EnmeshedStorageService<T extends BaseRecord> implements StorageService<T> {
     public storage: Map<string, T> = new Map<string, T>();
+    supportsCursorPagination: boolean = false;
     public constructor(
         private readonly accountController: AccountController,
         private readonly attributeController: AttributesController,
