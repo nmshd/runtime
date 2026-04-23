@@ -121,7 +121,8 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
     public async storeCredentials(credentialResponses: OpenId4VciCredentialResponseJSON[]): Promise<OwnIdentityAttribute[]> {
         const storedCredentials = await Promise.all(
             credentialResponses.map((credentialResponse) => {
-                if (![ClaimFormat.SdJwtW3cVc, ClaimFormat.SdJwtDc, ClaimFormat.MsoMdoc].includes(credentialResponse.claimFormat)) {
+                // add additional supported credential formats here as needed
+                if (![ClaimFormat.SdJwtDc].includes(credentialResponse.claimFormat)) {
                     throw new Error("Unsupported credential format");
                 }
 
