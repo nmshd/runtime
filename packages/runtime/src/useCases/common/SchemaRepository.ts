@@ -10,8 +10,8 @@ export class SchemaRepository {
 
     public constructor() {
         this.compiler = new ajv({ allErrors: true, allowUnionTypes: true });
-        addFormats(this.compiler);
-        addErrors(this.compiler);
+        addFormats.default(this.compiler);
+        addErrors.default(this.compiler);
     }
 
     public async loadSchemas(): Promise<void> {
