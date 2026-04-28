@@ -11,10 +11,10 @@ export interface JwkKeyPair {
     keyType?: string;
 }
 
-export class EnmshedHolderKeyManagmentService implements Kms.KeyManagementService {
+export class EnmeshedHolderKeyManagementService implements Kms.KeyManagementService {
     public static readonly backend = "enmeshed";
 
-    public readonly backend = EnmshedHolderKeyManagmentService.backend;
+    public readonly backend = EnmeshedHolderKeyManagementService.backend;
 
     private readonly b64url = (bytes: Uint8Array) => SodiumWrapper.sodium.to_base64(bytes, (SodiumWrapper.sodium as any).base64_variants.URLSAFE_NO_PADDING);
     private readonly b64urlDecode = (b64url: string) => SodiumWrapper.sodium.from_base64(b64url, (SodiumWrapper.sodium as any).base64_variants.URLSAFE_NO_PADDING);

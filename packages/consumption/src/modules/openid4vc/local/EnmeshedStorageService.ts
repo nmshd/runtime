@@ -94,6 +94,7 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
         });
     }
 
+    // this is currently the only method which supports all record types, as otherwise the presentation could not work
     private recordTypeToCredentialType(recordType: string): string {
         switch (recordType) {
             case SdJwtVcRecord.name:
