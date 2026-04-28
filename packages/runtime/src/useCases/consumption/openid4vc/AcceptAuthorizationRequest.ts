@@ -39,6 +39,6 @@ export class AcceptAuthorizationRequestUseCase extends UseCase<AcceptAuthorizati
         if (!credential) return Result.fail(RuntimeErrors.general.recordNotFound(LocalAttribute));
 
         const result = await this.openId4VcController.acceptAuthorizationRequest(request.authorizationRequest, credential);
-        return Result.ok({ status: result.status, message: JSON.stringify(result.message) });
+        return Result.ok({ status: result.status, message: JSON.stringify(result.message ?? {}) });
     }
 }
