@@ -22,7 +22,7 @@ export class OpenId4VcController extends ConsumptionBaseController {
         const keyCollection = await this.parent.accountController.getSynchronizedCollection("openid4vc-keys");
         const keyStorage = new KeyStorage(keyCollection, this._log);
 
-        //ToDo: long term solution requires a non fixed key id -  openid4vc v2
+        // ToDo: long term solution requires a non fixed key id -  openid4vc v2
         this.holder = new Holder(keyStorage, this.parent.accountController, this.parent.attributes, this.fetchInstance);
         await this.holder.initializeAgent("96213c3d7fc8d4d6754c7a0fd969598e");
 

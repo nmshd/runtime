@@ -2,7 +2,6 @@ import { EudiploClient } from "@eudiplo/sdk-core";
 import { AcceptShareAuthorizationRequestRequestItemParametersJSON } from "@nmshd/consumption";
 import { RequestJSON, ShareAuthorizationRequestRequestItemJSON, TokenContentVerifiablePresentationJSON, VerifiableCredentialJSON } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
-import { AxiosInstance } from "axios";
 import * as client from "openid-client";
 import path from "path";
 import { GenericContainer, StartedTestContainer, Wait } from "testcontainers";
@@ -27,8 +26,6 @@ const runtimeServiceProvider = new RuntimeServiceProvider(fetchInstance);
 let runtimeServices1: TestRuntimeServices;
 let runtimeServices2: TestRuntimeServices;
 
-let serviceAxiosInstance: AxiosInstance;
-
 let eudiploContainer: StartedTestContainer | undefined;
 
 beforeAll(async () => {
@@ -36,7 +33,7 @@ beforeAll(async () => {
     runtimeServices1 = runtimeServices[0];
     runtimeServices2 = runtimeServices[1];
 
-    //build connection between runtimes via relationship and request
+    // build connection between runtimes via relationship and request
     await establishRelationship(runtimeServices1.transport, runtimeServices2.transport);
 
     const eudiploBaseUrl = "http://localhost:3000";
@@ -56,31 +53,25 @@ afterAll(async () => {
 });
 
 test("issuance", async () => {
-    var credentialOfferUrl;
-    try {
-        credentialOfferUrl = (
-            await eudiploClient.createIssuanceOffer({
-                credentialConfigurationIds: [eudiploCredentialConfigurationId]
-            })
-        ).uri;
-
-        const resolveCredentialOfferResult = await runtimeServices1.consumption.openId4Vc.resolveCredentialOffer({ credentialOfferUrl });
-        expect(resolveCredentialOfferResult).toBeSuccessful();
-
-        const credentialResponsesResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
-            credentialOffer: resolveCredentialOfferResult.value.credentialOffer,
+    const credentialOfferUrl = (
+        await eudiploClient.createIssuanceOffer({
             credentialConfigurationIds: [eudiploCredentialConfigurationId]
-        });
-        const storeCredentialsResponse = await runtimeServices1.consumption.openId4Vc.storeCredentials({
-            credentialResponses: credentialResponsesResult.value.credentialResponses
-        });
-        expect(storeCredentialsResponse).toBeSuccessful();
-        expect((storeCredentialsResponse.value.content.value as VerifiableCredentialJSON).displayInformation?.[0].logo).toBeDefined();
-        expect((storeCredentialsResponse.value.content.value as VerifiableCredentialJSON).displayInformation?.[0].name).toBe("test");
-    } catch (error) {
-        console.error("Error creating issuance offer:", error);
-        throw error; // rethrow to fail the test
-    }
+        })
+    ).uri;
+
+    const resolveCredentialOfferResult = await runtimeServices1.consumption.openId4Vc.resolveCredentialOffer({ credentialOfferUrl });
+    expect(resolveCredentialOfferResult).toBeSuccessful();
+
+    const credentialResponsesResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
+        credentialOffer: resolveCredentialOfferResult.value.credentialOffer,
+        credentialConfigurationIds: [eudiploCredentialConfigurationId]
+    });
+    const storeCredentialsResponse = await runtimeServices1.consumption.openId4Vc.storeCredentials({
+        credentialResponses: credentialResponsesResult.value.credentialResponses
+    });
+    expect(storeCredentialsResponse).toBeSuccessful();
+    expect((storeCredentialsResponse.value.content.value as VerifiableCredentialJSON).displayInformation?.[0].logo).toBeDefined();
+    expect((storeCredentialsResponse.value.content.value as VerifiableCredentialJSON).displayInformation?.[0].name).toBe("test");
 });
 
 test("issuance with pin authentication", async () => {
@@ -151,7 +142,6 @@ test.skip("issuance with external authentication", async () => {
 });
 
 test("issuance via request", async () => {
-    //store old credentials to check later if a new one was added
     const oldCredentials = (
         await runtimeServices2.consumption.attributes.getAttributes({
             query: {
@@ -160,7 +150,6 @@ test("issuance via request", async () => {
         })
     ).value;
 
-    // firstly we fetch a credential offer URL
     const credentialOfferUrl = await eudiploClient
         .createIssuanceOffer({
             responseType: "uri",
@@ -169,7 +158,6 @@ test("issuance via request", async () => {
         })
         .then((res) => res.uri);
 
-    // next we wrap it in create an outgoing request
     const request = await runtimeServices1.consumption.outgoingRequests.create({
         peer: runtimeServices2.address,
         content: {
@@ -185,7 +173,6 @@ test("issuance via request", async () => {
         }
     });
 
-    //then we send it as a message to the other runtime
     const sentMessage = await runtimeServices1.transport.messages.sendMessage({
         recipients: [runtimeServices2.address],
         content: request.value.content
@@ -216,46 +203,39 @@ describe("presentation", () => {
     });
 
     test("standard presentation", async () => {
-        try {
-            const authorizationRequestUrl = (
-                await eudiploClient.createPresentationRequest({
-                    responseType: "uri",
-                    configId: eudiploPresentationConfigurationId
-                })
-            ).uri;
+        const authorizationRequestUrl = (
+            await eudiploClient.createPresentationRequest({
+                responseType: "uri",
+                configId: eudiploPresentationConfigurationId
+            })
+        ).uri;
 
-            const loadResult = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl });
-            const matchingCredentials = loadResult.value.matchingCredentials;
+        const loadResult = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl });
+        const matchingCredentials = loadResult.value.matchingCredentials;
 
-            const currentCredentials = (
-                await runtimeServices1.consumption.attributes.getAttributes({
-                    query: {
-                        "content.value.@type": "VerifiableCredential"
-                    }
-                })
-            ).value;
-            expect(matchingCredentials).toHaveLength(currentCredentials.length);
+        const currentCredentials = (
+            await runtimeServices1.consumption.attributes.getAttributes({
+                query: {
+                    "content.value.@type": "VerifiableCredential"
+                }
+            })
+        ).value;
+        expect(matchingCredentials).toHaveLength(currentCredentials.length);
 
-            const queryResult = loadResult.value.authorizationRequest.dcql!.queryResult;
-            expect(queryResult.can_be_satisfied).toBe(true);
+        const queryResult = loadResult.value.authorizationRequest.dcql!.queryResult;
+        expect(queryResult.can_be_satisfied).toBe(true);
 
-            const presentationResult = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({
-                authorizationRequest: loadResult.value.authorizationRequest,
-                attributeId: matchingCredentials[0].id
-            });
-            expect(presentationResult).toBeSuccessful();
-            expect(presentationResult.value.status).toBe(200);
-        } catch (error) {
-            console.error("Error during standard presentation test:", error);
-            throw error; // rethrow to fail the test
-        }
+        const presentationResult = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({
+            authorizationRequest: loadResult.value.authorizationRequest,
+            attributeId: matchingCredentials[0].id
+        });
+        expect(presentationResult).toBeSuccessful();
+        expect(presentationResult.value.status).toBe(200);
     });
 
     test("presentation with request", async () => {
-        // create a presentation request via eudiplo
         const presentationRequest = await eudiploClient.createPresentationRequest({ responseType: "uri", configId: eudiploPresentationConfigurationId });
 
-        // create request item with the presentation request URL and send it to the other runtime
         const request = await runtimeServices1.consumption.outgoingRequests.create({
             peer: runtimeServices2.address,
             content: {
@@ -271,13 +251,12 @@ describe("presentation", () => {
             }
         });
 
-        //send via message
         await runtimeServices1.transport.messages.sendMessage({
             recipients: [runtimeServices2.address],
             content: request.value.content
         });
 
-        const receivedMessage = await syncUntilHasMessageWithRequest(runtimeServices2.transport, request.value.id!);
+        const receivedMessage = await syncUntilHasMessageWithRequest(runtimeServices2.transport, request.value.id);
         const receivedRequestUrl = (receivedMessage.content.items[0] as ShareAuthorizationRequestRequestItemJSON).authorizationRequestUrl;
 
         const matchingAttribute = (
@@ -286,7 +265,7 @@ describe("presentation", () => {
             })
         ).value.matchingCredentials[0];
         await runtimeServices2.consumption.incomingRequests.accept({
-            requestId: request.value.id!,
+            requestId: request.value.id,
             items: [{ accept: true, attributeId: matchingAttribute.id } as AcceptShareAuthorizationRequestRequestItemParametersJSON]
         });
 
@@ -402,7 +381,7 @@ function tamperSignatureOfTokenContent(tokenContent: TokenContentVerifiablePrese
     return tamperedTokenContent;
 }
 
-export async function startEudiplo(): Promise<StartedTestContainer> {
+async function startEudiplo(): Promise<StartedTestContainer> {
     return await new GenericContainer("ghcr.io/openwallet-foundation-labs/eudiplo:4.1.0@sha256:14bc55723f8cdca0837b91541c80466e406e753c1febd07a26400fab1ca37e2d")
         .withEnvironment({
             PUBLIC_URL: "http://localhost:3000", // eslint-disable-line @typescript-eslint/naming-convention
