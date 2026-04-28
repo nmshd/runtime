@@ -1,15 +1,14 @@
-import { SdJwtVcRecord } from "@credo-ts/core";
 import { EudiploClient } from "@eudiplo/sdk-core";
-import { AcceptProposeAttributeRequestItemParametersWithNewAttributeJSON, AcceptShareAuthorizationRequestRequestItemParametersJSON, decodeRecord } from "@nmshd/consumption";
+import { AcceptShareAuthorizationRequestRequestItemParametersJSON } from "@nmshd/consumption";
 import { RequestJSON, ShareAuthorizationRequestRequestItemJSON, TokenContentVerifiablePresentationJSON, VerifiableCredentialJSON } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
-import axios, { AxiosInstance } from "axios";
+import { AxiosInstance } from "axios";
 import * as client from "openid-client";
 import path from "path";
-import { DockerComposeEnvironment, StartedDockerComposeEnvironment, Wait } from "testcontainers";
+import { GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 import { Agent as UndiciAgent, fetch as undiciFetch } from "undici";
-import { IncomingRequestStatusChangedEvent, LocalAttributeDTO } from "../../src";
-import { RuntimeServiceProvider, syncUntilHasMessageWithRequest, syncUntilHasRelationships, TestRuntimeServices } from "../lib";
+import { LocalAttributeDTO } from "../../src";
+import { establishRelationship, RuntimeServiceProvider, syncUntilHasMessageWithRequest, TestRuntimeServices } from "../lib";
 
 const fetchInstance: typeof fetch = (async (input: any, init: any) => {
     const response = await undiciFetch(input, { ...init, dispatcher: new UndiciAgent({}) });
@@ -17,7 +16,7 @@ const fetchInstance: typeof fetch = (async (input: any, init: any) => {
 }) as unknown as typeof fetch;
 
 const eudiploClientId = "test-admin";
-const eudiploClientSecret = "57c9cd444bf402b2cc1f5a0d2dafd3955bd9042c0372db17a4ede2d5fbda88e5";
+const eudiploClientSecret = "hgHrws1JR7sS24WR1IimsVdHAT0ddlgOB3dObaGSAEOo8JSFk3N";
 
 const eudiploPresentationConfigurationId = "test";
 const eudiploCredentialConfigurationId = "test";
@@ -26,31 +25,22 @@ let eudiploClient: EudiploClient;
 
 const runtimeServiceProvider = new RuntimeServiceProvider(fetchInstance);
 let runtimeServices1: TestRuntimeServices;
+let runtimeServices2: TestRuntimeServices;
 
 let serviceAxiosInstance: AxiosInstance;
 
-let dockerComposeStack: StartedDockerComposeEnvironment | undefined;
+let eudiploContainer: StartedTestContainer | undefined;
 
 beforeAll(async () => {
-    const runtimeServices = await runtimeServiceProvider.launch(1, { enableDeciderModule: true, enableRequestModule: true });
+    const runtimeServices = await runtimeServiceProvider.launch(2, { enableDeciderModule: true, enableRequestModule: true });
     runtimeServices1 = runtimeServices[0];
+    runtimeServices2 = runtimeServices[1];
 
-    let oid4vcServiceBaseUrl = process.env.OPENID4VC_SERVICE_BASEURL!;
-    if (!oid4vcServiceBaseUrl) {
-        dockerComposeStack = await startOid4VcComposeStack();
-        const mappedPort = dockerComposeStack.getContainer("oid4vc-service-1").getMappedPort(9000);
-        oid4vcServiceBaseUrl = `http://localhost:${mappedPort}`;
-    }
-    serviceAxiosInstance = axios.create({
-        baseURL: oid4vcServiceBaseUrl,
-        headers: {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            "Content-Type": "application/json"
-        }
-    });
-    await createActiveRelationshipToService(runtimeServices1, serviceAxiosInstance);
+    //build connection between runtimes via relationship and request
+    await establishRelationship(runtimeServices1.transport, runtimeServices2.transport);
 
     const eudiploBaseUrl = "http://localhost:3000";
+    eudiploContainer = await startEudiplo();
 
     eudiploClient = new EudiploClient({
         baseUrl: eudiploBaseUrl,
@@ -62,31 +52,35 @@ beforeAll(async () => {
 afterAll(async () => {
     await runtimeServiceProvider.stop();
 
-    if (dockerComposeStack) await dockerComposeStack.down();
+    if (eudiploContainer) await eudiploContainer.stop();
 });
 
 test("issuance", async () => {
-    const credentialOfferUrl = (
-        await eudiploClient.createIssuanceOffer({
-            responseType: "uri",
-            credentialConfigurationIds: [eudiploCredentialConfigurationId],
-            flow: "pre_authorized_code"
-        })
-    ).uri;
+    var credentialOfferUrl;
+    try {
+        credentialOfferUrl = (
+            await eudiploClient.createIssuanceOffer({
+                credentialConfigurationIds: [eudiploCredentialConfigurationId]
+            })
+        ).uri;
 
-    const resolveCredentialOfferResult = await runtimeServices1.consumption.openId4Vc.resolveCredentialOffer({ credentialOfferUrl });
-    expect(resolveCredentialOfferResult).toBeSuccessful();
+        const resolveCredentialOfferResult = await runtimeServices1.consumption.openId4Vc.resolveCredentialOffer({ credentialOfferUrl });
+        expect(resolveCredentialOfferResult).toBeSuccessful();
 
-    const credentialResponsesResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
-        credentialOffer: resolveCredentialOfferResult.value.credentialOffer,
-        credentialConfigurationIds: [eudiploCredentialConfigurationId]
-    });
-    const storeCredentialsResponse = await runtimeServices1.consumption.openId4Vc.storeCredentials({
-        credentialResponses: credentialResponsesResult.value.credentialResponses
-    });
-    expect(storeCredentialsResponse).toBeSuccessful();
-    expect((storeCredentialsResponse.value.content.value as VerifiableCredentialJSON).displayInformation?.[0].logo).toBeDefined();
-    expect((storeCredentialsResponse.value.content.value as VerifiableCredentialJSON).displayInformation?.[0].name).toBe("test");
+        const credentialResponsesResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
+            credentialOffer: resolveCredentialOfferResult.value.credentialOffer,
+            credentialConfigurationIds: [eudiploCredentialConfigurationId]
+        });
+        const storeCredentialsResponse = await runtimeServices1.consumption.openId4Vc.storeCredentials({
+            credentialResponses: credentialResponsesResult.value.credentialResponses
+        });
+        expect(storeCredentialsResponse).toBeSuccessful();
+        expect((storeCredentialsResponse.value.content.value as VerifiableCredentialJSON).displayInformation?.[0].logo).toBeDefined();
+        expect((storeCredentialsResponse.value.content.value as VerifiableCredentialJSON).displayInformation?.[0].name).toBe("test");
+    } catch (error) {
+        console.error("Error creating issuance offer:", error);
+        throw error; // rethrow to fail the test
+    }
 });
 
 test("issuance with pin authentication", async () => {
@@ -125,7 +119,7 @@ test("issuance with pin authentication", async () => {
     expect(requestResult).toBeSuccessful();
 });
 
-// external authentication buggy in the latest release (1.16.0)
+// external authentication buggy in the latest release (4.0.1)
 // eslint-disable-next-line jest/no-disabled-tests
 test.skip("issuance with external authentication", async () => {
     const credentialOfferUrl = (
@@ -156,48 +150,62 @@ test.skip("issuance with external authentication", async () => {
     expect(credentialResponsesResult).toBeSuccessful();
 });
 
-// TODO: unskip once fix to CanCreateShareCredentialOffer has been deployed to the connector
-// eslint-disable-next-line jest/no-disabled-tests
-test.skip("issuance with request", async () => {
+test("issuance via request", async () => {
+    //store old credentials to check later if a new one was added
     const oldCredentials = (
-        await runtimeServices1.consumption.attributes.getAttributes({
+        await runtimeServices2.consumption.attributes.getAttributes({
             query: {
                 "content.value.@type": "VerifiableCredential"
             }
         })
     ).value;
 
-    const sentMessage = (
-        await serviceAxiosInstance.post("/enmeshed-demo/credential", {
-            recipient: runtimeServices1.address,
-            credentialConfigurationId: eudiploCredentialConfigurationId
+    // firstly we fetch a credential offer URL
+    const credentialOfferUrl = await eudiploClient
+        .createIssuanceOffer({
+            responseType: "uri",
+            credentialConfigurationIds: [eudiploCredentialConfigurationId],
+            flow: "pre_authorized_code"
         })
-    ).data.result;
+        .then((res) => res.uri);
 
-    const requestId = (sentMessage.content as RequestJSON).id!;
-    await syncUntilHasMessageWithRequest(runtimeServices1.transport, requestId);
-    await runtimeServices1.consumption.incomingRequests.accept({
+    // next we wrap it in create an outgoing request
+    const request = await runtimeServices1.consumption.outgoingRequests.create({
+        peer: runtimeServices2.address,
+        content: {
+            title: "test",
+            description: "test",
+            items: [
+                {
+                    "@type": "ShareCredentialOfferRequestItem",
+                    mustBeAccepted: true,
+                    credentialOfferUrl: credentialOfferUrl
+                }
+            ]
+        }
+    });
+
+    //then we send it as a message to the other runtime
+    const sentMessage = await runtimeServices1.transport.messages.sendMessage({
+        recipients: [runtimeServices2.address],
+        content: request.value.content
+    });
+
+    const requestId = (sentMessage.value.content as RequestJSON).id!;
+    await syncUntilHasMessageWithRequest(runtimeServices2.transport, requestId);
+    await runtimeServices2.consumption.incomingRequests.accept({
         requestId,
         items: [{ accept: true }]
     });
 
     const currentCredentials = (
-        await runtimeServices1.consumption.attributes.getAttributes({
+        await runtimeServices2.consumption.attributes.getAttributes({
             query: {
                 "content.value.@type": "VerifiableCredential"
             }
         })
     ).value;
     expect(currentCredentials).toHaveLength(oldCredentials.length + 1);
-
-    const oldCredentialIds = oldCredentials.map((c) => c.id);
-    const createdCredential = currentCredentials.find((c) => !oldCredentialIds.includes(c.id));
-    expect(createdCredential).toBeDefined();
-
-    const credentialContent = createdCredential!.content.value as VerifiableCredentialJSON;
-    const decodedCredential = decodeRecord(credentialContent.type, credentialContent.value) as SdJwtVcRecord;
-    expect(decodedCredential.firstCredential.prettyClaims.givenName).toBe("aGivenName");
-    expect(credentialContent.value.split("~")).toHaveLength(3); // given name is selectively disclosable, hence length 3
 });
 
 describe("presentation", () => {
@@ -208,62 +216,84 @@ describe("presentation", () => {
     });
 
     test("standard presentation", async () => {
-        const authorizationRequestUrl = (
-            await eudiploClient.createPresentationRequest({
-                responseType: "uri",
-                configId: eudiploPresentationConfigurationId
-            })
-        ).uri;
+        try {
+            const authorizationRequestUrl = (
+                await eudiploClient.createPresentationRequest({
+                    responseType: "uri",
+                    configId: eudiploPresentationConfigurationId
+                })
+            ).uri;
 
-        const loadResult = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl });
-        const matchingCredentials = loadResult.value.matchingCredentials;
+            const loadResult = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl });
+            const matchingCredentials = loadResult.value.matchingCredentials;
 
-        const currentCredentials = (
-            await runtimeServices1.consumption.attributes.getAttributes({
-                query: {
-                    "content.value.@type": "VerifiableCredential"
-                }
-            })
-        ).value;
-        expect(matchingCredentials).toHaveLength(currentCredentials.length);
+            const currentCredentials = (
+                await runtimeServices1.consumption.attributes.getAttributes({
+                    query: {
+                        "content.value.@type": "VerifiableCredential"
+                    }
+                })
+            ).value;
+            expect(matchingCredentials).toHaveLength(currentCredentials.length);
 
-        const queryResult = loadResult.value.authorizationRequest.dcql!.queryResult;
-        expect(queryResult.can_be_satisfied).toBe(true);
+            const queryResult = loadResult.value.authorizationRequest.dcql!.queryResult;
+            expect(queryResult.can_be_satisfied).toBe(true);
 
-        const presentationResult = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({
-            authorizationRequest: loadResult.value.authorizationRequest,
-            attributeId: matchingCredentials[0].id
-        });
-        expect(presentationResult).toBeSuccessful();
-        expect(presentationResult.value.status).toBe(200);
+            const presentationResult = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({
+                authorizationRequest: loadResult.value.authorizationRequest,
+                attributeId: matchingCredentials[0].id
+            });
+            expect(presentationResult).toBeSuccessful();
+            expect(presentationResult.value.status).toBe(200);
+        } catch (error) {
+            console.error("Error during standard presentation test:", error);
+            throw error; // rethrow to fail the test
+        }
     });
 
     test("presentation with request", async () => {
-        const sentMessage = (
-            await serviceAxiosInstance.post("/enmeshed-demo/presentationRequests", {
-                recipient: runtimeServices1.address,
-                configId: eudiploCredentialConfigurationId
-            })
-        ).data.result;
+        // create a presentation request via eudiplo
+        const authorizationRequestUrl = (await eudiploClient.createPresentationRequest({ responseType: "uri", configId: eudiploPresentationConfigurationId })).uri;
 
-        const requestId = (sentMessage.content as RequestJSON).id!;
-        const receivedMessage = await syncUntilHasMessageWithRequest(runtimeServices1.transport, requestId);
-        const authorizationRequestUrl = (receivedMessage.content.items[0] as ShareAuthorizationRequestRequestItemJSON).authorizationRequestUrl;
+        // create request item with the presentation request URL and send it to the other runtime
+        const request = await runtimeServices1.consumption.outgoingRequests.create({
+            peer: runtimeServices2.address,
+            content: {
+                title: "test",
+                description: "test",
+                items: [
+                    {
+                        "@type": "ShareAuthorizationRequestRequestItem",
+                        mustBeAccepted: true,
+                        authorizationRequestUrl: authorizationRequestUrl
+                    }
+                ]
+            }
+        });
+
+        //send via message
+        await runtimeServices1.transport.messages.sendMessage({
+            recipients: [runtimeServices2.address],
+            content: request.value.content
+        });
+
+        const receivedMessage = await syncUntilHasMessageWithRequest(runtimeServices2.transport, request.value.id!);
+        const receivedRequestUrl = (receivedMessage.content.items[0] as ShareAuthorizationRequestRequestItemJSON).authorizationRequestUrl;
 
         const matchingAttribute = (
-            await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({
-                authorizationRequestUrl
+            await runtimeServices2.consumption.openId4Vc.resolveAuthorizationRequest({
+                authorizationRequestUrl: receivedRequestUrl
             })
         ).value.matchingCredentials[0];
-        await runtimeServices1.consumption.incomingRequests.accept({
-            requestId,
+        await runtimeServices2.consumption.incomingRequests.accept({
+            requestId: request.value.id!,
             items: [{ accept: true, attributeId: matchingAttribute.id } as AcceptShareAuthorizationRequestRequestItemParametersJSON]
         });
 
-        const sessionId = authorizationRequestUrl.split("%2F").at(-3)!;
+        const sessionId = receivedRequestUrl.split("%2F").at(-3)!;
 
         const sessionStatus = (await eudiploClient.getSession(sessionId)).status;
-        expect(sessionStatus).toBe("completed"); // in case of failed presentation: Status remains "active"
+        expect(sessionStatus).toBe("completed");
     });
 
     describe("presentation token", () => {
@@ -374,86 +404,26 @@ function tamperSignatureOfTokenContent(tokenContent: TokenContentVerifiablePrese
     return tamperedTokenContent;
 }
 
-async function startOid4VcComposeStack() {
-    const baseUrl = process.env.NMSHD_TEST_BASEURL!;
-
-    const composeEnvironment = {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        TEST_ENVIRONMENT: "container",
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        NMSHD_TEST_BASEURL: baseUrl
-    } as Record<string, string>;
-
-    if (baseUrl.includes("localhost")) {
-        composeEnvironment.NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE = "localhost";
-        composeEnvironment.NMSHD_TEST_BASEURL = baseUrl.replace("localhost", "host.docker.internal");
-    } else if (process.env.NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE) {
-        composeEnvironment.NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE = process.env.NMSHD_TEST_ADDRESSGENERATIONHOSTNAMEOVERRIDE;
-    }
-
-    const composeFolder = path.resolve(path.join(__dirname, "..", "..", "..", "..", ".dev"));
-    const composeStack = await new DockerComposeEnvironment(composeFolder, "compose.openid4vc.yml")
-        .withProjectName("runtime-oid4vc-tests")
-        .withEnvironment(composeEnvironment)
-        .withStartupTimeout(60000)
-        .withWaitStrategy("oid4vc-service-1", Wait.forHealthCheck())
-        .up();
-
-    return composeStack;
-}
-
-async function createActiveRelationshipToService(runtime: TestRuntimeServices, serviceAxiosInstance: AxiosInstance) {
-    const relationshipTemplateReference = (
-        await serviceAxiosInstance.post("/enmeshed-demo/relationshipTemplates", {
-            givenName: "aGivenName",
-            familyName: "aFamilyName",
-            city: "aCity",
-            zipCode: "aZipCode",
-            country: "DE",
-            houseNo: "aHouseNo",
-            street: "aStreet",
-            recipient: "aRecipient",
-            birthDay: 1,
-            birthMonth: 1,
-            birthYear: 2000
-        })
-    ).data.result;
-
-    const loadTemplateResult = await runtime.transport.relationshipTemplates.loadPeerRelationshipTemplate({ reference: relationshipTemplateReference });
-    expect(loadTemplateResult).toBeSuccessful();
-
-    const requestId = (await runtime.eventBus.waitForEvent(IncomingRequestStatusChangedEvent)).data.request.id;
-
-    const acceptRequestResult = await runtime.consumption.incomingRequests.accept({
-        requestId,
-        items: [
-            { items: [{ accept: true }] },
+export async function startEudiplo(): Promise<StartedTestContainer> {
+    return await new GenericContainer("ghcr.io/openwallet-foundation-labs/eudiplo:4.0.0@sha256:faa0e1eeebad3be2d79387a2e04a11d1ce4f8eaf112de0c338d3cd60b190f49a")
+        .withEnvironment({
+            PUBLIC_URL: "http://localhost:3000", // eslint-disable-line @typescript-eslint/naming-convention
+            MASTER_SECRET: "OgwrDcgVQQ2yZwcFt7kPxQm3nUF+X3etF6MdLTstZAY=", // eslint-disable-line @typescript-eslint/naming-convention
+            AUTH_CLIENT_ID: "root", // eslint-disable-line @typescript-eslint/naming-convention
+            AUTH_CLIENT_SECRET: "test", // eslint-disable-line @typescript-eslint/naming-convention
+            CONFIG_IMPORT: "true", // eslint-disable-line @typescript-eslint/naming-convention
+            CONFIG_IMPORT_FORCE: "true", // eslint-disable-line @typescript-eslint/naming-convention
+            CONFIG_FOLDER: "/config", // eslint-disable-line @typescript-eslint/naming-convention
+            PORT: "3000" // eslint-disable-line @typescript-eslint/naming-convention
+        } as Record<string, string>)
+        .withExposedPorts({ container: 3000, host: 3000 })
+        .withCopyDirectoriesToContainer([
             {
-                items: [
-                    { accept: true, attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "GivenName", value: "aGivenName" } } },
-                    { accept: true, attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "Surname", value: "aFamilyName" } } },
-                    {
-                        accept: true,
-                        attribute: {
-                            "@type": "IdentityAttribute",
-                            owner: "",
-                            value: {
-                                "@type": "StreetAddress",
-                                city: "aCity",
-                                country: "DE",
-                                houseNo: "aHouseNo",
-                                street: "aStreet",
-                                zipCode: "aZipCode",
-                                recipient: "aRecipient"
-                            }
-                        }
-                    },
-                    { accept: true, attribute: { "@type": "IdentityAttribute", owner: "", value: { "@type": "BirthDate", day: 1, month: 1, year: 2000 } } }
-                ] as AcceptProposeAttributeRequestItemParametersWithNewAttributeJSON[]
+                source: path.resolve(path.join(__dirname, "../../../../.dev/eudiplo/config")),
+                target: "/config"
             }
-        ]
-    });
-    expect(acceptRequestResult).toBeSuccessful();
-
-    await syncUntilHasRelationships(runtime.transport);
+        ])
+        .withStartupTimeout(60000)
+        .withWaitStrategy(Wait.forHealthCheck())
+        .start();
 }
