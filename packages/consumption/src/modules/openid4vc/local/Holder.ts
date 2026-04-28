@@ -24,6 +24,8 @@ import { OpenId4VciCredentialResponseJSON } from "./OpenId4VciCredentialResponse
 function getOpenIdHolderModules() {
     return {
         openid4vc: new OpenId4VcModule(),
+        // ToDo: Once there is a trust infrastructure in place, the X509 module should be configured to validate against the correct trust anchors
+        // and ask for users consent if trusting a new certificate.
         x509: new X509Module({
             getTrustedCertificatesForVerification: (_agentContext, { certificateChain, verification }) => {
                 // eslint-disable-next-line no-console
