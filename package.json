@@ -24,9 +24,9 @@
         "lint:tsc": "npm run --workspaces lint:tsc",
         "outdated": "ncu -i && ncu -i --workspaces",
         "start:backbone": "docker compose -f .dev/compose.backbone.yml up -d --wait",
-        "start:openid4vc": "docker compose -f .dev/compose.openid4vc.yml up -d --wait",
+        "start:openid4vc": "docker run --rm --name eudiplo --add-host host.docker.internal:host-gateway -p 3000:3000 -e PUBLIC_URL=http://localhost:3000 -e MASTER_SECRET='OgwrDcgVQQ2yZwcFt7kPxQm3nUF+X3etF6MdLTstZAY=' -e AUTH_CLIENT_ID='root' -e AUTH_CLIENT_SECRET='test' -e CONFIG_IMPORT=true -e CONFIG_FOLDER=/app/assets/config -e PORT=3000 -v \"$(pwd)/eudiplo/config:/app/assets/config\" ghcr.io/openwallet-foundation-labs/eudiplo:4.1.0@sha256:14bc55723f8cdca0837b91541c80466e406e753c1febd07a26400fab1ca37e2d",
         "teardown:backbone": "docker compose -f .dev/compose.backbone.yml down -v",
-        "teardown:openid4vc": "docker compose -f .dev/compose.openid4vc.yml down -v",
+        "teardown:openid4vc": "docker rm -f eudiplo",
         "test:teardown": "docker compose -f .dev/compose.yml down -fsv"
     },
     "devDependencies": {
