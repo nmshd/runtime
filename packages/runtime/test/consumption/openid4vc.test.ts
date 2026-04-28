@@ -253,7 +253,7 @@ describe("presentation", () => {
 
     test("presentation with request", async () => {
         // create a presentation request via eudiplo
-        const authorizationRequestUrl = (await eudiploClient.createPresentationRequest({ responseType: "uri", configId: eudiploPresentationConfigurationId })).uri;
+        const presentationRequest = await eudiploClient.createPresentationRequest({ responseType: "uri", configId: eudiploPresentationConfigurationId });
 
         // create request item with the presentation request URL and send it to the other runtime
         const request = await runtimeServices1.consumption.outgoingRequests.create({
@@ -265,7 +265,7 @@ describe("presentation", () => {
                     {
                         "@type": "ShareAuthorizationRequestRequestItem",
                         mustBeAccepted: true,
-                        authorizationRequestUrl: authorizationRequestUrl
+                        authorizationRequestUrl: presentationRequest.uri
                     }
                 ]
             }
@@ -290,9 +290,7 @@ describe("presentation", () => {
             items: [{ accept: true, attributeId: matchingAttribute.id } as AcceptShareAuthorizationRequestRequestItemParametersJSON]
         });
 
-        const sessionId = receivedRequestUrl.split("%2F").at(-3)!;
-
-        const sessionStatus = (await eudiploClient.getSession(sessionId)).status;
+        const sessionStatus = (await eudiploClient.getSession(presentationRequest.sessionId)).status;
         expect(sessionStatus).toBe("completed");
     });
 
@@ -405,7 +403,7 @@ function tamperSignatureOfTokenContent(tokenContent: TokenContentVerifiablePrese
 }
 
 export async function startEudiplo(): Promise<StartedTestContainer> {
-    return await new GenericContainer("ghcr.io/openwallet-foundation-labs/eudiplo:4.0.0@sha256:faa0e1eeebad3be2d79387a2e04a11d1ce4f8eaf112de0c338d3cd60b190f49a")
+    return await new GenericContainer("ghcr.io/openwallet-foundation-labs/eudiplo:4.1.0@sha256:14bc55723f8cdca0837b91541c80466e406e753c1febd07a26400fab1ca37e2d")
         .withEnvironment({
             PUBLIC_URL: "http://localhost:3000", // eslint-disable-line @typescript-eslint/naming-convention
             MASTER_SECRET: "OgwrDcgVQQ2yZwcFt7kPxQm3nUF+X3etF6MdLTstZAY=", // eslint-disable-line @typescript-eslint/naming-convention
