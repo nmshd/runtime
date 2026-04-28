@@ -1,0 +1,12 @@
+{
+  "id": "c02bae13-e5a5-42fd-94bd-c6999f5e4b45",
+  "usageType": "access",
+  "key": {
+    "kty": "EC",
+    "x": "dii3YD7um3gFaw2Rn_AD6g3SrxWGFAQNGjt74wUnCIA",
+    "y": "iitLOmBkThb8mzIZ8nDXw4P5_noEsSHps_Qk9jl3jX8",
+    "crv": "P-256",
+    "d": "h_05VoTTqPlQsox6BHDwScXhD61ZoYWGD1Gpirk06N8",
+    "alg": "ES256"
+  }
+}

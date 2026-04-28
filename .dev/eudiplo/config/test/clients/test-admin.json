@@ -1,0 +1,5 @@
+{
+    "clientId": "test-admin",
+    "secret": "hgHrws1JR7sS24WR1IimsVdHAT0ddlgOB3dObaGSAEOo8JSFk3N",
+    "roles": ["clients:manage", "issuance:manage", "issuance:offer", "presentation:manage", "presentation:request"]
+}
