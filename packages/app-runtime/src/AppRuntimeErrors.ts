@@ -28,6 +28,14 @@ class AppStringProcessor {
         return new ApplicationError("error.appruntime.appStringProcessor.passwordNotProvided", "No password was provided.");
     }
 
+    public invalidCredentialOffer(): ApplicationError {
+        return new ApplicationError("error.appruntime.appStringProcessor.invalidCredentialOffer", "The scanned code contains an invalid credential offer.");
+    }
+
+    public externalOauthRegistrationNotProvided(): ApplicationError {
+        return new ApplicationError("error.appruntime.appStringProcessor.externalOauthRegistrationNotProvided", "No external OAuth registration was provided.");
+    }
+
     public passwordRetryLimitReached(): ApplicationError {
         return new ApplicationError("error.appruntime.appStringProcessor.passwordRetryLimitReached", "The maximum number of attempts to enter the password was reached.");
     }
@@ -36,6 +44,13 @@ class AppStringProcessor {
         return new ApplicationError(
             "error.appruntime.appStringProcessor.noDeviceOnboardingCode",
             "The scanned code does not contain a device onboarding info, but this scanner is only able to process device onboarding codes."
+        );
+    }
+
+    public unsupportedOid4vcCredentialOfferGrantFound(): ApplicationError {
+        return new ApplicationError(
+            "error.appruntime.appStringProcessor.unsupportedOid4vcCredentialOfferGrantFound",
+            "The OpenID4VC Credential Offer contains an unsupported grant type."
         );
     }
 }

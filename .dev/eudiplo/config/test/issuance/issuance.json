@@ -1,0 +1,13 @@
+{
+    "authServers": ["https://kc-openid4vc.is.enmeshed.eu/realms/enmeshed-openid4vci"],
+    "batchSize": 1,
+    "dPopRequired": false,
+    "display": [
+        {
+            "name": "J&S-Soft",
+            "locale": "de-DE",
+            "logo": { "uri": "jsFrog.png" }
+        }
+    ],
+    "walletAttestationRequired": false
+}

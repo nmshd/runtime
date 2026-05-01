@@ -1,7 +1,9 @@
+import { EudiploClient } from "@eudiplo/sdk-core";
 import { ArbitraryRelationshipTemplateContentJSON, AuthenticationRequestItem, RelationshipTemplateContent } from "@nmshd/content";
 import { CoreDate, PasswordLocationIndicatorOptions } from "@nmshd/core-types";
 import { DeviceOnboardingInfoDTO, PeerRelationshipTemplateLoadedEvent } from "@nmshd/runtime";
 import assert from "assert";
+import { startEudiplo } from "../../../../.dev/eudiplo/startEudiplo";
 import { AppRuntime, LocalAccountSession } from "../../src";
 import { MockEventBus, MockUIBridge, TestUtil } from "../lib";
 
@@ -375,6 +377,55 @@ describe("AppStringProcessor", function () {
             expect(result.value).toBeUndefined();
 
             expect(runtime4MockUiBridge).showFileCalled(file.id);
+        });
+
+        test("get a token with verifiable presentation content using a url", async function () {
+            const eudiploClientId = "test-admin";
+            const eudiploClientSecret = "hgHrws1JR7sS24WR1IimsVdHAT0ddlgOB3dObaGSAEOo8JSFk3N";
+            const eudiploCredentialConfigurationId = "test";
+            const eudiploBaseUrl = "http://localhost:3000";
+
+            const eudiploContainer = await startEudiplo();
+
+            const eudiploClient = new EudiploClient({
+                baseUrl: eudiploBaseUrl,
+                clientId: eudiploClientId,
+                clientSecret: eudiploClientSecret
+            });
+
+            const credentialOfferUrl = (
+                await eudiploClient.createIssuanceOffer({
+                    responseType: "uri",
+                    credentialConfigurationIds: [eudiploCredentialConfigurationId],
+                    flow: "pre_authorized_code"
+                })
+            ).uri;
+
+            const resolveCredentialOfferResult = await runtime1Session.consumptionServices.openId4Vc.resolveCredentialOffer({ credentialOfferUrl });
+            const requestCredentialsResult = await runtime1Session.consumptionServices.openId4Vc.requestCredentials({
+                credentialOffer: resolveCredentialOfferResult.value.credentialOffer,
+                credentialConfigurationIds: [eudiploCredentialConfigurationId]
+            });
+            const storedCredential = (
+                await runtime1Session.consumptionServices.openId4Vc.storeCredentials({
+                    credentialResponses: requestCredentialsResult.value.credentialResponses
+                })
+            ).value;
+
+            const createPresentationTokenResult = await runtime1Session.consumptionServices.openId4Vc.createPresentationToken({
+                attributeId: storedCredential.id,
+                expiresAt: CoreDate.utc().add({ days: 1 }).toISOString(),
+                ephemeral: true
+            });
+            const token = createPresentationTokenResult.value;
+
+            const result = await runtime4.stringProcessor.processURL(token.reference.url, runtime4Session.account);
+            expect(result).toBeSuccessful();
+            expect(result.value).toBeUndefined();
+
+            expect(runtime4MockUiBridge).showVerifiablePresentationCalled(token.id, true);
+
+            await eudiploContainer.stop();
         });
 
         test("get a template using a url", async function () {
