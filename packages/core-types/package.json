@@ -45,18 +45,8 @@
                 {
                     "tsconfig": "test/tsconfig.json"
                 }
-            ],
-            "node_modules/uuid/.+\\.js$": [
-                "ts-jest",
-                {
-                    "tsconfig": "test/tsconfig.json",
-                    "diagnostics": false
-                }
             ]
-        },
-        "transformIgnorePatterns": [
-            "/node_modules/(?!uuid/)"
-        ]
+        }
     },
     "dependencies": {
         "@js-soft/logging-abstractions": "^1.2.4",

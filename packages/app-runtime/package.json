@@ -48,18 +48,8 @@
                 {
                     "tsconfig": "test/tsconfig.json"
                 }
-            ],
-            "node_modules/uuid/.+\\.js$": [
-                "ts-jest",
-                {
-                    "tsconfig": "test/tsconfig.json",
-                    "diagnostics": false
-                }
             ]
-        },
-        "transformIgnorePatterns": [
-            "/node_modules/(?!uuid/)"
-        ]
+        }
     },
     "dependencies": {
         "@js-soft/docdb-access-loki": "^1.4.1",
