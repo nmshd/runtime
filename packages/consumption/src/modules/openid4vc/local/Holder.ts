@@ -1,16 +1,4 @@
-import {
-    BaseRecord,
-    ClaimFormat,
-    DcqlCredentialsForRequest,
-    DidJwk,
-    DidKey,
-    InjectionSymbols,
-    JwkDidCreateOptions,
-    KeyDidCreateOptions,
-    Kms,
-    SdJwtVcApi,
-    X509Module
-} from "@credo-ts/core";
+import { BaseRecord, ClaimFormat, DidJwk, DidKey, InjectionSymbols, JwkDidCreateOptions, KeyDidCreateOptions, Kms, SdJwtVcApi, X509Module } from "@credo-ts/core";
 import { OpenId4VciCredentialResponse, OpenId4VcModule, type OpenId4VciResolvedCredentialOffer, type OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
 import { TokenContentVerifiablePresentation, VerifiableCredential } from "@nmshd/content";
 import { AccountController } from "@nmshd/transport";
@@ -162,10 +150,8 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         const credentialContent = credential.content.value as VerifiableCredential;
         const credentialRecord = decodeRecord(credentialContent.type, credentialContent.value);
 
-        let credentialForDcql: DcqlCredentialsForRequest | undefined;
-
         const queryId = resolvedAuthorizationRequest.dcql.queryResult.credentials[0].id;
-        credentialForDcql = {
+        const credentialForDcql = {
             [queryId]: [
                 {
                     credentialRecord,
@@ -178,7 +164,7 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         const submissionResult = await this.agent.openid4vc.holder.acceptOpenId4VpAuthorizationRequest({
             authorizationRequestPayload: resolvedAuthorizationRequest.authorizationRequestPayload,
             presentationExchange: undefined,
-            dcql: credentialForDcql ? { credentials: credentialForDcql } : undefined
+            dcql: { credentials: credentialForDcql }
         });
         return submissionResult.serverResponse;
     }
