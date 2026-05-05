@@ -20,7 +20,6 @@ export class EnmeshedHolderKeyManagementService implements Kms.KeyManagementServ
     private readonly b64urlDecode = (b64url: string) => SodiumWrapper.sodium.from_base64(b64url, (SodiumWrapper.sodium as any).base64_variants.URLSAFE_NO_PADDING);
 
     // please note: we cannot use buffer here - because it is not available in the browser
-    // and yes it could be pollyfilled but that extends the bundle size for no good reason
     private readonly buf2hex = (bytes: Uint8Array) => {
         return Array.from(bytes)
             .map((b) => b.toString(16).padStart(2, "0"))
@@ -75,7 +74,6 @@ export class EnmeshedHolderKeyManagementService implements Kms.KeyManagementServ
     }
     public async createKey<Type extends Kms.KmsCreateKeyType>(agentContext: AgentContext, options: Kms.KmsCreateKeyOptions<Type>): Promise<Kms.KmsCreateKeyReturn<Type>> {
         options.keyId ??= "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
-            // Use libsodium's randombytes_uniform for secure random number generation
             const r = SodiumWrapper.sodium.randombytes_uniform(16);
             const v = c === "x" ? r : (r & 0x3) | 0x8;
             return v.toString(16);
@@ -84,19 +82,16 @@ export class EnmeshedHolderKeyManagementService implements Kms.KeyManagementServ
         agentContext.config.logger.debug(`EKM: Creating key with id ${options.keyId} and type ${JSON.stringify(options.type)}`);
 
         if (options.type.kty === "EC" && options.type.crv === "P-256") {
-            // Use P-256 (aka secp256r1)
             const ec = new EC("p256");
             const key = ec.genKeyPair();
 
-            // Public JWK
             const publicJwk = {
-                kty: "EC", // Elliptic Curve
+                kty: "EC",
                 crv: "P-256",
                 x: this.b64url(new Uint8Array(key.getPublic().getX().toArray())),
                 y: this.b64url(new Uint8Array(key.getPublic().getY().toArray()))
             };
 
-            // Private JWK
             const privateJwk = {
                 ...publicJwk,
                 d: this.b64url(new Uint8Array(key.getPrivate().toArray()))
@@ -109,10 +104,11 @@ export class EnmeshedHolderKeyManagementService implements Kms.KeyManagementServ
             };
 
             agentContext.config.logger.debug(`EKM: Created EC key pair with id ${options.keyId}`);
-            // store the key pair in the keystore
             await this.keyStorage.storeKey(options.keyId, JSON.stringify(jwkKeyPair));
 
-            // Credo doesn't trust the key id provided in the key binding jwk anymore, so there are two options: Storing the key id with the credential and making sure that key id is properly fetched - this turned out to be difficult - or the easy way out by storing this alternative key id computed from the public key.
+            // Credo doesn't trust the key id provided in the key binding jwk anymore, so there are two options:
+            // Storing the key id with the credential and making sure that key id is properly fetched - this turned out to be difficult
+            // or the easy way out by storing this alternative key id computed from the public key.
             const credoLegacyKeyId = Kms.PublicJwk.fromPublicJwk(publicJwk as any).legacyKeyId;
             await this.keyStorage.storeKey(credoLegacyKeyId, JSON.stringify(jwkKeyPair));
 
@@ -123,14 +119,12 @@ export class EnmeshedHolderKeyManagementService implements Kms.KeyManagementServ
         agentContext.config.logger.debug(`EKM: Created OKP key pair with id ${options.keyId} and keyType ${keyType}`);
         const seed = privateKey.slice(0, (SodiumWrapper.sodium as any).crypto_sign_SEEDBYTES);
 
-        // Public JWK
         const publicJwk = {
-            kty: "OKP", // Octet Key Pair
+            kty: "OKP",
             crv: "Ed25519",
             x: this.b64url(publicKey)
         };
 
-        // Private JWK
         const privateJwk = {
             ...publicJwk,
             d: this.b64url(seed)
@@ -171,7 +165,6 @@ export class EnmeshedHolderKeyManagementService implements Kms.KeyManagementServ
         const { privateKey, publicKey } = JSON.parse(stringifiedKeyPair) as JwkKeyPair;
 
         if (options.algorithm === "ES256") {
-            // Use P-256 (aka secp256r1)
             const ec = new EC("p256");
             if (!privateKey.d) {
                 throw new Error("Private JWK does not contain 'd' parameter");
@@ -180,7 +173,6 @@ export class EnmeshedHolderKeyManagementService implements Kms.KeyManagementServ
             const priv = this.buf2hex(this.b64urlDecode(privateKey.d));
             const key = ec.keyFromPrivate(priv, "hex");
 
-            // we need to hash the data using SHA-256
             const dataHash = ec.hash().update(options.data).digest();
             const signature = key.sign(dataHash);
             const r = new Uint8Array(signature.r.toArray());
@@ -195,34 +187,29 @@ export class EnmeshedHolderKeyManagementService implements Kms.KeyManagementServ
         }
 
         const decode = (bytes: string) => SodiumWrapper.sodium.from_base64(bytes, (SodiumWrapper.sodium as any).base64_variants.URLSAFE_NO_PADDING);
-        // get the private key bytes
         if (privateKey.d === undefined) {
             throw new Error("Private key does not contain 'd' parameter");
         }
         const privateKeyBytes = decode(privateKey.d);
 
-        // get the public key bytes
         if (publicKey.x === undefined) {
             throw new Error("Public key does not contain 'x' parameter");
         }
         const publicKeyBytes = decode(publicKey.x);
 
-        // combine the key bytes to a full private key
         const fullPrivateKeyBytes = new Uint8Array(privateKeyBytes.length + publicKeyBytes.length);
         fullPrivateKeyBytes.set(privateKeyBytes);
         fullPrivateKeyBytes.set(publicKeyBytes, privateKeyBytes.length);
 
-        // and use it to sign the data
         const signature = SodiumWrapper.sodium.crypto_sign_detached(options.data, fullPrivateKeyBytes);
 
         return {
-            signature: signature as Uint8Array<ArrayBuffer> // I hope this cast doesn't paper over something
+            signature: signature as Uint8Array<ArrayBuffer>
         };
     }
 
     public verify(agentContext: AgentContext, options: Kms.KmsVerifyOptions): Promise<Kms.KmsVerifyReturn> {
         agentContext.config.logger.debug(`EKM: Verifying signature with key id ${options.key.keyId} using algorithm ${options.algorithm}`);
-        // Use P-256 (aka secp256r1)
         const ec = new EC("p256");
         if (!options.key.publicJwk) {
             throw new Error("Public JWK is undefined");
@@ -242,7 +229,6 @@ export class EnmeshedHolderKeyManagementService implements Kms.KeyManagementServ
         const s = signatureBytes.subarray(32, 64);
         const signature = { r: this.buf2hex(r), s: this.buf2hex(s) };
 
-        // we need to hash the data using SHA-256
         const dataHash = ec.hash().update(options.data).digest();
         try {
             const verified = key.verify(dataHash, signature);
@@ -270,7 +256,6 @@ export class EnmeshedHolderKeyManagementService implements Kms.KeyManagementServ
             throw new Error("Local private key does not contain 'd' parameter");
         }
         const localPriv = ec.keyFromPrivate(this.buf2hex(this.b64urlDecode(localKeyPair.privateKey.d)), "hex");
-        // the remote jwk is base64url encoded - we again decode and transform to hex to receive a fitting public key
         const remoteBasePoint = ec.keyFromPublic(
             {
                 x: this.buf2hex(this.b64urlDecode(remotePublicJWK.x)),
@@ -284,12 +269,10 @@ export class EnmeshedHolderKeyManagementService implements Kms.KeyManagementServ
         return sharedBytes;
     }
 
-    // UTF-8 encode helper
     private utf8(str: string): Uint8Array {
         return new TextEncoder().encode(str);
     }
 
-    // Concat Uint8Arrays
     private concat(...arrays: Uint8Array[]): Uint8Array {
         const total = arrays.reduce((sum, a) => sum + a.length, 0);
         const out = new Uint8Array(total);
@@ -301,7 +284,6 @@ export class EnmeshedHolderKeyManagementService implements Kms.KeyManagementServ
         return out;
     }
 
-    // Encode a 32-bit big-endian length prefix
     private lenPrefix(data: Uint8Array): Uint8Array {
         const buf = new Uint8Array(4 + data.length);
         const view = new DataView(buf.buffer);
@@ -329,21 +311,17 @@ export class EnmeshedHolderKeyManagementService implements Kms.KeyManagementServ
         const counter = new Uint8Array([0, 0, 0, 1]);
         const input = this.concat(counter, sharedSecret, otherInfo);
 
-        // Hash with SHA-256 (SJCL)
         const inputHex = this.buf2hex(input);
         const inputBits = sjcl.codec.hex.toBits(inputHex);
         const hashBits = sjcl.hash.sha256.hash(inputBits);
         const hashHex = sjcl.codec.hex.fromBits(hashBits);
         const hashBuf = this.hex2buf(hashHex);
 
-        // Truncate to desired key length
         return hashBuf.subarray(0, keyLength / 8);
     }
 
     public async encrypt(agentContext: AgentContext, options: Kms.KmsEncryptOptions): Promise<Kms.KmsEncryptReturn> {
         try {
-            // encryption via A-128-GCM/A-256-GCM
-            // we will call the services side bob and the incoming side alice
             if (options.key.keyAgreement === undefined) {
                 throw new Error("Key agreement is undefined");
             }
@@ -354,29 +332,21 @@ export class EnmeshedHolderKeyManagementService implements Kms.KeyManagementServ
             const algorithm = options.encryption.algorithm;
             const keyLength = options.encryption.algorithm === "A128GCM" ? 128 : 256;
 
-            // 1. derive the shared secret via ECDH-ES
             const sharedSecret = await this.ecdhEs(options.key.keyAgreement.keyId, options.key.keyAgreement.externalPublicJwk);
             agentContext.config.logger.debug(`EKM: Derived shared secret for encryption using ECDH-ES`);
-            // 2. Concat KDF to form the final key
-            const derivedKey = this.concatKdf(sharedSecret, keyLength, algorithm, options.key.keyAgreement);
-            // 3. Encrypt the data via AES-256-GCM using libsodium
 
-            // create nonce
+            const derivedKey = this.concatKdf(sharedSecret, keyLength, algorithm, options.key.keyAgreement);
+
             const iv = crypto.getRandomValues(new Uint8Array(12));
-            // transform to bit arrays for sjcl
             const keyBits = sjcl.codec.hex.toBits(this.buf2hex(derivedKey));
             const dataBits = sjcl.codec.hex.toBits(this.buf2hex(options.data));
             const ivBits = sjcl.codec.hex.toBits(this.buf2hex(iv));
-            // do not forget to add the additional authenticated data
             const aadBits = "aad" in options.encryption && options.encryption.aad ? sjcl.codec.hex.toBits(this.buf2hex(options.encryption.aad)) : [];
-            // setup aes
+
             const aes = new sjcl.cipher.aes(keyBits);
-            // encrypt
             const cyphertextBits = sjcl.mode.gcm.encrypt(aes, dataBits, ivBits, aadBits, 128);
 
-            // transform back to byte array
             const cyphertextBuf = this.hex2buf(sjcl.codec.hex.fromBits(cyphertextBits));
-            // In SJCL, GCM output = ciphertext || tag
             const cyphertext = cyphertextBuf.subarray(0, cyphertextBuf.length - 16);
             const tag = cyphertextBuf.subarray(cyphertextBuf.length - 16);
 
