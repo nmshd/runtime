@@ -4,7 +4,6 @@ import {
     DcqlCredentialsForRequest,
     DidJwk,
     DidKey,
-    DifPexInputDescriptorToCredentials,
     InjectionSymbols,
     JwkDidCreateOptions,
     KeyDidCreateOptions,
@@ -24,12 +23,8 @@ import { OpenId4VciCredentialResponseJSON } from "./OpenId4VciCredentialResponse
 function getOpenIdHolderModules() {
     return {
         openid4vc: new OpenId4VcModule(),
-        // ToDo: Once there is a trust infrastructure in place, the X509 module should be configured to validate against the correct trust anchors
-        // and ask for users consent if trusting a new certificate.
         x509: new X509Module({
             getTrustedCertificatesForVerification: (_agentContext, { certificateChain, verification }) => {
-                // eslint-disable-next-line no-console
-                console.log(`dynamically trusting certificate ${certificateChain[0].getIssuerNameField("C")} for verification of ${verification.type}`);
                 return [certificateChain[0].toString("pem")];
             }
         })
@@ -106,7 +101,6 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
                     };
                 }
 
-                // We fall back on jwk binding
                 return {
                     method: "jwk",
                     keys: [publicJwk]
@@ -123,7 +117,6 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
     public async storeCredentials(credentialResponses: OpenId4VciCredentialResponseJSON[]): Promise<OwnIdentityAttribute[]> {
         const storedCredentials = await Promise.all(
             credentialResponses.map((credentialResponse) => {
-                // add additional supported credential formats here as needed
                 if (![ClaimFormat.SdJwtDc].includes(credentialResponse.claimFormat)) {
                     throw new Error("Unsupported credential format");
                 }
@@ -162,26 +155,12 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
           }
         | undefined
     > {
-        if (!resolvedAuthorizationRequest.presentationExchange && !resolvedAuthorizationRequest.dcql) {
-            throw new Error("Missing presentation exchange or dcql on resolved authorization request");
+        if (!resolvedAuthorizationRequest.dcql) {
+            throw new Error("Missing dcql on resolved authorization request");
         }
 
         const credentialContent = credential.content.value as VerifiableCredential;
         const credentialRecord = decodeRecord(credentialContent.type, credentialContent.value);
-
-        let credentialForPex: DifPexInputDescriptorToCredentials | undefined;
-        if (resolvedAuthorizationRequest.presentationExchange) {
-            const inputDescriptor = resolvedAuthorizationRequest.presentationExchange.credentialsForRequest.requirements[0].submissionEntry[0].inputDescriptorId;
-            credentialForPex = {
-                [inputDescriptor]: [
-                    {
-                        credentialRecord,
-                        claimFormat: credentialContent.type as any,
-                        disclosedPayload: {} // TODO: implement SD properly
-                    }
-                ]
-            } as any;
-        }
 
         let credentialForDcql: DcqlCredentialsForRequest | undefined;
         if (resolvedAuthorizationRequest.dcql) {
@@ -191,7 +170,7 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
                     {
                         credentialRecord,
                         claimFormat: credentialContent.type as any,
-                        disclosedPayload: {} // TODO: implement SD properly
+                        disclosedPayload: {}
                     }
                 ]
             } as any;
@@ -199,14 +178,12 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
 
         const submissionResult = await this.agent.openid4vc.holder.acceptOpenId4VpAuthorizationRequest({
             authorizationRequestPayload: resolvedAuthorizationRequest.authorizationRequestPayload,
-            presentationExchange: credentialForPex ? { credentials: credentialForPex } : undefined,
+            presentationExchange: undefined,
             dcql: credentialForDcql ? { credentials: credentialForDcql } : undefined
         });
         return submissionResult.serverResponse;
     }
 
-    // hacky solution because credo doesn't support credentials without key binding
-    // TODO: use credentials without key binding once supported
     public async createPresentationTokenContent(credential: VerifiableCredential, nonce: string): Promise<TokenContentVerifiablePresentation> {
         if (credential.type !== ClaimFormat.SdJwtDc) throw new Error("Only SD-JWT credentials are supported for token presentation");
 
