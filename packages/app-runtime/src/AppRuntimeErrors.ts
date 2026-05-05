@@ -47,11 +47,8 @@ class AppStringProcessor {
         );
     }
 
-    public unsupportedOid4vcCredentialOfferGrantFound(): ApplicationError {
-        return new ApplicationError(
-            "error.appruntime.appStringProcessor.unsupportedOid4vcCredentialOfferGrantFound",
-            "The OpenID4VC Credential Offer contains an unsupported grant type."
-        );
+    public unsupportedCredentialOfferGrantFound(): ApplicationError {
+        return new ApplicationError("error.appruntime.appStringProcessor.unsupportedCredentialOfferGrantFound", "The credential offer contains an unsupported grant type.");
     }
 }
 
