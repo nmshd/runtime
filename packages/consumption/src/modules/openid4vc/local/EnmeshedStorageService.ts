@@ -116,7 +116,7 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
             }
         }
         if (records.length === 0) {
-            //recover from storage if no record was found by query, as the record might have been only added very shortly before calling the findByQuery
+            // recover from storage if no record was found by query, as the record might have been only added very shortly before calling the findByQuery
             for (const record of this.storage.values()) {
                 if (this.matchesQuery(record, query)) {
                     records.push(record);

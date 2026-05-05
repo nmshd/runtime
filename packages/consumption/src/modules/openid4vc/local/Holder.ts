@@ -24,7 +24,7 @@ function getOpenIdHolderModules() {
     return {
         openid4vc: new OpenId4VcModule(),
         x509: new X509Module({
-            getTrustedCertificatesForVerification: (_agentContext, { certificateChain, verification }) => {
+            getTrustedCertificatesForVerification: (_agentContext, { certificateChain }) => {
                 return [certificateChain[0].toString("pem")];
             }
         })
@@ -163,18 +163,17 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         const credentialRecord = decodeRecord(credentialContent.type, credentialContent.value);
 
         let credentialForDcql: DcqlCredentialsForRequest | undefined;
-        if (resolvedAuthorizationRequest.dcql) {
-            const queryId = resolvedAuthorizationRequest.dcql.queryResult.credentials[0].id;
-            credentialForDcql = {
-                [queryId]: [
-                    {
-                        credentialRecord,
-                        claimFormat: credentialContent.type as any,
-                        disclosedPayload: {}
-                    }
-                ]
-            } as any;
-        }
+
+        const queryId = resolvedAuthorizationRequest.dcql.queryResult.credentials[0].id;
+        credentialForDcql = {
+            [queryId]: [
+                {
+                    credentialRecord,
+                    claimFormat: credentialContent.type as any,
+                    disclosedPayload: {}
+                }
+            ]
+        } as any;
 
         const submissionResult = await this.agent.openid4vc.holder.acceptOpenId4VpAuthorizationRequest({
             authorizationRequestPayload: resolvedAuthorizationRequest.authorizationRequestPayload,
