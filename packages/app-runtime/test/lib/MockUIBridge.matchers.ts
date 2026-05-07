@@ -134,6 +134,54 @@ expect.extend({
 
         return { pass: true, message: () => "" };
     },
+    showResolvedAuthorizationRequestCalled(mockUIBridge: unknown) {
+        if (!(mockUIBridge instanceof MockUIBridge)) {
+            throw new Error("This method can only be used with expect(MockUIBridge).");
+        }
+
+        const calls = mockUIBridge.calls.filter((x) => x.method === "showResolvedAuthorizationRequest");
+        if (calls.length === 0) {
+            return { pass: false, message: () => "The method showResolvedAuthorizationRequest was not called." };
+        }
+
+        return { pass: true, message: () => "" };
+    },
+    showResolvedAuthorizationRequestNotCalled(mockUIBridge: unknown) {
+        if (!(mockUIBridge instanceof MockUIBridge)) {
+            throw new Error("This method can only be used with expect(MockUIBridge).");
+        }
+
+        const calls = mockUIBridge.calls.filter((x) => x.method === "showResolvedAuthorizationRequest");
+        if (calls.length > 0) {
+            return { pass: false, message: () => `The method showResolvedAuthorizationRequest was called: ${calls.map((c) => `'account id: ${c.account.id}'`)}` };
+        }
+
+        return { pass: true, message: () => "" };
+    },
+    showResolvedCredentialOfferCalled(mockUIBridge: unknown) {
+        if (!(mockUIBridge instanceof MockUIBridge)) {
+            throw new Error("This method can only be used with expect(MockUIBridge).");
+        }
+
+        const calls = mockUIBridge.calls.filter((x) => x.method === "showResolvedCredentialOffer");
+        if (calls.length === 0) {
+            return { pass: false, message: () => "The method showResolvedCredentialOffer was not called." };
+        }
+
+        return { pass: true, message: () => "" };
+    },
+    showResolvedCredentialOfferNotCalled(mockUIBridge: unknown) {
+        if (!(mockUIBridge instanceof MockUIBridge)) {
+            throw new Error("This method can only be used with expect(MockUIBridge).");
+        }
+
+        const calls = mockUIBridge.calls.filter((x) => x.method === "showResolvedCredentialOffer");
+        if (calls.length > 0) {
+            return { pass: false, message: () => `The method showResolvedCredentialOffer was called: ${calls.map((c) => `'account id: ${c.account.id}'`)}` };
+        }
+
+        return { pass: true, message: () => "" };
+    },
     showFileCalled(mockUIBridge: unknown, id: string) {
         if (!(mockUIBridge instanceof MockUIBridge)) {
             throw new Error("This method can only be used with expect(MockUIBridge).");
@@ -162,6 +210,44 @@ expect.extend({
         const calls = mockUIBridge.calls.filter((x) => x.method === "showFile");
         if (calls.length > 0) {
             return { pass: false, message: () => `The method showFile called: ${calls.map((c) => `'account id: ${c.account.id} - fileId: ${c.file.id}'`)}` };
+        }
+
+        return { pass: true, message: () => "" };
+    },
+    showVerifiablePresentationCalled(mockUIBridge: unknown, id: string, isTechnicallyValid: boolean) {
+        if (!(mockUIBridge instanceof MockUIBridge)) {
+            throw new Error("This method can only be used with expect(MockUIBridge).");
+        }
+
+        const calls = mockUIBridge.calls.filter((x) => x.method === "showVerifiablePresentation");
+        if (calls.length === 0) {
+            return { pass: false, message: () => "The method showVerifiablePresentation was not called." };
+        }
+
+        const matchingCalls = calls.filter((x) => x.token.id === id && x.isTechnicallyValid === isTechnicallyValid);
+        if (matchingCalls.length === 0) {
+            const callsWithData = calls.map((e) => `'${e.token.id}' (isTechnicallyValid: ${e.isTechnicallyValid})`).join(", ");
+            return {
+                pass: false,
+                message: () =>
+                    `The method showVerifiablePresentation was called, but not with token id '${id}' and isTechnicallyValid '${isTechnicallyValid}', instead with calls ${callsWithData}.`
+            };
+        }
+
+        return { pass: true, message: () => "" };
+    },
+    showVerifiablePresentationNotCalled(mockUIBridge: unknown) {
+        if (!(mockUIBridge instanceof MockUIBridge)) {
+            throw new Error("This method can only be used with expect(MockUIBridge).");
+        }
+
+        const calls = mockUIBridge.calls.filter((x) => x.method === "showVerifiablePresentation");
+        if (calls.length > 0) {
+            return {
+                pass: false,
+                message: () =>
+                    `The method showVerifiablePresentation called: ${calls.map((c) => `'account id: ${c.account.id} - tokenId: ${c.token.id} - isTechnicallyValid: ${c.isTechnicallyValid}'`)}`
+            };
         }
 
         return { pass: true, message: () => "" };
@@ -199,8 +285,14 @@ declare global {
             enterPasswordNotCalled(): R;
             showRequestCalled(): R;
             showRequestNotCalled(): R;
+            showResolvedAuthorizationRequestCalled(): R;
+            showResolvedAuthorizationRequestNotCalled(): R;
+            showResolvedCredentialOfferCalled(): R;
+            showResolvedCredentialOfferNotCalled(): R;
             showFileCalled(id: string): R;
             showFileNotCalled(): R;
+            showVerifiablePresentationCalled(id: string, isTechnicallyValid: boolean): R;
+            showVerifiablePresentationNotCalled(): R;
             showErrorCalled(code: string): R;
         }
     }

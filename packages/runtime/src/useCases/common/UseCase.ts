@@ -3,6 +3,7 @@ import { ApplicationError, Result } from "@js-soft/ts-utils";
 import { CoreError } from "@nmshd/core-types";
 import { RequestError } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
+import { Oauth2ClientErrorResponseError } from "@openid4vc/oauth2";
 import stringifySafe from "json-stringify-safe";
 import { AbstractCorrelator } from "./AbstractCorrelator";
 import { PlatformErrorCodes } from "./PlatformErrorCodes";
@@ -62,6 +63,10 @@ export abstract class UseCase<IRequest, IResponse> {
 
         if (error instanceof CoreError) {
             return Result.fail(new ApplicationError(error.code, error.message));
+        }
+
+        if (error instanceof Oauth2ClientErrorResponseError) {
+            return Result.fail(new ApplicationError(`error.runtime.openid4vc.oauth.${error.errorResponse.error}`, error.message));
         }
 
         return Result.fail(RuntimeErrors.general.unknown(`An error was thrown in a UseCase: ${error.message}`, error));

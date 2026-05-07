@@ -1,0 +1,15 @@
+{
+    "id": "test",
+    "description": "test",
+    "dcql_query": {
+        "credentials": [
+            {
+                "id": "test",
+                "format": "dc+sd-jwt",
+                "meta": { "vct_values": ["test"] }
+            }
+        ]
+    },
+    "accessCertId": "f712261e-70aa-459d-af79-330c86bd0711",
+    "lifeTime": 300
+}

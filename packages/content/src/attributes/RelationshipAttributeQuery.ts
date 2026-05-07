@@ -4,7 +4,7 @@ import { AbstractAttributeQuery, AbstractAttributeQueryJSON, IAbstractAttributeQ
 import { AttributeValues } from "./AttributeValueTypes";
 import { IValueHints, ValueHints, ValueHintsJSON } from "./hints";
 import { RelationshipAttributeConfidentiality } from "./RelationshipAttributeConfidentiality";
-import { PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH, PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH } from "./types/proprietary/ProprietaryAttributeValue";
+import { PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH, PROPRIETARY_ATTRIBUTE_MAX_TITLE_LENGTH } from "./types/proprietary";
 
 export interface RelationshipAttributeCreationHintsJSON {
     title: string;
