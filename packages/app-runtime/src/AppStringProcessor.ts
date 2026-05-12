@@ -82,14 +82,14 @@ export class AppStringProcessor {
         const credentialOffer = resolveCredentialOfferResult.value.credentialOffer;
         const grants = credentialOffer.credentialOfferPayload.grants;
 
-        if (grants?.authorization_code) return await this.processAuthCodeOpenIDCredentialOffer(services, account, credentialOffer);
-        if (grants?.["urn:ietf:params:oauth:grant-type:pre-authorized_code"]) return await this.processPreAuthorizedOpenIDCredentialOffer(services, account, credentialOffer);
+        if (grants?.authorization_code) return await this.processAuthCodeOpenIdCredentialOffer(services, account, credentialOffer);
+        if (grants?.["urn:ietf:params:oauth:grant-type:pre-authorized_code"]) return await this.processPreAuthorizedOpenIdCredentialOffer(services, account, credentialOffer);
 
         await uiBridge.showError(AppRuntimeErrors.appStringProcessor.unsupportedCredentialOfferGrantFound());
         return Result.ok(undefined);
     }
 
-    private async processAuthCodeOpenIDCredentialOffer(
+    private async processAuthCodeOpenIdCredentialOffer(
         services: RuntimeServices,
         account: LocalAccountDTO,
         credentialOffer: OpenId4VciResolvedCredentialOffer
@@ -129,7 +129,7 @@ export class AppStringProcessor {
         return Result.ok(undefined);
     }
 
-    private async processPreAuthorizedOpenIDCredentialOffer(
+    private async processPreAuthorizedOpenIdCredentialOffer(
         services: RuntimeServices,
         account: LocalAccountDTO,
         credentialOffer: OpenId4VciResolvedCredentialOffer
