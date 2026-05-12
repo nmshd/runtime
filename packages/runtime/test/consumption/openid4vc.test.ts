@@ -33,7 +33,6 @@ beforeAll(async () => {
     runtimeServices1 = runtimeServices[0];
     runtimeServices2 = runtimeServices[1];
 
-    // build connection between runtimes via relationship and request
     await establishRelationship(runtimeServices1.transport, runtimeServices2.transport);
 
     const eudiploBaseUrl = "http://localhost:3000";
