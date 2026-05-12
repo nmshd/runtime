@@ -29,7 +29,7 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
 
     public save(_agentContext: AgentContext, record: T): Promise<void> {
         if (record.id !== "STORAGE_VERSION_RECORD_ID" && record.type !== "DidRecord") {
-            throw new Error("Not implemented: saving records other than STORAGE_VERSION_RECORD_ID and DidRecord was previously not required.");
+            throw new Error("Not implemented: saving records other than STORAGE_VERSION_RECORD_ID and DidRecord has not been required so far.");
         }
 
         this.storage.set(record.id, record);

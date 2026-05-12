@@ -19,7 +19,7 @@ export class EnmeshedHolderKeyManagementService implements Kms.KeyManagementServ
     private readonly b64url = (bytes: Uint8Array) => SodiumWrapper.sodium.to_base64(bytes, (SodiumWrapper.sodium as any).base64_variants.URLSAFE_NO_PADDING);
     private readonly b64urlDecode = (b64url: string) => SodiumWrapper.sodium.from_base64(b64url, (SodiumWrapper.sodium as any).base64_variants.URLSAFE_NO_PADDING);
 
-    // please note: we cannot use buffer here - because it is not available in the browser
+    // we cannot use buffer here because it is not available in the browser
     private readonly buf2hex = (bytes: Uint8Array) => {
         return Array.from(bytes)
             .map((b) => b.toString(16).padStart(2, "0"))
