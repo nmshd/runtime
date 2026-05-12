@@ -36,7 +36,7 @@ export class AppStringProcessor {
         if (!allowedProtocols.includes(parsed.protocol)) return Result.fail(AppRuntimeErrors.appStringProcessor.wrongURL());
 
         if (parsed.protocol === "openid-credential-offer:") return await this.processOpenIdCredentialOfferUrl(url, account);
-        if (parsed.protocol === "openid4vp:") return await this.processOpenIdPresentationOfferUrl(url, account);
+        if (parsed.protocol === "openid4vp:") return await this.processOpenIdAuthorizationRequestUrl(url, account);
 
         return await this.processReference(url, account);
     }
@@ -185,7 +185,7 @@ export class AppStringProcessor {
         return fetchResult.result;
     }
 
-    private async processOpenIdPresentationOfferUrl(url: string, account?: LocalAccountDTO): Promise<Result<void>> {
+    private async processOpenIdAuthorizationRequestUrl(url: string, account?: LocalAccountDTO): Promise<Result<void>> {
         if (!account) {
             const result = await this.selectAccount();
             if (result.isError) {
