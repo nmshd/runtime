@@ -30,7 +30,7 @@
         "@js-soft/eslint-config-ts": "^2.0.5",
         "@js-soft/license-check": "^1.0.10",
         "@types/jest": "^30.0.0",
-        "@types/node": "^24.12.3",
+        "@types/node": "^24.12.4",
         "enhanced-publish": "^1.1.8",
         "eslint": "^10.3.0",
         "jest": "^30.3.0",
