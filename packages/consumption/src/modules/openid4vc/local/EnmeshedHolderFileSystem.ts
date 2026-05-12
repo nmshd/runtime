@@ -2,7 +2,7 @@ import { DownloadToFileOptions, FileSystem } from "@credo-ts/core";
 
 // File system is not used since we don't use Askar or AnonCreds.
 export class EnmeshedHolderFileSystem implements FileSystem {
-    private static readonly NOT_IMPLEMENTED_ERROR = "Not implemented: Credos file system support has not been needed so far and is therefore not implemented.";
+    private static readonly NOT_IMPLEMENTED_ERROR = "Not implemented: Credo's file system support has not been needed so far and is therefore not implemented.";
 
     public exists(_path: string): Promise<boolean> {
         throw new Error(EnmeshedHolderFileSystem.NOT_IMPLEMENTED_ERROR);
