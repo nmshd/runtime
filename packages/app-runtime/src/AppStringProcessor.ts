@@ -136,23 +136,7 @@ export class AppStringProcessor {
     ): Promise<Result<void>> {
         const uiBridge = await this.runtime.uiBridge();
 
-        const preAuthorizedCodeGrant = credentialOffer.credentialOfferPayload.grants!["urn:ietf:params:oauth:grant-type:pre-authorized_code"];
-        const credentialConfigurationId = credentialOffer.credentialOfferPayload.credential_configuration_ids;
-
-        let requestCredentialsResult;
-        if (preAuthorizedCodeGrant?.tx_code) {
-            requestCredentialsResult = await this._requestCredentialsWithPasswordProtection(
-                services,
-                credentialOffer,
-                credentialConfigurationId,
-                preAuthorizedCodeGrant.tx_code.input_mode === "text" ? "pw" : `pin${preAuthorizedCodeGrant.tx_code.length ?? 4}`
-            );
-        } else {
-            requestCredentialsResult = await services.consumptionServices.openId4Vc.requestCredentials({
-                credentialOffer: credentialOffer,
-                credentialConfigurationIds: credentialConfigurationId
-            });
-        }
+        let requestCredentialsResult = await this._requestPreAuthorizedCredentials(credentialOffer, services);
 
         if (requestCredentialsResult.isError) {
             if (!requestCredentialsResult.error.equals(AppRuntimeErrors.appStringProcessor.passwordNotProvided())) {
@@ -163,6 +147,25 @@ export class AppStringProcessor {
 
         await uiBridge.showResolvedCredentialOffer(account, requestCredentialsResult.value.credentialResponses, credentialOffer.metadata.credentialIssuer.display);
         return Result.ok(undefined);
+    }
+
+    private async _requestPreAuthorizedCredentials(credentialOffer: OpenId4VciResolvedCredentialOffer, services: RuntimeServices): Promise<Result<RequestCredentialsResponse>> {
+        const preAuthorizedCodeGrant = credentialOffer.credentialOfferPayload.grants!["urn:ietf:params:oauth:grant-type:pre-authorized_code"];
+        const credentialConfigurationId = credentialOffer.credentialOfferPayload.credential_configuration_ids;
+
+        if (preAuthorizedCodeGrant?.tx_code) {
+            return await this._requestCredentialsWithPasswordProtection(
+                services,
+                credentialOffer,
+                credentialConfigurationId,
+                preAuthorizedCodeGrant.tx_code.input_mode === "text" ? "pw" : `pin${preAuthorizedCodeGrant.tx_code.length ?? 4}`
+            );
+        }
+
+        return await services.consumptionServices.openId4Vc.requestCredentials({
+            credentialOffer: credentialOffer,
+            credentialConfigurationIds: credentialConfigurationId
+        });
     }
 
     private async _requestCredentialsWithPasswordProtection(
