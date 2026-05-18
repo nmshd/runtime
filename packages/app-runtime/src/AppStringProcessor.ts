@@ -136,7 +136,7 @@ export class AppStringProcessor {
     ): Promise<Result<void>> {
         const uiBridge = await this.runtime.uiBridge();
 
-        let requestCredentialsResult = await this._requestPreAuthorizedCredentials(credentialOffer, services);
+        const requestCredentialsResult = await this._requestPreAuthorizedCredentials(credentialOffer, services);
 
         if (requestCredentialsResult.isError) {
             if (!requestCredentialsResult.error.equals(AppRuntimeErrors.appStringProcessor.passwordNotProvided())) {
