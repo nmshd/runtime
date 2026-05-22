@@ -1,5 +1,4 @@
-const { SodiumWrapper } = require("@nmshd/crypto");
-
 beforeAll(async () => {
+    const { SodiumWrapper } = require("@nmshd/crypto");
     await SodiumWrapper.ready();
 });
