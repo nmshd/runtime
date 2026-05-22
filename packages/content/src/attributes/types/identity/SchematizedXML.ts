@@ -28,7 +28,7 @@ export class SchematizedXML extends AbstractXML implements ISchematizedXML {
         return this.fromAny(value);
     }
 
-    public override toJSON(verbose?: boolean | undefined, serializeAsString?: boolean | undefined): SchematizedXML {
-        return super.toJSON(verbose, serializeAsString) as SchematizedXML;
+    public override toJSON(verbose?: boolean | undefined, serializeAsString?: boolean | undefined): SchematizedXMLJSON {
+        return super.toJSON(verbose, serializeAsString) as SchematizedXMLJSON;
     }
 }
