@@ -1,6 +1,5 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreId } from "@nmshd/core-types";
-import { SodiumWrapper } from "@nmshd/crypto";
 import {
     AcceptResponseItem,
     AcceptResponseItemJSON,
@@ -36,8 +35,6 @@ class TestAcceptResponseItem extends AcceptResponseItem implements ITestAcceptRe
 }
 
 describe("Response", function () {
-    beforeAll(async () => await SodiumWrapper.ready());
-
     test("creates a Response and items from JSON", function () {
         const responseJSON = {
             "@type": "Response",

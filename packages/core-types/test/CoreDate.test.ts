@@ -1,9 +1,6 @@
-import { SodiumWrapper } from "@nmshd/crypto";
 import { CoreDate } from "../src";
 
 describe("CoreDate", function () {
-    beforeAll(async () => await SodiumWrapper.ready());
-
     describe("Constructor", function () {
         test("returns the current date when constructor is empty", function () {
             const date = CoreDate.utc();

@@ -1,13 +1,10 @@
 import { ResponseItem } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
-import { SodiumWrapper } from "@nmshd/crypto";
 import { LocalRequest, LocalRequestStatus, LocalRequestStatusLogEntry, LocalResponse } from "../../../../src";
 import { TestObjectFactory } from "../testHelpers/TestObjectFactory";
 import { TestRequestItem } from "../testHelpers/TestRequestItem";
 
 describe("LocalRequest", function () {
-    beforeAll(async () => await SodiumWrapper.ready());
-
     test("creates objects of all nested classes", function () {
         const request = TestObjectFactory.createLocalRequestWith({
             contentProperties: {},
