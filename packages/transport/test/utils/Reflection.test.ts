@@ -15,7 +15,8 @@ import {
     CryptoSignature,
     CryptoSignatureKeypair,
     CryptoSignaturePrivateKey,
-    CryptoSignaturePublicKey
+    CryptoSignaturePublicKey,
+    SodiumWrapper
 } from "@nmshd/crypto";
 
 import {
@@ -91,6 +92,8 @@ const transportClassNames: string[] = [
 ];
 
 describe("ReflectionTest", function () {
+    beforeAll(async () => await SodiumWrapper.ready());
+
     test("should find all Crypto classes", function () {
         const reflectionKeys = Reflect.getMetadataKeys(Serializable, "types");
         const notFoundClasses: string[] = [];

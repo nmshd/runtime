@@ -1,3 +1,4 @@
+import { SodiumWrapper } from "@nmshd/crypto";
 import { MessageReceivedEvent } from "@nmshd/runtime";
 import { AppRuntime, LocalAccountSession } from "../../src";
 import { MockEventBus, TestUtil } from "../lib";
@@ -11,6 +12,8 @@ describe.skip("SSEModuleTest", function () {
     let session2: LocalAccountSession;
 
     beforeAll(async function () {
+        await SodiumWrapper.ready();
+
         runtime = await TestUtil.createRuntime({ modules: { sse: { enabled: true, baseUrlOverride: process.env.NMSHD_TEST_BASEURL_SSE_SERVER } } }, undefined, eventBus);
         await runtime.start();
 

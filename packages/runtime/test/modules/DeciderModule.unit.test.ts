@@ -1,5 +1,6 @@
 import { NodeLoggerFactory } from "@js-soft/node-logger";
 import { IdentityAttribute } from "@nmshd/content";
+import { SodiumWrapper } from "@nmshd/crypto";
 import { DeciderModule } from "../../src";
 import {
     AcceptResponseConfig,
@@ -22,7 +23,9 @@ afterAll(async () => await runtimeServiceProvider.stop());
 
 describe("DeciderModule unit tests", () => {
     let deciderModule: DeciderModule;
-    beforeAll(() => {
+    beforeAll(async () => {
+        await SodiumWrapper.ready();
+        
         const runtime = runtimeServiceProvider["runtimes"][0];
 
         const loggerFactory = new NodeLoggerFactory({
