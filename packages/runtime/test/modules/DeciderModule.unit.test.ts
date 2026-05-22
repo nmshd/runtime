@@ -22,7 +22,7 @@ afterAll(async () => await runtimeServiceProvider.stop());
 
 describe("DeciderModule unit tests", () => {
     let deciderModule: DeciderModule;
-    beforeAll(async () => {
+    beforeAll(() => {
         const runtime = runtimeServiceProvider["runtimes"][0];
 
         const loggerFactory = new NodeLoggerFactory({
