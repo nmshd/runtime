@@ -154,38 +154,24 @@ export class AppStringProcessor {
         const credentialConfigurationId = credentialOffer.credentialOfferPayload.credential_configuration_ids;
 
         if (preAuthorizedCodeGrant?.tx_code) {
-            return await this._requestCredentialsWithPasswordProtection(
-                services,
-                credentialOffer,
-                credentialConfigurationId,
-                preAuthorizedCodeGrant.tx_code.input_mode === "text" ? "pw" : `pin${preAuthorizedCodeGrant.tx_code.length ?? 4}`
+            const fetchResult = await this._fetchPasswordProtectedItemWithRetry(
+                (password) =>
+                    services.consumptionServices.openId4Vc.requestCredentials({
+                        credentialOffer,
+                        credentialConfigurationIds: credentialConfigurationId,
+                        pinCode: password
+                    }),
+                { passwordType: preAuthorizedCodeGrant.tx_code.input_mode === "text" ? "pw" : `pin${preAuthorizedCodeGrant.tx_code.length ?? 4}` },
+                "error.runtime.openid4vc.oauth.invalid_grant"
             );
+
+            return fetchResult.result;
         }
 
         return await services.consumptionServices.openId4Vc.requestCredentials({
             credentialOffer: credentialOffer,
             credentialConfigurationIds: credentialConfigurationId
         });
-    }
-
-    private async _requestCredentialsWithPasswordProtection(
-        services: RuntimeServices,
-        credentialOffer: OpenId4VciResolvedCredentialOffer,
-        credentialConfigurationId: string[],
-        passwordType: "pw" | `pin${number}`
-    ): Promise<Result<RequestCredentialsResponse>> {
-        const fetchResult = await this._fetchPasswordProtectedItemWithRetry(
-            (password) =>
-                services.consumptionServices.openId4Vc.requestCredentials({
-                    credentialOffer,
-                    credentialConfigurationIds: credentialConfigurationId,
-                    pinCode: password
-                }),
-            { passwordType },
-            "error.runtime.openid4vc.oauth.invalid_grant"
-        );
-
-        return fetchResult.result;
     }
 
     private async processOpenIdAuthorizationRequestUrl(url: string, account?: LocalAccountDTO): Promise<Result<void>> {
