@@ -160,7 +160,7 @@ export async function syncUntilHasEvent<TEvent extends Event>(
                 e.namespace === subscriptionTarget.namespace &&
                 (typeof subscriptionTarget === "string" || e instanceof subscriptionTarget) &&
                 (!predicate || predicate(e as TEvent))
-        ) as TEvent | undefined;
+        );
 
         iterationNumber++;
     } while (!event && iterationNumber < 15);

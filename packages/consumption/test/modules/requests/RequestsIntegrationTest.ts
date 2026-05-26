@@ -542,7 +542,7 @@ export class RequestsWhen {
 
     public iTryToCheckPrerequisitesWith(params: Partial<ICheckPrerequisitesOfIncomingRequestParameters>): Promise<void> {
         this.context.actionToTry = async () => {
-            await this.iCheckPrerequisitesWith(params as ICheckPrerequisitesOfIncomingRequestParameters);
+            await this.iCheckPrerequisitesWith(params);
         };
         return Promise.resolve();
     }
@@ -955,7 +955,7 @@ export class RequestsWhen {
         };
 
         this.context.actionToTry = async () => {
-            await this.context.outgoingRequestsController.create(params as any);
+            await this.context.outgoingRequestsController.create(params);
         };
 
         return Promise.resolve();
@@ -991,7 +991,7 @@ export class RequestsWhen {
         };
 
         this.context.actionToTry = async () => {
-            await this.context.outgoingRequestsController.create(params as any);
+            await this.context.outgoingRequestsController.create(params);
         };
 
         return Promise.resolve();

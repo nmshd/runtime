@@ -2,17 +2,14 @@ import { serialize, type, validate } from "@js-soft/ts-serval";
 import { CoreId } from "@nmshd/core-types";
 import {
     AcceptResponseItem,
-    AcceptResponseItemJSON,
     ErrorResponseItemJSON,
     IAcceptResponseItem,
     IResponse,
     IResponseItem,
     IResponseItemGroup,
-    RejectResponseItemJSON,
     Response,
     ResponseItem,
     ResponseItemGroup,
-    ResponseItemGroupJSON,
     ResponseItemJSON,
     ResponseItemResult,
     ResponseJSON,
@@ -44,16 +41,16 @@ describe("Response", function () {
                 {
                     "@type": "AcceptResponseItem",
                     result: ResponseItemResult.Accepted
-                } as ResponseItemJSON,
+                },
                 {
                     "@type": "ResponseItemGroup",
                     items: [
                         {
                             "@type": "AcceptResponseItem",
                             result: ResponseItemResult.Accepted
-                        } as ResponseItemJSON
+                        }
                     ]
-                } as ResponseItemGroupJSON
+                }
             ]
         } as ResponseJSON;
 
@@ -118,7 +115,7 @@ describe("Response", function () {
                     result: ResponseItemResult.Rejected,
                     code: "SOME_REJECTION_CODE",
                     message: "Some rejection message"
-                } as RejectResponseItemJSON,
+                },
                 {
                     "@type": "ResponseItemGroup",
                     items: [
@@ -127,9 +124,9 @@ describe("Response", function () {
                             result: ResponseItemResult.Failed,
                             code: "SOME_ERROR_CODE",
                             message: "Some error message"
-                        } as ErrorResponseItemJSON
+                        }
                     ]
-                } as ResponseItemGroupJSON
+                }
             ]
         } as ResponseJSON;
 
@@ -163,7 +160,7 @@ describe("Response", function () {
                 {
                     "@type": "ResponseItemGroup",
                     items: []
-                } as ResponseItemGroupJSON
+                }
             ]
         } as ResponseJSON;
 
@@ -209,7 +206,7 @@ describe("Response", function () {
                     {
                         "@type": "AcceptResponseItem",
                         result: ResponseItemResult.Accepted
-                    } as AcceptResponseItemJSON
+                    }
                 ]
             } as ResponseJSON;
 

@@ -29,7 +29,7 @@ describe("AppLanguageModuleTest", function () {
     afterEach(() => eventBus.reset());
 
     test("should persist the app language via an AppLanguageChangedEvent", async function () {
-        runtime.eventBus.publish(new AppLanguageChangedEvent("de" as any));
+        runtime.eventBus.publish(new AppLanguageChangedEvent("de"));
         await eventBus.waitForRunningEventHandlers();
         let device = await devicesClient.getCurrentDevice();
         expect(device.value.communicationLanguage).toBe(LanguageISO639.de);
