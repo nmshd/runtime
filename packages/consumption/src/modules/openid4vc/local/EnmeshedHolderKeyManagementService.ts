@@ -12,9 +12,7 @@ export interface JwkKeyPair {
 }
 
 export class EnmeshedHolderKeyManagementService implements Kms.KeyManagementService {
-    public static readonly backend = "enmeshed";
-
-    public readonly backend = EnmeshedHolderKeyManagementService.backend;
+    public readonly backend = "enmeshed";
 
     private readonly b64url = (bytes: Uint8Array) => SodiumWrapper.sodium.to_base64(bytes, (SodiumWrapper.sodium as any).base64_variants.URLSAFE_NO_PADDING);
     private readonly b64urlDecode = (b64url: string) => SodiumWrapper.sodium.from_base64(b64url, (SodiumWrapper.sodium as any).base64_variants.URLSAFE_NO_PADDING);
@@ -63,6 +61,7 @@ export class EnmeshedHolderKeyManagementService implements Kms.KeyManagementServ
         }
         return false;
     }
+
     public async getPublicKey(agentContext: AgentContext, keyId: string): Promise<Kms.KmsJwkPublic> {
         const keyPair = await this.keyStorage.getKey(keyId);
         if (!keyPair) {
@@ -72,6 +71,7 @@ export class EnmeshedHolderKeyManagementService implements Kms.KeyManagementServ
 
         return (JSON.parse(keyPair) as JwkKeyPair).publicKey as Kms.KmsJwkPublic;
     }
+
     public async createKey<Type extends Kms.KmsCreateKeyType>(agentContext: AgentContext, options: Kms.KmsCreateKeyOptions<Type>): Promise<Kms.KmsCreateKeyReturn<Type>> {
         options.keyId ??= "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
             const r = SodiumWrapper.sodium.randombytes_uniform(16);
@@ -367,6 +367,7 @@ export class EnmeshedHolderKeyManagementService implements Kms.KeyManagementServ
         agentContext.config.logger.debug(`EKM: Decrypting data with key id ${options.key.keyId} using options ${options}`);
         throw new Error("Method not implemented.");
     }
+
     public randomBytes(agentContext: AgentContext, options: Kms.KmsRandomBytesOptions): Kms.KmsRandomBytesReturn {
         agentContext.config.logger.debug(`EKM: Generating ${options.length} random bytes`);
         return SodiumWrapper.sodium.randombytes_buf(options.length); // Uint8Array
