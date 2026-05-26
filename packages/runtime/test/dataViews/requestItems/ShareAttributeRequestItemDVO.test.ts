@@ -1,5 +1,5 @@
 import { DecideRequestItemParametersJSON } from "@nmshd/consumption";
-import { AbstractStringJSON, DisplayNameJSON, ShareAttributeRequestItemJSON } from "@nmshd/content";
+import { AbstractStringJSON, DisplayNameJSON } from "@nmshd/content";
 import {
     AcceptResponseItemDVO,
     ConsumptionServices,
@@ -83,7 +83,7 @@ beforeEach(async () => {
                     mustBeAccepted: true,
                     attribute: senderAttribute.content,
                     attributeId: senderAttribute.id
-                } as ShareAttributeRequestItemJSON
+                }
             ]
         },
         peer: rAddress

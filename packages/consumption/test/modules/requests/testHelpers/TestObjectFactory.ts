@@ -506,13 +506,12 @@ export class TestObjectFactory {
             result: ResponseResult.Accepted,
             items: [
                 {
-                    // @ts-expect-error
                     "@type": "AcceptResponseItem",
                     result: ResponseItemResult.Accepted
                 }
             ],
             requestId: CoreId.from(requestId)
-        } as IResponse);
+        });
     }
 
     public static createOutgoingMessage(sender: CoreAddress): Message {

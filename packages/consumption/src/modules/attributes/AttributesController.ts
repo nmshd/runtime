@@ -1108,7 +1108,7 @@ export class AttributesController extends ConsumptionBaseController {
     private trimAttribute(attribute: IdentityAttribute): IdentityAttribute {
         const trimmedAttribute = {
             ...attribute.toJSON(),
-            value: this.trimAttributeValue(attribute.value.toJSON() as AttributeValues.Identity.Json)
+            value: this.trimAttributeValue(attribute.value.toJSON())
         };
         return IdentityAttribute.from(trimmedAttribute);
     }
