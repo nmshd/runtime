@@ -20,7 +20,7 @@ export class OpenId4VcController extends ConsumptionBaseController {
             return String(value);
         } catch (error) {
             const reason = error instanceof Error ? error.message : "unknown error";
-            throw new Error(`Expected a string for, but casting to string failed: ${reason}`);
+            throw new Error(`Could not cast to string: ${reason}`);
         }
     }
 

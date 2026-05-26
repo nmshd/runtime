@@ -230,7 +230,7 @@ expect.extend({
             return {
                 pass: false,
                 message: () =>
-                    `The method showVerifiablePresentation was called, but not with token id '${id}' and isTechnicallyValid '${isTechnicallyValid}', instead with calls ${callsWithData}.`
+                    `The method showVerifiablePresentation was called, but not with token id '${id}' and isTechnicallyValid '${isTechnicallyValid}'. Instead, with calls ${callsWithData}.`
             };
         }
 
@@ -246,7 +246,7 @@ expect.extend({
             return {
                 pass: false,
                 message: () =>
-                    `The method showVerifiablePresentation called: ${calls.map((c) => `'account id: ${c.account.id} - tokenId: ${c.token.id} - isTechnicallyValid: ${c.isTechnicallyValid}'`)}`
+                    `The method showVerifiablePresentation was called: ${calls.map((c) => `'account id: ${c.account.id} - tokenId: ${c.token.id} - isTechnicallyValid: ${c.isTechnicallyValid}'`)}`
             };
         }
 
