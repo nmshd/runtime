@@ -32,10 +32,6 @@ class AppStringProcessor {
         return new ApplicationError("error.appruntime.appStringProcessor.invalidCredentialOffer", "The scanned code contains an invalid credential offer.");
     }
 
-    public externalOauthRegistrationNotProvided(): ApplicationError {
-        return new ApplicationError("error.appruntime.appStringProcessor.externalOauthRegistrationNotProvided", "No external OAuth registration was provided.");
-    }
-
     public passwordRetryLimitReached(): ApplicationError {
         return new ApplicationError("error.appruntime.appStringProcessor.passwordRetryLimitReached", "The maximum number of attempts to enter the password was reached.");
     }
