@@ -19,7 +19,7 @@ describe("AuthenticationTest", function () {
         const anyC = controller as any;
         oldLogger = anyC.client._logger;
         anyC.client._logger = mock<ILogger>();
-        oldGetCredentials = controller.parent.activeDevice.getCredentials as Function;
+        oldGetCredentials = controller.parent.activeDevice.getCredentials;
         controller.parent.activeDevice.getCredentials = async function () {
             const deviceCredentials = await oldGetCredentials.apply(anyC.parent.activeDevice);
             const newCredentials = Object.assign({}, deviceCredentials, config);

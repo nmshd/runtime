@@ -20,7 +20,6 @@ import { TransportLoggerFactory } from "@nmshd/transport";
 import {
     AcceptReadAttributeRequestItemParametersWithNewAttributeJSON,
     ConsumptionIds,
-    DecideRequestItemGroupParametersJSON,
     DecideRequestParametersJSON,
     IncomingRequestReceivedEvent,
     IncomingRequestStatusChangedEvent,
@@ -163,7 +162,7 @@ describe("IncomingRequestsController", function () {
                             shouldFailAtCheckPrerequisitesOfIncomingRequestItem: true
                         } as ITestRequestItem
                     ]
-                } as IRequest
+                }
             },
             {
                 content: {
@@ -178,7 +177,7 @@ describe("IncomingRequestsController", function () {
                             shouldFailAtCheckPrerequisitesOfIncomingRequestItem: true
                         } as ITestRequestItem
                     ]
-                } as IRequest
+                }
             },
             {
                 content: {
@@ -194,7 +193,7 @@ describe("IncomingRequestsController", function () {
                             ]
                         } as IRequestItemGroup
                     ]
-                } as IRequest
+                }
             }
         ])("does not change the status when a RequestItemProcessor returns false", async function (testParams) {
             await Given.anIncomingRequestWith({
@@ -271,14 +270,14 @@ describe("IncomingRequestsController", function () {
                             shouldFailAtCanAccept: true
                         } as ITestRequestItem
                     ]
-                } as IRequest,
+                },
                 acceptParams: {
                     items: [
                         {
                             accept: true
                         }
                     ]
-                } as Omit<DecideRequestParametersJSON, "requestId">
+                }
             },
 
             {
@@ -294,7 +293,7 @@ describe("IncomingRequestsController", function () {
                             shouldFailAtCanAccept: true
                         } as ITestRequestItem
                     ]
-                } as IRequest,
+                },
                 acceptParams: {
                     items: [
                         {
@@ -304,7 +303,7 @@ describe("IncomingRequestsController", function () {
                             accept: true
                         }
                     ]
-                } as Omit<DecideRequestParametersJSON, "requestId">
+                }
             },
 
             {
@@ -321,7 +320,7 @@ describe("IncomingRequestsController", function () {
                             ]
                         } as IRequestItemGroup
                     ]
-                } as IRequest,
+                },
                 acceptParams: {
                     items: [
                         {
@@ -330,9 +329,9 @@ describe("IncomingRequestsController", function () {
                                     accept: true
                                 }
                             ]
-                        } as DecideRequestItemGroupParametersJSON
+                        }
                     ]
-                } as Omit<DecideRequestParametersJSON, "requestId">
+                }
             }
         ])("returns 'error' when at least one RequestItem is invalid", async function (testParams) {
             await Given.anIncomingRequestWith({
@@ -715,14 +714,14 @@ describe("IncomingRequestsController", function () {
                             shouldFailAtCanReject: true
                         } as ITestRequestItem
                     ]
-                } as IRequest,
+                },
                 rejectParams: {
                     items: [
                         {
                             accept: false
                         }
                     ]
-                } as Omit<DecideRequestParametersJSON, "requestId">
+                }
             },
 
             {
@@ -738,7 +737,7 @@ describe("IncomingRequestsController", function () {
                             shouldFailAtCanReject: true
                         } as ITestRequestItem
                     ]
-                } as IRequest,
+                },
                 rejectParams: {
                     items: [
                         {
@@ -748,7 +747,7 @@ describe("IncomingRequestsController", function () {
                             accept: false
                         }
                     ]
-                } as Omit<DecideRequestParametersJSON, "requestId">
+                }
             },
 
             {
@@ -765,7 +764,7 @@ describe("IncomingRequestsController", function () {
                             ]
                         } as IRequestItemGroup
                     ]
-                } as IRequest,
+                },
                 rejectParams: {
                     items: [
                         {
@@ -776,7 +775,7 @@ describe("IncomingRequestsController", function () {
                             ]
                         }
                     ]
-                } as Omit<DecideRequestParametersJSON, "requestId">
+                }
             }
         ])("returns 'error' when at least one RequestItem is invalid", async function (testParams) {
             await Given.anIncomingRequestWith({

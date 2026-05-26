@@ -53,7 +53,7 @@ describe("MessageSync", function () {
         await TestUtil.syncUntilHasMessages(b1);
 
         const b1Messages = await b1.messages.getMessages();
-        expect(b1Messages[0].toJSON()).toStrictEqualExcluding(a2Message.toJSON() as any, "isOwn", "recipients[0].receivedAt", "recipients[0].receivedByDevice");
+        expect(b1Messages[0].toJSON()).toStrictEqualExcluding(a2Message.toJSON(), "isOwn", "recipients[0].receivedAt", "recipients[0].receivedByDevice");
     });
 
     test("concurrent send A1 -> B1, A2 -> B1: sync should receive messages sent parallel to the same identity on all devices", async function () {
@@ -79,9 +79,9 @@ describe("MessageSync", function () {
         expect(b1MessageFromA1).toBeDefined();
         expect(b1MessageFromA2).toBeDefined();
 
-        expect(b1MessageFromA1!.toJSON()).toStrictEqualExcluding(a1SentMessage.toJSON() as any, "isOwn", "recipients[0].receivedAt", "recipients[0].receivedByDevice");
+        expect(b1MessageFromA1!.toJSON()).toStrictEqualExcluding(a1SentMessage.toJSON(), "isOwn", "recipients[0].receivedAt", "recipients[0].receivedByDevice");
 
-        expect(b1MessageFromA2!.toJSON()).toStrictEqualExcluding(a2SentMessage.toJSON() as any, "isOwn", "recipients[0].receivedAt", "recipients[0].receivedByDevice");
+        expect(b1MessageFromA2!.toJSON()).toStrictEqualExcluding(a2SentMessage.toJSON(), "isOwn", "recipients[0].receivedAt", "recipients[0].receivedByDevice");
 
         // B2 syncs its datawallet
         await b2.syncDatawallet();
@@ -91,9 +91,9 @@ describe("MessageSync", function () {
         expect(b2MessageFromA1).toBeDefined();
         expect(b2MessageFromA2).toBeDefined();
 
-        expect(b2MessageFromA1!.toJSON()).toStrictEqualExcluding(a1SentMessage.toJSON() as any, "isOwn", "recipients[0].receivedAt", "recipients[0].receivedByDevice");
+        expect(b2MessageFromA1!.toJSON()).toStrictEqualExcluding(a1SentMessage.toJSON(), "isOwn", "recipients[0].receivedAt", "recipients[0].receivedByDevice");
 
-        expect(b2MessageFromA2!.toJSON()).toStrictEqualExcluding(a2SentMessage.toJSON() as any, "isOwn", "recipients[0].receivedAt", "recipients[0].receivedByDevice");
+        expect(b2MessageFromA2!.toJSON()).toStrictEqualExcluding(a2SentMessage.toJSON(), "isOwn", "recipients[0].receivedAt", "recipients[0].receivedByDevice");
     });
 
     test("concurrent receive A1 -> B1, A2 -> B1: only one active sync run is allowed", async function () {
@@ -132,8 +132,8 @@ describe("MessageSync", function () {
         expect(b1MessageFromA1).toBeDefined();
         expect(b1MessageFromA2).toBeDefined();
 
-        expect(b1MessageFromA1!.toJSON()).toStrictEqualExcluding(a1SentMessage.toJSON() as any, "isOwn", "recipients[0].receivedAt", "recipients[0].receivedByDevice");
-        expect(b1MessageFromA2!.toJSON()).toStrictEqualExcluding(a2SentMessage.toJSON() as any, "isOwn", "recipients[0].receivedAt", "recipients[0].receivedByDevice");
+        expect(b1MessageFromA1!.toJSON()).toStrictEqualExcluding(a1SentMessage.toJSON(), "isOwn", "recipients[0].receivedAt", "recipients[0].receivedByDevice");
+        expect(b1MessageFromA2!.toJSON()).toStrictEqualExcluding(a2SentMessage.toJSON(), "isOwn", "recipients[0].receivedAt", "recipients[0].receivedByDevice");
 
         // B2 synchronizes the received messages to its local datawallet
         await b2.syncDatawallet();

@@ -1,5 +1,5 @@
 import { CoreId } from "@nmshd/core-types";
-import { Response, ResponseItemJSON, ResponseItemResult, ResponseJSON, ResponseResult, ResponseWrapper } from "../../src";
+import { Response, ResponseItemResult, ResponseJSON, ResponseResult, ResponseWrapper } from "../../src";
 
 describe("ResponseWrapper", function () {
     const response = Response.from({
@@ -10,7 +10,7 @@ describe("ResponseWrapper", function () {
             {
                 "@type": "AcceptResponseItem",
                 result: ResponseItemResult.Accepted
-            } as ResponseItemJSON
+            }
         ]
     } as ResponseJSON);
 

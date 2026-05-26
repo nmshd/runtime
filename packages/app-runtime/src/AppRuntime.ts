@@ -13,7 +13,6 @@ import { IUIBridge } from "./extensibility";
 import { IAppLanguageProvider, INotificationAccess } from "./infrastructure";
 import {
     AppLanguageModule,
-    AppRuntimeModuleConfiguration,
     AppSyncModule,
     IAppRuntimeModuleConstructor,
     IdentityDeletionProcessStatusChangedModule,
@@ -246,9 +245,7 @@ export class AppRuntime extends Runtime<AppConfig> {
             return Promise.reject(error);
         }
 
-        const connectorModuleConfiguration = moduleConfiguration as AppRuntimeModuleConfiguration;
-
-        const module = new moduleConstructor(this, connectorModuleConfiguration, this.loggerFactory.getLogger(moduleConstructor));
+        const module = new moduleConstructor(this, moduleConfiguration, this.loggerFactory.getLogger(moduleConstructor));
 
         this.modules.add(module);
 
