@@ -1,10 +1,6 @@
 import { Serializable, type } from "@js-soft/ts-serval";
 import { CoreDate, CoreId } from "@nmshd/core-types";
-import { IRequest, IRequestItem, IRequestItemGroup, Request, RequestItem, RequestItemGroup, RequestItemGroupJSON, RequestItemJSON, RequestJSON } from "../../src";
-
-interface TestRequestItemJSON extends RequestItemJSON {
-    "@type": "TestRequestItem";
-}
+import { IRequest, IRequestItem, IRequestItemGroup, Request, RequestItem, RequestItemGroup, RequestJSON } from "../../src";
 
 interface ITestRequestItem extends IRequestItem {}
 
@@ -20,18 +16,18 @@ describe("Request", function () {
                 {
                     "@type": "TestRequestItem",
                     mustBeAccepted: true
-                } as TestRequestItemJSON,
+                },
                 {
                     "@type": "RequestItemGroup",
                     items: [
                         {
                             "@type": "TestRequestItem",
                             mustBeAccepted: true
-                        } as TestRequestItemJSON
+                        }
                     ]
-                } as RequestItemGroupJSON
+                }
             ]
-        } as RequestJSON;
+        };
 
         const request = Request.from(requestJSON);
 
@@ -95,7 +91,7 @@ describe("Request", function () {
                     metadata: {
                         aMetadataKey: "outer item - metadata value"
                     }
-                } as TestRequestItemJSON,
+                },
                 {
                     "@type": "RequestItemGroup",
                     title: "item group - title",
@@ -111,9 +107,9 @@ describe("Request", function () {
                             metadata: {
                                 aMetadataKey: "inner item - metadata value"
                             }
-                        } as TestRequestItemJSON
+                        }
                     ]
-                } as RequestItemGroupJSON
+                }
             ]
         } as RequestJSON;
 
@@ -145,7 +141,7 @@ describe("Request", function () {
                 {
                     "@type": "RequestItemGroup",
                     items: []
-                } as RequestItemGroupJSON
+                }
             ]
         } as RequestJSON;
 

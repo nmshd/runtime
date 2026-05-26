@@ -24,7 +24,7 @@ export class TestNotificationItem extends NotificationItem implements INotificat
     public failProcess?: boolean;
 
     public static from(value: ITestNotificationItem): TestNotificationItem {
-        return super.fromAny(value) as TestNotificationItem;
+        return super.fromAny(value);
     }
 }
 

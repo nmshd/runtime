@@ -1,5 +1,5 @@
 import { DecideRequestItemParametersJSON } from "@nmshd/consumption";
-import { RequestJSON, TransferFileOwnershipAcceptResponseItemJSON, TransferFileOwnershipRequestItemJSON } from "@nmshd/content";
+import { RequestJSON, TransferFileOwnershipAcceptResponseItemJSON } from "@nmshd/content";
 import {
     ConsumptionServices,
     CreateOutgoingRequestRequest,
@@ -70,13 +70,13 @@ beforeEach(async () => {
                     mustBeAccepted: true,
                     fileReference: truncatedFileReference,
                     ownershipToken: file.ownershipToken
-                } as TransferFileOwnershipRequestItemJSON
+                }
             ]
         },
         peer: rAddress
     };
 
-    responseItems = [{ accept: true }] as any;
+    responseItems = [{ accept: true }];
 
     await cleanupAttributes([sRuntimeServices, rRuntimeServices]);
 

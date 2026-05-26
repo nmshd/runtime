@@ -147,7 +147,7 @@ export class CoreDate extends Serializable {
 
     private get asValidDateTime(): DateTime<true> {
         if (!this.dateTime.isValid) throw new Error("The date is invalid.");
-        return this.dateTime as DateTime<true>;
+        return this.dateTime;
     }
 
     protected static override preFrom(value: any): any {

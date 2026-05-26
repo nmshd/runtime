@@ -1,5 +1,5 @@
 import { DecideRequestItemParametersJSON } from "@nmshd/consumption";
-import { ArbitraryMessageContent, ConsentRequestItemJSON, MailJSON } from "@nmshd/content";
+import { ArbitraryMessageContent, MailJSON } from "@nmshd/content";
 import { CreateOutgoingRequestRequest, MailDVO, RequestMessageDVO, SendMessageRequest } from "../../src";
 import {
     establishRelationship,
@@ -209,7 +209,7 @@ describe("Message with Request", () => {
                         "@type": "ConsentRequestItem",
                         consent: "Consent text",
                         mustBeAccepted: true
-                    } as ConsentRequestItemJSON
+                    }
                 ]
             },
             peer: services2.address

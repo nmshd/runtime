@@ -1,4 +1,4 @@
-import { RelationshipTemplateContentJSON, ShareAttributeRequestItemJSON } from "@nmshd/content";
+import { RelationshipTemplateContentJSON } from "@nmshd/content";
 import {
     AttributeDeletedEvent,
     IncomingRequestStatusChangedEvent,
@@ -46,7 +46,7 @@ describe("IdentityDVO after loading a relationship template sharing a DisplayNam
                         mustBeAccepted: true,
                         attribute: senderAttribute.value.content,
                         attributeId: senderAttribute.value.id
-                    } as ShareAttributeRequestItemJSON
+                    }
                 ]
             }
         };

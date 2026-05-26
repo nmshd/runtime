@@ -1,5 +1,5 @@
 import { DecideRequestItemParametersJSON } from "@nmshd/consumption";
-import { AbstractStringJSON, DeleteAttributeRequestItemJSON } from "@nmshd/content";
+import { AbstractStringJSON } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
 import {
     AcceptResponseItemDVO,
@@ -79,7 +79,7 @@ beforeEach(async () => {
                     "@type": "DeleteAttributeRequestItem",
                     mustBeAccepted: true,
                     attributeId: attributeId
-                } as DeleteAttributeRequestItemJSON
+                }
             ]
         },
         peer: rAddress
