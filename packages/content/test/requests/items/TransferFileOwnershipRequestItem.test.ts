@@ -1,13 +1,11 @@
 import { CoreId, FileReference } from "@nmshd/core-types";
-import { CoreBuffer, CryptoEncryptionAlgorithm, CryptoSecretKey, SodiumWrapper } from "@nmshd/crypto";
+import { CoreBuffer, CryptoEncryptionAlgorithm, CryptoSecretKey } from "@nmshd/crypto";
 import { TransferFileOwnershipRequestItem } from "../../../src";
 
 describe("TransferFileOwnershipRequestItem", () => {
     let fileReference: FileReference;
 
-    beforeAll(async function () {
-        await SodiumWrapper.ready();
-
+    beforeAll(function () {
         fileReference = FileReference.from({
             id: CoreId.from("FILxxxxxxxxxxxxxxxxx"),
             key: CryptoSecretKey.from({
