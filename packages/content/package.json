@@ -37,7 +37,8 @@
         "maxWorkers": 5,
         "preset": "ts-jest",
         "setupFilesAfterEnv": [
-            "jest-expect-message"
+            "jest-expect-message",
+            "../../jest.setup.cjs"
         ],
         "testEnvironment": "node",
         "testTimeout": 60000,
