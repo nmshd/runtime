@@ -16,7 +16,6 @@
         "noImplicitReturns": true,
         "strictNullChecks": true,
         "strictPropertyInitialization": false,
-        "downlevelIteration": true,
         "noImplicitOverride": true,
         "useDefineForClassFields": false,
         "lib": ["ES2022", "DOM"],
