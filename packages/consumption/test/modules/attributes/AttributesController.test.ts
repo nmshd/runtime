@@ -16,7 +16,6 @@ import {
 } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { AccountController, ClientResult, TagClient, Transport } from "@nmshd/transport";
-import { IPeerRelationshipAttributeSuccessorParams } from "src/modules/attributes/local/successorParams/PeerRelationshipAttributeSuccessorParams";
 import { anything, reset, spy, verify, when } from "ts-mockito";
 import {
     AttributeCreatedEvent,
@@ -40,6 +39,7 @@ import {
     ReceivedAttributeDeletionStatus,
     ThirdPartyRelationshipAttribute
 } from "../../../src";
+import { IPeerRelationshipAttributeSuccessorParams } from "../../../src/modules/attributes/local/successorParams/PeerRelationshipAttributeSuccessorParams";
 import { TestUtil } from "../../core/TestUtil";
 import { MockEventBus } from "../MockEventBus";
 
