@@ -9,7 +9,10 @@ expect.extend({
 
         return {
             pass: actual.isSuccess,
-            message: () => `expected a successful result; got an error result with the error message '${actual.error.message}'.`
+            message: () =>
+                actual.error.data
+                    ? `expected a successful result; got an error result with the error code '${actual.error.code}', the error message '${actual.error.message}', and the following data: ${JSON.stringify(actual.error.data, null, 2)}.`
+                    : `expected a successful result; got an error result with the error code '${actual.error.code}' and the error message '${actual.error.message}'.`
         };
     },
 

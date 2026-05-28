@@ -1,3 +1,4 @@
+export * from "./ProprietaryAttributeValue";
 export * from "./ProprietaryBoolean";
 export * from "./ProprietaryCountry";
 export * from "./ProprietaryEMailAddress";

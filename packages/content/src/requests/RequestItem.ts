@@ -19,6 +19,8 @@ import {
     IProposeAttributeRequestItem,
     IReadAttributeRequestItem,
     IShareAttributeRequestItem,
+    IShareAuthorizationRequestRequestItem,
+    IShareCredentialOfferRequestItem,
     ITransferFileOwnershipRequestItem,
     ProposeAttributeRequestItem,
     ProposeAttributeRequestItemJSON,
@@ -26,6 +28,10 @@ import {
     ReadAttributeRequestItemJSON,
     ShareAttributeRequestItem,
     ShareAttributeRequestItemJSON,
+    ShareAuthorizationRequestRequestItem,
+    ShareAuthorizationRequestRequestItemJSON,
+    ShareCredentialOfferRequestItem,
+    ShareCredentialOfferRequestItemJSON,
     TransferFileOwnershipRequestItem,
     TransferFileOwnershipRequestItemJSON
 } from "./items";
@@ -61,7 +67,9 @@ export type RequestItemJSONDerivations =
     | ConsentRequestItemJSON
     | AuthenticationRequestItemJSON
     | FormFieldRequestItemJSON
-    | TransferFileOwnershipRequestItemJSON;
+    | TransferFileOwnershipRequestItemJSON
+    | ShareCredentialOfferRequestItemJSON
+    | ShareAuthorizationRequestRequestItemJSON;
 
 export interface IRequestItem extends ISerializable {
     /**
@@ -94,7 +102,9 @@ export type IRequestItemDerivations =
     | IConsentRequestItem
     | IAuthenticationRequestItem
     | IFormFieldRequestItem
-    | ITransferFileOwnershipRequestItem;
+    | ITransferFileOwnershipRequestItem
+    | IShareCredentialOfferRequestItem
+    | IShareAuthorizationRequestRequestItem;
 
 export abstract class RequestItem extends Serializable {
     @serialize()
@@ -124,7 +134,9 @@ export type RequestItemDerivations =
     | ConsentRequestItem
     | AuthenticationRequestItem
     | FormFieldRequestItem
-    | TransferFileOwnershipRequestItem;
+    | TransferFileOwnershipRequestItem
+    | ShareCredentialOfferRequestItem
+    | ShareAuthorizationRequestRequestItem;
 
 export function isRequestItemDerivation(input: any): input is RequestItemDerivations {
     return (
@@ -137,6 +149,8 @@ export function isRequestItemDerivation(input: any): input is RequestItemDerivat
         input["@type"] === "ConsentRequestItem" ||
         input["@type"] === "AuthenticationRequestItem" ||
         input["@type"] === "FormFieldRequestItem" ||
-        input["@type"] === "TransferFileOwnershipRequestItem"
+        input["@type"] === "TransferFileOwnershipRequestItem" ||
+        input["@type"] === "ShareCredentialOfferRequestItem" ||
+        input["@type"] === "ShareAuthorizationRequestRequestItem"
     );
 }

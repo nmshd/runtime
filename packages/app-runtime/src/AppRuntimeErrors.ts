@@ -28,6 +28,10 @@ class AppStringProcessor {
         return new ApplicationError("error.appruntime.appStringProcessor.passwordNotProvided", "No password was provided.");
     }
 
+    public invalidCredentialOffer(): ApplicationError {
+        return new ApplicationError("error.appruntime.appStringProcessor.invalidCredentialOffer", "The scanned code contains an invalid credential offer.");
+    }
+
     public passwordRetryLimitReached(): ApplicationError {
         return new ApplicationError("error.appruntime.appStringProcessor.passwordRetryLimitReached", "The maximum number of attempts to enter the password was reached.");
     }
@@ -37,6 +41,10 @@ class AppStringProcessor {
             "error.appruntime.appStringProcessor.noDeviceOnboardingCode",
             "The scanned code does not contain a device onboarding info, but this scanner is only able to process device onboarding codes."
         );
+    }
+
+    public unsupportedCredentialOfferGrantFound(): ApplicationError {
+        return new ApplicationError("error.appruntime.appStringProcessor.unsupportedCredentialOfferGrantFound", "The credential offer contains an unsupported grant type.");
     }
 }
 
