@@ -1,13 +1,10 @@
 import { PasswordLocationIndicatorOptions } from "@nmshd/core-types";
-import { SodiumWrapper } from "@nmshd/crypto";
 import { TokenAndTemplateCreationValidator } from "../../src/useCases/common";
 
 describe("TokenAndTemplateCreationValidator", () => {
     let isValidPasswordLocationIndicator: (value: unknown) => boolean;
 
-    beforeAll(async function () {
-        await SodiumWrapper.ready();
-
+    beforeAll(function () {
         isValidPasswordLocationIndicator = TokenAndTemplateCreationValidator["isValidPasswordLocationIndicator"];
     });
 

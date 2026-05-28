@@ -5,7 +5,6 @@ import {
     IdentityAttribute,
     ReadAttributeAcceptResponseItem,
     ReadAttributeRequestItem,
-    ReadAttributeRequestItemJSON,
     RelationshipAttributeConfidentiality,
     RelationshipCreationContent,
     RelationshipCreationContentJSON,
@@ -375,7 +374,7 @@ describe("Can Create / Create Relationship", () => {
                             "@type": "IdentityAttributeQuery",
                             valueType: "GivenName"
                         }
-                    } as ReadAttributeRequestItemJSON
+                    }
                 ]
             }
         };

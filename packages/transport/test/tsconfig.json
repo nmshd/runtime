@@ -1,9 +1,9 @@
 {
     "extends": "../../tsconfig.base.json",
     "compilerOptions": {
-        "baseUrl": "../",
         "noEmit": true,
-        "composite": false
+        "composite": false,
+        "types": ["jest", "node"]
     },
     "files": ["../../../node_modules/jest-expect-message/types/index.d.ts"],
     "include": ["**/*.ts", "../src/**/*.ts"],

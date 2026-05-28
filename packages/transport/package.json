@@ -48,7 +48,8 @@
         "preset": "ts-jest",
         "setupFilesAfterEnv": [
             "./test/customMatchers.ts",
-            "jest-expect-message"
+            "jest-expect-message",
+            "../../jest.setup.cjs"
         ],
         "testEnvironment": "node",
         "testPathIgnorePatterns": [
@@ -91,8 +92,8 @@
         "@types/luxon": "^3.7.1",
         "@types/qs": "^6.15.1",
         "correlation-id": "^5.2.0",
-        "expect": "^30.3.0",
-        "testcontainers": "^12.0.0",
+        "expect": "^30.4.1",
+        "testcontainers": "^12.0.1",
         "ts-mockito": "^2.6.1"
     },
     "publishConfig": {

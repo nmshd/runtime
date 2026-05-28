@@ -1,4 +1,3 @@
-import { AcceptRequestItemParametersJSON } from "@nmshd/consumption";
 import {
     CreateAttributeRequestItemJSON,
     DeleteAttributeRequestItem,
@@ -2673,7 +2672,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                     }
                 };
 
-                await createRelationshipWithStatusPending(services1, services2, relationshipTemplateContent, [{ accept: true } as AcceptRequestItemParametersJSON]);
+                await createRelationshipWithStatusPending(services1, services2, relationshipTemplateContent, [{ accept: true }]);
                 await services1.eventBus.waitForEvent(OutgoingRequestFromRelationshipCreationCreatedAndCompletedEvent);
 
                 const result = await services1.consumption.attributes.deleteAttributeAndNotify({ attributeId: ownIdentityAttribute.id });
@@ -2779,7 +2778,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                     onNewRelationship: { items: [item], "@type": "Request" }
                 };
 
-                await createRelationshipWithStatusPending(services1, services2, relationshipTemplateContent, [{ accept: true } as AcceptRequestItemParametersJSON]);
+                await createRelationshipWithStatusPending(services1, services2, relationshipTemplateContent, [{ accept: true }]);
 
                 const peerIdentityAttribute = (await services2.consumption.attributes.getAttribute({ id: ownIdentityAttribute.id })).value;
 
@@ -3073,9 +3072,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                     onNewRelationship: { items: [item], "@type": "Request" }
                 };
 
-                const pendingRelationship = await createRelationshipWithStatusPending(services2, services1, relationshipTemplateContent, [
-                    { accept: true } as AcceptRequestItemParametersJSON
-                ]);
+                const pendingRelationship = await createRelationshipWithStatusPending(services2, services1, relationshipTemplateContent, [{ accept: true }]);
 
                 const ownRelationshipAttribute = (await services1.transport.relationships.getAttributesForRelationship({ id: pendingRelationship.id })).value[0];
 
@@ -3245,9 +3242,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                     onNewRelationship: { items: [item], "@type": "Request" }
                 };
 
-                const pendingRelationship = await createRelationshipWithStatusPending(services2, services1, relationshipTemplateContent, [
-                    { accept: true } as AcceptRequestItemParametersJSON
-                ]);
+                const pendingRelationship = await createRelationshipWithStatusPending(services2, services1, relationshipTemplateContent, [{ accept: true }]);
 
                 const peerRelationshipAttribute = (await services1.transport.relationships.getAttributesForRelationship({ id: pendingRelationship.id })).value[0];
 
@@ -3422,7 +3417,7 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
                 await createRelationshipWithStatusPending(services2, services3, relationshipTemplateContent, [
                     {
                         accept: true
-                    } as AcceptRequestItemParametersJSON
+                    }
                 ]);
 
                 const thirdPartyRelationshipAttribute = (await services3.consumption.attributes.getAttribute({ id: peerRelationshipAttribute.id })).value;
