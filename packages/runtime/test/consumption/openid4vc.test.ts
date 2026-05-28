@@ -391,7 +391,7 @@ async function startEudiplo(): Promise<StartedTestContainer> {
             CONFIG_IMPORT_FORCE: "true", // eslint-disable-line @typescript-eslint/naming-convention
             CONFIG_FOLDER: "/config", // eslint-disable-line @typescript-eslint/naming-convention
             PORT: "3000" // eslint-disable-line @typescript-eslint/naming-convention
-        } as Record<string, string>)
+        })
         .withExposedPorts({ container: 3000, host: 3000 })
         .withCopyDirectoriesToContainer([
             {

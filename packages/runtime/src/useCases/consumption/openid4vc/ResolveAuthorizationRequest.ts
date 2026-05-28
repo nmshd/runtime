@@ -1,4 +1,3 @@
-import { DcqlValidCredential } from "@credo-ts/core";
 import { OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
 import { Result } from "@js-soft/ts-utils";
 import { OpenId4VcController } from "@nmshd/consumption";
@@ -44,7 +43,7 @@ export class ResolveAuthorizationRequestUseCase extends UseCase<ResolveAuthoriza
             const queryId = result.authorizationRequest.dcql.queryResult.credentials[0].id;
             const queryResult = result.authorizationRequest.dcql.queryResult.credential_matches[queryId];
             if (queryResult.success) {
-                const recordType = (queryResult.valid_credentials[0] as DcqlValidCredential).record.type;
+                const recordType = queryResult.valid_credentials[0].record.type;
                 authorizationRequest.dcql.queryResult.credential_matches[queryId].valid_credentials[0].record.type = recordType;
             }
         }

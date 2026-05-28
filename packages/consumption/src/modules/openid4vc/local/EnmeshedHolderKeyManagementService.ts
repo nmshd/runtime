@@ -183,7 +183,7 @@ export class EnmeshedHolderKeyManagementService implements Kms.KeyManagementServ
 
             return await Promise.resolve({
                 signature: signatureBytes
-            } as Kms.KmsSignReturn);
+            });
         }
 
         const decode = (bytes: string) => SodiumWrapper.sodium.from_base64(bytes, (SodiumWrapper.sodium as any).base64_variants.URLSAFE_NO_PADDING);
