@@ -109,7 +109,7 @@ test("issuance with pin authentication", async () => {
     expect(requestResult).toBeSuccessful();
 });
 
-// external authentication buggy in the latest eudiplo release (4.0.1)
+// external authentication buggy in the latest eudiplo release (4.1.0)
 // eslint-disable-next-line jest/no-disabled-tests
 test.skip("issuance with external authentication", async () => {
     const credentialOfferUrl = (
