@@ -65,7 +65,7 @@
             ]
         },
         "transformIgnorePatterns": [
-            "<rootDir>/node_modules/(?!(@noble|@stablelib|@credo\\-ts|@verifiables)/)"
+            "<rootDir>/node_modules/(?!(@noble|@stablelib|@credo\\-ts)/)"
         ]
     },
     "dependencies": {
