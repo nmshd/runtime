@@ -1,4 +1,4 @@
-import { ErrorValidationResult, SuccessfulValidationResult, ValidationResult } from "../src/modules/common/ValidationResult";
+import { ErrorValidationResult, SuccessfulValidationResult, ValidationResult } from "../src";
 
 expect.extend({
     successfulValidationResult(actual: ValidationResult) {
