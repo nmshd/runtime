@@ -76,8 +76,8 @@
         ]
     },
     "dependencies": {
-        "@credo-ts/core": "^0.7.0",
-        "@credo-ts/openid4vc": "^0.7.0",
+        "@credo-ts/core": "^0.6.1",
+        "@credo-ts/openid4vc": "^0.6.1",
         "@js-soft/docdb-querytranslator": "^1.1.7",
         "@js-soft/ts-serval": "2.0.17",
         "@js-soft/ts-utils": "2.3.6",
