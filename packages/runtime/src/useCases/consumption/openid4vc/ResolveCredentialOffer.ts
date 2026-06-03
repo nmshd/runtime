@@ -29,8 +29,6 @@ export class ResolveCredentialOfferUseCase extends UseCase<ResolveCredentialOffe
 
     protected override async executeInternal(request: ResolveCredentialOfferRequest): Promise<Result<ResolveCredentialOfferResponse>> {
         const credentialOffer = await this.openId4VcController.resolveCredentialOffer(request.credentialOfferUrl);
-        return Result.ok({
-            credentialOffer: JSON.parse(stringifySafe(credentialOffer))
-        });
+        return Result.ok({ credentialOffer: JSON.parse(stringifySafe(credentialOffer)) });
     }
 }

@@ -381,7 +381,7 @@ describe("AppStringProcessor", function () {
 
         test("get a token with verifiable presentation content using a url", async function () {
             const eudiploClientId = "test-admin";
-            const eudiploClientSecret = "57c9cd444bf402b2cc1f5a0d2dafd3955bd9042c0372db17a4ede2d5fbda88e5";
+            const eudiploClientSecret = "hgHrws1JR7sS24WR1IimsVdHAT0ddlgOB3dObaGSAEOo8JSFk3N";
             const eudiploCredentialConfigurationId = "test";
             const eudiploBaseUrl = "http://localhost:3000";
 

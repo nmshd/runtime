@@ -15,7 +15,7 @@ export class SchemaRepository {
     }
 
     public async loadSchemas(): Promise<void> {
-        this.schemaDefinitions = (await import("./Schemas")) as Record<string, Definition>;
+        this.schemaDefinitions = await import("./Schemas");
     }
 
     public getSchema(schemaName: string): JsonSchema {

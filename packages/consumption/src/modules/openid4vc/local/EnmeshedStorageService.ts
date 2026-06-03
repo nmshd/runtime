@@ -29,7 +29,7 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
 
     public save(_agentContext: AgentContext, record: T): Promise<void> {
         if (record.id !== "STORAGE_VERSION_RECORD_ID" && record.type !== "DidRecord") {
-            throw new Error("Only storage of STORAGE_VERSION_RECORD_ID and DidRecord implemented because others previously not needed");
+            throw new Error("Not implemented: saving records other than STORAGE_VERSION_RECORD_ID and DidRecord has not been required so far.");
         }
 
         this.storage.set(record.id, record);
@@ -78,7 +78,6 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
     }
 
     public async getAll(_agentContext: AgentContext, recordClass: BaseRecordConstructor<T>): Promise<T[]> {
-        // so far only encountered in the credential context
         const recordType = recordClass.type;
         const correspondingCredentialType = this.recordTypeToCredentialType(recordType);
 
@@ -94,6 +93,7 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
         });
     }
 
+    // this is currently the only method which supports all record types, as otherwise the presentation could not work
     private recordTypeToCredentialType(recordType: string): string {
         switch (recordType) {
             case SdJwtVcRecord.name:
@@ -108,7 +108,6 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
     }
 
     public async findByQuery(agentContext: AgentContext, recordClass: BaseRecordConstructor<T>, query: Query<T>, queryOptions?: QueryOptions): Promise<T[]> {
-        // so far only encountered in the credential context
         agentContext.config.logger.debug(`Finding records by query ${JSON.stringify(query)} and options ${JSON.stringify(queryOptions)}`);
         const records: T[] = [];
         for (const record of await this.getAll(agentContext, recordClass)) {
@@ -117,7 +116,7 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
             }
         }
         if (records.length === 0) {
-            // try to recover over local storage - temporary fix
+            // recover from storage if no record was found by query, as the record might have been only added very shortly before calling the findByQuery
             for (const record of this.storage.values()) {
                 if (this.matchesQuery(record, query)) {
                     records.push(record);
@@ -141,10 +140,6 @@ export function decodeRecord(type: string, encoded: string | Record<string, any>
     switch (type) {
         case ClaimFormat.SdJwtDc:
             return new SdJwtVcRecord({ credentialInstances: [{ compactSdJwtVc: encoded as string }] });
-        case ClaimFormat.MsoMdoc:
-            return new MdocRecord({ credentialInstances: [{ issuerSignedBase64Url: encoded as string }] });
-        case ClaimFormat.SdJwtW3cVc:
-            return new W3cCredentialRecord({ credentialInstances: [{ credential: encoded as string }] });
         default:
             throw new Error("Credential type not supported.");
     }

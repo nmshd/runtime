@@ -3,7 +3,6 @@ import { ApplicationError, sleep } from "@js-soft/ts-utils";
 import {
     CreateAttributeRequestItem,
     IAcceptResponseItem,
-    IRequest,
     IRequestItemGroup,
     IResponse,
     IResponseItemGroup,
@@ -106,7 +105,7 @@ describe("OutgoingRequestsController", function () {
                         shouldFailAtCanCreateOutgoingRequestItem: true
                     } as ITestRequestItem
                 ]
-            } as IRequest,
+            },
             {
                 items: [
                     {
@@ -119,7 +118,7 @@ describe("OutgoingRequestsController", function () {
                         shouldFailAtCanCreateOutgoingRequestItem: true
                     } as ITestRequestItem
                 ]
-            } as IRequest,
+            },
             {
                 items: [
                     {
@@ -133,7 +132,7 @@ describe("OutgoingRequestsController", function () {
                         ]
                     } as IRequestItemGroup
                 ]
-            } as IRequest
+            }
         ])("returns 'error' when at least one RequestItem is invalid", async function (request: IRequestWithoutId) {
             await When.iCallCanCreateForAnOutgoingRequest({
                 content: request
@@ -263,8 +262,7 @@ describe("OutgoingRequestsController", function () {
                                 value: ProprietaryString.from({ title: "aTitle", value: "aStringValue" }).toJSON()
                             })
                         }),
-                        {
-                            "@type": "RequestItemGroup",
+                        RequestItemGroup.from({
                             items: [
                                 ProposeAttributeRequestItem.from({
                                     mustBeAccepted: true,
@@ -286,7 +284,7 @@ describe("OutgoingRequestsController", function () {
                                     })
                                 })
                             ]
-                        } as IRequestItemGroup
+                        })
                     ]
                 },
                 peer: "did:e:a-domain:dids:anidentity"
@@ -587,7 +585,7 @@ describe("OutgoingRequestsController", function () {
                             mustBeAccepted: false
                         } as ITestRequestItem
                     ]
-                } as IRequest,
+                },
                 response: {
                     result: ResponseResult.Accepted,
                     items: [
@@ -612,7 +610,7 @@ describe("OutgoingRequestsController", function () {
                             mustBeAccepted: false
                         } as ITestRequestItem
                     ]
-                } as IRequest,
+                },
                 response: {
                     result: ResponseResult.Accepted,
                     items: [
@@ -646,7 +644,7 @@ describe("OutgoingRequestsController", function () {
                             ]
                         } as IRequestItemGroup
                     ]
-                } as IRequest,
+                },
                 response: {
                     result: ResponseResult.Accepted,
                     items: [
@@ -690,7 +688,7 @@ describe("OutgoingRequestsController", function () {
                             shouldFailAtCanApplyIncomingResponseItem: true
                         } as ITestRequestItem
                     ]
-                } as IRequest,
+                },
                 response: {
                     result: ResponseResult.Accepted,
                     items: [
@@ -716,7 +714,7 @@ describe("OutgoingRequestsController", function () {
                             ]
                         } as IRequestItemGroup
                     ]
-                } as IRequest,
+                },
                 response: {
                     result: ResponseResult.Accepted,
                     items: [

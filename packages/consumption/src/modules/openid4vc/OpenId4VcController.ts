@@ -14,6 +14,16 @@ export class OpenId4VcController extends ConsumptionBaseController {
     private holder: Holder;
     private requestedCredentialCache: RequestedCredentialCache;
 
+    private castToStringOrThrow(value: unknown): string {
+        if (typeof value === "string") return value;
+        try {
+            return String(value);
+        } catch (error) {
+            const reason = error instanceof Error ? error.message : "unknown error";
+            throw new Error(`Could not cast to string: ${reason}`);
+        }
+    }
+
     public constructor(parent: ConsumptionController) {
         super(ConsumptionControllerName.OpenId4VcController, parent);
     }
@@ -70,8 +80,6 @@ export class OpenId4VcController extends ConsumptionBaseController {
 
     public async storeCredentials(credentialResponses: OpenId4VciCredentialResponseJSON[]): Promise<OwnIdentityAttribute> {
         const credentials = await this.holder.storeCredentials(credentialResponses);
-
-        // TODO: support multiple credentials
         return credentials[0];
     }
 
@@ -82,39 +90,32 @@ export class OpenId4VcController extends ConsumptionBaseController {
         const authorizationRequest = await this.holder.resolveAuthorizationRequest(authorizationRequestUrl);
 
         const matchingCredentials = await this.extractMatchingCredentialsFromAuthorizationRequest(authorizationRequest);
-
-        return {
-            authorizationRequest,
-            matchingCredentials
-        };
+        return { authorizationRequest, matchingCredentials };
     }
 
     private async extractMatchingCredentialsFromAuthorizationRequest(authorizationRequest: OpenId4VpResolvedAuthorizationRequest): Promise<OwnIdentityAttribute[]> {
         const dcqlSatisfied = authorizationRequest.dcql?.queryResult.can_be_satisfied ?? false;
-        const pexSatisfied = authorizationRequest.presentationExchange?.credentialsForRequest.areRequirementsSatisfied ?? false;
-        if (!dcqlSatisfied && !pexSatisfied) return [];
+        if (!dcqlSatisfied) return [];
 
         let matchedCredentials: (string | W3cJsonCredential)[] = [];
-        if (dcqlSatisfied) {
-            const queryId = authorizationRequest.dcql!.queryResult.credentials[0].id; // assume there is only one query for now
-            const queryResult = authorizationRequest.dcql!.queryResult.credential_matches[queryId];
-            if (queryResult.success) {
-                matchedCredentials = queryResult.valid_credentials.map((vc: DcqlValidCredential) => vc.record.encoded).flat();
-            }
-        } else if (pexSatisfied) {
-            matchedCredentials = authorizationRequest
-                .presentationExchange!.credentialsForRequest.requirements.map((entry) =>
-                    entry.submissionEntry.map((subEntry) => subEntry.verifiableCredentials.map((vc) => vc.credentialRecord.encoded)).flat()
-                )
-                .flat();
+
+        const queryId = authorizationRequest.dcql!.queryResult.credentials[0].id; // assume there is only one query for now
+        const queryResult = authorizationRequest.dcql!.queryResult.credential_matches[queryId];
+        if (queryResult.success) {
+            matchedCredentials = queryResult.valid_credentials.map((vc: DcqlValidCredential) => vc.record.encoded).flat();
         }
+
+        const matchedCredentialStrings = matchedCredentials.map((matchedCredential) => this.castToStringOrThrow(matchedCredential));
 
         const allCredentials = (await this.parent.attributes.getLocalAttributes({
             "@type": "OwnIdentityAttribute",
             "content.value.@type": "VerifiableCredential"
         })) as OwnIdentityAttribute[];
 
-        const matchingCredentials = allCredentials.filter((credential) => matchedCredentials.includes((credential.content.value as VerifiableCredential).value as string)); // in current demo scenarios this is a string
+        const matchingCredentials = allCredentials.filter((credential) => {
+            const credentialValueAsString = this.castToStringOrThrow((credential.content.value as VerifiableCredential).value);
+            return matchedCredentialStrings.includes(credentialValueAsString);
+        });
         return matchingCredentials;
     }
 
@@ -122,8 +123,6 @@ export class OpenId4VcController extends ConsumptionBaseController {
         authorizationRequest: OpenId4VpResolvedAuthorizationRequest,
         credential: OwnIdentityAttribute
     ): Promise<{ status: number; message: string | Record<string, unknown> | null }> {
-        // parse the credential type to be sdjwt
-
         const serverResponse = await this.holder.acceptAuthorizationRequest(authorizationRequest, credential);
         if (!serverResponse) throw new Error("No response from server");
 

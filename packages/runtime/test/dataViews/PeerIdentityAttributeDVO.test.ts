@@ -1,5 +1,5 @@
 import { AbstractStringJSON, IdentityAttributeJSON } from "@nmshd/content";
-import { PeerIdentityAttributeDVO } from "src";
+import { PeerIdentityAttributeDVO } from "../../src";
 import { ensureActiveRelationship, executeFullCreateAndShareOwnIdentityAttributeFlow, RuntimeServiceProvider, TestRuntimeServices } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();

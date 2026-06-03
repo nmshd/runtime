@@ -46,7 +46,7 @@ function validateValue(value: any) {
             return "stringified value must not be longer than 52428800 characters";
         }
     } catch (e) {
-        if (e instanceof SyntaxError) {
+        if (e instanceof SyntaxError || e instanceof TypeError) {
             return "must be a valid JSON object";
         }
 

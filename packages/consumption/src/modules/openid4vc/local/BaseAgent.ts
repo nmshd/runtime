@@ -17,7 +17,7 @@ import { EventEmitter } from "events";
 import webSocket from "ws";
 import { AttributesController } from "../../attributes";
 import { EnmeshedHolderFileSystem } from "./EnmeshedHolderFileSystem";
-import { EnmshedHolderKeyManagmentService } from "./EnmeshedHolderKeyManagmentService";
+import { EnmeshedHolderKeyManagementService } from "./EnmeshedHolderKeyManagementService";
 import { EnmeshedStorageService } from "./EnmeshedStorageService";
 import { KeyStorage } from "./KeyStorage";
 
@@ -69,7 +69,7 @@ export class BaseAgent<AgentModules extends ModulesMap> {
         await storage.save(this.agent.context, new StorageVersionRecord({ storageVersion: "0.5.0" }));
 
         const kmsConfig = this.agent.dependencyManager.resolve(Kms.KeyManagementModuleConfig);
-        kmsConfig.registerBackend(new EnmshedHolderKeyManagmentService(this.keyStorage));
+        kmsConfig.registerBackend(new EnmeshedHolderKeyManagementService(this.keyStorage));
 
         if (kmsConfig.backends.length === 0) throw new Error("No KMS backend registered");
 

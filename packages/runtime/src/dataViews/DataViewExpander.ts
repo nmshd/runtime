@@ -106,17 +106,11 @@ import {
     AttributeAlreadySharedAcceptResponseItemDVO,
     AttributeQueryDVO,
     AttributeSuccessionAcceptResponseItemDVO,
-    AuthenticationRequestItemDVO,
-    ConsentRequestItemDVO,
     CreateAttributeAcceptResponseItemDVO,
     CreateAttributeRequestItemDVO,
-    DeleteAttributeAcceptResponseItemDVO,
     DeleteAttributeRequestItemDVO,
     DraftIdentityAttributeDVO,
     DraftRelationshipAttributeDVO,
-    ErrorResponseItemDVO,
-    FormFieldAcceptResponseItemDVO,
-    FormFieldRequestItemDVO,
     IQLQueryDVO,
     IdentityAttributeQueryDVO,
     MailDVO,
@@ -124,7 +118,6 @@ import {
     ProposeAttributeRequestItemDVO,
     ReadAttributeAcceptResponseItemDVO,
     ReadAttributeRequestItemDVO,
-    RejectResponseItemDVO,
     RelationshipAttributeQueryDVO,
     RequestDVO,
     RequestItemDVO,
@@ -598,7 +591,7 @@ export class DataViewExpander {
                     name: authenticationRequestItem.title,
                     isDecidable,
                     response: responseItemDVO
-                } as AuthenticationRequestItemDVO;
+                };
 
             case "ConsentRequestItem":
                 const consentRequestItem = requestItem as ConsentRequestItemJSON;
@@ -610,7 +603,7 @@ export class DataViewExpander {
                     name: this.generateRequestItemName(requestItem["@type"], isDecidable),
                     isDecidable,
                     response: responseItemDVO
-                } as ConsentRequestItemDVO;
+                };
 
             case "FormFieldRequestItem":
                 const formFieldRequestItem = requestItem as FormFieldRequestItemJSON;
@@ -622,7 +615,7 @@ export class DataViewExpander {
                     name: formFieldRequestItem.title,
                     isDecidable,
                     response: responseItemDVO
-                } as FormFieldRequestItemDVO;
+                };
 
             case "TransferFileOwnershipRequestItem":
                 const transferFileOwnershipRequestItem = requestItem as TransferFileOwnershipRequestItemJSON;
@@ -806,7 +799,7 @@ export class DataViewExpander {
                         type: "DeleteAttributeAcceptResponseItemDVO",
                         id: "",
                         name: name
-                    } as DeleteAttributeAcceptResponseItemDVO;
+                    };
 
                 case "ProposeAttributeAcceptResponseItem":
                     const proposeAttributeResponseItem = responseItem as ProposeAttributeAcceptResponseItemJSON;
@@ -839,7 +832,7 @@ export class DataViewExpander {
                         type: "FormFieldAcceptResponseItemDVO",
                         id: "",
                         name: name
-                    } as FormFieldAcceptResponseItemDVO;
+                    };
 
                 case "TransferFileOwnershipAcceptResponseItem":
                     const transferFileOwnershipResponseItem = responseItem as TransferFileOwnershipAcceptResponseItemJSON;
@@ -934,7 +927,7 @@ export class DataViewExpander {
                 type: "RejectResponseItemDVO",
                 id: "",
                 name: "i18n://dvo.responseItem.rejected"
-            } as RejectResponseItemDVO;
+            };
         } else {
             const errorResponseItem = responseItem as ErrorResponseItemJSON;
             return {
@@ -942,7 +935,7 @@ export class DataViewExpander {
                 type: "ErrorResponseItemDVO",
                 id: "",
                 name: "i18n://dvo.responseItem.error"
-            } as ErrorResponseItemDVO;
+            };
         }
     }
 
