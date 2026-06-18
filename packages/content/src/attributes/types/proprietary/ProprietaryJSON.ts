@@ -38,7 +38,7 @@ export class ProprietaryJSON extends AbstractAttributeValue {
     public static get renderHints(): RenderHints {
         return RenderHints.from({
             editType: RenderHintsEditType.TextArea,
-            technicalType: RenderHintsTechnicalType.Unknown
+            technicalType: RenderHintsTechnicalType.Json
         });
     }
 

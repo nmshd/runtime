@@ -1,8 +1,10 @@
+import { OpenId4VciResolvedCredentialOffer } from "@credo-ts/openid4vc";
 import { ILogger, ILoggerFactory } from "@js-soft/logging-abstractions";
 import { Serializable } from "@js-soft/ts-serval";
 import { EventBus, Result } from "@js-soft/ts-utils";
-import { ICoreAddress, Reference, SharedPasswordProtection } from "@nmshd/core-types";
-import { AnonymousServices, DeviceMapper, RuntimeServices } from "@nmshd/runtime";
+import { TokenContentVerifiablePresentation } from "@nmshd/content";
+import { ICoreAddress, Reference } from "@nmshd/core-types";
+import { AnonymousServices, DeviceMapper, RequestCredentialsResponse, RuntimeServices } from "@nmshd/runtime";
 import { BackboneIds, TokenContentDeviceSharedSecret } from "@nmshd/transport";
 import { AppRuntimeErrors } from "./AppRuntimeErrors";
 import { IUIBridge } from "./extensibility";
@@ -29,8 +31,12 @@ export class AppStringProcessor {
         url = url.trim();
 
         const parsed = new URL(url);
-        const allowedProtocols = ["http:", "https:"];
+
+        const allowedProtocols = ["http:", "https:", "openid4vp:", "openid-credential-offer:"];
         if (!allowedProtocols.includes(parsed.protocol)) return Result.fail(AppRuntimeErrors.appStringProcessor.wrongURL());
+
+        if (parsed.protocol === "openid-credential-offer:") return await this.processOpenIdCredentialOfferUrl(url, account);
+        if (parsed.protocol === "openid4vp:") return await this.processOpenIdAuthorizationRequestUrl(url, account);
 
         return await this.processReference(url, account);
     }
@@ -42,6 +48,160 @@ export class AppStringProcessor {
         } catch (_) {
             return Result.fail(AppRuntimeErrors.appStringProcessor.invalidReference());
         }
+    }
+
+    private async processOpenIdCredentialOfferUrl(url: string, account?: LocalAccountDTO): Promise<Result<void>> {
+        if (!account) {
+            const result = await this.selectAccount();
+            if (result.isError) {
+                this.logger.info("Could not query account", result.error);
+                return Result.fail(result.error);
+            }
+
+            if (!result.value) {
+                this.logger.info("User cancelled account selection");
+                return Result.ok(undefined);
+            }
+
+            account = result.value;
+        }
+
+        const services = await this.runtime.getServices(account.id);
+        const resolveCredentialOfferResult = await services.consumptionServices.openId4Vc.resolveCredentialOffer({ credentialOfferUrl: url });
+
+        const uiBridge = await this.runtime.uiBridge();
+
+        if (resolveCredentialOfferResult.isError) {
+            this.logger.error("Could not resolve credential offer", resolveCredentialOfferResult.error);
+
+            await uiBridge.showError(resolveCredentialOfferResult.error);
+
+            return Result.ok(undefined);
+        }
+
+        const credentialOffer = resolveCredentialOfferResult.value.credentialOffer;
+        const grants = credentialOffer.credentialOfferPayload.grants;
+
+        if (grants?.authorization_code) return await this.processAuthCodeOpenIdCredentialOffer(services, account, credentialOffer);
+        if (grants?.["urn:ietf:params:oauth:grant-type:pre-authorized_code"]) return await this.processPreAuthorizedOpenIdCredentialOffer(services, account, credentialOffer);
+
+        await uiBridge.showError(AppRuntimeErrors.appStringProcessor.unsupportedCredentialOfferGrantFound());
+        return Result.ok(undefined);
+    }
+
+    private async processAuthCodeOpenIdCredentialOffer(
+        services: RuntimeServices,
+        account: LocalAccountDTO,
+        credentialOffer: OpenId4VciResolvedCredentialOffer
+    ): Promise<Result<void>> {
+        const uiBridge = await this.runtime.uiBridge();
+
+        if (credentialOffer.metadata.authorizationServers.length === 0) {
+            await uiBridge.showError(AppRuntimeErrors.appStringProcessor.unsupportedCredentialOfferGrantFound());
+            return Result.ok(undefined);
+        }
+
+        const authorizationServer = credentialOffer.credentialOfferPayload.grants!.authorization_code!.authorization_server;
+        if (!authorizationServer) {
+            await uiBridge.showError(AppRuntimeErrors.appStringProcessor.invalidCredentialOffer());
+            this.logger.error("Credential offer does not contain an authorization server", credentialOffer);
+            return Result.ok(undefined);
+        }
+
+        const tokenResult = await uiBridge.performOauthAuthentication(authorizationServer);
+        if (tokenResult.isError) {
+            this.logger.error("Could not perform OAuth authentication", tokenResult.error);
+            return Result.ok(undefined);
+        }
+
+        const requestCredentialsResult = await services.consumptionServices.openId4Vc.requestCredentials({
+            credentialOffer: credentialOffer,
+            credentialConfigurationIds: credentialOffer.credentialOfferPayload.credential_configuration_ids,
+            accessToken: tokenResult.value
+        });
+
+        if (requestCredentialsResult.isError) {
+            await uiBridge.showError(requestCredentialsResult.error);
+            return Result.ok(undefined);
+        }
+
+        await uiBridge.showResolvedCredentialOffer(account, requestCredentialsResult.value.credentialResponses, credentialOffer.metadata.credentialIssuer.display);
+        return Result.ok(undefined);
+    }
+
+    private async processPreAuthorizedOpenIdCredentialOffer(
+        services: RuntimeServices,
+        account: LocalAccountDTO,
+        credentialOffer: OpenId4VciResolvedCredentialOffer
+    ): Promise<Result<void>> {
+        const uiBridge = await this.runtime.uiBridge();
+
+        const requestCredentialsResult = await this._requestPreAuthorizedCredentials(credentialOffer, services);
+
+        if (requestCredentialsResult.isError) {
+            if (!requestCredentialsResult.error.equals(AppRuntimeErrors.appStringProcessor.passwordNotProvided())) {
+                await uiBridge.showError(requestCredentialsResult.error);
+            }
+            return Result.ok(undefined);
+        }
+
+        await uiBridge.showResolvedCredentialOffer(account, requestCredentialsResult.value.credentialResponses, credentialOffer.metadata.credentialIssuer.display);
+        return Result.ok(undefined);
+    }
+
+    private async _requestPreAuthorizedCredentials(credentialOffer: OpenId4VciResolvedCredentialOffer, services: RuntimeServices): Promise<Result<RequestCredentialsResponse>> {
+        const preAuthorizedCodeGrant = credentialOffer.credentialOfferPayload.grants!["urn:ietf:params:oauth:grant-type:pre-authorized_code"];
+        const credentialConfigurationId = credentialOffer.credentialOfferPayload.credential_configuration_ids;
+
+        if (preAuthorizedCodeGrant?.tx_code) {
+            const fetchResult = await this._fetchPasswordProtectedItemWithRetry(
+                (password) =>
+                    services.consumptionServices.openId4Vc.requestCredentials({
+                        credentialOffer,
+                        credentialConfigurationIds: credentialConfigurationId,
+                        pinCode: password
+                    }),
+                { passwordType: preAuthorizedCodeGrant.tx_code.input_mode === "text" ? "pw" : `pin${preAuthorizedCodeGrant.tx_code.length ?? 4}` },
+                "error.runtime.openid4vc.oauth.invalid_grant"
+            );
+
+            return fetchResult.result;
+        }
+
+        return await services.consumptionServices.openId4Vc.requestCredentials({
+            credentialOffer: credentialOffer,
+            credentialConfigurationIds: credentialConfigurationId
+        });
+    }
+
+    private async processOpenIdAuthorizationRequestUrl(url: string, account?: LocalAccountDTO): Promise<Result<void>> {
+        if (!account) {
+            const result = await this.selectAccount();
+            if (result.isError) {
+                this.logger.info("Could not query account", result.error);
+                return Result.fail(result.error);
+            }
+
+            if (!result.value) {
+                this.logger.info("User cancelled account selection");
+                return Result.ok(undefined);
+            }
+
+            account = result.value;
+        }
+
+        const session = await this.runtime.getServices(account.id);
+        const result = await session.consumptionServices.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl: url });
+
+        const uiBridge = await this.runtime.uiBridge();
+        if (result.isError) {
+            this.logger.error("Could not resolve authorization request", result.error);
+            await uiBridge.showError(result.error);
+
+            return Result.ok(undefined);
+        }
+
+        return await uiBridge.showResolvedAuthorizationRequest(account, result.value);
     }
 
     private async _processReference(reference: Reference, account?: LocalAccountDTO): Promise<Result<void>> {
@@ -134,6 +294,14 @@ export class AppStringProcessor {
                 // RelationshipTemplates are processed by the RequestModule
                 break;
             case "Token":
+                const token = result.value.value;
+                const tokenContent = this.parseTokenContent(token.content);
+
+                if (tokenContent instanceof TokenContentVerifiablePresentation) {
+                    const verificationResult = await services.consumptionServices.openId4Vc.verifyPresentationToken({ token });
+                    await uiBridge.showVerifiablePresentation(account, result.value.value, verificationResult.value.isValid);
+                    break;
+                }
                 return Result.fail(AppRuntimeErrors.appStringProcessor.notSupportedTokenContent());
             case "DeviceOnboardingInfo":
                 return Result.fail(AppRuntimeErrors.appStringProcessor.deviceOnboardingNotAllowed());
@@ -190,7 +358,11 @@ export class AppStringProcessor {
 
     private async _fetchPasswordProtectedItemWithRetry<T>(
         fetchFunction: (password: string) => Promise<Result<T>>,
-        passwordProtection: SharedPasswordProtection
+        passwordProtection: {
+            passwordType: "pw" | `pin${number}`;
+            passwordLocationIndicator?: number;
+        },
+        wrongPasswordErrorCode = "error.runtime.recordNotFound"
     ): Promise<{ result: Result<T>; password?: string }> {
         let attempt = 1;
 
@@ -214,7 +386,7 @@ export class AppStringProcessor {
             attempt++;
 
             if (result.isSuccess) return { result, password };
-            if (result.isError && result.error.code === "error.runtime.recordNotFound") continue;
+            if (result.isError && result.error.code === wrongPasswordErrorCode) continue;
             return { result };
         }
 

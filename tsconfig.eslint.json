@@ -3,5 +3,5 @@
     "compilerOptions": {
         "noEmit": true
     },
-    "include": ["packages/*/src", "packages/*/test"]
+    "include": ["packages/*/src", "packages/*/test", ".dev/eudiplo"]
 }

@@ -4,5 +4,6 @@ export enum RenderHintsTechnicalType {
     Integer = "Integer",
     Object = "Object",
     String = "String",
+    Json = "Json",
     Unknown = "Unknown"
 }
