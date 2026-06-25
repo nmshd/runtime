@@ -17541,9 +17541,9 @@ export const RequestCredentialsRequest: any = {
     "$ref": "#/definitions/RequestCredentialsRequest",
     "definitions": {
         "RequestCredentialsRequest": {
-            "$ref": "#/definitions/AbstractRequestCredentialsRequest%3Calias-2033348025-74138-74264-2033348025-0-218439%3Cstring%2Cany%3E%3E"
+            "$ref": "#/definitions/AbstractRequestCredentialsRequest%3Calias-1782228875-74138-74264-1782228875-0-218439%3Cstring%2Cany%3E%3E"
         },
-        "AbstractRequestCredentialsRequest<alias-2033348025-74138-74264-2033348025-0-218439<string,any>>": {
+        "AbstractRequestCredentialsRequest<alias-1782228875-74138-74264-1782228875-0-218439<string,any>>": {
             "anyOf": [
                 {
                     "type": "object",
