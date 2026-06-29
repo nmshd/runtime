@@ -1,5 +1,5 @@
 {
-    "authServers": ["https://kc-openid4vc.is.enmeshed.eu/realms/enmeshed-openid4vci"],
+    "authServers": ["https://kc-openid4vc.frosch.work/realms/enmeshed-openid4vci"],
     "batchSize": 1,
     "dPopRequired": false,
     "display": [
