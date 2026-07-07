@@ -123,7 +123,7 @@ test.skip("issuance with external authentication", async () => {
     const resolveCredentialOfferResult = await runtimeServices1.consumption.openId4Vc.resolveCredentialOffer({ credentialOfferUrl });
     expect(resolveCredentialOfferResult).toBeSuccessful();
 
-    const server = URL.parse("https://kc-openid4vc.is.enmeshed.eu/realms/enmeshed-openid4vci")!;
+    const server = URL.parse("https://kc-openid4vc.frosch.work/realms/enmeshed-openid4vci")!;
     const clientId = "wallet";
     const config: client.Configuration = await client.discovery(server, clientId);
     const grantReq = await client.genericGrantRequest(config, "password", {
