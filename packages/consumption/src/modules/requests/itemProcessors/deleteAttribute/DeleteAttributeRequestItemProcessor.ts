@@ -105,10 +105,7 @@ export class DeleteAttributeRequestItemProcessor extends GenericRequestItemProce
         _requestInfo: LocalRequestInfo
     ): Promise<DeleteAttributeAcceptResponseItem | AcceptResponseItem> {
         const attribute = (await this.consumptionController.attributes.getLocalAttribute(requestItem.attributeId)) as
-            | PeerIdentityAttribute
-            | PeerRelationshipAttribute
-            | ThirdPartyRelationshipAttribute
-            | undefined;
+            PeerIdentityAttribute | PeerRelationshipAttribute | ThirdPartyRelationshipAttribute | undefined;
         if (!attribute) return AcceptResponseItem.from({ result: ResponseItemResult.Accepted });
 
         const deletionDate = CoreDate.from(params.deletionDate);

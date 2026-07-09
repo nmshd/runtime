@@ -1026,15 +1026,13 @@ export class DataViewExpander {
         const valueType = attribute.content.value["@type"];
         const localAttribute = await this.consumptionController.attributes.getLocalAttribute(CoreId.from(attribute.id));
         if (!localAttribute) throw new Error("Attribute not found");
-        if (
-            !(
-                localAttribute instanceof OwnIdentityAttribute ||
-                localAttribute instanceof PeerIdentityAttribute ||
-                localAttribute instanceof OwnRelationshipAttribute ||
-                localAttribute instanceof PeerRelationshipAttribute ||
-                localAttribute instanceof ThirdPartyRelationshipAttribute
-            )
-        ) {
+        if (!(
+            localAttribute instanceof OwnIdentityAttribute ||
+            localAttribute instanceof PeerIdentityAttribute ||
+            localAttribute instanceof OwnRelationshipAttribute ||
+            localAttribute instanceof PeerRelationshipAttribute ||
+            localAttribute instanceof ThirdPartyRelationshipAttribute
+        )) {
             throw new Error("Attribute has unknown type");
         }
 

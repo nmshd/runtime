@@ -5,11 +5,11 @@ import { nameof } from "ts-simple-nameof";
 import { CoreSynchronizable, ICoreSynchronizable } from "../../../core";
 
 export enum DeviceType {
-    "Unknown",
-    "Phone",
-    "Tablet",
-    "Desktop",
-    "Connector"
+    Unknown,
+    Phone,
+    Tablet,
+    Desktop,
+    Connector
 }
 
 export interface DeviceInfo {
