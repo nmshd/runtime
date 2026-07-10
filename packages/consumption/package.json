@@ -93,8 +93,8 @@
         "ws": "^8.21.0"
     },
     "devDependencies": {
-        "@js-soft/docdb-access-loki": "1.4.1",
-        "@js-soft/docdb-access-mongo": "1.4.1",
+        "@js-soft/docdb-access-loki": "1.4.2",
+        "@js-soft/docdb-access-mongo": "1.4.2",
         "@js-soft/node-logger": "1.2.5",
         "@nmshd/crypto": "3.0.0",
         "@types/lodash": "^4.17.24",
