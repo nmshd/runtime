@@ -78,13 +78,15 @@ export class SendMessageUseCase extends UseCase<SendMessageRequest, MessageDTO> 
 
     private async validateMessage(content: any, recipients: string[]) {
         const transformedContent = Serializable.fromUnknown(content);
-        if (!(
-            transformedContent instanceof Mail ||
-            transformedContent instanceof ResponseWrapper ||
-            transformedContent instanceof Notification ||
-            transformedContent instanceof ArbitraryMessageContent ||
-            transformedContent instanceof Request
-        )) {
+        if (
+            !(
+                transformedContent instanceof Mail ||
+                transformedContent instanceof ResponseWrapper ||
+                transformedContent instanceof Notification ||
+                transformedContent instanceof ArbitraryMessageContent ||
+                transformedContent instanceof Request
+            )
+        ) {
             return RuntimeErrors.general.invalidPropertyValue(
                 "The content of a Message must either be a Mail, Request, ResponseWrapper, Notification or an ArbitraryMessageContent."
             );

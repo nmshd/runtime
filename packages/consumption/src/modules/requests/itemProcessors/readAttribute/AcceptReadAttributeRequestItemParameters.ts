@@ -15,7 +15,8 @@ export interface AcceptReadAttributeRequestItemParametersWithNewAttributeJSON ex
 }
 
 export type AcceptReadAttributeRequestItemParametersJSON =
-    AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON | AcceptReadAttributeRequestItemParametersWithNewAttributeJSON;
+    | AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON
+    | AcceptReadAttributeRequestItemParametersWithNewAttributeJSON;
 
 @type("AcceptReadAttributeRequestItemParameters")
 export class AcceptReadAttributeRequestItemParameters extends Serializable {
