@@ -101,8 +101,8 @@
     },
     "devDependencies": {
         "@eudiplo/sdk-core": "^4.1.0",
-        "@js-soft/docdb-access-loki": "1.4.1",
-        "@js-soft/docdb-access-mongo": "1.4.1",
+        "@js-soft/docdb-access-loki": "1.4.2",
+        "@js-soft/docdb-access-mongo": "1.4.2",
         "@js-soft/node-logger": "1.2.5",
         "@nmshd/connector-sdk": "^7.3.4",
         "@types/elliptic": "^6.4.18",
