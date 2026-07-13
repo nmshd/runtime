@@ -65,6 +65,7 @@
             ]
         },
         "transformIgnorePatterns": [
+            "[/\\\\]packages[/\\\\][^/\\\\]+[/\\\\]dist[/\\\\]",
             "<rootDir>/node_modules/(?!(@noble|@stablelib|@credo\\-ts)/)"
         ]
     },
