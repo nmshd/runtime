@@ -198,7 +198,7 @@ describe("IdentityAttribute", function () {
     test("should validate attribute values from JSON", function () {
         expect(() =>
             IdentityAttribute.from({
-                value: { "@type": "BirthDate", day: { value: 22 }, month: { value: 13 }, year: { value: 2022 } },
+                value: { "@type": "BirthDate", day: { value: 22 }, month: { value: 13 }, year: { value: 2022 } } as any,
                 owner: CoreAddress.from("address")
             })
         ).toThrow("BirthMonth.value:Number :: must be an integer value between 1 and 12");
