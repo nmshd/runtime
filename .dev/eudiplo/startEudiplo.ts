@@ -2,7 +2,7 @@ import path from "path";
 import { GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 
 export async function startEudiplo(): Promise<StartedTestContainer> {
-    return await new GenericContainer("ghcr.io/openwallet-foundation-labs/eudiplo:4.1.0@sha256:14bc55723f8cdca0837b91541c80466e406e753c1febd07a26400fab1ca37e2d")
+    return await new GenericContainer("ghcr.io/openwallet-foundation/eudiplo:4.4.0@sha256:10653e8645a0e86a1ff2ec2fb9bb700c02913c9da03b2abdc438186c3ae4e52a")
         .withEnvironment({
             PUBLIC_URL: "http://localhost:3000", // eslint-disable-line @typescript-eslint/naming-convention
             MASTER_SECRET: "OgwrDcgVQQ2yZwcFt7kPxQm3nUF+X3etF6MdLTstZAY=", // eslint-disable-line @typescript-eslint/naming-convention
