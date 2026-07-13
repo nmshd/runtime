@@ -64,9 +64,12 @@
                 }
             ]
         },
+        "moduleNameMapper": {
+            "^@verifiables/request-converter$": "<rootDir>/../../node_modules/@verifiables/request-converter/dist/index.js"
+        },
         "transformIgnorePatterns": [
             "[/\\\\]packages[/\\\\][^/\\\\]+[/\\\\]dist[/\\\\]",
-            "<rootDir>/node_modules/(?!(@noble|@stablelib|@credo\\-ts)/)"
+            "<rootDir>/node_modules/(?!(@noble|@stablelib|@credo\\-ts|@verifiables)/)"
         ]
     },
     "dependencies": {
