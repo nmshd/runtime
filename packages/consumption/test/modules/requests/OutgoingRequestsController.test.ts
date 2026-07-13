@@ -92,6 +92,7 @@ describe("OutgoingRequestsController", function () {
                 expectedErrorMessage: "*Request.items*Value is not defined*"
             }
         ])("throws on syntactically invalid input", async function (testParams) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
             await When.iTryToCallCanCreateForAnOutgoingRequest(testParams.params as unknown as ICreateOutgoingRequestParameters);
             await Then.itThrowsAnErrorWithTheErrorMessage(testParams.expectedErrorMessage);
         });

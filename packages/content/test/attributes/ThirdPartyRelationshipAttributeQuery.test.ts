@@ -40,6 +40,7 @@ describe("ThirdPartyRelationshipAttributeQuery", function () {
             owner: "thirdParty",
 
             // casting as any to test backwards compatibility
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
             thirdParty: params.in as unknown as any
         });
 
@@ -73,6 +74,7 @@ describe("ThirdPartyRelationshipAttributeQuery", function () {
                     owner: "thirdParty",
 
                     // casting as any to test backwards compatibility
+                    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
                     thirdParty: params.in as unknown as any
                 }
             });
