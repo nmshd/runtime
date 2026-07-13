@@ -13,16 +13,16 @@ jobs:
   run-checks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
       - run: bash .ci/runChecks.sh
 
   test-app-runtime:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
       - name: Start Backbone
         run: npm run start:backbone
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version-file: .nvmrc
       - run: npm ci
@@ -34,7 +34,7 @@ jobs:
           NMSHD_TEST_CLIENTSECRET: test
           NMSHD_TEST_BASEURL_SSE_SERVER: http://localhost:8092
       - name: Upload coverage reports to Codecov with GitHub Action
-        uses: codecov/codecov-action@v7
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         env:
           fail_ci_if_error: true
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
@@ -42,15 +42,15 @@ jobs:
   test-consumption-mongodb:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
       - name: Start Backbone
         run: npm run start:backbone
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version-file: .nvmrc
       - run: npm ci
       - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@1.12.1
+        uses: supercharge/mongodb-github-action@315db7fe45ac2880b7758f1933e6e5d59afd5e94 # 1.12.1
       - run: npm run build:node
       - run: npm run test:ci:mongodb --workspace=@nmshd/consumption
         env:
@@ -62,10 +62,10 @@ jobs:
   test-consumption-loki:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
       - name: Start Backbone
         run: npm run start:backbone
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version-file: .nvmrc
       - run: npm ci
@@ -76,7 +76,7 @@ jobs:
           NMSHD_TEST_CLIENTID: test
           NMSHD_TEST_CLIENTSECRET: test
       - name: Upload coverage reports to Codecov with GitHub Action
-        uses: codecov/codecov-action@v7
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         env:
           fail_ci_if_error: true
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
@@ -84,15 +84,15 @@ jobs:
   test-content:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version-file: .nvmrc
       - run: npm ci
       - run: npm run build:node
       - run: npm run test:ci --workspace=@nmshd/content
       - name: Upload coverage reports to Codecov with GitHub Action
-        uses: codecov/codecov-action@v7
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         env:
           fail_ci_if_error: true
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
@@ -100,15 +100,15 @@ jobs:
   test-core-types:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version-file: .nvmrc
       - run: npm ci
       - run: npm run build:node
       - run: npm run test:ci --workspace=@nmshd/core-types
       - name: Upload coverage reports to Codecov with GitHub Action
-        uses: codecov/codecov-action@v7
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         env:
           fail_ci_if_error: true
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
@@ -116,19 +116,19 @@ jobs:
   test-runtime-mongodb:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
       - name: Start Backbone
         run: npm run start:backbone
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v4
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4
         with:
           registry: ghcr.io
           username: ${{ secrets.GHCR_USER_FOR_OID4VC_SERVICE_PULL }}
           password: ${{ secrets.GHCR_PAT_FOR_OID4VC_SERVICE_PULL }}
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version-file: .nvmrc
-      - uses: supercharge/mongodb-github-action@1.12.1
+      - uses: supercharge/mongodb-github-action@315db7fe45ac2880b7758f1933e6e5d59afd5e94 # 1.12.1
       - run: npm ci
       - run: npm run build:node
       - run: npm run build:schemas --workspace=@nmshd/runtime
@@ -144,16 +144,16 @@ jobs:
   test-runtime-loki:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
       - name: Start Backbone
         run: npm run start:backbone
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v4
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4
         with:
           registry: ghcr.io
           username: ${{ secrets.GHCR_USER_FOR_OID4VC_SERVICE_PULL }}
           password: ${{ secrets.GHCR_PAT_FOR_OID4VC_SERVICE_PULL }}
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version-file: .nvmrc
       - run: npm ci
@@ -167,7 +167,7 @@ jobs:
           NMSHD_TEST_CLIENTID: test
           NMSHD_TEST_CLIENTSECRET: test
       - name: Upload coverage reports to Codecov with GitHub Action
-        uses: codecov/codecov-action@v7
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         env:
           fail_ci_if_error: true
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
@@ -175,16 +175,16 @@ jobs:
   test-transport-mongodb:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
       - name: Start Backbone
         run: npm run start:backbone
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version-file: .nvmrc
       - run: npm ci
       - run: npm run build:node
       - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@1.12.1
+        uses: supercharge/mongodb-github-action@315db7fe45ac2880b7758f1933e6e5d59afd5e94 # 1.12.1
       - run: npm run test:ci:mongodb --workspace=@nmshd/transport
         env:
           CONNECTION_STRING: mongodb://127.0.0.1:27017
@@ -197,10 +197,10 @@ jobs:
   test-transport-loki:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
       - name: Start Backbone
         run: npm run start:backbone
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version-file: .nvmrc
       - run: npm ci
@@ -213,7 +213,7 @@ jobs:
           NMSHD_TEST_CLIENTID: test
           NMSHD_TEST_CLIENTSECRET: test
       - name: Upload coverage reports to Codecov with GitHub Action
-        uses: codecov/codecov-action@v7
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7
         env:
           fail_ci_if_error: true
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

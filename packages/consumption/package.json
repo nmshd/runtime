@@ -97,9 +97,9 @@
         "@js-soft/docdb-access-mongo": "1.4.2",
         "@js-soft/node-logger": "1.2.5",
         "@nmshd/crypto": "3.0.0",
-        "@types/lodash": "^4.17.24",
-        "@types/sjcl": "^1.0.34",
-        "ts-mockito": "^2.6.1"
+        "@types/lodash": "4.17.24",
+        "@types/sjcl": "1.0.34",
+        "ts-mockito": "2.6.1"
     },
     "publishConfig": {
         "access": "public",
