@@ -9,5 +9,10 @@ module.exports = {
                 circular: true
             }
         }
-    ]
+    ],
+    options: {
+        doNotFollow: {
+            path: ["node_modules"]
+        }
+    }
 };
