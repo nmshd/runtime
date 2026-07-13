@@ -19,7 +19,7 @@
         "build:ci": "npm run build:node && ../../.ci/writeBuildInformation.sh",
         "build:node": "tsc -p tsconfig.json",
         "build:notest": "npm run build:node",
-        "cdep": "tsc && madge --circular dist",
+        "cdep": "tsc && depcruiser dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
         "test": "jest --forceExit",
         "test:ci": "jest -i --forceExit --coverage"

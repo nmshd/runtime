@@ -17,7 +17,7 @@
     "scripts": {
         "build": "tsc",
         "build:ci": "tsc",
-        "cdep": "tsc && madge --circular dist",
+        "cdep": "tsc && depcruiser dist",
         "lint:tsc": "tsc --noEmit"
     },
     "dependencies": {

@@ -20,7 +20,7 @@
         "build:node": "npm run build:schemas && tsc -p tsconfig.json",
         "build:notest": "npm run build:node",
         "build:schemas": "node scripts/buildSchemas.mjs",
-        "cdep": "tsc && madge --circular dist",
+        "cdep": "tsc && depcruiser dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
         "test:ci:lokijs": "USE_LOKIJS=true jest -i --coverage",
         "test:ci:mongodb": "jest -i --coverage",
