@@ -17,7 +17,7 @@
     "scripts": {
         "build": "tsc",
         "build:ci": "tsc",
-        "cdep": "tsc && depcruiser dist",
+        "cdep": "tsc && depcruise --config ../../.dependency-cruiser.cjs dist",
         "lint:tsc": "tsc --noEmit"
     },
     "dependencies": {

@@ -17,9 +17,9 @@
     "scripts": {
         "build": "npm run build:node",
         "build:ci": "npm run build:node && ../../.ci/writeBuildInformation.sh",
-        "build:node": "tsc -p tsconfig.json && depcruiser dist",
+        "build:node": "tsc -p tsconfig.json && depcruise --config ../../.dependency-cruiser.cjs dist",
         "build:notest": "npm run build:node",
-        "cdep": "tsc && depcruiser dist",
+        "cdep": "tsc && depcruise --config ../../.dependency-cruiser.cjs dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
         "test": "jest",
         "test:ci": "jest -i --coverage"
