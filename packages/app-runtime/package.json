@@ -64,8 +64,12 @@
                 }
             ]
         },
+        "moduleNameMapper": {
+            "^@verifiables/request-converter$": "<rootDir>/../../node_modules/@verifiables/request-converter/dist/index.js"
+        },
         "transformIgnorePatterns": [
-            "<rootDir>/node_modules/(?!(@noble|@stablelib|@credo\\-ts)/)"
+            "[/\\\\]packages[/\\\\][^/\\\\]+[/\\\\]dist[/\\\\]",
+            "<rootDir>/node_modules/(?!(@noble|@stablelib|@credo\\-ts|@verifiables)/)"
         ]
     },
     "dependencies": {
@@ -76,6 +80,7 @@
         "lodash": "^4.18.1"
     },
     "devDependencies": {
+        "@eudiplo/sdk-core": "4.4.0",
         "@js-soft/node-logger": "1.2.5",
         "@types/lodash": "4.17.24",
         "@types/lokijs": "1.5.14",
