@@ -329,9 +329,9 @@ describe("FileController", function () {
             ]);
 
             expect(result).toHaveLength(1);
-            expect(result[0].locale).toBe("en");
-            expect(result[0].logo?.toString()).toBe(logoRef.toString());
-            expect(result[0].backgroundImage?.toString()).toBe(backgroundRef.toString());
+            expect(result![0].locale).toBe("en");
+            expect(result![0].logo?.toString()).toBe(logoRef.toString());
+            expect(result![0].backgroundImage?.toString()).toBe(backgroundRef.toString());
 
             expect(cacheImageFromUrlSpy).toHaveBeenNthCalledWith(1, "https://example.org/logo.png");
             expect(cacheImageFromUrlSpy).toHaveBeenNthCalledWith(2, "https://example.org/background.png");
@@ -345,9 +345,9 @@ describe("FileController", function () {
             ]);
 
             expect(result).toHaveLength(1);
-            expect(result[0].locale).toBe("de");
-            expect(result[0].logo).toBeUndefined();
-            expect(result[0].backgroundImage).toBeUndefined();
+            expect(result![0].locale).toBe("de");
+            expect(result![0].logo).toBeUndefined();
+            expect(result![0].backgroundImage).toBeUndefined();
 
             expect(cacheImageFromUrlSpy).toHaveBeenNthCalledWith(1, "https://example.org/unreachable-logo.png");
             expect(cacheImageFromUrlSpy).toHaveBeenNthCalledWith(2, "https://example.org/unreachable-background.png");
