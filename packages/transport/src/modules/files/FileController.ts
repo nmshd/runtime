@@ -280,8 +280,12 @@ export class FileController extends TransportController {
     }
 
     public async cacheVerifiableCredentialDisplayInformationImages(
-        displayInformation: Record<string, any>[]
-    ): Promise<{ locale?: string; logo?: FileReference; backgroundImage?: FileReference }[]> {
+        displayInformation?: Record<string, any>[]
+    ): Promise<{ locale?: string; logo?: FileReference; backgroundImage?: FileReference }[] | undefined> {
+        if (!displayInformation) {
+            return;
+        }
+
         return await Promise.all(
             displayInformation.map(async (displayInfo) => {
                 const logoUrl = displayInfo.logo;

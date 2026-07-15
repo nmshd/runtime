@@ -43,7 +43,8 @@ export class ShareCredentialOfferRequestItemProcessor extends GenericRequestItem
         _requestInfo: LocalRequestInfo
     ): Promise<AcceptResponseItem> {
         const cachedCredentials = await this.consumptionController.openId4Vc.requestAllCredentialsFromCredentialOfferUrl(requestItem.credentialOfferUrl);
-        await this.consumptionController.openId4Vc.storeCredentials(cachedCredentials);
+        const credential = await this.consumptionController.openId4Vc.storeCredentials(cachedCredentials);
+        await this.accountController.files.cacheVerifiableCredentialDisplayInformationImages(credential.content.value.displayInformation);
 
         return AcceptResponseItem.from({ result: ResponseItemResult.Accepted });
     }

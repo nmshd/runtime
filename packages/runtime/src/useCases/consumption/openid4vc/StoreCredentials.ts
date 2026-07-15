@@ -33,9 +33,7 @@ export class StoreCredentialsUseCase extends UseCase<StoreCredentialsRequest, Lo
         const attribute = await this.openId4VcController.storeCredentials(request.credentialResponses);
 
         const displayInformation = attribute.content.value.displayInformation;
-        if (displayInformation) {
-            attribute.content.value.displayInformationCachedImages = await this.fileController.cacheVerifiableCredentialDisplayInformationImages(displayInformation);
-        }
+        attribute.content.value.displayInformationCachedImages = await this.fileController.cacheVerifiableCredentialDisplayInformationImages(displayInformation);
 
         return Result.ok(AttributeMapper.toAttributeDTO(attribute));
     }
