@@ -21,8 +21,7 @@ export interface AcceptProposeAttributeRequestItemParametersWithNewAttributeJSON
 }
 
 export type AcceptProposeAttributeRequestItemParametersJSON =
-    | AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON
-    | AcceptProposeAttributeRequestItemParametersWithNewAttributeJSON;
+    AcceptProposeAttributeRequestItemParametersWithExistingAttributeJSON | AcceptProposeAttributeRequestItemParametersWithNewAttributeJSON;
 
 @type("AcceptProposeAttributeRequestItemParameters")
 export class AcceptProposeAttributeRequestItemParameters extends Serializable {
