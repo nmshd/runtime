@@ -115,13 +115,11 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 return ValidationResult.error(TransportCoreErrors.general.recordNotFound(LocalAttribute, parsedParams.existingAttributeId.toString()));
             }
 
-            if (
-                !(
-                    foundLocalAttribute instanceof OwnIdentityAttribute ||
-                    foundLocalAttribute instanceof OwnRelationshipAttribute ||
-                    foundLocalAttribute instanceof PeerRelationshipAttribute
-                )
-            ) {
+            if (!(
+                foundLocalAttribute instanceof OwnIdentityAttribute ||
+                foundLocalAttribute instanceof OwnRelationshipAttribute ||
+                foundLocalAttribute instanceof PeerRelationshipAttribute
+            )) {
                 return ValidationResult.error(
                     ConsumptionCoreErrors.requests.invalidAcceptParameters(
                         "The selected Attribute is not an OwnIdentityAttribute, an OwnRelationshipAttribute or a PeerRelationshipAttribute. When accepting a ReadAttributeRequestItem with an existing Attribute it may only be such an Attribute."
@@ -276,13 +274,11 @@ export class ReadAttributeRequestItemProcessor extends GenericRequestItemProcess
                 throw TransportCoreErrors.general.recordNotFound(LocalAttribute, parsedParams.existingAttributeId.toString());
             }
 
-            if (
-                !(
-                    existingAttribute instanceof OwnIdentityAttribute ||
-                    existingAttribute instanceof OwnRelationshipAttribute ||
-                    existingAttribute instanceof PeerRelationshipAttribute
-                )
-            ) {
+            if (!(
+                existingAttribute instanceof OwnIdentityAttribute ||
+                existingAttribute instanceof OwnRelationshipAttribute ||
+                existingAttribute instanceof PeerRelationshipAttribute
+            )) {
                 throw ConsumptionCoreErrors.requests.invalidAcceptParameters(
                     "The selected Attribute is not an OwnIdentityAttribute, an OwnRelationshipAttribute or a PeerRelationshipAttribute. When accepting a ReadAttributeRequestItem with an existing Attribute it may only be such an Attribute."
                 );
