@@ -9,6 +9,7 @@ export async function startEudiplo(): Promise<StartedTestContainer> {
             AUTH_CLIENT_ID: "root", // eslint-disable-line @typescript-eslint/naming-convention
             AUTH_CLIENT_SECRET: "test", // eslint-disable-line @typescript-eslint/naming-convention
             CONFIG_IMPORT: "true", // eslint-disable-line @typescript-eslint/naming-convention
+            CONFIG_IMPORT_FORCE: "true", // eslint-disable-line @typescript-eslint/naming-convention
             CONFIG_FOLDER: "/app/assets/config", // eslint-disable-line @typescript-eslint/naming-convention
             PORT: "3000" // eslint-disable-line @typescript-eslint/naming-convention
         })
