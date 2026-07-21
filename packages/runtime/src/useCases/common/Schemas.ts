@@ -1923,19 +1923,7 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "displayInformationCachedImages": {
                     "type": "array",
                     "items": {
-                        "type": "object",
-                        "properties": {
-                            "locale": {
-                                "type": "string"
-                            },
-                            "logo": {
-                                "$ref": "#/definitions/FileReference"
-                            },
-                            "backgroundImage": {
-                                "$ref": "#/definitions/FileReference"
-                            }
-                        },
-                        "additionalProperties": false
+                        "$ref": "#/definitions/DisplayInformationCachedImagesJSON"
                     }
                 }
             },
@@ -1946,138 +1934,31 @@ export const CanCreateOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
-        "FileReference": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/CoreId"
-                },
-                "backboneBaseUrl": {
-                    "type": "string"
-                },
-                "key": {
-                    "$ref": "#/definitions/CryptoSecretKey"
-                },
-                "forIdentityTruncated": {
-                    "type": "string"
-                },
-                "passwordProtection": {
-                    "$ref": "#/definitions/SharedPasswordProtection"
-                }
-            },
-            "required": [
-                "id",
-                "key"
-            ]
-        },
-        "CoreId": {
+        "DisplayInformationCachedImagesJSON": {
             "type": "object",
             "properties": {
-                "id": {
+                "@type": {
+                    "type": "string",
+                    "const": "DisplayInformationCachedImages"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "locale": {
+                    "type": "string"
+                },
+                "logo": {
+                    "type": "string"
+                },
+                "backgroundImage": {
                     "type": "string"
                 }
             },
             "required": [
-                "id"
-            ],
-            "additionalProperties": false,
-            "description": "A CoreId is any kind of identifier we have in the system."
-        },
-        "CryptoSecretKey": {
-            "type": "object",
-            "properties": {
-                "algorithm": {
-                    "$ref": "#/definitions/CryptoEncryptionAlgorithm"
-                },
-                "secretKey": {
-                    "$ref": "#/definitions/CoreBuffer"
-                }
-            },
-            "required": [
-                "algorithm",
-                "secretKey"
-            ],
-            "additionalProperties": false
-        },
-        "CryptoEncryptionAlgorithm": {
-            "type": "number",
-            "enum": [
-                1,
-                2,
-                3
-            ],
-            "description": "The symmetric encryption algorithm to use."
-        },
-        "CoreBuffer": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "buffer": {
-                    "type": "object",
-                    "properties": {
-                        "BYTES_PER_ELEMENT": {
-                            "type": "number"
-                        },
-                        "buffer": {
-                            "type": "object",
-                            "properties": {
-                                "byteLength": {
-                                    "type": "number"
-                                }
-                            },
-                            "required": [
-                                "byteLength"
-                            ],
-                            "additionalProperties": false
-                        },
-                        "byteLength": {
-                            "type": "number"
-                        },
-                        "byteOffset": {
-                            "type": "number"
-                        },
-                        "length": {
-                            "type": "number"
-                        }
-                    },
-                    "required": [
-                        "BYTES_PER_ELEMENT",
-                        "buffer",
-                        "byteLength",
-                        "byteOffset",
-                        "length"
-                    ],
-                    "additionalProperties": {
-                        "type": "number"
-                    },
-                    "description": "The underlying native Buffer/Uint8Array object"
-                },
-                "length": {
-                    "type": "number"
-                }
-            },
-            "required": [
-                "buffer",
-                "length"
-            ]
-        },
-        "SharedPasswordProtection": {
-            "type": "object",
-            "properties": {
-                "passwordType": {
-                    "type": "string"
-                },
-                "salt": {
-                    "$ref": "#/definitions/CoreBuffer"
-                },
-                "passwordLocationIndicator": {
-                    "type": "number"
-                }
-            },
-            "required": [
-                "passwordType",
-                "salt"
+                "@type"
             ],
             "additionalProperties": false
         },
@@ -4257,19 +4138,7 @@ export const CompleteOutgoingRequestRequest: any = {
                 "displayInformationCachedImages": {
                     "type": "array",
                     "items": {
-                        "type": "object",
-                        "properties": {
-                            "locale": {
-                                "type": "string"
-                            },
-                            "logo": {
-                                "$ref": "#/definitions/FileReference"
-                            },
-                            "backgroundImage": {
-                                "$ref": "#/definitions/FileReference"
-                            }
-                        },
-                        "additionalProperties": false
+                        "$ref": "#/definitions/DisplayInformationCachedImagesJSON"
                     }
                 }
             },
@@ -4280,138 +4149,31 @@ export const CompleteOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
-        "FileReference": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/CoreId"
-                },
-                "backboneBaseUrl": {
-                    "type": "string"
-                },
-                "key": {
-                    "$ref": "#/definitions/CryptoSecretKey"
-                },
-                "forIdentityTruncated": {
-                    "type": "string"
-                },
-                "passwordProtection": {
-                    "$ref": "#/definitions/SharedPasswordProtection"
-                }
-            },
-            "required": [
-                "id",
-                "key"
-            ]
-        },
-        "CoreId": {
+        "DisplayInformationCachedImagesJSON": {
             "type": "object",
             "properties": {
-                "id": {
+                "@type": {
+                    "type": "string",
+                    "const": "DisplayInformationCachedImages"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "locale": {
+                    "type": "string"
+                },
+                "logo": {
+                    "type": "string"
+                },
+                "backgroundImage": {
                     "type": "string"
                 }
             },
             "required": [
-                "id"
-            ],
-            "additionalProperties": false,
-            "description": "A CoreId is any kind of identifier we have in the system."
-        },
-        "CryptoSecretKey": {
-            "type": "object",
-            "properties": {
-                "algorithm": {
-                    "$ref": "#/definitions/CryptoEncryptionAlgorithm"
-                },
-                "secretKey": {
-                    "$ref": "#/definitions/CoreBuffer"
-                }
-            },
-            "required": [
-                "algorithm",
-                "secretKey"
-            ],
-            "additionalProperties": false
-        },
-        "CryptoEncryptionAlgorithm": {
-            "type": "number",
-            "enum": [
-                1,
-                2,
-                3
-            ],
-            "description": "The symmetric encryption algorithm to use."
-        },
-        "CoreBuffer": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "buffer": {
-                    "type": "object",
-                    "properties": {
-                        "BYTES_PER_ELEMENT": {
-                            "type": "number"
-                        },
-                        "buffer": {
-                            "type": "object",
-                            "properties": {
-                                "byteLength": {
-                                    "type": "number"
-                                }
-                            },
-                            "required": [
-                                "byteLength"
-                            ],
-                            "additionalProperties": false
-                        },
-                        "byteLength": {
-                            "type": "number"
-                        },
-                        "byteOffset": {
-                            "type": "number"
-                        },
-                        "length": {
-                            "type": "number"
-                        }
-                    },
-                    "required": [
-                        "BYTES_PER_ELEMENT",
-                        "buffer",
-                        "byteLength",
-                        "byteOffset",
-                        "length"
-                    ],
-                    "additionalProperties": {
-                        "type": "number"
-                    },
-                    "description": "The underlying native Buffer/Uint8Array object"
-                },
-                "length": {
-                    "type": "number"
-                }
-            },
-            "required": [
-                "buffer",
-                "length"
-            ]
-        },
-        "SharedPasswordProtection": {
-            "type": "object",
-            "properties": {
-                "passwordType": {
-                    "type": "string"
-                },
-                "salt": {
-                    "$ref": "#/definitions/CoreBuffer"
-                },
-                "passwordLocationIndicator": {
-                    "type": "number"
-                }
-            },
-            "required": [
-                "passwordType",
-                "salt"
+                "@type"
             ],
             "additionalProperties": false
         },
@@ -6505,19 +6267,7 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                 "displayInformationCachedImages": {
                     "type": "array",
                     "items": {
-                        "type": "object",
-                        "properties": {
-                            "locale": {
-                                "type": "string"
-                            },
-                            "logo": {
-                                "$ref": "#/definitions/FileReference"
-                            },
-                            "backgroundImage": {
-                                "$ref": "#/definitions/FileReference"
-                            }
-                        },
-                        "additionalProperties": false
+                        "$ref": "#/definitions/DisplayInformationCachedImagesJSON"
                     }
                 }
             },
@@ -6528,138 +6278,31 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
             ],
             "additionalProperties": false
         },
-        "FileReference": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/CoreId"
-                },
-                "backboneBaseUrl": {
-                    "type": "string"
-                },
-                "key": {
-                    "$ref": "#/definitions/CryptoSecretKey"
-                },
-                "forIdentityTruncated": {
-                    "type": "string"
-                },
-                "passwordProtection": {
-                    "$ref": "#/definitions/SharedPasswordProtection"
-                }
-            },
-            "required": [
-                "id",
-                "key"
-            ]
-        },
-        "CoreId": {
+        "DisplayInformationCachedImagesJSON": {
             "type": "object",
             "properties": {
-                "id": {
+                "@type": {
+                    "type": "string",
+                    "const": "DisplayInformationCachedImages"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "locale": {
+                    "type": "string"
+                },
+                "logo": {
+                    "type": "string"
+                },
+                "backgroundImage": {
                     "type": "string"
                 }
             },
             "required": [
-                "id"
-            ],
-            "additionalProperties": false,
-            "description": "A CoreId is any kind of identifier we have in the system."
-        },
-        "CryptoSecretKey": {
-            "type": "object",
-            "properties": {
-                "algorithm": {
-                    "$ref": "#/definitions/CryptoEncryptionAlgorithm"
-                },
-                "secretKey": {
-                    "$ref": "#/definitions/CoreBuffer"
-                }
-            },
-            "required": [
-                "algorithm",
-                "secretKey"
-            ],
-            "additionalProperties": false
-        },
-        "CryptoEncryptionAlgorithm": {
-            "type": "number",
-            "enum": [
-                1,
-                2,
-                3
-            ],
-            "description": "The symmetric encryption algorithm to use."
-        },
-        "CoreBuffer": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "buffer": {
-                    "type": "object",
-                    "properties": {
-                        "BYTES_PER_ELEMENT": {
-                            "type": "number"
-                        },
-                        "buffer": {
-                            "type": "object",
-                            "properties": {
-                                "byteLength": {
-                                    "type": "number"
-                                }
-                            },
-                            "required": [
-                                "byteLength"
-                            ],
-                            "additionalProperties": false
-                        },
-                        "byteLength": {
-                            "type": "number"
-                        },
-                        "byteOffset": {
-                            "type": "number"
-                        },
-                        "length": {
-                            "type": "number"
-                        }
-                    },
-                    "required": [
-                        "BYTES_PER_ELEMENT",
-                        "buffer",
-                        "byteLength",
-                        "byteOffset",
-                        "length"
-                    ],
-                    "additionalProperties": {
-                        "type": "number"
-                    },
-                    "description": "The underlying native Buffer/Uint8Array object"
-                },
-                "length": {
-                    "type": "number"
-                }
-            },
-            "required": [
-                "buffer",
-                "length"
-            ]
-        },
-        "SharedPasswordProtection": {
-            "type": "object",
-            "properties": {
-                "passwordType": {
-                    "type": "string"
-                },
-                "salt": {
-                    "$ref": "#/definitions/CoreBuffer"
-                },
-                "passwordLocationIndicator": {
-                    "type": "number"
-                }
-            },
-            "required": [
-                "passwordType",
-                "salt"
+                "@type"
             ],
             "additionalProperties": false
         },
@@ -9376,19 +9019,7 @@ export const CreateOutgoingRequestRequest: any = {
                 "displayInformationCachedImages": {
                     "type": "array",
                     "items": {
-                        "type": "object",
-                        "properties": {
-                            "locale": {
-                                "type": "string"
-                            },
-                            "logo": {
-                                "$ref": "#/definitions/FileReference"
-                            },
-                            "backgroundImage": {
-                                "$ref": "#/definitions/FileReference"
-                            }
-                        },
-                        "additionalProperties": false
+                        "$ref": "#/definitions/DisplayInformationCachedImagesJSON"
                     }
                 }
             },
@@ -9399,138 +9030,31 @@ export const CreateOutgoingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
-        "FileReference": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/CoreId"
-                },
-                "backboneBaseUrl": {
-                    "type": "string"
-                },
-                "key": {
-                    "$ref": "#/definitions/CryptoSecretKey"
-                },
-                "forIdentityTruncated": {
-                    "type": "string"
-                },
-                "passwordProtection": {
-                    "$ref": "#/definitions/SharedPasswordProtection"
-                }
-            },
-            "required": [
-                "id",
-                "key"
-            ]
-        },
-        "CoreId": {
+        "DisplayInformationCachedImagesJSON": {
             "type": "object",
             "properties": {
-                "id": {
+                "@type": {
+                    "type": "string",
+                    "const": "DisplayInformationCachedImages"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "locale": {
+                    "type": "string"
+                },
+                "logo": {
+                    "type": "string"
+                },
+                "backgroundImage": {
                     "type": "string"
                 }
             },
             "required": [
-                "id"
-            ],
-            "additionalProperties": false,
-            "description": "A CoreId is any kind of identifier we have in the system."
-        },
-        "CryptoSecretKey": {
-            "type": "object",
-            "properties": {
-                "algorithm": {
-                    "$ref": "#/definitions/CryptoEncryptionAlgorithm"
-                },
-                "secretKey": {
-                    "$ref": "#/definitions/CoreBuffer"
-                }
-            },
-            "required": [
-                "algorithm",
-                "secretKey"
-            ],
-            "additionalProperties": false
-        },
-        "CryptoEncryptionAlgorithm": {
-            "type": "number",
-            "enum": [
-                1,
-                2,
-                3
-            ],
-            "description": "The symmetric encryption algorithm to use."
-        },
-        "CoreBuffer": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "buffer": {
-                    "type": "object",
-                    "properties": {
-                        "BYTES_PER_ELEMENT": {
-                            "type": "number"
-                        },
-                        "buffer": {
-                            "type": "object",
-                            "properties": {
-                                "byteLength": {
-                                    "type": "number"
-                                }
-                            },
-                            "required": [
-                                "byteLength"
-                            ],
-                            "additionalProperties": false
-                        },
-                        "byteLength": {
-                            "type": "number"
-                        },
-                        "byteOffset": {
-                            "type": "number"
-                        },
-                        "length": {
-                            "type": "number"
-                        }
-                    },
-                    "required": [
-                        "BYTES_PER_ELEMENT",
-                        "buffer",
-                        "byteLength",
-                        "byteOffset",
-                        "length"
-                    ],
-                    "additionalProperties": {
-                        "type": "number"
-                    },
-                    "description": "The underlying native Buffer/Uint8Array object"
-                },
-                "length": {
-                    "type": "number"
-                }
-            },
-            "required": [
-                "buffer",
-                "length"
-            ]
-        },
-        "SharedPasswordProtection": {
-            "type": "object",
-            "properties": {
-                "passwordType": {
-                    "type": "string"
-                },
-                "salt": {
-                    "$ref": "#/definitions/CoreBuffer"
-                },
-                "passwordLocationIndicator": {
-                    "type": "number"
-                }
-            },
-            "required": [
-                "passwordType",
-                "salt"
+                "@type"
             ],
             "additionalProperties": false
         },
@@ -12722,19 +12246,7 @@ export const ReceivedIncomingRequestRequest: any = {
                 "displayInformationCachedImages": {
                     "type": "array",
                     "items": {
-                        "type": "object",
-                        "properties": {
-                            "locale": {
-                                "type": "string"
-                            },
-                            "logo": {
-                                "$ref": "#/definitions/FileReference"
-                            },
-                            "backgroundImage": {
-                                "$ref": "#/definitions/FileReference"
-                            }
-                        },
-                        "additionalProperties": false
+                        "$ref": "#/definitions/DisplayInformationCachedImagesJSON"
                     }
                 }
             },
@@ -12745,138 +12257,31 @@ export const ReceivedIncomingRequestRequest: any = {
             ],
             "additionalProperties": false
         },
-        "FileReference": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/CoreId"
-                },
-                "backboneBaseUrl": {
-                    "type": "string"
-                },
-                "key": {
-                    "$ref": "#/definitions/CryptoSecretKey"
-                },
-                "forIdentityTruncated": {
-                    "type": "string"
-                },
-                "passwordProtection": {
-                    "$ref": "#/definitions/SharedPasswordProtection"
-                }
-            },
-            "required": [
-                "id",
-                "key"
-            ]
-        },
-        "CoreId": {
+        "DisplayInformationCachedImagesJSON": {
             "type": "object",
             "properties": {
-                "id": {
+                "@type": {
+                    "type": "string",
+                    "const": "DisplayInformationCachedImages"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "locale": {
+                    "type": "string"
+                },
+                "logo": {
+                    "type": "string"
+                },
+                "backgroundImage": {
                     "type": "string"
                 }
             },
             "required": [
-                "id"
-            ],
-            "additionalProperties": false,
-            "description": "A CoreId is any kind of identifier we have in the system."
-        },
-        "CryptoSecretKey": {
-            "type": "object",
-            "properties": {
-                "algorithm": {
-                    "$ref": "#/definitions/CryptoEncryptionAlgorithm"
-                },
-                "secretKey": {
-                    "$ref": "#/definitions/CoreBuffer"
-                }
-            },
-            "required": [
-                "algorithm",
-                "secretKey"
-            ],
-            "additionalProperties": false
-        },
-        "CryptoEncryptionAlgorithm": {
-            "type": "number",
-            "enum": [
-                1,
-                2,
-                3
-            ],
-            "description": "The symmetric encryption algorithm to use."
-        },
-        "CoreBuffer": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "buffer": {
-                    "type": "object",
-                    "properties": {
-                        "BYTES_PER_ELEMENT": {
-                            "type": "number"
-                        },
-                        "buffer": {
-                            "type": "object",
-                            "properties": {
-                                "byteLength": {
-                                    "type": "number"
-                                }
-                            },
-                            "required": [
-                                "byteLength"
-                            ],
-                            "additionalProperties": false
-                        },
-                        "byteLength": {
-                            "type": "number"
-                        },
-                        "byteOffset": {
-                            "type": "number"
-                        },
-                        "length": {
-                            "type": "number"
-                        }
-                    },
-                    "required": [
-                        "BYTES_PER_ELEMENT",
-                        "buffer",
-                        "byteLength",
-                        "byteOffset",
-                        "length"
-                    ],
-                    "additionalProperties": {
-                        "type": "number"
-                    },
-                    "description": "The underlying native Buffer/Uint8Array object"
-                },
-                "length": {
-                    "type": "number"
-                }
-            },
-            "required": [
-                "buffer",
-                "length"
-            ]
-        },
-        "SharedPasswordProtection": {
-            "type": "object",
-            "properties": {
-                "passwordType": {
-                    "type": "string"
-                },
-                "salt": {
-                    "$ref": "#/definitions/CoreBuffer"
-                },
-                "passwordLocationIndicator": {
-                    "type": "number"
-                }
-            },
-            "required": [
-                "passwordType",
-                "salt"
+                "@type"
             ],
             "additionalProperties": false
         },
@@ -17057,19 +16462,7 @@ export const SucceedOwnIdentityAttributeRequest: any = {
                 "displayInformationCachedImages": {
                     "type": "array",
                     "items": {
-                        "type": "object",
-                        "properties": {
-                            "locale": {
-                                "type": "string"
-                            },
-                            "logo": {
-                                "$ref": "#/definitions/FileReference"
-                            },
-                            "backgroundImage": {
-                                "$ref": "#/definitions/FileReference"
-                            }
-                        },
-                        "additionalProperties": false
+                        "$ref": "#/definitions/DisplayInformationCachedImagesJSON"
                     }
                 }
             },
@@ -17080,138 +16473,31 @@ export const SucceedOwnIdentityAttributeRequest: any = {
             ],
             "additionalProperties": false
         },
-        "FileReference": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/CoreId"
-                },
-                "backboneBaseUrl": {
-                    "type": "string"
-                },
-                "key": {
-                    "$ref": "#/definitions/CryptoSecretKey"
-                },
-                "forIdentityTruncated": {
-                    "type": "string"
-                },
-                "passwordProtection": {
-                    "$ref": "#/definitions/SharedPasswordProtection"
-                }
-            },
-            "required": [
-                "id",
-                "key"
-            ]
-        },
-        "CoreId": {
+        "DisplayInformationCachedImagesJSON": {
             "type": "object",
             "properties": {
-                "id": {
+                "@type": {
+                    "type": "string",
+                    "const": "DisplayInformationCachedImages"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "locale": {
+                    "type": "string"
+                },
+                "logo": {
+                    "type": "string"
+                },
+                "backgroundImage": {
                     "type": "string"
                 }
             },
             "required": [
-                "id"
-            ],
-            "additionalProperties": false,
-            "description": "A CoreId is any kind of identifier we have in the system."
-        },
-        "CryptoSecretKey": {
-            "type": "object",
-            "properties": {
-                "algorithm": {
-                    "$ref": "#/definitions/CryptoEncryptionAlgorithm"
-                },
-                "secretKey": {
-                    "$ref": "#/definitions/CoreBuffer"
-                }
-            },
-            "required": [
-                "algorithm",
-                "secretKey"
-            ],
-            "additionalProperties": false
-        },
-        "CryptoEncryptionAlgorithm": {
-            "type": "number",
-            "enum": [
-                1,
-                2,
-                3
-            ],
-            "description": "The symmetric encryption algorithm to use."
-        },
-        "CoreBuffer": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "buffer": {
-                    "type": "object",
-                    "properties": {
-                        "BYTES_PER_ELEMENT": {
-                            "type": "number"
-                        },
-                        "buffer": {
-                            "type": "object",
-                            "properties": {
-                                "byteLength": {
-                                    "type": "number"
-                                }
-                            },
-                            "required": [
-                                "byteLength"
-                            ],
-                            "additionalProperties": false
-                        },
-                        "byteLength": {
-                            "type": "number"
-                        },
-                        "byteOffset": {
-                            "type": "number"
-                        },
-                        "length": {
-                            "type": "number"
-                        }
-                    },
-                    "required": [
-                        "BYTES_PER_ELEMENT",
-                        "buffer",
-                        "byteLength",
-                        "byteOffset",
-                        "length"
-                    ],
-                    "additionalProperties": {
-                        "type": "number"
-                    },
-                    "description": "The underlying native Buffer/Uint8Array object"
-                },
-                "length": {
-                    "type": "number"
-                }
-            },
-            "required": [
-                "buffer",
-                "length"
-            ]
-        },
-        "SharedPasswordProtection": {
-            "type": "object",
-            "properties": {
-                "passwordType": {
-                    "type": "string"
-                },
-                "salt": {
-                    "$ref": "#/definitions/CoreBuffer"
-                },
-                "passwordLocationIndicator": {
-                    "type": "number"
-                }
-            },
-            "required": [
-                "passwordType",
-                "salt"
+                "@type"
             ],
             "additionalProperties": false
         },
@@ -22947,19 +22233,7 @@ export const VerifiableCredential: any = {
                 "displayInformationCachedImages": {
                     "type": "array",
                     "items": {
-                        "type": "object",
-                        "properties": {
-                            "locale": {
-                                "type": "string"
-                            },
-                            "logo": {
-                                "$ref": "#/definitions/FileReference"
-                            },
-                            "backgroundImage": {
-                                "$ref": "#/definitions/FileReference"
-                            }
-                        },
-                        "additionalProperties": false
+                        "$ref": "#/definitions/DisplayInformationCachedImages"
                     }
                 }
             },
@@ -22970,138 +22244,31 @@ export const VerifiableCredential: any = {
             ],
             "additionalProperties": false
         },
-        "FileReference": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "id": {
-                    "$ref": "#/definitions/CoreId"
-                },
-                "backboneBaseUrl": {
-                    "type": "string"
-                },
-                "key": {
-                    "$ref": "#/definitions/CryptoSecretKey"
-                },
-                "forIdentityTruncated": {
-                    "type": "string"
-                },
-                "passwordProtection": {
-                    "$ref": "#/definitions/SharedPasswordProtection"
-                }
-            },
-            "required": [
-                "id",
-                "key"
-            ]
-        },
-        "CoreId": {
+        "DisplayInformationCachedImages": {
             "type": "object",
             "properties": {
-                "id": {
+                "@type": {
+                    "type": "string",
+                    "const": "DisplayInformationCachedImages"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "locale": {
+                    "type": "string"
+                },
+                "logo": {
+                    "type": "string"
+                },
+                "backgroundImage": {
                     "type": "string"
                 }
             },
             "required": [
-                "id"
-            ],
-            "additionalProperties": false,
-            "description": "A CoreId is any kind of identifier we have in the system."
-        },
-        "CryptoSecretKey": {
-            "type": "object",
-            "properties": {
-                "algorithm": {
-                    "$ref": "#/definitions/CryptoEncryptionAlgorithm"
-                },
-                "secretKey": {
-                    "$ref": "#/definitions/CoreBuffer"
-                }
-            },
-            "required": [
-                "algorithm",
-                "secretKey"
-            ],
-            "additionalProperties": false
-        },
-        "CryptoEncryptionAlgorithm": {
-            "type": "number",
-            "enum": [
-                1,
-                2,
-                3
-            ],
-            "description": "The symmetric encryption algorithm to use."
-        },
-        "CoreBuffer": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "buffer": {
-                    "type": "object",
-                    "properties": {
-                        "BYTES_PER_ELEMENT": {
-                            "type": "number"
-                        },
-                        "buffer": {
-                            "type": "object",
-                            "properties": {
-                                "byteLength": {
-                                    "type": "number"
-                                }
-                            },
-                            "required": [
-                                "byteLength"
-                            ],
-                            "additionalProperties": false
-                        },
-                        "byteLength": {
-                            "type": "number"
-                        },
-                        "byteOffset": {
-                            "type": "number"
-                        },
-                        "length": {
-                            "type": "number"
-                        }
-                    },
-                    "required": [
-                        "BYTES_PER_ELEMENT",
-                        "buffer",
-                        "byteLength",
-                        "byteOffset",
-                        "length"
-                    ],
-                    "additionalProperties": {
-                        "type": "number"
-                    },
-                    "description": "The underlying native Buffer/Uint8Array object"
-                },
-                "length": {
-                    "type": "number"
-                }
-            },
-            "required": [
-                "buffer",
-                "length"
-            ]
-        },
-        "SharedPasswordProtection": {
-            "type": "object",
-            "properties": {
-                "passwordType": {
-                    "type": "string"
-                },
-                "salt": {
-                    "$ref": "#/definitions/CoreBuffer"
-                },
-                "passwordLocationIndicator": {
-                    "type": "number"
-                }
-            },
-            "required": [
-                "passwordType",
-                "salt"
+                "@type"
             ],
             "additionalProperties": false
         }

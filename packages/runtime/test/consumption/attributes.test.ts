@@ -69,6 +69,7 @@ import {
     executeFullSucceedOwnIdentityAttributeAndNotifyPeerFlow,
     syncUntilHasMessageWithNotification,
     syncUntilHasRelationships,
+    uploadFile,
     waitForRecipientToReceiveNotification
 } from "../lib";
 
@@ -2554,6 +2555,43 @@ describe(DeleteAttributeAndNotifyUseCase.name, () => {
 
                 const getDeletedAttributeResult = await services1.consumption.attributes.getAttribute({ id: ownIdentityAttributeVersion0.id });
                 expect(getDeletedAttributeResult).toBeAnError(/.*/, "error.runtime.recordNotFound");
+            });
+
+            test("should delete cached files of a VerifiableCredential OwnIdentityAttribute", async () => {
+                const logoFile = await uploadFile(services1.transport);
+                const backgroundFile = await uploadFile(services1.transport);
+
+                const verifiableCredentialAttribute = (
+                    await services1.consumption.attributes.createOwnIdentityAttribute({
+                        content: {
+                            value: {
+                                "@type": "VerifiableCredential",
+                                value: { vc: "test" },
+                                type: "TestCredential",
+                                displayInformation: [{ logo: "logo-url", backgroundImage: "background-url" }],
+                                displayInformationCachedImages: [
+                                    {
+                                        "@type": "DisplayInformationCachedImages",
+                                        logo: logoFile.reference.truncated,
+                                        backgroundImage: backgroundFile.reference.truncated
+                                    }
+                                ]
+                            }
+                        }
+                    })
+                ).value;
+
+                const deletionResult = await services1.consumption.attributes.deleteAttributeAndNotify({ attributeId: verifiableCredentialAttribute.id });
+                expect(deletionResult).toBeSuccessful();
+
+                expect(await services1.transport.files.getFile({ id: logoFile.id })).toBeAnError(
+                    "File not found. Make sure the ID exists and the record is not expired.",
+                    "error.runtime.recordNotFound"
+                );
+                expect(await services1.transport.files.getFile({ id: backgroundFile.id })).toBeAnError(
+                    "File not found. Make sure the ID exists and the record is not expired.",
+                    "error.runtime.recordNotFound"
+                );
             });
 
             test("should delete a succeeded OwnIdentityAttribute and its predecessors", async () => {

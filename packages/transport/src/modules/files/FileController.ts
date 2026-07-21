@@ -281,7 +281,7 @@ export class FileController extends TransportController {
 
     public async cacheVerifiableCredentialDisplayInformationImages(
         displayInformation?: Record<string, any>[]
-    ): Promise<{ locale?: string; logo?: FileReference; backgroundImage?: FileReference }[] | undefined> {
+    ): Promise<{ locale?: string; logo?: string; backgroundImage?: string }[] | undefined> {
         if (!displayInformation) return;
 
         return await Promise.all(
@@ -303,7 +303,7 @@ export class FileController extends TransportController {
         );
     }
 
-    private async cacheImageFromUrl(imageUrl: string): Promise<FileReference | undefined> {
+    private async cacheImageFromUrl(imageUrl: string): Promise<string | undefined> {
         let response;
         try {
             response = await axios.get<ArrayBuffer>(imageUrl, { responseType: "arraybuffer" });
@@ -325,6 +325,6 @@ export class FileController extends TransportController {
             expiresAt: CoreDate.from("9999-12-31T00:00:00.000Z")
         });
 
-        return file.toFileReference(this.transport.config.baseUrl);
+        return file.toFileReference(this.transport.config.baseUrl).truncate();
     }
 }

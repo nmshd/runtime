@@ -1,5 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
 import { OpenId4VcController, OpenId4VciCredentialResponseJSON } from "@nmshd/consumption";
+import { DisplayInformationCachedImages } from "@nmshd/content";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { FileController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
@@ -33,7 +34,9 @@ export class StoreCredentialsUseCase extends UseCase<StoreCredentialsRequest, Lo
         const attribute = await this.openId4VcController.storeCredentials(request.credentialResponses);
 
         const displayInformation = attribute.content.value.displayInformation;
-        attribute.content.value.displayInformationCachedImages = await this.fileController.cacheVerifiableCredentialDisplayInformationImages(displayInformation);
+        const cachedImages = await this.fileController.cacheVerifiableCredentialDisplayInformationImages(displayInformation);
+        const displayInformationCachedImages = cachedImages?.map((cachedImagesEntry) => DisplayInformationCachedImages.from(cachedImagesEntry));
+        attribute.content.value.displayInformationCachedImages = displayInformationCachedImages;
 
         return Result.ok(AttributeMapper.toAttributeDTO(attribute));
     }
