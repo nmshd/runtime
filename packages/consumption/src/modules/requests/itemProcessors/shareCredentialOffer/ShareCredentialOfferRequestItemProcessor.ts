@@ -1,5 +1,4 @@
-import { AcceptResponseItem, RejectResponseItem, Request, ResponseItemResult, ShareCredentialOfferRequestItem } from "@nmshd/content";
-import { CoreAddress } from "@nmshd/core-types";
+import { AcceptResponseItem, RejectResponseItem, ResponseItemResult, ShareCredentialOfferRequestItem } from "@nmshd/content";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { ShareCredentialOfferRequestItemProcessedByRecipientEvent } from "../../events";
@@ -8,20 +7,6 @@ import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 import { LocalRequestInfo } from "../IRequestItemProcessor";
 
 export class ShareCredentialOfferRequestItemProcessor extends GenericRequestItemProcessor<ShareCredentialOfferRequestItem> {
-    public override async canCreateOutgoingRequestItem(requestItem: ShareCredentialOfferRequestItem, _request: Request, _recipient?: CoreAddress): Promise<ValidationResult> {
-        const offer = await this.consumptionController.openId4Vc.resolveCredentialOffer(requestItem.credentialOfferUrl);
-
-        const preAuthorizedCodeGrant = offer.credentialOfferPayload.grants?.["urn:ietf:params:oauth:grant-type:pre-authorized_code"];
-        const isUnauthenticatedOffer = preAuthorizedCodeGrant && !preAuthorizedCodeGrant.tx_code;
-        if (!isUnauthenticatedOffer) {
-            return ValidationResult.error(
-                ConsumptionCoreErrors.requests.invalidRequestItem("Only unauthenticated credential offers (pre-authorized code grants without tx_code) are supported.")
-            );
-        }
-
-        return ValidationResult.success();
-    }
-
     public override async canAccept(
         requestItem: ShareCredentialOfferRequestItem,
         _params: AcceptRequestItemParametersJSON,
