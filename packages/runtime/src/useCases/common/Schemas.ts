@@ -1919,12 +1919,46 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "items": {
                         "type": "object"
                     }
+                },
+                "displayInformationCachedImages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/DisplayInformationCachedImagesJSON"
+                    }
                 }
             },
             "required": [
                 "@type",
                 "type",
                 "value"
+            ],
+            "additionalProperties": false
+        },
+        "DisplayInformationCachedImagesJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "DisplayInformationCachedImages"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "locale": {
+                    "type": "string"
+                },
+                "logo": {
+                    "type": "string"
+                },
+                "backgroundImage": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type"
             ],
             "additionalProperties": false
         },
@@ -4100,12 +4134,46 @@ export const CompleteOutgoingRequestRequest: any = {
                     "items": {
                         "type": "object"
                     }
+                },
+                "displayInformationCachedImages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/DisplayInformationCachedImagesJSON"
+                    }
                 }
             },
             "required": [
                 "@type",
                 "type",
                 "value"
+            ],
+            "additionalProperties": false
+        },
+        "DisplayInformationCachedImagesJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "DisplayInformationCachedImages"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "locale": {
+                    "type": "string"
+                },
+                "logo": {
+                    "type": "string"
+                },
+                "backgroundImage": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type"
             ],
             "additionalProperties": false
         },
@@ -6195,12 +6263,46 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "items": {
                         "type": "object"
                     }
+                },
+                "displayInformationCachedImages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/DisplayInformationCachedImagesJSON"
+                    }
                 }
             },
             "required": [
                 "@type",
                 "type",
                 "value"
+            ],
+            "additionalProperties": false
+        },
+        "DisplayInformationCachedImagesJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "DisplayInformationCachedImages"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "locale": {
+                    "type": "string"
+                },
+                "logo": {
+                    "type": "string"
+                },
+                "backgroundImage": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type"
             ],
             "additionalProperties": false
         },
@@ -8913,12 +9015,46 @@ export const CreateOutgoingRequestRequest: any = {
                     "items": {
                         "type": "object"
                     }
+                },
+                "displayInformationCachedImages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/DisplayInformationCachedImagesJSON"
+                    }
                 }
             },
             "required": [
                 "@type",
                 "type",
                 "value"
+            ],
+            "additionalProperties": false
+        },
+        "DisplayInformationCachedImagesJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "DisplayInformationCachedImages"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "locale": {
+                    "type": "string"
+                },
+                "logo": {
+                    "type": "string"
+                },
+                "backgroundImage": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type"
             ],
             "additionalProperties": false
         },
@@ -12106,12 +12242,46 @@ export const ReceivedIncomingRequestRequest: any = {
                     "items": {
                         "type": "object"
                     }
+                },
+                "displayInformationCachedImages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/DisplayInformationCachedImagesJSON"
+                    }
                 }
             },
             "required": [
                 "@type",
                 "type",
                 "value"
+            ],
+            "additionalProperties": false
+        },
+        "DisplayInformationCachedImagesJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "DisplayInformationCachedImages"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "locale": {
+                    "type": "string"
+                },
+                "logo": {
+                    "type": "string"
+                },
+                "backgroundImage": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type"
             ],
             "additionalProperties": false
         },
@@ -16288,12 +16458,46 @@ export const SucceedOwnIdentityAttributeRequest: any = {
                     "items": {
                         "type": "object"
                     }
+                },
+                "displayInformationCachedImages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/DisplayInformationCachedImagesJSON"
+                    }
                 }
             },
             "required": [
                 "@type",
                 "type",
                 "value"
+            ],
+            "additionalProperties": false
+        },
+        "DisplayInformationCachedImagesJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "DisplayInformationCachedImages"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "locale": {
+                    "type": "string"
+                },
+                "logo": {
+                    "type": "string"
+                },
+                "backgroundImage": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type"
             ],
             "additionalProperties": false
         },
@@ -22025,12 +22229,46 @@ export const VerifiableCredential: any = {
                     "items": {
                         "type": "object"
                     }
+                },
+                "displayInformationCachedImages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/DisplayInformationCachedImages"
+                    }
                 }
             },
             "required": [
                 "@type",
                 "type",
                 "value"
+            ],
+            "additionalProperties": false
+        },
+        "DisplayInformationCachedImages": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "DisplayInformationCachedImages"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "locale": {
+                    "type": "string"
+                },
+                "logo": {
+                    "type": "string"
+                },
+                "backgroundImage": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type"
             ],
             "additionalProperties": false
         }
