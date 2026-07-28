@@ -13,13 +13,13 @@ jobs:
   run-checks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - run: bash .ci/runChecks.sh
 
   test-app-runtime:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Start Backbone
         run: npm run start:backbone
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
@@ -42,7 +42,7 @@ jobs:
   test-consumption-mongodb:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Start Backbone
         run: npm run start:backbone
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
@@ -62,7 +62,7 @@ jobs:
   test-consumption-loki:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Start Backbone
         run: npm run start:backbone
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
@@ -84,7 +84,7 @@ jobs:
   test-content:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version-file: .nvmrc
@@ -100,7 +100,7 @@ jobs:
   test-core-types:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version-file: .nvmrc
@@ -116,7 +116,7 @@ jobs:
   test-runtime-mongodb:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Start Backbone
         run: npm run start:backbone
       - name: Login to GitHub Container Registry
@@ -144,7 +144,7 @@ jobs:
   test-runtime-loki:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Start Backbone
         run: npm run start:backbone
       - name: Login to GitHub Container Registry
@@ -175,7 +175,7 @@ jobs:
   test-transport-mongodb:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Start Backbone
         run: npm run start:backbone
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
@@ -197,7 +197,7 @@ jobs:
   test-transport-loki:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Start Backbone
         run: npm run start:backbone
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
