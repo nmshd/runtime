@@ -36,7 +36,7 @@
         "@js-soft/license-check": "1.0.12",
         "@types/jest": "30.0.0",
         "@types/node": "24.13.3",
-        "dependency-cruiser": "17.4.3",
+        "dependency-cruiser": "18.1.0",
         "enhanced-publish": "1.1.10",
         "eslint": "10.8.0",
         "jest": "30.4.2",
