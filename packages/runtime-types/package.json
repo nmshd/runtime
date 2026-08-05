@@ -21,7 +21,7 @@
         "lint:tsc": "tsc --noEmit"
     },
     "dependencies": {
-        "@js-soft/ts-utils": "2.3.6",
+        "@js-soft/ts-utils": "2.3.7",
         "@nmshd/content": "*"
     },
     "devDependencies": {},

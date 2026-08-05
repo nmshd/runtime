@@ -81,7 +81,7 @@
     },
     "devDependencies": {
         "@eudiplo/sdk-core": "6.2.0",
-        "@js-soft/node-logger": "1.2.8",
+        "@js-soft/node-logger": "1.2.9",
         "@types/lodash": "4.17.25",
         "@types/lokijs": "1.5.14",
         "@types/luxon": "3.7.3"
