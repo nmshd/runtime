@@ -1,7 +1,7 @@
-import { AbstractStringJSON, CommunicationLanguage, GivenName, IdentityAttribute, MaritalStatus, Nationality, Sex, StreetAddress } from "@nmshd/content";
+import { AbstractStringJSON, CommunicationLanguage, GivenName, IdentityAttribute, MaritalStatus, Nationality, Sex, StreetAddress, VerifiableCredentialJSON } from "@nmshd/content";
 import { CoreAddress } from "@nmshd/core-types";
 import { DataViewExpander, TransportServices } from "../../src";
-import { RuntimeServiceProvider } from "../lib";
+import { RuntimeServiceProvider, uploadFile } from "../lib";
 
 const serviceProvider = new RuntimeServiceProvider();
 let transportServices1: TransportServices;
@@ -209,5 +209,57 @@ describe("DraftIdentityAttributeDVO", () => {
         expect(dvo.valueHints["@type"]).toBe("ValueHints");
         expect(dvo.valueHints.propertyHints!["street"]).toBeDefined();
         expect(dvo.valueHints.propertyHints!["street"].max).toBe(100);
+    });
+
+    test("check the VerifiableCredential", async () => {
+        const logoFile = await uploadFile(transportServices1);
+        const backgroundFile = await uploadFile(transportServices1);
+
+        const attribute = IdentityAttribute.from({
+            owner: transportService1Address,
+            value: {
+                "@type": "VerifiableCredential",
+                value: { vc: "test" },
+                type: "TestCredential",
+                displayInformation: [{ locale: "DE", logo: "logo-url", backgroundImage: "background-url" }],
+                displayInformationCachedImages: [
+                    {
+                        "@type": "DisplayInformationCachedImages",
+                        locale: "DE",
+                        logo: logoFile.reference.truncated,
+                        backgroundImage: backgroundFile.reference.truncated
+                    }
+                ]
+            }
+        }).toJSON();
+
+        const dvo = await expander1.expandAttribute(attribute);
+        expect(dvo).toBeDefined();
+        expect(dvo.type).toBe("DraftIdentityAttributeDVO");
+        expect(dvo.id).toBe("");
+        expect(dvo.name).toBe("i18n://dvo.attribute.name.VerifiableCredential");
+        expect(dvo.description).toBe("i18n://dvo.attribute.description.VerifiableCredential");
+        expect(dvo.content).toStrictEqual(attribute);
+        const value = dvo.value as VerifiableCredentialJSON;
+        expect(value["@type"]).toBe("VerifiableCredential");
+        expect(dvo.owner.type).toBe("IdentityDVO");
+        expect(dvo.owner.id).toStrictEqual(attribute.owner);
+        expect(dvo.owner.name).toBe("i18n://dvo.identity.self.name");
+        expect(dvo.owner.isSelf).toBe(true);
+        expect(dvo.renderHints["@type"]).toBe("RenderHints");
+        expect(dvo.renderHints.technicalType).toBe("Unknown");
+        expect(dvo.renderHints.editType).toBe("TextArea");
+        expect(dvo.valueHints["@type"]).toBe("ValueHints");
+        expect(value.value).toStrictEqual({ vc: "test" });
+        expect(value.type).toBe("TestCredential");
+        expect(value.displayInformation).toStrictEqual([{ locale: "DE", logo: "logo-url", backgroundImage: "background-url" }]);
+        expect(value.displayInformationCachedImages).toStrictEqual([
+            {
+                "@type": "DisplayInformationCachedImages",
+                locale: "DE",
+                logo: logoFile.reference.truncated,
+                backgroundImage: backgroundFile.reference.truncated
+            }
+        ]);
     });
 });
