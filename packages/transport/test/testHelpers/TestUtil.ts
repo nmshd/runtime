@@ -34,6 +34,9 @@ import {
 } from "../../src";
 
 export class TestUtil {
+    private static readonly DEFAULT_SYNC_UNTIL_TIMEOUT = 60000;
+    private static readonly MAX_SYNC_UNTIL_SLEEP = 1000;
+
     public static loggerFactory = new NodeLoggerFactory({
         appenders: {
             consoleAppender: {
@@ -466,18 +469,21 @@ export class TestUtil {
         const syncResult = new ChangedItems();
 
         let iterationNumber = 0;
+        let criteriaMet = false;
+        const startedAt = Date.now();
         do {
-            await sleep(150 * iterationNumber);
+            await sleep(Math.min(150 * iterationNumber, TestUtil.MAX_SYNC_UNTIL_SLEEP));
             const newSyncResult = await accountController.syncEverything();
             syncResult.messages.push(...newSyncResult.messages);
             syncResult.relationships.push(...newSyncResult.relationships);
             syncResult.identityDeletionProcesses.push(...newSyncResult.identityDeletionProcesses);
             syncResult.files.push(...newSyncResult.files);
             iterationNumber++;
-        } while (!until(syncResult) && iterationNumber < 20);
+            criteriaMet = until(syncResult);
+        } while (!criteriaMet && Date.now() - startedAt < TestUtil.DEFAULT_SYNC_UNTIL_TIMEOUT);
 
-        if (!until(syncResult)) {
-            throw new Error("syncUntil condition was not met");
+        if (!criteriaMet) {
+            throw new Error(`syncUntil condition was not met after ${TestUtil.DEFAULT_SYNC_UNTIL_TIMEOUT}ms`);
         }
         return syncResult;
     }
