@@ -67,13 +67,17 @@ import {
 import { TestRuntimeServices } from "./RuntimeServiceProvider";
 import { TestNotificationItem } from "./TestNotificationItem";
 
+const DEFAULT_SYNC_UNTIL_TIMEOUT = 10000;
+const MAX_SYNC_UNTIL_SLEEP = 250;
+
 export async function syncUntil(transportServices: TransportServices, until: (syncResult: SyncEverythingResponse) => boolean): Promise<SyncEverythingResponse> {
     const finalSyncResult: SyncEverythingResponse = { messages: [], relationships: [], identityDeletionProcesses: [], files: [] };
 
     let iterationNumber = 0;
     let criteriaMet: boolean;
+    const startedAt = Date.now();
     do {
-        await sleep(iterationNumber * 25);
+        await sleep(Math.min(iterationNumber * 25, MAX_SYNC_UNTIL_SLEEP));
 
         const currentIterationSyncResult = (await transportServices.account.syncEverything()).value;
 
@@ -84,8 +88,8 @@ export async function syncUntil(transportServices: TransportServices, until: (sy
 
         iterationNumber++;
         criteriaMet = until(finalSyncResult);
-    } while (!criteriaMet && iterationNumber < 15);
-    if (!criteriaMet) throw new Error("syncUntil timed out.");
+    } while (!criteriaMet && Date.now() - startedAt < DEFAULT_SYNC_UNTIL_TIMEOUT);
+    if (!criteriaMet) throw new Error(`syncUntil timed out after ${DEFAULT_SYNC_UNTIL_TIMEOUT}ms.`);
     return finalSyncResult;
 }
 
@@ -151,8 +155,9 @@ export async function syncUntilHasEvent<TEvent extends Event>(
 ): Promise<Event> {
     let iterationNumber = 0;
     let event: Event | undefined;
+    const startedAt = Date.now();
     do {
-        await sleep(iterationNumber * 25);
+        await sleep(Math.min(iterationNumber * 25, MAX_SYNC_UNTIL_SLEEP));
 
         await runtimeServices.transport.account.syncEverything();
         event = runtimeServices.eventBus.publishedEvents.find(
@@ -163,8 +168,8 @@ export async function syncUntilHasEvent<TEvent extends Event>(
         );
 
         iterationNumber++;
-    } while (!event && iterationNumber < 15);
-    if (!event) throw new Error("syncUntil timed out.");
+    } while (!event && Date.now() - startedAt < DEFAULT_SYNC_UNTIL_TIMEOUT);
+    if (!event) throw new Error(`syncUntil timed out after ${DEFAULT_SYNC_UNTIL_TIMEOUT}ms.`);
     return event;
 }
 
