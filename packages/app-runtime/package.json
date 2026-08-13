@@ -84,7 +84,7 @@
         "@js-soft/node-logger": "1.2.9",
         "@types/lodash": "4.17.25",
         "@types/lokijs": "1.5.14",
-        "@types/luxon": "3.7.3"
+        "@types/luxon": "3.7.4"
     },
     "publishConfig": {
         "access": "public",
