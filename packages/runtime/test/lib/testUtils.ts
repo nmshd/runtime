@@ -33,6 +33,7 @@ import { IdentityUtil, SynchronizedCollection } from "@nmshd/transport";
 import fs from "fs";
 import _ from "lodash";
 import { DateTime } from "luxon";
+import { fileURLToPath } from "url";
 import {
     AttributeSucceededEvent,
     ConsumptionServices,
@@ -204,7 +205,7 @@ export async function makeUploadRequest(values: object = {}): Promise<UploadOwnF
     return {
         title: "aTitle",
         filename: "aFileName",
-        content: await fs.promises.readFile(`${__dirname}/../__assets__/test.txt`),
+        content: await fs.promises.readFile(fileURLToPath(new URL("../__assets__/test.txt", import.meta.url))),
         mimetype: "aMimetype",
         description: "aDescription",
         expiresAt: DateTime.utc().plus({ minutes: 5 }).toString(),
