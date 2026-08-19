@@ -15,7 +15,6 @@
             "issuer": "https://kc-openid4vc.frosch.work/realms/enmeshed-openid4vci"
         }
     ],
-    "preferredAuthServer": "authorization-server:test-built-in",
     "batchSize": 1,
     "dPopRequired": false,
     "display": [
