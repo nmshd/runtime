@@ -59,15 +59,13 @@ export class MessageMapper {
     }
 
     private static toMessageContent(content: Serializable) {
-        if (
-            !(
-                content instanceof Mail ||
-                content instanceof Request ||
-                content instanceof ResponseWrapper ||
-                content instanceof Notification ||
-                content instanceof ArbitraryMessageContent
-            )
-        ) {
+        if (!(
+            content instanceof Mail ||
+            content instanceof Request ||
+            content instanceof ResponseWrapper ||
+            content instanceof Notification ||
+            content instanceof ArbitraryMessageContent
+        )) {
             return ArbitraryMessageContent.from({ value: content }).toJSON();
         }
 

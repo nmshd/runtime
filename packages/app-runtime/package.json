@@ -19,7 +19,7 @@
         "build:ci": "npm run build:node && ../../.ci/writeBuildInformation.sh",
         "build:node": "tsc -p tsconfig.json",
         "build:notest": "npm run build:node",
-        "cdep": "tsc && madge --circular dist",
+        "cdep": "tsc && depcruise --config ../../.dependency-cruiser.cjs dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
         "test": "jest --forceExit",
         "test:ci": "jest -i --forceExit --coverage"
@@ -64,8 +64,12 @@
                 }
             ]
         },
+        "moduleNameMapper": {
+            "^@verifiables/request-converter$": "<rootDir>/../../node_modules/@verifiables/request-converter/dist/index.js"
+        },
         "transformIgnorePatterns": [
-            "<rootDir>/node_modules/(?!(@noble|@stablelib|@credo\\-ts)/)"
+            "[/\\\\]packages[/\\\\][^/\\\\]+[/\\\\]dist[/\\\\]",
+            "<rootDir>/node_modules/(?!(@noble|@stablelib|@credo\\-ts|@verifiables)/)"
         ]
     },
     "dependencies": {
@@ -76,10 +80,11 @@
         "lodash": "^4.18.1"
     },
     "devDependencies": {
-        "@js-soft/node-logger": "^1.2.5",
-        "@types/lodash": "^4.17.24",
-        "@types/lokijs": "^1.5.14",
-        "@types/luxon": "^3.7.2"
+        "@eudiplo/sdk-core": "6.2.0",
+        "@js-soft/node-logger": "1.2.10",
+        "@types/lodash": "4.17.25",
+        "@types/lokijs": "1.5.14",
+        "@types/luxon": "3.7.4"
     },
     "publishConfig": {
         "access": "public",

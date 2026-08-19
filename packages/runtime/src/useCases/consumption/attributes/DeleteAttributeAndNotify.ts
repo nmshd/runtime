@@ -13,9 +13,10 @@ import {
     ForwardedAttributeDeletedByPeerNotificationItem,
     Notification,
     OwnAttributeDeletedByOwnerNotificationItem,
-    PeerRelationshipAttributeDeletedByPeerNotificationItem
+    PeerRelationshipAttributeDeletedByPeerNotificationItem,
+    VerifiableCredential
 } from "@nmshd/content";
-import { CoreAddress, CoreId } from "@nmshd/core-types";
+import { CoreAddress, CoreId, FileReference } from "@nmshd/core-types";
 import { RelationshipStatus } from "@nmshd/runtime-types";
 import { AccountController, MessageController, PeerDeletionStatus, RelationshipsController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
@@ -60,6 +61,8 @@ export class DeleteAttributeAndNotifyUseCase extends UseCase<DeleteAttributeAndN
         if (peersOfOnlyPredecessorResult.isError) return Result.fail(peersOfOnlyPredecessorResult.error);
 
         await this.attributesController.executeFullAttributeDeletionProcess(attribute);
+
+        await this.deleteCachedFilesOfVerifiableCredentials(attribute);
 
         const notificationIds = await this.notifyPeers(attribute, peersOfAttributeResult.value, peersOfOnlyPredecessorResult.value);
 
@@ -226,5 +229,23 @@ export class DeleteAttributeAndNotifyUseCase extends UseCase<DeleteAttributeAndN
         await this.messageController.sendMessage({ recipients: [peer], content: notification });
 
         return notificationId.toString();
+    }
+
+    private async deleteCachedFilesOfVerifiableCredentials(attribute: LocalAttribute): Promise<void> {
+        if (!(attribute.content.value instanceof VerifiableCredential)) return;
+
+        const verifiableCredential = attribute.content.value;
+        const logos = verifiableCredential.displayInformationCachedImages?.map((image) => image.logo).filter((logo): logo is string => logo !== undefined);
+        const backgroundImages = verifiableCredential.displayInformationCachedImages
+            ?.map((image) => image.backgroundImage)
+            .filter((backgroundImage): backgroundImage is string => backgroundImage !== undefined);
+
+        const filesToDelete = [...(logos ?? []), ...(backgroundImages ?? [])];
+        await Promise.all(
+            filesToDelete.map(async (truncatedFileReference) => {
+                const file = await this.accountController.files.getOrLoadFileByReference(FileReference.from(truncatedFileReference));
+                await this.accountController.files.deleteFile(file);
+            })
+        );
     }
 }

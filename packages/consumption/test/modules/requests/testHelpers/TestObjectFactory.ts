@@ -347,58 +347,6 @@ export class TestObjectFactory {
         return request;
     }
 
-    public static createUnansweredLocalRequestBasedOnTemplateWith(params: {
-        contentProperties?: Partial<Request>;
-        status?: LocalRequestStatus;
-        statusLogEntries?: LocalRequestStatusLogEntry[];
-    }): LocalRequest {
-        if (params.status && [LocalRequestStatus.Decided, LocalRequestStatus.Completed].includes(params.status)) {
-            throw new Error("An unanswered LocalRequest cannot be 'Decided' or 'Completed'.");
-        }
-
-        const requestJSON: ILocalRequest = {
-            id: CoreId.from("REQ1"),
-            isOwn: false,
-            peer: CoreAddress.from("did:e:a-domain:dids:sender"),
-            createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
-            content: TestObjectFactory.createRequestWithOneItem(params.contentProperties),
-            source: { type: "RelationshipTemplate", reference: CoreId.from("RLT1") },
-            status: params.status ?? LocalRequestStatus.ManualDecisionRequired,
-            statusLog: params.statusLogEntries ?? []
-        };
-
-        const request = LocalRequest.from(requestJSON);
-        return request;
-    }
-
-    public static createRejectedLocalRequestBasedOnTemplateWith(params: {
-        contentProperties?: Partial<Request>;
-        status?: LocalRequestStatus;
-        statusLogEntries?: LocalRequestStatusLogEntry[];
-    }): LocalRequest {
-        if (params.status && ![LocalRequestStatus.Decided, LocalRequestStatus.Completed, LocalRequestStatus.Expired].includes(params.status)) {
-            throw new Error("A rejected LocalRequest must be 'Decided', 'Completed' or 'Expired'.");
-        }
-
-        const requestJSON: ILocalRequest = {
-            id: CoreId.from("REQ1"),
-            isOwn: false,
-            peer: CoreAddress.from("did:e:a-domain:dids:sender"),
-            createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
-            content: TestObjectFactory.createRequestWithOneItem(params.contentProperties),
-            source: { type: "RelationshipTemplate", reference: CoreId.from("RLT1") },
-            response: {
-                createdAt: CoreDate.from("2020-01-01T00:00:00.000Z"),
-                content: TestObjectFactory.createResponse("REQ1", ResponseResult.Rejected)
-            },
-            status: params.status ?? LocalRequestStatus.Decided,
-            statusLog: params.statusLogEntries ?? []
-        };
-
-        const request = LocalRequest.from(requestJSON);
-        return request;
-    }
-
     public static createRequestWithOneItem(properties: Partial<Request> = {}, mustBeAccepted = false): Request {
         return Request.from({
             items: [

@@ -1,5 +1,21 @@
 {
-    "authServers": ["https://kc-openid4vc.frosch.work/realms/enmeshed-openid4vci"],
+    "authorizationServers": [
+        {
+            "type": "built-in",
+            "id": "test-built-in",
+            "label": "Built-in",
+            "enabled": true,
+            "requireDPoP": false
+        },
+        {
+            "type": "external",
+            "id": "keycloak",
+            "label": "Keycloak",
+            "enabled": true,
+            "issuer": "https://kc-openid4vc.frosch.work/realms/enmeshed-openid4vci"
+        }
+    ],
+    "preferredAuthServer": "authorization-server:test-built-in",
     "batchSize": 1,
     "dPopRequired": false,
     "display": [

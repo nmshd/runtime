@@ -47,9 +47,6 @@ export function isReadAttributeWithNewAttributeAcceptResponseConfig(object: any)
 }
 
 export type AcceptResponseConfigDerivation =
-    | AcceptResponseConfig
-    | DeleteAttributeAcceptResponseConfig
-    | ProposeAttributeWithNewAttributeAcceptResponseConfig
-    | ReadAttributeWithNewAttributeAcceptResponseConfig;
+    AcceptResponseConfig | DeleteAttributeAcceptResponseConfig | ProposeAttributeWithNewAttributeAcceptResponseConfig | ReadAttributeWithNewAttributeAcceptResponseConfig;
 
 export type ResponseConfig = AcceptResponseConfigDerivation | RejectResponseConfig;

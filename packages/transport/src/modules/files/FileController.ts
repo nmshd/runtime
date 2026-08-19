@@ -2,6 +2,7 @@ import { ISerializable } from "@js-soft/ts-serval";
 import { log } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId, FileReference } from "@nmshd/core-types";
 import { CoreBuffer, CryptoCipher, CryptoHash, CryptoHashAlgorithm, CryptoSecretKey, Encoding } from "@nmshd/crypto";
+import axios from "axios";
 import { CoreCrypto, CoreHash, TransportCoreErrors } from "../../core";
 import { DbCollectionName } from "../../core/DbCollectionName";
 import { ControllerName, TransportController } from "../../core/TransportController";
@@ -276,5 +277,54 @@ export class FileController extends TransportController {
 
         await this.files.update(fileDoc, file);
         return file;
+    }
+
+    public async cacheVerifiableCredentialDisplayInformationImages(
+        displayInformation?: Record<string, any>[]
+    ): Promise<{ locale?: string; logo?: string; backgroundImage?: string }[] | undefined> {
+        if (!displayInformation) return;
+
+        return await Promise.all(
+            displayInformation.map(async (displayInfo) => {
+                const logoUrl = displayInfo.logo;
+                const backgroundImageUrl = displayInfo.backgroundImage;
+
+                const [logo, backgroundImage] = await Promise.all([
+                    logoUrl ? this.cacheImageFromUrl(logoUrl) : Promise.resolve(undefined),
+                    backgroundImageUrl ? this.cacheImageFromUrl(backgroundImageUrl) : Promise.resolve(undefined)
+                ]);
+
+                return {
+                    locale: displayInfo.locale,
+                    logo,
+                    backgroundImage
+                };
+            })
+        );
+    }
+
+    private async cacheImageFromUrl(imageUrl: string): Promise<string | undefined> {
+        let response;
+        try {
+            response = await axios.get<ArrayBuffer>(imageUrl, { responseType: "arraybuffer" });
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                return undefined;
+            }
+
+            throw error;
+        }
+
+        const contentTypeHeader = response.headers["content-type"];
+        const mimetype = typeof contentTypeHeader === "string" && contentTypeHeader.length > 0 ? contentTypeHeader.split(";")[0] : "application/octet-stream";
+
+        const file = await this.sendFile({
+            buffer: CoreBuffer.from(response.data),
+            mimetype,
+            filename: imageUrl,
+            expiresAt: CoreDate.from("9999-12-31T00:00:00.000Z")
+        });
+
+        return file.toFileReference(this.transport.config.baseUrl).truncate();
     }
 }

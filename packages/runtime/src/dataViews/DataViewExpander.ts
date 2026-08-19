@@ -459,6 +459,8 @@ export class DataViewExpander {
                 const readAttributeRequestItem = requestItem as ReadAttributeRequestItemJSON;
                 if (isDecidable) {
                     const processedQuery = await this.processAttributeQuery(readAttributeRequestItem.query, localRequestDTO?.isOwn);
+                    processedQuery.results = processedQuery.results.filter((attribute) => !attribute.succeededBy);
+
                     // ThirdPartyAttributeQueries without results cannot be changed.
                     if (processedQuery.type === "ProcessedThirdPartyRelationshipAttributeQueryDVO" && processedQuery.results.length === 0) {
                         error = {
@@ -550,15 +552,21 @@ export class DataViewExpander {
                     }
                 }
 
+                let expandedProposeAttributeQuery;
+                if (isDecidable) {
+                    expandedProposeAttributeQuery = await this.processAttributeQuery(proposeAttributeRequestItem.query, localRequestDTO?.isOwn);
+                    expandedProposeAttributeQuery.results = expandedProposeAttributeQuery.results.filter((attribute) => !attribute.succeededBy);
+                } else {
+                    expandedProposeAttributeQuery = await this.expandAttributeQuery(proposeAttributeRequestItem.query, localRequestDTO?.isOwn);
+                }
+
                 return {
                     ...proposeAttributeRequestItem,
                     type: "ProposeAttributeRequestItemDVO",
                     id: "",
                     name: this.generateRequestItemName(requestItem["@type"], isDecidable),
                     attribute: await this.expandAttribute(proposeAttributeRequestItem.attribute),
-                    query: isDecidable
-                        ? await this.processAttributeQuery(proposeAttributeRequestItem.query, localRequestDTO?.isOwn)
-                        : await this.expandAttributeQuery(proposeAttributeRequestItem.query, localRequestDTO?.isOwn),
+                    query: expandedProposeAttributeQuery,
                     isDecidable,
                     response: responseItemDVO,
                     proposedValueOverruled
@@ -1026,15 +1034,13 @@ export class DataViewExpander {
         const valueType = attribute.content.value["@type"];
         const localAttribute = await this.consumptionController.attributes.getLocalAttribute(CoreId.from(attribute.id));
         if (!localAttribute) throw new Error("Attribute not found");
-        if (
-            !(
-                localAttribute instanceof OwnIdentityAttribute ||
-                localAttribute instanceof PeerIdentityAttribute ||
-                localAttribute instanceof OwnRelationshipAttribute ||
-                localAttribute instanceof PeerRelationshipAttribute ||
-                localAttribute instanceof ThirdPartyRelationshipAttribute
-            )
-        ) {
+        if (!(
+            localAttribute instanceof OwnIdentityAttribute ||
+            localAttribute instanceof PeerIdentityAttribute ||
+            localAttribute instanceof OwnRelationshipAttribute ||
+            localAttribute instanceof PeerRelationshipAttribute ||
+            localAttribute instanceof ThirdPartyRelationshipAttribute
+        )) {
             throw new Error("Attribute has unknown type");
         }
 

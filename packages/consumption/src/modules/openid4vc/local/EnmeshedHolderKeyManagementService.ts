@@ -204,7 +204,7 @@ export class EnmeshedHolderKeyManagementService implements Kms.KeyManagementServ
         const signature = SodiumWrapper.sodium.crypto_sign_detached(options.data, fullPrivateKeyBytes);
 
         return {
-            signature: signature as Uint8Array<ArrayBuffer>
+            signature: signature
         };
     }
 
