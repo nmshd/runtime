@@ -1,5 +1,15 @@
 {
     "$schema": "https://docs.renovatebot.com/renovate-schema.json",
     "extends": ["github>js-soft/renovate-config"],
-    "reviewers": ["team:npm-dependency-update-reviewers"]
+    "reviewers": ["team:npm-dependency-update-reviewers"],
+    "customManagers": [
+        {
+            "customType": "regex",
+            "description": "Update EUDIPLO image when used in test containers",
+            "managerFilePatterns": ["/\\.ts$/"],
+            "matchStrings": ["new GenericContainer\\(\"(?<depName>ghcr\\.io/openwallet-foundation/eudiplo):(?<currentValue>[^\"@]+)@(?<currentDigest>sha256:[a-f0-9]+)\"\\)"],
+            "datasourceTemplate": "docker",
+            "versioningTemplate": "docker"
+        }
+    ]
 }
