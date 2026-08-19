@@ -21,8 +21,8 @@
         "build:notest": "npm run build:node",
         "cdep": "tsc && depcruise --config ../../.dependency-cruiser.cjs dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
-        "test": "jest --forceExit",
-        "test:ci": "jest -i --forceExit --coverage"
+        "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --forceExit",
+        "test:ci": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest -i --forceExit --coverage"
     },
     "jest": {
         "collectCoverageFrom": [
@@ -35,7 +35,9 @@
             "lcov"
         ],
         "maxWorkers": 5,
-        "preset": "ts-jest",
+        "extensionsToTreatAsEsm": [
+            ".ts"
+        ],
         "setupFilesAfterEnv": [
             "./test/customMatchers.ts",
             "jest-expect-message",
@@ -44,28 +46,17 @@
         "testEnvironment": "node",
         "testTimeout": 60000,
         "transform": {
-            "^.+\\.(t|j)s$": [
+            "^.+\\.ts$": [
                 "ts-jest",
                 {
-                    "tsconfig": "test/tsconfig.json"
-                }
-            ],
-            "^.+\\.mjs$": [
-                "babel-jest",
-                {
-                    "presets": [
-                        [
-                            "@babel/preset-env",
-                            {
-                                "modules": "commonjs"
-                            }
-                        ]
-                    ]
+                    "tsconfig": "test/tsconfig.json",
+                    "useESM": true
                 }
             ]
         },
         "moduleNameMapper": {
-            "^@verifiables/request-converter$": "<rootDir>/../../node_modules/@verifiables/request-converter/dist/index.js"
+            "^@verifiables/request-converter$": "<rootDir>/../../node_modules/@verifiables/request-converter/dist/index.js",
+            "^webcrypto-core$": "<rootDir>/../../node_modules/webcrypto-core/build/webcrypto-core.js"
         },
         "transformIgnorePatterns": [
             "[/\\\\]packages[/\\\\][^/\\\\]+[/\\\\]dist[/\\\\]",
