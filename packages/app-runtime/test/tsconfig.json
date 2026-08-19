@@ -4,8 +4,6 @@
         "noEmit": true,
         "composite": false,
         "module": "ES2022",
-        "moduleResolution": "node10",
-        "ignoreDeprecations": "6.0",
         "skipLibCheck": true,
         "types": ["jest", "node", "lokijs"]
     },
