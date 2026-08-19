@@ -22,11 +22,11 @@
         "build:schemas": "node scripts/buildSchemas.mjs",
         "cdep": "tsc && depcruise --config ../../.dependency-cruiser.cjs dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
-        "test:ci:lokijs": "USE_LOKIJS=true jest -i --coverage",
-        "test:ci:mongodb": "jest -i --coverage",
-        "test:local:ferretdb": "npm run test:local:start:ferretdb && CONNECTION_STRING='mongodb://root:example@localhost:27022' jest",
-        "test:local:lokijs": "USE_LOKIJS=true jest",
-        "test:local:mongodb": "npm run test:local:start:mongodb && CONNECTION_STRING='mongodb://root:example@localhost:27021' jest",
+        "test:ci:lokijs": "USE_LOKIJS=true NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest -i --coverage",
+        "test:ci:mongodb": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest -i --coverage",
+        "test:local:ferretdb": "npm run test:local:start:ferretdb && CONNECTION_STRING='mongodb://root:example@localhost:27022' NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest",
+        "test:local:lokijs": "USE_LOKIJS=true NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest",
+        "test:local:mongodb": "npm run test:local:start:mongodb && CONNECTION_STRING='mongodb://root:example@localhost:27021' NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest",
         "test:local:start:ferretdb": "docker compose -f ../../.dev/compose.yml up -d runtime-ferret",
         "test:local:start:mongodb": "docker compose -f ../../.dev/compose.yml up -d runtime-mongo",
         "test:local:teardown": "docker compose -f ../../.dev/compose.yml rm -fsv"
@@ -42,7 +42,9 @@
             "lcov"
         ],
         "maxWorkers": 1,
-        "preset": "ts-jest",
+        "extensionsToTreatAsEsm": [
+            ".ts"
+        ],
         "setupFilesAfterEnv": [
             "./test/customMatchers.ts",
             "./test/disableTimeoutForDebugging.ts",
@@ -52,28 +54,17 @@
         "testEnvironment": "node",
         "testTimeout": 60000,
         "transform": {
-            "^.+\\.(t|j)s$": [
+            "^.+\\.ts$": [
                 "ts-jest",
                 {
-                    "tsconfig": "test/tsconfig.json"
-                }
-            ],
-            "^.+\\.mjs$": [
-                "babel-jest",
-                {
-                    "presets": [
-                        [
-                            "@babel/preset-env",
-                            {
-                                "modules": "commonjs"
-                            }
-                        ]
-                    ]
+                    "tsconfig": "test/tsconfig.json",
+                    "useESM": true
                 }
             ]
         },
         "moduleNameMapper": {
-            "^@verifiables/request-converter$": "<rootDir>/../../node_modules/@verifiables/request-converter/dist/index.js"
+            "^@verifiables/request-converter$": "<rootDir>/../../node_modules/@verifiables/request-converter/dist/index.js",
+            "^webcrypto-core$": "<rootDir>/../../node_modules/webcrypto-core/build/webcrypto-core.js"
         },
         "transformIgnorePatterns": [
             "[/\\\\]packages[/\\\\][^/\\\\]+[/\\\\]dist[/\\\\]",
