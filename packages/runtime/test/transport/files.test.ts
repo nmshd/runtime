@@ -1,6 +1,7 @@
 import { CoreDate } from "@nmshd/core-types";
 import fs from "fs";
 import { DateTime } from "luxon";
+import { fileURLToPath } from "url";
 import { GetFilesQuery, OwnerRestriction, TransportServices } from "../../src";
 import { cleanupFiles, exchangeFile, makeUploadRequest, QueryParamConditions, RuntimeServiceProvider, TestRuntimeServices, uploadFile } from "../lib";
 
@@ -97,7 +98,7 @@ describe("File upload", () => {
     });
 
     test("can upload same file twice", async () => {
-        const request = await makeUploadRequest({ content: await fs.promises.readFile(`${__dirname}/../__assets__/test.txt`) });
+        const request = await makeUploadRequest({ content: await fs.promises.readFile(fileURLToPath(new URL("../__assets__/test.txt", import.meta.url))) });
 
         const response1 = await transportServices1.files.uploadOwnFile(request);
         const response2 = await transportServices1.files.uploadOwnFile(request);
@@ -203,7 +204,7 @@ describe("Get file", () => {
 
 describe("Upload big files", () => {
     test("can not upload a file that is bigger than 10MB", async () => {
-        const file = await fs.promises.readFile(`${__dirname}/../__assets__/upload-10+mb.bin`);
+        const file = await fs.promises.readFile(fileURLToPath(new URL("../__assets__/upload-10+mb.bin", import.meta.url)));
 
         const response = await transportServices1.files.uploadOwnFile(await makeUploadRequest({ content: file }));
         expect(response).toBeAnError("'content' is too large", "error.runtime.validation.invalidPropertyValue");
