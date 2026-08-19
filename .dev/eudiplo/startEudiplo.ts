@@ -1,5 +1,5 @@
-import path from "path";
 import { GenericContainer, StartedTestContainer, Wait } from "testcontainers";
+import { fileURLToPath } from "url";
 
 export async function startEudiplo(): Promise<StartedTestContainer> {
     return await new GenericContainer("ghcr.io/openwallet-foundation/eudiplo:6.1.0@sha256:1aa0fd250d40c88f842dd5853dba81f87b75bc435b486b79e0789ed9297440ce")
@@ -16,7 +16,7 @@ export async function startEudiplo(): Promise<StartedTestContainer> {
         .withExposedPorts({ container: 3000, host: 3000 })
         .withCopyDirectoriesToContainer([
             {
-                source: path.resolve(path.join(__dirname, "config")),
+                source: fileURLToPath(new URL("config", import.meta.url)),
                 target: "/app/assets/config"
             }
         ])

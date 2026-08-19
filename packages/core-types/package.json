@@ -19,8 +19,8 @@
         "build:ci": "tsc",
         "cdep": "tsc && depcruise --config ../../.dependency-cruiser.cjs dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
-        "test": "jest -i",
-        "test:ci": "jest -i --coverage"
+        "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest -i",
+        "test:ci": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest -i --coverage"
     },
     "jest": {
         "collectCoverageFrom": [
@@ -33,7 +33,9 @@
             "lcov"
         ],
         "maxWorkers": 1,
-        "preset": "ts-jest",
+        "extensionsToTreatAsEsm": [
+            ".ts"
+        ],
         "setupFilesAfterEnv": [
             "jest-expect-message",
             "../../jest.setup.cjs"
@@ -44,7 +46,8 @@
             "^.+\\.ts$": [
                 "ts-jest",
                 {
-                    "tsconfig": "test/tsconfig.json"
+                    "tsconfig": "test/tsconfig.json",
+                    "useESM": true
                 }
             ]
         }
