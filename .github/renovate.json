@@ -11,5 +11,13 @@
             "datasourceTemplate": "docker",
             "versioningTemplate": "docker"
         }
+    ],
+    "packageRules": [
+        {
+            "description": "Update the EUDIPLO SDK and testcontainer image together",
+            "matchPackageNames": ["@eudiplo/sdk-core", "ghcr.io/openwallet-foundation/eudiplo"],
+            "groupName": "EUDIPLO",
+            "groupSlug": "eudiplo"
+        }
     ]
 }
