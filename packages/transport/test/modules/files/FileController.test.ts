@@ -1,4 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
+import { jest } from "@jest/globals";
 import { CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
 import { AccountController, File, FileOwnershipLockedEvent, Transport } from "../../../src";

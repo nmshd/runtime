@@ -9,8 +9,8 @@ import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
 import fs from "fs";
 import { DurationLike } from "luxon";
-import path from "path";
 import { GenericContainer, Wait } from "testcontainers";
+import { fileURLToPath } from "url";
 import {
     AccountController,
     ChangedItems,
@@ -650,7 +650,7 @@ export class TestUtil {
 
     public static async runDeletionJob(): Promise<void> {
         const backboneVersion = this.getBackboneVersion();
-        const appsettingsOverrideLocation = process.env.APPSETTINGS_OVERRIDE_LOCATION ?? `${__dirname}/../../../../.dev/appsettings.override.json`;
+        const appsettingsOverrideLocation = process.env.APPSETTINGS_OVERRIDE_LOCATION ?? fileURLToPath(new URL("../../../../.dev/appsettings.override.json", import.meta.url));
         const backboneNetwork = process.env.BACKBONE_NETWORK ?? "local-test-backbone";
 
         await new GenericContainer(`ghcr.io/nmshd/backbone-identity-deletion-jobs:${backboneVersion}`)
@@ -664,7 +664,7 @@ export class TestUtil {
     private static getBackboneVersion() {
         if (process.env.BACKBONE_VERSION) return process.env.BACKBONE_VERSION;
 
-        const composeFile = fs.readFileSync(path.resolve(`${__dirname}/../../../../.dev/compose.backbone.yml`));
+        const composeFile = fs.readFileSync(fileURLToPath(new URL("../../../../.dev/compose.backbone.yml", import.meta.url)));
 
         const regex = /image: ghcr\.io\/nmshd\/backbone-consumer-api:(?<version>[^\r\n]*)@.*/;
         const match = composeFile.toString().match(regex);
