@@ -69,8 +69,16 @@ test("issuance", async () => {
         credentialResponses: credentialResponsesResult.value.credentialResponses
     });
     expect(storeCredentialsResponse).toBeSuccessful();
-    expect((storeCredentialsResponse.value.content.value as VerifiableCredentialJSON).displayInformation?.[0].logo).toBeDefined();
-    expect((storeCredentialsResponse.value.content.value as VerifiableCredentialJSON).displayInformation?.[0].name).toBe("test");
+    const storedCredential = storeCredentialsResponse.value.content.value as VerifiableCredentialJSON;
+    expect(storedCredential.displayInformation?.[0].logo).toBeDefined();
+    expect(storedCredential.displayInformation?.[0].name).toBe("test");
+    expect(storedCredential.displayInformationCachedImages?.[0].logo).toBeDefined();
+
+    const getStoredCredentialResponse = await runtimeServices1.consumption.attributes.getAttribute({ id: storeCredentialsResponse.value.id });
+    expect(getStoredCredentialResponse).toBeSuccessful();
+    expect((getStoredCredentialResponse.value.content.value as VerifiableCredentialJSON).displayInformationCachedImages).toStrictEqual(
+        storedCredential.displayInformationCachedImages
+    );
 });
 
 test("issuance with pin authentication", async () => {
@@ -288,6 +296,9 @@ describe("presentation", () => {
             expect((presentationTokenContent as TokenContentVerifiablePresentationJSON).value).toBeDefined();
             expect((presentationTokenContent as TokenContentVerifiablePresentationJSON).displayInformation).toBeDefined();
             expect((presentationTokenContent as TokenContentVerifiablePresentationJSON).displayInformation![0].name).toBe("test");
+            const presentationCachedImages = (presentationTokenContent as TokenContentVerifiablePresentationJSON).displayInformationCachedImages;
+            expect(presentationCachedImages).toBeDefined();
+            expect(presentationCachedImages).toStrictEqual((storedCredential.content.value as VerifiableCredentialJSON).displayInformationCachedImages);
         });
 
         test("verify presentation token", async () => {

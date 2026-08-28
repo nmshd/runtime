@@ -115,7 +115,8 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
                     this.agent.context,
                     credentialResponse.encoded,
                     credentialResponse.claimFormat,
-                    credentialResponse.displayInformation
+                    credentialResponse.displayInformation,
+                    credentialResponse.displayInformationCachedImages
                 );
             })
         );
@@ -185,7 +186,8 @@ export class Holder extends BaseAgent<ReturnType<typeof getOpenIdHolderModules>>
         return TokenContentVerifiablePresentation.from({
             value: presentation,
             type: credential.type,
-            displayInformation: credential.displayInformation
+            displayInformation: credential.displayInformation,
+            displayInformationCachedImages: credential.displayInformationCachedImages
         });
     }
 

@@ -11,7 +11,7 @@ import {
     StorageService,
     W3cCredentialRecord
 } from "@credo-ts/core";
-import { IdentityAttribute, VerifiableCredential } from "@nmshd/content";
+import { DisplayInformationCachedImagesJSON, IdentityAttribute, VerifiableCredential } from "@nmshd/content";
 import { AccountController } from "@nmshd/transport";
 import { OwnIdentityAttribute } from "../../attributes";
 import { AttributesController } from "../../attributes/AttributesController";
@@ -40,7 +40,8 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
         agentContext: AgentContext,
         value: string | Record<string, any>,
         type: string,
-        displayInformation?: Record<string, any>[]
+        displayInformation?: Record<string, any>[],
+        displayInformationCachedImages?: DisplayInformationCachedImagesJSON[]
     ): Promise<OwnIdentityAttribute> {
         const owner = this.accountController.identity.address;
         const identityAttribute = IdentityAttribute.from({
@@ -48,7 +49,8 @@ export class EnmeshedStorageService<T extends BaseRecord> implements StorageServ
                 "@type": "VerifiableCredential",
                 value: value,
                 type: type,
-                displayInformation: displayInformation
+                displayInformation: displayInformation,
+                displayInformationCachedImages: displayInformationCachedImages
             },
             owner: owner
         });

@@ -286,8 +286,8 @@ export class FileController extends TransportController {
 
         return await Promise.all(
             displayInformation.map(async (displayInfo) => {
-                const logoUrl = displayInfo.logo;
-                const backgroundImageUrl = displayInfo.backgroundImage;
+                const logoUrl = this.getDisplayInformationImageUrl(displayInfo.logo);
+                const backgroundImageUrl = this.getDisplayInformationImageUrl(displayInfo.backgroundImage ?? displayInfo.background_image);
 
                 const [logo, backgroundImage] = await Promise.all([
                     logoUrl ? this.cacheImageFromUrl(logoUrl) : Promise.resolve(undefined),
@@ -301,6 +301,15 @@ export class FileController extends TransportController {
                 };
             })
         );
+    }
+
+    private getDisplayInformationImageUrl(image: unknown): string | undefined {
+        if (typeof image === "string") return image;
+        if (!image || typeof image !== "object") return;
+
+        const imageObject = image as Record<string, unknown>;
+        if (typeof imageObject.uri === "string") return imageObject.uri;
+        return typeof imageObject.url === "string" ? imageObject.url : undefined;
     }
 
     private async cacheImageFromUrl(imageUrl: string): Promise<string | undefined> {

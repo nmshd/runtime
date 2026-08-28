@@ -17986,12 +17986,46 @@ export const VerifyPresentationTokenRequest: any = {
                     "items": {
                         "type": "object"
                     }
+                },
+                "displayInformationCachedImages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/DisplayInformationCachedImagesJSON"
+                    }
                 }
             },
             "required": [
                 "@type",
                 "type",
                 "value"
+            ],
+            "additionalProperties": false
+        },
+        "DisplayInformationCachedImagesJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "DisplayInformationCachedImages"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "locale": {
+                    "type": "string"
+                },
+                "logo": {
+                    "type": "string"
+                },
+                "backgroundImage": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type"
             ],
             "additionalProperties": false
         },

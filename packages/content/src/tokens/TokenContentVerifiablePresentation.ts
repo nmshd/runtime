@@ -1,18 +1,20 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { ContentJSON } from "../ContentJSON";
-import { PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH } from "../attributes";
+import { DisplayInformationCachedImages, DisplayInformationCachedImagesJSON, IDisplayInformationCachedImages, PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH } from "../attributes";
 
 export interface TokenContentVerifiablePresentationJSON extends ContentJSON {
     "@type": "TokenContentVerifiablePresentation";
     value: string | Record<string, any>;
     type: string;
     displayInformation?: Record<string, any>[];
+    displayInformationCachedImages?: DisplayInformationCachedImagesJSON[];
 }
 
 export interface ITokenContentVerifiablePresentation extends ISerializable {
     value: string | Record<string, any>;
     type: string;
     displayInformation?: Record<string, any>[];
+    displayInformationCachedImages?: IDisplayInformationCachedImages[];
 }
 
 @type("TokenContentVerifiablePresentation")
@@ -28,6 +30,10 @@ export class TokenContentVerifiablePresentation extends Serializable implements 
     @serialize()
     @validate({ nullable: true, max: PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH })
     public displayInformation?: Record<string, any>[];
+
+    @serialize()
+    @validate({ nullable: true })
+    public displayInformationCachedImages?: DisplayInformationCachedImages[];
 
     public static from(value: ITokenContentVerifiablePresentation | Omit<TokenContentVerifiablePresentationJSON, "@type">): TokenContentVerifiablePresentation {
         return this.fromAny(value);

@@ -1,6 +1,6 @@
 import { DcqlValidCredential, W3cJsonCredential } from "@credo-ts/core";
 import { OpenId4VciResolvedCredentialOffer, OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
-import { IdentityAttribute, TokenContentVerifiablePresentation, VerifiableCredential } from "@nmshd/content";
+import { DisplayInformationCachedImages, IdentityAttribute, TokenContentVerifiablePresentation, VerifiableCredential } from "@nmshd/content";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../consumption/ConsumptionController";
 import { ConsumptionControllerName } from "../../consumption/ConsumptionControllerName";
@@ -83,7 +83,20 @@ export class OpenId4VcController extends ConsumptionBaseController {
     }
 
     public async storeCredentials(credentialResponses: OpenId4VciCredentialResponseJSON[]): Promise<OwnIdentityAttributeWithVerifiableCredential> {
-        const credentials = await this.holder.storeCredentials(credentialResponses);
+        const credentialResponsesWithCachedImages = await Promise.all(
+            credentialResponses.map(async (credentialResponse) => {
+                if (credentialResponse.displayInformationCachedImages) return credentialResponse;
+
+                const cachedImages = await this.parent.accountController.files.cacheVerifiableCredentialDisplayInformationImages(credentialResponse.displayInformation);
+
+                return {
+                    ...credentialResponse,
+                    displayInformationCachedImages: cachedImages?.map((entry) => DisplayInformationCachedImages.from(entry).toJSON())
+                };
+            })
+        );
+
+        const credentials = await this.holder.storeCredentials(credentialResponsesWithCachedImages);
         return credentials[0] as OwnIdentityAttributeWithVerifiableCredential;
     }
 
