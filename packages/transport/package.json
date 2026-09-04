@@ -95,7 +95,7 @@
         "@types/luxon": "3.7.5",
         "@types/qs": "6.15.1",
         "correlation-id": "5.2.0",
-        "expect": "30.4.1",
+        "expect": "30.5.0",
         "testcontainers": "12.1.0",
         "ts-mockito": "2.6.1"
     },
