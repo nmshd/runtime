@@ -32,6 +32,45 @@ describe("File upload", () => {
         expect(response).toBeSuccessful();
     });
 
+    test.each(["test.txt", "a file.txt", "ÄÖÜ.txt"])("can upload a file named '%s'", async (filename) => {
+        const response = await transportServices1.files.uploadOwnFile(await makeUploadRequest({ filename }));
+
+        expect(response).toBeSuccessful();
+        expect(response.value.filename).toBe(filename);
+    });
+
+    test.each([
+        ["an empty filename", ""],
+        ["a filename consisting only of whitespace", " \t "],
+        ["'.' as filename", "."],
+        ["'..' as filename", ".."],
+        ["a forward slash in the filename", "directory/file.txt"],
+        ["a backslash in the filename", "directory\\file.txt"],
+        ["a NUL character in the filename", "file\0.txt"],
+        ["another control character in the filename", "file\u0085.txt"],
+        ["a filename longer than 255 UTF-8 bytes", "ä".repeat(128)]
+    ])("cannot upload a file with %s", async (_description, filename) => {
+        const response = await transportServices1.files.uploadOwnFile(await makeUploadRequest({ filename }));
+
+        expect(response).toBeAnError(/filename/, "error.runtime.validation.invalidPropertyValue");
+    });
+
+    test.each(["text/plain", "application/pdf", "image/svg+xml", "application/vnd.api+json", "IMAGE/PNG"])("can upload a file with MIME type '%s'", async (mimetype) => {
+        const response = await transportServices1.files.uploadOwnFile(await makeUploadRequest({ mimetype }));
+
+        expect(response).toBeSuccessful();
+        expect(response.value.mimetype).toBe(mimetype);
+    });
+
+    test.each(["", " \t ", "text", "text/", "/plain", "text/pla in", "text/plain; charset=utf-8", "text/*", "*/*", "text/plain\r\n"])(
+        "cannot upload a file with invalid MIME type '%s'",
+        async (mimetype) => {
+            const response = await transportServices1.files.uploadOwnFile(await makeUploadRequest({ mimetype }));
+
+            expect(response).toBeAnError(/mimetype/, "error.runtime.validation.invalidPropertyValue");
+        }
+    );
+
     test("uploaded files can be accessed under /Files", async () => {
         const uploadResponse = await transportServices1.files.uploadOwnFile(await makeUploadRequest());
         expect(uploadResponse).toBeSuccessful();
