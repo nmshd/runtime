@@ -206,7 +206,7 @@ export async function makeUploadRequest(values: object = {}): Promise<UploadOwnF
         title: "aTitle",
         filename: "aFileName",
         content: await fs.promises.readFile(fileURLToPath(new URL("../__assets__/test.txt", import.meta.url))),
-        mimetype: "aMimetype",
+        mimetype: "text/plain",
         description: "aDescription",
         expiresAt: DateTime.utc().plus({ minutes: 5 }).toString(),
         ...values

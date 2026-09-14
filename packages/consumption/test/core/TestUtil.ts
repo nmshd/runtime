@@ -460,7 +460,7 @@ export class TestUtil {
             description: "aDescription",
             filename: "aFilename",
             filemodified: CoreDate.from("2019-09-30T00:00:00.000Z"),
-            mimetype: "aMimetype",
+            mimetype: "text/plain",
             expiresAt: parameters?.expiresAt ?? CoreDate.utc().add({ minutes: 5 }),
             tags: parameters?.tags
         };

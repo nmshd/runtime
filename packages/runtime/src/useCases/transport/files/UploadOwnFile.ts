@@ -5,6 +5,7 @@ import { CoreBuffer } from "@nmshd/crypto";
 import { FileDTO } from "@nmshd/runtime-types";
 import { AccountController, FileController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
+import { parse as parseMediaType } from "media-typer";
 import { nameof } from "ts-simple-nameof";
 import { ISO8601DateTimeString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase, ValidationFailure, ValidationResult } from "../../common";
 import { FileMapper } from "./FileMapper";
@@ -40,6 +41,26 @@ class Validator extends SchemaValidator<UploadOwnFileValidatableRequest> {
         const validationResult = super.validate(input);
         if (!validationResult.isValid()) return validationResult;
 
+        const filenameValidationError = this.validateFilename(input.filename);
+        if (filenameValidationError) {
+            validationResult.addFailure(
+                new ValidationFailure(
+                    RuntimeErrors.general.invalidPropertyValue(filenameValidationError),
+                    nameof<UploadOwnFileValidatableRequest>((r) => r.filename)
+                )
+            );
+        }
+
+        const mimetypeValidationError = this.validateMimetype(input.mimetype);
+        if (mimetypeValidationError) {
+            validationResult.addFailure(
+                new ValidationFailure(
+                    RuntimeErrors.general.invalidPropertyValue(mimetypeValidationError),
+                    nameof<UploadOwnFileValidatableRequest>((r) => r.mimetype)
+                )
+            );
+        }
+
         if (input.content.byteLength > this._maxFileSize) {
             validationResult.addFailure(
                 new ValidationFailure(
@@ -59,6 +80,32 @@ class Validator extends SchemaValidator<UploadOwnFileValidatableRequest> {
         }
 
         return validationResult;
+    }
+
+    private validateFilename(filename: string): string | undefined {
+        const propertyName = nameof<UploadOwnFileValidatableRequest>((r) => r.filename);
+
+        if (filename.trim().length === 0) return `'${propertyName}' must not be empty or consist only of whitespace`;
+        if (filename === "." || filename === "..") return `'${propertyName}' must not be '.' or '..'`;
+        if (/[\\/]/.test(filename)) return `'${propertyName}' must not contain path separators`;
+        if (/\p{Cc}/u.test(filename)) return `'${propertyName}' must not contain Unicode control characters`;
+        if (new TextEncoder().encode(filename).byteLength > 255) return `'${propertyName}' must not exceed 255 UTF-8 bytes`;
+
+        return undefined;
+    }
+
+    private validateMimetype(mimetype: string): string | undefined {
+        const propertyName = nameof<UploadOwnFileValidatableRequest>((r) => r.mimetype);
+
+        if (mimetype.trim().length === 0) return `'${propertyName}' must not be empty or consist only of whitespace`;
+        if (mimetype.trim() !== mimetype) return `'${propertyName}' must not contain leading or trailing whitespace`;
+
+        try {
+            parseMediaType(mimetype);
+            return undefined;
+        } catch {
+            return `'${propertyName}' must be a concrete media type in the form 'type/subtype' without parameters or wildcards`;
+        }
     }
 }
 

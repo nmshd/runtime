@@ -23,7 +23,7 @@ describe("FileSync", function () {
             description: "aDescription",
             expiresAt: CoreDate.utc().add({ minutes: 2 }),
             filename: "aFilename.txt",
-            mimetype: "aMimetype",
+            mimetype: "text/plain",
             title: "aTitle",
             buffer: CoreBuffer.fromUtf8("test")
         });
