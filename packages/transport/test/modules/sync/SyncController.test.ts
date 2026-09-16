@@ -1,7 +1,7 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { sleep } from "@js-soft/ts-utils";
 import { CoreDate } from "@nmshd/core-types";
-import { AccountController, Transport } from "../../../src";
+import { AccountController, ClientResult, RequestError, Transport } from "../../../src";
 import { FakeSyncClient } from "../../testHelpers/FakeSyncClient";
 import { TestUtil } from "../../testHelpers/TestUtil";
 
@@ -53,6 +53,21 @@ describe("SyncController", function () {
         for (const modification of syncClient.createDatawalletModificationsRequest!.modifications) {
             expect(modification.datawalletVersion).toStrictEqual(account.config.supportedDatawalletVersion);
         }
+    });
+
+    test("syncDatawallet creates a missing Datawallet", async function () {
+        const syncClient = new FakeSyncClient();
+        const account = await TestUtil.createAccount(transport, connection, { syncClient });
+        syncClient.finalizeDatawalletVersionUpgradeRequest = undefined;
+
+        jest.spyOn(syncClient, "getDatawallet").mockResolvedValue(
+            ClientResult.fail(new RequestError("GET", "/api/v2/Datawallet", undefined, "error.platform.recordNotFound", "Datawallet not found.", "", 404))
+        );
+
+        await account.syncDatawallet();
+
+        expect(syncClient.finalizeDatawalletVersionUpgradeRequest).toBeDefined();
+        expect(syncClient.finalizeDatawalletVersionUpgradeRequest!.newDatawalletVersion).toBe(account.config.supportedDatawalletVersion);
     });
 
     test("syncDatawallet upgrades identityDatawalletVersion to supportedDatawalletVersion", async function () {

@@ -130,6 +130,12 @@ export class SyncController extends TransportController {
 
         const identityDatawalletVersion = await this.getIdentityDatawalletVersion();
 
+        if (identityDatawalletVersion === undefined) {
+            await this.setInititalDatawalletVersion(this.config.supportedDatawalletVersion);
+            await this.setLastCompletedDatawalletSyncTime();
+            return;
+        }
+
         if (this.config.supportedDatawalletVersion < identityDatawalletVersion) {
             // This means that the datawallet of the identity was upgraded by another device with a higher version.
             // It is necessary to update the current device.
@@ -317,9 +323,16 @@ export class SyncController extends TransportController {
         await this.finalizeDatawalletVersionUpgradeSyncRun(version);
     }
 
-    private async getIdentityDatawalletVersion() {
-        const datawalletInfo = (await this.client.getDatawallet()).value;
-        return datawalletInfo.version;
+    private async getIdentityDatawalletVersion(): Promise<number | undefined> {
+        const result = await this.client.getDatawallet();
+
+        if (result.isError) {
+            if (result.error.code === "error.platform.recordNotFound") return undefined;
+
+            throw result.error;
+        }
+
+        return result.value.version;
     }
 
     private async startExternalEventsSyncRun(): Promise<boolean> {
