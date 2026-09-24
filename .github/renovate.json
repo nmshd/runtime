@@ -18,6 +18,11 @@
             "matchPackageNames": ["@eudiplo/sdk-core", "ghcr.io/openwallet-foundation/eudiplo"],
             "groupName": "EUDIPLO",
             "groupSlug": "eudiplo"
+        },
+        {
+            "description": "Do not update @credo-ts packages to version 0.7.1",
+            "matchPackageNames": ["@credo-ts/*"],
+            "allowedVersions": "!=0.7.1"
         }
     ]
 }
