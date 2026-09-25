@@ -71,7 +71,7 @@
         "lodash": "^4.18.1"
     },
     "devDependencies": {
-        "@eudiplo/sdk-core": "7.6.1",
+        "@eudiplo/sdk-core": "8.0.2",
         "@js-soft/node-logger": "1.2.14",
         "@types/lodash": "4.17.25",
         "@types/lokijs": "1.5.14",
