@@ -1,4 +1,10 @@
 {
-    "name": "test",
-    "description": "test tenant - DO NOT CHANGE IN DEPLOYMENT"
+    "$schema": "https://eudiplo.dev/schemas/v1/TenantConfigFile.schema.json",
+    "metadata": {
+        "generation": 1
+    },
+    "spec": {
+        "name": "test",
+        "description": "test tenant - DO NOT CHANGE IN DEPLOYMENT"
+    }
 }

@@ -1,5 +1,11 @@
 {
-    "clientId": "test-admin",
-    "secret": "hgHrws1JR7sS24WR1IimsVdHAT0ddlgOB3dObaGSAEOo8JSFk3N",
-    "roles": ["clients:manage", "issuance:manage", "issuance:offer", "presentation:manage", "presentation:request"]
+    "$schema": "https://eudiplo.dev/schemas/v1/ClientConfigFile.schema.json",
+    "metadata": {
+        "generation": 1
+    },
+    "spec": {
+        "clientId": "test-admin",
+        "secret": "hgHrws1JR7sS24WR1IimsVdHAT0ddlgOB3dObaGSAEOo8JSFk3N",
+        "roles": ["clients:manage", "issuance:manage", "issuance:offer", "presentation:manage", "presentation:request"]
+    }
 }
