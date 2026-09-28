@@ -1,28 +1,34 @@
 {
-    "authorizationServers": [
-        {
-            "type": "built-in",
-            "id": "test-built-in",
-            "label": "Built-in",
-            "enabled": true,
-            "requireDPoP": false
-        },
-        {
-            "type": "external",
-            "id": "keycloak",
-            "label": "Keycloak",
-            "enabled": true,
-            "issuer": "https://kc-openid4vc.frosch.work/realms/enmeshed-openid4vci"
-        }
-    ],
-    "batchSize": 1,
-    "dPopRequired": false,
-    "display": [
-        {
-            "name": "J&S-Soft",
-            "locale": "de-DE",
-            "logo": { "uri": "jsFrog.png" }
-        }
-    ],
-    "walletAttestationRequired": false
+    "$schema": "https://eudiplo.dev/schemas/v1/IssuanceConfigFile.schema.json",
+    "metadata": {
+        "generation": 1
+    },
+    "spec": {
+        "authorizationServers": [
+            {
+                "type": "built-in",
+                "id": "test-built-in",
+                "label": "Built-in",
+                "enabled": true,
+                "requireDPoP": false
+            },
+            {
+                "type": "external",
+                "id": "keycloak",
+                "label": "Keycloak",
+                "enabled": true,
+                "issuer": "https://kc-openid4vc.frosch.work/realms/enmeshed-openid4vci"
+            }
+        ],
+        "batchSize": 1,
+        "dPopRequired": false,
+        "display": [
+            {
+                "name": "J&S-Soft",
+                "locale": "de-DE",
+                "logo": { "uri": "jsFrog.png" }
+            }
+        ],
+        "walletAttestationRequired": false
+    }
 }
