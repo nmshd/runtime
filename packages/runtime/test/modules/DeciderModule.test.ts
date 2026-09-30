@@ -1425,9 +1425,11 @@ describe("DeciderModule", () => {
                 MessageProcessedEvent,
                 (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
             );
+await expect(recipient.eventBus).toHavePublished(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Decided);
+            await expect(recipient.eventBus).toHavePublished(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
 
             const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
-            expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
+            expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Completed);
             expect(requestAfterAction.response).toBeDefined();
 
             const responseContent = requestAfterAction.response!.content;
@@ -2024,9 +2026,11 @@ describe("DeciderModule", () => {
                 MessageProcessedEvent,
                 (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
             );
+await expect(recipient.eventBus).toHavePublished(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Decided);
+            await expect(recipient.eventBus).toHavePublished(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
 
             const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
-            expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
+            expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Completed);
             expect(requestAfterAction.response).toBeDefined();
 
             const responseContent = requestAfterAction.response!.content;
@@ -2984,9 +2988,11 @@ describe("DeciderModule", () => {
                 MessageProcessedEvent,
                 (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
             );
+await expect(recipient.eventBus).toHavePublished(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Decided);
+            await expect(recipient.eventBus).toHavePublished(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
 
             const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
-            expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Decided);
+            expect(requestAfterAction.status).toStrictEqual(LocalRequestStatus.Completed);
             expect(requestAfterAction.response).toBeDefined();
 
             const responseContent = requestAfterAction.response!.content;
