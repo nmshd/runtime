@@ -179,10 +179,11 @@ test("issuance via request", async () => {
 
     const requestId = (sentMessage.value.content as RequestJSON).id!;
     await syncUntilHasMessageWithRequest(runtimeServices2.transport, requestId);
-    await runtimeServices2.consumption.incomingRequests.accept({
+    const acceptResult = await runtimeServices2.consumption.incomingRequests.accept({
         requestId,
         items: [{ accept: true }]
     });
+    expect(acceptResult).toBeSuccessful();
 
     const currentCredentials = (
         await runtimeServices2.consumption.attributes.getAttributes({
