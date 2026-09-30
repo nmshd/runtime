@@ -1425,7 +1425,7 @@ describe("DeciderModule", () => {
                 MessageProcessedEvent,
                 (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
             );
-await expect(recipient.eventBus).toHavePublished(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Decided);
+            await expect(recipient.eventBus).toHavePublished(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Decided);
             await expect(recipient.eventBus).toHavePublished(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
 
             const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
@@ -2026,7 +2026,7 @@ await expect(recipient.eventBus).toHavePublished(IncomingRequestStatusChangedEve
                 MessageProcessedEvent,
                 (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
             );
-await expect(recipient.eventBus).toHavePublished(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Decided);
+            await expect(recipient.eventBus).toHavePublished(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Decided);
             await expect(recipient.eventBus).toHavePublished(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
 
             const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
@@ -2988,7 +2988,7 @@ await expect(recipient.eventBus).toHavePublished(IncomingRequestStatusChangedEve
                 MessageProcessedEvent,
                 (e) => e.data.result === MessageProcessedResult.RequestAutomaticallyDecided && e.data.message.id === message.id
             );
-await expect(recipient.eventBus).toHavePublished(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Decided);
+            await expect(recipient.eventBus).toHavePublished(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Decided);
             await expect(recipient.eventBus).toHavePublished(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
 
             const requestAfterAction = (await recipient.consumption.incomingRequests.getRequest({ id: receivedRequestResult.value.id })).value;
