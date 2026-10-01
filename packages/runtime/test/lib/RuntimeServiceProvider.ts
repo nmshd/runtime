@@ -2,6 +2,7 @@ import { IConfigOverwrite } from "@nmshd/transport";
 import correlator from "correlation-id";
 import { AnonymousServices, AutomationConfig, ConsumptionServices, DataViewExpander, RuntimeConfig, TransportServices } from "../../src";
 import { MockEventBus } from "./MockEventBus";
+import { registerEventBusForTransportServices } from "./RuntimeEventBusRegistry";
 import { TestRuntime } from "./TestRuntime";
 
 export interface TestRuntimeServices {
@@ -89,6 +90,7 @@ export class RuntimeServiceProvider {
             await runtime.start();
 
             const services = await runtime.getServices("");
+            registerEventBusForTransportServices(services.transportServices, runtime.eventBus);
 
             runtimeServices.push({
                 transport: services.transportServices,

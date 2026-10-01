@@ -94,19 +94,41 @@ test("issuance with pin authentication", async () => {
     const credentialOffer = result.value.credentialOffer;
     const requestedCredentials = credentialOffer.credentialOfferPayload.credential_configuration_ids;
 
-    const wrongPinRequestResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
-        credentialOffer,
-        credentialConfigurationIds: requestedCredentials,
-        pinCode: `1${pin}`
-    });
-    expect(wrongPinRequestResult.isError).toBe(true);
-
     const requestResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
         credentialOffer,
         credentialConfigurationIds: requestedCredentials,
         pinCode: pin
     });
     expect(requestResult).toBeSuccessful();
+});
+
+test("issuance with pin authentication is rejected with incorrect pin", async () => {
+    const correctPin = "1234";
+
+    const credentialOfferUrl = (
+        await eudiploClient.createIssuanceOffer({
+            responseType: "uri",
+            credentialConfigurationIds: [eudiploCredentialConfigurationId],
+            flow: "pre_authorized_code",
+            txCode: correctPin
+        })
+    ).uri;
+
+    const result = await runtimeServices1.consumption.openId4Vc.resolveCredentialOffer({
+        credentialOfferUrl
+    });
+
+    expect(result).toBeSuccessful();
+
+    const credentialOffer = result.value.credentialOffer;
+    const requestedCredentials = credentialOffer.credentialOfferPayload.credential_configuration_ids;
+
+    const requestResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
+        credentialOffer,
+        credentialConfigurationIds: requestedCredentials,
+        pinCode: `1${correctPin}`
+    });
+    expect(requestResult.isError).toBe(true);
 });
 
 // external authentication buggy in the latest eudiplo release (4.1.0)
@@ -179,10 +201,11 @@ test("issuance via request", async () => {
 
     const requestId = (sentMessage.value.content as RequestJSON).id!;
     await syncUntilHasMessageWithRequest(runtimeServices2.transport, requestId);
-    await runtimeServices2.consumption.incomingRequests.accept({
+    const acceptResult = await runtimeServices2.consumption.incomingRequests.accept({
         requestId,
         items: [{ accept: true }]
     });
+    expect(acceptResult).toBeSuccessful();
 
     const currentCredentials = (
         await runtimeServices2.consumption.attributes.getAttributes({

@@ -4,7 +4,7 @@ import { LokiJsConnection } from "@js-soft/docdb-access-loki";
 import { MongoDbConnection } from "@js-soft/docdb-access-mongo";
 import { NodeLoggerFactory } from "@js-soft/node-logger";
 import { ISerializable, Serializable } from "@js-soft/ts-serval";
-import { EventEmitter2EventBus, sleep } from "@js-soft/ts-utils";
+import { sleep } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
 import fs from "fs";
@@ -32,6 +32,8 @@ import {
     TokenReference,
     Transport
 } from "../../src";
+import { TestAccountController } from "./TestAccountController";
+import { TestEventBus } from "./TestEventBus";
 
 export class TestUtil {
     private static readonly DEFAULT_SYNC_UNTIL_TIMEOUT = 60000;
@@ -154,10 +156,8 @@ export class TestUtil {
         return new Transport({ ...config, ...configOverwrite }, eventBus, TestUtil.loggerFactory, correlator);
     }
 
-    public static createEventBus(): EventEmitter2EventBus {
-        return new EventEmitter2EventBus(() => {
-            // ignore errors
-        });
+    public static createEventBus(): TestEventBus {
+        return new TestEventBus();
     }
 
     public static createConfig(): IConfigOverwrite {
@@ -181,7 +181,7 @@ export class TestUtil {
         const randomAccountName = Math.random().toString(36).substring(7);
         const db = await connection.getDatabase(`acc-${randomAccountName}`);
 
-        const accountController = new AccountController(transport, db, transport.config, dependencyOverrides);
+        const accountController = new TestAccountController(transport, db, transport.config, dependencyOverrides);
 
         await accountController.init();
 
@@ -273,7 +273,7 @@ export class TestUtil {
     public static async onboardDevice(transport: Transport, connection: IDatabaseConnection, deviceSharedSecret: DeviceSharedSecret): Promise<AccountController> {
         const randomId = Math.random().toString(36).substring(7);
         const db = await connection.getDatabase(`acc-${randomId}`);
-        const accountController = new AccountController(transport, db, transport.config);
+        const accountController = new TestAccountController(transport, db, transport.config);
         await accountController.init(deviceSharedSecret);
 
         return accountController;

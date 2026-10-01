@@ -65,6 +65,7 @@ import {
     TransportServices,
     UploadOwnFileRequest
 } from "../../src";
+import { getEventBusForTransportServices } from "./RuntimeEventBusRegistry";
 import { TestRuntimeServices } from "./RuntimeServiceProvider";
 import { TestNotificationItem } from "./TestNotificationItem";
 
@@ -91,6 +92,10 @@ export async function syncUntil(transportServices: TransportServices, until: (sy
         criteriaMet = until(finalSyncResult);
     } while (!criteriaMet && Date.now() - startedAt < DEFAULT_SYNC_UNTIL_TIMEOUT);
     if (!criteriaMet) throw new Error(`syncUntil timed out after ${DEFAULT_SYNC_UNTIL_TIMEOUT}ms.`);
+
+    // syncEverything returns after publishing runtime events, not after their asynchronous handlers have finished.
+    await getEventBusForTransportServices(transportServices)?.waitForRunningEventHandlers();
+
     return finalSyncResult;
 }
 
@@ -161,6 +166,7 @@ export async function syncUntilHasEvent<TEvent extends Event>(
         await sleep(Math.min(iterationNumber * 25, MAX_SYNC_UNTIL_SLEEP));
 
         await runtimeServices.transport.account.syncEverything();
+        await runtimeServices.eventBus.waitForRunningEventHandlers();
         event = runtimeServices.eventBus.publishedEvents.find(
             (e) =>
                 e.namespace === subscriptionTarget.namespace &&

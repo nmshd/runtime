@@ -41,6 +41,9 @@ export class TestDatabaseFactory implements ILokiJsDatabaseFactory {
 }
 
 export class TestUtil {
+    private static readonly DEFAULT_SYNC_UNTIL_TIMEOUT = 30000;
+    private static readonly MAX_SYNC_UNTIL_SLEEP = 1000;
+
     private static readonly loggerFactory = new NodeLoggerFactory({
         appenders: {
             consoleAppender: {
@@ -232,15 +235,23 @@ export class TestUtil {
         };
 
         let iterationNumber = 0;
+        let criteriaMet = false;
+        const startedAt = Date.now();
         do {
-            await sleep(iterationNumber * 25);
+            await sleep(Math.min(150 * iterationNumber, TestUtil.MAX_SYNC_UNTIL_SLEEP));
             const newSyncResult = await session.transportServices.account.syncEverything();
             syncResponse.messages.push(...newSyncResult.value.messages);
             syncResponse.relationships.push(...newSyncResult.value.relationships);
             syncResponse.identityDeletionProcesses.push(...newSyncResult.value.identityDeletionProcesses);
             syncResponse.files.push(...newSyncResult.value.files);
             iterationNumber++;
-        } while (!until(syncResponse) && iterationNumber < 15);
+            criteriaMet = until(syncResponse);
+        } while (!criteriaMet && Date.now() - startedAt < TestUtil.DEFAULT_SYNC_UNTIL_TIMEOUT);
+
+        if (!criteriaMet) {
+            throw new Error(`syncUntil condition was not met after ${TestUtil.DEFAULT_SYNC_UNTIL_TIMEOUT}ms`);
+        }
+
         return syncResponse;
     }
 
@@ -251,7 +262,7 @@ export class TestUtil {
 
     public static async syncUntilHasRelationship(session: LocalAccountSession, id: string): Promise<RelationshipDTO> {
         const syncResult = await TestUtil.syncUntil(session, (syncResult) => syncResult.relationships.some((r) => r.id === id));
-        return syncResult.relationships[0];
+        return syncResult.relationships.find((r) => r.id === id)!;
     }
 
     public static async syncUntilHasMessages(session: LocalAccountSession, expectedNumberOfMessages = 1): Promise<MessageDTO[]> {
@@ -261,7 +272,7 @@ export class TestUtil {
 
     public static async syncUntilHasMessage(session: LocalAccountSession, id: string): Promise<MessageDTO> {
         const syncResult = await TestUtil.syncUntil(session, (syncResult) => syncResult.messages.some((m) => m.id === id));
-        return syncResult.messages[0];
+        return syncResult.messages.find((m) => m.id === id)!;
     }
 
     public static async sendMessage(from: LocalAccountSession, to: LocalAccountSession, content?: MessageContentDerivation): Promise<MessageDTO> {
