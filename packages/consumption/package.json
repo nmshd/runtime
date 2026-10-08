@@ -61,18 +61,12 @@
                 }
             ]
         },
-        "moduleNameMapper": {
-            "^@verifiables/request-converter$": "<rootDir>/../../node_modules/@verifiables/request-converter/dist/index.js",
-            "^webcrypto-core$": "<rootDir>/../../node_modules/webcrypto-core/build/webcrypto-core.js"
-        },
         "transformIgnorePatterns": [
             "[/\\\\]packages[/\\\\][^/\\\\]+[/\\\\]dist[/\\\\]",
-            "<rootDir>/node_modules/(?!(@noble|@stablelib|@credo\\-ts|@verifiables)/)"
+            "<rootDir>/node_modules/(?!(@noble|@stablelib|@openid4vc|@owf|@sd-jwt)/)"
         ]
     },
     "dependencies": {
-        "@credo-ts/core": "0.7.0",
-        "@credo-ts/openid4vc": "0.7.0",
         "@js-soft/docdb-querytranslator": "^1.1.7",
         "@js-soft/ts-serval": "2.0.17",
         "@js-soft/ts-utils": "2.3.9",
@@ -81,11 +75,25 @@
         "@nmshd/iql": "^1.0.5",
         "@nmshd/transport": "*",
         "@noble/ciphers": "^2.2.0",
+        "@noble/curves": "^2.0.0",
+        "@openid4vc/oauth2": "0.7.0",
+        "@openid4vc/openid4vci": "0.7.0",
+        "@openid4vc/openid4vp": "0.7.0",
+        "@openid4vc/utils": "0.7.0",
+        "@owf/cose": "0.4.2",
+        "@owf/mdoc": "0.8.2",
+        "@peculiar/x509": "2.1.0",
+        "@scure/base": "^2.0.0",
+        "@sd-jwt/core": "0.22.0",
+        "@sd-jwt/sd-jwt-vc": "0.22.0",
+        "dcql": "4.0.0",
+        "did-jwt-vc": "5.0.1",
         "jose": "^6.2.3",
         "lodash": "^4.18.1",
-        "sjcl": "^1.0.9",
+        "reflect-metadata": "0.2.2",
         "ts-simple-nameof": "^1.3.3",
-        "ws": "^8.21.0"
+        "valibot": "1.5.0",
+        "zod": "4.6.5"
     },
     "devDependencies": {
         "@js-soft/docdb-access-loki": "1.4.5",
@@ -93,7 +101,6 @@
         "@js-soft/node-logger": "1.2.15",
         "@nmshd/crypto": "3.0.9",
         "@types/lodash": "4.17.25",
-        "@types/sjcl": "1.0.34",
         "ts-mockito": "2.6.1"
     },
     "publishConfig": {

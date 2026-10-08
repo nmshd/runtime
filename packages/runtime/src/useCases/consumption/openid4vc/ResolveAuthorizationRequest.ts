@@ -1,9 +1,8 @@
-import { OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
+import { OpenId4VpResolvedAuthorizationRequest } from "@nmshd/content";
 import { Result } from "@js-soft/ts-utils";
 import { OpenId4VcController } from "@nmshd/consumption";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
-import stringifySafe from "json-stringify-safe";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
 import { AttributeMapper } from "../attributes";
 
@@ -33,21 +32,6 @@ export class ResolveAuthorizationRequestUseCase extends UseCase<ResolveAuthoriza
     protected override async executeInternal(request: ResolveAuthorizationRequestRequest): Promise<Result<ResolveAuthorizationRequestResponse>> {
         const result = await this.openId4VcController.resolveAuthorizationRequest(request.authorizationRequestUrl);
 
-        const authorizationRequest = JSON.parse(stringifySafe(result.authorizationRequest));
-
-        if (result.matchingCredentials.length === 0) {
-            return Result.ok({ authorizationRequest, matchingCredentials: [] });
-        }
-
-        if (result.authorizationRequest.dcql) {
-            const queryId = result.authorizationRequest.dcql.queryResult.credentials[0].id;
-            const queryResult = result.authorizationRequest.dcql.queryResult.credential_matches[queryId];
-            if (queryResult.success) {
-                const recordType = queryResult.valid_credentials[0].record.type;
-                authorizationRequest.dcql.queryResult.credential_matches[queryId].valid_credentials[0].record.type = recordType;
-            }
-        }
-
-        return Result.ok({ authorizationRequest, matchingCredentials: AttributeMapper.toAttributeDTOList(result.matchingCredentials) });
+        return Result.ok({ authorizationRequest: result.authorizationRequest, matchingCredentials: AttributeMapper.toAttributeDTOList(result.matchingCredentials) });
     }
 }
