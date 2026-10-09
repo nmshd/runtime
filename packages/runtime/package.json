@@ -62,17 +62,15 @@
                 }
             ]
         },
-        "moduleNameMapper": {
-            "^@verifiables/request-converter$": "<rootDir>/../../node_modules/@verifiables/request-converter/dist/index.js",
-            "^webcrypto-core$": "<rootDir>/../../node_modules/webcrypto-core/build/webcrypto-core.js"
-        },
         "transformIgnorePatterns": [
             "[/\\\\]packages[/\\\\][^/\\\\]+[/\\\\]dist[/\\\\]",
-            "<rootDir>/node_modules/(?!(@noble|@stablelib|@credo\\-ts|@verifiables)/)"
-        ]
+            "<rootDir>/node_modules/(?!(@noble|@stablelib|@openid4vc|@owf|@sd-jwt)/)"
+        ],
+        "moduleNameMapper": {
+            "^@nmshd/consumption$": "<rootDir>/../consumption/src/index.ts"
+        }
     },
     "dependencies": {
-        "@credo-ts/openid4vc": "0.7.0",
         "@js-soft/docdb-querytranslator": "^1.1.7",
         "@js-soft/logging-abstractions": "^1.2.5",
         "@js-soft/ts-serval": "2.0.17",
@@ -85,11 +83,10 @@
         "@nmshd/runtime-types": "*",
         "@nmshd/transport": "*",
         "@nmshd/typescript-ioc": "3.2.6",
-        "@openid4vc/oauth2": "0.6.0",
+        "@openid4vc/oauth2": "0.7.0",
         "ajv": "^8.20.0",
         "ajv-errors": "^3.0.0",
         "ajv-formats": "^3.0.1",
-        "elliptic": "^6.6.1",
         "json-stringify-safe": "^5.0.1",
         "lodash": "^4.18.1",
         "luxon": "^3.7.2",
@@ -103,7 +100,6 @@
         "@js-soft/docdb-access-mongo": "1.4.5",
         "@js-soft/node-logger": "1.2.15",
         "@nmshd/connector-sdk": "7.5.3",
-        "@types/elliptic": "6.4.18",
         "@types/jest": "30.0.0",
         "@types/json-stringify-safe": "5.0.3",
         "@types/lodash": "4.17.25",

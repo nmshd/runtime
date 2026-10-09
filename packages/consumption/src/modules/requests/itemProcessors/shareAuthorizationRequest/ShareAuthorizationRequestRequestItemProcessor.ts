@@ -2,8 +2,9 @@ import { AcceptResponseItem, Request, ResponseItemResult, ShareAuthorizationRequ
 import { CoreAddress } from "@nmshd/core-types";
 import { TransportCoreErrors, TransportLoggerFactory } from "@nmshd/transport";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
-import { LocalAttribute, OwnIdentityAttribute } from "../../../attributes";
+import { LocalAttribute } from "../../../attributes";
 import { ValidationResult } from "../../../common/ValidationResult";
+import { isVerifiableCredentialAttribute } from "../../../openid4vc";
 import { GenericRequestItemProcessor } from "../GenericRequestItemProcessor";
 import { LocalRequestInfo } from "../IRequestItemProcessor";
 import {
@@ -29,8 +30,10 @@ export class ShareAuthorizationRequestRequestItemProcessor extends GenericReques
     ): Promise<ValidationResult> {
         const parsedParams = AcceptShareAuthorizationRequestRequestItemParameters.from(params);
 
-        const attribute = (await this.consumptionController.attributes.getLocalAttribute(parsedParams.attributeId)) as OwnIdentityAttribute | undefined;
-        if (!attribute) return ValidationResult.error(TransportCoreErrors.general.recordNotFound(LocalAttribute, parsedParams.attributeId.toString()));
+        const attribute = await this.consumptionController.attributes.getLocalAttribute(parsedParams.attributeId);
+        if (!isVerifiableCredentialAttribute(attribute)) {
+            return ValidationResult.error(TransportCoreErrors.general.recordNotFound(LocalAttribute, parsedParams.attributeId.toString()));
+        }
 
         let resolvedAuthorizationRequest;
         try {
@@ -57,8 +60,8 @@ export class ShareAuthorizationRequestRequestItemProcessor extends GenericReques
 
         const resolvedAuthorizationRequest = await this.consumptionController.openId4Vc.resolveAuthorizationRequest(requestItem.authorizationRequestUrl);
 
-        const attribute = (await this.consumptionController.attributes.getLocalAttribute(parsedParams.attributeId)) as OwnIdentityAttribute | undefined;
-        if (!attribute) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, parsedParams.attributeId.toString());
+        const attribute = await this.consumptionController.attributes.getLocalAttribute(parsedParams.attributeId);
+        if (!isVerifiableCredentialAttribute(attribute)) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, parsedParams.attributeId.toString());
 
         const acceptResult = await this.consumptionController.openId4Vc.acceptAuthorizationRequest(resolvedAuthorizationRequest.authorizationRequest, attribute);
         if (acceptResult.status !== 200) {
