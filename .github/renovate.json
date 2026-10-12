@@ -20,7 +20,7 @@
             "groupSlug": "eudiplo"
         },
         {
-            "description": "Do not update @credo-ts packages to version 0.7.1",
+            "description": "Do not update @credo-ts packages",
             "matchPackageNames": ["@credo-ts/*"],
             "enabled": false
         }
