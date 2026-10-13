@@ -72,10 +72,10 @@
     },
     "devDependencies": {
         "@eudiplo/sdk-core": "8.1.0",
-        "@js-soft/node-logger": "1.2.15",
-        "@types/lodash": "4.17.25",
+        "@js-soft/node-logger": "1.2.18",
+        "@types/lodash": "4.17.26",
         "@types/lokijs": "1.5.14",
-        "@types/luxon": "3.7.5"
+        "@types/luxon": "3.7.6"
     },
     "publishConfig": {
         "access": "public",
