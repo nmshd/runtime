@@ -15,7 +15,7 @@
     "packageRules": [
         {
             "description": "Update the EUDIPLO SDK and testcontainer image together",
-            "matchPackageNames": ["@eudiplo/sdk-core", "ghcr.io/openwallet-foundation/eudiplo"],
+            "matchPackageNames": ["@eudiplo/sdk-core", "ghcr.io/eudiplo/eudiplo"],
             "groupName": "EUDIPLO",
             "groupSlug": "eudiplo"
         },
