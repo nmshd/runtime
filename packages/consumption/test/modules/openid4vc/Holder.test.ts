@@ -504,10 +504,39 @@ test("rejects invalid signatures and audiences on SD-JWT tokens", async () => {
     expect((await fixture.holder.verifyPresentationTokenContent(wrongAudience, "token-id")).error?.message).toBe("Verify Error: Invalid Audience");
 });
 
-test.each<OpenId4VcCredentialFormat>(["mso_mdoc", "jwt_vc_json"])("does not create enmeshed tokens for %s", async (format) => {
-    fixture.format = format;
+test.each<OpenId4VcCredentialFormat>(["dc+sd-jwt", "mso_mdoc", "jwt_vc_json"])(
+    "creates and verifies enmeshed presentation tokens for %s without the holder key",
+    async (format) => {
+        fixture.format = format;
+        const credential = await fixture.receive();
+        const token = await fixture.holder.createPresentationTokenContent(credential.content.value, "token-id");
+        expect(token.type).toBe(format);
+        expect(token.displayInformation?.[0].name).toBe("Test credential");
+
+        fixture.keyEntries.clear();
+        const peerWithoutHolderKey = fixture.restart();
+        const transferred = TokenContentVerifiablePresentation.from(JSON.parse(JSON.stringify(token.toJSON())));
+        expect(await peerWithoutHolderKey.verifyPresentationTokenContent(transferred, "token-id")).toStrictEqual({ isValid: true });
+
+        const wrongNonce = await peerWithoutHolderKey.verifyPresentationTokenContent(transferred, "other-token-id");
+        expect(wrongNonce.isValid).toBe(false);
+        expect(wrongNonce.error?.message).toMatch(/^Verify Error: /);
+    }
+);
+
+test("rejects a jwt_vc_json presentation token that is not signed by the credential's holder key", async () => {
+    fixture.format = "jwt_vc_json";
     const credential = await fixture.receive();
-    await expect(fixture.holder.createPresentationTokenContent(credential.content.value, "token-id")).rejects.toThrow("Only SD-JWT");
+    const token = await fixture.holder.createPresentationTokenContent(credential.content.value, "token-id");
+    expect(await fixture.holder.verifyPresentationTokenContent(token, "token-id")).toStrictEqual({ isValid: true });
+    const otherKey = await fixture.crypto.createKeyForAlgorithms(["ES256"]);
+    const forged = await fixture.crypto.signJwt(decodeJwt(token.value as string), otherKey, { typ: "JWT" });
+    const result = await fixture.holder.verifyPresentationTokenContent(TokenContentVerifiablePresentation.from({ type: token.type, value: forged }), "token-id");
+    expect(result.error?.message).toBe("Verify Error: Invalid JWT Signature");
+    const wrongAudience = await fixture.crypto.signJwt({ ...decodeJwt(token.value as string), aud: "other" }, fixture.issuedKey, { typ: "JWT" });
+    expect(
+        (await fixture.holder.verifyPresentationTokenContent(TokenContentVerifiablePresentation.from({ type: token.type, value: wrongAudience }), "token-id")).error?.message
+    ).toBe("Verify Error: Invalid Audience");
 });
 
 test.each<OpenId4VcCredentialFormat>(["dc+sd-jwt", "mso_mdoc", "jwt_vc_json"])("rejects a modified %s signature before storing any attribute", async (format) => {

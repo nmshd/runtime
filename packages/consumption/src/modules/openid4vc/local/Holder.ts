@@ -16,7 +16,7 @@ import { extractEncryptionJwkFromJwks, Openid4vpClient, zClientMetadata } from "
 import { setGlobalConfig as setPresentationConfig } from "@openid4vc/utils";
 import { SDJWTException } from "@sd-jwt/core";
 import { DcqlQuery } from "dcql";
-import { base64url, errors } from "jose";
+import { base64url } from "jose";
 import { parse } from "valibot";
 import { z } from "zod";
 import { AttributesController, OwnIdentityAttribute } from "../../attributes";
@@ -25,6 +25,8 @@ import { KeyStorage } from "./KeyStorage";
 import { OpenId4VcCrypto } from "./OpenId4VcCrypto";
 import { displayInformationSchema } from "./OpenId4VcSchemas";
 import { isVerifiableCredentialAttribute, OwnIdentityAttributeWithVerifiableCredential } from "./VerifiableCredentialAttribute";
+
+const presentationTokenAudience = "defaultPresentationAudience";
 
 function isSupportedFormat(format: string): format is OpenId4VcCredentialFormat {
     return format === "dc+sd-jwt" || format === "mso_mdoc" || format === "jwt_vc_json";
@@ -152,7 +154,7 @@ export class Holder {
                 displayInformationCachedImages: response.displayInformationCachedImages
             })
         );
-        await Promise.all(contents.map((content) => this.formats.decode(content)));
+        await Promise.all(contents.map((content) => this.formats.decodeWithHolderKey(content)));
         return await Promise.all(
             contents.map(async (value) => {
                 const attribute = await this.attributeController.createOwnIdentityAttribute({
@@ -201,7 +203,7 @@ export class Holder {
         for (const attribute of attributes) {
             if (!isVerifiableCredentialAttribute(attribute)) continue;
             try {
-                const decoded = await this.formats.decode(attribute.content.value);
+                const decoded = await this.formats.decodeWithHolderKey(attribute.content.value);
                 if (DcqlQuery.query(query, [decoded.dcql]).can_be_satisfied) matching.push(attribute);
             } catch {
                 // Unsupported, malformed, expired credentials and credentials without a holder key cannot be presented.
@@ -217,7 +219,7 @@ export class Holder {
         const query = this.query(request);
         if (!isVerifiableCredentialAttribute(credential)) throw new Error("The selected attribute does not contain a verifiable credential");
         const content = credential.content.value;
-        const decoded = await this.formats.decode(content);
+        const decoded = await this.formats.decodeWithHolderKey(content);
         const result = DcqlQuery.query(query, [decoded.dcql]);
         const queryId = query.credentials[0].id;
         const matches = result.credential_matches[queryId];
@@ -263,25 +265,22 @@ export class Holder {
     }
 
     public async createPresentationTokenContent(credential: VerifiableCredential, nonce: string): Promise<TokenContentVerifiablePresentation> {
-        if (credential.type !== "dc+sd-jwt") throw new Error("Only SD-JWT credentials are supported for token presentation");
-        if (typeof credential.value !== "string") throw new Error("Credential must be encoded as a string");
-        const { holderKey } = await this.formats.decode(credential);
-        const value = await this.formats
-            .sdJwt(holderKey)
-            .present(credential.value, undefined, { kb: { payload: { aud: "defaultPresentationAudience", nonce, iat: Math.floor(Date.now() / 1000) } } });
+        if (!isSupportedFormat(credential.type)) throw new Error("Unsupported credential format for token presentation");
+        const value = await this.formats.presentAllClaimsForToken(credential, presentationTokenAudience, nonce);
         return TokenContentVerifiablePresentation.from({ value, type: credential.type, displayInformation: credential.displayInformation });
     }
 
     public async verifyPresentationTokenContent(content: TokenContentVerifiablePresentation, expectedNonce: string): Promise<{ isValid: boolean; error?: Error }> {
-        if (content.type !== "dc+sd-jwt") throw new Error("Only SD-JWT credentials are supported for token presentation");
+        if (!isSupportedFormat(content.type)) throw new Error("Unsupported credential format for token presentation");
         try {
             if (typeof content.value !== "string") throw new Error("Invalid presentation encoding");
-            await this.formats.sdJwt().verify(content.value, { keyBindingNonce: expectedNonce, expectedKeyBindingAudience: "defaultPresentationAudience", skewSeconds: 30 });
+            await this.formats.verifyTokenPresentation(content.type, content.value, presentationTokenAudience, expectedNonce);
             return { isValid: true };
-        } catch (cause) {
-            const code = cause instanceof SDJWTException || cause instanceof errors.JOSEError ? cause.code : undefined;
-            let message = cause instanceof Error ? cause.message : "Invalid presentation";
-            switch (code) {
+        } catch (cause: unknown) {
+            const verificationError = cause instanceof Error ? cause : new Error("Invalid presentation", { cause });
+            const sdJwtOrJoseErrorCode = "code" in verificationError && typeof verificationError.code === "string" ? verificationError.code : undefined;
+            let message = verificationError.message;
+            switch (sdJwtOrJoseErrorCode) {
                 case "INVALID_JWT_SIGNATURE":
                 case "KEY_BINDING_SIGNATURE_INVALID":
                 case "ERR_JWS_SIGNATURE_VERIFICATION_FAILED":
@@ -313,7 +312,7 @@ export class Holder {
                     break;
             }
             // SD-JWT 0.22 has no error codes for these key-binding failures.
-            if (cause instanceof SDJWTException && !code) {
+            if (verificationError instanceof SDJWTException && !sdJwtOrJoseErrorCode) {
                 switch (message) {
                     case "Verify Error: Invalid Key Binding audience":
                         message = "Verify Error: Invalid Audience";

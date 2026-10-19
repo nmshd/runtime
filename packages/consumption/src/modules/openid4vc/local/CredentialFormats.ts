@@ -2,7 +2,7 @@
 import { OpenId4VcJsonObject, OpenId4VpResolvedAuthorizationRequest, VerifiableCredential } from "@nmshd/content";
 import { Jwk, zJwk } from "@openid4vc/oauth2";
 import { CoseKey } from "@owf/cose";
-import { DeviceRequest, DocRequest, Holder as MdocHolder, IssuerSigned, ItemsRequest, SessionTranscript } from "@owf/mdoc";
+import { DeviceRequest, DeviceResponse, DocRequest, Holder as MdocHolder, IssuerSigned, ItemsRequest, SessionTranscript } from "@owf/mdoc";
 import { SDJwtVcInstance } from "@sd-jwt/sd-jwt-vc";
 import { DcqlCredential, DcqlQuery } from "dcql";
 import { normalizeCredential, transformPresentationInput, validateCredentialPayload, validateJwtCredentialPayload, validateJwtPresentationPayload } from "did-jwt-vc";
@@ -77,14 +77,19 @@ export class CredentialFormats {
         throw new Error("Credential has no supported holder binding");
     }
 
-    public async decode(credential: VerifiableCredential): Promise<{ dcql: DcqlCredential; holderKey: Jwk }> {
+    public async decodeWithHolderKey(credential: VerifiableCredential): Promise<{ dcql: DcqlCredential; holderKey: Jwk }> {
+        const decoded = await this.decodeWithoutHolderKey(credential);
+        await this.cryptography.getPrivateKey(decoded.holderKey);
+        return decoded;
+    }
+
+    public async decodeWithoutHolderKey(credential: VerifiableCredential): Promise<{ dcql: DcqlCredential; holderKey: Jwk }> {
         if (typeof credential.value !== "string") throw new Error("Credential must be encoded as a string");
         switch (credential.type) {
             case "dc+sd-jwt": {
                 const result = await this.sdJwt().verify(credential.value, { skewSeconds: 30 });
                 const claims = jsonObjectSchema.parse(result.payload);
                 const holderKey = await this.holderKey(result.payload);
-                await this.cryptography.getPrivateKey(holderKey);
                 return {
                     dcql: {
                         credential_format: "dc+sd-jwt",
@@ -108,7 +113,6 @@ export class CredentialFormats {
                     throw new Error("W3C credential is not valid at the current time");
                 }
                 const holderKey = await this.holderKey({ ...payload, sub: payload.sub ?? vc.credentialSubject.id });
-                await this.cryptography.getPrivateKey(holderKey);
                 return {
                     dcql: {
                         credential_format: "jwt_vc_json",
@@ -127,7 +131,6 @@ export class CredentialFormats {
                 );
                 const mso = issuerSigned.issuerAuth.mobileSecurityObject;
                 const holderKey = this.cryptography.publicKey(mso.deviceKeyInfo.deviceKey.jwk);
-                await this.cryptography.getPrivateKey(holderKey);
                 if (!issuerSigned.issuerNamespaces) throw new Error("mdoc issuer namespaces are missing");
                 const namespaceClaimsSchema = z.record(z.string(), z.unknown());
                 const namespaces = Object.fromEntries(
@@ -144,7 +147,7 @@ export class CredentialFormats {
     }
 
     public async assertHolderBinding(credential: VerifiableCredential, expectedKey: Jwk): Promise<void> {
-        const decoded = await this.decode(credential);
+        const decoded = await this.decodeWithHolderKey(credential);
         if ((await calculateJwkThumbprint(decoded.holderKey)) !== (await calculateJwkThumbprint(expectedKey))) {
             throw new Error("Issued credential does not match the requested holder key");
         }
@@ -168,7 +171,7 @@ export class CredentialFormats {
         encryptionKey?: Jwk,
         mdocGeneratedNonce?: string
     ): Promise<string> {
-        const { holderKey } = await this.decode(credential);
+        const { holderKey } = await this.decodeWithHolderKey(credential);
         if (typeof credential.value !== "string") throw new Error("Credential must be encoded as a string");
         const encoded = credential.value;
         const payload = request.authorizationRequestPayload;
@@ -178,28 +181,10 @@ export class CredentialFormats {
                 return await this.sdJwt(holderKey).present(encoded, this.presentationFrame(jsonObjectSchema.parse(disclosedClaims)), {
                     kb: { payload: { iat: Math.floor(Date.now() / 1000), aud: payload.client_id, nonce: payload.nonce } }
                 });
-            case "jwt_vc_json": {
-                const jwtPayload = decodeJwt(encoded);
-                const vc = w3cCredentialSchema.parse(jwtPayload.vc);
-                const subject = jwtPayload.sub ?? vc.credentialSubject.id;
-                const holderDid = typeof subject === "string" && subject.startsWith("did:") ? subject : this.cryptography.didForKey(holderKey, "jwk").split("#")[0];
-                const kid = holderDid.startsWith("did:key:") ? `${holderDid}#${holderDid.slice(8)}` : holderDid.startsWith("did:jwk:") ? `${holderDid}#0` : undefined;
-                const presentation = transformPresentationInput({
-                    "@context": ["https://www.w3.org/2018/credentials/v1"],
-                    type: ["VerifiablePresentation"],
-                    holder: holderDid,
-                    verifiableCredential: [encoded],
-                    aud: payload.client_id,
-                    nonce: payload.nonce,
-                    iat: Math.floor(Date.now() / 1000)
-                });
-                validateJwtPresentationPayload(presentation);
-                return await this.cryptography.signJwt(presentation, holderKey, kid ? { typ: "JWT", kid } : { typ: "JWT", jwk: holderKey });
-            }
+            case "jwt_vc_json":
+                return await this.jwtVcPresentation(encoded, holderKey, payload.client_id, payload.nonce);
             case "mso_mdoc": {
-                const issuerSigned = IssuerSigned.fromEncodedForOid4Vci(encoded);
                 const namespaceClaims = z.record(z.string(), z.record(z.string(), z.unknown())).parse(disclosedClaims);
-                const namespaces = new Map(Object.entries(namespaceClaims).map(([namespace, claims]) => [namespace, new Map(Object.keys(claims).map((claim) => [claim, false]))]));
                 if (!payload.response_uri) throw new Error("Presentation response URI is missing");
                 const sessionTranscript =
                     request.version >= 100
@@ -221,20 +206,111 @@ export class CredentialFormats {
                               },
                               this.cryptography.mdocContext
                           );
-                const response = await MdocHolder.createDeviceResponseForDeviceRequest(
-                    {
-                        deviceRequest: DeviceRequest.create({
-                            docRequests: [DocRequest.create({ itemsRequest: ItemsRequest.create({ docType: issuerSigned.issuerAuth.mobileSecurityObject.docType, namespaces }) })]
-                        }),
-                        sessionTranscript,
-                        documents: [{ issuerSigned, docRequestIndex: 0, signature: { signingKey: CoseKey.fromJwk({ ...holderKey, alg: this.cryptography.algorithm(holderKey) }) } }]
-                    },
-                    this.cryptography.mdocContext
-                );
-                return response.encodedForOid4Vp;
+                return await this.mdocPresentation(encoded, holderKey, namespaceClaims, sessionTranscript);
             }
             default:
                 throw new Error("Unsupported credential format");
         }
+    }
+
+    public async presentAllClaimsForToken(credential: VerifiableCredential, audience: string, nonce: string): Promise<string> {
+        const { holderKey } = await this.decodeWithHolderKey(credential);
+        if (typeof credential.value !== "string") throw new Error("Credential must be encoded as a string");
+        const encoded = credential.value;
+        switch (credential.type) {
+            case "dc+sd-jwt":
+                return await this.sdJwt(holderKey).present(encoded, undefined, { kb: { payload: { aud: audience, nonce, iat: Math.floor(Date.now() / 1000) } } });
+            case "jwt_vc_json":
+                return await this.jwtVcPresentation(encoded, holderKey, audience, nonce);
+            case "mso_mdoc": {
+                const issuerSigned = IssuerSigned.fromEncodedForOid4Vci(encoded);
+                const namespaces = Object.fromEntries(
+                    [...(issuerSigned.issuerNamespaces?.issuerNamespaces.keys() ?? [])].map((namespace) => [namespace, issuerSigned.getPrettyClaims(namespace) ?? {}])
+                );
+                return await this.mdocPresentation(encoded, holderKey, namespaces, await this.tokenSessionTranscript(audience, nonce));
+            }
+            default:
+                throw new Error("Unsupported credential format");
+        }
+    }
+
+    public async verifyTokenPresentation(type: string, value: string, audience: string, nonce: string): Promise<void> {
+        switch (type) {
+            case "dc+sd-jwt":
+                await this.sdJwt().verify(value, { keyBindingNonce: nonce, expectedKeyBindingAudience: audience, skewSeconds: 30 });
+                return;
+            case "jwt_vc_json": {
+                const payload = decodeJwt(value);
+                const [encodedCredential] = z
+                    .object({ verifiableCredential: z.tuple([z.string()]) })
+                    .parse(payload.vp, { error: () => "Verify Error: Presentation must contain exactly one credential" }).verifiableCredential;
+                const { holderKey } = await this.decodeWithoutHolderKey(VerifiableCredential.from({ value: encodedCredential, type }));
+                if (!(await this.cryptography.verifyWithKey(value, holderKey))) throw new Error("Verify Error: Invalid JWT Signature");
+                if (!(Array.isArray(payload.aud) ? payload.aud : [payload.aud]).includes(audience)) throw new Error("Verify Error: Invalid Audience");
+                if (payload.nonce !== nonce) throw new Error("Verify Error: Invalid Nonce");
+                return;
+            }
+            case "mso_mdoc": {
+                const response = DeviceResponse.fromEncodedForOid4Vp(value);
+                const documents = response.documents ?? [];
+                if (documents.length !== 1) throw new Error("Verify Error: Presentation must contain exactly one document");
+                const embeddedIssuerCertificate = documents[0].issuerSigned.issuerAuth.certificate;
+                await response.verify(
+                    {
+                        sessionTranscript: await this.tokenSessionTranscript(audience, nonce),
+                        trustedCertificates: [{ issuance: [embeddedIssuerCertificate] }],
+                        skewSeconds: 30
+                    },
+                    this.cryptography.mdocContext
+                );
+                return;
+            }
+            default:
+                throw new Error("Unsupported credential format");
+        }
+    }
+
+    private async tokenSessionTranscript(audience: string, nonce: string): Promise<SessionTranscript> {
+        return await SessionTranscript.forOid4Vp({ clientId: audience, nonce, responseUri: audience }, this.cryptography.mdocContext);
+    }
+
+    private async jwtVcPresentation(encoded: string, holderKey: Jwk, audience: string, nonce: string): Promise<string> {
+        const jwtPayload = decodeJwt(encoded);
+        const vc = w3cCredentialSchema.parse(jwtPayload.vc);
+        const subject = jwtPayload.sub ?? vc.credentialSubject.id;
+        const holderDid = typeof subject === "string" && subject.startsWith("did:") ? subject : this.cryptography.didForKey(holderKey, "jwk").split("#")[0];
+        const kid = holderDid.startsWith("did:key:") ? `${holderDid}#${holderDid.slice(8)}` : holderDid.startsWith("did:jwk:") ? `${holderDid}#0` : undefined;
+        const presentation = transformPresentationInput({
+            "@context": ["https://www.w3.org/2018/credentials/v1"],
+            type: ["VerifiablePresentation"],
+            holder: holderDid,
+            verifiableCredential: [encoded],
+            aud: audience,
+            nonce,
+            iat: Math.floor(Date.now() / 1000)
+        });
+        validateJwtPresentationPayload(presentation);
+        return await this.cryptography.signJwt(presentation, holderKey, kid ? { typ: "JWT", kid } : { typ: "JWT", jwk: holderKey });
+    }
+
+    private async mdocPresentation(
+        encoded: string,
+        holderKey: Jwk,
+        disclosedClaims: Record<string, Record<string, unknown>>,
+        sessionTranscript: SessionTranscript
+    ): Promise<string> {
+        const issuerSigned = IssuerSigned.fromEncodedForOid4Vci(encoded);
+        const namespaces = new Map(Object.entries(disclosedClaims).map(([namespace, claims]) => [namespace, new Map(Object.keys(claims).map((claim) => [claim, false]))]));
+        const response = await MdocHolder.createDeviceResponseForDeviceRequest(
+            {
+                deviceRequest: DeviceRequest.create({
+                    docRequests: [DocRequest.create({ itemsRequest: ItemsRequest.create({ docType: issuerSigned.issuerAuth.mobileSecurityObject.docType, namespaces }) })]
+                }),
+                sessionTranscript,
+                documents: [{ issuerSigned, docRequestIndex: 0, signature: { signingKey: CoseKey.fromJwk({ ...holderKey, alg: this.cryptography.algorithm(holderKey) }) } }]
+            },
+            this.cryptography.mdocContext
+        );
+        return response.encodedForOid4Vp;
     }
 }
