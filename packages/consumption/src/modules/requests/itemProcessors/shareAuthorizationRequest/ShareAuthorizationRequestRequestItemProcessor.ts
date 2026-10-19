@@ -42,6 +42,13 @@ export class ShareAuthorizationRequestRequestItemProcessor extends GenericReques
             return ValidationResult.error(ConsumptionCoreErrors.requests.invalidRequestItem("The authorization request url can't be resolved."));
         }
 
+        const credentialQueryCount = resolvedAuthorizationRequest.authorizationRequest.authorizationRequestPayload.dcql_query?.credentials.length ?? 0;
+        if (credentialQueryCount !== 1) {
+            return ValidationResult.error(
+                ConsumptionCoreErrors.requests.invalidAcceptParameters("Authorization requests asking for multiple credentials can't be accepted via a RequestItem.")
+            );
+        }
+
         const matchingCredentials = resolvedAuthorizationRequest.matchingCredentials;
         const matchingAttributeIds = matchingCredentials.map((c) => c.id.toString());
         if (!matchingAttributeIds.includes(parsedParams.attributeId.toString())) {
@@ -63,7 +70,11 @@ export class ShareAuthorizationRequestRequestItemProcessor extends GenericReques
         const attribute = await this.consumptionController.attributes.getLocalAttribute(parsedParams.attributeId);
         if (!isVerifiableCredentialAttribute(attribute)) throw TransportCoreErrors.general.recordNotFound(LocalAttribute, parsedParams.attributeId.toString());
 
-        const acceptResult = await this.consumptionController.openId4Vc.acceptAuthorizationRequest(resolvedAuthorizationRequest.authorizationRequest, attribute);
+        const authorizationRequest = resolvedAuthorizationRequest.authorizationRequest;
+        const queryId = authorizationRequest.authorizationRequestPayload.dcql_query?.credentials[0].id;
+        if (!queryId) throw ConsumptionCoreErrors.requests.invalidAcceptParameters("The authorization request has no credential query.");
+
+        const acceptResult = await this.consumptionController.openId4Vc.acceptAuthorizationRequest(authorizationRequest, { [queryId]: [attribute] });
         if (acceptResult.status !== 200) {
             TransportLoggerFactory.getLogger(ShareAuthorizationRequestRequestItemProcessor).error(
                 "Failed to accept ShareAuthorizationRequestRequestItem. Error message:",

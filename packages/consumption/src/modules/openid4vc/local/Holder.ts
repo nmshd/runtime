@@ -10,7 +10,7 @@ import {
     VerifiableCredential
 } from "@nmshd/content";
 import { AccountController } from "@nmshd/transport";
-import { JwtSigner, setGlobalConfig as setOauthConfig, zJwkSet } from "@openid4vc/oauth2";
+import { Jwk, JwtSigner, setGlobalConfig as setOauthConfig, zJwkSet } from "@openid4vc/oauth2";
 import { Openid4vciClient, setGlobalConfig as setIssuanceConfig } from "@openid4vc/openid4vci";
 import { extractEncryptionJwkFromJwks, Openid4vpClient, zClientMetadata } from "@openid4vc/openid4vp";
 import { setGlobalConfig as setPresentationConfig } from "@openid4vc/utils";
@@ -172,8 +172,7 @@ export class Holder {
         if (payload.transaction_data) throw new Error("Transaction data is not supported");
         if (!["direct_post", "direct_post.jwt"].includes(payload.response_mode ?? "")) throw new Error("Unsupported presentation response mode");
         const query = parse(DcqlQuery.vModel, payload.dcql_query);
-        if (query.credentials.length !== 1 || query.credentials[0].multiple) throw new Error("Exactly one credential query is supported");
-        if (!isSupportedFormat(query.credentials[0].format)) throw new Error("Unsupported presentation credential format");
+        if (query.credentials.some((credentialQuery) => !isSupportedFormat(credentialQuery.format))) throw new Error("Unsupported presentation credential format");
         DcqlQuery.validate(query);
         return query;
     }
@@ -193,37 +192,65 @@ export class Holder {
         return result;
     }
 
-    public async matchingCredentials(request: OpenId4VpResolvedAuthorizationRequest): Promise<OwnIdentityAttributeWithVerifiableCredential[]> {
+    public async matchingCredentialsByQueryId(request: OpenId4VpResolvedAuthorizationRequest): Promise<Record<string, OwnIdentityAttributeWithVerifiableCredential[]>> {
         const query = this.query(request);
         const attributes = await this.attributeController.getLocalAttributes({
             "@type": "OwnIdentityAttribute",
             "content.value.@type": "VerifiableCredential"
         });
-        const matching: OwnIdentityAttributeWithVerifiableCredential[] = [];
+        const matchingByQueryId = Object.fromEntries(
+            query.credentials.map((credentialQuery): [string, OwnIdentityAttributeWithVerifiableCredential[]] => [credentialQuery.id, []])
+        );
         for (const attribute of attributes) {
             if (!isVerifiableCredentialAttribute(attribute)) continue;
             try {
                 const decoded = await this.formats.decodeWithHolderKey(attribute.content.value);
-                if (DcqlQuery.query(query, [decoded.dcql]).can_be_satisfied) matching.push(attribute);
+                const result = DcqlQuery.query(query, [decoded.dcql]);
+                for (const [queryId, match] of Object.entries(result.credential_matches)) {
+                    if (match.success) matchingByQueryId[queryId].push(attribute);
+                }
             } catch {
                 // Unsupported, malformed, expired credentials and credentials without a holder key cannot be presented.
             }
         }
-        return matching;
+        return matchingByQueryId;
+    }
+
+    private assertCredentialsSatisfyQuery(query: DcqlQuery.Output, credentialsByQueryId: Record<string, OwnIdentityAttribute[]>): void {
+        const selectedQueryIds = Object.keys(credentialsByQueryId);
+        if (!selectedQueryIds.length) throw new Error("At least one credential must be selected");
+        for (const queryId of selectedQueryIds) {
+            const credentialQuery = query.credentials.find((candidate) => candidate.id === queryId);
+            if (!credentialQuery) throw new Error(`Unknown credential query: ${queryId}`);
+            const credentials = credentialsByQueryId[queryId];
+            if (!credentials.length) throw new Error(`No credential selected for credential query '${queryId}'`);
+            if (credentials.length > 1 && !credentialQuery.multiple) throw new Error(`Credential query '${queryId}' does not allow multiple credentials`);
+            if (new Set(credentials.map((credential) => credential.id.toString())).size !== credentials.length) {
+                throw new Error(`Credential query '${queryId}' contains the same credential more than once`);
+            }
+        }
+        if (!query.credential_sets) {
+            const missing = query.credentials.filter((credentialQuery) => !selectedQueryIds.includes(credentialQuery.id)).map((credentialQuery) => credentialQuery.id);
+            if (missing.length) throw new Error(`No credential selected for credential queries: ${missing.join(", ")}`);
+            return;
+        }
+        const referencedQueryIds = new Set(query.credential_sets.flatMap((credentialSet) => credentialSet.options.flat()));
+        const unreferenced = selectedQueryIds.filter((queryId) => !referencedQueryIds.has(queryId));
+        if (unreferenced.length) throw new Error(`Credential queries are not part of any credential set: ${unreferenced.join(", ")}`);
+        for (const credentialSet of query.credential_sets) {
+            if (!credentialSet.required) continue;
+            if (!credentialSet.options.some((option) => option.every((queryId) => selectedQueryIds.includes(queryId)))) {
+                throw new Error(`The selection does not satisfy the required credential set: ${credentialSet.options.map((option) => `[${option.join(", ")}]`).join(" or ")}`);
+            }
+        }
     }
 
     public async acceptAuthorizationRequest(
         request: OpenId4VpResolvedAuthorizationRequest,
-        credential: OwnIdentityAttribute
+        credentialsByQueryId: Record<string, OwnIdentityAttribute[]>
     ): Promise<{ status: number; body: OpenId4VcJsonValue }> {
         const query = this.query(request);
-        if (!isVerifiableCredentialAttribute(credential)) throw new Error("The selected attribute does not contain a verifiable credential");
-        const content = credential.content.value;
-        const decoded = await this.formats.decodeWithHolderKey(content);
-        const result = DcqlQuery.query(query, [decoded.dcql]);
-        const queryId = query.credentials[0].id;
-        const matches = result.credential_matches[queryId];
-        if (!result.can_be_satisfied || !matches.success) throw new Error("The selected credential does not match the query");
+        this.assertCredentialsSatisfyQuery(query, credentialsByQueryId);
         const payload = request.authorizationRequestPayload;
         const clientMetadata = payload.client_metadata;
         const jwks = clientMetadata?.jwks ?? (clientMetadata?.jwks_uri ? zJwkSet.parse(await this.cryptography.fetchJson(clientMetadata.jwks_uri)) : undefined);
@@ -232,17 +259,31 @@ export class Holder {
                 ? extractEncryptionJwkFromJwks(jwks, { supportedAlgValues: ["ECDH-ES", "ECDH-ES+A256KW", "RSA-OAEP-256"] })
                 : undefined;
         const mdocGeneratedNonce = base64url.encode(crypto.getRandomValues(new Uint8Array(16)));
-        const presentation = await this.formats.present(content, request, matches.valid_credentials[0], encryptionKey, mdocGeneratedNonce);
+        const vpToken: Record<string, string[]> = {};
+        let responseSigningKey: Jwk | undefined;
+        for (const [queryId, credentials] of Object.entries(credentialsByQueryId)) {
+            vpToken[queryId] = [];
+            for (const credential of credentials) {
+                if (!isVerifiableCredentialAttribute(credential)) throw new Error("The selected attribute does not contain a verifiable credential");
+                const content = credential.content.value;
+                const decoded = await this.formats.decodeWithHolderKey(content);
+                const match = DcqlQuery.query(query, [decoded.dcql]).credential_matches[queryId];
+                if (!match.success) throw new Error(`The selected credential does not match the query '${queryId}'`);
+                responseSigningKey ??= decoded.holderKey;
+                vpToken[queryId].push(await this.formats.present(content, request, match.valid_credentials[0], encryptionKey, mdocGeneratedNonce));
+            }
+        }
         const response = await this.presentationClient.createOpenid4vpAuthorizationResponse({
             authorizationRequestPayload: payload,
-            authorizationResponsePayload: { vp_token: { [queryId]: [presentation] } },
+            authorizationResponsePayload: { vp_token: vpToken },
             jarm:
                 payload.response_mode === "direct_post.jwt"
                     ? {
                           encryption: { nonce: mdocGeneratedNonce, jwk: encryptionKey },
-                          jwtSigner: clientMetadata?.authorization_signed_response_alg
-                              ? { method: "jwk", publicJwk: decoded.holderKey, alg: this.cryptography.algorithm(decoded.holderKey) }
-                              : undefined,
+                          jwtSigner:
+                              clientMetadata?.authorization_signed_response_alg && responseSigningKey
+                                  ? { method: "jwk", publicJwk: responseSigningKey, alg: this.cryptography.algorithm(responseSigningKey) }
+                                  : undefined,
                           authorizationServer: "wallet",
                           audience: payload.client_id,
                           serverMetadata: {

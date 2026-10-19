@@ -13,6 +13,7 @@ export interface ResolveAuthorizationRequestRequest {
 export interface ResolveAuthorizationRequestResponse {
     authorizationRequest: OpenId4VpResolvedAuthorizationRequest;
     matchingCredentials: LocalAttributeDTO[];
+    matchingCredentialsByQueryId: Record<string, LocalAttributeDTO[]>;
 }
 
 class Validator extends SchemaValidator<ResolveAuthorizationRequestRequest> {
@@ -32,6 +33,12 @@ export class ResolveAuthorizationRequestUseCase extends UseCase<ResolveAuthoriza
     protected override async executeInternal(request: ResolveAuthorizationRequestRequest): Promise<Result<ResolveAuthorizationRequestResponse>> {
         const result = await this.openId4VcController.resolveAuthorizationRequest(request.authorizationRequestUrl);
 
-        return Result.ok({ authorizationRequest: result.authorizationRequest, matchingCredentials: AttributeMapper.toAttributeDTOList(result.matchingCredentials) });
+        return Result.ok({
+            authorizationRequest: result.authorizationRequest,
+            matchingCredentials: AttributeMapper.toAttributeDTOList(result.matchingCredentials),
+            matchingCredentialsByQueryId: Object.fromEntries(
+                Object.entries(result.matchingCredentialsByQueryId).map(([queryId, credentials]) => [queryId, AttributeMapper.toAttributeDTOList(credentials)])
+            )
+        });
     }
 }

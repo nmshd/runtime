@@ -75,18 +75,26 @@ export class OpenId4VcController extends ConsumptionBaseController {
     public async resolveAuthorizationRequest(authorizationRequestUrl: string): Promise<{
         authorizationRequest: OpenId4VpResolvedAuthorizationRequest;
         matchingCredentials: OwnIdentityAttributeWithVerifiableCredential[];
+        matchingCredentialsByQueryId: Record<string, OwnIdentityAttributeWithVerifiableCredential[]>;
     }> {
         const authorizationRequest = await this.holder.resolveAuthorizationRequest(authorizationRequestUrl);
 
-        const matchingCredentials = await this.holder.matchingCredentials(authorizationRequest);
-        return { authorizationRequest, matchingCredentials };
+        const matchingCredentialsByQueryId = await this.holder.matchingCredentialsByQueryId(authorizationRequest);
+        const matchingCredentials = [
+            ...new Map(
+                Object.values(matchingCredentialsByQueryId)
+                    .flat()
+                    .map((credential) => [credential.id.toString(), credential])
+            ).values()
+        ];
+        return { authorizationRequest, matchingCredentials, matchingCredentialsByQueryId };
     }
 
     public async acceptAuthorizationRequest(
         authorizationRequest: OpenId4VpResolvedAuthorizationRequest,
-        credential: OwnIdentityAttribute
+        credentialsByQueryId: Record<string, OwnIdentityAttribute[]>
     ): Promise<{ status: number; message: OpenId4VcJsonValue }> {
-        const serverResponse = await this.holder.acceptAuthorizationRequest(authorizationRequest, credential);
+        const serverResponse = await this.holder.acceptAuthorizationRequest(authorizationRequest, credentialsByQueryId);
 
         return { status: serverResponse.status, message: serverResponse.body };
     }

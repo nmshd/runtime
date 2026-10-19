@@ -18324,12 +18324,18 @@ export const AcceptAuthorizationRequestRequest: any = {
                 "authorizationRequest": {
                     "$ref": "#/definitions/OpenId4VpResolvedAuthorizationRequest"
                 },
-                "attributeId": {
-                    "$ref": "#/definitions/AttributeIdString"
+                "attributeIdsByQueryId": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/AttributeIdString"
+                        }
+                    }
                 }
             },
             "required": [
-                "attributeId",
+                "attributeIdsByQueryId",
                 "authorizationRequest"
             ]
         },

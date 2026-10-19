@@ -242,9 +242,12 @@ describe("presentation", () => {
 
         expect(loadResult.value.authorizationRequest.authorizationRequestPayload.dcql_query).toBeDefined();
 
+        const [queryId, matchingCredentialsForQuery] = Object.entries(loadResult.value.matchingCredentialsByQueryId)[0];
+        expect(matchingCredentialsForQuery).toStrictEqual(matchingCredentials);
+
         const presentationResult = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({
             authorizationRequest: loadResult.value.authorizationRequest,
-            attributeId: matchingCredentials[0].id
+            attributeIdsByQueryId: { [queryId]: [matchingCredentialsForQuery[0].id] }
         });
         expect(presentationResult).toBeSuccessful();
         expect(presentationResult.value.status).toBe(200);

@@ -2,7 +2,15 @@
 /* eslint-disable @typescript-eslint/require-await -- In-memory fixtures implement asynchronous storage APIs. */
 import { jest } from "@jest/globals";
 import { ILogger } from "@js-soft/logging-abstractions";
-import { GivenName, IdentityAttribute, OpenId4VcCredentialFormat, OpenId4VpResolvedAuthorizationRequest, TokenContentVerifiablePresentation } from "@nmshd/content";
+import {
+    GivenName,
+    IdentityAttribute,
+    OpenId4VcCredentialFormat,
+    OpenId4VpDcqlCredentialQuery,
+    OpenId4VpDcqlQuery,
+    OpenId4VpResolvedAuthorizationRequest,
+    TokenContentVerifiablePresentation
+} from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { AccountController, CoreSynchronizable, ICoreSynchronizable, Identity, SynchronizedCollection } from "@nmshd/transport";
 import { Jwk, zJwk } from "@openid4vc/oauth2";
@@ -255,20 +263,21 @@ class Fixture {
         return attribute;
     }
 
-    public async request(mode: "direct_post" | "direct_post.jwt" = "direct_post"): Promise<OpenId4VpResolvedAuthorizationRequest> {
+    public credentialQuery(id: string, format: OpenId4VcCredentialFormat = this.format): OpenId4VpDcqlCredentialQuery {
+        if (format === "mso_mdoc") return { id, format, claims: [{ path: [namespace, "given_name"] }], meta: { doctype_value: docType } };
+        if (format === "jwt_vc_json") return { id, format, claims: [{ path: ["credentialSubject", "name"] }], meta: { type_values: [["VerifiableCredential", "TestCredential"]] } };
+        return { id, format, claims: [{ path: ["name"] }], meta: { vct_values: [vct] } };
+    }
+
+    public async request(
+        mode: "direct_post" | "direct_post.jwt" = "direct_post",
+        dcqlQuery: OpenId4VpDcqlQuery = { credentials: [this.credentialQuery("credential")] }
+    ): Promise<OpenId4VpResolvedAuthorizationRequest> {
         if (mode === "direct_post.jwt") {
             const key = await generateKeyPair("ECDH-ES", { extractable: true });
             this.encryptionKey = zJwk.parse(await exportJWK(key.privateKey));
             this.encryptionPublicKey = { ...zJwk.parse(await exportJWK(key.publicKey)), use: "enc", alg: "ECDH-ES", kid: "verifier-key" };
         }
-        const claims =
-            this.format === "mso_mdoc" ? [{ path: [namespace, "given_name"] }] : this.format === "jwt_vc_json" ? [{ path: ["credentialSubject", "name"] }] : [{ path: ["name"] }];
-        const meta =
-            this.format === "mso_mdoc"
-                ? { doctype_value: docType }
-                : this.format === "dc+sd-jwt"
-                  ? { vct_values: [vct] }
-                  : { type_values: [["VerifiableCredential", "TestCredential"]] };
         this.presentationRequest = {
             client_id: "x509_san_dns:verifier.example",
             nonce: "verifier-nonce",
@@ -276,7 +285,7 @@ class Fixture {
             response_mode: mode,
             response_uri: `${verifier}/response`,
             state: "state",
-            dcql_query: { credentials: [{ id: "credential", format: this.format, claims, meta }] },
+            dcql_query: dcqlQuery,
             client_metadata: mode === "direct_post.jwt" ? { jwks: { keys: [this.encryptionPublicKey] }, encrypted_response_enc_values_supported: ["A256GCM"] } : undefined
         };
         return await this.holder.resolveAuthorizationRequest(`openid4vp://?client_id=x509_san_dns%3Averifier.example&request_uri=${encodeURIComponent(`${verifier}/request`)}`);
@@ -298,8 +307,8 @@ describe.each<OpenId4VcCredentialFormat>(["dc+sd-jwt", "mso_mdoc", "jwt_vc_json"
         expect(fixture.account.syncDatawallet).toHaveBeenCalled();
         fixture.holder = fixture.restart();
         const request = JSON.parse(JSON.stringify(await fixture.request(mode)));
-        expect(await fixture.holder.matchingCredentials(request)).toStrictEqual([credential]);
-        const response = await fixture.holder.acceptAuthorizationRequest(request, credential);
+        expect(await fixture.holder.matchingCredentialsByQueryId(request)).toStrictEqual({ credential: [credential] });
+        const response = await fixture.holder.acceptAuthorizationRequest(request, { credential: [credential] });
         expect(response.status).toBe(200);
         expect(fixture.submitted.state).toBe("state");
         const presentation = fixture.submitted.vp_token.credential[0];
@@ -348,8 +357,8 @@ describe.each<OpenId4VcCredentialFormat>(["dc+sd-jwt", "mso_mdoc", "jwt_vc_json"
         fixture.expiresAt = Math.floor(Date.now() / 1000) - 60;
         credential.content.value.value = await fixture.issue(fixture.issuedKey);
         const request = await fixture.request();
-        expect(await fixture.holder.matchingCredentials(request)).toStrictEqual([]);
-        await expect(fixture.holder.acceptAuthorizationRequest(request, credential)).rejects.toThrow(expect.any(Error));
+        expect(await fixture.holder.matchingCredentialsByQueryId(request)).toStrictEqual({ credential: [] });
+        await expect(fixture.holder.acceptAuthorizationRequest(request, { credential: [credential] })).rejects.toThrow(expect.any(Error));
     });
 
     test("does not present a credential without its key", async () => {
@@ -357,8 +366,8 @@ describe.each<OpenId4VcCredentialFormat>(["dc+sd-jwt", "mso_mdoc", "jwt_vc_json"
         const credential = await fixture.receive();
         const request = await fixture.request();
         fixture.keyEntries.clear();
-        expect(await fixture.holder.matchingCredentials(request)).toStrictEqual([]);
-        await expect(fixture.holder.acceptAuthorizationRequest(request, credential)).rejects.toThrow("Holder key not found");
+        expect(await fixture.holder.matchingCredentialsByQueryId(request)).toStrictEqual({ credential: [] });
+        await expect(fixture.holder.acceptAuthorizationRequest(request, { credential: [credential] })).rejects.toThrow("Holder key not found");
     });
 });
 
@@ -381,7 +390,7 @@ test.each<OpenId4VcCredentialFormat>(["dc+sd-jwt", "mso_mdoc", "jwt_vc_json"])("
         expect(fixture.issuedKey).toMatchObject({ kty: "EC", crv: "P-256" });
         expect(fixture.keyEntries.size).toBe(1);
         fixture.holder = fixture.restart();
-        await fixture.holder.acceptAuthorizationRequest(await fixture.request(), credential);
+        await fixture.holder.acceptAuthorizationRequest(await fixture.request(), { credential: [credential] });
         expect(fixture.submitted.vp_token.credential).toHaveLength(1);
     } finally {
         generate.mockRestore();
@@ -473,15 +482,87 @@ test("rejects unknown configuration ids before requesting a token", async () => 
     expect(fixture.requests.some(({ url }) => url === `${issuer}/token`)).toBe(false);
 });
 
-test("rechecks the selected credential and rejects multiple queries", async () => {
+test("rechecks the selected credential against the query", async () => {
     const credential = await fixture.receive();
     const request = await fixture.request();
     const query = request.authorizationRequestPayload.dcql_query;
     if (query?.credentials[0].format !== "dc+sd-jwt") throw new Error("Expected an SD-JWT query");
     query.credentials[0].meta = { vct_values: ["different"] };
-    await expect(fixture.holder.acceptAuthorizationRequest(request, credential)).rejects.toThrow("does not match the query");
-    query.credentials.push({ ...query.credentials[0], id: "second" });
-    await expect(fixture.holder.matchingCredentials(request)).rejects.toThrow("Exactly one credential query");
+    await expect(fixture.holder.acceptAuthorizationRequest(request, { credential: [credential] })).rejects.toThrow("does not match the query");
+});
+
+describe("multiple credentials", () => {
+    async function receive(format: OpenId4VcCredentialFormat): Promise<OwnIdentityAttributeWithVerifiableCredential> {
+        fixture.format = format;
+        return await fixture.receive();
+    }
+
+    test("presents a credential of each format for multiple credential queries in one response", async () => {
+        const sdJwt = await receive("dc+sd-jwt");
+        const jwtVc = await receive("jwt_vc_json");
+        const mdoc = await receive("mso_mdoc");
+        const request = await fixture.request("direct_post", {
+            credentials: [fixture.credentialQuery("pid", "dc+sd-jwt"), fixture.credentialQuery("diploma", "jwt_vc_json"), fixture.credentialQuery("mdl", "mso_mdoc")]
+        });
+
+        expect(await fixture.holder.matchingCredentialsByQueryId(request)).toStrictEqual({ pid: [sdJwt], diploma: [jwtVc], mdl: [mdoc] });
+        await expect(fixture.holder.acceptAuthorizationRequest(request, { pid: [sdJwt], diploma: [jwtVc], mdl: [mdoc] })).resolves.toMatchObject({ status: 200 });
+        expect(Object.keys(fixture.submitted.vp_token).sort()).toStrictEqual(["diploma", "mdl", "pid"]);
+        expect(Object.values(fixture.submitted.vp_token).map((presentations) => presentations.length)).toStrictEqual([1, 1, 1]);
+        expect(DeviceResponse.fromEncodedForOid4Vp(fixture.submitted.vp_token.mdl[0]).documents![0].issuerSigned.getPrettyClaims(namespace)).toStrictEqual({ given_name: "Alice" });
+    });
+
+    test("requires a credential for every query when there are no credential sets", async () => {
+        const sdJwt = await receive("dc+sd-jwt");
+        await receive("jwt_vc_json");
+        const request = await fixture.request("direct_post", { credentials: [fixture.credentialQuery("pid", "dc+sd-jwt"), fixture.credentialQuery("diploma", "jwt_vc_json")] });
+
+        await expect(fixture.holder.acceptAuthorizationRequest(request, { pid: [sdJwt] })).rejects.toThrow("No credential selected for credential queries: diploma");
+        await expect(fixture.holder.acceptAuthorizationRequest(request, {})).rejects.toThrow("At least one credential must be selected");
+        await expect(fixture.holder.acceptAuthorizationRequest(request, { unknown: [sdJwt] })).rejects.toThrow("Unknown credential query: unknown");
+        await expect(fixture.holder.acceptAuthorizationRequest(request, { pid: [sdJwt], diploma: [sdJwt] })).rejects.toThrow("does not match the query 'diploma'");
+        expect(fixture.requests.some(({ url }) => url === `${verifier}/response`)).toBe(false);
+    });
+
+    test("presents several credentials for a query that allows multiple credentials", async () => {
+        const first = await receive("dc+sd-jwt");
+        const second = await receive("dc+sd-jwt");
+        const single = await fixture.request("direct_post", { credentials: [fixture.credentialQuery("pid")] });
+
+        expect(await fixture.holder.matchingCredentialsByQueryId(single)).toStrictEqual({ pid: [first, second] });
+        await expect(fixture.holder.acceptAuthorizationRequest(single, { pid: [first, second] })).rejects.toThrow("does not allow multiple credentials");
+        await expect(fixture.holder.acceptAuthorizationRequest(single, { pid: [first] })).resolves.toMatchObject({ status: 200 });
+
+        const multiple = await fixture.request("direct_post", { credentials: [{ ...fixture.credentialQuery("pid"), multiple: true }] });
+        await expect(fixture.holder.acceptAuthorizationRequest(multiple, { pid: [first, first] })).rejects.toThrow("contains the same credential more than once");
+        await expect(fixture.holder.acceptAuthorizationRequest(multiple, { pid: [first, second] })).resolves.toMatchObject({ status: 200 });
+        expect(fixture.submitted.vp_token.pid).toHaveLength(2);
+    });
+
+    test("satisfies credential sets with any of their options", async () => {
+        const sdJwt = await receive("dc+sd-jwt");
+        const jwtVc = await receive("jwt_vc_json");
+        const request = await fixture.request("direct_post", {
+            credentials: [fixture.credentialQuery("pid", "dc+sd-jwt"), fixture.credentialQuery("diploma", "jwt_vc_json"), fixture.credentialQuery("extra", "jwt_vc_json")],
+            credential_sets: [{ options: [["pid"], ["diploma"]] }, { options: [["extra"]], required: false }]
+        });
+
+        await expect(fixture.holder.acceptAuthorizationRequest(request, { diploma: [jwtVc] })).resolves.toMatchObject({ status: 200 });
+        expect(Object.keys(fixture.submitted.vp_token)).toStrictEqual(["diploma"]);
+        await expect(fixture.holder.acceptAuthorizationRequest(request, { pid: [sdJwt], extra: [jwtVc] })).resolves.toMatchObject({ status: 200 });
+        await expect(fixture.holder.acceptAuthorizationRequest(request, { extra: [jwtVc] })).rejects.toThrow("does not satisfy the required credential set: [pid] or [diploma]");
+    });
+
+    test("rejects queries that are not part of any credential set", async () => {
+        const sdJwt = await receive("dc+sd-jwt");
+        const jwtVc = await receive("jwt_vc_json");
+        const request = await fixture.request("direct_post", {
+            credentials: [fixture.credentialQuery("pid", "dc+sd-jwt"), fixture.credentialQuery("diploma", "jwt_vc_json")],
+            credential_sets: [{ options: [["pid"]] }]
+        });
+
+        await expect(fixture.holder.acceptAuthorizationRequest(request, { pid: [sdJwt], diploma: [jwtVc] })).rejects.toThrow("not part of any credential set: diploma");
+    });
 });
 
 test("rejects invalid signatures and audiences on SD-JWT tokens", async () => {
@@ -583,14 +664,14 @@ test.each<OpenId4VcCredentialFormat>(["dc+sd-jwt", "mso_mdoc", "jwt_vc_json"])("
     });
     otherDevice.attributes.push(synchronized);
     const request = await otherDevice.request();
-    expect(await otherDevice.holder.matchingCredentials(request)).toStrictEqual([synchronized]);
-    await expect(otherDevice.holder.acceptAuthorizationRequest(request, synchronized)).resolves.toMatchObject({ status: 200 });
+    expect(await otherDevice.holder.matchingCredentialsByQueryId(request)).toStrictEqual({ credential: [synchronized] });
+    await expect(otherDevice.holder.acceptAuthorizationRequest(request, { credential: [synchronized] })).resolves.toMatchObject({ status: 200 });
 });
 
 test("rejects Presentation Exchange explicitly", async () => {
     const request = await fixture.request();
     request.authorizationRequestPayload.presentation_definition = { id: "pex", input_descriptors: [] };
-    await expect(fixture.holder.matchingCredentials(request)).rejects.toThrow("Presentation Exchange is not supported");
+    await expect(fixture.holder.matchingCredentialsByQueryId(request)).rejects.toThrow("Presentation Exchange is not supported");
 });
 
 test("rejects empty credential batches", async () => {
@@ -661,7 +742,7 @@ test("receives and presents mdoc credentials with an Ed25519 holder key", async 
     fixture.algorithm = "EdDSA";
     const attribute = await fixture.receive();
     const request = await fixture.request();
-    await fixture.holder.acceptAuthorizationRequest(request, attribute);
+    await fixture.holder.acceptAuthorizationRequest(request, { credential: [attribute] });
     const response = DeviceResponse.fromEncodedForOid4Vp(fixture.submitted.vp_token.credential[0]);
     const transcript = await SessionTranscript.forOid4Vp(
         { clientId: request.authorizationRequestPayload.client_id, nonce: request.authorizationRequestPayload.nonce, responseUri: `${verifier}/response` },
@@ -678,8 +759,8 @@ test.each<OpenId4VcCredentialFormat>(["dc+sd-jwt", "mso_mdoc", "jwt_vc_json"])("
     await fixture.init();
     const attribute = await fixture.receive();
     const request = await fixture.request();
-    expect(await fixture.holder.matchingCredentials(request)).toStrictEqual([attribute]);
-    await expect(fixture.holder.acceptAuthorizationRequest(request, attribute)).resolves.toMatchObject({ status: 200 });
+    expect(await fixture.holder.matchingCredentialsByQueryId(request)).toStrictEqual({ credential: [attribute] });
+    await expect(fixture.holder.acceptAuthorizationRequest(request, { credential: [attribute] })).resolves.toMatchObject({ status: 200 });
 });
 
 test.each(["embedded", "remote"])("selects the signing key from mixed %s JWKS using only the injected fetch", async (location) => {
@@ -739,8 +820,8 @@ test("receives, stores and presents SD-JWT credentials within the configured exp
     fixture.expiresAt = Math.floor(Date.now() / 1000) - 10;
     const credential = await fixture.receive();
     const request = await fixture.request();
-    expect(await fixture.holder.matchingCredentials(request)).toStrictEqual([credential]);
-    await expect(fixture.holder.acceptAuthorizationRequest(request, credential)).resolves.toMatchObject({ status: 200 });
+    expect(await fixture.holder.matchingCredentialsByQueryId(request)).toStrictEqual({ credential: [credential] });
+    await expect(fixture.holder.acceptAuthorizationRequest(request, { credential: [credential] })).resolves.toMatchObject({ status: 200 });
     const token = await fixture.holder.createPresentationTokenContent(credential.content.value, "token-id");
     await expect(fixture.holder.verifyPresentationTokenContent(token, "token-id")).resolves.toStrictEqual({ isValid: true });
 });
@@ -773,7 +854,7 @@ test.each([
     payload.vc = { ...(payload.vc as object), ...dates };
     const encoded = await new SignJWT(payload).setProtectedHeader({ alg: "ES256", kid: "issuer-key" }).sign(await importJWK(fixture.issuerKey, "ES256"));
     const [attribute] = await fixture.holder.storeCredentials([{ claimFormat: "jwt_vc_json", encoded }]);
-    await fixture.holder.acceptAuthorizationRequest(await fixture.request(), attribute);
+    await fixture.holder.acceptAuthorizationRequest(await fixture.request(), { credential: [attribute] });
     const { payload: presentation } = await jwtVerify(fixture.submitted.vp_token.credential[0], await importJWK(holderKey, "ES256"), { audience: "x509_san_dns:verifier.example" });
     expect(presentation.iss).toBe(payload.sub);
     expect(presentation.nonce).toBe("verifier-nonce");
@@ -854,8 +935,8 @@ test("ignores and rejects an attribute that does not contain a verifiable creden
     fixture.attributes.push(otherAttribute);
     const request = await fixture.request();
 
-    expect(await fixture.holder.matchingCredentials(request)).toStrictEqual([credential]);
-    await expect(fixture.holder.acceptAuthorizationRequest(request, otherAttribute)).rejects.toThrow("does not contain a verifiable credential");
+    expect(await fixture.holder.matchingCredentialsByQueryId(request)).toStrictEqual({ credential: [credential] });
+    await expect(fixture.holder.acceptAuthorizationRequest(request, { credential: [otherAttribute] })).rejects.toThrow("does not contain a verifiable credential");
     expect(fixture.requests.some(({ url }) => url === `${verifier}/response`)).toBe(false);
 });
 
@@ -874,7 +955,7 @@ test("rejects DCQL sets with unknown credential identifiers", async () => {
     if (!query) throw new Error("Expected a DCQL query");
     query.credential_sets = [{ options: [["unknown-credential"]] }];
 
-    await expect(fixture.holder.matchingCredentials(request)).rejects.toThrow("Credential set contains undefined credential id");
+    await expect(fixture.holder.matchingCredentialsByQueryId(request)).rejects.toThrow("Credential set contains undefined credential id");
 });
 
 test("rejects DCQL claim sets with unknown claim identifiers", async () => {
@@ -883,7 +964,7 @@ test("rejects DCQL claim sets with unknown claim identifiers", async () => {
     if (!query) throw new Error("Expected a DCQL query");
     query.credentials[0].claim_sets = [["unknown-claim"]];
 
-    await expect(fixture.holder.matchingCredentials(request)).rejects.toThrow("Credential set contains undefined credential id");
+    await expect(fixture.holder.matchingCredentialsByQueryId(request)).rejects.toThrow("Credential set contains undefined credential id");
 });
 
 test("rejects malformed issuer JWKS instead of trusting its declared type", async () => {
