@@ -353,5 +353,17 @@ describe("FileController", function () {
             expect(cacheImageFromUrlSpy).toHaveBeenNthCalledWith(1, "https://example.org/unreachable-logo.png");
             expect(cacheImageFromUrlSpy).toHaveBeenNthCalledWith(2, "https://example.org/unreachable-background.png");
         });
+
+        test("should cache images from standardized OpenID4VC display metadata", async function () {
+            const cacheImageFromUrlSpy = jest.spyOn(sender.files as any, "cacheImageFromUrl").mockResolvedValue("cached-image");
+            const display: Record<string, any> = { locale: "de", logo: { uri: "https://example.org/logo.png" } };
+            display["background_image"] = { uri: "https://example.org/background.png" };
+
+            const result = await sender.files.cacheVerifiableCredentialDisplayInformationImages([display]);
+
+            expect(result).toStrictEqual([{ locale: "de", logo: "cached-image", backgroundImage: "cached-image" }]);
+            expect(cacheImageFromUrlSpy).toHaveBeenNthCalledWith(1, "https://example.org/logo.png");
+            expect(cacheImageFromUrlSpy).toHaveBeenNthCalledWith(2, "https://example.org/background.png");
+        });
     });
 });

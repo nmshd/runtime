@@ -1,8 +1,7 @@
-import { OpenId4VciResolvedCredentialOffer } from "@credo-ts/openid4vc";
+import { OpenId4VciResolvedCredentialOffer } from "@nmshd/content";
 import { Result } from "@js-soft/ts-utils";
 import { OpenId4VcController } from "@nmshd/consumption";
 import { Inject } from "@nmshd/typescript-ioc";
-import stringifySafe from "json-stringify-safe";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
 
 export interface ResolveCredentialOfferRequest {
@@ -29,6 +28,6 @@ export class ResolveCredentialOfferUseCase extends UseCase<ResolveCredentialOffe
 
     protected override async executeInternal(request: ResolveCredentialOfferRequest): Promise<Result<ResolveCredentialOfferResponse>> {
         const credentialOffer = await this.openId4VcController.resolveCredentialOffer(request.credentialOfferUrl);
-        return Result.ok({ credentialOffer: JSON.parse(stringifySafe(credentialOffer)) });
+        return Result.ok({ credentialOffer: credentialOffer });
     }
 }

@@ -1907,7 +1907,7 @@ export const CanCreateOutgoingRequestRequest: any = {
                             "type": "string"
                         },
                         {
-                            "type": "object"
+                            "$ref": "#/definitions/OpenId4VcJsonObject"
                         }
                     ]
                 },
@@ -1917,7 +1917,7 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "displayInformation": {
                     "type": "array",
                     "items": {
-                        "type": "object"
+                        "$ref": "#/definitions/OpenId4VcDisplayInformation"
                     }
                 },
                 "displayInformationCachedImages": {
@@ -1933,6 +1933,112 @@ export const CanCreateOutgoingRequestRequest: any = {
                 "value"
             ],
             "additionalProperties": false
+        },
+        "OpenId4VcJsonObject": {
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/OpenId4VcJsonValue"
+            }
+        },
+        "OpenId4VcJsonValue": {
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "number"
+                },
+                {
+                    "type": "boolean"
+                },
+                {
+                    "type": "null"
+                },
+                {
+                    "$ref": "#/definitions/OpenId4VcJsonObject"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/OpenId4VcJsonValue"
+                    }
+                }
+            ]
+        },
+        "OpenId4VcDisplayInformation": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "locale": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "logo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "uri": {
+                                    "type": "string"
+                                },
+                                "alt_text": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    ]
+                },
+                "backgroundImage": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "uri": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    ]
+                },
+                "background_image": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "uri": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    ]
+                },
+                "background_color": {
+                    "type": "string"
+                },
+                "text_color": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": {}
         },
         "DisplayInformationCachedImagesJSON": {
             "type": "object",
@@ -4122,7 +4228,7 @@ export const CompleteOutgoingRequestRequest: any = {
                             "type": "string"
                         },
                         {
-                            "type": "object"
+                            "$ref": "#/definitions/OpenId4VcJsonObject"
                         }
                     ]
                 },
@@ -4132,7 +4238,7 @@ export const CompleteOutgoingRequestRequest: any = {
                 "displayInformation": {
                     "type": "array",
                     "items": {
-                        "type": "object"
+                        "$ref": "#/definitions/OpenId4VcDisplayInformation"
                     }
                 },
                 "displayInformationCachedImages": {
@@ -4148,6 +4254,112 @@ export const CompleteOutgoingRequestRequest: any = {
                 "value"
             ],
             "additionalProperties": false
+        },
+        "OpenId4VcJsonObject": {
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/OpenId4VcJsonValue"
+            }
+        },
+        "OpenId4VcJsonValue": {
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "number"
+                },
+                {
+                    "type": "boolean"
+                },
+                {
+                    "type": "null"
+                },
+                {
+                    "$ref": "#/definitions/OpenId4VcJsonObject"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/OpenId4VcJsonValue"
+                    }
+                }
+            ]
+        },
+        "OpenId4VcDisplayInformation": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "locale": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "logo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "uri": {
+                                    "type": "string"
+                                },
+                                "alt_text": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    ]
+                },
+                "backgroundImage": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "uri": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    ]
+                },
+                "background_image": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "uri": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    ]
+                },
+                "background_color": {
+                    "type": "string"
+                },
+                "text_color": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": {}
         },
         "DisplayInformationCachedImagesJSON": {
             "type": "object",
@@ -6251,7 +6463,7 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                             "type": "string"
                         },
                         {
-                            "type": "object"
+                            "$ref": "#/definitions/OpenId4VcJsonObject"
                         }
                     ]
                 },
@@ -6261,7 +6473,7 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                 "displayInformation": {
                     "type": "array",
                     "items": {
-                        "type": "object"
+                        "$ref": "#/definitions/OpenId4VcDisplayInformation"
                     }
                 },
                 "displayInformationCachedImages": {
@@ -6277,6 +6489,112 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                 "value"
             ],
             "additionalProperties": false
+        },
+        "OpenId4VcJsonObject": {
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/OpenId4VcJsonValue"
+            }
+        },
+        "OpenId4VcJsonValue": {
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "number"
+                },
+                {
+                    "type": "boolean"
+                },
+                {
+                    "type": "null"
+                },
+                {
+                    "$ref": "#/definitions/OpenId4VcJsonObject"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/OpenId4VcJsonValue"
+                    }
+                }
+            ]
+        },
+        "OpenId4VcDisplayInformation": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "locale": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "logo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "uri": {
+                                    "type": "string"
+                                },
+                                "alt_text": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    ]
+                },
+                "backgroundImage": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "uri": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    ]
+                },
+                "background_image": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "uri": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    ]
+                },
+                "background_color": {
+                    "type": "string"
+                },
+                "text_color": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": {}
         },
         "DisplayInformationCachedImagesJSON": {
             "type": "object",
@@ -9003,7 +9321,7 @@ export const CreateOutgoingRequestRequest: any = {
                             "type": "string"
                         },
                         {
-                            "type": "object"
+                            "$ref": "#/definitions/OpenId4VcJsonObject"
                         }
                     ]
                 },
@@ -9013,7 +9331,7 @@ export const CreateOutgoingRequestRequest: any = {
                 "displayInformation": {
                     "type": "array",
                     "items": {
-                        "type": "object"
+                        "$ref": "#/definitions/OpenId4VcDisplayInformation"
                     }
                 },
                 "displayInformationCachedImages": {
@@ -9029,6 +9347,112 @@ export const CreateOutgoingRequestRequest: any = {
                 "value"
             ],
             "additionalProperties": false
+        },
+        "OpenId4VcJsonObject": {
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/OpenId4VcJsonValue"
+            }
+        },
+        "OpenId4VcJsonValue": {
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "number"
+                },
+                {
+                    "type": "boolean"
+                },
+                {
+                    "type": "null"
+                },
+                {
+                    "$ref": "#/definitions/OpenId4VcJsonObject"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/OpenId4VcJsonValue"
+                    }
+                }
+            ]
+        },
+        "OpenId4VcDisplayInformation": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "locale": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "logo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "uri": {
+                                    "type": "string"
+                                },
+                                "alt_text": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    ]
+                },
+                "backgroundImage": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "uri": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    ]
+                },
+                "background_image": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "uri": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    ]
+                },
+                "background_color": {
+                    "type": "string"
+                },
+                "text_color": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": {}
         },
         "DisplayInformationCachedImagesJSON": {
             "type": "object",
@@ -12230,7 +12654,7 @@ export const ReceivedIncomingRequestRequest: any = {
                             "type": "string"
                         },
                         {
-                            "type": "object"
+                            "$ref": "#/definitions/OpenId4VcJsonObject"
                         }
                     ]
                 },
@@ -12240,7 +12664,7 @@ export const ReceivedIncomingRequestRequest: any = {
                 "displayInformation": {
                     "type": "array",
                     "items": {
-                        "type": "object"
+                        "$ref": "#/definitions/OpenId4VcDisplayInformation"
                     }
                 },
                 "displayInformationCachedImages": {
@@ -12256,6 +12680,112 @@ export const ReceivedIncomingRequestRequest: any = {
                 "value"
             ],
             "additionalProperties": false
+        },
+        "OpenId4VcJsonObject": {
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/OpenId4VcJsonValue"
+            }
+        },
+        "OpenId4VcJsonValue": {
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "number"
+                },
+                {
+                    "type": "boolean"
+                },
+                {
+                    "type": "null"
+                },
+                {
+                    "$ref": "#/definitions/OpenId4VcJsonObject"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/OpenId4VcJsonValue"
+                    }
+                }
+            ]
+        },
+        "OpenId4VcDisplayInformation": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "locale": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "logo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "uri": {
+                                    "type": "string"
+                                },
+                                "alt_text": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    ]
+                },
+                "backgroundImage": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "uri": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    ]
+                },
+                "background_image": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "uri": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    ]
+                },
+                "background_color": {
+                    "type": "string"
+                },
+                "text_color": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": {}
         },
         "DisplayInformationCachedImagesJSON": {
             "type": "object",
@@ -16446,7 +16976,7 @@ export const SucceedOwnIdentityAttributeRequest: any = {
                             "type": "string"
                         },
                         {
-                            "type": "object"
+                            "$ref": "#/definitions/OpenId4VcJsonObject"
                         }
                     ]
                 },
@@ -16456,7 +16986,7 @@ export const SucceedOwnIdentityAttributeRequest: any = {
                 "displayInformation": {
                     "type": "array",
                     "items": {
-                        "type": "object"
+                        "$ref": "#/definitions/OpenId4VcDisplayInformation"
                     }
                 },
                 "displayInformationCachedImages": {
@@ -16472,6 +17002,112 @@ export const SucceedOwnIdentityAttributeRequest: any = {
                 "value"
             ],
             "additionalProperties": false
+        },
+        "OpenId4VcJsonObject": {
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/OpenId4VcJsonValue"
+            }
+        },
+        "OpenId4VcJsonValue": {
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "number"
+                },
+                {
+                    "type": "boolean"
+                },
+                {
+                    "type": "null"
+                },
+                {
+                    "$ref": "#/definitions/OpenId4VcJsonObject"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/OpenId4VcJsonValue"
+                    }
+                }
+            ]
+        },
+        "OpenId4VcDisplayInformation": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "locale": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "logo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "uri": {
+                                    "type": "string"
+                                },
+                                "alt_text": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    ]
+                },
+                "backgroundImage": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "uri": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    ]
+                },
+                "background_image": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "uri": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    ]
+                },
+                "background_color": {
+                    "type": "string"
+                },
+                "text_color": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": {}
         },
         "DisplayInformationCachedImagesJSON": {
             "type": "object",
@@ -17686,7 +18322,7 @@ export const AcceptAuthorizationRequestRequest: any = {
             "additionalProperties": false,
             "properties": {
                 "authorizationRequest": {
-                    "type": "object"
+                    "$ref": "#/definitions/OpenId4VpResolvedAuthorizationRequest"
                 },
                 "attributeId": {
                     "$ref": "#/definitions/AttributeIdString"
@@ -17695,6 +18331,652 @@ export const AcceptAuthorizationRequestRequest: any = {
             "required": [
                 "attributeId",
                 "authorizationRequest"
+            ]
+        },
+        "OpenId4VpResolvedAuthorizationRequest": {
+            "type": "object",
+            "properties": {
+                "authorizationRequestPayload": {
+                    "type": "object",
+                    "properties": {
+                        "client_id": {
+                            "type": "string"
+                        },
+                        "nonce": {
+                            "type": "string"
+                        },
+                        "response_type": {
+                            "type": "string",
+                            "const": "vp_token"
+                        },
+                        "response_mode": {
+                            "type": "string",
+                            "enum": [
+                                "direct_post",
+                                "direct_post.jwt"
+                            ]
+                        },
+                        "response_uri": {
+                            "type": "string"
+                        },
+                        "client_metadata": {
+                            "$ref": "#/definitions/OpenId4VpClientMetadata"
+                        },
+                        "dcql_query": {
+                            "$ref": "#/definitions/OpenId4VpDcqlQuery"
+                        },
+                        "presentation_definition": {
+                            "$ref": "#/definitions/OpenId4VcJsonObject"
+                        },
+                        "presentation_definition_uri": {
+                            "type": "string"
+                        },
+                        "transaction_data": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "state": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "client_id",
+                        "nonce",
+                        "response_type"
+                    ],
+                    "additionalProperties": {}
+                },
+                "version": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "authorizationRequestPayload",
+                "version"
+            ],
+            "additionalProperties": false,
+            "description": "Validated OpenID4VP payload, without library records or credential matches."
+        },
+        "OpenId4VpClientMetadata": {
+            "type": "object",
+            "properties": {
+                "jwks": {
+                    "type": "object",
+                    "properties": {
+                        "keys": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/OpenId4VcJwk"
+                            }
+                        }
+                    },
+                    "required": [
+                        "keys"
+                    ],
+                    "additionalProperties": false
+                },
+                "jwks_uri": {
+                    "type": "string"
+                },
+                "authorization_signed_response_alg": {
+                    "type": "string"
+                },
+                "authorization_encrypted_response_alg": {
+                    "type": "string"
+                },
+                "authorization_encrypted_response_enc": {
+                    "type": "string"
+                },
+                "encrypted_response_enc_values_supported": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "vp_formats": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                            "alg_values_supported": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                }
+            },
+            "additionalProperties": {}
+        },
+        "OpenId4VcJwk": {
+            "type": "object",
+            "properties": {
+                "kty": {
+                    "type": "string"
+                },
+                "crv": {
+                    "type": "string"
+                },
+                "x": {
+                    "type": "string"
+                },
+                "y": {
+                    "type": "string"
+                },
+                "n": {
+                    "type": "string"
+                },
+                "e": {
+                    "type": "string"
+                },
+                "d": {
+                    "type": "string"
+                },
+                "k": {
+                    "type": "string"
+                },
+                "p": {
+                    "type": "string"
+                },
+                "q": {
+                    "type": "string"
+                },
+                "dp": {
+                    "type": "string"
+                },
+                "dq": {
+                    "type": "string"
+                },
+                "qi": {
+                    "type": "string"
+                },
+                "alg": {
+                    "type": "string"
+                },
+                "kid": {
+                    "type": "string"
+                },
+                "use": {
+                    "type": "string"
+                },
+                "key_ops": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "ext": {
+                    "type": "boolean"
+                },
+                "x5c": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "x5u": {
+                    "type": "string"
+                },
+                "x5t": {
+                    "type": "string"
+                },
+                "x5t#S256": {
+                    "type": "string"
+                },
+                "oth": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "d": {
+                                "type": "string"
+                            },
+                            "r": {
+                                "type": "string"
+                            },
+                            "t": {
+                                "type": "string"
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                }
+            },
+            "required": [
+                "kty"
+            ],
+            "additionalProperties": {},
+            "description": "Standard JWK fields; private key material is rejected at public-key boundaries."
+        },
+        "OpenId4VpDcqlQuery": {
+            "type": "object",
+            "properties": {
+                "credentials": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/OpenId4VpDcqlCredentialQuery"
+                    }
+                },
+                "credential_sets": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "options": {
+                                "type": "array",
+                                "items": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "required": {
+                                "type": "boolean"
+                            },
+                            "purpose": {
+                                "anyOf": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "number"
+                                    },
+                                    {
+                                        "type": "object",
+                                        "additionalProperties": {}
+                                    }
+                                ]
+                            }
+                        },
+                        "required": [
+                            "options"
+                        ],
+                        "additionalProperties": false
+                    }
+                }
+            },
+            "required": [
+                "credentials"
+            ],
+            "additionalProperties": false,
+            "description": "Plain protocol data; dcql validates cardinalities, identifiers and references."
+        },
+        "OpenId4VpDcqlCredentialQuery": {
+            "anyOf": [
+                {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "format": {
+                            "type": "string",
+                            "const": "mso_mdoc"
+                        },
+                        "meta": {
+                            "type": "object",
+                            "properties": {
+                                "doctype_value": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        "claims": {
+                            "type": "array",
+                            "items": {
+                                "anyOf": [
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "id": {
+                                                "type": "string"
+                                            },
+                                            "path": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string"
+                                                },
+                                                "minItems": 2,
+                                                "maxItems": 2
+                                            },
+                                            "values": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": [
+                                                        "string",
+                                                        "number",
+                                                        "boolean"
+                                                    ]
+                                                }
+                                            },
+                                            "intent_to_retain": {
+                                                "type": "boolean"
+                                            }
+                                        },
+                                        "required": [
+                                            "path"
+                                        ],
+                                        "additionalProperties": false
+                                    },
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "id": {
+                                                "type": "string"
+                                            },
+                                            "namespace": {
+                                                "type": "string"
+                                            },
+                                            "claim_name": {
+                                                "type": "string"
+                                            },
+                                            "values": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": [
+                                                        "string",
+                                                        "number",
+                                                        "boolean"
+                                                    ]
+                                                }
+                                            }
+                                        },
+                                        "required": [
+                                            "namespace",
+                                            "claim_name"
+                                        ],
+                                        "additionalProperties": false
+                                    }
+                                ]
+                            }
+                        },
+                        "id": {
+                            "type": "string"
+                        },
+                        "require_cryptographic_holder_binding": {
+                            "type": "boolean"
+                        },
+                        "multiple": {
+                            "type": "boolean"
+                        },
+                        "claim_sets": {
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "trusted_authorities": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "aki",
+                                            "etsi_tl",
+                                            "openid_federation"
+                                        ]
+                                    },
+                                    "values": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "required": [
+                                    "type",
+                                    "values"
+                                ],
+                                "additionalProperties": false
+                            }
+                        }
+                    },
+                    "required": [
+                        "format",
+                        "id"
+                    ]
+                },
+                {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "format": {
+                            "type": "string",
+                            "enum": [
+                                "dc+sd-jwt",
+                                "vc+sd-jwt"
+                            ]
+                        },
+                        "meta": {
+                            "type": "object",
+                            "properties": {
+                                "vct_values": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        "claims": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/OpenId4VpDcqlJsonClaimQuery"
+                            }
+                        },
+                        "id": {
+                            "type": "string"
+                        },
+                        "require_cryptographic_holder_binding": {
+                            "type": "boolean"
+                        },
+                        "multiple": {
+                            "type": "boolean"
+                        },
+                        "claim_sets": {
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "trusted_authorities": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "aki",
+                                            "etsi_tl",
+                                            "openid_federation"
+                                        ]
+                                    },
+                                    "values": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "required": [
+                                    "type",
+                                    "values"
+                                ],
+                                "additionalProperties": false
+                            }
+                        }
+                    },
+                    "required": [
+                        "format",
+                        "id"
+                    ]
+                },
+                {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "format": {
+                            "type": "string",
+                            "enum": [
+                                "jwt_vc_json",
+                                "ldp_vc",
+                                "vc+sd-jwt"
+                            ]
+                        },
+                        "meta": {
+                            "type": "object",
+                            "properties": {
+                                "type_values": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            },
+                            "required": [
+                                "type_values"
+                            ],
+                            "additionalProperties": false
+                        },
+                        "claims": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/OpenId4VpDcqlJsonClaimQuery"
+                            }
+                        },
+                        "id": {
+                            "type": "string"
+                        },
+                        "require_cryptographic_holder_binding": {
+                            "type": "boolean"
+                        },
+                        "multiple": {
+                            "type": "boolean"
+                        },
+                        "claim_sets": {
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "trusted_authorities": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "aki",
+                                            "etsi_tl",
+                                            "openid_federation"
+                                        ]
+                                    },
+                                    "values": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "required": [
+                                    "type",
+                                    "values"
+                                ],
+                                "additionalProperties": false
+                            }
+                        }
+                    },
+                    "required": [
+                        "format",
+                        "id",
+                        "meta"
+                    ]
+                }
+            ]
+        },
+        "OpenId4VpDcqlJsonClaimQuery": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "array",
+                    "items": {
+                        "type": [
+                            "string",
+                            "number",
+                            "null"
+                        ]
+                    }
+                },
+                "values": {
+                    "type": "array",
+                    "items": {
+                        "type": [
+                            "string",
+                            "number",
+                            "boolean"
+                        ]
+                    }
+                }
+            },
+            "required": [
+                "path"
+            ],
+            "additionalProperties": false
+        },
+        "OpenId4VcJsonObject": {
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/OpenId4VcJsonValue"
+            }
+        },
+        "OpenId4VcJsonValue": {
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "number"
+                },
+                {
+                    "type": "boolean"
+                },
+                {
+                    "type": "null"
+                },
+                {
+                    "$ref": "#/definitions/OpenId4VcJsonObject"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/OpenId4VcJsonValue"
+                    }
+                }
             ]
         },
         "AttributeIdString": {
@@ -17745,16 +19027,16 @@ export const RequestCredentialsRequest: any = {
     "$ref": "#/definitions/RequestCredentialsRequest",
     "definitions": {
         "RequestCredentialsRequest": {
-            "$ref": "#/definitions/AbstractRequestCredentialsRequest%3Calias-1782228875-74138-74264-1782228875-0-218439%3Cstring%2Cany%3E%3E"
+            "$ref": "#/definitions/AbstractRequestCredentialsRequest%3COpenId4VciResolvedCredentialOffer%3E"
         },
-        "AbstractRequestCredentialsRequest<alias-1782228875-74138-74264-1782228875-0-218439<string,any>>": {
+        "AbstractRequestCredentialsRequest<OpenId4VciResolvedCredentialOffer>": {
             "anyOf": [
                 {
                     "type": "object",
                     "additionalProperties": false,
                     "properties": {
                         "credentialOffer": {
-                            "type": "object"
+                            "$ref": "#/definitions/OpenId4VciResolvedCredentialOffer"
                         },
                         "credentialConfigurationIds": {
                             "type": "array",
@@ -17776,7 +19058,7 @@ export const RequestCredentialsRequest: any = {
                             "type": "string"
                         },
                         "credentialOffer": {
-                            "type": "object"
+                            "$ref": "#/definitions/OpenId4VciResolvedCredentialOffer"
                         },
                         "credentialConfigurationIds": {
                             "type": "array",
@@ -17799,7 +19081,7 @@ export const RequestCredentialsRequest: any = {
                             "type": "string"
                         },
                         "credentialOffer": {
-                            "type": "object"
+                            "$ref": "#/definitions/OpenId4VciResolvedCredentialOffer"
                         },
                         "credentialConfigurationIds": {
                             "type": "array",
@@ -17815,6 +19097,385 @@ export const RequestCredentialsRequest: any = {
                     ]
                 }
             ]
+        },
+        "OpenId4VciResolvedCredentialOffer": {
+            "type": "object",
+            "properties": {
+                "credentialOfferPayload": {
+                    "type": "object",
+                    "properties": {
+                        "credential_issuer": {
+                            "type": "string"
+                        },
+                        "credential_configuration_ids": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "grants": {
+                            "type": "object",
+                            "properties": {
+                                "authorization_code": {
+                                    "type": "object",
+                                    "properties": {
+                                        "authorization_server": {
+                                            "type": "string"
+                                        },
+                                        "issuer_state": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "additionalProperties": false
+                                },
+                                "urn:ietf:params:oauth:grant-type:pre-authorized_code": {
+                                    "type": "object",
+                                    "properties": {
+                                        "pre-authorized_code": {
+                                            "type": "string"
+                                        },
+                                        "authorization_server": {
+                                            "type": "string"
+                                        },
+                                        "tx_code": {
+                                            "type": "object",
+                                            "properties": {
+                                                "input_mode": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "numeric",
+                                                        "text"
+                                                    ]
+                                                },
+                                                "length": {
+                                                    "type": "number"
+                                                },
+                                                "description": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "additionalProperties": false
+                                        }
+                                    },
+                                    "required": [
+                                        "pre-authorized_code"
+                                    ],
+                                    "additionalProperties": false
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": [
+                        "credential_issuer",
+                        "credential_configuration_ids"
+                    ],
+                    "additionalProperties": {}
+                },
+                "metadata": {
+                    "type": "object",
+                    "properties": {
+                        "credentialIssuer": {
+                            "$ref": "#/definitions/OpenId4VciIssuerMetadata"
+                        },
+                        "authorizationServers": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "issuer": {
+                                        "type": "string"
+                                    },
+                                    "token_endpoint": {
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "issuer",
+                                    "token_endpoint"
+                                ],
+                                "additionalProperties": {}
+                            }
+                        }
+                    },
+                    "required": [
+                        "credentialIssuer",
+                        "authorizationServers"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "credentialOfferPayload",
+                "metadata"
+            ],
+            "additionalProperties": false,
+            "description": "JSON data exchanged between resolving an offer and requesting its credentials."
+        },
+        "OpenId4VciIssuerMetadata": {
+            "type": "object",
+            "properties": {
+                "credential_issuer": {
+                    "type": "string"
+                },
+                "credential_endpoint": {
+                    "type": "string"
+                },
+                "credential_configurations_supported": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/OpenId4VciCredentialConfiguration"
+                    }
+                },
+                "nonce_endpoint": {
+                    "type": "string"
+                },
+                "deferred_credential_endpoint": {
+                    "type": "string"
+                },
+                "notification_endpoint": {
+                    "type": "string"
+                },
+                "authorization_servers": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "display": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/OpenId4VcDisplayInformation"
+                    }
+                },
+                "credential_metadata": {
+                    "type": "object",
+                    "properties": {
+                        "display": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/OpenId4VcDisplayInformation"
+                            }
+                        }
+                    },
+                    "additionalProperties": {}
+                }
+            },
+            "required": [
+                "credential_issuer",
+                "credential_endpoint",
+                "credential_configurations_supported"
+            ],
+            "additionalProperties": {}
+        },
+        "OpenId4VciCredentialConfiguration": {
+            "type": "object",
+            "properties": {
+                "format": {
+                    "type": "string"
+                },
+                "scope": {
+                    "type": "string"
+                },
+                "vct": {
+                    "type": "string"
+                },
+                "doctype": {
+                    "type": "string"
+                },
+                "credential_definition": {
+                    "type": "object",
+                    "properties": {
+                        "@context": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "type": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "credentialSubject": {
+                            "$ref": "#/definitions/OpenId4VcJsonObject"
+                        }
+                    },
+                    "required": [
+                        "type"
+                    ],
+                    "additionalProperties": false
+                },
+                "cryptographic_binding_methods_supported": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "credential_signing_alg_values_supported": {
+                    "anyOf": [
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "number"
+                            }
+                        }
+                    ]
+                },
+                "proof_types_supported": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                            "proof_signing_alg_values_supported": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "required": [
+                            "proof_signing_alg_values_supported"
+                        ],
+                        "additionalProperties": {}
+                    }
+                },
+                "display": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/OpenId4VcDisplayInformation"
+                    }
+                },
+                "credential_metadata": {
+                    "type": "object",
+                    "properties": {
+                        "display": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/OpenId4VcDisplayInformation"
+                            }
+                        }
+                    },
+                    "additionalProperties": {}
+                }
+            },
+            "required": [
+                "format"
+            ],
+            "additionalProperties": {}
+        },
+        "OpenId4VcJsonObject": {
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/OpenId4VcJsonValue"
+            }
+        },
+        "OpenId4VcJsonValue": {
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "number"
+                },
+                {
+                    "type": "boolean"
+                },
+                {
+                    "type": "null"
+                },
+                {
+                    "$ref": "#/definitions/OpenId4VcJsonObject"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/OpenId4VcJsonValue"
+                    }
+                }
+            ]
+        },
+        "OpenId4VcDisplayInformation": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "locale": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "logo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "uri": {
+                                    "type": "string"
+                                },
+                                "alt_text": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    ]
+                },
+                "backgroundImage": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "uri": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    ]
+                },
+                "background_image": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "uri": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    ]
+                },
+                "background_color": {
+                    "type": "string"
+                },
+                "text_color": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": {}
         }
     }
 }
@@ -17868,13 +19529,152 @@ export const StoreCredentialsRequest: any = {
                 "credentialResponses": {
                     "type": "array",
                     "items": {
-                        "type": "object"
+                        "$ref": "#/definitions/OpenId4VciCredentialResponseJSON"
                     }
                 }
             },
             "required": [
                 "credentialResponses"
             ]
+        },
+        "OpenId4VciCredentialResponseJSON": {
+            "type": "object",
+            "properties": {
+                "claimFormat": {
+                    "$ref": "#/definitions/OpenId4VcCredentialFormat"
+                },
+                "encoded": {
+                    "type": "string"
+                },
+                "displayInformation": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/OpenId4VcDisplayInformation"
+                    }
+                },
+                "displayInformationCachedImages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/DisplayInformationCachedImagesJSON"
+                    }
+                }
+            },
+            "required": [
+                "claimFormat",
+                "encoded"
+            ],
+            "additionalProperties": false
+        },
+        "OpenId4VcCredentialFormat": {
+            "type": "string",
+            "enum": [
+                "dc+sd-jwt",
+                "mso_mdoc",
+                "jwt_vc_json"
+            ]
+        },
+        "OpenId4VcDisplayInformation": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "locale": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "logo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "uri": {
+                                    "type": "string"
+                                },
+                                "alt_text": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    ]
+                },
+                "backgroundImage": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "uri": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    ]
+                },
+                "background_image": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "uri": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    ]
+                },
+                "background_color": {
+                    "type": "string"
+                },
+                "text_color": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": {}
+        },
+        "DisplayInformationCachedImagesJSON": {
+            "type": "object",
+            "properties": {
+                "@type": {
+                    "type": "string",
+                    "const": "DisplayInformationCachedImages"
+                },
+                "@context": {
+                    "type": "string"
+                },
+                "@version": {
+                    "type": "string"
+                },
+                "locale": {
+                    "type": "string"
+                },
+                "logo": {
+                    "type": "string"
+                },
+                "backgroundImage": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "@type"
+            ],
+            "additionalProperties": false
         }
     }
 }
@@ -17974,7 +19774,7 @@ export const VerifyPresentationTokenRequest: any = {
                             "type": "string"
                         },
                         {
-                            "type": "object"
+                            "$ref": "#/definitions/OpenId4VcJsonObject"
                         }
                     ]
                 },
@@ -17984,7 +19784,7 @@ export const VerifyPresentationTokenRequest: any = {
                 "displayInformation": {
                     "type": "array",
                     "items": {
-                        "type": "object"
+                        "$ref": "#/definitions/OpenId4VcDisplayInformation"
                     }
                 }
             },
@@ -17994,6 +19794,112 @@ export const VerifyPresentationTokenRequest: any = {
                 "value"
             ],
             "additionalProperties": false
+        },
+        "OpenId4VcJsonObject": {
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/OpenId4VcJsonValue"
+            }
+        },
+        "OpenId4VcJsonValue": {
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "number"
+                },
+                {
+                    "type": "boolean"
+                },
+                {
+                    "type": "null"
+                },
+                {
+                    "$ref": "#/definitions/OpenId4VcJsonObject"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/OpenId4VcJsonValue"
+                    }
+                }
+            ]
+        },
+        "OpenId4VcDisplayInformation": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "locale": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "logo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "uri": {
+                                    "type": "string"
+                                },
+                                "alt_text": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    ]
+                },
+                "backgroundImage": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "uri": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    ]
+                },
+                "background_image": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "uri": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    ]
+                },
+                "background_color": {
+                    "type": "string"
+                },
+                "text_color": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": {}
         },
         "PasswordProtectionDTO": {
             "type": "object",
@@ -22217,7 +24123,7 @@ export const VerifiableCredential: any = {
                             "type": "string"
                         },
                         {
-                            "type": "object"
+                            "$ref": "#/definitions/OpenId4VcJsonObject"
                         }
                     ]
                 },
@@ -22227,7 +24133,7 @@ export const VerifiableCredential: any = {
                 "displayInformation": {
                     "type": "array",
                     "items": {
-                        "type": "object"
+                        "$ref": "#/definitions/OpenId4VcDisplayInformation"
                     }
                 },
                 "displayInformationCachedImages": {
@@ -22243,6 +24149,112 @@ export const VerifiableCredential: any = {
                 "value"
             ],
             "additionalProperties": false
+        },
+        "OpenId4VcJsonObject": {
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/OpenId4VcJsonValue"
+            }
+        },
+        "OpenId4VcJsonValue": {
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "number"
+                },
+                {
+                    "type": "boolean"
+                },
+                {
+                    "type": "null"
+                },
+                {
+                    "$ref": "#/definitions/OpenId4VcJsonObject"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/OpenId4VcJsonValue"
+                    }
+                }
+            ]
+        },
+        "OpenId4VcDisplayInformation": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "locale": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "logo": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "uri": {
+                                    "type": "string"
+                                },
+                                "alt_text": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    ]
+                },
+                "backgroundImage": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "uri": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    ]
+                },
+                "background_image": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "uri": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    ]
+                },
+                "background_color": {
+                    "type": "string"
+                },
+                "text_color": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": {}
         },
         "DisplayInformationCachedImages": {
             "type": "object",
