@@ -88,13 +88,13 @@ export class EnmeshedHolderKeyManagementService implements Kms.KeyManagementServ
             const publicJwk = {
                 kty: "EC",
                 crv: "P-256",
-                x: this.b64url(new Uint8Array(key.getPublic().getX().toArray())),
-                y: this.b64url(new Uint8Array(key.getPublic().getY().toArray()))
+                x: this.b64url(new Uint8Array(key.getPublic().getX().toArray("be", 32))),
+                y: this.b64url(new Uint8Array(key.getPublic().getY().toArray("be", 32)))
             };
 
             const privateJwk = {
                 ...publicJwk,
-                d: this.b64url(new Uint8Array(key.getPrivate().toArray()))
+                d: this.b64url(new Uint8Array(key.getPrivate().toArray("be", 32)))
             };
 
             const jwkKeyPair = {
@@ -175,11 +175,11 @@ export class EnmeshedHolderKeyManagementService implements Kms.KeyManagementServ
 
             const dataHash = ec.hash().update(options.data).digest();
             const signature = key.sign(dataHash);
-            const r = new Uint8Array(signature.r.toArray());
-            const s = new Uint8Array(signature.s.toArray());
-            const signatureBytes = new Uint8Array(r.length + s.length);
+            const r = new Uint8Array(signature.r.toArray("be", 32));
+            const s = new Uint8Array(signature.s.toArray("be", 32));
+            const signatureBytes = new Uint8Array(64);
             signatureBytes.set(r);
-            signatureBytes.set(s, r.length);
+            signatureBytes.set(s, 32);
 
             return await Promise.resolve({
                 signature: signatureBytes
@@ -204,7 +204,7 @@ export class EnmeshedHolderKeyManagementService implements Kms.KeyManagementServ
         const signature = SodiumWrapper.sodium.crypto_sign_detached(options.data, fullPrivateKeyBytes);
 
         return {
-            signature: signature as Uint8Array<ArrayBuffer>
+            signature: signature
         };
     }
 
@@ -265,7 +265,7 @@ export class EnmeshedHolderKeyManagementService implements Kms.KeyManagementServ
         );
 
         const sharedSecret = localPriv.derive(remoteBasePoint.getPublic());
-        const sharedBytes = new Uint8Array(sharedSecret.toArray("be"));
+        const sharedBytes = new Uint8Array(sharedSecret.toArray("be", 32));
         return sharedBytes;
     }
 

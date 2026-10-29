@@ -20,63 +20,20 @@
         "build:node": "npm run build:schemas && tsc -p tsconfig.json",
         "build:notest": "npm run build:node",
         "build:schemas": "node scripts/buildSchemas.mjs",
-        "cdep": "tsc && depcruise --config ../../.dependency-cruiser.json dist",
+        "cdep": "tsc && depcruise --config ../../.dependency-cruiser.cjs dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
-        "test:ci:lokijs": "USE_LOKIJS=true jest -i --coverage",
-        "test:ci:mongodb": "jest -i --coverage",
-        "test:local:ferretdb": "npm run test:local:start:ferretdb && CONNECTION_STRING='mongodb://root:example@localhost:27022' jest",
-        "test:local:lokijs": "USE_LOKIJS=true jest",
-        "test:local:mongodb": "npm run test:local:start:mongodb && CONNECTION_STRING='mongodb://root:example@localhost:27021' jest",
+        "test:ci:lokijs": "npm run test:compile && USE_LOKIJS=true vitest run --coverage --maxWorkers=1",
+        "test:ci:mongodb": "npm run test:compile && vitest run --coverage --maxWorkers=1",
+        "test:local:ferretdb": "npm run test:compile && npm run test:local:start:ferretdb && CONNECTION_STRING='mongodb://root:example@localhost:27022' vitest run",
+        "test:local:lokijs": "npm run test:compile && USE_LOKIJS=true vitest run",
+        "test:local:mongodb": "npm run test:compile && npm run test:local:start:mongodb && CONNECTION_STRING='mongodb://root:example@localhost:27021' vitest run",
         "test:local:start:ferretdb": "docker compose -f ../../.dev/compose.yml up -d runtime-ferret",
         "test:local:start:mongodb": "docker compose -f ../../.dev/compose.yml up -d runtime-mongo",
-        "test:local:teardown": "docker compose -f ../../.dev/compose.yml rm -fsv"
-    },
-    "jest": {
-        "collectCoverageFrom": [
-            "./src/**"
-        ],
-        "coverageProvider": "v8",
-        "coverageReporters": [
-            "text-summary",
-            "cobertura",
-            "lcov"
-        ],
-        "maxWorkers": 1,
-        "preset": "ts-jest",
-        "setupFilesAfterEnv": [
-            "./test/customMatchers.ts",
-            "./test/disableTimeoutForDebugging.ts",
-            "jest-expect-message",
-            "../../jest.setup.cjs"
-        ],
-        "testEnvironment": "node",
-        "testTimeout": 60000,
-        "transform": {
-            "^.+\\.(t|j)s$": [
-                "ts-jest",
-                {
-                    "tsconfig": "test/tsconfig.json"
-                }
-            ],
-            "^.+\\.mjs$": [
-                "babel-jest",
-                {
-                    "presets": [
-                        [
-                            "@babel/preset-env",
-                            {
-                                "modules": "commonjs"
-                            }
-                        ]
-                    ]
-                }
-            ]
-        },
-        "transformIgnorePatterns": [
-            "<rootDir>/node_modules/(?!(@noble|@stablelib|@credo\\-ts)/)"
-        ]
+        "test:local:teardown": "docker compose -f ../../.dev/compose.yml rm -fsv",
+        "test:compile": "tsc -p test/tsconfig.vitest.json && cp -R test/__assets__ .vitest-build/packages/runtime/test/"
     },
     "dependencies": {
+        "@credo-ts/openid4vc": "0.7.0",
         "@js-soft/docdb-querytranslator": "^1.1.7",
         "@js-soft/logging-abstractions": "^1.2.5",
         "@js-soft/ts-serval": "2.0.17",
@@ -84,11 +41,12 @@
         "@nmshd/consumption": "*",
         "@nmshd/content": "*",
         "@nmshd/core-types": "*",
-        "@nmshd/crypto": "3.0.0",
+        "@nmshd/crypto": "3.0.14",
         "@nmshd/iql": "^1.0.5",
         "@nmshd/runtime-types": "*",
         "@nmshd/transport": "*",
-        "@nmshd/typescript-ioc": "3.2.5",
+        "@nmshd/typescript-ioc": "3.2.6",
+        "@openid4vc/oauth2": "0.8.2",
         "ajv": "^8.20.0",
         "ajv-errors": "^3.0.0",
         "ajv-formats": "^3.0.1",
@@ -96,24 +54,24 @@
         "json-stringify-safe": "^5.0.1",
         "lodash": "^4.18.1",
         "luxon": "^3.7.2",
+        "media-typer": "^2.0.0",
         "reflect-metadata": "^0.2.2",
         "ts-simple-nameof": "^1.3.3"
     },
     "devDependencies": {
-        "@eudiplo/sdk-core": "^4.1.0",
-        "@js-soft/docdb-access-loki": "1.4.2",
-        "@js-soft/docdb-access-mongo": "1.4.2",
-        "@js-soft/node-logger": "1.2.5",
-        "@nmshd/connector-sdk": "^7.3.4",
-        "@types/elliptic": "^6.4.18",
-        "@types/jest": "^30.0.0",
-        "@types/json-stringify-safe": "^5.0.3",
-        "@types/lodash": "^4.17.24",
-        "@types/luxon": "^3.7.2",
-        "jwt-decode": "^4.0.0",
-        "openid-client": "^6.8.4",
+        "@eudiplo/sdk-core": "9.1.0",
+        "@js-soft/docdb-access-loki": "1.4.6",
+        "@js-soft/docdb-access-mongo": "1.4.6",
+        "@js-soft/node-logger": "1.2.20",
+        "@nmshd/connector-sdk": "7.5.7",
+        "@types/elliptic": "6.4.18",
+        "@types/json-stringify-safe": "5.0.3",
+        "@types/lodash": "4.17.27",
+        "@types/luxon": "3.7.6",
+        "jwt-decode": "4.0.0",
+        "openid-client": "6.8.8",
         "ts-json-schema-generator": "2.9.0",
-        "ts-mockito": "^2.6.1"
+        "ts-mockito": "2.6.1"
     },
     "publishConfig": {
         "access": "public",

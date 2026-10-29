@@ -367,7 +367,7 @@ describe("AppStringProcessor", function () {
             const fileResult = await runtime1Session.transportServices.files.uploadOwnFile({
                 filename: "aFileName",
                 content: new TextEncoder().encode("aFileContent"),
-                mimetype: "aMimetype",
+                mimetype: "text/plain",
                 expiresAt: CoreDate.utc().add({ minutes: 10 }).toISOString()
             });
             const file = fileResult.value;
@@ -502,7 +502,7 @@ describe("AppStringProcessor", function () {
             const fileResult = await runtime1Session.transportServices.files.uploadOwnFile({
                 filename: "aFileName",
                 content: new TextEncoder().encode("aFileContent"),
-                mimetype: "aMimetype",
+                mimetype: "text/plain",
                 expiresAt: CoreDate.utc().add({ minutes: 10 }).toISOString()
             });
             const file = fileResult.value;

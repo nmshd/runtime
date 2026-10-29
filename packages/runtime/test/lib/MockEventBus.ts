@@ -40,7 +40,11 @@ export class MockEventBus extends EventEmitter2EventBus {
     }
 
     public async waitForRunningEventHandlers(): Promise<void> {
-        await Promise.all(this.publishPromises);
+        while (this.publishPromises.length > 0) {
+            const runningPublishPromises = this.publishPromises;
+            this.publishPromises = [];
+            await Promise.all(runningPublishPromises);
+        }
     }
 
     public reset(): void {

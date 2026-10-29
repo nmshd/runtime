@@ -17,11 +17,11 @@
     "scripts": {
         "build": "tsc",
         "build:ci": "tsc",
-        "cdep": "tsc && depcruise --config ../../.dependency-cruiser.json dist",
+        "cdep": "tsc && depcruise --config ../../.dependency-cruiser.cjs dist",
         "lint:tsc": "tsc --noEmit"
     },
     "dependencies": {
-        "@js-soft/ts-utils": "2.3.6",
+        "@js-soft/ts-utils": "2.3.11",
         "@nmshd/content": "*"
     },
     "devDependencies": {},

@@ -2,7 +2,7 @@ name: local-test-backbone
 
 services:
   consumer-api:
-    image: ghcr.io/nmshd/backbone-consumer-api:7.1.6@sha256:594a3741ef85e226c9425f2f05bc14742586513f9d4be536390b66e87440b31b
+    image: ghcr.io/nmshd/backbone-consumer-api:7.2.5@sha256:8bcfc1713eed09e0bf5e5902f9e41599cb59f04a630e8f403bb165286e89ce1a
     container_name: consumer-api
     hostname: consumer-api
     environment:
@@ -25,7 +25,7 @@ services:
         target: app/appsettings.override.json
 
   event-handler-service:
-    image: ghcr.io/nmshd/backbone-event-handler:7.1.6@sha256:36ab4018030a96e14cc93014114c941aeb19dd6f73b1bad080e433cbfb2acde4
+    image: ghcr.io/nmshd/backbone-event-handler:7.2.5@sha256:932b4f5b16a784a706a598f0a5ed231abd102091b0177c1a3d4b5ca193973629
     container_name: event-handler-service
     depends_on:
       database:
@@ -39,7 +39,7 @@ services:
         target: app/appsettings.override.json
 
   sse-server:
-    image: ghcr.io/nmshd/backbone-sse-server:7.1.6@sha256:1c6feadf37d60a28752e37566e2101c8d84926c9cbb201cb3685b53963107c40
+    image: ghcr.io/nmshd/backbone-sse-server:7.2.5@sha256:b1f8227fbad108dbf1b9521a862c3dcf425a802c6d7961aaac5fec95b579712d
     container_name: sse-server
     hostname: sse-server
     ports:
@@ -52,7 +52,7 @@ services:
         target: app/appsettings.override.json
 
   admin-ui:
-    image: ghcr.io/nmshd/backbone-admin-ui:7.1.6@sha256:4cacbda5cf15ff53388ac51f02fc82e3a4a0df235d0f350dc1239b140d831b22
+    image: ghcr.io/nmshd/backbone-admin-ui:7.2.5@sha256:59f1271c55663d0113e505e02479c304c474a807ac5b850a3e4c398c0d133681
     container_name: admin-ui
     hostname: admin-ui
     ports:
@@ -72,7 +72,7 @@ services:
 
   database-migrator:
     container_name: database-migrator
-    image: ghcr.io/nmshd/backbone-database-migrator:7.1.6@sha256:f44463234a4dd171ed974990c9e1e8b7710959806107c5ac9c2a9a193b116331
+    image: ghcr.io/nmshd/backbone-database-migrator:7.2.5@sha256:49e87eb755349f79187a8bb102a754afc7498d09bc2a6526e3b5fa89564539a0
     environment:
       Infrastructure__SqlDatabase__Provider: Postgres
       Infrastructure__SqlDatabase__ConnectionString: "Server=postgres;Database=enmeshed;User Id=postgres;Password=Passw0rd;Port=5432"
@@ -89,7 +89,7 @@ services:
   database:
     container_name: bkb-postgres
     hostname: postgres
-    image: postgres@sha256:22c89fe0d0f507606260237fd55e51f6137f58b2d5bcf6152242b96d9fe8f9a4
+    image: postgres@sha256:979bccfde35445db618c65107d27d08c6c21339d8dc3ad4c830c6633947be0e4
     environment:
       - POSTGRES_PASSWORD=Passw0rd
       - POSTGRES_DB=enmeshed
@@ -102,20 +102,20 @@ services:
   azure-storage-emulator:
     container_name: azure-storage-emulator
     hostname: azurite
-    image: mcr.microsoft.com/azure-storage/azurite:3.35.0@sha256:647c63a91102a9d8e8000aab803436e1fc85fbb285e7ce830a82ee5d6661cf37
+    image: mcr.microsoft.com/azure-storage/azurite:3.37.0@sha256:830430c1da1a2d537e08f3e6764dd1f5ae00cf0346bcaf625b968ec3f0971fd5
     pull_policy: always
     command: azurite -d /data/debug.log -l /data --blobHost "0.0.0.0" --queueHost "0.0.0.0" --skipApiVersionCheck
 
   rabbitmq:
     container_name: bkb-rabbitmq
     hostname: rabbitmq
-    image: rabbitmq:4.3.2-alpine@sha256:835cbc6fabceedef7a3b0ce3195a17adccb753a3ba645bdd61c5557b6e4bf580
+    image: rabbitmq:4.4.0-alpine@sha256:21577d148f4f7563a87d761862fa353f59348a094833ca8b1b1a46a8102dffce
 
   ### seeds ###
 
   seed-client:
     container_name: seed-client
-    image: ghcr.io/nmshd/backbone-admin-cli:7.1.6@sha256:0aae9aded1c046bfcd93fcb2675d52d2e301485a3bf7534895b6701c14978613
+    image: ghcr.io/nmshd/backbone-admin-cli:7.2.5@sha256:bfd2d2438e9b9266fdcc49ec969bbc89562636154f09a0f679bfeaba7d56532e
     depends_on:
       consumer-api:
         condition: service_healthy

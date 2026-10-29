@@ -17,61 +17,30 @@
     "scripts": {
         "build": "npm run build:node",
         "build:ci": "npm run build:node && ../../.ci/writeBuildInformation.sh",
-        "build:node": "tsc -p tsconfig.json && depcruise --config ../../.dependency-cruiser.json dist",
+        "build:node": "tsc -p tsconfig.json && depcruise --config ../../.dependency-cruiser.cjs dist",
         "build:notest": "npm run build:node",
-        "cdep": "tsc && depcruise --config ../../.dependency-cruiser.json dist",
+        "cdep": "tsc && depcruise --config ../../.dependency-cruiser.cjs dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
         "test:ci": "npm run test:ci:lokijs && npm run test:ci:mongodb",
-        "test:ci:lokijs": "USE_LOKIJS=true jest -i --coverage",
-        "test:ci:mongodb": "jest -i",
-        "test:local:ferretdb": "npm run test:local:start:ferretdb && CONNECTION_STRING='mongodb://root:example@localhost:27022' jest",
-        "test:local:lokijs": "USE_LOKIJS=true jest",
-        "test:local:mongodb": "npm run test:local:start:mongodb && CONNECTION_STRING='mongodb://root:example@localhost:27021' jest",
+        "test:ci:lokijs": "npm run test:compile && USE_LOKIJS=true vitest run --coverage --maxWorkers=1",
+        "test:ci:mongodb": "npm run test:compile && vitest run --maxWorkers=1",
+        "test:local:ferretdb": "npm run test:compile && npm run test:local:start:ferretdb && CONNECTION_STRING='mongodb://root:example@localhost:27022' vitest run",
+        "test:local:lokijs": "npm run test:compile && USE_LOKIJS=true vitest run",
+        "test:local:mongodb": "npm run test:compile && npm run test:local:start:mongodb && CONNECTION_STRING='mongodb://root:example@localhost:27021' vitest run",
         "test:local:start:ferretdb": "docker compose -f ../../.dev/compose.yml up -d runtime-ferret",
         "test:local:start:mongodb": "docker compose -f ../../.dev/compose.yml up -d runtime-mongo",
         "test:local:teardown": "docker compose -f ../../.dev/compose.yml rm -fsv",
-        "test:mongodb": "jest",
+        "test:mongodb": "npm run test:compile && vitest run",
         "test:performance:kube:start": "kubectl apply -f ./test/performance/k8s.yaml",
-        "test:performance:kube:stop": "kubectl delete -f ./test/performance/k8s.yaml"
-    },
-    "jest": {
-        "collectCoverageFrom": [
-            "./src/**"
-        ],
-        "coverageProvider": "v8",
-        "coverageReporters": [
-            "text-summary",
-            "cobertura",
-            "lcov"
-        ],
-        "maxWorkers": 5,
-        "preset": "ts-jest",
-        "setupFilesAfterEnv": [
-            "./test/customMatchers.ts",
-            "jest-expect-message",
-            "../../jest.setup.cjs"
-        ],
-        "testEnvironment": "node",
-        "testPathIgnorePatterns": [
-            "/test/performance/",
-            "/node_modules/"
-        ],
-        "testTimeout": 60000,
-        "transform": {
-            "^.+\\.ts$": [
-                "ts-jest",
-                {
-                    "tsconfig": "test/tsconfig.json"
-                }
-            ]
-        }
+        "test:performance:kube:stop": "kubectl delete -f ./test/performance/k8s.yaml",
+        "test:compile": "tsc -p test/tsconfig.vitest.json"
     },
     "dependencies": {
-        "@js-soft/docdb-access-abstractions": "1.3.1",
+        "@js-soft/docdb-access-abstractions": "1.4.6",
         "@js-soft/logging-abstractions": "^1.2.5",
         "@js-soft/ts-utils": "^2.3.6",
         "@nmshd/core-types": "*",
-        "@nmshd/crypto": "3.0.0",
+        "@nmshd/crypto": "3.0.14",
         "axios": "^1.17.0",
         "fast-json-patch": "^3.1.1",
         "form-data": "^4.0.6",
@@ -83,18 +52,17 @@
         "ts-simple-nameof": "^1.3.3"
     },
     "devDependencies": {
-        "@js-soft/docdb-access-loki": "1.4.2",
-        "@js-soft/docdb-access-mongo": "1.4.2",
-        "@js-soft/node-logger": "1.2.5",
+        "@js-soft/docdb-access-loki": "1.4.6",
+        "@js-soft/docdb-access-mongo": "1.4.6",
+        "@js-soft/node-logger": "1.2.20",
         "@js-soft/ts-serval": "2.0.17",
-        "@types/json-stringify-safe": "^5.0.3",
-        "@types/lodash": "^4.17.24",
-        "@types/luxon": "^3.7.2",
-        "@types/qs": "^6.15.1",
-        "correlation-id": "^5.2.0",
-        "expect": "^30.4.1",
-        "testcontainers": "^12.0.4",
-        "ts-mockito": "^2.6.1"
+        "@types/json-stringify-safe": "5.0.3",
+        "@types/lodash": "4.17.27",
+        "@types/luxon": "3.7.6",
+        "@types/qs": "6.15.1",
+        "correlation-id": "5.2.0",
+        "testcontainers": "12.2.1",
+        "ts-mockito": "2.6.1"
     },
     "publishConfig": {
         "access": "public",

@@ -38,7 +38,7 @@ export class BaseAgent<AgentModules extends ModulesMap> {
     ) {
         const config = {
             allowInsecureHttpUrls: true,
-            logger: new ConsoleLogger(LogLevel.off)
+            logger: new ConsoleLogger(LogLevel.Off)
         } satisfies InitConfig;
 
         this.config = config;

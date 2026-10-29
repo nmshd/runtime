@@ -3,9 +3,9 @@ import { AcceptShareAuthorizationRequestRequestItemParametersJSON } from "@nmshd
 import { RequestJSON, ShareAuthorizationRequestRequestItemJSON, TokenContentVerifiablePresentationJSON, VerifiableCredentialJSON } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";
 import * as client from "openid-client";
-import path from "path";
-import { GenericContainer, StartedTestContainer, Wait } from "testcontainers";
+import { StartedTestContainer } from "testcontainers";
 import { Agent as UndiciAgent, fetch as undiciFetch } from "undici";
+import { startEudiplo } from "../../../../.dev/eudiplo/startEudiplo";
 import { LocalAttributeDTO } from "../../src";
 import { establishRelationship, RuntimeServiceProvider, syncUntilHasMessageWithRequest, TestRuntimeServices } from "../lib";
 
@@ -94,13 +94,6 @@ test("issuance with pin authentication", async () => {
     const credentialOffer = result.value.credentialOffer;
     const requestedCredentials = credentialOffer.credentialOfferPayload.credential_configuration_ids;
 
-    const wrongPinRequestResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
-        credentialOffer,
-        credentialConfigurationIds: requestedCredentials,
-        pinCode: `1${pin}`
-    });
-    expect(wrongPinRequestResult.isError).toBe(true);
-
     const requestResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
         credentialOffer,
         credentialConfigurationIds: requestedCredentials,
@@ -109,8 +102,37 @@ test("issuance with pin authentication", async () => {
     expect(requestResult).toBeSuccessful();
 });
 
+test("issuance with pin authentication is rejected with incorrect pin", async () => {
+    const correctPin = "1234";
+
+    const credentialOfferUrl = (
+        await eudiploClient.createIssuanceOffer({
+            responseType: "uri",
+            credentialConfigurationIds: [eudiploCredentialConfigurationId],
+            flow: "pre_authorized_code",
+            txCode: correctPin
+        })
+    ).uri;
+
+    const result = await runtimeServices1.consumption.openId4Vc.resolveCredentialOffer({
+        credentialOfferUrl
+    });
+
+    expect(result).toBeSuccessful();
+
+    const credentialOffer = result.value.credentialOffer;
+    const requestedCredentials = credentialOffer.credentialOfferPayload.credential_configuration_ids;
+
+    const requestResult = await runtimeServices1.consumption.openId4Vc.requestCredentials({
+        credentialOffer,
+        credentialConfigurationIds: requestedCredentials,
+        pinCode: `1${correctPin}`
+    });
+    expect(requestResult.isError).toBe(true);
+});
+
 // external authentication buggy in the latest eudiplo release (4.1.0)
-// eslint-disable-next-line jest/no-disabled-tests
+// eslint-disable-next-line vitest/no-disabled-tests
 test.skip("issuance with external authentication", async () => {
     const credentialOfferUrl = (
         await eudiploClient.createIssuanceOffer({
@@ -179,10 +201,11 @@ test("issuance via request", async () => {
 
     const requestId = (sentMessage.value.content as RequestJSON).id!;
     await syncUntilHasMessageWithRequest(runtimeServices2.transport, requestId);
-    await runtimeServices2.consumption.incomingRequests.accept({
+    const acceptResult = await runtimeServices2.consumption.incomingRequests.accept({
         requestId,
         items: [{ accept: true }]
     });
+    expect(acceptResult).toBeSuccessful();
 
     const currentCredentials = (
         await runtimeServices2.consumption.attributes.getAttributes({
@@ -378,28 +401,4 @@ function tamperSignatureOfTokenContent(tokenContent: TokenContentVerifiablePrese
         value: `${header}.${payload}.${tamperedSignature}.${disclosure}.${keyBindingJWT}`
     };
     return tamperedTokenContent;
-}
-
-async function startEudiplo(): Promise<StartedTestContainer> {
-    return await new GenericContainer("ghcr.io/openwallet-foundation-labs/eudiplo:4.1.0@sha256:14bc55723f8cdca0837b91541c80466e406e753c1febd07a26400fab1ca37e2d")
-        .withEnvironment({
-            PUBLIC_URL: "http://localhost:3000", // eslint-disable-line @typescript-eslint/naming-convention
-            MASTER_SECRET: "OgwrDcgVQQ2yZwcFt7kPxQm3nUF+X3etF6MdLTstZAY=", // eslint-disable-line @typescript-eslint/naming-convention
-            AUTH_CLIENT_ID: "root", // eslint-disable-line @typescript-eslint/naming-convention
-            AUTH_CLIENT_SECRET: "test", // eslint-disable-line @typescript-eslint/naming-convention
-            CONFIG_IMPORT: "true", // eslint-disable-line @typescript-eslint/naming-convention
-            CONFIG_IMPORT_FORCE: "true", // eslint-disable-line @typescript-eslint/naming-convention
-            CONFIG_FOLDER: "/config", // eslint-disable-line @typescript-eslint/naming-convention
-            PORT: "3000" // eslint-disable-line @typescript-eslint/naming-convention
-        })
-        .withExposedPorts({ container: 3000, host: 3000 })
-        .withCopyDirectoriesToContainer([
-            {
-                source: path.resolve(path.join(__dirname, "../../../../.dev/eudiplo/config")),
-                target: "/config"
-            }
-        ])
-        .withStartupTimeout(60000)
-        .withWaitStrategy(Wait.forHealthCheck())
-        .start();
 }

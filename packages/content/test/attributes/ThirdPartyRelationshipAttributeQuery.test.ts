@@ -39,8 +39,9 @@ describe("ThirdPartyRelationshipAttributeQuery", function () {
             key: "test",
             owner: "thirdParty",
 
-            // @ts-expect-error: legacy thirdParty formats are accepted at runtime
-            thirdParty: params.in
+            // casting as any to test backwards compatibility
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+            thirdParty: params.in as unknown as any
         });
 
         expect(serialized).toBeInstanceOf(ThirdPartyRelationshipAttributeQuery);
@@ -72,8 +73,9 @@ describe("ThirdPartyRelationshipAttributeQuery", function () {
                     key: "test",
                     owner: "thirdParty",
 
-                    // @ts-expect-error: legacy thirdParty formats are accepted at runtime
-                    thirdParty: params.in
+                    // casting as any to test backwards compatibility
+                    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+                    thirdParty: params.in as unknown as any
                 }
             });
 

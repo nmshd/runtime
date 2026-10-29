@@ -1,19 +1,22 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import { AbstractAttributeValue, AbstractAttributeValueJSON, IAbstractAttributeValue } from "../AbstractAttributeValue";
-import { RenderHints, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../hints";
-import { PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH } from "./proprietary";
+import { AbstractAttributeValue, AbstractAttributeValueJSON, IAbstractAttributeValue } from "../../AbstractAttributeValue";
+import { RenderHints, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../../hints";
+import { PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH } from "../proprietary";
+import { DisplayInformationCachedImages, DisplayInformationCachedImagesJSON, IDisplayInformationCachedImages } from "./DisplayInformationCachedImages";
 
 export interface VerifiableCredentialJSON extends AbstractAttributeValueJSON {
     "@type": "VerifiableCredential";
     value: string | Record<string, any>;
     type: string;
     displayInformation?: Record<string, any>[];
+    displayInformationCachedImages?: DisplayInformationCachedImagesJSON[];
 }
 
 export interface IVerifiableCredential extends IAbstractAttributeValue {
     value: string | Record<string, any>;
     type: string;
     displayInformation?: Record<string, any>[];
+    displayInformationCachedImages?: IDisplayInformationCachedImages[];
 }
 
 @type("VerifiableCredential")
@@ -29,6 +32,10 @@ export class VerifiableCredential extends AbstractAttributeValue implements IVer
     @serialize()
     @validate({ nullable: true, max: PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH })
     public displayInformation?: Record<string, any>[];
+
+    @serialize()
+    @validate({ nullable: true })
+    public displayInformationCachedImages?: DisplayInformationCachedImages[];
 
     public static get valueHints(): ValueHints {
         return ValueHints.from({});

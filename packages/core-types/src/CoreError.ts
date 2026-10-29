@@ -2,6 +2,10 @@ import { ILogger } from "@js-soft/logging-abstractions";
 import stringify from "json-stringify-safe";
 
 export class CoreError extends Error {
+    private static readonly errorConstructorWithStackTrace = Error as ErrorConstructor & {
+        captureStackTrace?(errorInstance: object, startAtConstructor?: Function): void;
+    };
+
     private readonly _code: string;
     public get code(): string {
         return this._code;
@@ -58,8 +62,9 @@ export class CoreError extends Error {
         this._rootError = rootError;
         this._context = context;
 
-        if (typeof Error.captureStackTrace !== "undefined") {
-            Error.captureStackTrace(this, context ?? CoreError);
+        const { captureStackTrace } = CoreError.errorConstructorWithStackTrace;
+        if (typeof captureStackTrace !== "undefined") {
+            captureStackTrace(this, context ?? CoreError);
         }
     }
 

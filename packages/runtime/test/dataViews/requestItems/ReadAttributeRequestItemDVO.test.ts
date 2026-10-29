@@ -804,6 +804,8 @@ describe("ReadAttributeRequestItemDVO with IQL and fallback", () => {
 });
 
 describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery", () => {
+    let successorOwnIdentityAttributeId: string;
+
     beforeAll(async () => {
         const runtimeServices = await serviceProvider.launch(2, { enableRequestModule: true, enableDeciderModule: true });
         runtimeServices1 = runtimeServices[0];
@@ -858,6 +860,8 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
                 }
             })
         ).value;
+
+        successorOwnIdentityAttributeId = successorOwnIdentityAttribute.id;
 
         responseItems = [{ accept: true, existingAttributeId: successorOwnIdentityAttribute.id } as AcceptReadAttributeRequestItemParametersWithExistingAttributeJSON];
     }, 30000);
@@ -962,6 +966,20 @@ describe("AttributeSuccessionAcceptResponseItemDVO with IdentityAttributeQuery",
 
         await syncUntilHasMessageWithResponse(transportServices1, recipientMessage.content.id!);
         await eventBus1.waitForEvent(OutgoingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.Completed);
+    });
+
+    test("check the MessageDVO for the recipient only contains the latest query result before acceptance", async () => {
+        const recipientMessage = await exchangeMessageWithRequest(runtimeServices1, runtimeServices2, requestContent);
+        await eventBus2.waitForEvent(IncomingRequestStatusChangedEvent, (e) => e.data.newStatus === LocalRequestStatus.DecisionRequired);
+
+        const dvo = (await expander2.expandMessageDTO(recipientMessage)) as RequestMessageDVO;
+        const requestItemDVO = dvo.request.content.items[0] as ReadAttributeRequestItemDVO;
+
+        expect(requestItemDVO.query.type).toBe("ProcessedIdentityAttributeQueryDVO");
+        const identityAttributeQueryDVO = requestItemDVO.query as ProcessedIdentityAttributeQueryDVO;
+        expect(identityAttributeQueryDVO.results).toHaveLength(1);
+        expect(identityAttributeQueryDVO.results[0].id).toBe(successorOwnIdentityAttributeId);
+        expect(identityAttributeQueryDVO.results[0].succeededBy).toBeUndefined();
     });
 
     test("check the MessageDVO for the sender after acceptance", async () => {

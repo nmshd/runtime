@@ -1,3 +1,4 @@
+import "vitest";
 import { ErrorValidationResult, SuccessfulValidationResult, ValidationResult } from "../src";
 
 expect.extend({
@@ -41,11 +42,11 @@ expect.extend({
     }
 });
 
-declare global {
-    namespace jest {
-        interface Matchers<R> {
-            successfulValidationResult(): R;
-            errorValidationResult(error?: { code?: string; message?: string | RegExp }): R;
-        }
+declare module "vitest" {
+    // Vitest requires the received value type parameter, but these matchers do not use it.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    interface Matchers<R, T> {
+        successfulValidationResult(): R;
+        errorValidationResult(error?: { code?: string; message?: string | RegExp }): R;
     }
 }

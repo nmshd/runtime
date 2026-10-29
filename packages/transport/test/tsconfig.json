@@ -3,9 +3,9 @@
     "compilerOptions": {
         "noEmit": true,
         "composite": false,
-        "types": ["jest", "node", "lokijs"]
+        "module": "ES2022",
+        "types": ["vitest/globals", "node", "lokijs"]
     },
-    "files": ["../../../node_modules/jest-expect-message/types/index.d.ts"],
     "include": ["**/*.ts", "../src/**/*.ts"],
     "exclude": []
 }

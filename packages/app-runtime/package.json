@@ -19,67 +19,25 @@
         "build:ci": "npm run build:node && ../../.ci/writeBuildInformation.sh",
         "build:node": "tsc -p tsconfig.json",
         "build:notest": "npm run build:node",
-        "cdep": "tsc && depcruise --config ../../.dependency-cruiser.json dist",
+        "cdep": "tsc && depcruise --config ../../.dependency-cruiser.cjs dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
-        "test": "jest --forceExit",
-        "test:ci": "jest -i --forceExit --coverage"
-    },
-    "jest": {
-        "collectCoverageFrom": [
-            "./src/**"
-        ],
-        "coverageProvider": "v8",
-        "coverageReporters": [
-            "text-summary",
-            "cobertura",
-            "lcov"
-        ],
-        "maxWorkers": 5,
-        "preset": "ts-jest",
-        "setupFilesAfterEnv": [
-            "./test/customMatchers.ts",
-            "jest-expect-message",
-            "../../jest.setup.cjs"
-        ],
-        "testEnvironment": "node",
-        "testTimeout": 60000,
-        "transform": {
-            "^.+\\.(t|j)s$": [
-                "ts-jest",
-                {
-                    "tsconfig": "test/tsconfig.json"
-                }
-            ],
-            "^.+\\.mjs$": [
-                "babel-jest",
-                {
-                    "presets": [
-                        [
-                            "@babel/preset-env",
-                            {
-                                "modules": "commonjs"
-                            }
-                        ]
-                    ]
-                }
-            ]
-        },
-        "transformIgnorePatterns": [
-            "<rootDir>/node_modules/(?!(@noble|@stablelib|@credo\\-ts)/)"
-        ]
+        "test": "npm run test:compile && vitest run",
+        "test:ci": "npm run test:compile && vitest run --maxWorkers=1 --coverage",
+        "test:compile": "tsc -p test/tsconfig.vitest.json"
     },
     "dependencies": {
         "@js-soft/docdb-access-loki": "^1.4.2",
         "@js-soft/logging-abstractions": "^1.2.5",
         "@nmshd/runtime": "*",
-        "eventsource": "^4.1.0",
+        "eventsource": "^5.0.0",
         "lodash": "^4.18.1"
     },
     "devDependencies": {
-        "@js-soft/node-logger": "^1.2.5",
-        "@types/lodash": "^4.17.24",
-        "@types/lokijs": "^1.5.14",
-        "@types/luxon": "^3.7.2"
+        "@eudiplo/sdk-core": "9.1.0",
+        "@js-soft/node-logger": "1.2.20",
+        "@types/lodash": "4.17.27",
+        "@types/lokijs": "1.5.14",
+        "@types/luxon": "3.7.6"
     },
     "publishConfig": {
         "access": "public",

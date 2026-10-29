@@ -1,16 +1,16 @@
-/* eslint-disable jest/no-standalone-expect */
+/* eslint-disable vitest/no-standalone-expect */
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { LokiJsConnection } from "@js-soft/docdb-access-loki";
 import { MongoDbConnection } from "@js-soft/docdb-access-mongo";
 import { NodeLoggerFactory } from "@js-soft/node-logger";
 import { ISerializable, Serializable } from "@js-soft/ts-serval";
-import { EventEmitter2EventBus, sleep } from "@js-soft/ts-utils";
+import { sleep } from "@js-soft/ts-utils";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
 import fs from "fs";
 import { DurationLike } from "luxon";
-import path from "path";
 import { GenericContainer, Wait } from "testcontainers";
+import { resolve } from "node:path";
 import {
     AccountController,
     ChangedItems,
@@ -32,8 +32,13 @@ import {
     TokenReference,
     Transport
 } from "../../src";
+import { TestAccountController } from "./TestAccountController";
+import { TestEventBus } from "./TestEventBus";
 
 export class TestUtil {
+    private static readonly DEFAULT_SYNC_UNTIL_TIMEOUT = 60000;
+    private static readonly MAX_SYNC_UNTIL_SLEEP = 1000;
+
     public static loggerFactory = new NodeLoggerFactory({
         appenders: {
             consoleAppender: {
@@ -151,10 +156,8 @@ export class TestUtil {
         return new Transport({ ...config, ...configOverwrite }, eventBus, TestUtil.loggerFactory, correlator);
     }
 
-    public static createEventBus(): EventEmitter2EventBus {
-        return new EventEmitter2EventBus(() => {
-            // ignore errors
-        });
+    public static createEventBus(): TestEventBus {
+        return new TestEventBus();
     }
 
     public static createConfig(): IConfigOverwrite {
@@ -178,7 +181,7 @@ export class TestUtil {
         const randomAccountName = Math.random().toString(36).substring(7);
         const db = await connection.getDatabase(`acc-${randomAccountName}`);
 
-        const accountController = new AccountController(transport, db, transport.config, dependencyOverrides);
+        const accountController = new TestAccountController(transport, db, transport.config, dependencyOverrides);
 
         await accountController.init();
 
@@ -270,7 +273,7 @@ export class TestUtil {
     public static async onboardDevice(transport: Transport, connection: IDatabaseConnection, deviceSharedSecret: DeviceSharedSecret): Promise<AccountController> {
         const randomId = Math.random().toString(36).substring(7);
         const db = await connection.getDatabase(`acc-${randomId}`);
-        const accountController = new AccountController(transport, db, transport.config);
+        const accountController = new TestAccountController(transport, db, transport.config);
         await accountController.init(deviceSharedSecret);
 
         return accountController;
@@ -466,18 +469,21 @@ export class TestUtil {
         const syncResult = new ChangedItems();
 
         let iterationNumber = 0;
+        let criteriaMet = false;
+        const startedAt = Date.now();
         do {
-            await sleep(150 * iterationNumber);
+            await sleep(Math.min(150 * iterationNumber, TestUtil.MAX_SYNC_UNTIL_SLEEP));
             const newSyncResult = await accountController.syncEverything();
             syncResult.messages.push(...newSyncResult.messages);
             syncResult.relationships.push(...newSyncResult.relationships);
             syncResult.identityDeletionProcesses.push(...newSyncResult.identityDeletionProcesses);
             syncResult.files.push(...newSyncResult.files);
             iterationNumber++;
-        } while (!until(syncResult) && iterationNumber < 20);
+            criteriaMet = until(syncResult);
+        } while (!criteriaMet && Date.now() - startedAt < TestUtil.DEFAULT_SYNC_UNTIL_TIMEOUT);
 
-        if (!until(syncResult)) {
-            throw new Error("syncUntil condition was not met");
+        if (!criteriaMet) {
+            throw new Error(`syncUntil condition was not met after ${TestUtil.DEFAULT_SYNC_UNTIL_TIMEOUT}ms`);
         }
         return syncResult;
     }
@@ -644,7 +650,7 @@ export class TestUtil {
 
     public static async runDeletionJob(): Promise<void> {
         const backboneVersion = this.getBackboneVersion();
-        const appsettingsOverrideLocation = process.env.APPSETTINGS_OVERRIDE_LOCATION ?? `${__dirname}/../../../../.dev/appsettings.override.json`;
+        const appsettingsOverrideLocation = process.env.APPSETTINGS_OVERRIDE_LOCATION ?? resolve(process.cwd(), "../../.dev/appsettings.override.json");
         const backboneNetwork = process.env.BACKBONE_NETWORK ?? "local-test-backbone";
 
         await new GenericContainer(`ghcr.io/nmshd/backbone-identity-deletion-jobs:${backboneVersion}`)
@@ -658,7 +664,7 @@ export class TestUtil {
     private static getBackboneVersion() {
         if (process.env.BACKBONE_VERSION) return process.env.BACKBONE_VERSION;
 
-        const composeFile = fs.readFileSync(path.resolve(`${__dirname}/../../../../.dev/compose.backbone.yml`));
+        const composeFile = fs.readFileSync(resolve(process.cwd(), "../../.dev/compose.backbone.yml"));
 
         const regex = /image: ghcr\.io\/nmshd\/backbone-consumer-api:(?<version>[^\r\n]*)@.*/;
         const match = composeFile.toString().match(regex);

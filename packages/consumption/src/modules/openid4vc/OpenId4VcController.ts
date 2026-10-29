@@ -1,6 +1,6 @@
 import { DcqlValidCredential, W3cJsonCredential } from "@credo-ts/core";
 import { OpenId4VciResolvedCredentialOffer, OpenId4VpResolvedAuthorizationRequest } from "@credo-ts/openid4vc";
-import { TokenContentVerifiablePresentation, VerifiableCredential } from "@nmshd/content";
+import { IdentityAttribute, TokenContentVerifiablePresentation, VerifiableCredential } from "@nmshd/content";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../consumption/ConsumptionController";
 import { ConsumptionControllerName } from "../../consumption/ConsumptionControllerName";
@@ -9,6 +9,10 @@ import { Holder } from "./local/Holder";
 import { KeyStorage } from "./local/KeyStorage";
 import { OpenId4VciCredentialResponseJSON } from "./local/OpenId4VciCredentialResponseJSON";
 import { RequestedCredentialCache } from "./local/RequestedCredentialCache";
+
+export type OwnIdentityAttributeWithVerifiableCredential = OwnIdentityAttribute & {
+    content: IdentityAttribute<VerifiableCredential>;
+};
 
 export class OpenId4VcController extends ConsumptionBaseController {
     private holder: Holder;
@@ -42,7 +46,8 @@ export class OpenId4VcController extends ConsumptionBaseController {
     }
 
     private get fetchInstance(): typeof fetch {
-        return this.parent.consumptionConfig.fetchInstance ?? fetch;
+        // Native WebView fetch requires the Window receiver, even when called by a library callback.
+        return this.parent.consumptionConfig.fetchInstance ?? ((...args) => globalThis.fetch(...args));
     }
 
     public async requestAllCredentialsFromCredentialOfferUrl(credentialOfferUrl: string): Promise<OpenId4VciCredentialResponseJSON[]> {
@@ -78,9 +83,9 @@ export class OpenId4VcController extends ConsumptionBaseController {
         return mappedResponses;
     }
 
-    public async storeCredentials(credentialResponses: OpenId4VciCredentialResponseJSON[]): Promise<OwnIdentityAttribute> {
+    public async storeCredentials(credentialResponses: OpenId4VciCredentialResponseJSON[]): Promise<OwnIdentityAttributeWithVerifiableCredential> {
         const credentials = await this.holder.storeCredentials(credentialResponses);
-        return credentials[0];
+        return credentials[0] as OwnIdentityAttributeWithVerifiableCredential;
     }
 
     public async resolveAuthorizationRequest(authorizationRequestUrl: string): Promise<{

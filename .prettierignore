@@ -1,4 +1,5 @@
 dist
+**/.vitest-build/**
 node_modules
 package-lock.json
 lib-web

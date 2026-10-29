@@ -33,6 +33,7 @@ import { IdentityUtil, SynchronizedCollection } from "@nmshd/transport";
 import fs from "fs";
 import _ from "lodash";
 import { DateTime } from "luxon";
+import { fileURLToPath } from "url";
 import {
     AttributeSucceededEvent,
     ConsumptionServices,
@@ -64,16 +65,21 @@ import {
     TransportServices,
     UploadOwnFileRequest
 } from "../../src";
+import { getEventBusForTransportServices } from "./RuntimeEventBusRegistry";
 import { TestRuntimeServices } from "./RuntimeServiceProvider";
 import { TestNotificationItem } from "./TestNotificationItem";
+
+const DEFAULT_SYNC_UNTIL_TIMEOUT = 10000;
+const MAX_SYNC_UNTIL_SLEEP = 250;
 
 export async function syncUntil(transportServices: TransportServices, until: (syncResult: SyncEverythingResponse) => boolean): Promise<SyncEverythingResponse> {
     const finalSyncResult: SyncEverythingResponse = { messages: [], relationships: [], identityDeletionProcesses: [], files: [] };
 
     let iterationNumber = 0;
     let criteriaMet: boolean;
+    const startedAt = Date.now();
     do {
-        await sleep(iterationNumber * 25);
+        await sleep(Math.min(iterationNumber * 25, MAX_SYNC_UNTIL_SLEEP));
 
         const currentIterationSyncResult = (await transportServices.account.syncEverything()).value;
 
@@ -84,8 +90,12 @@ export async function syncUntil(transportServices: TransportServices, until: (sy
 
         iterationNumber++;
         criteriaMet = until(finalSyncResult);
-    } while (!criteriaMet && iterationNumber < 15);
-    if (!criteriaMet) throw new Error("syncUntil timed out.");
+    } while (!criteriaMet && Date.now() - startedAt < DEFAULT_SYNC_UNTIL_TIMEOUT);
+    if (!criteriaMet) throw new Error(`syncUntil timed out after ${DEFAULT_SYNC_UNTIL_TIMEOUT}ms.`);
+
+    // syncEverything returns after publishing runtime events, not after their asynchronous handlers have finished.
+    await getEventBusForTransportServices(transportServices)?.waitForRunningEventHandlers();
+
     return finalSyncResult;
 }
 
@@ -151,10 +161,12 @@ export async function syncUntilHasEvent<TEvent extends Event>(
 ): Promise<Event> {
     let iterationNumber = 0;
     let event: Event | undefined;
+    const startedAt = Date.now();
     do {
-        await sleep(iterationNumber * 25);
+        await sleep(Math.min(iterationNumber * 25, MAX_SYNC_UNTIL_SLEEP));
 
         await runtimeServices.transport.account.syncEverything();
+        await runtimeServices.eventBus.waitForRunningEventHandlers();
         event = runtimeServices.eventBus.publishedEvents.find(
             (e) =>
                 e.namespace === subscriptionTarget.namespace &&
@@ -163,8 +175,8 @@ export async function syncUntilHasEvent<TEvent extends Event>(
         );
 
         iterationNumber++;
-    } while (!event && iterationNumber < 15);
-    if (!event) throw new Error("syncUntil timed out.");
+    } while (!event && Date.now() - startedAt < DEFAULT_SYNC_UNTIL_TIMEOUT);
+    if (!event) throw new Error(`syncUntil timed out after ${DEFAULT_SYNC_UNTIL_TIMEOUT}ms.`);
     return event;
 }
 
@@ -199,8 +211,8 @@ export async function makeUploadRequest(values: object = {}): Promise<UploadOwnF
     return {
         title: "aTitle",
         filename: "aFileName",
-        content: await fs.promises.readFile(`${__dirname}/../__assets__/test.txt`),
-        mimetype: "aMimetype",
+        content: await fs.promises.readFile(fileURLToPath(new URL("../__assets__/test.txt", import.meta.url))),
+        mimetype: "text/plain",
         description: "aDescription",
         expiresAt: DateTime.utc().plus({ minutes: 5 }).toString(),
         ...values

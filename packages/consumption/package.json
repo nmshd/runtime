@@ -17,70 +17,28 @@
     "scripts": {
         "build": "npm run build:node",
         "build:ci": "npm run build:node && ../../.ci/writeBuildInformation.sh",
-        "build:node": "tsc -p tsconfig.json && depcruise --config ../../.dependency-cruiser.json dist",
+        "build:node": "tsc -p tsconfig.json && depcruise --config ../../.dependency-cruiser.cjs dist",
         "build:notest": "npm run build:node",
-        "cdep": "tsc && depcruise --config ../../.dependency-cruiser.json dist",
+        "cdep": "tsc && depcruise --config ../../.dependency-cruiser.cjs dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
         "test:ci": "npm run test",
-        "test:ci:lokijs": "USE_LOKIJS=true jest -i --coverage",
-        "test:ci:mongodb": "jest -i",
-        "test:local:ferretdb": "npm run test:local:start:ferretdb && CONNECTION_STRING='mongodb://root:example@localhost:27022' jest",
-        "test:local:lokijs": "USE_LOKIJS=true jest",
-        "test:local:mongodb": "npm run test:local:start:mongodb && CONNECTION_STRING='mongodb://root:example@localhost:27021' jest",
+        "test:ci:lokijs": "npm run test:compile && USE_LOKIJS=true vitest run --coverage --maxWorkers=1",
+        "test:ci:mongodb": "npm run test:compile && vitest run --maxWorkers=1",
+        "test:local:ferretdb": "npm run test:compile && npm run test:local:start:ferretdb && CONNECTION_STRING='mongodb://root:example@localhost:27022' vitest run",
+        "test:local:lokijs": "npm run test:compile && USE_LOKIJS=true vitest run",
+        "test:local:mongodb": "npm run test:compile && npm run test:local:start:mongodb && CONNECTION_STRING='mongodb://root:example@localhost:27021' vitest run",
         "test:local:start:ferretdb": "docker compose -f ../../.dev/compose.yml up -d runtime-ferret",
         "test:local:start:mongodb": "docker compose -f ../../.dev/compose.yml up -d runtime-mongo",
-        "test:local:teardown": "docker compose -f ../../.dev/compose.yml rm -fsv"
-    },
-    "jest": {
-        "collectCoverageFrom": [
-            "./src/**"
-        ],
-        "coverageProvider": "v8",
-        "coverageReporters": [
-            "text-summary",
-            "cobertura",
-            "lcov"
-        ],
-        "maxWorkers": 1,
-        "preset": "ts-jest",
-        "setupFilesAfterEnv": [
-            "./test/customMatchers.ts",
-            "jest-expect-message",
-            "../../jest.setup.cjs"
-        ],
-        "testEnvironment": "node",
-        "testTimeout": 60000,
-        "transform": {
-            "^.+\\.(t|j)s$": [
-                "ts-jest",
-                {
-                    "tsconfig": "test/tsconfig.json"
-                }
-            ],
-            "^.+\\.mjs$": [
-                "babel-jest",
-                {
-                    "presets": [
-                        [
-                            "@babel/preset-env",
-                            {
-                                "modules": "commonjs"
-                            }
-                        ]
-                    ]
-                }
-            ]
-        },
-        "transformIgnorePatterns": [
-            "<rootDir>/node_modules/(?!(@noble|@stablelib|@credo\\-ts)/)"
-        ]
+        "test:local:teardown": "docker compose -f ../../.dev/compose.yml rm -fsv",
+        "test:compile": "tsc -p test/tsconfig.vitest.json",
+        "test": "npm run test:compile && vitest run"
     },
     "dependencies": {
-        "@credo-ts/core": "^0.6.1",
-        "@credo-ts/openid4vc": "^0.6.1",
+        "@credo-ts/core": "0.7.0",
+        "@credo-ts/openid4vc": "0.7.0",
         "@js-soft/docdb-querytranslator": "^1.1.7",
         "@js-soft/ts-serval": "2.0.17",
-        "@js-soft/ts-utils": "2.3.6",
+        "@js-soft/ts-utils": "2.3.11",
         "@nmshd/content": "*",
         "@nmshd/core-types": "*",
         "@nmshd/iql": "^1.0.5",
@@ -93,13 +51,13 @@
         "ws": "^8.21.0"
     },
     "devDependencies": {
-        "@js-soft/docdb-access-loki": "1.4.2",
-        "@js-soft/docdb-access-mongo": "1.4.2",
-        "@js-soft/node-logger": "1.2.5",
-        "@nmshd/crypto": "3.0.0",
-        "@types/lodash": "^4.17.24",
-        "@types/sjcl": "^1.0.34",
-        "ts-mockito": "^2.6.1"
+        "@js-soft/docdb-access-loki": "1.4.6",
+        "@js-soft/docdb-access-mongo": "1.4.6",
+        "@js-soft/node-logger": "1.2.20",
+        "@nmshd/crypto": "3.0.14",
+        "@types/lodash": "4.17.27",
+        "@types/sjcl": "1.0.34",
+        "ts-mockito": "2.6.1"
     },
     "publishConfig": {
         "access": "public",

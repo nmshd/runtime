@@ -1,4 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
+import { vi } from "vitest";
 import { CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
 import { AccountController, File, FileOwnershipLockedEvent, Transport } from "../../../src";
@@ -307,6 +308,50 @@ describe("FileController", function () {
 
             const updatedFile = await sender.files.regenerateFileOwnershipToken(file.id);
             expect(updatedFile.ownershipIsLocked).toBeUndefined();
+        });
+    });
+
+    describe("cache VerifiableCredential displayInformation images", function () {
+        afterEach(function () {
+            vi.restoreAllMocks();
+        });
+
+        test("should return cached image references for reachable URLs", async function () {
+            const logoRef = (await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("logo"))).toFileReference(sender.config.baseUrl);
+            const backgroundRef = (await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("background"))).toFileReference(sender.config.baseUrl);
+
+            const cacheImageFromUrlSpy = vi
+                .spyOn(sender.files as any, "cacheImageFromUrl")
+                .mockResolvedValueOnce(logoRef)
+                .mockResolvedValueOnce(backgroundRef);
+
+            const result = await sender.files.cacheVerifiableCredentialDisplayInformationImages([
+                { locale: "en", logo: "https://example.org/logo.png", backgroundImage: "https://example.org/background.png" }
+            ]);
+
+            expect(result).toHaveLength(1);
+            expect(result![0].locale).toBe("en");
+            expect(result![0].logo?.toString()).toBe(logoRef.toString());
+            expect(result![0].backgroundImage?.toString()).toBe(backgroundRef.toString());
+
+            expect(cacheImageFromUrlSpy).toHaveBeenNthCalledWith(1, "https://example.org/logo.png");
+            expect(cacheImageFromUrlSpy).toHaveBeenNthCalledWith(2, "https://example.org/background.png");
+        });
+
+        test("should skip unreachable URLs", async function () {
+            const cacheImageFromUrlSpy = vi.spyOn(sender.files as any, "cacheImageFromUrl").mockResolvedValue(undefined);
+
+            const result = await sender.files.cacheVerifiableCredentialDisplayInformationImages([
+                { locale: "de", logo: "https://example.org/unreachable-logo.png", backgroundImage: "https://example.org/unreachable-background.png" }
+            ]);
+
+            expect(result).toHaveLength(1);
+            expect(result![0].locale).toBe("de");
+            expect(result![0].logo).toBeUndefined();
+            expect(result![0].backgroundImage).toBeUndefined();
+
+            expect(cacheImageFromUrlSpy).toHaveBeenNthCalledWith(1, "https://example.org/unreachable-logo.png");
+            expect(cacheImageFromUrlSpy).toHaveBeenNthCalledWith(2, "https://example.org/unreachable-background.png");
         });
     });
 });

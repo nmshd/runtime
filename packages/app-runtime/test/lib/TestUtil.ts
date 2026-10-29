@@ -1,4 +1,4 @@
-/* eslint-disable jest/no-standalone-expect */
+/* eslint-disable vitest/no-standalone-expect */
 import { ILokiJsDatabaseFactory } from "@js-soft/docdb-access-loki";
 import { NodeLoggerFactory } from "@js-soft/node-logger";
 import { EventBus, Result, sleep } from "@js-soft/ts-utils";
@@ -18,8 +18,8 @@ import { IConfigOverwrite } from "@nmshd/transport";
 import fs from "fs";
 import { defaultsDeep } from "lodash";
 import loki from "lokijs";
-import path from "path";
 import { GenericContainer, Wait } from "testcontainers";
+import { resolve } from "node:path";
 import {
     AppConfig,
     AppConfigOverwrite,
@@ -41,6 +41,9 @@ export class TestDatabaseFactory implements ILokiJsDatabaseFactory {
 }
 
 export class TestUtil {
+    private static readonly DEFAULT_SYNC_UNTIL_TIMEOUT = 30000;
+    private static readonly MAX_SYNC_UNTIL_SLEEP = 1000;
+
     private static readonly loggerFactory = new NodeLoggerFactory({
         appenders: {
             consoleAppender: {
@@ -232,15 +235,23 @@ export class TestUtil {
         };
 
         let iterationNumber = 0;
+        let criteriaMet = false;
+        const startedAt = Date.now();
         do {
-            await sleep(iterationNumber * 25);
+            await sleep(Math.min(150 * iterationNumber, TestUtil.MAX_SYNC_UNTIL_SLEEP));
             const newSyncResult = await session.transportServices.account.syncEverything();
             syncResponse.messages.push(...newSyncResult.value.messages);
             syncResponse.relationships.push(...newSyncResult.value.relationships);
             syncResponse.identityDeletionProcesses.push(...newSyncResult.value.identityDeletionProcesses);
             syncResponse.files.push(...newSyncResult.value.files);
             iterationNumber++;
-        } while (!until(syncResponse) && iterationNumber < 15);
+            criteriaMet = until(syncResponse);
+        } while (!criteriaMet && Date.now() - startedAt < TestUtil.DEFAULT_SYNC_UNTIL_TIMEOUT);
+
+        if (!criteriaMet) {
+            throw new Error(`syncUntil condition was not met after ${TestUtil.DEFAULT_SYNC_UNTIL_TIMEOUT}ms`);
+        }
+
         return syncResponse;
     }
 
@@ -251,7 +262,7 @@ export class TestUtil {
 
     public static async syncUntilHasRelationship(session: LocalAccountSession, id: string): Promise<RelationshipDTO> {
         const syncResult = await TestUtil.syncUntil(session, (syncResult) => syncResult.relationships.some((r) => r.id === id));
-        return syncResult.relationships[0];
+        return syncResult.relationships.find((r) => r.id === id)!;
     }
 
     public static async syncUntilHasMessages(session: LocalAccountSession, expectedNumberOfMessages = 1): Promise<MessageDTO[]> {
@@ -261,7 +272,7 @@ export class TestUtil {
 
     public static async syncUntilHasMessage(session: LocalAccountSession, id: string): Promise<MessageDTO> {
         const syncResult = await TestUtil.syncUntil(session, (syncResult) => syncResult.messages.some((m) => m.id === id));
-        return syncResult.messages[0];
+        return syncResult.messages.find((m) => m.id === id)!;
     }
 
     public static async sendMessage(from: LocalAccountSession, to: LocalAccountSession, content?: MessageContentDerivation): Promise<MessageDTO> {
@@ -303,7 +314,7 @@ export class TestUtil {
 
     public static async runDeletionJob(): Promise<void> {
         const backboneVersion = this.getBackboneVersion();
-        const appsettingsOverrideLocation = process.env.APPSETTINGS_OVERRIDE_LOCATION ?? `${__dirname}/../../../../.dev/appsettings.override.json`;
+        const appsettingsOverrideLocation = process.env.APPSETTINGS_OVERRIDE_LOCATION ?? resolve(process.cwd(), "../../.dev/appsettings.override.json");
         const backboneNetwork = process.env.BACKBONE_NETWORK ?? "local-test-backbone";
 
         await new GenericContainer(`ghcr.io/nmshd/backbone-identity-deletion-jobs:${backboneVersion}`)
@@ -317,7 +328,7 @@ export class TestUtil {
     private static getBackboneVersion() {
         if (process.env.BACKBONE_VERSION) return process.env.BACKBONE_VERSION;
 
-        const composeFile = fs.readFileSync(path.resolve(`${__dirname}/../../../../.dev/compose.backbone.yml`));
+        const composeFile = fs.readFileSync(resolve(process.cwd(), "../../.dev/compose.backbone.yml"));
 
         const regex = /image: ghcr\.io\/nmshd\/backbone-consumer-api:(?<version>[^\r\n]*)@.*/;
         const match = composeFile.toString().match(regex);

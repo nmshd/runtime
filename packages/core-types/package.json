@@ -17,47 +17,21 @@
     "scripts": {
         "build": "tsc",
         "build:ci": "tsc",
-        "cdep": "tsc && depcruise --config ../../.dependency-cruiser.json dist",
+        "cdep": "tsc && depcruise --config ../../.dependency-cruiser.cjs dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
-        "test": "jest -i",
-        "test:ci": "jest -i --coverage"
-    },
-    "jest": {
-        "collectCoverageFrom": [
-            "./src/**"
-        ],
-        "coverageProvider": "v8",
-        "coverageReporters": [
-            "text-summary",
-            "cobertura",
-            "lcov"
-        ],
-        "maxWorkers": 1,
-        "preset": "ts-jest",
-        "setupFilesAfterEnv": [
-            "jest-expect-message",
-            "../../jest.setup.cjs"
-        ],
-        "testEnvironment": "node",
-        "testTimeout": 60000,
-        "transform": {
-            "^.+\\.ts$": [
-                "ts-jest",
-                {
-                    "tsconfig": "test/tsconfig.json"
-                }
-            ]
-        }
+        "test": "npm run test:compile && vitest run --maxWorkers=1",
+        "test:ci": "npm run test:compile && vitest run --coverage --maxWorkers=1",
+        "test:compile": "tsc -p test/tsconfig.vitest.json"
     },
     "dependencies": {
         "@js-soft/logging-abstractions": "^1.2.5",
         "@js-soft/ts-serval": "2.0.17",
-        "@nmshd/crypto": "3.0.0",
+        "@nmshd/crypto": "3.0.14",
         "json-stringify-safe": "^5.0.1",
         "luxon": "^3.7.2"
     },
     "devDependencies": {
-        "@types/luxon": "^3.7.2"
+        "@types/luxon": "3.7.6"
     },
     "publishConfig": {
         "access": "public",
