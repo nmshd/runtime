@@ -3,6 +3,7 @@
     "compilerOptions": {
         "noEmit": true,
         "composite": false,
+        "skipLibCheck": true,
         "allowJs": true, // we want to use the ts compiler to compile ESM node modules into CJS which is understood by jest. This is required since those node modules are javascript.
         "types": ["jest", "node"]
     },
