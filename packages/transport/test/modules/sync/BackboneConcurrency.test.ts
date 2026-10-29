@@ -39,7 +39,7 @@ describe("BackboneConcurrency", function () {
         expect(resultOfCreate.error.code).toBe("error.platform.validation.datawallet.cannotPushDatawalletModificationsDuringActiveSyncRun");
     });
 
-    // eslint-disable-next-line jest/no-disabled-tests
+    // eslint-disable-next-line vitest/no-disabled-tests
     test.skip("should only start one sync run on multiple calls", async function () {
         const a1 = await TestUtil.createIdentityWithOneDevice(connection, { datawalletEnabled: true });
 

@@ -21,38 +21,8 @@
         "build:notest": "npm run build:node",
         "cdep": "tsc && depcruise --config ../../.dependency-cruiser.cjs dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
-        "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest",
-        "test:ci": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest -i --coverage"
-    },
-    "jest": {
-        "collectCoverageFrom": [
-            "./src/**"
-        ],
-        "coverageProvider": "v8",
-        "coverageReporters": [
-            "text-summary",
-            "cobertura",
-            "lcov"
-        ],
-        "maxWorkers": 5,
-        "extensionsToTreatAsEsm": [
-            ".ts"
-        ],
-        "setupFilesAfterEnv": [
-            "jest-expect-message",
-            "../../jest.setup.cjs"
-        ],
-        "testEnvironment": "node",
-        "testTimeout": 60000,
-        "transform": {
-            "^.+\\.ts$": [
-                "ts-jest",
-                {
-                    "tsconfig": "test/tsconfig.json",
-                    "useESM": true
-                }
-            ]
-        }
+        "test": "vitest run",
+        "test:ci": "vitest run --coverage --maxWorkers=1"
     },
     "dependencies": {
         "@js-soft/ts-serval": "2.0.17",

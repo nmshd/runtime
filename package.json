@@ -28,22 +28,21 @@
         "test:teardown": "docker compose -f .dev/compose.yml down -fsv"
     },
     "devDependencies": {
-        "@babel/preset-env": "7.29.7",
-        "@babel/preset-typescript": "7.29.7",
         "@js-soft/eslint-config-ts": "2.0.12",
         "@js-soft/license-check": "1.0.16",
-        "@types/jest": "30.0.0",
+        "@swc/core": "^1.16.20",
         "@types/node": "24.19.2",
+        "@vitest/coverage-v8": "^5.0.5",
+        "@vitest/eslint-plugin": "^1.6.28",
         "dependency-cruiser": "18.7.0",
         "enhanced-publish": "1.1.17",
         "eslint": "10.13.0",
-        "jest": "30.5.2",
-        "jest-expect-message": "1.1.3",
         "npm-check-updates": "23.1.1",
         "prettier": "3.9.10",
-        "ts-jest": "29.4.15",
         "ts-node": "10.9.2",
         "tsconfig-paths": "4.2.0",
-        "typescript": "6.0.3"
+        "typescript": "6.0.3",
+        "unplugin-swc": "^2.0.0",
+        "vitest": "^5.0.5"
     }
 }

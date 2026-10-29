@@ -132,7 +132,7 @@ test("issuance with pin authentication is rejected with incorrect pin", async ()
 });
 
 // external authentication buggy in the latest eudiplo release (4.1.0)
-// eslint-disable-next-line jest/no-disabled-tests
+// eslint-disable-next-line vitest/no-disabled-tests
 test.skip("issuance with external authentication", async () => {
     const credentialOfferUrl = (
         await eudiploClient.createIssuanceOffer({

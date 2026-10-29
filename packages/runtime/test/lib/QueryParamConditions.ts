@@ -1,4 +1,4 @@
-/* eslint-disable jest/no-standalone-expect */
+/* eslint-disable vitest/no-standalone-expect */
 import { Result } from "@js-soft/ts-utils";
 import { DateTime } from "luxon";
 import { TransportServices } from "../../src";

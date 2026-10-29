@@ -22,54 +22,14 @@
         "build:schemas": "node scripts/buildSchemas.mjs",
         "cdep": "tsc && depcruise --config ../../.dependency-cruiser.cjs dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
-        "test:ci:lokijs": "USE_LOKIJS=true NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest -i --coverage",
-        "test:ci:mongodb": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest -i --coverage",
-        "test:local:ferretdb": "npm run test:local:start:ferretdb && CONNECTION_STRING='mongodb://root:example@localhost:27022' NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest",
-        "test:local:lokijs": "USE_LOKIJS=true NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest",
-        "test:local:mongodb": "npm run test:local:start:mongodb && CONNECTION_STRING='mongodb://root:example@localhost:27021' NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest",
+        "test:ci:lokijs": "USE_LOKIJS=true vitest run --coverage --maxWorkers=1",
+        "test:ci:mongodb": "vitest run --coverage --maxWorkers=1",
+        "test:local:ferretdb": "npm run test:local:start:ferretdb && CONNECTION_STRING='mongodb://root:example@localhost:27022' vitest run",
+        "test:local:lokijs": "USE_LOKIJS=true vitest run",
+        "test:local:mongodb": "npm run test:local:start:mongodb && CONNECTION_STRING='mongodb://root:example@localhost:27021' vitest run",
         "test:local:start:ferretdb": "docker compose -f ../../.dev/compose.yml up -d runtime-ferret",
         "test:local:start:mongodb": "docker compose -f ../../.dev/compose.yml up -d runtime-mongo",
         "test:local:teardown": "docker compose -f ../../.dev/compose.yml rm -fsv"
-    },
-    "jest": {
-        "collectCoverageFrom": [
-            "./src/**"
-        ],
-        "coverageProvider": "v8",
-        "coverageReporters": [
-            "text-summary",
-            "cobertura",
-            "lcov"
-        ],
-        "maxWorkers": 1,
-        "extensionsToTreatAsEsm": [
-            ".ts"
-        ],
-        "setupFilesAfterEnv": [
-            "./test/customMatchers.ts",
-            "./test/disableTimeoutForDebugging.ts",
-            "jest-expect-message",
-            "../../jest.setup.cjs"
-        ],
-        "testEnvironment": "node",
-        "testTimeout": 60000,
-        "transform": {
-            "^.+\\.ts$": [
-                "ts-jest",
-                {
-                    "tsconfig": "test/tsconfig.json",
-                    "useESM": true
-                }
-            ]
-        },
-        "moduleNameMapper": {
-            "^@verifiables/request-converter$": "<rootDir>/../../node_modules/@verifiables/request-converter/dist/index.js",
-            "^webcrypto-core$": "<rootDir>/../../node_modules/webcrypto-core/build/webcrypto-core.js"
-        },
-        "transformIgnorePatterns": [
-            "[/\\\\]packages[/\\\\][^/\\\\]+[/\\\\]dist[/\\\\]",
-            "<rootDir>/node_modules/(?!(@noble|@stablelib|@credo\\-ts|@verifiables)/)"
-        ]
     },
     "dependencies": {
         "@credo-ts/openid4vc": "0.7.0",
@@ -104,7 +64,6 @@
         "@js-soft/node-logger": "1.2.19",
         "@nmshd/connector-sdk": "7.5.5",
         "@types/elliptic": "6.4.18",
-        "@types/jest": "30.0.0",
         "@types/json-stringify-safe": "5.0.3",
         "@types/lodash": "4.17.26",
         "@types/luxon": "3.7.6",

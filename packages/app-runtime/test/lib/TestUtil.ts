@@ -1,4 +1,4 @@
-/* eslint-disable jest/no-standalone-expect */
+/* eslint-disable vitest/no-standalone-expect */
 import { ILokiJsDatabaseFactory } from "@js-soft/docdb-access-loki";
 import { NodeLoggerFactory } from "@js-soft/node-logger";
 import { EventBus, Result, sleep } from "@js-soft/ts-utils";

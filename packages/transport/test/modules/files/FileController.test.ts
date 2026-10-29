@@ -1,5 +1,5 @@
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 import { CoreDate, CoreId } from "@nmshd/core-types";
 import { CoreBuffer } from "@nmshd/crypto";
 import { AccountController, File, FileOwnershipLockedEvent, Transport } from "../../../src";
@@ -313,14 +313,14 @@ describe("FileController", function () {
 
     describe("cache VerifiableCredential displayInformation images", function () {
         afterEach(function () {
-            jest.restoreAllMocks();
+            vi.restoreAllMocks();
         });
 
         test("should return cached image references for reachable URLs", async function () {
             const logoRef = (await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("logo"))).toFileReference(sender.config.baseUrl);
             const backgroundRef = (await TestUtil.uploadFile(sender, CoreBuffer.fromUtf8("background"))).toFileReference(sender.config.baseUrl);
 
-            const cacheImageFromUrlSpy = jest
+            const cacheImageFromUrlSpy = vi
                 .spyOn(sender.files as any, "cacheImageFromUrl")
                 .mockResolvedValueOnce(logoRef)
                 .mockResolvedValueOnce(backgroundRef);
@@ -339,7 +339,7 @@ describe("FileController", function () {
         });
 
         test("should skip unreachable URLs", async function () {
-            const cacheImageFromUrlSpy = jest.spyOn(sender.files as any, "cacheImageFromUrl").mockResolvedValue(undefined);
+            const cacheImageFromUrlSpy = vi.spyOn(sender.files as any, "cacheImageFromUrl").mockResolvedValue(undefined);
 
             const result = await sender.files.cacheVerifiableCredentialDisplayInformationImages([
                 { locale: "de", logo: "https://example.org/unreachable-logo.png", backgroundImage: "https://example.org/unreachable-background.png" }

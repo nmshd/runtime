@@ -22,52 +22,17 @@
         "cdep": "tsc && depcruise --config ../../.dependency-cruiser.cjs dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
         "test:ci": "npm run test:ci:lokijs && npm run test:ci:mongodb",
-        "test:ci:lokijs": "USE_LOKIJS=true NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest -i --coverage",
-        "test:ci:mongodb": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest -i",
-        "test:local:ferretdb": "npm run test:local:start:ferretdb && CONNECTION_STRING='mongodb://root:example@localhost:27022' NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest",
-        "test:local:lokijs": "USE_LOKIJS=true NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest",
-        "test:local:mongodb": "npm run test:local:start:mongodb && CONNECTION_STRING='mongodb://root:example@localhost:27021' NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest",
+        "test:ci:lokijs": "USE_LOKIJS=true vitest run --coverage --maxWorkers=1",
+        "test:ci:mongodb": "vitest run --maxWorkers=1",
+        "test:local:ferretdb": "npm run test:local:start:ferretdb && CONNECTION_STRING='mongodb://root:example@localhost:27022' vitest run",
+        "test:local:lokijs": "USE_LOKIJS=true vitest run",
+        "test:local:mongodb": "npm run test:local:start:mongodb && CONNECTION_STRING='mongodb://root:example@localhost:27021' vitest run",
         "test:local:start:ferretdb": "docker compose -f ../../.dev/compose.yml up -d runtime-ferret",
         "test:local:start:mongodb": "docker compose -f ../../.dev/compose.yml up -d runtime-mongo",
         "test:local:teardown": "docker compose -f ../../.dev/compose.yml rm -fsv",
-        "test:mongodb": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest",
+        "test:mongodb": "vitest run",
         "test:performance:kube:start": "kubectl apply -f ./test/performance/k8s.yaml",
         "test:performance:kube:stop": "kubectl delete -f ./test/performance/k8s.yaml"
-    },
-    "jest": {
-        "collectCoverageFrom": [
-            "./src/**"
-        ],
-        "coverageProvider": "v8",
-        "coverageReporters": [
-            "text-summary",
-            "cobertura",
-            "lcov"
-        ],
-        "maxWorkers": 5,
-        "extensionsToTreatAsEsm": [
-            ".ts"
-        ],
-        "setupFilesAfterEnv": [
-            "./test/customMatchers.ts",
-            "jest-expect-message",
-            "../../jest.setup.cjs"
-        ],
-        "testEnvironment": "node",
-        "testPathIgnorePatterns": [
-            "/test/performance/",
-            "/node_modules/"
-        ],
-        "testTimeout": 60000,
-        "transform": {
-            "^.+\\.ts$": [
-                "ts-jest",
-                {
-                    "tsconfig": "test/tsconfig.json",
-                    "useESM": true
-                }
-            ]
-        }
     },
     "dependencies": {
         "@js-soft/docdb-access-abstractions": "1.4.6",
@@ -95,7 +60,6 @@
         "@types/luxon": "3.7.6",
         "@types/qs": "6.15.1",
         "correlation-id": "5.2.0",
-        "expect": "30.5.2",
         "testcontainers": "12.2.1",
         "ts-mockito": "2.6.1"
     },

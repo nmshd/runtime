@@ -21,47 +21,8 @@
         "build:notest": "npm run build:node",
         "cdep": "tsc && depcruise --config ../../.dependency-cruiser.cjs dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
-        "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --forceExit",
-        "test:ci": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest -i --forceExit --coverage"
-    },
-    "jest": {
-        "collectCoverageFrom": [
-            "./src/**"
-        ],
-        "coverageProvider": "v8",
-        "coverageReporters": [
-            "text-summary",
-            "cobertura",
-            "lcov"
-        ],
-        "maxWorkers": 5,
-        "extensionsToTreatAsEsm": [
-            ".ts"
-        ],
-        "setupFilesAfterEnv": [
-            "./test/customMatchers.ts",
-            "jest-expect-message",
-            "../../jest.setup.cjs"
-        ],
-        "testEnvironment": "node",
-        "testTimeout": 60000,
-        "transform": {
-            "^.+\\.ts$": [
-                "ts-jest",
-                {
-                    "tsconfig": "test/tsconfig.json",
-                    "useESM": true
-                }
-            ]
-        },
-        "moduleNameMapper": {
-            "^@verifiables/request-converter$": "<rootDir>/../../node_modules/@verifiables/request-converter/dist/index.js",
-            "^webcrypto-core$": "<rootDir>/../../node_modules/webcrypto-core/build/webcrypto-core.js"
-        },
-        "transformIgnorePatterns": [
-            "[/\\\\]packages[/\\\\][^/\\\\]+[/\\\\]dist[/\\\\]",
-            "<rootDir>/node_modules/(?!(@noble|@stablelib|@credo\\-ts|@verifiables)/)"
-        ]
+        "test": "vitest run",
+        "test:ci": "vitest run --maxWorkers=1 --coverage"
     },
     "dependencies": {
         "@js-soft/docdb-access-loki": "^1.4.2",

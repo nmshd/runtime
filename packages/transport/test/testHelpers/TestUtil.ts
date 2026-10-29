@@ -1,4 +1,4 @@
-/* eslint-disable jest/no-standalone-expect */
+/* eslint-disable vitest/no-standalone-expect */
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { LokiJsConnection } from "@js-soft/docdb-access-loki";
 import { MongoDbConnection } from "@js-soft/docdb-access-mongo";

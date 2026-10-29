@@ -1,5 +1,5 @@
-FROM node:15.5.1
+FROM node:26.13.0
 
 COPY . .
 
-ENTRYPOINT npx jest --testPathIgnorePatterns="[]" --testPathPattern="test/performance"
+ENTRYPOINT cd packages/transport && npx vitest run --config vitest.performance.config.mts
