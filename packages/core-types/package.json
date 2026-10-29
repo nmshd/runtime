@@ -19,8 +19,9 @@
         "build:ci": "tsc",
         "cdep": "tsc && depcruise --config ../../.dependency-cruiser.cjs dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
-        "test": "vitest run --maxWorkers=1",
-        "test:ci": "vitest run --coverage --maxWorkers=1"
+        "test": "npm run test:compile && vitest run --maxWorkers=1",
+        "test:ci": "npm run test:compile && vitest run --coverage --maxWorkers=1",
+        "test:compile": "tsc -p test/tsconfig.vitest.json"
     },
     "dependencies": {
         "@js-soft/logging-abstractions": "^1.2.5",

@@ -21,8 +21,9 @@
         "build:notest": "npm run build:node",
         "cdep": "tsc && depcruise --config ../../.dependency-cruiser.cjs dist",
         "lint:tsc": "tsc --noEmit && tsc -p test/tsconfig.json --noEmit",
-        "test": "vitest run",
-        "test:ci": "vitest run --maxWorkers=1 --coverage"
+        "test": "npm run test:compile && vitest run",
+        "test:ci": "npm run test:compile && vitest run --maxWorkers=1 --coverage",
+        "test:compile": "tsc -p test/tsconfig.vitest.json"
     },
     "dependencies": {
         "@js-soft/docdb-access-loki": "^1.4.2",

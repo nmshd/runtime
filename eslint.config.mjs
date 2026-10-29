@@ -6,7 +6,7 @@ import vitest from "@vitest/eslint-plugin";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-    globalIgnores(["**/Schemas.ts", "**/dist", "**/scripts", "**/coverage", "**/node_modules", "eslint.config.mjs"]),
+    globalIgnores(["**/Schemas.ts", "**/dist", "**/scripts", "**/coverage", "**/.vitest-build", "**/node_modules", "eslint.config.mjs"]),
     {
         extends: [configs.base],
         languageOptions: {
