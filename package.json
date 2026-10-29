@@ -33,7 +33,7 @@
         "@js-soft/eslint-config-ts": "2.0.12",
         "@js-soft/license-check": "1.0.16",
         "@types/jest": "30.0.0",
-        "@types/node": "24.19.2",
+        "@types/node": "26.6.5",
         "dependency-cruiser": "18.7.0",
         "enhanced-publish": "1.1.17",
         "eslint": "10.13.0",
