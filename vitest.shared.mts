@@ -13,6 +13,8 @@ interface WorkspaceOptions {
 export function createVitestConfig(root: string, options: WorkspaceOptions) {
     return defineConfig({
         root,
+        // Vitest uses Vite's transform pipeline. unplugin-swc connects that pipeline to SWC, and @swc/core performs the transform.
+        // SWC reads this tsconfig so legacy decorators and emitDecoratorMetadata keep working for the runtime's dependency injection.
         plugins: [swc.vite({ tsconfigFile: resolve(root, "test/tsconfig.json") })],
         resolve: {
             alias: options.aliases
