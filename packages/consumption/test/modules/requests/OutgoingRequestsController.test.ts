@@ -92,7 +92,8 @@ describe("OutgoingRequestsController", function () {
                 expectedErrorMessage: "*Request.items*Value is not defined*"
             }
         ])("throws on syntactically invalid input", async function (testParams) {
-            await When.iTryToCallCanCreateForAnOutgoingRequest(testParams.params as unknown as ICreateOutgoingRequestParameters);
+            // @ts-expect-error: deliberately invalid request to test runtime validation
+            await When.iTryToCallCanCreateForAnOutgoingRequest(testParams.params);
             await Then.itThrowsAnErrorWithTheErrorMessage(testParams.expectedErrorMessage);
         });
 
