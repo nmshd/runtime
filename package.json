@@ -31,6 +31,7 @@
         "@js-soft/eslint-config-ts": "2.0.13",
         "@js-soft/license-check": "1.0.16",
         "@types/node": "26.6.5",
+        "@typescript/native": "npm:typescript@^7.0.2",
         "@vitest/coverage-v8": "^5.0.5",
         "@vitest/eslint-plugin": "^1.6.28",
         "dependency-cruiser": "18.7.0",
@@ -40,7 +41,7 @@
         "prettier": "3.9.10",
         "ts-node": "10.9.2",
         "tsconfig-paths": "4.2.0",
-        "typescript": "6.0.3",
+        "typescript": "npm:@typescript/typescript6@^6.0.2",
         "vitest": "^5.0.5"
     }
 }
