@@ -1,4 +1,4 @@
-/* eslint-disable jest/expect-expect */
+/* eslint-disable vitest/expect-expect */
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { AcceptResponseItem, RelationshipCreationContent, RelationshipTemplateContent, Request, Response, ResponseWrapper } from "@nmshd/content";
 import { CoreDate } from "@nmshd/core-types";

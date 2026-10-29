@@ -1,4 +1,4 @@
-/* eslint-disable jest/no-standalone-expect */
+/* eslint-disable vitest/no-standalone-expect */
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { LokiJsConnection } from "@js-soft/docdb-access-loki";
 import { MongoDbConnection } from "@js-soft/docdb-access-mongo";
@@ -10,7 +10,7 @@ import { CoreBuffer } from "@nmshd/crypto";
 import fs from "fs";
 import { DurationLike } from "luxon";
 import { GenericContainer, Wait } from "testcontainers";
-import { fileURLToPath } from "url";
+import { resolve } from "node:path";
 import {
     AccountController,
     ChangedItems,
@@ -650,7 +650,7 @@ export class TestUtil {
 
     public static async runDeletionJob(): Promise<void> {
         const backboneVersion = this.getBackboneVersion();
-        const appsettingsOverrideLocation = process.env.APPSETTINGS_OVERRIDE_LOCATION ?? fileURLToPath(new URL("../../../../.dev/appsettings.override.json", import.meta.url));
+        const appsettingsOverrideLocation = process.env.APPSETTINGS_OVERRIDE_LOCATION ?? resolve(process.cwd(), "../../.dev/appsettings.override.json");
         const backboneNetwork = process.env.BACKBONE_NETWORK ?? "local-test-backbone";
 
         await new GenericContainer(`ghcr.io/nmshd/backbone-identity-deletion-jobs:${backboneVersion}`)
@@ -664,7 +664,7 @@ export class TestUtil {
     private static getBackboneVersion() {
         if (process.env.BACKBONE_VERSION) return process.env.BACKBONE_VERSION;
 
-        const composeFile = fs.readFileSync(fileURLToPath(new URL("../../../../.dev/compose.backbone.yml", import.meta.url)));
+        const composeFile = fs.readFileSync(resolve(process.cwd(), "../../.dev/compose.backbone.yml"));
 
         const regex = /image: ghcr\.io\/nmshd\/backbone-consumer-api:(?<version>[^\r\n]*)@.*/;
         const match = composeFile.toString().match(regex);

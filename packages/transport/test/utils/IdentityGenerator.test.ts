@@ -138,7 +138,7 @@ describe("IdentityGeneratorTest", function () {
             const valid = await IdentityUtil.checkAddress(address, "example.com", kp2.publicKey);
             expect(valid).toBe(false);
         });
-        // eslint-disable-next-line jest/no-commented-out-tests
+        // eslint-disable-next-line vitest/no-commented-out-tests
         /*
                 it("should serialize as a String and valid JSON", async function() {
                     const i:OwnIdentity = await IdentityUtil.createIdentity("Test");

@@ -1,4 +1,4 @@
-/* eslint-disable jest/no-standalone-expect */
+/* eslint-disable vitest/no-standalone-expect */
 import { DataEvent, Event, EventBus, EventHandler, SubscriptionTarget } from "@js-soft/ts-utils";
 import { TransportDataEvent } from "@nmshd/transport";
 
@@ -45,7 +45,7 @@ export class MockEventBus extends EventBus {
         const lastEvent = this.publishedEvents[this.publishedEvents.length - 1];
         expect(lastEvent.namespace).toStrictEqual(eventConstructor.namespace);
 
-        if (data) expect(lastEvent.data).toStrictEqual(expect.objectContaining(data));
+        if (data) expect(lastEvent.data).toStrictEqual(expect.objectContaining(data as any));
     }
 
     public expectPublishedEvents(...eventContructors: ((new (...args: any[]) => DataEvent<unknown>) & { namespace: string })[]): void {

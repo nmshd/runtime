@@ -1,7 +1,7 @@
 import type { AppRuntime, LocalAccountSession } from "../../src";
 import { MockEventBus } from "../lib/MockEventBus";
 
-// eslint-disable-next-line jest/no-disabled-tests -- disabled because the Backbone currently isn't performant enough in the CI
+// eslint-disable-next-line vitest/no-disabled-tests -- disabled because the Backbone currently isn't performant enough in the CI
 describe.skip("SSEModuleTest", function () {
     const eventBus = new MockEventBus();
     // Note: even when skipped, Jest executes top-level imports.

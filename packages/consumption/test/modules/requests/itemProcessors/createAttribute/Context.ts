@@ -1,4 +1,4 @@
-/* eslint-disable jest/no-standalone-expect */
+/* eslint-disable vitest/no-standalone-expect */
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import {
     AttributeAlreadySharedAcceptResponseItem,

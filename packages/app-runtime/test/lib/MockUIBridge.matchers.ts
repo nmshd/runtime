@@ -1,3 +1,4 @@
+import "vitest";
 import { DeviceOnboardingInfoDTO } from "@nmshd/runtime";
 import { MockUIBridge } from "./MockUIBridge";
 
@@ -274,26 +275,26 @@ expect.extend({
     }
 });
 
-declare global {
-    namespace jest {
-        interface Matchers<R> {
-            showDeviceOnboardingCalled(predicate: (deviceOnboardingInfo: DeviceOnboardingInfoDTO) => boolean): R;
-            showDeviceOnboardingNotCalled(): R;
-            requestAccountSelectionCalled(possibleAccountsLength: number): R;
-            requestAccountSelectionNotCalled(): R;
-            enterPasswordCalled(passwordType: "pw" | "pin", pinLength?: number, attempt?: number, passwordLocationIndicator?: number): R;
-            enterPasswordNotCalled(): R;
-            showRequestCalled(): R;
-            showRequestNotCalled(): R;
-            showResolvedAuthorizationRequestCalled(): R;
-            showResolvedAuthorizationRequestNotCalled(): R;
-            showResolvedCredentialOfferCalled(): R;
-            showResolvedCredentialOfferNotCalled(): R;
-            showFileCalled(id: string): R;
-            showFileNotCalled(): R;
-            showVerifiablePresentationCalled(id: string, isTechnicallyValid: boolean): R;
-            showVerifiablePresentationNotCalled(): R;
-            showErrorCalled(code: string): R;
-        }
+declare module "vitest" {
+    // Vitest requires the received value type parameter, but these matchers do not use it.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    interface Matchers<R, T> {
+        showDeviceOnboardingCalled(predicate: (deviceOnboardingInfo: DeviceOnboardingInfoDTO) => boolean): R;
+        showDeviceOnboardingNotCalled(): R;
+        requestAccountSelectionCalled(possibleAccountsLength: number): R;
+        requestAccountSelectionNotCalled(): R;
+        enterPasswordCalled(passwordType: "pw" | "pin", pinLength?: number, attempt?: number, passwordLocationIndicator?: number): R;
+        enterPasswordNotCalled(): R;
+        showRequestCalled(): R;
+        showRequestNotCalled(): R;
+        showResolvedAuthorizationRequestCalled(): R;
+        showResolvedAuthorizationRequestNotCalled(): R;
+        showResolvedCredentialOfferCalled(): R;
+        showResolvedCredentialOfferNotCalled(): R;
+        showFileCalled(id: string): R;
+        showFileNotCalled(): R;
+        showVerifiablePresentationCalled(id: string, isTechnicallyValid: boolean): R;
+        showVerifiablePresentationNotCalled(): R;
+        showErrorCalled(code: string): R;
     }
 }

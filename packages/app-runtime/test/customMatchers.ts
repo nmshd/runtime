@@ -1,3 +1,4 @@
+import "vitest";
 import { ApplicationError, EventConstructor, Result } from "@js-soft/ts-utils";
 import { MockEventBus } from "./lib/MockEventBus";
 
@@ -54,12 +55,12 @@ expect.extend({
     }
 });
 
-declare global {
-    namespace jest {
-        interface Matchers<R> {
-            toBeSuccessful(): R;
-            toBeAnError(expectedMessage: string | RegExp, expectedCode: string | RegExp): R;
-            toHavePublished<TEvent>(eventConstructor: EventConstructor<TEvent>, eventConditions?: (event: TEvent) => boolean): Promise<R>;
-        }
+declare module "vitest" {
+    // Vitest requires the received value type parameter, but these matchers do not use it.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    interface Matchers<R, T> {
+        toBeSuccessful(): R;
+        toBeAnError(expectedMessage: string | RegExp, expectedCode: string | RegExp): R;
+        toHavePublished<TEvent>(eventConstructor: EventConstructor<TEvent>, eventConditions?: (event: TEvent) => boolean): Promise<R>;
     }
 }
