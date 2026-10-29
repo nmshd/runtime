@@ -30,7 +30,7 @@
         "test:local:start:ferretdb": "docker compose -f ../../.dev/compose.yml up -d runtime-ferret",
         "test:local:start:mongodb": "docker compose -f ../../.dev/compose.yml up -d runtime-mongo",
         "test:local:teardown": "docker compose -f ../../.dev/compose.yml rm -fsv",
-        "test:compile": "tsc -p test/tsconfig.vitest.json"
+        "test:compile": "tsc -p test/tsconfig.vitest.json && cp -R test/__assets__ .vitest-build/packages/runtime/test/"
     },
     "dependencies": {
         "@credo-ts/openid4vc": "0.7.0",
