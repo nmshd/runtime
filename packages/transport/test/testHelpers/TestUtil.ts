@@ -1,3 +1,6 @@
+Warning: truncated output (original token count: 7274)
+Total output lines: 675
+
 /* eslint-disable vitest/no-standalone-expect */
 import { IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { LokiJsConnection } from "@js-soft/docdb-access-loki";
@@ -10,7 +13,7 @@ import { CoreBuffer } from "@nmshd/crypto";
 import fs from "fs";
 import { DurationLike } from "luxon";
 import { GenericContainer, Wait } from "testcontainers";
-import { fileURLToPath } from "url";
+import { resolve } from "node:path";
 import {
     AccountController,
     ChangedItems,
@@ -271,196 +274,7 @@ export class TestUtil {
     }
 
     public static async onboardDevice(transport: Transport, connection: IDatabaseConnection, deviceSharedSecret: DeviceSharedSecret): Promise<AccountController> {
-        const randomId = Math.random().toString(36).substring(7);
-        const db = await connection.getDatabase(`acc-${randomId}`);
-        const accountController = new TestAccountController(transport, db, transport.config);
-        await accountController.init(deviceSharedSecret);
-
-        return accountController;
-    }
-
-    public static async exchangeTemplate(from: AccountController, to: AccountController): Promise<RelationshipTemplate> {
-        const templateFrom = await from.relationshipTemplates.sendRelationshipTemplate({
-            content: {
-                mycontent: "template"
-            },
-            expiresAt: CoreDate.utc().add({ minutes: 5 }),
-            maxNumberOfAllocations: 1
-        });
-
-        const templateReference = templateFrom.toRelationshipTemplateReference(from.config.baseUrl);
-        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByReference(templateReference);
-
-        return templateTo;
-    }
-
-    public static async addRejectedRelationship(from: AccountController, to: AccountController): Promise<Relationship> {
-        const templateFrom = await from.relationshipTemplates.sendRelationshipTemplate({
-            content: {
-                mycontent: "template"
-            },
-            expiresAt: CoreDate.utc().add({ minutes: 5 }),
-            maxNumberOfAllocations: 1
-        });
-
-        const reference = templateFrom.toRelationshipTemplateReference(from.config.baseUrl);
-        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByReference(reference);
-
-        await to.relationships.sendRelationship({
-            template: templateTo,
-            creationContent: {
-                mycontent: "request"
-            }
-        });
-
-        // Reject relationship
-        const syncedRelationships = await TestUtil.syncUntilHasRelationships(from);
-        expect(syncedRelationships).toHaveLength(1);
-        const pendingRelationship = syncedRelationships[0];
-        expect(pendingRelationship.status).toStrictEqual(RelationshipStatus.Pending);
-
-        const rejectedRelationshipFromSelf = await from.relationships.reject(pendingRelationship.id);
-        expect(rejectedRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Rejected);
-
-        // Get rejected relationship
-        const syncedRelationshipsPeer = await TestUtil.syncUntilHasRelationships(to);
-        expect(syncedRelationshipsPeer).toHaveLength(1);
-        const rejectedRelationshipPeer = syncedRelationshipsPeer[0];
-        expect(rejectedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Rejected);
-
-        return rejectedRelationshipFromSelf;
-    }
-
-    public static async addPendingRelationship(from: AccountController, to: AccountController, template?: RelationshipTemplate): Promise<Relationship> {
-        const templateFrom =
-            template ??
-            (await from.relationshipTemplates.sendRelationshipTemplate({
-                content: {
-                    mycontent: "template"
-                },
-                expiresAt: CoreDate.utc().add({ minutes: 5 }),
-                maxNumberOfAllocations: 1
-            }));
-
-        const templateReference = templateFrom.toRelationshipTemplateReference(from.config.baseUrl);
-        const templateTo = await to.relationshipTemplates.loadPeerRelationshipTemplateByReference(templateReference);
-
-        await to.relationships.sendRelationship({
-            template: templateTo,
-            creationContent: {
-                mycontent: "request"
-            }
-        });
-
-        const syncedRelationshipsFromSelf = await TestUtil.syncUntilHasRelationships(from);
-        expect(syncedRelationshipsFromSelf).toHaveLength(1);
-        const pendingRelationshipFromSelf = syncedRelationshipsFromSelf[0];
-        expect(pendingRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Pending);
-
-        return pendingRelationshipFromSelf;
-    }
-
-    public static async addRelationship(
-        from: AccountController,
-        to: AccountController
-    ): Promise<{ acceptedRelationshipFromSelf: Relationship; acceptedRelationshipPeer: Relationship }> {
-        const templateFrom = await from.relationshipTemplates.sendRelationshipTemplate({
-            content: {
-                mycontent: "template"
-            },
-            expiresAt: CoreDate.utc().add({ minutes: 5 }),
-            maxNumberOfAllocations: 1
-        });
-
-        return await this.addRelationshipWithExistingTemplate(from, to, templateFrom);
-    }
-
-    public static async addRelationshipWithExistingTemplate(
-        from: AccountController,
-        to: AccountController,
-        template: RelationshipTemplate
-    ): Promise<{ acceptedRelationshipFromSelf: Relationship; acceptedRelationshipPeer: Relationship }> {
-        const pendingRelationshipFromSelf = await TestUtil.addPendingRelationship(from, to, template);
-
-        const acceptedRelationshipFromSelf = await from.relationships.accept(pendingRelationshipFromSelf.id);
-        expect(acceptedRelationshipFromSelf.status).toStrictEqual(RelationshipStatus.Active);
-
-        // Get accepted relationship
-        await this.sleep(300);
-        const syncedRelationshipsPeer = (await TestUtil.syncUntil(to, (syncResult) => syncResult.relationships.length > 0)).relationships;
-
-        await from.syncDatawallet();
-
-        expect(syncedRelationshipsPeer).toHaveLength(1);
-        const acceptedRelationshipPeer = syncedRelationshipsPeer[0];
-        expect(acceptedRelationshipPeer.status).toStrictEqual(RelationshipStatus.Active);
-        expect(acceptedRelationshipFromSelf.id.toString()).toBe(acceptedRelationshipPeer.id.toString());
-
-        return { acceptedRelationshipFromSelf, acceptedRelationshipPeer };
-    }
-
-    public static async revokeRelationship(
-        from: AccountController,
-        to: AccountController
-    ): Promise<{ revokedRelationshipFromSelf: Relationship; revokedRelationshipPeer: Relationship }> {
-        const relationshipId = (await to.relationships.getRelationshipToIdentity(from.identity.address))!.id;
-        const revokedRelationshipPeer = await to.relationships.revoke(relationshipId);
-        const revokedRelationshipFromSelf = (await this.syncUntilHasRelationship(from, relationshipId))[0];
-
-        return { revokedRelationshipFromSelf, revokedRelationshipPeer };
-    }
-
-    public static async terminateRelationship(
-        from: AccountController,
-        to: AccountController
-    ): Promise<{ terminatedRelationshipFromSelf: Relationship; terminatedRelationshipPeer: Relationship }> {
-        const relationshipId = (await from.relationships.getRelationshipToIdentity(to.identity.address))!.id;
-        const terminatedRelationshipFromSelf = await from.relationships.terminate(relationshipId);
-        const terminatedRelationshipPeer = (await this.syncUntilHasRelationship(to, relationshipId))[0];
-
-        return { terminatedRelationshipFromSelf, terminatedRelationshipPeer };
-    }
-
-    public static async reactivateRelationship(
-        from: AccountController,
-        to: AccountController
-    ): Promise<{ reactivatedRelationshipFromSelf: Relationship; reactivatedRelationshipPeer: Relationship }> {
-        const relationshipId = (await from.relationships.getRelationshipToIdentity(to.identity.address))!.id;
-        await from.relationships.requestReactivation(relationshipId);
-        await this.syncUntilHasRelationship(to, relationshipId);
-        const reactivatedRelationshipFromSelf = await to.relationships.acceptReactivation(relationshipId);
-        const reactivatedRelationshipPeer = (await this.syncUntilHasRelationship(from, relationshipId))[0];
-
-        return { reactivatedRelationshipFromSelf, reactivatedRelationshipPeer };
-    }
-
-    public static async decomposeRelationship(from: AccountController, to: AccountController): Promise<Relationship> {
-        const relationship = (await from.relationships.getRelationshipToIdentity(to.identity.address))!;
-        await from.relationships.decompose(relationship.id);
-        await from.cleanupDataOfDecomposedRelationship(relationship);
-        const decomposedRelationshipPeer = (await this.syncUntilHasRelationship(to, relationship.id))[0];
-
-        return decomposedRelationshipPeer;
-    }
-
-    public static async terminateAndDecomposeRelationshipMutually(from: AccountController, to: AccountController): Promise<void> {
-        await TestUtil.terminateRelationship(from, to);
-        await TestUtil.decomposeRelationship(from, to);
-
-        const relationship = (await to.relationships.getRelationshipToIdentity(from.identity.address))!;
-        await to.relationships.decompose(relationship.id);
-        await to.cleanupDataOfDecomposedRelationship(relationship);
-    }
-
-    public static async generateAddressPseudonym(backboneBaseUrl: string): Promise<CoreAddress> {
-        const pseudoPublicKey = CoreBuffer.fromUtf8("deleted identity");
-        const pseudonym = await IdentityUtil.createAddress({ algorithm: 1, publicKey: pseudoPublicKey }, new URL(backboneBaseUrl).hostname);
-
-        return pseudonym;
-    }
-
-    /**
-     * SyncEvents in the Backbone are only eventually consistent. This means that if you send a message now and
+        const randomId = Math.random().toString(36…2274 tokens truncated…ns that if you send a message now and
      * get all SyncEvents right after, you cannot rely on getting a NewMessage SyncEvent right away. So instead
      * this method executes the syncEverything()-method of the account controller until the condition specified in
      * the `until` callback is met.
@@ -650,7 +464,7 @@ export class TestUtil {
 
     public static async runDeletionJob(): Promise<void> {
         const backboneVersion = this.getBackboneVersion();
-        const appsettingsOverrideLocation = process.env.APPSETTINGS_OVERRIDE_LOCATION ?? fileURLToPath(new URL("../../../../.dev/appsettings.override.json", import.meta.url));
+        const appsettingsOverrideLocation = process.env.APPSETTINGS_OVERRIDE_LOCATION ?? resolve(process.cwd(), "../../.dev/appsettings.override.json");
         const backboneNetwork = process.env.BACKBONE_NETWORK ?? "local-test-backbone";
 
         await new GenericContainer(`ghcr.io/nmshd/backbone-identity-deletion-jobs:${backboneVersion}`)
@@ -664,7 +478,7 @@ export class TestUtil {
     private static getBackboneVersion() {
         if (process.env.BACKBONE_VERSION) return process.env.BACKBONE_VERSION;
 
-        const composeFile = fs.readFileSync(fileURLToPath(new URL("../../../../.dev/compose.backbone.yml", import.meta.url)));
+        const composeFile = fs.readFileSync(resolve(process.cwd(), "../../.dev/compose.backbone.yml"));
 
         const regex = /image: ghcr\.io\/nmshd\/backbone-consumer-api:(?<version>[^\r\n]*)@.*/;
         const match = composeFile.toString().match(regex);

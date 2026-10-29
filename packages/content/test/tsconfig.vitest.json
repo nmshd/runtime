@@ -4,7 +4,7 @@
         "noEmit": false,
         "composite": false,
         "rootDir": "../../..",
-        "outDir": "../../../.vitest-build",
+        "outDir": "../.vitest-build",
         "declaration": false,
         "declarationMap": false,
         "sourceMap": true

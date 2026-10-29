@@ -10,7 +10,7 @@ interface WorkspaceOptions {
 }
 
 export function createVitestConfig(root: string, options: WorkspaceOptions) {
-    const buildRoot = resolve(root, "../../.vitest-build/packages", basename(root));
+    const buildRoot = resolve(root, ".vitest-build/packages", basename(root));
     const buildRootRelative = relative(root, buildRoot);
 
     return defineConfig({
