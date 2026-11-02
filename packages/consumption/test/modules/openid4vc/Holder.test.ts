@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention -- Protocol fixture field names. */
 /* eslint-disable @typescript-eslint/require-await -- In-memory fixtures implement asynchronous storage APIs. */
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 import { ILogger } from "@js-soft/logging-abstractions";
 import { GivenName, IdentityAttribute, OpenId4VcCredentialFormat, OpenId4VpResolvedAuthorizationRequest, TokenContentVerifiablePresentation } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
@@ -40,10 +40,11 @@ class Fixture {
     public readonly attributes: OwnIdentityAttribute[] = [];
     public readonly account = Object.assign(instance(mock<AccountController>()), {
         identity: Object.assign(instance(mock<Identity>()), { address: CoreAddress.from("id1test") }),
-        syncDatawallet: jest.fn(() => Promise.resolve())
+        syncDatawallet: vi.fn(() => Promise.resolve())
     });
     private readonly collection = Object.assign(instance(mock<SynchronizedCollection>()), {
         read: async (id: string) => this.keyEntries.get(id),
+        find: async () => Array.from(this.keyEntries.values()),
         create: async (entry: CoreSynchronizable) => this.keyEntries.set(entry.id.toString(), z.record(z.string(), z.unknown()).parse(entry.toJSON())),
         delete: async (entry: ICoreSynchronizable) => this.keyEntries.delete(CoreId.from(entry.id).toString())
     });
@@ -375,7 +376,7 @@ test.each(["EdDSA", "ES256"])("uses %s with did:key and verifies a presentation 
 test.each<OpenId4VcCredentialFormat>(["dc+sd-jwt", "mso_mdoc", "jwt_vc_json"])("receives and presents %s when the WebView supports P-256 but not Ed25519", async (format) => {
     fixture.format = format;
     fixture.proofAlgorithms = ["EdDSA", "ES256"];
-    const generate = jest.spyOn(crypto.subtle, "generateKey").mockRejectedValueOnce(new DOMException("Ed25519 is not supported", "NotSupportedError"));
+    const generate = vi.spyOn(crypto.subtle, "generateKey").mockRejectedValueOnce(new DOMException("Ed25519 is not supported", "NotSupportedError"));
     try {
         const credential = await fixture.receive();
         expect(fixture.issuedKey).toMatchObject({ kty: "EC", crv: "P-256" });
@@ -390,7 +391,7 @@ test.each<OpenId4VcCredentialFormat>(["dc+sd-jwt", "mso_mdoc", "jwt_vc_json"])("
 
 test("rejects an Ed25519-only issuer when the WebView does not support Ed25519", async () => {
     fixture.proofAlgorithms = ["EdDSA"];
-    const generate = jest.spyOn(crypto.subtle, "generateKey").mockRejectedValueOnce(new DOMException("Ed25519 is not supported", "NotSupportedError"));
+    const generate = vi.spyOn(crypto.subtle, "generateKey").mockRejectedValueOnce(new DOMException("Ed25519 is not supported", "NotSupportedError"));
     try {
         await expect(fixture.receive()).rejects.toThrow("None of the issuer's holder signature algorithms are available");
         expect(fixture.keyEntries.size).toBe(0);
@@ -408,7 +409,7 @@ test("preserves the issuer's algorithm preference when Ed25519 is available", as
 
 test("does not retry key generation after an unrelated cryptographic failure", async () => {
     fixture.proofAlgorithms = ["EdDSA", "ES256"];
-    const generate = jest.spyOn(crypto.subtle, "generateKey").mockRejectedValueOnce(new DOMException("Key generation failed", "OperationError"));
+    const generate = vi.spyOn(crypto.subtle, "generateKey").mockRejectedValueOnce(new DOMException("Key generation failed", "OperationError"));
     try {
         await expect(fixture.receive()).rejects.toThrow("Key generation failed");
         expect(generate).toHaveBeenCalledTimes(1);
@@ -425,8 +426,8 @@ test("rejects an issuer without a supported holder algorithm", async () => {
 });
 
 test("does not generate another holder key when synchronized storage fails", async () => {
-    const generate = jest.spyOn(crypto.subtle, "generateKey");
-    const store = jest.spyOn(fixture.keyStorage, "storeKey").mockRejectedValueOnce(new DOMException("Storage is not supported", "NotSupportedError"));
+    const generate = vi.spyOn(crypto.subtle, "generateKey");
+    const store = vi.spyOn(fixture.keyStorage, "storeKey").mockRejectedValueOnce(new DOMException("Storage is not supported", "NotSupportedError"));
     try {
         await expect(fixture.crypto.createKeyForAlgorithms(["EdDSA", "ES256"])).rejects.toThrow("Storage is not supported");
         expect(generate).toHaveBeenCalledTimes(1);
@@ -597,7 +598,7 @@ test.each<OpenId4VcCredentialFormat>(["dc+sd-jwt", "mso_mdoc", "jwt_vc_json"])("
     fixture.format = format;
     const otherKey = await fixture.crypto.createKey("ES256");
     const issue = fixture.issue.bind(fixture);
-    jest.spyOn(fixture, "issue").mockImplementation(() => issue(otherKey));
+    vi.spyOn(fixture, "issue").mockImplementation(() => issue(otherKey));
     await expect(fixture.receive()).rejects.toThrow("Issued credential does not match the requested holder key");
     expect(fixture.attributes).toHaveLength(0);
 });

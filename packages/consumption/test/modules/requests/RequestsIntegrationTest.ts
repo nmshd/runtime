@@ -1,4 +1,4 @@
-/* eslint-disable jest/no-standalone-expect */
+/* eslint-disable vitest/no-standalone-expect */
 import { IDatabaseCollection, IDatabaseConnection } from "@js-soft/docdb-access-abstractions";
 import { DataEvent, EventEmitter2EventBus } from "@js-soft/ts-utils";
 import {
