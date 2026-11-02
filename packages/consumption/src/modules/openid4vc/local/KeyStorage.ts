@@ -12,25 +12,33 @@ const legacyKeyEntrySchema = z.object({ key: z.string() });
 
 function normalizeLegacyKey(key: Jwk): Jwk {
     if (key.kty !== "EC" || key.crv !== "P-256") return key;
+
     const coordinates = z.object({ x: z.string(), y: z.string(), d: z.string().optional() }).parse(key);
+
     // The old generator encoded these integers without leading zeros; P-256
     // JWK coordinates and private scalars must occupy exactly 32 bytes.
     const pad = (value: string): string => {
         const bytes = base64url.decode(value);
         if (!bytes.length || bytes.length > 32) throw new Error("Invalid legacy P-256 coordinate length");
+
         const padded = new Uint8Array(32);
         padded.set(bytes, 32 - bytes.length);
+
         return base64url.encode(padded);
     };
+
     return { ...key, x: pad(coordinates.x), y: pad(coordinates.y), ...(coordinates.d ? { d: pad(coordinates.d) } : {}) };
 }
 
 function decodeKeyPair(value: unknown): HolderKeyPair {
     if (typeof value !== "string") return keyPairSchema.parse(value);
+
     const parsed: unknown = JSON.parse(value);
     const key = keyPairSchema.parse(parsed);
+
     return { publicKey: normalizeLegacyKey(key.publicKey), privateKey: normalizeLegacyKey(key.privateKey) };
 }
+
 export interface HolderKeyPair {
     publicKey: Jwk;
     privateKey: Jwk;
@@ -67,6 +75,7 @@ export class KeyStorage {
         const entry: unknown = await this.collection.read(keyId);
         if (entry) {
             this.logger.info(`Key with id ${keyId} already exists`);
+
             return;
         }
 
@@ -82,9 +91,11 @@ export class KeyStorage {
         // Old keys were stored as JSON strings under UUIDs (and sometimes an
         // additional public-key id). Resolve their JWK thumbprint on demand.
         const records: unknown[] = await this.collection.find({});
+
         for (const record of records) {
             const legacy = legacyKeyEntrySchema.safeParse(record);
             if (!legacy.success) continue;
+
             try {
                 const parsed: unknown = JSON.parse(legacy.data.key);
                 const original = keyPairSchema.parse(parsed);
@@ -97,6 +108,7 @@ export class KeyStorage {
         }
 
         this.logger.warn(`Key with id ${keyId} not found`);
+
         return undefined;
     }
 
@@ -104,6 +116,7 @@ export class KeyStorage {
         const entry: unknown = await this.collection.read(keyId);
         if (!entry) {
             this.logger.warn(`Key with id ${keyId} not found, cannot delete`);
+
             return;
         }
 

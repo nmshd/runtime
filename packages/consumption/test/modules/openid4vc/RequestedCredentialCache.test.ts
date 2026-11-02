@@ -12,6 +12,7 @@ test.each<OpenId4VcCredentialFormat>(["dc+sd-jwt", "mso_mdoc", "jwt_vc_json"])("
     });
     const cache = new RequestedCredentialCache(collection);
     const responses: OpenId4VciCredentialResponseJSON[] = [{ claimFormat: format, encoded: "credential", displayInformation: [{ name: "Test credential" }] }];
+
     await cache.set("https://issuer.example/offer", responses);
 
     const restored = await new RequestedCredentialCache(collection).get("https://issuer.example/offer");

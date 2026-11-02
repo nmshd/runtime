@@ -11,6 +11,7 @@ import { z } from "zod";
 import { OpenId4VcCrypto } from "./OpenId4VcCrypto";
 
 type CredentialMatch = Extract<ReturnType<typeof DcqlQuery.query>["credential_matches"][string], { success: true }>["valid_credentials"][number];
+
 interface SdJwtPresentationFrame {
     [claim: string]: boolean | SdJwtPresentationFrame;
 }
@@ -43,6 +44,7 @@ export class CredentialFormats {
             verifier: async (data, signature) => {
                 // The SD-JWT library validates claims, including its configured clock skew.
                 await this.cryptography.verifyIssuerSignature(`${data}.${signature}`);
+
                 return true;
             },
             kbVerifier: async (data, signature, payload) => await this.cryptography.verifyWithKey(`${data}.${signature}`, await this.holderKey(payload)),
@@ -51,11 +53,13 @@ export class CredentialFormats {
             statusListFetcher: async (uri) => {
                 const response = await this.fetchInstance(uri);
                 if (!response.ok) throw new Error(`Unable to fetch status list: HTTP ${response.status}`);
+
                 return await response.text();
             },
             statusVerifier: async (data, signature) => {
                 try {
                     await this.cryptography.verifyIssuerSignature(`${data}.${signature}`);
+
                     return true;
                 } catch {
                     return false;
@@ -69,22 +73,29 @@ export class CredentialFormats {
         const { cnf: confirmation, sub } = holderBindingSchema.parse(payload);
         if (confirmation?.jwk) {
             const key = this.cryptography.publicKey(confirmation.jwk);
+
             this.cryptography.algorithm(key);
+
             return key;
         }
+
         const did = confirmation?.kid ?? sub;
         if (typeof did === "string" && did.startsWith("did:")) return await this.cryptography.resolveDid(did);
+
         throw new Error("Credential has no supported holder binding");
     }
 
     public async decode(credential: VerifiableCredential): Promise<{ dcql: DcqlCredential; holderKey: Jwk }> {
         if (typeof credential.value !== "string") throw new Error("Credential must be encoded as a string");
+
         switch (credential.type) {
             case "dc+sd-jwt": {
                 const result = await this.sdJwt().verify(credential.value, { skewSeconds: 30 });
                 const claims = jsonObjectSchema.parse(result.payload);
                 const holderKey = await this.holderKey(result.payload);
+
                 await this.cryptography.getPrivateKey(holderKey);
+
                 return {
                     dcql: {
                         credential_format: "dc+sd-jwt",
@@ -98,17 +109,23 @@ export class CredentialFormats {
             case "jwt_vc_json": {
                 const payload = await this.cryptography.verifyIssuerJwt(credential.value);
                 const vc = w3cCredentialSchema.parse(payload.vc);
+
                 validateJwtCredentialPayload({ ...payload, vc });
                 if (vc.issuer && (typeof vc.issuer === "string" ? vc.issuer : vc.issuer.id) !== payload.iss) throw new Error("W3C credential issuer mismatch");
+
                 const notBefore = vc.validFrom ?? vc.issuanceDate;
                 const expires = vc.validUntil ?? vc.expirationDate;
                 const normalized = normalizeCredential({ ...payload, vc });
+
                 validateCredentialPayload({ ...normalized, issuanceDate: notBefore ?? normalized.issuanceDate, expirationDate: expires ?? normalized.expirationDate });
                 if ((notBefore && Date.parse(notBefore) > Date.now()) || (expires && Date.parse(expires) <= Date.now())) {
                     throw new Error("W3C credential is not valid at the current time");
                 }
+
                 const holderKey = await this.holderKey({ ...payload, sub: payload.sub ?? vc.credentialSubject.id });
+
                 await this.cryptography.getPrivateKey(holderKey);
+
                 return {
                     dcql: {
                         credential_format: "jwt_vc_json",
@@ -121,14 +138,18 @@ export class CredentialFormats {
             }
             case "mso_mdoc": {
                 const issuerSigned = IssuerSigned.fromEncodedForOid4Vci(credential.value);
+
                 await MdocHolder.verifyIssuerSigned(
                     { issuerSigned, trustedCertificates: [{ issuance: [issuerSigned.issuerAuth.certificate] }], skewSeconds: 0 },
                     this.cryptography.mdocContext
                 );
+
                 const mso = issuerSigned.issuerAuth.mobileSecurityObject;
                 const holderKey = this.cryptography.publicKey(mso.deviceKeyInfo.deviceKey.jwk);
+
                 await this.cryptography.getPrivateKey(holderKey);
                 if (!issuerSigned.issuerNamespaces) throw new Error("mdoc issuer namespaces are missing");
+
                 const namespaceClaimsSchema = z.record(z.string(), z.unknown());
                 const namespaces = Object.fromEntries(
                     [...issuerSigned.issuerNamespaces.issuerNamespaces.keys()].map((namespace) => [
@@ -136,6 +157,7 @@ export class CredentialFormats {
                         namespaceClaimsSchema.parse(issuerSigned.getPrettyClaims(namespace) ?? {})
                     ])
                 );
+
                 return { dcql: { credential_format: "mso_mdoc", doctype: mso.docType, namespaces, cryptographic_holder_binding: true }, holderKey };
             }
             default:
@@ -170,9 +192,11 @@ export class CredentialFormats {
     ): Promise<string> {
         const { holderKey } = await this.decode(credential);
         if (typeof credential.value !== "string") throw new Error("Credential must be encoded as a string");
+
         const encoded = credential.value;
         const payload = request.authorizationRequestPayload;
         const disclosedClaims = match.claims.valid_claim_sets[0].output;
+
         switch (credential.type) {
             case "dc+sd-jwt":
                 return await this.sdJwt(holderKey).present(encoded, this.presentationFrame(jsonObjectSchema.parse(disclosedClaims)), {
@@ -193,7 +217,9 @@ export class CredentialFormats {
                     nonce: payload.nonce,
                     iat: Math.floor(Date.now() / 1000)
                 });
+
                 validateJwtPresentationPayload(presentation);
+
                 return await this.cryptography.signJwt(presentation, holderKey, kid ? { typ: "JWT", kid } : { typ: "JWT", jwk: holderKey });
             }
             case "mso_mdoc": {
@@ -201,6 +227,7 @@ export class CredentialFormats {
                 const namespaceClaims = z.record(z.string(), z.record(z.string(), z.unknown())).parse(disclosedClaims);
                 const namespaces = new Map(Object.entries(namespaceClaims).map(([namespace, claims]) => [namespace, new Map(Object.keys(claims).map((claim) => [claim, false]))]));
                 if (!payload.response_uri) throw new Error("Presentation response URI is missing");
+
                 const sessionTranscript =
                     request.version >= 100
                         ? await SessionTranscript.forOid4Vp(
@@ -231,6 +258,7 @@ export class CredentialFormats {
                     },
                     this.cryptography.mdocContext
                 );
+
                 return response.encodedForOid4Vp;
             }
             default:

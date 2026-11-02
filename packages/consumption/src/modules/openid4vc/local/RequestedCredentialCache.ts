@@ -35,12 +35,15 @@ export class RequestedCredentialCache {
     public async get(credentialOfferUrl: string): Promise<OpenId4VciCredentialResponseJSON[] | undefined> {
         const doc: unknown = await this.collection.findOne({ credentialOfferUrl: credentialOfferUrl });
         if (!doc) return undefined;
+
         const entry = RequestedCredentialCacheEntry.fromAny<RequestedCredentialCacheEntry>(doc);
+
         return credentialResponsesSchema.parse(entry.credentialResponses);
     }
 
     public async set(credentialOfferUrl: string, credentialResponses: OpenId4VciCredentialResponseJSON[]): Promise<void> {
         const id = await ConsumptionIds.requestedCredentialCacheEntry.generate();
+
         await this.collection.create(RequestedCredentialCacheEntry.create(id, credentialOfferUrl, credentialResponses));
     }
 }
