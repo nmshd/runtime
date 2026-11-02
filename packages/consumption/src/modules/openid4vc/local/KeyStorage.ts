@@ -1,4 +1,5 @@
 import { ILogger } from "@js-soft/logging-abstractions";
+import { OpenId4VcJwk } from "@nmshd/content";
 import { Jwk, zJwk } from "@openid4vc/oauth2";
 import { z } from "zod";
 import { serialize, validate } from "@js-soft/ts-serval";
@@ -40,8 +41,8 @@ function decodeKeyPair(value: unknown): HolderKeyPair {
 }
 
 export interface HolderKeyPair {
-    publicKey: Jwk;
-    privateKey: Jwk;
+    publicKey: OpenId4VcJwk;
+    privateKey: OpenId4VcJwk;
 }
 
 interface IKeyStorageEntry extends ICoreSynchronizable {
