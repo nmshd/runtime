@@ -38,7 +38,7 @@
     "dependencies": {
         "@js-soft/docdb-access-abstractions": "1.4.6",
         "@js-soft/logging-abstractions": "^1.2.5",
-        "@js-soft/ts-utils": "^2.3.6",
+        "@js-soft/ts-utils": "2.3.11",
         "@nmshd/core-types": "*",
         "@nmshd/crypto": "3.0.14",
         "axios": "^1.17.0",
