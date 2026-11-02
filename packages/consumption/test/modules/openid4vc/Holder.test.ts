@@ -76,6 +76,8 @@ class Fixture {
     public accessTokens: string[] = [];
     public encryptionKey?: Jwk;
     public encryptionPublicKey?: Jwk;
+    public jarmSigningAlgorithm?: string;
+    public submittedJarm?: string;
 
     public restart(): Holder {
         return new Holder(new KeyStorage(this.collection, instance(mock<ILogger>())), this.account, this.attributeController, (...args) => this.fetch(...args));
@@ -175,11 +177,25 @@ class Fixture {
         }
         if (url === `${verifier}/response`) {
             if (!body) throw new Error("Missing presentation response body");
-            this.submitted = presentationResponseSchema.parse(
-                body.response
-                    ? JSON.parse(new TextDecoder().decode((await compactDecrypt(body.response, await importJWK(zJwk.parse(this.encryptionKey), "ECDH-ES"))).plaintext))
-                    : { ...body, vp_token: JSON.parse(body.vp_token) }
-            );
+            let responsePayload: unknown;
+            if (body.response) {
+                const plaintext = new TextDecoder().decode((await compactDecrypt(body.response, await importJWK(zJwk.parse(this.encryptionKey), "ECDH-ES"))).plaintext);
+                if (this.jarmSigningAlgorithm) {
+                    this.submittedJarm = plaintext;
+                    responsePayload = (
+                        await jwtVerify(plaintext, await importJWK(this.issuedKey, this.jarmSigningAlgorithm), {
+                            algorithms: [this.jarmSigningAlgorithm],
+                            issuer: "wallet",
+                            audience: "x509_san_dns:verifier.example"
+                        })
+                    ).payload;
+                } else {
+                    responsePayload = JSON.parse(plaintext);
+                }
+            } else {
+                responsePayload = { ...body, vp_token: JSON.parse(body.vp_token) };
+            }
+            this.submitted = presentationResponseSchema.parse(responsePayload);
             return this.json({ accepted: true });
         }
         throw new Error(`Unexpected fetch: ${url}`);
@@ -278,7 +294,14 @@ class Fixture {
             response_uri: `${verifier}/response`,
             state: "state",
             dcql_query: { credentials: [{ id: "credential", format: this.format, claims, meta }] },
-            client_metadata: mode === "direct_post.jwt" ? { jwks: { keys: [this.encryptionPublicKey] }, encrypted_response_enc_values_supported: ["A256GCM"] } : undefined
+            client_metadata:
+                mode === "direct_post.jwt"
+                    ? {
+                          jwks: { keys: [this.encryptionPublicKey] },
+                          encrypted_response_enc_values_supported: ["A256GCM"],
+                          ...(this.jarmSigningAlgorithm ? { authorization_signed_response_alg: this.jarmSigningAlgorithm } : {})
+                      }
+                    : undefined
         };
         return await this.holder.resolveAuthorizationRequest(`openid4vp://?client_id=x509_san_dns%3Averifier.example&request_uri=${encodeURIComponent(`${verifier}/request`)}`);
     }
@@ -289,6 +312,45 @@ beforeEach(async () => {
     fixture = new Fixture();
     await fixture.init();
 });
+
+test.each(["ES256", "EdDSA"])("signs and encrypts a JARM response with the requested %s algorithm", async (algorithm) => {
+    fixture.algorithm = algorithm;
+    fixture.jarmSigningAlgorithm = algorithm;
+    const credential = await fixture.receive();
+    const request = await fixture.request("direct_post.jwt");
+
+    await expect(fixture.holder.acceptAuthorizationRequest(request, credential)).resolves.toMatchObject({ status: 200 });
+
+    expect(decodeProtectedHeader(z.string().parse(fixture.submittedJarm)).alg).toBe(algorithm);
+    expect(fixture.submitted.vp_token.credential).toHaveLength(1);
+});
+
+test.each([
+    { holderAlgorithm: "ES256", requestedAlgorithm: "EdDSA" },
+    { holderAlgorithm: "EdDSA", requestedAlgorithm: "ES256" },
+    { holderAlgorithm: "ES256", requestedAlgorithm: "ES384" },
+    { holderAlgorithm: "ES256", requestedAlgorithm: "none" },
+    { holderAlgorithm: "ES256", requestedAlgorithm: "" }
+])(
+    "rejects JARM signing algorithm '$requestedAlgorithm' for a $holderAlgorithm holder key before constructing or sending a presentation",
+    async ({ holderAlgorithm, requestedAlgorithm }) => {
+        fixture.algorithm = holderAlgorithm;
+        const credential = await fixture.receive();
+        const request = await fixture.request("direct_post.jwt");
+        if (!request.authorizationRequestPayload.client_metadata) throw new Error("Expected client metadata");
+        request.authorizationRequestPayload.client_metadata.authorization_signed_response_alg = requestedAlgorithm;
+        const present = vi.spyOn(CredentialFormats.prototype, "present");
+        try {
+            await expect(fixture.holder.acceptAuthorizationRequest(request, credential)).rejects.toThrow(
+                `Requested JARM signing algorithm '${requestedAlgorithm}' is not supported by the selected credential (holder algorithm '${holderAlgorithm}')`
+            );
+            expect(present).not.toHaveBeenCalled();
+            expect(fixture.requests.some(({ url }) => url === `${verifier}/response`)).toBe(false);
+        } finally {
+            present.mockRestore();
+        }
+    }
+);
 
 describe.each<OpenId4VcCredentialFormat>(["dc+sd-jwt", "mso_mdoc", "jwt_vc_json"])("%s", (format) => {
     test.each(["direct_post", "direct_post.jwt"] as const)("receives, stores and presents using %s after restart", async (mode) => {

@@ -224,6 +224,11 @@ export class Holder {
         if (!result.can_be_satisfied || !matches.success) throw new Error("The selected credential does not match the query");
         const payload = request.authorizationRequestPayload;
         const clientMetadata = payload.client_metadata;
+        const holderAlgorithm = this.cryptography.algorithm(decoded.holderKey);
+        const requestedSigningAlgorithm = payload.response_mode === "direct_post.jwt" ? clientMetadata?.authorization_signed_response_alg : undefined;
+        if (requestedSigningAlgorithm !== undefined && requestedSigningAlgorithm !== holderAlgorithm) {
+            throw new Error(`Requested JARM signing algorithm '${requestedSigningAlgorithm}' is not supported by the selected credential (holder algorithm '${holderAlgorithm}')`);
+        }
         const jwks = clientMetadata?.jwks ?? (clientMetadata?.jwks_uri ? zJwkSet.parse(await this.cryptography.fetchJson(clientMetadata.jwks_uri)) : undefined);
         const encryptionKey =
             payload.response_mode === "direct_post.jwt" && jwks
@@ -238,13 +243,11 @@ export class Holder {
                 payload.response_mode === "direct_post.jwt"
                     ? {
                           encryption: { nonce: mdocGeneratedNonce, jwk: encryptionKey },
-                          jwtSigner: clientMetadata?.authorization_signed_response_alg
-                              ? { method: "jwk", publicJwk: decoded.holderKey, alg: this.cryptography.algorithm(decoded.holderKey) }
-                              : undefined,
+                          jwtSigner: requestedSigningAlgorithm ? { method: "jwk", publicJwk: decoded.holderKey, alg: holderAlgorithm } : undefined,
                           authorizationServer: "wallet",
                           audience: payload.client_id,
                           serverMetadata: {
-                              authorization_signing_alg_values_supported: ["EdDSA", "ES256"],
+                              authorization_signing_alg_values_supported: [holderAlgorithm],
                               authorization_encryption_alg_values_supported: ["ECDH-ES", "ECDH-ES+A256KW", "RSA-OAEP-256"],
                               authorization_encryption_enc_values_supported: ["A128GCM", "A256GCM"]
                           }
