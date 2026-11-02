@@ -1,10 +1,10 @@
 import "reflect-metadata";
+import { CoreBuffer } from "@nmshd/crypto";
 import { p256 } from "@noble/curves/nist.js";
 import { CallbackContext, clientAuthenticationNone, Jwk, JwtSigner, zJwk, zJwkSet } from "@openid4vc/oauth2";
 import { CoseKey, SignatureAlgorithm } from "@owf/cose";
 import { MdocContext } from "@owf/mdoc";
 import { SubjectAlternativeNameExtension, X509Certificate } from "@peculiar/x509";
-import { base58 } from "@scure/base";
 import {
     base64url,
     calculateJwkThumbprint,
@@ -118,7 +118,7 @@ export class OpenId4VcCrypto {
             bytes = new Uint8Array([0x80, 0x24, ...p256.Point.fromBytes(new Uint8Array([4, ...base64url.decode(key.x), ...base64url.decode(key.y)])).toBytes(true)]);
         }
 
-        const fingerprint = `z${base58.encode(bytes)}`;
+        const fingerprint = `z${CoreBuffer.from(bytes).toBase58()}`;
 
         return `did:key:${fingerprint}#${fingerprint}`;
     }
@@ -135,7 +135,7 @@ export class OpenId4VcCrypto {
             const fingerprint = did.slice(8);
             if (fragment && fragment !== fingerprint) throw new Error("Unknown did:key verification method");
 
-            const bytes = base58.decode(fingerprint.slice(1));
+            const bytes = CoreBuffer.fromBase58(fingerprint.slice(1)).buffer;
             if (bytes[0] === 0xed && bytes[1] === 1 && bytes.length === 34) return { kty: "OKP", crv: "Ed25519", x: base64url.encode(bytes.slice(2)) };
             if (bytes[0] === 0x80 && bytes[1] === 0x24) {
                 const point = p256.Point.fromBytes(bytes.slice(2)).toBytes(false);
