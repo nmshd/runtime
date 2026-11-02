@@ -15,8 +15,6 @@ import { OpenId4VciCredentialResponseJSON } from "./local/OpenId4VciCredentialRe
 import { RequestedCredentialCache } from "./local/RequestedCredentialCache";
 import { OwnIdentityAttributeWithVerifiableCredential } from "./local/VerifiableCredentialAttribute";
 
-export { isVerifiableCredentialAttribute, OwnIdentityAttributeWithVerifiableCredential } from "./local/VerifiableCredentialAttribute";
-
 export class OpenId4VcController extends ConsumptionBaseController {
     private holder: Holder;
     private requestedCredentialCache: RequestedCredentialCache;
