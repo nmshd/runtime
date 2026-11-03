@@ -1,5 +1,5 @@
 import { serialize, type, validate } from "@js-soft/ts-serval";
-import type { OpenId4VcDisplayInformation, OpenId4VcJsonObject } from "../../../openid4vc/OpenId4Vc";
+import type { OpenId4VcDisplayInformation, OpenId4VcJsonObject } from "../../../openid4vc";
 import { AbstractAttributeValue, AbstractAttributeValueJSON, IAbstractAttributeValue } from "../../AbstractAttributeValue";
 import { RenderHints, RenderHintsEditType, RenderHintsTechnicalType, ValueHints } from "../../hints";
 import { PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH } from "../proprietary";

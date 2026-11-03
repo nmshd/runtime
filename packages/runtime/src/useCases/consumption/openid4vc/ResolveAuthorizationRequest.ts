@@ -1,6 +1,5 @@
-import { OpenId4VpResolvedAuthorizationRequest } from "@nmshd/content";
 import { Result } from "@js-soft/ts-utils";
-import { OpenId4VcController } from "@nmshd/consumption";
+import { OpenId4VcController, OpenId4VpResolvedAuthorizationRequest } from "@nmshd/consumption";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { Inject } from "@nmshd/typescript-ioc";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";

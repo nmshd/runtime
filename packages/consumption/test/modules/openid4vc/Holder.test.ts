@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/require-await -- In-memory fixtures implement asynchronous storage APIs. */
 import { vi } from "vitest";
 import { ILogger } from "@js-soft/logging-abstractions";
-import { GivenName, IdentityAttribute, OpenId4VcCredentialFormat, OpenId4VpResolvedAuthorizationRequest, TokenContentVerifiablePresentation } from "@nmshd/content";
+import { GivenName, IdentityAttribute, TokenContentVerifiablePresentation } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { AccountController, CoreSynchronizable, ICoreSynchronizable, Identity, SynchronizedCollection } from "@nmshd/transport";
 import { Jwk, zJwk } from "@openid4vc/oauth2";
@@ -14,7 +14,13 @@ import { base64url, compactDecrypt, decodeJwt, decodeProtectedHeader, exportJWK,
 import { instance, mock } from "ts-mockito";
 import { ValiError } from "valibot";
 import { z } from "zod";
-import { AttributesController, OwnIdentityAttribute, OwnIdentityAttributeWithVerifiableCredential } from "../../../src";
+import {
+    AttributesController,
+    OwnIdentityAttribute,
+    OwnIdentityAttributeWithVerifiableCredential,
+    OpenId4VcCredentialFormat,
+    OpenId4VpResolvedAuthorizationRequest
+} from "../../../src";
 import { CredentialFormats } from "../../../src/modules/openid4vc/local/CredentialFormats";
 import { Holder } from "../../../src/modules/openid4vc/local/Holder";
 import { KeyStorage } from "../../../src/modules/openid4vc/local/KeyStorage";

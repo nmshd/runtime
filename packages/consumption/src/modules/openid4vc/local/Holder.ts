@@ -1,14 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention -- OpenID4VC and DCQL use standardized field names. */
-import {
-    IdentityAttribute,
-    OpenId4VcJsonValue,
-    OpenId4VcCredentialFormat,
-    OpenId4VciCredentialResponseJSON,
-    OpenId4VciResolvedCredentialOffer,
-    OpenId4VpResolvedAuthorizationRequest,
-    TokenContentVerifiablePresentation,
-    VerifiableCredential
-} from "@nmshd/content";
+import { IdentityAttribute, OpenId4VcJsonValue, TokenContentVerifiablePresentation, VerifiableCredential } from "@nmshd/content";
 import { AccountController } from "@nmshd/transport";
 import { JwtSigner, setGlobalConfig as setOauthConfig, zJwkSet } from "@openid4vc/oauth2";
 import { Openid4vciClient, setGlobalConfig as setIssuanceConfig } from "@openid4vc/openid4vci";
@@ -22,8 +13,12 @@ import { z } from "zod";
 import { AttributesController, OwnIdentityAttribute } from "../../attributes";
 import { CredentialFormats } from "./CredentialFormats";
 import { KeyStorage } from "./KeyStorage";
+import { OpenId4VcCredentialFormat } from "./OpenId4VcCredentialFormat";
 import { OpenId4VcCrypto } from "./OpenId4VcCrypto";
 import { displayInformationSchema } from "./OpenId4VcSchemas";
+import { OpenId4VciCredentialResponseJSON } from "./OpenId4VciCredentialResponseJSON";
+import { OpenId4VciResolvedCredentialOffer } from "./OpenId4VciResolvedCredentialOffer";
+import { OpenId4VpResolvedAuthorizationRequest } from "./OpenId4VpResolvedAuthorizationRequest";
 import { isVerifiableCredentialAttribute, OwnIdentityAttributeWithVerifiableCredential } from "./VerifiableCredentialAttribute";
 
 function isSupportedFormat(format: string): format is OpenId4VcCredentialFormat {

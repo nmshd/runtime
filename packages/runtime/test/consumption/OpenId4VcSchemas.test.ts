@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention -- Standard OpenID4VC and DCQL fields. */
-import { OpenId4VpDcqlQuery, OpenId4VpResolvedAuthorizationRequest } from "@nmshd/content";
+
+import { OpenId4VpDcqlQuery, OpenId4VpResolvedAuthorizationRequest } from "@nmshd/consumption";
 import { SchemaRepository } from "../../src/useCases/common/SchemaRepository";
 
 const schemas = new SchemaRepository();

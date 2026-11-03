@@ -1,5 +1,6 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
-import { OpenId4VcDisplayInformation, OpenId4VciCredentialResponseJSON } from "@nmshd/content";
+import { OpenId4VciCredentialResponseJSON } from "@nmshd/consumption";
+import { OpenId4VcDisplayInformation } from "@nmshd/content";
 import {
     DeviceOnboardingInfoDTO,
     FileDVO,

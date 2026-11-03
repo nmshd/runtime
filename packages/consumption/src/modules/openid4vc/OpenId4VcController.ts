@@ -1,10 +1,4 @@
-import {
-    OpenId4VcJsonValue,
-    OpenId4VciResolvedCredentialOffer,
-    OpenId4VpResolvedAuthorizationRequest,
-    TokenContentVerifiablePresentation,
-    VerifiableCredential
-} from "@nmshd/content";
+import { OpenId4VcJsonValue, TokenContentVerifiablePresentation, VerifiableCredential } from "@nmshd/content";
 import { ConsumptionBaseController } from "../../consumption/ConsumptionBaseController";
 import { ConsumptionController } from "../../consumption/ConsumptionController";
 import { ConsumptionControllerName } from "../../consumption/ConsumptionControllerName";
@@ -12,6 +6,8 @@ import { OwnIdentityAttribute } from "../attributes";
 import { Holder } from "./local/Holder";
 import { KeyStorage } from "./local/KeyStorage";
 import { OpenId4VciCredentialResponseJSON } from "./local/OpenId4VciCredentialResponseJSON";
+import { OpenId4VciResolvedCredentialOffer } from "./local/OpenId4VciResolvedCredentialOffer";
+import { OpenId4VpResolvedAuthorizationRequest } from "./local/OpenId4VpResolvedAuthorizationRequest";
 import { RequestedCredentialCache } from "./local/RequestedCredentialCache";
 import { OwnIdentityAttributeWithVerifiableCredential } from "./local/VerifiableCredentialAttribute";
 

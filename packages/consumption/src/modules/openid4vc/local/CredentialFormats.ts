@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention -- OpenID4VC and DCQL use standardized field names. */
-import { OpenId4VcJsonObject, OpenId4VpResolvedAuthorizationRequest, VerifiableCredential } from "@nmshd/content";
+import { OpenId4VcJsonObject, VerifiableCredential } from "@nmshd/content";
 import { Jwk, zJwk } from "@openid4vc/oauth2";
 import { CoseKey } from "@owf/cose";
 import { DeviceRequest, DocRequest, Holder as MdocHolder, IssuerSigned, ItemsRequest, SessionTranscript } from "@owf/mdoc";
@@ -9,6 +9,7 @@ import { normalizeCredential, transformPresentationInput, validateCredentialPayl
 import { base64url, calculateJwkThumbprint, decodeJwt } from "jose";
 import { z } from "zod";
 import { OpenId4VcCrypto } from "./OpenId4VcCrypto";
+import { OpenId4VpResolvedAuthorizationRequest } from "./OpenId4VpResolvedAuthorizationRequest";
 
 type CredentialMatch = Extract<ReturnType<typeof DcqlQuery.query>["credential_matches"][string], { success: true }>["valid_credentials"][number];
 

@@ -1,6 +1,5 @@
-import { OpenId4VpResolvedAuthorizationRequest } from "@nmshd/content";
 import { Result } from "@js-soft/ts-utils";
-import { AttributesController, isVerifiableCredentialAttribute, LocalAttribute, OpenId4VcController } from "@nmshd/consumption";
+import { AttributesController, isVerifiableCredentialAttribute, LocalAttribute, OpenId4VcController, OpenId4VpResolvedAuthorizationRequest } from "@nmshd/consumption";
 import { CoreId } from "@nmshd/core-types";
 import { Inject } from "@nmshd/typescript-ioc";
 import { AttributeIdString, RuntimeErrors, SchemaRepository, SchemaValidator, UseCase } from "../../common";

@@ -1,7 +1,7 @@
 import { ISerializable, Serializable, serialize, type, validate } from "@js-soft/ts-serval";
 import { ContentJSON } from "../ContentJSON";
-import type { OpenId4VcDisplayInformation, OpenId4VcJsonObject } from "../openid4vc/OpenId4Vc";
 import { PROPRIETARY_ATTRIBUTE_MAX_DESCRIPTION_LENGTH } from "../attributes";
+import type { OpenId4VcDisplayInformation, OpenId4VcJsonObject } from "../openid4vc";
 
 export interface TokenContentVerifiablePresentationJSON extends ContentJSON {
     "@type": "TokenContentVerifiablePresentation";

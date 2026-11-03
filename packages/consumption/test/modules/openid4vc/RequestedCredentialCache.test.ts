@@ -1,8 +1,8 @@
-import { OpenId4VcCredentialFormat, OpenId4VciCredentialResponseJSON } from "@nmshd/content";
 import { CoreSynchronizable, SynchronizedCollection } from "@nmshd/transport";
 import { instance, mock } from "ts-mockito";
 import { z } from "zod";
 import { RequestedCredentialCache } from "../../../src/modules/openid4vc/local/RequestedCredentialCache";
+import { OpenId4VcCredentialFormat, OpenId4VciCredentialResponseJSON } from "../../../src";
 
 test.each<OpenId4VcCredentialFormat>(["dc+sd-jwt", "mso_mdoc", "jwt_vc_json"])("preserves cached %s responses after serialization", async (format) => {
     const records: Record<string, unknown>[] = [];

@@ -1,12 +1,12 @@
 import { ILogger } from "@js-soft/logging-abstractions";
-import { OpenId4VcJwk } from "@nmshd/content";
-import { Jwk, zJwk } from "@openid4vc/oauth2";
-import { z } from "zod";
 import { serialize, validate } from "@js-soft/ts-serval";
 import { CoreId } from "@nmshd/core-types";
 import { CoreSynchronizable, ICoreSynchronizable, SynchronizedCollection } from "@nmshd/transport";
+import { Jwk, zJwk } from "@openid4vc/oauth2";
 import { base64url, calculateJwkThumbprint } from "jose";
 import { nameof } from "ts-simple-nameof";
+import { z } from "zod";
+import { OpenId4VcJwk } from "./OpenId4VcJwk";
 
 const keyPairSchema = z.object({ publicKey: zJwk, privateKey: zJwk });
 const legacyKeyEntrySchema = z.object({ key: z.string() });

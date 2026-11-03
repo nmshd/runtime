@@ -1,6 +1,5 @@
-import { OpenId4VciResolvedCredentialOffer } from "@nmshd/content";
 import { Result } from "@js-soft/ts-utils";
-import { OpenId4VcController, OpenId4VciCredentialResponseJSON } from "@nmshd/consumption";
+import { OpenId4VcController, OpenId4VciCredentialResponseJSON, OpenId4VciResolvedCredentialOffer } from "@nmshd/consumption";
 import { Inject } from "@nmshd/typescript-ioc";
 import { SchemaRepository, SchemaValidator, UseCase } from "../../common";
 

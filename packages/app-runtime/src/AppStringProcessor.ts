@@ -1,7 +1,8 @@
 import { ILogger, ILoggerFactory } from "@js-soft/logging-abstractions";
 import { Serializable } from "@js-soft/ts-serval";
 import { EventBus, Result } from "@js-soft/ts-utils";
-import { OpenId4VciResolvedCredentialOffer, TokenContentVerifiablePresentation } from "@nmshd/content";
+import { OpenId4VciResolvedCredentialOffer } from "@nmshd/consumption";
+import { TokenContentVerifiablePresentation } from "@nmshd/content";
 import { ICoreAddress, Reference } from "@nmshd/core-types";
 import { AnonymousServices, DeviceMapper, RequestCredentialsResponse, RuntimeServices } from "@nmshd/runtime";
 import { BackboneIds, TokenContentDeviceSharedSecret } from "@nmshd/transport";
