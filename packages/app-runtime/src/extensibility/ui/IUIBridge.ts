@@ -1,5 +1,5 @@
 import { ApplicationError, Result } from "@js-soft/ts-utils";
-import { OpenId4VciCredentialResponseJSON } from "@nmshd/consumption";
+import { OpenId4VcDisplayInformation, OpenId4VciCredentialResponseJSON } from "@nmshd/content";
 import {
     DeviceOnboardingInfoDTO,
     FileDVO,
@@ -24,15 +24,7 @@ export interface IUIBridge {
     showResolvedCredentialOffer(
         account: LocalAccountDTO,
         credentialResponses: OpenId4VciCredentialResponseJSON[],
-        issuerDisplayInformation?: {
-            name?: string;
-            locale?: string;
-            logo?: {
-                uri?: string;
-                // eslint-disable-next-line @typescript-eslint/naming-convention
-                alt_text?: string;
-            };
-        }[]
+        issuerDisplayInformation?: OpenId4VcDisplayInformation[]
     ): Promise<Result<void>>;
     showError(error: ApplicationError, account?: LocalAccountDTO): Promise<Result<void>>;
     requestAccountSelection(possibleAccounts: LocalAccountDTO[], title?: string, description?: string): Promise<Result<LocalAccountDTO | undefined>>;

@@ -1,8 +1,7 @@
-import { OpenId4VciResolvedCredentialOffer } from "@credo-ts/openid4vc";
 import { ILogger, ILoggerFactory } from "@js-soft/logging-abstractions";
 import { Serializable } from "@js-soft/ts-serval";
 import { EventBus, Result } from "@js-soft/ts-utils";
-import { TokenContentVerifiablePresentation } from "@nmshd/content";
+import { OpenId4VciResolvedCredentialOffer, TokenContentVerifiablePresentation } from "@nmshd/content";
 import { ICoreAddress, Reference } from "@nmshd/core-types";
 import { AnonymousServices, DeviceMapper, RequestCredentialsResponse, RuntimeServices } from "@nmshd/runtime";
 import { BackboneIds, TokenContentDeviceSharedSecret } from "@nmshd/transport";
@@ -101,7 +100,7 @@ export class AppStringProcessor {
             return Result.ok(undefined);
         }
 
-        const authorizationServer = credentialOffer.credentialOfferPayload.grants!.authorization_code!.authorization_server;
+        const authorizationServer = credentialOffer.credentialOfferPayload.grants?.authorization_code?.authorization_server;
         if (!authorizationServer) {
             await uiBridge.showError(AppRuntimeErrors.appStringProcessor.invalidCredentialOffer());
             this.logger.error("Credential offer does not contain an authorization server", credentialOffer);
@@ -125,7 +124,11 @@ export class AppStringProcessor {
             return Result.ok(undefined);
         }
 
-        await uiBridge.showResolvedCredentialOffer(account, requestCredentialsResult.value.credentialResponses, credentialOffer.metadata.credentialIssuer.display);
+        await uiBridge.showResolvedCredentialOffer(
+            account,
+            requestCredentialsResult.value.credentialResponses,
+            credentialOffer.metadata.credentialIssuer.credential_metadata?.display ?? credentialOffer.metadata.credentialIssuer.display
+        );
         return Result.ok(undefined);
     }
 
@@ -145,12 +148,16 @@ export class AppStringProcessor {
             return Result.ok(undefined);
         }
 
-        await uiBridge.showResolvedCredentialOffer(account, requestCredentialsResult.value.credentialResponses, credentialOffer.metadata.credentialIssuer.display);
+        await uiBridge.showResolvedCredentialOffer(
+            account,
+            requestCredentialsResult.value.credentialResponses,
+            credentialOffer.metadata.credentialIssuer.credential_metadata?.display ?? credentialOffer.metadata.credentialIssuer.display
+        );
         return Result.ok(undefined);
     }
 
     private async _requestPreAuthorizedCredentials(credentialOffer: OpenId4VciResolvedCredentialOffer, services: RuntimeServices): Promise<Result<RequestCredentialsResponse>> {
-        const preAuthorizedCodeGrant = credentialOffer.credentialOfferPayload.grants!["urn:ietf:params:oauth:grant-type:pre-authorized_code"];
+        const preAuthorizedCodeGrant = credentialOffer.credentialOfferPayload.grants?.["urn:ietf:params:oauth:grant-type:pre-authorized_code"];
         const credentialConfigurationId = credentialOffer.credentialOfferPayload.credential_configuration_ids;
 
         if (preAuthorizedCodeGrant?.tx_code) {
@@ -347,7 +354,7 @@ export class AppStringProcessor {
         return Result.ok(undefined);
     }
 
-    private parseTokenContent(content: any) {
+    private parseTokenContent(content: unknown): Serializable | undefined {
         try {
             return Serializable.fromUnknown(content);
         } catch (e) {

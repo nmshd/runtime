@@ -1,4 +1,4 @@
-import { OpenId4VciResolvedCredentialOffer } from "@credo-ts/openid4vc";
+import { OpenId4VciResolvedCredentialOffer } from "@nmshd/content";
 import { Result } from "@js-soft/ts-utils";
 import { OpenId4VcController, OpenId4VciCredentialResponseJSON } from "@nmshd/consumption";
 import { Inject } from "@nmshd/typescript-ioc";
@@ -14,8 +14,6 @@ export interface RequestCredentialsResponse {
 }
 
 export type RequestCredentialsRequest = AbstractRequestCredentialsRequest<OpenId4VciResolvedCredentialOffer>;
-
-export type SchemaValidatableRequestCredentialsRequest = AbstractRequestCredentialsRequest<Record<string, any>>;
 
 class Validator extends SchemaValidator<RequestCredentialsRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {

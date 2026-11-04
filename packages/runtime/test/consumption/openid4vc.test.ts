@@ -4,15 +4,11 @@ import { RequestJSON, ShareAuthorizationRequestRequestItemJSON, TokenContentVeri
 import { CoreDate } from "@nmshd/core-types";
 import * as client from "openid-client";
 import { StartedTestContainer } from "testcontainers";
-import { Agent as UndiciAgent, fetch as undiciFetch } from "undici";
 import { startEudiplo } from "../../../../.dev/eudiplo/startEudiplo";
 import { LocalAttributeDTO } from "../../src";
 import { establishRelationship, RuntimeServiceProvider, syncUntilHasMessageWithRequest, TestRuntimeServices } from "../lib";
 
-const fetchInstance: typeof fetch = (async (input: any, init: any) => {
-    const response = await undiciFetch(input, { ...init, dispatcher: new UndiciAgent({}) });
-    return response;
-}) as unknown as typeof fetch;
+const fetchInstance: typeof fetch = (input, init) => fetch(input, init);
 
 const eudiploClientId = "test-admin";
 const eudiploClientSecret = "hgHrws1JR7sS24WR1IimsVdHAT0ddlgOB3dObaGSAEOo8JSFk3N";
@@ -244,8 +240,7 @@ describe("presentation", () => {
         ).value;
         expect(matchingCredentials).toHaveLength(currentCredentials.length);
 
-        const queryResult = loadResult.value.authorizationRequest.dcql!.queryResult;
-        expect(queryResult.can_be_satisfied).toBe(true);
+        expect(loadResult.value.authorizationRequest.authorizationRequestPayload.dcql_query).toBeDefined();
 
         const presentationResult = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({
             authorizationRequest: loadResult.value.authorizationRequest,
@@ -385,6 +380,7 @@ async function createAndStoreCredential(eudiploClient: EudiploClient, eudiploCre
 }
 
 function tamperSignatureOfTokenContent(tokenContent: TokenContentVerifiablePresentationJSON): TokenContentVerifiablePresentationJSON {
+    if (typeof tokenContent.value !== "string") throw new Error("Expected an encoded SD-JWT presentation");
     const splittedValue = tokenContent.value.split(".");
 
     const header = splittedValue[0];

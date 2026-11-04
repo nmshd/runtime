@@ -1,4 +1,4 @@
-import { AcceptResponseItem, RejectResponseItem, ResponseItemResult, ShareCredentialOfferRequestItem } from "@nmshd/content";
+import { AcceptResponseItem, RejectResponseItem, ResponseItemResult, ShareCredentialOfferRequestItem, VerifiableCredential } from "@nmshd/content";
 import { ConsumptionCoreErrors } from "../../../../consumption/ConsumptionCoreErrors";
 import { ValidationResult } from "../../../common/ValidationResult";
 import { ShareCredentialOfferRequestItemProcessedByRecipientEvent } from "../../events";
@@ -29,7 +29,8 @@ export class ShareCredentialOfferRequestItemProcessor extends GenericRequestItem
     ): Promise<AcceptResponseItem> {
         const cachedCredentials = await this.consumptionController.openId4Vc.requestAllCredentialsFromCredentialOfferUrl(requestItem.credentialOfferUrl);
         const credential = await this.consumptionController.openId4Vc.storeCredentials(cachedCredentials);
-        await this.accountController.files.cacheVerifiableCredentialDisplayInformationImages(credential.content.value.displayInformation);
+        const value: VerifiableCredential = credential.content.value;
+        await this.accountController.files.cacheVerifiableCredentialDisplayInformationImages(value.toJSON().displayInformation);
 
         return AcceptResponseItem.from({ result: ResponseItemResult.Accepted });
     }
