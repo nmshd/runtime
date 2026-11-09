@@ -45,7 +45,7 @@
         "@nmshd/runtime-types": "*",
         "@nmshd/transport": "*",
         "@nmshd/typescript-ioc": "3.2.6",
-        "@openid4vc/oauth2": "0.9.1",
+        "@openid4vc/oauth2": "0.9.2",
         "ajv": "^8.20.0",
         "ajv-errors": "^3.0.0",
         "ajv-formats": "^3.0.1",
