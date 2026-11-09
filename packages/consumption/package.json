@@ -65,7 +65,7 @@
     "devDependencies": {
         "@js-soft/docdb-access-loki": "1.4.6",
         "@js-soft/docdb-access-mongo": "1.4.6",
-        "@js-soft/node-logger": "1.2.20",
+        "@js-soft/node-logger": "1.2.21",
         "@types/lodash": "4.17.27",
         "ts-mockito": "2.6.1"
     },
