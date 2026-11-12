@@ -1,10 +1,13 @@
 /* eslint-disable @typescript-eslint/naming-convention -- Standard OpenID4VC and DCQL field names. */
 import { EudiploClient } from "@eudiplo/sdk-core";
 import { AcceptShareAuthorizationRequestRequestItemParametersJSON, OpenId4VciCredentialResponseJSON } from "@nmshd/consumption";
+import { compactDecrypt, exportJWK, generateKeyPair } from "jose";
+import { deflateSync } from "node:zlib";
 import { RequestItemJSONDerivations, TokenContentVerifiablePresentationJSON, VerifiableCredentialJSON } from "@nmshd/content";
+import { CoreBuffer } from "@nmshd/crypto";
 import { CoreDate } from "@nmshd/core-types";
 import { TokenContentDeviceSharedSecret } from "@nmshd/transport";
-import { createHash, createPrivateKey, createPublicKey, generateKeyPairSync, sign, verify, webcrypto, X509Certificate } from "node:crypto";
+import { createHash, createPrivateKey, createPublicKey, ECDH, generateKeyPairSync, sign, verify, webcrypto, X509Certificate } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { StartedTestContainer } from "testcontainers";
@@ -16,9 +19,13 @@ const eudiploBaseUrl = "http://localhost:3000";
 
 const issuerResponses = new Map<string, Response>();
 const outboundRequests = new Map<string, RequestInit | undefined>();
+const inboundResponses = new Map<string, Response>();
+const issuerHandlers = new Map<string, (init: RequestInit | undefined) => Response | Promise<Response>>();
 const fetchInstance: typeof fetch = async (input, init) => {
     outboundRequests.set(input.toString(), init);
-    return issuerResponses.get(input.toString())?.clone() ?? (await fetch(input, init));
+    const response = await (issuerHandlers.get(input.toString())?.(init) ?? issuerResponses.get(input.toString())?.clone() ?? fetch(input, init));
+    inboundResponses.set(input.toString(), response.clone());
+    return response;
 };
 
 const eudiploClientId = "test-admin";
@@ -63,6 +70,8 @@ afterEach(() => {
     vi.restoreAllMocks();
     issuerResponses.clear();
     outboundRequests.clear();
+    inboundResponses.clear();
+    issuerHandlers.clear();
 });
 
 test("request an SD-JWT credential using a pre-authorized code", async () => {
@@ -312,7 +321,7 @@ describe("credential issuance", () => {
         expect(result).toBeAnError(/invalid_request/, /^error\.runtime\.openid4vc\.oauth\.invalid_request$/);
     });
 
-    test("reject reuse of a pre-authorized code", async () => {
+    test("propagate the authorization server rejection of a reused pre-authorized code", async () => {
         // Arrange
         const credentialOffer = await prepareCredentialOffer();
         await runtimeServices1.consumption.openId4Vc.requestCredentials({ credentialOffer, credentialConfigurationIds: ["test"] });
@@ -442,6 +451,84 @@ describe("credential issuance", () => {
         expect(body).not.toHaveProperty("proof");
     });
 
+    test.each([
+        ["typ", "openid4vci-proof+jwt"],
+        ["alg", "ES256"]
+    ])("set the credential proof header %s to %s", async (property, expected) => {
+        // Arrange
+        const credentialOffer = await prepareCredentialOffer();
+
+        // Act
+        const result = await runtimeServices1.consumption.openId4Vc.requestCredentials({ credentialOffer, credentialConfigurationIds: ["test"] });
+
+        // Assert
+        expect(result).toBeSuccessful();
+        const proof = credentialProof(credentialOffer.metadata.credentialIssuer.credential_endpoint);
+        expect(JSON.parse(Buffer.from(proof.split(".")[0], "base64url").toString())).toHaveProperty(property, expected);
+    });
+
+    test("address the credential proof to the credential issuer", async () => {
+        // Arrange
+        const credentialOffer = await prepareCredentialOffer();
+
+        // Act
+        const result = await runtimeServices1.consumption.openId4Vc.requestCredentials({ credentialOffer, credentialConfigurationIds: ["test"] });
+
+        // Assert
+        expect(result).toBeSuccessful();
+        expect(decodeJwtPayload(credentialProof(credentialOffer.metadata.credentialIssuer.credential_endpoint)).aud).toBe(credentialOffer.credentialOfferPayload.credential_issuer);
+    });
+
+    test("set the credential proof issuance time to the current time", async () => {
+        // Arrange
+        const credentialOffer = await prepareCredentialOffer();
+        const before = Math.floor(Date.now() / 1000);
+
+        // Act
+        const result = await runtimeServices1.consumption.openId4Vc.requestCredentials({ credentialOffer, credentialConfigurationIds: ["test"] });
+
+        // Assert
+        expect(result).toBeSuccessful();
+        const issuedAt = decodeJwtPayload(credentialProof(credentialOffer.metadata.credentialIssuer.credential_endpoint)).iat;
+        expect(issuedAt).toBeGreaterThanOrEqual(before);
+        expect(issuedAt).toBeLessThanOrEqual(Math.floor(Date.now() / 1000));
+    });
+
+    test("use the issuer's nonce in the credential proof", async () => {
+        // Arrange
+        const credentialOffer = await prepareCredentialOffer();
+
+        // Act
+        const result = await runtimeServices1.consumption.openId4Vc.requestCredentials({ credentialOffer, credentialConfigurationIds: ["test"] });
+
+        // Assert
+        expect(result).toBeSuccessful();
+        const nonceResponse = (await inboundResponses.get(credentialOffer.metadata.credentialIssuer.nonce_endpoint!)!.json()) as { c_nonce: string };
+        expect(nonceResponse.c_nonce).toEqual(expect.any(String));
+        expect(decodeJwtPayload(credentialProof(credentialOffer.metadata.credentialIssuer.credential_endpoint)).nonce).toBe(nonceResponse.c_nonce);
+    });
+
+    test("sign the credential proof with the advertised holder key", async () => {
+        // Arrange
+        const credentialOffer = await prepareCredentialOffer();
+
+        // Act
+        const result = await runtimeServices1.consumption.openId4Vc.requestCredentials({ credentialOffer, credentialConfigurationIds: ["test"] });
+
+        // Assert
+        expect(result).toBeSuccessful();
+        const [header, payload, signature] = credentialProof(credentialOffer.metadata.credentialIssuer.credential_endpoint).split(".");
+        const jwk = (JSON.parse(Buffer.from(header, "base64url").toString()) as { jwk: webcrypto.JsonWebKey }).jwk;
+        expect(
+            verify(
+                "sha256",
+                Buffer.from(`${header}.${payload}`),
+                { key: createPublicKey({ key: jwk, format: "jwk" }), dsaEncoding: "ieee-p1363" },
+                Buffer.from(signature, "base64url")
+            )
+        ).toBe(true);
+    });
+
     test("request multiple offered credential configurations", async () => {
         // Arrange
         const offer = await eudiploClient.createIssuanceOffer({ credentialConfigurationIds: ["test", "selective"], flow: "pre_authorized_code" });
@@ -541,6 +628,54 @@ describe("credential issuance", () => {
 
         // Assert
         expect(result).toBeAnError(/does not match the requested holder key/, /.+/);
+    });
+
+    test.each([
+        { algorithm: "ES256", binding: "jwk", keyFromProof: (header: ProofHeader) => header.jwk!, digest: "sha256" },
+        { algorithm: "EdDSA", binding: "jwk", keyFromProof: (header: ProofHeader) => header.jwk!, digest: null },
+        {
+            algorithm: "ES256",
+            binding: "did:jwk",
+            keyFromProof: (header: ProofHeader) => JSON.parse(Buffer.from(header.kid!.split("#")[0].slice(8), "base64url").toString()) as webcrypto.JsonWebKey,
+            digest: "sha256"
+        },
+        { algorithm: "ES256", binding: "did:key", keyFromProof: p256DidProofKey, digest: "sha256" },
+        {
+            algorithm: "EdDSA",
+            binding: "did:key",
+            keyFromProof: (header: ProofHeader) => ({
+                kty: "OKP",
+                crv: "Ed25519",
+                x: Buffer.from(CoreBuffer.fromBase58(header.kid!.split("#")[0].slice(9)).buffer.slice(2)).toString("base64url")
+            }),
+            digest: null
+        }
+    ])("request a JWT VC using $algorithm and $binding through the facade from a test issuer", async ({ algorithm, binding, keyFromProof, digest }) => {
+        // Arrange
+        const credentialOffer = await prepareJwtVcIssuer(algorithm, binding, keyFromProof);
+
+        // Act
+        const result = await runtimeServices1.consumption.openId4Vc.requestCredentials({ credentialOffer, credentialConfigurationIds: ["test"] });
+
+        // Assert
+        expect(result).toBeSuccessful();
+        expect(result.value.credentialResponses).toHaveLength(1);
+        const credential = result.value.credentialResponses[0];
+        expect(credential.claimFormat).toBe("jwt_vc_json");
+        const proof = credentialProof(credentialOffer.metadata.credentialIssuer.credential_endpoint);
+        const [header, payload, signature] = proof.split(".");
+        const proofHeader = JSON.parse(Buffer.from(header, "base64url").toString()) as ProofHeader;
+        expect(proofHeader.alg).toBe(algorithm);
+        const holderKey = keyFromProof(proofHeader);
+        expect(
+            verify(
+                digest,
+                Buffer.from(`${header}.${payload}`),
+                { key: createPublicKey({ key: holderKey, format: "jwk" }), dsaEncoding: "ieee-p1363" },
+                Buffer.from(signature, "base64url")
+            )
+        ).toBe(true);
+        expect(decodeJwtPayload(credential.encoded)).toMatchObject({ cnf: { jwk: holderKey }, vc: { type: ["VerifiableCredential", "TestCredential"] } });
     });
 
     test("request an mdoc credential", async () => {
@@ -753,6 +888,21 @@ describe("credential storage", () => {
         );
     });
 
+    test("create no attributes when a credential batch contains an invalid credential", async () => {
+        // Arrange
+        const [valid] = await issueCredential(runtimeServices1);
+        const invalid = { ...valid, encoded: tamperIssuerSignature(valid.encoded) };
+        const original = await runtimeServices1.consumption.attributes.getAttributes({ query: { "content.value.@type": "VerifiableCredential" } });
+
+        // Act
+        const result = await runtimeServices1.consumption.openId4Vc.storeCredentials({ credentialResponses: [valid, invalid] });
+
+        // Assert
+        expect(result).toBeAnError(/signature/i, /.+/);
+        const stored = await runtimeServices1.consumption.attributes.getAttributes({ query: { "content.value.@type": "VerifiableCredential" } });
+        expect(stored.value.map((attribute) => attribute.id)).toEqual(original.value.map((attribute) => attribute.id));
+    });
+
     test("store a JWT VC through the runtime schema and attribute mapper", async () => {
         // Arrange
         const credentialResponse = await prepareJwtVcCredential();
@@ -915,6 +1065,46 @@ describe("presentation", () => {
         expect(result.value.matchingCredentials).toEqual([]);
     });
 
+    test.each([
+        {
+            name: "multiple credential queries",
+            changes: {
+                dcql_query: {
+                    credentials: [
+                        { id: "first", format: "dc+sd-jwt", meta: { vct_values: ["https://example.com/credentials/test"] } },
+                        { id: "second", format: "dc+sd-jwt", meta: { vct_values: ["https://example.com/credentials/test"] } }
+                    ]
+                }
+            },
+            error: /Exactly one credential query/
+        },
+        {
+            name: "multiple credential instances",
+            changes: { dcql_query: { credentials: [{ id: "test", format: "dc+sd-jwt", meta: { vct_values: ["https://example.com/credentials/test"] }, multiple: true }] } },
+            error: /Exactly one credential query/
+        },
+        { name: "a missing response mode", changes: { response_mode: undefined }, error: /response.mode|responseMode|response mode/ },
+        {
+            name: "transaction data",
+            changes: { transaction_data: [Buffer.from(JSON.stringify({ type: "test", credential_ids: ["test"] })).toString("base64url")] },
+            error: /Transaction data is not supported/
+        },
+        {
+            name: "Presentation Exchange",
+            changes: { response_mode: "direct_post", client_metadata: undefined, dcql_query: undefined, presentation_definition: { id: "unsupported", input_descriptors: [] } },
+            error: /Presentation Exchange|DCQL|dcql/
+        }
+    ])("reject a signed incoming request containing $name during resolution", async ({ changes, error }) => {
+        // Arrange
+        const authorizationRequestUrl = await signedAuthorizationRequest(changes);
+
+        // Act
+        const result = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl });
+
+        // Assert
+        expect(result).toBeAnError(error, /.+/);
+    });
+
     test("reject a modified authorization request signature", async () => {
         // Arrange
         const request = await eudiploClient.createPresentationRequest({ configId: "test" });
@@ -1023,7 +1213,7 @@ describe("presentation", () => {
         expect(session.credentials![0].values).toEqual([expect.not.objectContaining({ given_name: expect.anything() })]);
     });
 
-    test("present claims selected using an array index path", async () => {
+    test("satisfy an array index query when the issuer discloses the array as a whole", async () => {
         // Arrange
         const attribute = await createAndStoreCredential(runtimeServices1, "array");
         const request = await eudiploClient.createPresentationRequest({ configId: "array" });
@@ -1040,6 +1230,37 @@ describe("presentation", () => {
         const session = await eudiploClient.getSession(request.sessionId);
         expect(session.status).toBe("completed");
         expect(session.credentials).toEqual([{ id: "names", values: [expect.objectContaining({ names: [{ given_name: "Alice" }, { given_name: "Bob" }] })] }]);
+    });
+
+    test("disclose only the selected independently disclosable array element", async () => {
+        // Arrange
+        const credential = await prepareArrayCredential();
+        const stored = await runtimeServices1.consumption.openId4Vc.storeCredentials({ credentialResponses: [credential] });
+        const authorizationRequestUrl = await signedAuthorizationRequest({
+            response_mode: "direct_post",
+            dcql_query: {
+                credentials: [{ id: "names", format: "dc+sd-jwt", meta: { vct_values: ["https://example.com/credentials/test"] }, claims: [{ path: ["names", 0, "given_name"] }] }]
+            }
+        });
+        const resolved = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl });
+        const responseUri = resolved.value.authorizationRequest.authorizationRequestPayload.response_uri!;
+        issuerResponses.set(responseUri, new Response("accepted"));
+
+        // Act
+        const result = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({
+            authorizationRequest: resolved.value.authorizationRequest,
+            attributeId: stored.value.id
+        });
+
+        // Assert
+        expect(result).toBeSuccessful();
+        const body = new URLSearchParams(outboundRequests.get(responseUri)!.body as string);
+        const presentation = (JSON.parse(body.get("vp_token")!) as { names: string[] }).names[0];
+        const disclosures = presentation
+            .split("~")
+            .slice(1, -1)
+            .map((disclosure) => JSON.parse(Buffer.from(disclosure, "base64url").toString()) as unknown);
+        expect(disclosures).toEqual([[expect.any(String), { given_name: "Alice" }]]);
     });
 
     test("reject conflicting outer and signed client identifiers", async () => {
@@ -1255,6 +1476,177 @@ describe("presentation", () => {
 
         // Assert
         expect(result).toBeAnError(/Transaction data is not supported/, /.+/);
+    });
+
+    test.each(["ECDH-ES", "ECDH-ES+A256KW", "RSA-OAEP-256"])("encrypt a Final response using %s through the facade", async (algorithm) => {
+        // Arrange
+        const { authorizationRequest, privateKey, responseUri } = await prepareEncryptedPresentation(algorithm);
+
+        // Act
+        const result = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest, attributeId: storedCredential.id });
+
+        // Assert
+        expect(result).toBeSuccessful();
+        const encrypted = new URLSearchParams(outboundRequests.get(responseUri)!.body as string).get("response")!;
+        const decrypted = await compactDecrypt(encrypted, privateKey);
+        expect(decrypted.protectedHeader).toMatchObject({ alg: algorithm, enc: "A256GCM", kid: "encryption-key" });
+        expect(JSON.parse(new TextDecoder().decode(decrypted.plaintext))).toMatchObject({ vp_token: { test: [expect.any(String)] } });
+    });
+
+    test("preserve state in an encrypted authorization response", async () => {
+        // Arrange
+        const { authorizationRequest, privateKey, responseUri } = await prepareEncryptedPresentation();
+        authorizationRequest.authorizationRequestPayload.state = "verifier-state";
+
+        // Act
+        const result = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest, attributeId: storedCredential.id });
+
+        // Assert
+        expect(result).toBeSuccessful();
+        const encrypted = new URLSearchParams(outboundRequests.get(responseUri)!.body as string).get("response")!;
+        const decrypted = await compactDecrypt(encrypted, privateKey);
+        expect(JSON.parse(new TextDecoder().decode(decrypted.plaintext))).toHaveProperty("state", "verifier-state");
+    });
+
+    test("preserve state in a direct_post authorization response", async () => {
+        // Arrange
+        const authorizationRequestUrl = await signedAuthorizationRequest({ response_mode: "direct_post", state: "verifier-state" });
+        const resolved = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl });
+        const authorizationRequest = resolved.value.authorizationRequest;
+        const responseUri = authorizationRequest.authorizationRequestPayload.response_uri!;
+        issuerResponses.set(responseUri, new Response("accepted"));
+
+        // Act
+        const result = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest, attributeId: storedCredential.id });
+
+        // Assert
+        expect(result).toBeSuccessful();
+        expect(new URLSearchParams(outboundRequests.get(responseUri)!.body as string).get("state")).toBe("verifier-state");
+    });
+
+    test("default to A128GCM when the verifier supplies no enc preference", async () => {
+        // Arrange
+        const { authorizationRequest, privateKey, responseUri } = await prepareEncryptedPresentation();
+        delete authorizationRequest.authorizationRequestPayload.client_metadata!.encrypted_response_enc_values_supported;
+
+        // Act
+        const result = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest, attributeId: storedCredential.id });
+
+        // Assert
+        expect(result).toBeSuccessful();
+        const encrypted = new URLSearchParams(outboundRequests.get(responseUri)!.body as string).get("response")!;
+        expect((await compactDecrypt(encrypted, privateKey)).protectedHeader.enc).toBe("A128GCM");
+    });
+
+    test("resolve the encryption key from jwks_uri through the facade", async () => {
+        // Arrange
+        const { authorizationRequest, privateKey, responseUri } = await prepareEncryptedPresentation();
+        const jwksUri = `${eudiploBaseUrl}/test-verifier-jwks`;
+        issuerResponses.set(
+            jwksUri,
+            new Response(JSON.stringify(authorizationRequest.authorizationRequestPayload.client_metadata!.jwks), { headers: { "content-type": "application/jwk-set+json" } })
+        );
+        delete authorizationRequest.authorizationRequestPayload.client_metadata!.jwks;
+        authorizationRequest.authorizationRequestPayload.client_metadata!.jwks_uri = jwksUri;
+
+        // Act
+        const result = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest, attributeId: storedCredential.id });
+
+        // Assert
+        expect(result).toBeSuccessful();
+        const encrypted = new URLSearchParams(outboundRequests.get(responseUri)!.body as string).get("response")!;
+        expect((await compactDecrypt(encrypted, privateKey)).protectedHeader.kid).toBe("encryption-key");
+        expect(outboundRequests.has(jwksUri)).toBe(true);
+    });
+
+    test("select an encryption key when the verifier also offers a signing key", async () => {
+        // Arrange
+        const { authorizationRequest, privateKey, responseUri } = await prepareEncryptedPresentation();
+        const jwks = authorizationRequest.authorizationRequestPayload.client_metadata!.jwks!;
+        jwks.keys.unshift({ ...jwks.keys[0], use: "sig", kid: "signing-key" });
+
+        // Act
+        const result = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest, attributeId: storedCredential.id });
+
+        // Assert
+        expect(result).toBeSuccessful();
+        const encrypted = new URLSearchParams(outboundRequests.get(responseUri)!.body as string).get("response")!;
+        expect((await compactDecrypt(encrypted, privateKey)).protectedHeader.kid).toBe("encryption-key");
+    });
+
+    test.each([
+        { name: "no keys", keys: [] },
+        { name: "a signing-only key", keys: [{ use: "sig" }] },
+        { name: "a verification-only key", keys: [{ key_ops: ["verify"] }] }
+    ])("reject response encryption with $name through the facade", async ({ keys }) => {
+        // Arrange
+        const { authorizationRequest, responseUri } = await prepareEncryptedPresentation();
+        const key = authorizationRequest.authorizationRequestPayload.client_metadata!.jwks!.keys[0];
+        authorizationRequest.authorizationRequestPayload.client_metadata!.jwks!.keys = keys.map((properties) => ({ ...key, ...properties }));
+        outboundRequests.delete(responseUri);
+
+        // Act
+        const result = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest, attributeId: storedCredential.id });
+
+        // Assert
+        expect(result).toBeAnError(/encryption.*key|encryption JWK/i, /.+/);
+        expect(outboundRequests.has(responseUri)).toBe(false);
+    });
+
+    test("ignore legacy signing metadata in a Final encrypted response through the facade", async () => {
+        // Arrange
+        const { authorizationRequest, privateKey, responseUri } = await prepareEncryptedPresentation();
+        authorizationRequest.authorizationRequestPayload.client_metadata!.authorization_signed_response_alg = "RS256";
+
+        // Act
+        const result = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest, attributeId: storedCredential.id });
+
+        // Assert
+        expect(result).toBeSuccessful();
+        const encrypted = new URLSearchParams(outboundRequests.get(responseUri)!.body as string).get("response")!;
+        const decrypted = await compactDecrypt(encrypted, privateKey);
+        expect(JSON.parse(new TextDecoder().decode(decrypted.plaintext))).toHaveProperty("vp_token.test", [expect.any(String)]);
+    });
+
+    test("sign a legacy draft JARM response through the facade", async () => {
+        // Arrange
+        const { authorizationRequest, privateKey, responseUri } = await prepareEncryptedPresentation("ECDH-ES", {
+            vp_formats: { "dc+sd-jwt": { alg_values_supported: ["ES256"] } },
+            authorization_signed_response_alg: "ES256"
+        });
+        const holderKey = createPublicKey({
+            key: (decodeJwtPayload((storedCredential.content.value as VerifiableCredentialJSON).value as string).cnf as { jwk: webcrypto.JsonWebKey }).jwk,
+            format: "jwk"
+        });
+
+        // Act
+        const result = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest, attributeId: storedCredential.id });
+
+        // Assert
+        expect(result).toBeSuccessful();
+        const encrypted = new URLSearchParams(outboundRequests.get(responseUri)!.body as string).get("response")!;
+        const decrypted = await compactDecrypt(encrypted, privateKey);
+        const [header, payload, signature] = new TextDecoder().decode(decrypted.plaintext).split(".");
+        expect(verify("sha256", Buffer.from(`${header}.${payload}`), { key: holderKey, dsaEncoding: "ieee-p1363" }, Buffer.from(signature, "base64url"))).toBe(true);
+        expect(JSON.parse(Buffer.from(payload, "base64url").toString())).toHaveProperty("vp_token.test", [expect.any(String)]);
+    });
+
+    test.each([
+        { name: "JSON object", body: JSON.stringify({ accepted: true }), message: JSON.stringify({ accepted: true }) },
+        { name: "JSON string", body: JSON.stringify("accepted"), message: JSON.stringify("accepted") },
+        { name: "plain text", body: "accepted", message: JSON.stringify("accepted") },
+        { name: "empty response", body: null, message: "{}" }
+    ])("map a verifier $name response to message", async ({ body, message }) => {
+        // Arrange
+        const authorizationRequest = await prepareAuthorizationRequest();
+        issuerResponses.set(authorizationRequest.authorizationRequestPayload.response_uri!, new Response(body));
+
+        // Act
+        const result = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest, attributeId: storedCredential.id });
+
+        // Assert
+        expect(result).toBeSuccessful();
+        expect(result.value).toEqual({ status: 200, message });
     });
 
     test("return the verifier rejection of a presentation with an unknown nonce", async () => {
@@ -1512,6 +1904,55 @@ describe("presentation", () => {
     });
 });
 
+describe("credential status through the facade", () => {
+    const statusUri = `${eudiploBaseUrl}/test-status-list`;
+
+    test.each([
+        { name: "a revoked credential", response: async () => new Response(await prepareStatusListJwt(1)), error: /status|revoked/i },
+        {
+            name: "an invalid status list signature",
+            response: async () => new Response(tamperSignature(await prepareStatusListJwt(0))),
+            error: /Status List JWT verification failed/i
+        },
+        { name: "an unavailable status list", response: () => Promise.resolve(new Response("unavailable", { status: 503 })), error: /Unable to fetch status list: HTTP 503/ },
+        {
+            name: "an expired status list",
+            response: async () => new Response(await prepareStatusListJwt(0, { exp: Math.floor(Date.now() / 1000) - 60 })),
+            error: /Status List JWT verification failed|expired/i
+        }
+    ])("report $name when verifying a presentation token", async ({ response, error }) => {
+        // Arrange
+        issuerResponses.set(statusUri, new Response(await prepareStatusListJwt(0)));
+        const credential = await prepareSdJwtCredential({ status: { status_list: { uri: statusUri, idx: 0 } } });
+        const stored = await runtimeServices1.consumption.openId4Vc.storeCredentials({ credentialResponses: [credential] });
+        const token = await createPresentationToken(stored.value);
+        issuerResponses.set(statusUri, await response());
+
+        // Act
+        const result = await runtimeServices1.consumption.openId4Vc.verifyPresentationToken({ token });
+
+        // Assert
+        expect(result).toBeSuccessful();
+        expect(result.value).toMatchObject({ isValid: false, error: { message: expect.stringMatching(error) } });
+    });
+
+    test("exclude a credential revoked after storage from matching credentials", async () => {
+        // Arrange
+        issuerResponses.set(statusUri, new Response(await prepareStatusListJwt(0)));
+        const credential = await prepareSdJwtCredential({ status: { status_list: { uri: statusUri, idx: 0 } } });
+        const stored = await runtimeServices1.consumption.openId4Vc.storeCredentials({ credentialResponses: [credential] });
+        const presentation = await eudiploClient.createPresentationRequest({ configId: "test" });
+        issuerResponses.set(statusUri, new Response(await prepareStatusListJwt(1)));
+
+        // Act
+        const result = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl: presentation.uri });
+
+        // Assert
+        expect(result).toBeSuccessful();
+        expect(result.value.matchingCredentials.map((attribute) => attribute.id)).not.toContain(stored.value.id);
+    });
+});
+
 describe("credential synchronization", () => {
     test.each(["test", "mdoc"])("present a %s credential after real device onboarding and datawallet synchronization", async (configurationId) => {
         // Arrange
@@ -1533,6 +1974,82 @@ describe("credential synchronization", () => {
         expect(result).toBeSuccessful();
         expect(result.value.status).toBe(200);
         expect((await eudiploClient.getSession(request.sessionId)).status).toBe("completed");
+    });
+});
+
+describe("additional device synchronization", () => {
+    test("present a JWT VC after real device onboarding and datawallet synchronization", async () => {
+        // Arrange
+        const [owner] = await runtimeServiceProvider.launch(1, { enableDatawallet: true });
+        const credential = await prepareJwtVcCredential(owner);
+        const stored = await owner.consumption.openId4Vc.storeCredentials({ credentialResponses: [credential] });
+        await owner.transport.account.syncDatawallet();
+        const emptyToken = await owner.anonymous.tokens.createEmptyToken();
+        const onboarding = await owner.transport.devices.fillDeviceOnboardingTokenWithNewDevice({ reference: emptyToken.value.reference.truncated });
+        const deviceSharedSecret = TokenContentDeviceSharedSecret.from(onboarding.value.content).sharedSecret;
+        const [otherDevice] = await runtimeServiceProvider.launch(1, { enableDatawallet: true, deviceSharedSecret });
+        await otherDevice.transport.account.syncDatawallet();
+        const authorizationRequestUrl = await signedAuthorizationRequest({
+            response_mode: "direct_post",
+            dcql_query: { credentials: [{ id: "vc", format: "jwt_vc_json", meta: { type_values: [["VerifiableCredential", "TestCredential"]] } }] }
+        });
+        const resolved = await otherDevice.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl });
+        const responseUri = resolved.value.authorizationRequest.authorizationRequestPayload.response_uri!;
+        issuerResponses.set(responseUri, new Response("accepted"));
+        const publicKey = createPublicKey({ key: (decodeJwtPayload(credential.encoded).cnf as { jwk: webcrypto.JsonWebKey }).jwk, format: "jwk" });
+
+        // Act
+        const result = await otherDevice.consumption.openId4Vc.acceptAuthorizationRequest({
+            authorizationRequest: resolved.value.authorizationRequest,
+            attributeId: stored.value.id
+        });
+
+        // Assert
+        expect(result).toBeSuccessful();
+        const body = new URLSearchParams(outboundRequests.get(responseUri)!.body as string);
+        const presentation = (JSON.parse(body.get("vp_token")!) as { vc: string[] }).vc[0];
+        const [header, payload, signature] = presentation.split(".");
+        expect(verify("sha256", Buffer.from(`${header}.${payload}`), { key: publicKey, dsaEncoding: "ieee-p1363" }, Buffer.from(signature, "base64url"))).toBe(true);
+        expect(decodeJwtPayload(presentation)).toMatchObject({
+            aud: resolved.value.authorizationRequest.authorizationRequestPayload.client_id,
+            nonce: resolved.value.authorizationRequest.authorizationRequestPayload.nonce,
+            vp: { verifiableCredential: [credential.encoded] }
+        });
+    });
+
+    test("reuse the synchronized credential cache on an onboarded device", async () => {
+        // Arrange
+        const [owner] = await runtimeServiceProvider.launch(1, { enableDatawallet: true, enableRequestModule: true, enableDeciderModule: true });
+        await establishRelationship(runtimeServices1.transport, owner.transport);
+        const offer = await eudiploClient.createIssuanceOffer({ credentialConfigurationIds: ["test"], flow: "pre_authorized_code" });
+        const metadata = (await (await fetch(`${eudiploBaseUrl}/.well-known/openid-credential-issuer/issuers/test`)).json()) as { credential_endpoint: string };
+        const credentialEndpoint = metadata.credential_endpoint;
+        const requestId = await prepareIncomingRequest(
+            { "@type": "ShareCredentialOfferRequestItem", mustBeAccepted: true, credentialOfferUrl: offer.uri },
+            runtimeServices1,
+            owner
+        );
+        await owner.consumption.incomingRequests.canAccept({ requestId, items: [{ accept: true }] });
+        await owner.transport.account.syncDatawallet();
+        const emptyToken = await owner.anonymous.tokens.createEmptyToken();
+        const onboarding = await owner.transport.devices.fillDeviceOnboardingTokenWithNewDevice({ reference: emptyToken.value.reference.truncated });
+        const deviceSharedSecret = TokenContentDeviceSharedSecret.from(onboarding.value.content).sharedSecret;
+        const [otherDevice] = await runtimeServiceProvider.launch(1, { enableDatawallet: true, enableRequestModule: true, enableDeciderModule: true, deviceSharedSecret });
+        await otherDevice.transport.account.syncDatawallet();
+        const cached = (await inboundResponses.get(credentialEndpoint)!.clone().json()) as { credentials: { credential: string }[] };
+        outboundRequests.delete(credentialEndpoint);
+
+        // Act
+        const result = await otherDevice.consumption.incomingRequests.accept({ requestId, items: [{ accept: true }] });
+
+        // Assert
+        expect(result).toBeSuccessful();
+        expect(result.value.response?.content.items).toEqual([{ "@type": "AcceptResponseItem", result: "Accepted" }]);
+        expect(outboundRequests.has(credentialEndpoint)).toBe(false);
+        const attributes = await otherDevice.consumption.attributes.getAttributes({ query: { "content.value.@type": "VerifiableCredential" } });
+        expect(attributes.value).toContainEqual(
+            expect.objectContaining({ content: expect.objectContaining({ value: expect.objectContaining({ value: cached.credentials[0].credential }) }) })
+        );
     });
 });
 
@@ -1656,6 +2173,87 @@ describe("request integration", () => {
         expect(result).toBeAnError(/presentation was not successful/i, /^error\.runtime\.unknown$/);
     });
 
+    test("report an authorization request resolution failure during peer acceptance validation", async () => {
+        // Arrange
+        const presentation = await eudiploClient.createPresentationRequest({ configId: "test" });
+        const requestId = await prepareIncomingRequest({ "@type": "ShareAuthorizationRequestRequestItem", mustBeAccepted: true, authorizationRequestUrl: presentation.uri });
+        const requestUri = new URL(presentation.uri).searchParams.get("request_uri")!;
+        issuerResponses.set(requestUri, new Response("unavailable", { status: 503 }));
+
+        // Act
+        const result = await runtimeServices2.consumption.incomingRequests.canAccept({
+            requestId,
+            items: [{ accept: true, attributeId: peerCredential.id } as AcceptShareAuthorizationRequestRequestItemParametersJSON]
+        });
+
+        // Assert
+        expect(result).toBeSuccessful();
+        expect(result.value).toMatchObject({
+            isSuccess: false,
+            items: [
+                expect.objectContaining({
+                    isSuccess: false,
+                    code: "error.consumption.requests.invalidRequestItem",
+                    message: expect.stringContaining("The authorization request url can't be resolved.")
+                })
+            ]
+        });
+    });
+
+    test("report a credential offer resolution failure during peer acceptance validation", async () => {
+        // Arrange
+        const offer = await eudiploClient.createIssuanceOffer({ credentialConfigurationIds: ["test"], flow: "pre_authorized_code" });
+        const requestId = await prepareIncomingRequest({ "@type": "ShareCredentialOfferRequestItem", mustBeAccepted: true, credentialOfferUrl: offer.uri });
+        issuerResponses.set(new URL(offer.uri).searchParams.get("credential_offer_uri")!, new Response("unavailable", { status: 503 }));
+
+        // Act
+        const result = await runtimeServices2.consumption.incomingRequests.canAccept({ requestId, items: [{ accept: true }] });
+
+        // Assert
+        expect(result).toBeSuccessful();
+        expect(result.value).toMatchObject({
+            isSuccess: false,
+            items: [expect.objectContaining({ isSuccess: false, message: expect.stringMatching(/could not be processed.*503/s) })]
+        });
+    });
+
+    test("reject a peer presentation request without submitting a presentation", async () => {
+        // Arrange
+        const presentation = await eudiploClient.createPresentationRequest({ configId: "test" });
+        const resolved = await runtimeServices2.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl: presentation.uri });
+        const responseUri = resolved.value.authorizationRequest.authorizationRequestPayload.response_uri!;
+        const requestId = await prepareIncomingRequest({ "@type": "ShareAuthorizationRequestRequestItem", mustBeAccepted: true, authorizationRequestUrl: presentation.uri });
+        outboundRequests.delete(responseUri);
+
+        // Act
+        const result = await runtimeServices2.consumption.incomingRequests.reject({ requestId, items: [{ accept: false }] });
+
+        // Assert
+        expect(result).toBeSuccessful();
+        expect(result.value.response?.content.items).toEqual([{ "@type": "RejectResponseItem", result: "Rejected" }]);
+        expect(outboundRequests.has(responseUri)).toBe(false);
+    });
+
+    test("publish the credential-offer rejection event to the peer", async () => {
+        // Arrange
+        const offer = await eudiploClient.createIssuanceOffer({ credentialConfigurationIds: ["test"], flow: "pre_authorized_code" });
+        const requestId = await prepareIncomingRequest({ "@type": "ShareCredentialOfferRequestItem", mustBeAccepted: true, credentialOfferUrl: offer.uri });
+
+        // Act
+        const result = await runtimeServices2.consumption.incomingRequests.reject({ requestId, items: [{ accept: false }] });
+
+        // Assert
+        await syncUntilHasMessageWithResponse(runtimeServices1.transport, requestId);
+        await runtimeServices1.eventBus.waitForRunningEventHandlers();
+        expect(result).toBeSuccessful();
+        expect(runtimeServices1.eventBus.publishedEvents).toContainEqual(
+            expect.objectContaining({
+                namespace: "consumption.shareCredentialOfferRequestItemProcessedByRecipient",
+                data: expect.objectContaining({ credentialOfferUrl: offer.uri, accepted: false })
+            })
+        );
+    });
+
     test("publish the credential-offer acceptance event to the peer", async () => {
         // Arrange
         const offer = await eudiploClient.createIssuanceOffer({ credentialConfigurationIds: ["test"], flow: "pre_authorized_code" });
@@ -1763,10 +2361,10 @@ async function createPresentationToken(storedCredential: LocalAttributeDTO) {
     return { ...result.value, content: result.value.content as TokenContentVerifiablePresentationJSON };
 }
 
-async function prepareIncomingRequest(item: RequestItemJSONDerivations) {
-    const request = await runtimeServices1.consumption.outgoingRequests.create({ peer: runtimeServices2.address, content: { items: [item] } });
-    await runtimeServices1.transport.messages.sendMessage({ recipients: [runtimeServices2.address], content: request.value.content });
-    await syncUntilHasMessageWithRequest(runtimeServices2.transport, request.value.id);
+async function prepareIncomingRequest(item: RequestItemJSONDerivations, sender = runtimeServices1, recipient = runtimeServices2) {
+    const request = await sender.consumption.outgoingRequests.create({ peer: recipient.address, content: { items: [item] } });
+    await sender.transport.messages.sendMessage({ recipients: [recipient.address], content: request.value.content });
+    await syncUntilHasMessageWithRequest(recipient.transport, request.value.id);
     return request.value.id;
 }
 
@@ -1821,8 +2419,8 @@ async function replaceKeyBindingClaims(encoded: string, claims: Record<string, u
     return `${credential}${header}.${payload}.${signature.toString("base64url")}`;
 }
 
-async function prepareJwtVcCredential(): Promise<OpenId4VciCredentialResponseJSON> {
-    const [issued] = await issueCredential(runtimeServices1);
+async function prepareJwtVcCredential(services = runtimeServices1): Promise<OpenId4VciCredentialResponseJSON> {
+    const [issued] = await issueCredential(services);
     const original = decodeJwtPayload(issued.encoded.split("~")[0]);
     const holderJwk = (original.cnf as { jwk: webcrypto.JsonWebKey }).jwk;
     const holderDid = `did:jwk:${Buffer.from(JSON.stringify(holderJwk)).toString("base64url")}`;
@@ -1844,4 +2442,127 @@ async function prepareJwtVcCredential(): Promise<OpenId4VciCredentialResponseJSO
     ).toString("base64url");
     const signature = sign("sha256", Buffer.from(`${header}.${payload}`), { key, dsaEncoding: "ieee-p1363" }).toString("base64url");
     return { claimFormat: "jwt_vc_json", encoded: `${header}.${payload}.${signature}` };
+}
+
+function credentialProof(endpoint: string): string {
+    return (JSON.parse(outboundRequests.get(endpoint)!.body as string) as { proofs: { jwt: string[] } }).proofs.jwt[0];
+}
+
+async function signedAuthorizationRequest(changes: Record<string, unknown>) {
+    const request = await eudiploClient.createPresentationRequest({ configId: "test" });
+    const jwt = await fetchAuthorizationRequestJwt(request.uri);
+    const signedRequest = await replaceJwtClaims(jwt, changes, "access-key");
+    return `openid4vp://?client_id=${encodeURIComponent(decodeJwtPayload(jwt).client_id as string)}&request=${signedRequest}`;
+}
+
+async function prepareSdJwtCredential(claims: Record<string, unknown>): Promise<OpenId4VciCredentialResponseJSON> {
+    const [issued] = await issueCredential(runtimeServices1);
+    return { ...issued, encoded: await replaceIssuerClaims(issued.encoded, claims) };
+}
+
+async function prepareArrayCredential(): Promise<OpenId4VciCredentialResponseJSON> {
+    const [issued] = await issueCredential(runtimeServices1);
+    const alice = Buffer.from(JSON.stringify([crypto.randomUUID(), { given_name: "Alice" }])).toString("base64url");
+    const bob = Buffer.from(JSON.stringify([crypto.randomUUID(), { given_name: "Bob" }])).toString("base64url");
+    const issuerJwt = await replaceJwtClaims(
+        issued.encoded.split("~")[0],
+        {
+            _sd: undefined,
+            names: [{ "...": createHash("sha256").update(alice).digest("base64url") }, { "...": createHash("sha256").update(bob).digest("base64url") }]
+        },
+        "attestation-key"
+    );
+    return { ...issued, encoded: `${issuerJwt}~${alice}~${bob}~` };
+}
+
+async function fixturePrivateKey(keyFile: string) {
+    const config = JSON.parse(await readFile(resolve(process.cwd(), `../../.dev/eudiplo/config/test/key-chains/${keyFile}.json`), "utf8")) as {
+        spec: { keySource: { jwk: webcrypto.JsonWebKey } };
+    };
+    return createPrivateKey({ key: config.spec.keySource.jwk, format: "jwk" });
+}
+
+async function prepareStatusListJwt(status: number, claims: Record<string, unknown> = {}) {
+    const [issued] = await issueCredential(runtimeServices1);
+    const originalHeader = JSON.parse(Buffer.from(issued.encoded.split(".")[0], "base64url").toString()) as Record<string, unknown>;
+    const header = Buffer.from(JSON.stringify({ ...originalHeader, typ: "statuslist+jwt" })).toString("base64url");
+    const payload = Buffer.from(
+        JSON.stringify({
+            iss: `${eudiploBaseUrl}/issuers/test`,
+            sub: `${eudiploBaseUrl}/test-status-list`,
+            iat: Math.floor(Date.now() / 1000),
+            exp: Math.floor(Date.now() / 1000) + 3600,
+            status_list: { bits: 1, lst: deflateSync(Uint8Array.of(status)).toString("base64url") },
+            ...claims
+        })
+    ).toString("base64url");
+    const signature = sign("sha256", Buffer.from(`${header}.${payload}`), { key: await fixturePrivateKey("attestation-key"), dsaEncoding: "ieee-p1363" }).toString("base64url");
+    return `${header}.${payload}.${signature}`;
+}
+
+async function prepareEncryptedPresentation(algorithm = "ECDH-ES", clientMetadata: Record<string, unknown> = {}) {
+    const { publicKey, privateKey } = await generateKeyPair(algorithm, { extractable: true });
+    const jwk = { ...(await exportJWK(publicKey)), alg: algorithm, use: "enc", kid: "encryption-key" };
+    const authorizationRequestUrl = await signedAuthorizationRequest({
+        client_metadata: { jwks: { keys: [jwk] }, encrypted_response_enc_values_supported: ["A256GCM"], ...clientMetadata }
+    });
+    const resolved = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl });
+    const authorizationRequest = resolved.value.authorizationRequest;
+    const responseUri = authorizationRequest.authorizationRequestPayload.response_uri!;
+    issuerResponses.set(responseUri, new Response(JSON.stringify({ accepted: true })));
+    return { authorizationRequest, privateKey, responseUri };
+}
+
+interface ProofHeader {
+    alg: string;
+    jwk?: webcrypto.JsonWebKey;
+    kid?: string;
+}
+
+function p256DidProofKey(header: ProofHeader): webcrypto.JsonWebKey {
+    const compressed = CoreBuffer.fromBase58(header.kid!.split("#")[0].slice(9)).buffer.slice(2);
+    const point = ECDH.convertKey(Buffer.from(compressed), "prime256v1", undefined, undefined, "uncompressed") as Buffer;
+    return { kty: "EC", crv: "P-256", x: point.subarray(1, 33).toString("base64url"), y: point.subarray(33).toString("base64url") };
+}
+
+async function prepareJwtVcIssuer(algorithm: string, binding: string, keyFromProof: (header: ProofHeader) => webcrypto.JsonWebKey) {
+    // EUDIPLO supplies the offer, authorization and nonce. This endpoint supplies its unsupported JWT VC format.
+    const [template] = await issueCredential(runtimeServices1);
+    const credentialOffer = await prepareCredentialOffer();
+    const issuer = credentialOffer.credentialOfferPayload.credential_issuer;
+    const metadata = {
+        ...credentialOffer.metadata.credentialIssuer,
+        credential_configurations_supported: {
+            test: {
+                format: "jwt_vc_json",
+                credential_definition: { type: ["VerifiableCredential", "TestCredential"], "@context": ["https://www.w3.org/2018/credentials/v1"] },
+                cryptographic_binding_methods_supported: [binding],
+                proof_types_supported: { jwt: { proof_signing_alg_values_supported: [algorithm] } }
+            }
+        }
+    };
+    const issuerUrl = new URL(issuer);
+    issuerResponses.set(`${issuerUrl.origin}/.well-known/openid-credential-issuer${issuerUrl.pathname}`, Response.json(metadata));
+    const issuerKey = await fixturePrivateKey("attestation-key");
+    const issuerHeader = JSON.parse(Buffer.from(template.encoded.split(".")[0], "base64url").toString()) as Record<string, unknown>;
+    issuerHandlers.set(metadata.credential_endpoint, (init) => {
+        const proof = (JSON.parse(init!.body as string) as { proofs: { jwt: string[] } }).proofs.jwt[0];
+        const proofHeader = JSON.parse(Buffer.from(proof.split(".")[0], "base64url").toString()) as ProofHeader;
+        const holderKey = keyFromProof(proofHeader);
+        const subject = proofHeader.kid?.split("#")[0] ?? `did:jwk:${Buffer.from(JSON.stringify(holderKey)).toString("base64url")}`;
+        const header = Buffer.from(JSON.stringify({ ...issuerHeader, typ: "JWT" })).toString("base64url");
+        const payload = Buffer.from(
+            JSON.stringify({
+                iss: issuer,
+                sub: subject,
+                cnf: { jwk: holderKey },
+                iat: Math.floor(Date.now() / 1000),
+                exp: Math.floor(Date.now() / 1000) + 3600,
+                vc: { "@context": ["https://www.w3.org/2018/credentials/v1"], type: ["VerifiableCredential", "TestCredential"], credentialSubject: { id: subject, name: "Alice" } }
+            })
+        ).toString("base64url");
+        const signature = sign("sha256", Buffer.from(`${header}.${payload}`), { key: issuerKey, dsaEncoding: "ieee-p1363" }).toString("base64url");
+        return Response.json({ credentials: [{ credential: `${header}.${payload}.${signature}` }] });
+    });
+    return credentialOffer;
 }
