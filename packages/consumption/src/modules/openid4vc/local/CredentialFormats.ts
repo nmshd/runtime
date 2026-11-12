@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/naming-convention -- OpenID4VC and DCQL use standardized field names. */
-import { OpenId4VcJsonObject, VerifiableCredential } from "@nmshd/content";
+import { VerifiableCredential } from "@nmshd/content";
 import { Jwk, zJwk } from "@openid4vc/oauth2";
 import { CoseKey } from "@owf/cose";
 import { DeviceRequest, DocRequest, Holder as MdocHolder, IssuerSigned, ItemsRequest, SessionTranscript } from "@owf/mdoc";
 import { SDJwtVcInstance } from "@sd-jwt/sd-jwt-vc";
-import { DcqlCredential, DcqlQuery } from "dcql";
+import { DcqlCredential, DcqlNotDisclosed, DcqlQuery } from "dcql";
 import { normalizeCredential, transformPresentationInput, validateCredentialPayload, validateJwtCredentialPayload, validateJwtPresentationPayload } from "did-jwt-vc";
 import { base64url, calculateJwkThumbprint, decodeJwt } from "jose";
 import { z } from "zod";
@@ -173,14 +173,12 @@ export class CredentialFormats {
         }
     }
 
-    private presentationFrame(claims: OpenId4VcJsonObject): SdJwtPresentationFrame {
+    private presentationFrame(claims: unknown): SdJwtPresentationFrame {
+        const entries = z.record(z.string(), z.unknown()).parse(Array.isArray(claims) ? Object.fromEntries(claims.entries()) : claims);
         return Object.fromEntries(
-            Object.entries(claims).map(([key, value]) => [
-                key,
-                value !== null && typeof value === "object"
-                    ? this.presentationFrame(jsonObjectSchema.parse(Array.isArray(value) ? Object.fromEntries(value.entries()) : value))
-                    : true
-            ])
+            Object.entries(entries)
+                .filter(([, value]) => value !== DcqlNotDisclosed)
+                .map(([key, value]) => [key, value !== null && typeof value === "object" ? this.presentationFrame(value) : true])
         );
     }
 
@@ -200,7 +198,7 @@ export class CredentialFormats {
 
         switch (credential.type) {
             case "dc+sd-jwt":
-                return await this.sdJwt(holderKey).present(encoded, this.presentationFrame(jsonObjectSchema.parse(disclosedClaims)), {
+                return await this.sdJwt(holderKey).present(encoded, this.presentationFrame(disclosedClaims), {
                     kb: { payload: { iat: Math.floor(Date.now() / 1000), aud: payload.client_id, nonce: payload.nonce } }
                 });
             case "jwt_vc_json": {

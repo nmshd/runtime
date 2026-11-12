@@ -1,4 +1,4 @@
-import { IConfigOverwrite } from "@nmshd/transport";
+import { DeviceSharedSecret, IConfigOverwrite } from "@nmshd/transport";
 import correlator from "correlation-id";
 import { AnonymousServices, AutomationConfig, ConsumptionServices, DataViewExpander, RuntimeConfig, TransportServices } from "../../src";
 import { MockEventBus } from "./MockEventBus";
@@ -22,6 +22,7 @@ export interface LaunchConfiguration {
     enableNotificationModule?: boolean;
     enableDefaultOwnIdentityAttributes?: boolean;
     useCorrelator?: boolean;
+    deviceSharedSecret?: DeviceSharedSecret;
 }
 
 export class RuntimeServiceProvider {
@@ -81,7 +82,8 @@ export class RuntimeServiceProvider {
                     setDefaultOwnIdentityAttributes: launchConfiguration.enableDefaultOwnIdentityAttributes ?? false,
                     fetchInstance: this.fetchInstance
                 },
-                launchConfiguration.useCorrelator ? correlator : undefined
+                launchConfiguration.useCorrelator ? correlator : undefined,
+                launchConfiguration.deviceSharedSecret
             );
 
             this.runtimes.push(runtime);

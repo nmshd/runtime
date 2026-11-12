@@ -68,6 +68,22 @@ Set the following environment variables:
 - a specific test suite: `npm run test:local:[mongodb|lokijs|ferretdb] -- testSuiteName`
 - with code coverage: `npm run test:local:[mongodb|lokijs|ferretdb] -- --coverage`, a result summary is written to the console, a detailed report is accessible via the path `coverage/lcov-report/index.html`
 
+### OpenID4VC tests
+
+Run the Runtime integration tests with Docker running and the Backbone environment variables configured:
+
+```shell
+npm run test:local:lokijs -w @nmshd/runtime -- openid4vc.test
+```
+
+The suite starts EUDIPLO on port 3000. It covers SD-JWT and mdoc issuance and presentation, peer requests, and actual device onboarding with datawallet synchronization. Protocol error tests replace individual issuer responses after resolving real EUDIPLO offers. JWT VC Runtime tests use a holder key obtained through EUDIPLO, sign a W3C test credential, and independently verify the generated presentation; EUDIPLO does not issue or verify `jwt_vc_json`.
+
+The Consumption tests use a strict Final 1.0 issuer fixture requiring `proofs.jwt` and reject the legacy `proof` field. Final 1.0 encrypted responses contain unsigned JSON; signed JARM tests explicitly target an older draft. Array wildcard tests run against this fixture because EUDIPLO 9.0.0's configuration schema does not accept null claim path elements.
+
+Authorization code preparation, including PAR and PKCE, runs outside the Runtime. The Runtime's credential request API consumes the resulting access token. Verifier nonce and replay tests check EUDIPLO's rejection and the Runtime's returned response, rather than a separate Runtime replay cache.
+
+These are interoperability and regression tests, not a complete conformance certification. Current feature limits include a single selected credential query, one credential per holder proof, no deferred issuance, and no issuer-authority discovery for DCQL `trusted_authorities`. Verifier certificate trust policy is outside this change's scope; signature and certificate-hash validation remain tested.
+
 ### Teardown
 
 After testing on MongoDB or FerretDB, you can run `npm run test:local:teardown` to remove the test database.

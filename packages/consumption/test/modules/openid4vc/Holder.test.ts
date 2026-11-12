@@ -12,6 +12,7 @@ import { SubjectAlternativeNameExtension, X509Certificate, X509CertificateGenera
 import { SDJwtVcInstance } from "@sd-jwt/sd-jwt-vc";
 import { base64url, compactDecrypt, decodeJwt, decodeProtectedHeader, exportJWK, generateKeyPair, importJWK, JWTPayload, jwtVerify, SignJWT } from "jose";
 import { instance, mock } from "ts-mockito";
+import { deflateSync } from "node:zlib";
 import { ValiError } from "valibot";
 import { z } from "zod";
 import {
@@ -30,8 +31,8 @@ const issuer = "https://issuer.example";
 const verifier = "https://verifier.example";
 const docType = "org.iso.18013.5.1.mDL";
 const namespace = "org.iso.18013.5.1";
-const vct = "urn:enmeshed:test";
-const credentialRequestSchema = z.object({ proof: z.object({ jwt: z.string() }).optional(), proofs: z.object({ jwt: z.array(z.string()) }).optional() }).loose();
+const vct = "https://example.com/credentials/holder-test";
+const credentialRequestSchema = z.object({ proof: z.never().optional(), proofs: z.object({ jwt: z.array(z.string()).length(1) }) }).loose();
 const presentationResponseSchema = z.object({ state: z.string().optional(), vp_token: z.record(z.string(), z.array(z.string())) });
 
 async function importAsymmetricKey(jwk: Jwk, algorithm: string): Promise<CryptoKey> {
@@ -68,6 +69,11 @@ class Fixture {
     public readonly keyStorage = new KeyStorage(this.collection, instance(mock<ILogger>()));
     public readonly crypto = new OpenId4VcCrypto(this.keyStorage, (...args) => this.fetch(...args));
     public holder = this.restart();
+    public presentationVersion = 100;
+    public requestClientId = "x509_san_dns:verifier.example";
+    public extraResponses = new Map<string, Response>();
+    public submittedPlaintext?: string;
+    public submittedEncryptionHeader?: Record<string, unknown>;
     public issuerAlgorithm = "ES256";
     public issuerKey: Jwk;
     public issuerPublicKey: Jwk;
@@ -83,10 +89,16 @@ class Fixture {
     public presentationRequest: JWTPayload & { client_id: string; nonce: string };
     public submitted: z.infer<typeof presentationResponseSchema>;
     public accessTokens: string[] = [];
+    public encryptionAlgorithm = "ECDH-ES";
     public encryptionKey?: Jwk;
     public encryptionPublicKey?: Jwk;
     public jarmSigningAlgorithm?: string;
     public submittedJarm?: string;
+    public credentialResponseOverride?: Record<string, unknown>;
+    public credentialResponseStatus = 200;
+    public names?: string[];
+    public credentialStatus?: { status_list: { uri: string; idx: number } };
+    public statusListResponse = new Response("missing", { status: 404 });
 
     public restart(): Holder {
         return new Holder(new KeyStorage(this.collection, instance(mock<ILogger>())), this.account, this.attributeController, (...args) => this.fetch(...args));
@@ -120,6 +132,8 @@ class Fixture {
         const body = requestBody ? Object.fromEntries(new URLSearchParams(requestBody)) : undefined;
 
         this.requests.push({ url });
+        const extraResponse = this.extraResponses.get(url);
+        if (extraResponse) return extraResponse.clone();
         if (url.includes("/.well-known/openid-credential-issuer")) {
             return this.json({
                 credential_issuer: issuer,
@@ -167,6 +181,7 @@ class Fixture {
             return this.json({ access_token: "access-token", token_type: "Bearer" });
         }
 
+        if (url === `${issuer}/status`) return this.statusListResponse.clone();
         if (url === `${issuer}/nonce`) return this.json({ c_nonce: this.proofNonce });
         if (url === `${issuer}/credential`) {
             this.accessTokens.push(new Headers(init?.headers).get("authorization")!);
@@ -176,7 +191,7 @@ class Fixture {
 
             this.requests[this.requests.length - 1].body = request;
 
-            const proof = request.proof?.jwt ?? request.proofs?.jwt[0];
+            const proof = request.proofs.jwt[0];
             if (!proof) throw new Error("Missing credential request proof");
 
             const header = decodeProtectedHeader(proof);
@@ -187,10 +202,14 @@ class Fixture {
             const verified = await jwtVerify(proof, await importJWK(publicKey, header.alg), { audience: issuer });
             if (verified.payload.nonce !== this.proofNonce) return this.json({ error: "invalid_proof" }, 400);
 
-            return this.json({ credentials: [{ credential: await this.issue(publicKey, header.kid?.split("#")[0]) }] });
+            return this.json(
+                this.credentialResponseOverride ?? { credentials: [{ credential: await this.issue(publicKey, header.kid?.split("#")[0]) }] },
+                this.credentialResponseStatus
+            );
         }
 
         if (url === `${issuer}/.well-known/jwt-vc-issuer`) return this.json({ issuer, jwks_uri: `${issuer}/jwks` });
+        if (url === `${verifier}/jwks`) return this.json({ keys: [this.encryptionPublicKey] });
         if (url === `${issuer}/jwks`) return this.json({ keys: [{ ...this.issuerPublicKey, kid: "issuer-key" }] });
         if (url === `${verifier}/request`) {
             return new Response(
@@ -206,8 +225,11 @@ class Fixture {
 
             let responsePayload: unknown;
             if (body.response) {
-                const plaintext = new TextDecoder().decode((await compactDecrypt(body.response, await importJWK(zJwk.parse(this.encryptionKey), "ECDH-ES"))).plaintext);
-                if (this.jarmSigningAlgorithm) {
+                const decrypted = await compactDecrypt(body.response, await importJWK(zJwk.parse(this.encryptionKey), this.encryptionAlgorithm));
+                const plaintext = new TextDecoder().decode(decrypted.plaintext);
+                this.submittedPlaintext = plaintext;
+                this.submittedEncryptionHeader = decrypted.protectedHeader;
+                if (this.presentationVersion < 100 && this.jarmSigningAlgorithm) {
                     this.submittedJarm = plaintext;
                     responsePayload = (
                         await jwtVerify(plaintext, await importJWK(this.issuedKey, this.jarmSigningAlgorithm), {
@@ -257,9 +279,11 @@ class Fixture {
                     exp: this.expiresAt,
                     name: "Alice",
                     secret: "hidden",
-                    address: { street: "Main", city: "Berlin" }
+                    address: { street: "Main", city: "Berlin" },
+                    status: this.credentialStatus,
+                    names: this.names
                 },
-                { _sd: ["name", "secret"], address: { _sd: ["street", "city"] } },
+                { _sd: ["name", "secret"], address: { _sd: ["street", "city"] }, ...(this.names ? { names: { _sd: [0, 1] } } : {}) },
                 { header: { kid: "issuer-key" } }
             );
         }
@@ -308,10 +332,10 @@ class Fixture {
 
     public async request(mode: "direct_post" | "direct_post.jwt" = "direct_post"): Promise<OpenId4VpResolvedAuthorizationRequest> {
         if (mode === "direct_post.jwt") {
-            const key = await generateKeyPair("ECDH-ES", { extractable: true });
+            const key = await generateKeyPair(this.encryptionAlgorithm, { extractable: true });
 
             this.encryptionKey = zJwk.parse(await exportJWK(key.privateKey));
-            this.encryptionPublicKey = { ...zJwk.parse(await exportJWK(key.publicKey)), use: "enc", alg: "ECDH-ES", kid: "verifier-key" };
+            this.encryptionPublicKey = { ...zJwk.parse(await exportJWK(key.publicKey)), use: "enc", alg: this.encryptionAlgorithm, kid: "verifier-key" };
         }
 
         const claims =
@@ -324,7 +348,7 @@ class Fixture {
                   : { type_values: [["VerifiableCredential", "TestCredential"]] };
 
         this.presentationRequest = {
-            client_id: "x509_san_dns:verifier.example",
+            client_id: this.requestClientId,
             nonce: "verifier-nonce",
             response_type: "vp_token",
             response_mode: mode,
@@ -341,7 +365,10 @@ class Fixture {
                     : undefined
         };
 
-        return await this.holder.resolveAuthorizationRequest(`openid4vp://?client_id=x509_san_dns%3Averifier.example&request_uri=${encodeURIComponent(`${verifier}/request`)}`);
+        const request = await this.holder.resolveAuthorizationRequest(
+            `openid4vp://?client_id=${encodeURIComponent(this.requestClientId)}&request_uri=${encodeURIComponent(`${verifier}/request`)}`
+        );
+        return { ...request, version: this.presentationVersion };
     }
 }
 
@@ -351,9 +378,39 @@ beforeEach(async () => {
     await fixture.init();
 });
 
-test.each(["ES256", "EdDSA"])("signs and encrypts a JARM response with the requested %s algorithm", async (algorithm) => {
+test("encrypts an unsigned JSON authorization response for Final 1.0", async () => {
+    // Arrange
+    const credential = await fixture.receive();
+    const request = await fixture.request("direct_post.jwt");
+
+    // Act
+    const result = await fixture.holder.acceptAuthorizationRequest(request, credential);
+
+    // Assert
+    expect(result.status).toBe(200);
+    expect(JSON.parse(fixture.submittedPlaintext!)).toEqual({ state: "state", vp_token: { credential: [expect.any(String)] } });
+    expect(fixture.submittedEncryptionHeader).toMatchObject({ alg: "ECDH-ES", enc: "A256GCM", kid: "verifier-key" });
+});
+
+test("does not sign a Final 1.0 response when legacy signing metadata is supplied", async () => {
+    // Arrange
+    fixture.jarmSigningAlgorithm = "ES384";
+    const credential = await fixture.receive();
+    const request = await fixture.request("direct_post.jwt");
+
+    // Act
+    const result = await fixture.holder.acceptAuthorizationRequest(request, credential);
+
+    // Assert
+    expect(result.status).toBe(200);
+    expect(JSON.parse(fixture.submittedPlaintext!)).toEqual({ state: "state", vp_token: { credential: [expect.any(String)] } });
+    expect(fixture.submittedJarm).toBeUndefined();
+});
+
+test.each(["ES256", "EdDSA"])("signs and encrypts a legacy draft JARM response with the requested %s algorithm", async (algorithm) => {
     fixture.algorithm = algorithm;
     fixture.jarmSigningAlgorithm = algorithm;
+    fixture.presentationVersion = 25;
 
     const credential = await fixture.receive();
     const request = await fixture.request("direct_post.jwt");
@@ -371,9 +428,10 @@ test.each([
     { holderAlgorithm: "ES256", requestedAlgorithm: "none" },
     { holderAlgorithm: "ES256", requestedAlgorithm: "" }
 ])(
-    "rejects JARM signing algorithm '$requestedAlgorithm' for a $holderAlgorithm holder key before constructing or sending a presentation",
+    "rejects legacy draft JARM signing algorithm '$requestedAlgorithm' for a $holderAlgorithm holder key before constructing or sending a presentation",
     async ({ holderAlgorithm, requestedAlgorithm }) => {
         fixture.algorithm = holderAlgorithm;
+        fixture.presentationVersion = 25;
 
         const credential = await fixture.receive();
         const request = await fixture.request("direct_post.jwt");
@@ -1093,4 +1151,363 @@ test("rejects malformed issuer JWKS instead of trusting its declared type", asyn
     const jwt = await new SignJWT({ iss: issuer }).setProtectedHeader({ alg: "ES256" }).sign(await importJWK(fixture.issuerKey, "ES256"));
 
     await expect(cryptography.verifyIssuerJwt(jwt)).rejects.toThrow(z.ZodError);
+});
+
+test("rejects a deferred response explicitly", async () => {
+    // Arrange
+    fixture.credentialResponseOverride = { transaction_id: "deferred", interval: 5 };
+    const offer = await fixture.holder.resolveCredentialOffer(`openid-credential-offer://?credential_offer_uri=${encodeURIComponent(`${issuer}/offer`)}`);
+
+    // Act
+    const result = fixture.holder.requestCredentials(offer, ["test"], {});
+
+    // Assert
+    await expect(result).rejects.toThrow("deferred issuance is not supported");
+});
+
+test("rejects an empty credentials array", async () => {
+    // Arrange
+    fixture.credentialResponseOverride = { credentials: [] };
+    const offer = await fixture.holder.resolveCredentialOffer(`openid-credential-offer://?credential_offer_uri=${encodeURIComponent(`${issuer}/offer`)}`);
+
+    // Act
+    const result = fixture.holder.requestCredentials(offer, ["test"], {});
+
+    // Assert
+    await expect(result).rejects.toThrow("Issuer did not return credentials");
+});
+
+test("rejects multiple credentials returned for a single proof", async () => {
+    // Arrange
+    fixture.credentialResponseOverride = { credentials: [{ credential: "first" }, { credential: "second" }] };
+    const offer = await fixture.holder.resolveCredentialOffer(`openid-credential-offer://?credential_offer_uri=${encodeURIComponent(`${issuer}/offer`)}`);
+
+    // Act
+    const result = fixture.holder.requestCredentials(offer, ["test"], {});
+
+    // Assert
+    await expect(result).rejects.toThrow("Issuer returned multiple credentials for one holder key");
+});
+
+test("rejects a JSON object where an encoded credential is required", async () => {
+    // Arrange
+    fixture.credentialResponseOverride = { credentials: [{ credential: { unsupported: true } }] };
+    const offer = await fixture.holder.resolveCredentialOffer(`openid-credential-offer://?credential_offer_uri=${encodeURIComponent(`${issuer}/offer`)}`);
+
+    // Act
+    const result = fixture.holder.requestCredentials(offer, ["test"], {});
+
+    // Assert
+    await expect(result).rejects.toThrow("Unsupported credential encoding");
+});
+
+test.each(["invalid_proof", "invalid_nonce", "invalid_credential_request"])("preserves the issuer's %s error", async (error) => {
+    // Arrange
+    fixture.credentialResponseOverride = { error, error_description: "Issuer rejected the request" };
+    fixture.credentialResponseStatus = 400;
+    const offer = await fixture.holder.resolveCredentialOffer(`openid-credential-offer://?credential_offer_uri=${encodeURIComponent(`${issuer}/offer`)}`);
+
+    // Act
+    const result = fixture.holder.requestCredentials(offer, ["test"], {});
+
+    // Assert
+    await expect(result).rejects.toMatchObject({ errorResponse: { error, error_description: "Issuer rejected the request" } });
+});
+
+test("verifies a credential with an active status list entry", async () => {
+    // Arrange
+    fixture.credentialStatus = { status_list: { uri: `${issuer}/status`, idx: 0 } };
+    fixture.statusListResponse = new Response(await createStatusListJwt(0));
+    const offer = await fixture.holder.resolveCredentialOffer(`openid-credential-offer://?credential_offer_uri=${encodeURIComponent(`${issuer}/offer`)}`);
+
+    // Act
+    const result = await fixture.holder.requestCredentials(offer, ["test"], {});
+
+    // Assert
+    expect(result).toHaveLength(1);
+});
+
+test("rejects a credential revoked after issuance", async () => {
+    // Arrange
+    fixture.credentialStatus = { status_list: { uri: `${issuer}/status`, idx: 0 } };
+    fixture.statusListResponse = new Response(await createStatusListJwt(0));
+    const credential = await fixture.receive();
+    const token = await fixture.holder.createPresentationTokenContent(credential.content.value, "token-id");
+    fixture.statusListResponse = new Response(await createStatusListJwt(1));
+
+    // Act
+    const result = await fixture.holder.verifyPresentationTokenContent(token, "token-id");
+
+    // Assert
+    expect(result).toMatchObject({ isValid: false, error: { message: expect.stringMatching(/status|revoked/i) } });
+});
+
+test("rejects a status list with an invalid signature", async () => {
+    // Arrange
+    fixture.credentialStatus = { status_list: { uri: `${issuer}/status`, idx: 0 } };
+    fixture.statusListResponse = new Response(await createStatusListJwt(0));
+    const credential = await fixture.receive();
+    const token = await fixture.holder.createPresentationTokenContent(credential.content.value, "token-id");
+    const [header, payload, signature] = (await createStatusListJwt(0)).split(".");
+    const bytes = base64url.decode(signature);
+    bytes[0] ^= 1;
+    fixture.statusListResponse = new Response(`${header}.${payload}.${base64url.encode(bytes)}`);
+
+    // Act
+    const result = await fixture.holder.verifyPresentationTokenContent(token, "token-id");
+
+    // Assert
+    expect(result).toMatchObject({ isValid: false, error: { message: expect.stringMatching(/Status List JWT verification failed/i) } });
+});
+
+test("reports a status list retrieval failure", async () => {
+    // Arrange
+    fixture.credentialStatus = { status_list: { uri: `${issuer}/status`, idx: 0 } };
+    fixture.statusListResponse = new Response(await createStatusListJwt(0));
+    const credential = await fixture.receive();
+    const token = await fixture.holder.createPresentationTokenContent(credential.content.value, "token-id");
+    fixture.statusListResponse = new Response("unavailable", { status: 503 });
+
+    // Act
+    const result = await fixture.holder.verifyPresentationTokenContent(token, "token-id");
+
+    // Assert
+    expect(result).toMatchObject({ isValid: false, error: { message: "Verify Error: Unable to fetch status list: HTTP 503" } });
+});
+
+test("rejects an expired status list", async () => {
+    // Arrange
+    fixture.credentialStatus = { status_list: { uri: `${issuer}/status`, idx: 0 } };
+    fixture.statusListResponse = new Response(await createStatusListJwt(0));
+    const credential = await fixture.receive();
+    const token = await fixture.holder.createPresentationTokenContent(credential.content.value, "token-id");
+    fixture.statusListResponse = new Response(await createStatusListJwt(0, { exp: Math.floor(Date.now() / 1000) - 60 }));
+
+    // Act
+    const result = await fixture.holder.verifyPresentationTokenContent(token, "token-id");
+
+    // Assert
+    expect(result).toMatchObject({ isValid: false, error: { message: expect.stringMatching(/Status List JWT verification failed|expired/i) } });
+});
+
+test("recovers a holder key from a legacy JSON record after restart", async () => {
+    // Arrange
+    const credential = await fixture.receive();
+    const [id, entry] = [...fixture.keyEntries][0];
+    fixture.keyEntries.delete(id);
+    fixture.keyEntries.set("legacy-key-id", { ...entry, id: "legacy-key-id", key: JSON.stringify(entry.key) });
+    fixture.holder = fixture.restart();
+
+    // Act
+    const token = await fixture.holder.createPresentationTokenContent(credential.content.value, "token-id");
+
+    // Assert
+    const verified = await jwtVerify((token.value as string).split("~").at(-1)!, await importJWK(fixture.issuedKey, "ES256"));
+    expect(verified.payload.nonce).toBe("token-id");
+});
+
+async function createStatusListJwt(status: number, claims: Record<string, unknown> = {}) {
+    return await new SignJWT({
+        iss: issuer,
+        sub: `${issuer}/status`,
+        iat: Math.floor(Date.now() / 1000),
+        exp: Math.floor(Date.now() / 1000) + 3600,
+        status_list: { bits: 1, lst: base64url.encode(deflateSync(Uint8Array.of(status))) },
+        ...claims
+    })
+        .setProtectedHeader({ alg: "ES256", typ: "statuslist+jwt", kid: "issuer-key" })
+        .sign(await importJWK(fixture.issuerKey, "ES256"));
+}
+
+test("matches DCQL wildcard array paths", async () => {
+    // Arrange
+    fixture.names = ["Alice", "Bob"];
+    const credential = await fixture.receive();
+    const request = await fixture.request();
+    request.authorizationRequestPayload.dcql_query!.credentials = [
+        { id: "credential", format: "dc+sd-jwt", meta: { vct_values: [vct] }, claims: [{ path: ["names", null], values: ["Bob"] }] }
+    ];
+
+    // Act
+    const result = await fixture.holder.acceptAuthorizationRequest(request, credential);
+
+    // Assert
+    expect(result.status).toBe(200);
+    const verifier = new SDJwtVcInstance({
+        hasher: (data, algorithm) => fixture.crypto.hash(typeof data === "string" ? new TextEncoder().encode(data) : new Uint8Array(data), algorithm)
+    });
+    expect((await verifier.getClaims(fixture.submitted.vp_token.credential[0])).names).toEqual(["Bob"]);
+});
+
+test("rejects a SAN DNS request with a conflicting response URI", async () => {
+    // Arrange
+    await fixture.request();
+    fixture.presentationRequest.response_uri = "https://another-verifier.example/response";
+    const url = `openid4vp://?client_id=x509_san_dns%3Averifier.example&request_uri=${encodeURIComponent(`${verifier}/request`)}`;
+
+    // Act
+    const result = fixture.holder.resolveAuthorizationRequest(url);
+
+    // Assert
+    await expect(result).rejects.toThrow(/fully qualified domain name/i);
+});
+
+test.each(["ECDH-ES", "ECDH-ES+A256KW", "RSA-OAEP-256"])("encrypts a Final 1.0 response using %s", async (algorithm) => {
+    // Arrange
+    fixture.encryptionAlgorithm = algorithm;
+    const credential = await fixture.receive();
+    const request = await fixture.request("direct_post.jwt");
+
+    // Act
+    const result = await fixture.holder.acceptAuthorizationRequest(request, credential);
+
+    // Assert
+    expect(result.status).toBe(200);
+    expect(fixture.submittedEncryptionHeader).toMatchObject({ alg: algorithm, enc: "A256GCM" });
+    expect(JSON.parse(fixture.submittedPlaintext!)).toEqual({ state: "state", vp_token: { credential: [expect.any(String)] } });
+});
+
+test("resolves response encryption keys from jwks_uri", async () => {
+    // Arrange
+    const credential = await fixture.receive();
+    const request = await fixture.request("direct_post.jwt");
+    delete request.authorizationRequestPayload.client_metadata!.jwks;
+    request.authorizationRequestPayload.client_metadata!.jwks_uri = `${verifier}/jwks`;
+
+    // Act
+    const result = await fixture.holder.acceptAuthorizationRequest(request, credential);
+
+    // Assert
+    expect(result.status).toBe(200);
+    expect(fixture.requests).toContainEqual({ url: `${verifier}/jwks` });
+    expect(fixture.submittedEncryptionHeader).toMatchObject({ alg: "ECDH-ES", kid: "verifier-key" });
+});
+
+test("uses A128GCM when no response enc preference is advertised", async () => {
+    // Arrange
+    const credential = await fixture.receive();
+    const request = await fixture.request("direct_post.jwt");
+    delete request.authorizationRequestPayload.client_metadata!.encrypted_response_enc_values_supported;
+
+    // Act
+    const result = await fixture.holder.acceptAuthorizationRequest(request, credential);
+
+    // Assert
+    expect(result.status).toBe(200);
+    expect(fixture.submittedEncryptionHeader).toMatchObject({ enc: "A128GCM" });
+});
+
+test("rejects an encrypted response request without an encryption key", async () => {
+    // Arrange
+    const credential = await fixture.receive();
+    const request = await fixture.request("direct_post.jwt");
+    request.authorizationRequestPayload.client_metadata!.jwks = { keys: [] };
+
+    // Act
+    const result = fixture.holder.acceptAuthorizationRequest(request, credential);
+
+    // Assert
+    await expect(result).rejects.toThrow(/No encryption JWK|encryption.*key/i);
+    expect(fixture.requests).not.toContainEqual({ url: `${verifier}/response` });
+});
+
+test("does not use a signing-only key for response encryption", async () => {
+    // Arrange
+    const credential = await fixture.receive();
+    const request = await fixture.request("direct_post.jwt");
+    request.authorizationRequestPayload.client_metadata!.jwks!.keys[0].use = "sig";
+
+    // Act
+    const result = fixture.holder.acceptAuthorizationRequest(request, credential);
+
+    // Assert
+    await expect(result).rejects.toThrow(/No encryption JWK|encryption.*key/i);
+    expect(fixture.requests).not.toContainEqual({ url: `${verifier}/response` });
+});
+
+test("rejects an unsupported response content encryption algorithm", async () => {
+    // Arrange
+    const credential = await fixture.receive();
+    const request = await fixture.request("direct_post.jwt");
+    request.authorizationRequestPayload.client_metadata!.encrypted_response_enc_values_supported = ["unsupported"];
+
+    // Act
+    const result = fixture.holder.acceptAuthorizationRequest(request, credential);
+
+    // Assert
+    await expect(result).rejects.toThrow(/Invalid 'enc' value/);
+    expect(fixture.requests).not.toContainEqual({ url: `${verifier}/response` });
+});
+
+test("uses the authorization server explicitly selected by the credential offer", async () => {
+    // Arrange
+    const offer = await fixture.holder.resolveCredentialOffer(`openid-credential-offer://?credential_offer_uri=${encodeURIComponent(`${issuer}/offer`)}`);
+    const selected = `${issuer}/selected`;
+    const unused = `${issuer}/unused`;
+    const issuerMetadata = { ...offer.metadata.credentialIssuer, authorization_servers: [unused, selected] };
+    fixture.extraResponses.set(`${issuer}/.well-known/openid-credential-issuer`, new Response(JSON.stringify(issuerMetadata), { headers: { "content-type": "application/json" } }));
+    fixture.extraResponses.set(
+        `${issuer}/.well-known/oauth-authorization-server/selected`,
+        new Response(JSON.stringify({ issuer: selected, token_endpoint: `${selected}/token`, grant_types_supported: ["urn:ietf:params:oauth:grant-type:pre-authorized_code"] }), {
+            headers: { "content-type": "application/json" }
+        })
+    );
+    fixture.extraResponses.set(
+        `${issuer}/.well-known/oauth-authorization-server/unused`,
+        new Response(JSON.stringify({ issuer: unused, token_endpoint: `${unused}/token`, grant_types_supported: ["urn:ietf:params:oauth:grant-type:pre-authorized_code"] }), {
+            headers: { "content-type": "application/json" }
+        })
+    );
+    fixture.extraResponses.set(
+        `${selected}/token`,
+        new Response(JSON.stringify({ access_token: "selected-token", token_type: "Bearer" }), { headers: { "content-type": "application/json" } })
+    );
+    offer.credentialOfferPayload.grants!["urn:ietf:params:oauth:grant-type:pre-authorized_code"]!.authorization_server = selected;
+
+    // Act
+    const result = await fixture.holder.requestCredentials(offer, ["test"], {});
+
+    // Assert
+    expect(result).toHaveLength(1);
+    expect(fixture.accessTokens).toEqual(["Bearer selected-token"]);
+    expect(fixture.requests).not.toContainEqual({ url: `${unused}/token` });
+});
+
+test("binds a presentation to an x509_san_uri client identifier", async () => {
+    // Arrange
+    fixture.requestClientId = `x509_san_uri:${verifier}/response`;
+    fixture.issuerCertificate = await X509CertificateGenerator.createSelfSigned({
+        name: "CN=URI Verifier",
+        serialNumber: "03",
+        notBefore: new Date("2020-01-01"),
+        notAfter: new Date("2040-01-01"),
+        signingAlgorithm: { name: "ECDSA", hash: "SHA-256" },
+        keys: { privateKey: await importAsymmetricKey(fixture.issuerKey, "ES256"), publicKey: await importAsymmetricKey(fixture.issuerPublicKey, "ES256") },
+        extensions: [new SubjectAlternativeNameExtension([{ type: "url", value: `${verifier}/response` }])]
+    });
+    const credential = await fixture.receive();
+    const request = await fixture.request();
+
+    // Act
+    const result = await fixture.holder.acceptAuthorizationRequest(request, credential);
+
+    // Assert
+    expect(result.status).toBe(200);
+    const keyBindingJwt = fixture.submitted.vp_token.credential[0].split("~").at(-1)!;
+    const verified = await jwtVerify(keyBindingJwt, await importJWK(fixture.issuedKey, "ES256"), { audience: fixture.requestClientId });
+    expect(verified.payload.nonce).toBe("verifier-nonce");
+});
+
+test("rejects encryption keys whose key_ops permit only verification", async () => {
+    // Arrange
+    const credential = await fixture.receive();
+    const request = await fixture.request("direct_post.jwt");
+    request.authorizationRequestPayload.client_metadata!.jwks!.keys[0].key_ops = ["verify"];
+
+    // Act
+    const result = fixture.holder.acceptAuthorizationRequest(request, credential);
+
+    // Assert
+    await expect(result).rejects.toThrow(/No suitable response encryption key/);
+    expect(fixture.requests).not.toContainEqual({ url: `${verifier}/response` });
 });

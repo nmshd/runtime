@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/naming-convention -- OpenID4VC and DCQL use standardized field names. */
 import { IdentityAttribute, OpenId4VcJsonValue, TokenContentVerifiablePresentation, VerifiableCredential } from "@nmshd/content";
 import { AccountController } from "@nmshd/transport";
-import { JwtSigner, setGlobalConfig as setOauthConfig, zJwkSet } from "@openid4vc/oauth2";
-import { Openid4vciClient, setGlobalConfig as setIssuanceConfig } from "@openid4vc/openid4vci";
+import { JwtSigner, Oauth2ClientErrorResponseError, setGlobalConfig as setOauthConfig, zJwkSet } from "@openid4vc/oauth2";
+import { Openid4vciClient, Openid4vciRetrieveCredentialsError, setGlobalConfig as setIssuanceConfig } from "@openid4vc/openid4vci";
 import { extractEncryptionJwkFromJwks, Openid4vpClient, zClientMetadata } from "@openid4vc/openid4vp";
 import { setGlobalConfig as setPresentationConfig } from "@openid4vc/utils";
 import { SDJWTException } from "@sd-jwt/core";
@@ -62,8 +62,19 @@ export class Holder {
     }
 
     public async resolveCredentialOffer(credentialOffer: string): Promise<OpenId4VciResolvedCredentialOffer> {
+        const parameters = new URL(credentialOffer).searchParams;
+        if (parameters.has("credential_offer") && parameters.has("credential_offer_uri")) {
+            throw new Error("Credential offer cannot contain both credential_offer and credential_offer_uri");
+        }
         const credentialOfferPayload = await this.issuanceClient.resolveCredentialOffer(credentialOffer);
+        if (!credentialOfferPayload.credential_configuration_ids.length) throw new Error("At least one offered credential configuration is required");
+        if (new Set(credentialOfferPayload.credential_configuration_ids).size !== credentialOfferPayload.credential_configuration_ids.length) {
+            throw new Error("Offered credential configuration identifiers must be unique");
+        }
         const metadata = await this.issuanceClient.resolveIssuerMetadata(credentialOfferPayload.credential_issuer);
+        for (const id of credentialOfferPayload.credential_configuration_ids) {
+            if (!Object.hasOwn(metadata.knownCredentialConfigurations, id)) throw new Error(`Unknown offered credential configuration: ${id}`);
+        }
 
         return { credentialOfferPayload, metadata: { credentialIssuer: metadata.credentialIssuer, authorizationServers: metadata.authorizationServers } };
     }
@@ -74,6 +85,7 @@ export class Holder {
         access: { accessToken: string } | { pinCode?: string }
     ): Promise<OpenId4VciCredentialResponseJSON[]> {
         if (!credentialConfigurationIds.length) throw new Error("At least one credential configuration is required");
+        if (new Set(credentialConfigurationIds).size !== credentialConfigurationIds.length) throw new Error("Credential configuration identifiers must be unique");
 
         // Re-resolve protocol metadata, rather than trusting caller-provided metadata or exposing library state.
         const issuerMetadata = await this.issuanceClient.resolveIssuerMetadata(offer.credentialOfferPayload.credential_issuer);
@@ -126,12 +138,19 @@ export class Holder {
             const nonce = issuerMetadata.credentialIssuer.nonce_endpoint ? (await this.issuanceClient.requestNonce({ issuerMetadata })).c_nonce : token.c_nonce;
             const proof = await this.issuanceClient.createCredentialRequestJwtProof({ issuerMetadata, credentialConfigurationId: id, signer, nonce, clientId: "wallet" });
 
-            const { credentialResponse } = await this.issuanceClient.retrieveCredentials({
-                issuerMetadata,
-                credentialConfigurationId: id,
-                accessToken: token.access_token,
-                proof: { proof_type: "jwt", jwt: proof.jwt }
-            });
+            const { credentialResponse } = await this.issuanceClient
+                .retrieveCredentials({
+                    issuerMetadata,
+                    credentialConfigurationId: id,
+                    accessToken: token.access_token,
+                    ...(issuerMetadata.originalDraftVersion === "V1" ? { proofs: { jwt: [proof.jwt] } } : { proof: { proof_type: "jwt" as const, jwt: proof.jwt } })
+                })
+                .catch((error: unknown) => {
+                    if (error instanceof Openid4vciRetrieveCredentialsError && error.response.credentialErrorResponseResult?.success) {
+                        throw new Oauth2ClientErrorResponseError(error.message, error.response.credentialErrorResponseResult.data, error.response.response);
+                    }
+                    throw error;
+                });
 
             const credentials = credentialResponse.credentials ?? (credentialResponse.credential ? [credentialResponse.credential] : []);
             if (!credentials.length) throw new Error("Issuer did not return credentials; deferred issuance is not supported");
@@ -259,7 +278,8 @@ export class Holder {
         const clientMetadata = payload.client_metadata;
 
         const holderAlgorithm = this.cryptography.algorithm(decoded.holderKey);
-        const requestedSigningAlgorithm = payload.response_mode === "direct_post.jwt" ? clientMetadata?.authorization_signed_response_alg : undefined;
+        // Final 1.0 encrypts the JSON response without a JWS. Signing is only supported for older drafts.
+        const requestedSigningAlgorithm = request.version < 100 && payload.response_mode === "direct_post.jwt" ? clientMetadata?.authorization_signed_response_alg : undefined;
         if (requestedSigningAlgorithm !== undefined && requestedSigningAlgorithm !== holderAlgorithm) {
             throw new Error(`Requested JARM signing algorithm '${requestedSigningAlgorithm}' is not supported by the selected credential (holder algorithm '${holderAlgorithm}')`);
         }
@@ -267,14 +287,25 @@ export class Holder {
         const jwks = clientMetadata?.jwks ?? (clientMetadata?.jwks_uri ? zJwkSet.parse(await this.cryptography.fetchJson(clientMetadata.jwks_uri)) : undefined);
         const encryptionKey =
             payload.response_mode === "direct_post.jwt" && jwks
-                ? extractEncryptionJwkFromJwks(jwks, { supportedAlgValues: ["ECDH-ES", "ECDH-ES+A256KW", "RSA-OAEP-256"] })
+                ? extractEncryptionJwkFromJwks(
+                      {
+                          keys: jwks.keys.filter(
+                              (key) =>
+                                  (key.use === undefined || key.use === "enc") &&
+                                  (key.key_ops === undefined || key.key_ops.some((operation) => ["encrypt", "wrapKey", "deriveKey", "deriveBits"].includes(operation)))
+                          )
+                      },
+                      { supportedAlgValues: ["ECDH-ES", "ECDH-ES+A256KW", "RSA-OAEP-256"] }
+                  )
                 : undefined;
+        if (payload.response_mode === "direct_post.jwt" && !encryptionKey) throw new Error("No suitable response encryption key");
         const mdocGeneratedNonce = base64url.encode(crypto.getRandomValues(new Uint8Array(16)));
 
         const presentation = await this.formats.present(content, request, matches.valid_credentials[0], encryptionKey, mdocGeneratedNonce);
 
         const response = await this.presentationClient.createOpenid4vpAuthorizationResponse({
-            authorizationRequestPayload: payload,
+            authorizationRequestPayload:
+                request.version >= 100 && clientMetadata ? { ...payload, client_metadata: { ...clientMetadata, authorization_signed_response_alg: undefined } } : payload,
             authorizationResponsePayload: { vp_token: { [queryId]: [presentation] } },
             jarm:
                 payload.response_mode === "direct_post.jwt"
