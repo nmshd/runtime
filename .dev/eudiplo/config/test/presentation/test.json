@@ -11,7 +11,7 @@
                 {
                     "id": "test",
                     "format": "dc+sd-jwt",
-                    "meta": { "vct_values": ["test"] }
+                    "meta": { "vct_values": ["https://example.com/credentials/test"] }
                 }
             ]
         },
