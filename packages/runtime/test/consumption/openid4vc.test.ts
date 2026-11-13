@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention -- Standard OpenID4VC and DCQL field names. */
 import { EudiploClient } from "@eudiplo/sdk-core";
 import { AcceptShareAuthorizationRequestRequestItemParametersJSON, OpenId4VciCredentialResponseJSON } from "@nmshd/consumption";
+import { Decoder, Encoder, Tag } from "cbor-x";
 import { compactDecrypt, exportJWK, generateKeyPair } from "jose";
 import { deflateSync } from "node:zlib";
 import { RequestItemJSONDerivations, TokenContentVerifiablePresentationJSON, VerifiableCredentialJSON } from "@nmshd/content";
@@ -1085,6 +1086,11 @@ describe("presentation", () => {
             changes: { dcql_query: { credentials: [{ id: "test", format: "dc+sd-jwt", meta: { vct_values: ["https://example.com/credentials/test"] }, multiple: true }] } },
             error: /Exactly one credential query/
         },
+        {
+            name: "an unsupported credential format",
+            changes: { dcql_query: { credentials: [{ id: "test", format: "ldp_vc", meta: { type_values: [["VerifiableCredential"]] } }] } },
+            error: /Unsupported presentation credential format/
+        },
         { name: "a missing response mode", changes: { response_mode: undefined }, error: /response.mode|responseMode|response mode/ },
         {
             name: "transaction data",
@@ -1312,7 +1318,7 @@ describe("presentation", () => {
         });
     });
 
-    test("present an mdoc with device authentication", async () => {
+    test("present an mdoc accepted by EUDIPLO", async () => {
         // Arrange
         const request = await eudiploClient.createPresentationRequest({ configId: "mdoc" });
         const resolved = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl: request.uri });
@@ -1328,6 +1334,65 @@ describe("presentation", () => {
         const session = await eudiploClient.getSession(request.sessionId);
         expect(session.status).toBe("completed");
         expect(session.credentials).toEqual([{ id: "licence", values: [{ given_name: "Alice" }] }]);
+    });
+
+    test("disclose exactly the requested mdoc claim on the wire", async () => {
+        // Arrange
+        const { authorizationRequest, privateKey, responseUri } = await prepareEncryptedPresentation("ECDH-ES", {}, "mdoc");
+
+        // Act
+        const result = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest, attributeId: mdocCredential.id });
+
+        // Assert
+        expect(result).toBeSuccessful();
+        const document = await submittedMdoc(responseUri, privateKey);
+        const namespaces = (document.get("issuerSigned") as CborMap).get("nameSpaces") as Map<string, EncodedCborItem[]>;
+        expect(Array.from(namespaces.keys())).toEqual(["org.iso.18013.5.1"]);
+        const items = namespaces.get("org.iso.18013.5.1")!.map((item) => decodeCbor<CborMap>(encodedCborItemBytes(item)));
+        expect(items.map((item) => [item.get("elementIdentifier"), item.get("elementValue")])).toEqual([["given_name", "Alice"]]);
+    });
+
+    test("sign the mdoc DeviceAuthentication with the key bound in the issued MSO", async () => {
+        // Arrange
+        const { authorizationRequest, privateKey, responseUri } = await prepareEncryptedPresentation("ECDH-ES", {}, "mdoc");
+        const original = decodeCbor<CborMap>(Buffer.from((mdocCredential.content.value as VerifiableCredentialJSON).value as string, "base64url"));
+        const publicKey = mdocDevicePublicKey(original);
+        const handover = mdocHandover(authorizationRequest.authorizationRequestPayload);
+
+        // Act
+        const result = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest, attributeId: mdocCredential.id });
+
+        // Assert
+        expect(result).toBeSuccessful();
+        const document = await submittedMdoc(responseUri, privateKey);
+        const signature = mdocDeviceSignature(document);
+        expect(decodeCbor<Map<number, number>>(signature[0]).get(1)).toBe(-7);
+        const issuerAuth = (document.get("issuerSigned") as CborMap).get("issuerAuth") as CoseSignature;
+        expect(Buffer.from(issuerAuth[2]!)).toEqual(Buffer.from((original.get("issuerAuth") as CoseSignature)[2]!));
+        expect(verify("sha256", mdocSignatureInput(document, handover), { key: publicKey, dsaEncoding: "ieee-p1363" }, signature[3])).toBe(true);
+    });
+
+    test.each([
+        { parameter: "clientId", value: "x509_hash:another-client" },
+        { parameter: "nonce", value: "another-nonce" },
+        { parameter: "responseUri", value: `${eudiploBaseUrl}/another-response` },
+        { parameter: "jwkThumbprint", value: createHash("sha256").update("another encryption key").digest() }
+    ])("bind the mdoc device signature to $parameter", async ({ parameter, value }) => {
+        // Arrange
+        const { authorizationRequest, privateKey, responseUri } = await prepareEncryptedPresentation("ECDH-ES", {}, "mdoc");
+        const original = decodeCbor<CborMap>(Buffer.from((mdocCredential.content.value as VerifiableCredentialJSON).value as string, "base64url"));
+        const publicKey = mdocDevicePublicKey(original);
+        const handover = mdocHandover(authorizationRequest.authorizationRequestPayload);
+
+        // Act
+        const result = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest, attributeId: mdocCredential.id });
+
+        // Assert
+        expect(result).toBeSuccessful();
+        const document = await submittedMdoc(responseUri, privateKey);
+        const signature = mdocDeviceSignature(document);
+        expect(verify("sha256", mdocSignatureInput(document, handover), { key: publicKey, dsaEncoding: "ieee-p1363" }, signature[3])).toBe(true);
+        expect(verify("sha256", mdocSignatureInput(document, { ...handover, [parameter]: value }), { key: publicKey, dsaEncoding: "ieee-p1363" }, signature[3])).toBe(false);
     });
 
     test("present a credential using a JSON-serialized authorization request", async () => {
@@ -1377,7 +1442,7 @@ describe("presentation", () => {
         expect(result).toBeAnError(/not found/i, /recordNotFound/);
     });
 
-    test("reject multiple credential queries as a current runtime limitation", async () => {
+    test("reject multiple credential queries as a current runtime limitation at acceptance", async () => {
         // Arrange
         const authorizationRequest = await prepareAuthorizationRequest("test");
         authorizationRequest.authorizationRequestPayload.dcql_query!.credentials.push({
@@ -1393,7 +1458,7 @@ describe("presentation", () => {
         expect(result).toBeAnError(/Exactly one credential query/, /.+/);
     });
 
-    test("reject multiple credential instances as a current runtime limitation", async () => {
+    test("reject multiple credential instances as a current runtime limitation at acceptance", async () => {
         // Arrange
         const authorizationRequest = await prepareAuthorizationRequest("test");
         authorizationRequest.authorizationRequestPayload.dcql_query!.credentials[0].multiple = true;
@@ -1407,10 +1472,23 @@ describe("presentation", () => {
 
     test("reject a credential that does not match the requested claim value", async () => {
         // Arrange
-        const authorizationRequest = await prepareAuthorizationRequest("selective");
-        authorizationRequest.authorizationRequestPayload.dcql_query!.credentials = [
-            { id: "name", format: "dc+sd-jwt", meta: { vct_values: ["https://example.com/credentials/selective"] }, claims: [{ path: ["given_name"], values: ["Bob"] }] }
-        ];
+        const authorizationRequestUrl = await signedAuthorizationRequest(
+            {
+                dcql_query: {
+                    credentials: [
+                        {
+                            id: "name",
+                            format: "dc+sd-jwt",
+                            meta: { vct_values: ["https://example.com/credentials/selective"] },
+                            claims: [{ path: ["given_name"], values: ["Bob"] }]
+                        }
+                    ]
+                }
+            },
+            "selective"
+        );
+        const resolved = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl });
+        const authorizationRequest = resolved.value.authorizationRequest;
 
         // Act
         const result = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest, attributeId: selectiveCredential.id });
@@ -1421,10 +1499,12 @@ describe("presentation", () => {
 
     test("reject a query for a claim absent from the credential", async () => {
         // Arrange
-        const authorizationRequest = await prepareAuthorizationRequest("test");
-        authorizationRequest.authorizationRequestPayload.dcql_query!.credentials = [
-            { id: "test", format: "dc+sd-jwt", meta: { vct_values: ["https://example.com/credentials/test"] }, claims: [{ path: ["missing"] }] }
-        ];
+        const authorizationRequestUrl = await signedAuthorizationRequest(
+            { dcql_query: { credentials: [{ id: "test", format: "dc+sd-jwt", meta: { vct_values: ["https://example.com/credentials/test"] }, claims: [{ path: ["missing"] }] }] } },
+            "test"
+        );
+        const resolved = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl });
+        const authorizationRequest = resolved.value.authorizationRequest;
 
         // Act
         const result = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest, attributeId: storedCredential.id });
@@ -1433,7 +1513,7 @@ describe("presentation", () => {
         expect(result).toBeAnError(/does not match the query/, /.+/);
     });
 
-    test("reject unsupported presentation credential formats", async () => {
+    test("reject unsupported presentation credential formats at acceptance", async () => {
         // Arrange
         const authorizationRequest = await prepareAuthorizationRequest("test");
         authorizationRequest.authorizationRequestPayload.dcql_query!.credentials = [{ id: "test", format: "ldp_vc", meta: { type_values: [["VerifiableCredential"]] } }];
@@ -1445,7 +1525,7 @@ describe("presentation", () => {
         expect(result).toBeAnError(/Unsupported presentation credential format/, /.+/);
     });
 
-    test("reject a request without a supported response mode", async () => {
+    test("reject a request without a supported response mode at acceptance", async () => {
         // Arrange
         const authorizationRequest = await prepareAuthorizationRequest("test");
         delete authorizationRequest.authorizationRequestPayload.response_mode;
@@ -1457,7 +1537,7 @@ describe("presentation", () => {
         expect(result).toBeAnError(/Unsupported presentation response mode/, /.+/);
     });
 
-    test("reject Presentation Exchange requests", async () => {
+    test("reject Presentation Exchange requests at acceptance", async () => {
         // Arrange
         const authorizationRequest = await prepareAuthorizationRequest("test");
         authorizationRequest.authorizationRequestPayload.presentation_definition = { id: "unsupported", input_descriptors: [] };
@@ -1469,7 +1549,7 @@ describe("presentation", () => {
         expect(result).toBeAnError(/Presentation Exchange is not supported/, /.+/);
     });
 
-    test("reject unsupported transaction data", async () => {
+    test("reject unsupported transaction data at acceptance", async () => {
         // Arrange
         const authorizationRequest = await prepareAuthorizationRequest("test");
         authorizationRequest.authorizationRequestPayload.transaction_data = [Buffer.from(JSON.stringify({ type: "test" })).toString("base64url")];
@@ -1659,8 +1739,7 @@ describe("presentation", () => {
 
     test("default to A128GCM when the verifier supplies no enc preference", async () => {
         // Arrange
-        const { authorizationRequest, privateKey, responseUri } = await prepareEncryptedPresentation();
-        delete authorizationRequest.authorizationRequestPayload.client_metadata!.encrypted_response_enc_values_supported;
+        const { authorizationRequest, privateKey, responseUri } = await prepareEncryptedPresentation("ECDH-ES", { encrypted_response_enc_values_supported: undefined });
 
         // Act
         const result = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest, attributeId: storedCredential.id });
@@ -1692,6 +1771,31 @@ describe("presentation", () => {
         expect(outboundRequests.has(jwksUri)).toBe(true);
     });
 
+    test("resolve encryption keys from jwks_uri in a signed incoming request", async () => {
+        // Arrange
+        const request = await eudiploClient.createPresentationRequest({ configId: "test" });
+        const jwt = await fetchAuthorizationRequestJwt(request.uri);
+        const payload = decodeJwtPayload(jwt);
+        const metadata = payload.client_metadata as Record<string, unknown>;
+        const jwksUri = `${eudiploBaseUrl}/signed-request-jwks`;
+        issuerResponses.set(jwksUri, Response.json(metadata.jwks));
+        const signed = await replaceJwtClaims(jwt, { client_metadata: { ...metadata, jwks: undefined, jwks_uri: jwksUri } }, "access-key");
+        const authorizationRequestUrl = `openid4vp://?client_id=${encodeURIComponent(payload.client_id as string)}&request=${signed}`;
+        const resolved = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl });
+
+        // Act
+        const result = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({
+            authorizationRequest: resolved.value.authorizationRequest,
+            attributeId: storedCredential.id
+        });
+
+        // Assert
+        expect(result).toBeSuccessful();
+        expect(result.value.status).toBe(200);
+        expect(outboundRequests.has(jwksUri)).toBe(true);
+        expect((await eudiploClient.getSession(request.sessionId)).status).toBe("completed");
+    });
+
     test("select an encryption key when the verifier also offers a signing key", async () => {
         // Arrange
         const { authorizationRequest, privateKey, responseUri } = await prepareEncryptedPresentation();
@@ -1713,9 +1817,17 @@ describe("presentation", () => {
         { name: "a verification-only key", keys: [{ key_ops: ["verify"] }] }
     ])("reject response encryption with $name through the facade", async ({ keys }) => {
         // Arrange
-        const { authorizationRequest, responseUri } = await prepareEncryptedPresentation();
-        const key = authorizationRequest.authorizationRequestPayload.client_metadata!.jwks!.keys[0];
-        authorizationRequest.authorizationRequestPayload.client_metadata!.jwks!.keys = keys.map((properties) => ({ ...key, ...properties }));
+        const { publicKey } = await generateKeyPair("ECDH-ES", { extractable: true });
+        const key = { ...(await exportJWK(publicKey)), alg: "ECDH-ES", kid: "test-key" };
+        const authorizationRequestUrl = await signedAuthorizationRequest({
+            client_metadata: {
+                jwks: { keys: keys.map((properties) => ({ ...key, ...properties })) },
+                encrypted_response_enc_values_supported: ["A256GCM"]
+            }
+        });
+        const resolved = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl });
+        const authorizationRequest = resolved.value.authorizationRequest;
+        const responseUri = authorizationRequest.authorizationRequestPayload.response_uri!;
         outboundRequests.delete(responseUri);
 
         // Act
@@ -1728,8 +1840,7 @@ describe("presentation", () => {
 
     test("ignore legacy signing metadata in a Final encrypted response through the facade", async () => {
         // Arrange
-        const { authorizationRequest, privateKey, responseUri } = await prepareEncryptedPresentation();
-        authorizationRequest.authorizationRequestPayload.client_metadata!.authorization_signed_response_alg = "RS256";
+        const { authorizationRequest, privateKey, responseUri } = await prepareEncryptedPresentation("ECDH-ES", { authorization_signed_response_alg: "RS256" });
 
         // Act
         const result = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest, attributeId: storedCredential.id });
@@ -1784,8 +1895,9 @@ describe("presentation", () => {
 
     test("return the verifier rejection of a presentation with an unknown nonce", async () => {
         // Arrange
-        const authorizationRequest = await prepareAuthorizationRequest("test");
-        authorizationRequest.authorizationRequestPayload.nonce = "wrong-nonce";
+        const authorizationRequestUrl = await signedAuthorizationRequest({ nonce: "wrong-nonce" });
+        const resolved = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl });
+        const authorizationRequest = resolved.value.authorizationRequest;
 
         // Act
         const result = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest, attributeId: storedCredential.id });
@@ -1795,7 +1907,7 @@ describe("presentation", () => {
         expect(result.value.status).toBe(400);
     });
 
-    test("return the verifier rejection of replaying a completed presentation", async () => {
+    test("return the verifier rejection of a new presentation to an already completed session", async () => {
         // Arrange
         const authorizationRequest = await prepareAuthorizationRequest("test");
         const firstPresentation = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest, attributeId: storedCredential.id });
@@ -1808,6 +1920,28 @@ describe("presentation", () => {
         expect(result).toBeSuccessful();
         expect(result.value.status).toBe(400);
         expect(firstStatus).toBe(200);
+        expect(result.value.message).toMatch(/already been used/);
+    });
+
+    test("return the verifier rejection when the identical encrypted HTTP authorization response is sent again", async () => {
+        // Arrange
+        const authorizationRequest = await prepareAuthorizationRequest("test");
+        const responseUri = authorizationRequest.authorizationRequestPayload.response_uri!;
+        const firstPresentation = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest, attributeId: storedCredential.id });
+        const firstHttpRequest = outboundRequests.get(responseUri)!;
+        // Replay the captured bytes at the fetch boundary; the Act still calls the Runtime facade.
+        issuerHandlers.set(responseUri, () => fetch(responseUri, firstHttpRequest));
+        const fetchSpy = vi.spyOn(globalThis, "fetch");
+
+        // Act
+        const result = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest, attributeId: storedCredential.id });
+
+        // Assert
+        expect(firstPresentation).toBeSuccessful();
+        expect(firstPresentation.value.status).toBe(200);
+        expect(fetchSpy.mock.calls.filter(([url]) => url.toString() === responseUri)).toEqual([[responseUri, firstHttpRequest]]);
+        expect(result).toBeSuccessful();
+        expect(result.value.status).toBe(400);
         expect(result.value.message).toMatch(/already been used/);
     });
 
@@ -2634,12 +2768,15 @@ async function prepareStatusListJwt(status: number, claims: Record<string, unkno
     return `${header}.${payload}.${signature}`;
 }
 
-async function prepareEncryptedPresentation(algorithm = "ECDH-ES", clientMetadata: Record<string, unknown> = {}) {
+async function prepareEncryptedPresentation(algorithm = "ECDH-ES", clientMetadata: Record<string, unknown> = {}, configId = "test") {
     const { publicKey, privateKey } = await generateKeyPair(algorithm, { extractable: true });
     const jwk = { ...(await exportJWK(publicKey)), alg: algorithm, use: "enc", kid: "encryption-key" };
-    const authorizationRequestUrl = await signedAuthorizationRequest({
-        client_metadata: { jwks: { keys: [jwk] }, encrypted_response_enc_values_supported: ["A256GCM"], ...clientMetadata }
-    });
+    const authorizationRequestUrl = await signedAuthorizationRequest(
+        {
+            client_metadata: { jwks: { keys: [jwk] }, encrypted_response_enc_values_supported: ["A256GCM"], ...clientMetadata }
+        },
+        configId
+    );
     const resolved = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl });
     const authorizationRequest = resolved.value.authorizationRequest;
     const responseUri = authorizationRequest.authorizationRequestPayload.response_uri!;
@@ -2713,4 +2850,62 @@ async function prepareAuthorizationRequestWithFormats(vpFormatsSupported: Record
     const authorizationRequestUrl = `openid4vp://?client_id=${encodeURIComponent(payload.client_id as string)}&request=${signedRequest}`;
     const resolved = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl });
     return { authorizationRequest: resolved.value.authorizationRequest, sessionId: request.sessionId };
+}
+
+type CborMap = Map<string | number, unknown>;
+type CoseSignature = [Uint8Array, CborMap, null | Uint8Array, Uint8Array];
+const cborDecoder = new Decoder({ mapsAsObjects: false });
+const cborEncoder = new Encoder({ useRecords: false, tagUint8Array: false, mapsAsObjects: false });
+
+function decodeCbor<T>(encoded: Uint8Array): T {
+    return cborDecoder.decode(encoded) as T;
+}
+
+async function submittedMdoc(responseUri: string, privateKey: CryptoKey) {
+    const encrypted = new URLSearchParams(outboundRequests.get(responseUri)!.body as string).get("response")!;
+    const decrypted = await compactDecrypt(encrypted, privateKey);
+    const presentation = (JSON.parse(new TextDecoder().decode(decrypted.plaintext)) as { vp_token: { licence: string[] } }).vp_token.licence[0];
+    return (decodeCbor<CborMap>(Buffer.from(presentation, "base64url")).get("documents") as CborMap[])[0];
+}
+
+function mdocDevicePublicKey(issuerSigned: CborMap) {
+    const issuerAuth = issuerSigned.get("issuerAuth") as CoseSignature;
+    const mso = decodeCbor<CborMap>(encodedCborItemBytes(decodeCbor<EncodedCborItem>(issuerAuth[2]!)));
+    const key = (mso.get("deviceKeyInfo") as CborMap).get("deviceKey") as Map<number, Uint8Array>;
+    return createPublicKey({
+        key: { kty: "EC", crv: "P-256", x: Buffer.from(key.get(-2)!).toString("base64url"), y: Buffer.from(key.get(-3)!).toString("base64url") },
+        format: "jwk"
+    });
+}
+
+function mdocDeviceSignature(document: CborMap) {
+    return ((document.get("deviceSigned") as CborMap).get("deviceAuth") as CborMap).get("deviceSignature") as CoseSignature;
+}
+
+function mdocHandover(payload: { client_id: string; nonce: string; response_uri?: string; client_metadata?: { jwks?: { keys: webcrypto.JsonWebKey[] } } }) {
+    const jwk = payload.client_metadata!.jwks!.keys[0];
+    const jwkThumbprint = createHash("sha256")
+        .update(JSON.stringify({ crv: jwk.crv, kty: jwk.kty, x: jwk.x, y: jwk.y }))
+        .digest();
+    return { clientId: payload.client_id, nonce: payload.nonce, jwkThumbprint, responseUri: payload.response_uri! };
+}
+
+function mdocSignatureInput(document: CborMap, handover: { clientId: string; nonce: string; jwkThumbprint: Uint8Array; responseUri: string }) {
+    const handoverHash = createHash("sha256")
+        .update(cborEncoder.encode([handover.clientId, handover.nonce, handover.jwkThumbprint, handover.responseUri]))
+        .digest();
+    const transcript = [null, null, ["OpenID4VPHandover", handoverHash]];
+    const namespaces = new Tag(encodedCborItemBytes((document.get("deviceSigned") as CborMap).get("nameSpaces") as EncodedCborItem), 24);
+    const authentication = new Tag(cborEncoder.encode(["DeviceAuthentication", transcript, document.get("docType"), namespaces]), 24);
+    return cborEncoder.encode(["Signature1", mdocDeviceSignature(document)[0], Buffer.alloc(0), cborEncoder.encode(authentication)]);
+}
+
+interface EncodedCborItem {
+    value?: Uint8Array;
+    buffer?: Uint8Array;
+}
+
+function encodedCborItemBytes(item: EncodedCborItem): Uint8Array {
+    // The mdoc library registers a global tag-24 decoder exposing the original bytes as buffer.
+    return (item.value ?? item.buffer)!;
 }
