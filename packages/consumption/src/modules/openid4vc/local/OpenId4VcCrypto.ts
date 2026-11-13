@@ -224,6 +224,12 @@ export class OpenId4VcCrypto {
         throw new Error("JWT issuer metadata has no JWKS");
     }
 
+    public async issuerSignatureAlgorithm(jwt: string): Promise<string> {
+        const algorithm = z.string().parse(decodeProtectedHeader(jwt).alg);
+        // EdDSA is polymorphic; the verifier's fully specified identifier also constrains the curve.
+        return algorithm === "EdDSA" ? (await this.issuerKey(jwt)).algorithm.name : algorithm;
+    }
+
     public async verifyIssuerJwt(jwt: string): Promise<JWTPayload> {
         const key = await this.issuerKey(jwt);
         const { payload } = await jwtVerify(jwt, key);

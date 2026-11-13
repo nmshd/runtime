@@ -1511,3 +1511,146 @@ test("rejects encryption keys whose key_ops permit only verification", async () 
     await expect(result).rejects.toThrow(/No suitable response encryption key/);
     expect(fixture.requests).not.toContainEqual({ url: `${verifier}/response` });
 });
+
+test.each([
+    { format: "dc+sd-jwt" as const, parameter: "sd-jwt_alg_values", algorithms: ["Ed25519"] },
+    { format: "dc+sd-jwt" as const, parameter: "kb-jwt_alg_values", algorithms: ["Ed25519"] },
+    { format: "mso_mdoc" as const, parameter: "issuerauth_alg_values", algorithms: [-19] },
+    { format: "mso_mdoc" as const, parameter: "deviceauth_alg_values", algorithms: [-19] },
+    { format: "jwt_vc_json" as const, parameter: "alg_values", algorithms: ["EdDSA"] }
+])("rejects a $format presentation excluded by $parameter before submitting it", async ({ format, parameter, algorithms }) => {
+    // Arrange
+    fixture.format = format;
+    const credential = await fixture.receive();
+    const request = await fixture.request();
+    request.authorizationRequestPayload.client_metadata = { vp_formats_supported: { [format]: { [parameter]: algorithms } } };
+
+    // Act
+    const result = fixture.holder.acceptAuthorizationRequest(request, credential);
+
+    // Assert
+    await expect(result).rejects.toThrow(new RegExp(`Verifier.*${parameter}`));
+    expect(fixture.requests).not.toContainEqual({ url: `${verifier}/response` });
+});
+
+test.each([
+    { format: "dc+sd-jwt" as const, supported: { "sd-jwt_alg_values": ["ES256"], "kb-jwt_alg_values": ["ES256"] } },
+    { format: "dc+sd-jwt" as const, supported: {} },
+    { format: "mso_mdoc" as const, supported: { issuerauth_alg_values: [-7], deviceauth_alg_values: [-7] } },
+    { format: "mso_mdoc" as const, supported: { issuerauth_alg_values: [-9], deviceauth_alg_values: [-9] } },
+    { format: "mso_mdoc" as const, supported: {} },
+    { format: "jwt_vc_json" as const, supported: { alg_values: ["ES256"] } },
+    { format: "jwt_vc_json" as const, supported: {} }
+])("presents $format with compatible verifier algorithm metadata $supported", async ({ format, supported }) => {
+    // Arrange
+    fixture.format = format;
+    const credential = await fixture.receive();
+    const request = await fixture.request();
+    request.authorizationRequestPayload.client_metadata = { vp_formats_supported: { [format]: supported } };
+
+    // Act
+    const result = await fixture.holder.acceptAuthorizationRequest(request, credential);
+
+    // Assert
+    expect(result.status).toBe(200);
+});
+
+test.each(["sd-jwt_alg_values", "kb-jwt_alg_values"])("accepts Ed25519 in %s for an EdDSA signature with an Ed25519 key", async (parameter) => {
+    // Arrange
+    fixture.issuerAlgorithm = "EdDSA";
+    fixture.algorithm = "EdDSA";
+    await fixture.init();
+    const credential = await fixture.receive();
+    const request = await fixture.request();
+    request.authorizationRequestPayload.client_metadata = { vp_formats_supported: { "dc+sd-jwt": { [parameter]: ["Ed25519"] } } };
+
+    // Act
+    const result = await fixture.holder.acceptAuthorizationRequest(request, credential);
+
+    // Assert
+    expect(result.status).toBe(200);
+});
+
+test.each(["sd-jwt_alg_values", "kb-jwt_alg_values"])("rejects an Ed25519 signature when %s allows only Ed448", async (parameter) => {
+    // Arrange
+    fixture.issuerAlgorithm = "EdDSA";
+    fixture.algorithm = "EdDSA";
+    await fixture.init();
+    const credential = await fixture.receive();
+    const request = await fixture.request();
+    request.authorizationRequestPayload.client_metadata = { vp_formats_supported: { "dc+sd-jwt": { [parameter]: ["Ed448"] } } };
+
+    // Act
+    const result = fixture.holder.acceptAuthorizationRequest(request, credential);
+
+    // Assert
+    await expect(result).rejects.toThrow(new RegExp(`Verifier.*${parameter}`));
+    expect(fixture.requests).not.toContainEqual({ url: `${verifier}/response` });
+});
+
+test.each([
+    { excluded: "issuer", algorithms: ["ES256"] },
+    { excluded: "holder", algorithms: ["EdDSA"] }
+])("rejects a JWT VC when alg_values excludes the $excluded signature", async ({ algorithms }) => {
+    // Arrange
+    fixture.format = "jwt_vc_json";
+    fixture.issuerAlgorithm = "EdDSA";
+    await fixture.init();
+    const credential = await fixture.receive();
+    const request = await fixture.request();
+    request.authorizationRequestPayload.client_metadata = { vp_formats_supported: { jwt_vc_json: { alg_values: algorithms } } };
+
+    // Act
+    const result = fixture.holder.acceptAuthorizationRequest(request, credential);
+
+    // Assert
+    await expect(result).rejects.toThrow(/Verifier.*alg_values/);
+    expect(fixture.requests).not.toContainEqual({ url: `${verifier}/response` });
+});
+
+test("accepts an mdoc with distinct fully specified issuer and device signature algorithms", async () => {
+    // Arrange
+    fixture.format = "mso_mdoc";
+    fixture.issuerAlgorithm = "EdDSA";
+    await fixture.init();
+    const credential = await fixture.receive();
+    const request = await fixture.request();
+    request.authorizationRequestPayload.client_metadata = { vp_formats_supported: { mso_mdoc: { issuerauth_alg_values: [-19], deviceauth_alg_values: [-9] } } };
+
+    // Act
+    const result = await fixture.holder.acceptAuthorizationRequest(request, credential);
+
+    // Assert
+    expect(result.status).toBe(200);
+});
+
+test("rejects an Ed25519 mdoc issuer signature when only Ed448 is allowed", async () => {
+    // Arrange
+    fixture.format = "mso_mdoc";
+    fixture.issuerAlgorithm = "EdDSA";
+    await fixture.init();
+    const credential = await fixture.receive();
+    const request = await fixture.request();
+    request.authorizationRequestPayload.client_metadata = { vp_formats_supported: { mso_mdoc: { issuerauth_alg_values: [-53] } } };
+
+    // Act
+    const result = fixture.holder.acceptAuthorizationRequest(request, credential);
+
+    // Assert
+    await expect(result).rejects.toThrow(/Verifier.*issuerauth_alg_values/);
+    expect(fixture.requests).not.toContainEqual({ url: `${verifier}/response` });
+});
+
+test("rejects a credential format absent from vp_formats_supported", async () => {
+    // Arrange
+    const credential = await fixture.receive();
+    const request = await fixture.request();
+    request.authorizationRequestPayload.client_metadata = { vp_formats_supported: { jwt_vc_json: {} } };
+
+    // Act
+    const result = fixture.holder.acceptAuthorizationRequest(request, credential);
+
+    // Assert
+    await expect(result).rejects.toThrow("Verifier does not support credential format 'dc+sd-jwt'");
+    expect(fixture.requests).not.toContainEqual({ url: `${verifier}/response` });
+});

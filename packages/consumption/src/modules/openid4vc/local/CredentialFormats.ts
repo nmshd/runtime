@@ -1,14 +1,16 @@
 /* eslint-disable @typescript-eslint/naming-convention -- OpenID4VC and DCQL use standardized field names. */
 import { VerifiableCredential } from "@nmshd/content";
 import { Jwk, zJwk } from "@openid4vc/oauth2";
+import { zClientMetadata } from "@openid4vc/openid4vp";
 import { CoseKey } from "@owf/cose";
 import { DeviceRequest, DocRequest, Holder as MdocHolder, IssuerSigned, ItemsRequest, SessionTranscript } from "@owf/mdoc";
 import { SDJwtVcInstance } from "@sd-jwt/sd-jwt-vc";
 import { DcqlCredential, DcqlNotDisclosed, DcqlQuery } from "dcql";
 import { normalizeCredential, transformPresentationInput, validateCredentialPayload, validateJwtCredentialPayload, validateJwtPresentationPayload } from "did-jwt-vc";
-import { base64url, calculateJwkThumbprint, decodeJwt } from "jose";
+import { base64url, calculateJwkThumbprint, decodeJwt, decodeProtectedHeader } from "jose";
 import { z } from "zod";
 import { OpenId4VcCrypto } from "./OpenId4VcCrypto";
+import { OpenId4VpClientMetadata } from "./OpenId4VpClientMetadata";
 import { OpenId4VpResolvedAuthorizationRequest } from "./OpenId4VpResolvedAuthorizationRequest";
 
 type CredentialMatch = Extract<ReturnType<typeof DcqlQuery.query>["credential_matches"][string], { success: true }>["valid_credentials"][number];
@@ -170,6 +172,72 @@ export class CredentialFormats {
         const decoded = await this.decode(credential);
         if ((await calculateJwkThumbprint(decoded.holderKey)) !== (await calculateJwkThumbprint(expectedKey))) {
             throw new Error("Issued credential does not match the requested holder key");
+        }
+    }
+
+    public async assertPresentationAlgorithms(credential: VerifiableCredential, holderKey: Jwk, metadata?: OpenId4VpClientMetadata): Promise<void> {
+        const formats = zClientMetadata.shape.vp_formats_supported.parse(metadata?.vp_formats_supported);
+        if (!formats) return;
+        if (!Object.hasOwn(formats, credential.type)) throw new Error(`Verifier does not support credential format '${credential.type}'`);
+
+        const encoded = z.string().parse(credential.value);
+        const holderAlgorithm = this.cryptography.algorithm(holderKey);
+        switch (credential.type) {
+            case "dc+sd-jwt": {
+                const supported = formats["dc+sd-jwt"];
+                const issuerJwt = encoded.split("~")[0];
+                if (supported?.["sd-jwt_alg_values"]) {
+                    this.assertAlgorithm(
+                        supported["sd-jwt_alg_values"],
+                        await this.cryptography.issuerSignatureAlgorithm(issuerJwt),
+                        "sd-jwt_alg_values",
+                        decodeProtectedHeader(issuerJwt).alg
+                    );
+                }
+                this.assertAlgorithm(supported?.["kb-jwt_alg_values"], holderKey.crv === "Ed25519" ? "Ed25519" : holderAlgorithm, "kb-jwt_alg_values", holderAlgorithm);
+                break;
+            }
+            case "jwt_vc_json": {
+                const algorithms = formats.jwt_vc_json?.alg_values;
+                this.assertAlgorithm(algorithms, z.string().parse(decodeProtectedHeader(encoded).alg), "alg_values");
+                this.assertAlgorithm(algorithms, holderAlgorithm, "alg_values");
+                break;
+            }
+            case "mso_mdoc": {
+                const supported = formats.mso_mdoc;
+                const issuerAuth = IssuerSigned.fromEncodedForOid4Vci(encoded).issuerAuth;
+                // COSE permits the header's polymorphic identifier or its curve-specific equivalent.
+                const fullySpecified: Record<string, number> = {
+                    "ES256:P-256": -9,
+                    "ES384:P-384": -51,
+                    "ES512:P-521": -52,
+                    "EdDSA:Ed25519": -19,
+                    "EdDSA:Ed448": -53
+                };
+                if (supported?.issuerauth_alg_values) {
+                    const issuerKey = await this.cryptography.certificateKey(issuerAuth.certificate, z.string().parse(issuerAuth.jwaAlgorithm));
+                    this.assertAlgorithm(
+                        supported.issuerauth_alg_values,
+                        z.number().parse(issuerAuth.algorithm),
+                        "issuerauth_alg_values",
+                        fullySpecified[`${issuerAuth.jwaAlgorithm}:${issuerKey.crv}`]
+                    );
+                }
+                const deviceAlgorithm = CoseKey.fromJwk({ ...holderKey, alg: holderAlgorithm }).algorithm;
+                this.assertAlgorithm(
+                    supported?.deviceauth_alg_values,
+                    z.number().parse(deviceAlgorithm),
+                    "deviceauth_alg_values",
+                    fullySpecified[`${holderAlgorithm}:${holderKey.crv}`]
+                );
+                break;
+            }
+        }
+    }
+
+    private assertAlgorithm(supported: (string | number)[] | undefined, actual: string | number, parameter: string, alternative?: string | number): void {
+        if (supported && !supported.some((algorithm) => algorithm === actual || algorithm === alternative)) {
+            throw new Error(`Verifier '${parameter}' does not support signature algorithm '${actual}'`);
         }
     }
 

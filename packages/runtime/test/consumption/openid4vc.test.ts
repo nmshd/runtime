@@ -324,13 +324,15 @@ describe("credential issuance", () => {
     test("propagate the authorization server rejection of a reused pre-authorized code", async () => {
         // Arrange
         const credentialOffer = await prepareCredentialOffer();
-        await runtimeServices1.consumption.openId4Vc.requestCredentials({ credentialOffer, credentialConfigurationIds: ["test"] });
+        const firstIssuance = await runtimeServices1.consumption.openId4Vc.requestCredentials({ credentialOffer, credentialConfigurationIds: ["test"] });
 
         // Act
         const result = await runtimeServices1.consumption.openId4Vc.requestCredentials({ credentialOffer, credentialConfigurationIds: ["test"] });
 
         // Assert
-        expect(result).toBeAnError(/invalid_grant|already|code/i, /.+/);
+        expect(firstIssuance).toBeSuccessful();
+        expect(firstIssuance.value.credentialResponses).toHaveLength(1);
+        expect(result).toBeAnError(/invalid_grant/, /^error\.runtime\.openid4vc\.oauth\.invalid_grant$/);
     });
 
     test("reject an unknown credential configuration", async () => {
@@ -1282,6 +1284,7 @@ describe("presentation", () => {
         const stored = await runtimeServices1.consumption.openId4Vc.storeCredentials({ credentialResponses: [credential] });
         const request = await prepareAuthorizationRequest();
         request.authorizationRequestPayload.response_mode = "direct_post";
+        request.authorizationRequestPayload.client_metadata = { vp_formats_supported: { jwt_vc_json: { alg_values: ["ES256"] } } };
         request.authorizationRequestPayload.dcql_query = {
             credentials: [
                 { id: "vc", format: "jwt_vc_json", meta: { type_values: [["VerifiableCredential", "TestCredential"]] }, claims: [{ path: ["credentialSubject", "name"] }] }
@@ -1476,6 +1479,136 @@ describe("presentation", () => {
 
         // Assert
         expect(result).toBeAnError(/Transaction data is not supported/, /.+/);
+    });
+
+    test.each([
+        { configId: "test", format: "dc+sd-jwt", parameter: "sd-jwt_alg_values", algorithms: ["Ed25519"] },
+        { configId: "test", format: "dc+sd-jwt", parameter: "kb-jwt_alg_values", algorithms: ["Ed25519"] },
+        { configId: "mdoc", format: "mso_mdoc", parameter: "issuerauth_alg_values", algorithms: [-19] },
+        { configId: "mdoc", format: "mso_mdoc", parameter: "deviceauth_alg_values", algorithms: [-19] }
+    ])("reject a $format presentation excluded by the verifier's $parameter", async ({ configId, format, parameter, algorithms }) => {
+        // Arrange
+        const attribute = await createAndStoreCredential(runtimeServices1, configId);
+        const authorizationRequestUrl = await signedAuthorizationRequest(
+            {
+                response_mode: "direct_post",
+                client_metadata: { vp_formats_supported: { [format]: { [parameter]: algorithms } } }
+            },
+            configId
+        );
+        const resolved = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl });
+        const responseUri = resolved.value.authorizationRequest.authorizationRequestPayload.response_uri!;
+        outboundRequests.delete(responseUri);
+
+        // Act
+        const result = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({
+            authorizationRequest: resolved.value.authorizationRequest,
+            attributeId: attribute.id
+        });
+
+        // Assert
+        expect(result).toBeAnError(new RegExp(`Verifier.*${parameter}`), /^error\.runtime\.unknown$/);
+        expect(outboundRequests.has(responseUri)).toBe(false);
+    });
+
+    test.each([
+        { configId: "test", format: "dc+sd-jwt", parameter: "sd-jwt_alg_values", algorithms: ["Ed25519"] },
+        { configId: "test", format: "dc+sd-jwt", parameter: "kb-jwt_alg_values", algorithms: ["Ed25519"] },
+        { configId: "mdoc", format: "mso_mdoc", parameter: "issuerauth_alg_values", algorithms: [-19] },
+        { configId: "mdoc", format: "mso_mdoc", parameter: "deviceauth_alg_values", algorithms: [-19] }
+    ])("exclude credentials incompatible with $format $parameter from matching", async ({ configId, format, parameter, algorithms }) => {
+        // Arrange
+        const attribute = await createAndStoreCredential(runtimeServices1, configId);
+        const authorizationRequestUrl = await signedAuthorizationRequest(
+            {
+                response_mode: "direct_post",
+                client_metadata: { vp_formats_supported: { [format]: { [parameter]: algorithms } } }
+            },
+            configId
+        );
+
+        // Act
+        const result = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl });
+
+        // Assert
+        expect(result).toBeSuccessful();
+        expect(result.value.matchingCredentials.map((credential) => credential.id)).not.toContain(attribute.id);
+    });
+
+    test("reject a JWT VC excluded by the verifier's alg_values", async () => {
+        // Arrange
+        const credential = await prepareJwtVcCredential();
+        const stored = await runtimeServices1.consumption.openId4Vc.storeCredentials({ credentialResponses: [credential] });
+        const authorizationRequestUrl = await signedAuthorizationRequest({
+            response_mode: "direct_post",
+            client_metadata: { vp_formats_supported: { jwt_vc_json: { alg_values: ["EdDSA"] } } },
+            dcql_query: { credentials: [{ id: "vc", format: "jwt_vc_json", meta: { type_values: [["VerifiableCredential", "TestCredential"]] } }] }
+        });
+        const resolved = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl });
+        const responseUri = resolved.value.authorizationRequest.authorizationRequestPayload.response_uri!;
+        outboundRequests.delete(responseUri);
+
+        // Act
+        const result = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({
+            authorizationRequest: resolved.value.authorizationRequest,
+            attributeId: stored.value.id
+        });
+
+        // Assert
+        expect(result).toBeAnError(/Verifier.*alg_values/, /^error\.runtime\.unknown$/);
+        expect(outboundRequests.has(responseUri)).toBe(false);
+    });
+
+    test("present an SD-JWT when both verifier signature constraints permit ES256", async () => {
+        // Arrange
+        const { authorizationRequest, sessionId } = await prepareAuthorizationRequestWithFormats({
+            "dc+sd-jwt": { "sd-jwt_alg_values": ["ES256"], "kb-jwt_alg_values": ["ES256"] }
+        });
+
+        // Act
+        const result = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest, attributeId: storedCredential.id });
+
+        // Assert
+        expect(result).toBeSuccessful();
+        expect(result.value.status).toBe(200);
+        expect((await eudiploClient.getSession(sessionId)).status).toBe("completed");
+    });
+
+    test("reject a presentation whose format is absent from vp_formats_supported", async () => {
+        // Arrange
+        const authorizationRequestUrl = await signedAuthorizationRequest({
+            response_mode: "direct_post",
+            client_metadata: { vp_formats_supported: { jwt_vc_json: { alg_values: ["ES256"] } } }
+        });
+        const resolved = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl });
+        const responseUri = resolved.value.authorizationRequest.authorizationRequestPayload.response_uri!;
+        outboundRequests.delete(responseUri);
+
+        // Act
+        const result = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({
+            authorizationRequest: resolved.value.authorizationRequest,
+            attributeId: storedCredential.id
+        });
+
+        // Assert
+        expect(result).toBeAnError(/Verifier does not support credential format 'dc\+sd-jwt'/, /^error\.runtime\.unknown$/);
+        expect(outboundRequests.has(responseUri)).toBe(false);
+    });
+
+    test.each([-7, -9])("present an mdoc when both signature constraints permit COSE algorithm %s", async (algorithm) => {
+        // Arrange
+        const { authorizationRequest, sessionId } = await prepareAuthorizationRequestWithFormats(
+            { mso_mdoc: { issuerauth_alg_values: [algorithm], deviceauth_alg_values: [algorithm] } },
+            "mdoc"
+        );
+
+        // Act
+        const result = await runtimeServices1.consumption.openId4Vc.acceptAuthorizationRequest({ authorizationRequest, attributeId: mdocCredential.id });
+
+        // Assert
+        expect(result).toBeSuccessful();
+        expect(result.value.status).toBe(200);
+        expect((await eudiploClient.getSession(sessionId)).status).toBe("completed");
     });
 
     test.each(["ECDH-ES", "ECDH-ES+A256KW", "RSA-OAEP-256"])("encrypt a Final response using %s through the facade", async (algorithm) => {
@@ -1991,6 +2124,7 @@ describe("additional device synchronization", () => {
         await otherDevice.transport.account.syncDatawallet();
         const authorizationRequestUrl = await signedAuthorizationRequest({
             response_mode: "direct_post",
+            client_metadata: { vp_formats_supported: { jwt_vc_json: { alg_values: ["ES256"] } } },
             dcql_query: { credentials: [{ id: "vc", format: "jwt_vc_json", meta: { type_values: [["VerifiableCredential", "TestCredential"]] } }] }
         });
         const resolved = await otherDevice.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl });
@@ -2448,8 +2582,8 @@ function credentialProof(endpoint: string): string {
     return (JSON.parse(outboundRequests.get(endpoint)!.body as string) as { proofs: { jwt: string[] } }).proofs.jwt[0];
 }
 
-async function signedAuthorizationRequest(changes: Record<string, unknown>) {
-    const request = await eudiploClient.createPresentationRequest({ configId: "test" });
+async function signedAuthorizationRequest(changes: Record<string, unknown>, configId = "test") {
+    const request = await eudiploClient.createPresentationRequest({ configId });
     const jwt = await fetchAuthorizationRequestJwt(request.uri);
     const signedRequest = await replaceJwtClaims(jwt, changes, "access-key");
     return `openid4vp://?client_id=${encodeURIComponent(decodeJwtPayload(jwt).client_id as string)}&request=${signedRequest}`;
@@ -2565,4 +2699,18 @@ async function prepareJwtVcIssuer(algorithm: string, binding: string, keyFromPro
         return Response.json({ credentials: [{ credential: `${header}.${payload}.${signature}` }] });
     });
     return credentialOffer;
+}
+
+async function prepareAuthorizationRequestWithFormats(vpFormatsSupported: Record<string, unknown>, configId = "test") {
+    const request = await eudiploClient.createPresentationRequest({ configId });
+    const jwt = await fetchAuthorizationRequestJwt(request.uri);
+    const payload = decodeJwtPayload(jwt);
+    const signedRequest = await replaceJwtClaims(
+        jwt,
+        { client_metadata: { ...(payload.client_metadata as Record<string, unknown>), vp_formats_supported: vpFormatsSupported } },
+        "access-key"
+    );
+    const authorizationRequestUrl = `openid4vp://?client_id=${encodeURIComponent(payload.client_id as string)}&request=${signedRequest}`;
+    const resolved = await runtimeServices1.consumption.openId4Vc.resolveAuthorizationRequest({ authorizationRequestUrl });
+    return { authorizationRequest: resolved.value.authorizationRequest, sessionId: request.sessionId };
 }

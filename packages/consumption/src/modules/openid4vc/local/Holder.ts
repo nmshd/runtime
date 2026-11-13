@@ -250,6 +250,7 @@ export class Holder {
 
             try {
                 const decoded = await this.formats.decode(attribute.content.value);
+                await this.formats.assertPresentationAlgorithms(attribute.content.value, decoded.holderKey, request.authorizationRequestPayload.client_metadata);
                 if (DcqlQuery.query(query, [decoded.dcql]).can_be_satisfied) matching.push(attribute);
             } catch {
                 // Unsupported, malformed, expired credentials and credentials without a holder key cannot be presented.
@@ -268,6 +269,7 @@ export class Holder {
 
         const content = credential.content.value;
         const decoded = await this.formats.decode(content);
+        await this.formats.assertPresentationAlgorithms(content, decoded.holderKey, request.authorizationRequestPayload.client_metadata);
 
         const result = DcqlQuery.query(query, [decoded.dcql]);
         const queryId = query.credentials[0].id;
