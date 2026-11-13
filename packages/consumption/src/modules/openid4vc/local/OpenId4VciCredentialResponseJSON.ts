@@ -1,9 +1,9 @@
-import { ClaimFormat, W3cJsonCredential } from "@credo-ts/core";
-import { DisplayInformationCachedImagesJSON } from "@nmshd/content";
+import type { DisplayInformationCachedImagesJSON, OpenId4VcDisplayInformation } from "@nmshd/content";
+import type { OpenId4VcCredentialFormat } from "./OpenId4VcCredentialFormat";
 
 export interface OpenId4VciCredentialResponseJSON {
-    claimFormat: ClaimFormat;
-    encoded: string | W3cJsonCredential;
-    displayInformation?: Record<string, any>[];
+    claimFormat: OpenId4VcCredentialFormat;
+    encoded: string;
+    displayInformation?: OpenId4VcDisplayInformation[];
     displayInformationCachedImages?: DisplayInformationCachedImagesJSON[];
 }

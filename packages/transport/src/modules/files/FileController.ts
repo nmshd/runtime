@@ -280,14 +280,21 @@ export class FileController extends TransportController {
     }
 
     public async cacheVerifiableCredentialDisplayInformationImages(
-        displayInformation?: Record<string, any>[]
+        displayInformation?: {
+            locale?: string;
+            logo?: string | { uri?: string };
+            backgroundImage?: string | { uri?: string };
+            // eslint-disable-next-line @typescript-eslint/naming-convention -- Standard OpenID4VC metadata field.
+            background_image?: string | { uri?: string };
+        }[]
     ): Promise<{ locale?: string; logo?: string; backgroundImage?: string }[] | undefined> {
         if (!displayInformation) return;
 
         return await Promise.all(
             displayInformation.map(async (displayInfo) => {
-                const logoUrl = displayInfo.logo;
-                const backgroundImageUrl = displayInfo.backgroundImage;
+                const logoUrl = typeof displayInfo.logo === "string" ? displayInfo.logo : displayInfo.logo?.uri;
+                const backgroundImageMetadata = displayInfo.backgroundImage ?? displayInfo.background_image;
+                const backgroundImageUrl = typeof backgroundImageMetadata === "string" ? backgroundImageMetadata : backgroundImageMetadata?.uri;
 
                 const [logo, backgroundImage] = await Promise.all([
                     logoUrl ? this.cacheImageFromUrl(logoUrl) : Promise.resolve(undefined),
