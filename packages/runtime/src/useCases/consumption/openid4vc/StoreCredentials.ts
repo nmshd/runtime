@@ -1,6 +1,6 @@
 import { Result } from "@js-soft/ts-utils";
 import { OpenId4VcController, OpenId4VciCredentialResponseJSON } from "@nmshd/consumption";
-import { DisplayInformationCachedImages } from "@nmshd/content";
+import { DisplayInformationCachedImages, VerifiableCredential } from "@nmshd/content";
 import { LocalAttributeDTO } from "@nmshd/runtime-types";
 import { FileController } from "@nmshd/transport";
 import { Inject } from "@nmshd/typescript-ioc";
@@ -12,8 +12,6 @@ export interface AbstractStoreCredentialsRequest<T> {
 }
 
 export interface StoreCredentialsRequest extends AbstractStoreCredentialsRequest<OpenId4VciCredentialResponseJSON[]> {}
-
-export interface SchemaValidatableStoreCredentialsRequest extends AbstractStoreCredentialsRequest<Record<string, any>[]> {}
 
 class Validator extends SchemaValidator<StoreCredentialsRequest> {
     public constructor(@Inject schemaRepository: SchemaRepository) {
@@ -33,7 +31,8 @@ export class StoreCredentialsUseCase extends UseCase<StoreCredentialsRequest, Lo
     protected override async executeInternal(request: StoreCredentialsRequest): Promise<Result<LocalAttributeDTO>> {
         const attribute = await this.openId4VcController.storeCredentials(request.credentialResponses);
 
-        const displayInformation = attribute.content.value.displayInformation;
+        const value: VerifiableCredential = attribute.content.value;
+        const displayInformation = value.toJSON().displayInformation;
         const cachedImages = await this.fileController.cacheVerifiableCredentialDisplayInformationImages(displayInformation);
         const displayInformationCachedImages = cachedImages?.map((cachedImagesEntry) => DisplayInformationCachedImages.from(cachedImagesEntry));
         attribute.content.value.displayInformationCachedImages = displayInformationCachedImages;

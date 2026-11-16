@@ -1,0 +1,19 @@
+{
+    "$schema": "https://eudiplo.dev/schemas/v1/PresentationConfigFile.schema.json",
+    "metadata": { "generation": 1 },
+    "spec": {
+        "id": "mdoc",
+        "dcql_query": {
+            "credentials": [
+                {
+                    "id": "licence",
+                    "format": "mso_mdoc",
+                    "meta": { "doctype_value": "org.iso.18013.5.1.mDL" },
+                    "claims": [{ "path": ["org.iso.18013.5.1", "given_name"] }]
+                }
+            ]
+        },
+        "accessKeyChainId": "c02bae13-e5a5-42fd-94bd-c6999f5e4b45",
+        "lifeTime": 300
+    }
+}
