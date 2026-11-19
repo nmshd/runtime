@@ -1,0 +1,12 @@
+{
+    "$schema": "https://eudiplo.dev/schemas/v1/PresentationConfigFile.schema.json",
+    "metadata": { "generation": 1 },
+    "spec": {
+        "id": "unavailable",
+        "dcql_query": {
+            "credentials": [{ "id": "unavailable", "format": "dc+sd-jwt", "meta": { "vct_values": ["https://example.com/credentials/unavailable"] } }]
+        },
+        "accessKeyChainId": "c02bae13-e5a5-42fd-94bd-c6999f5e4b45",
+        "lifeTime": 300
+    }
+}

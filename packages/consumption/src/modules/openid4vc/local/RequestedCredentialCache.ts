@@ -4,6 +4,7 @@ import { CoreSynchronizable, SynchronizedCollection } from "@nmshd/transport";
 import { nameof } from "ts-simple-nameof";
 import { ConsumptionIds } from "../../../consumption/ConsumptionIds";
 import { OpenId4VciCredentialResponseJSON } from "./OpenId4VciCredentialResponseJSON";
+import { credentialResponsesSchema } from "./OpenId4VcSchemas";
 
 class RequestedCredentialCacheEntry extends CoreSynchronizable {
     public override technicalProperties: string[] = [
@@ -32,12 +33,17 @@ export class RequestedCredentialCache {
     public constructor(private readonly collection: SynchronizedCollection) {}
 
     public async get(credentialOfferUrl: string): Promise<OpenId4VciCredentialResponseJSON[] | undefined> {
-        const doc = await this.collection.findOne({ credentialOfferUrl: credentialOfferUrl });
-        return doc ? RequestedCredentialCacheEntry.fromAny(doc).credentialResponses : undefined;
+        const doc: unknown = await this.collection.findOne({ credentialOfferUrl: credentialOfferUrl });
+        if (!doc) return undefined;
+
+        const entry = RequestedCredentialCacheEntry.fromAny<RequestedCredentialCacheEntry>(doc);
+
+        return credentialResponsesSchema.parse(entry.credentialResponses);
     }
 
     public async set(credentialOfferUrl: string, credentialResponses: OpenId4VciCredentialResponseJSON[]): Promise<void> {
         const id = await ConsumptionIds.requestedCredentialCacheEntry.generate();
+
         await this.collection.create(RequestedCredentialCacheEntry.create(id, credentialOfferUrl, credentialResponses));
     }
 }

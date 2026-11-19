@@ -1,0 +1,40 @@
+{
+    "$schema": "https://eudiplo.dev/schemas/v1/PresentationConfigFile.schema.json",
+    "metadata": {
+        "generation": 1
+    },
+    "spec": {
+        "id": "claim-sets",
+        "dcql_query": {
+            "credentials": [
+                {
+                    "id": "name",
+                    "format": "dc+sd-jwt",
+                    "meta": {
+                        "vct_values": ["https://example.com/credentials/selective"]
+                    },
+                    "claims": [
+                        {
+                            "id": "given",
+                            "path": ["given_name"],
+                            "values": ["Bob"]
+                        },
+                        {
+                            "id": "family",
+                            "path": ["family_name"]
+                        }
+                    ],
+                    "claim_sets": [["given"], ["family"]]
+                }
+            ],
+            "credential_sets": [
+                {
+                    "options": [["name"]],
+                    "required": true
+                }
+            ]
+        },
+        "accessKeyChainId": "c02bae13-e5a5-42fd-94bd-c6999f5e4b45",
+        "lifeTime": 300
+    }
+}

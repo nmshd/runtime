@@ -4,7 +4,7 @@ import { MongoDbConnection } from "@js-soft/docdb-access-mongo";
 import { NodeLoggerFactory } from "@js-soft/node-logger";
 import { ConsumptionConfig, ConsumptionController, GenericRequestItemProcessor } from "@nmshd/consumption";
 import { ICoreAddress } from "@nmshd/core-types";
-import { AccountController } from "@nmshd/transport";
+import { AccountController, DeviceSharedSecret } from "@nmshd/transport";
 import assert from "assert";
 import { ConsumptionServices, DataViewExpander, ModuleConfiguration, Runtime, RuntimeConfig, RuntimeHealth, RuntimeServices, TransportServices } from "../../src";
 import { AbstractCorrelator } from "../../src/useCases/common/AbstractCorrelator";
@@ -22,7 +22,8 @@ export class TestRuntime extends Runtime {
     public constructor(
         runtimeConfig: RuntimeConfig,
         private readonly consumptionConfig: ConsumptionConfig,
-        correlator?: AbstractCorrelator
+        correlator?: AbstractCorrelator,
+        private readonly deviceSharedSecret?: DeviceSharedSecret
     ) {
         super(
             runtimeConfig,
@@ -91,7 +92,7 @@ export class TestRuntime extends Runtime {
         const randomAccountName = Math.random().toString(36).substring(7);
         const db = await this.dbConnection!.getDatabase(`acc-${randomAccountName}`);
 
-        const accountController = await new AccountController(this.transport, db, this.transport.config).init();
+        const accountController = await new AccountController(this.transport, db, this.transport.config).init(this.deviceSharedSecret);
 
         const requestItemProcessorOverrides = new Map([[TestRequestItem, GenericRequestItemProcessor]]);
         const notificationItemProcessorOverrides = new Map([[TestNotificationItem, TestNotificationItemProcessor]]);
