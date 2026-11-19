@@ -69,7 +69,7 @@
         "cbor-x": "1.6.9",
         "jose": "6.2.16",
         "jwt-decode": "4.0.0",
-        "openid-client": "6.8.9",
+        "openid-client": "6.9.0",
         "ts-json-schema-generator": "2.9.0",
         "ts-mockito": "2.6.1"
     },
