@@ -4,7 +4,7 @@ import { MockEventBus } from "../lib/MockEventBus";
 // eslint-disable-next-line vitest/no-disabled-tests -- disabled because the Backbone currently isn't performant enough in the CI
 describe.skip("SSEModuleTest", function () {
     const eventBus = new MockEventBus();
-    // Note: even when skipped, Jest executes top-level imports.
+    // Note: even when skipped, Vitest executes top-level imports.
     // Keep runtime-heavy imports lazy to avoid teardown-time libsodium init errors.
     let testUtil: typeof import("../lib/TestUtil").TestUtil;
 

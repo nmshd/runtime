@@ -18,6 +18,7 @@
         "noImplicitOverride": true,
         "useDefineForClassFields": false,
         "lib": ["ES2022", "DOM"],
+        "types": ["node"],
         "composite": true
     }
 }

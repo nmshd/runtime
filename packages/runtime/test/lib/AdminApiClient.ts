@@ -1,10 +1,10 @@
 import { LanguageISO639 } from "@nmshd/core-types";
-import axios, { Axios } from "axios";
+import axios, { AxiosInstance } from "axios";
 import { AnnouncementSeverity } from "../../src";
 
-let adminClient: Axios | undefined;
+let adminClient: AxiosInstance | undefined;
 
-export async function getBackboneAdminApiClient(): Promise<Axios> {
+export async function getBackboneAdminApiClient(): Promise<AxiosInstance> {
     if (adminClient) return adminClient;
 
     const adminAPIBaseUrl = process.env.NMSHD_TEST_BASEURL_ADMIN_API!;

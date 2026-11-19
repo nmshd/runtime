@@ -1,11 +1,11 @@
 import { LanguageISO639 } from "@nmshd/core-types";
-import axios, { Axios } from "axios";
+import axios, { AxiosInstance } from "axios";
 import { AnnouncementSeverity } from "../../src/modules/announcements/data/Announcement";
 
 export class AdminApiClient {
-    private static adminClient: Axios | undefined;
+    private static adminClient: AxiosInstance | undefined;
 
-    public static async getBackboneAdminApiClient(): Promise<Axios> {
+    public static async getBackboneAdminApiClient(): Promise<AxiosInstance> {
         if (AdminApiClient.adminClient) {
             return AdminApiClient.adminClient;
         }
