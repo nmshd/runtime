@@ -7,7 +7,7 @@
             "customType": "regex",
             "description": "Update EUDIPLO image when used in test containers",
             "managerFilePatterns": ["/\\.ts$/"],
-            "matchStrings": ["new GenericContainer\\(\"(?<depName>ghcr\\.io/openwallet-foundation/eudiplo):(?<currentValue>[^\"@]+)@(?<currentDigest>sha256:[a-f0-9]+)\"\\)"],
+            "matchStrings": ["new GenericContainer\\(\"(?<depName>ghcr\\.io/eudiplo/eudiplo):(?<currentValue>[^\"@]+)@(?<currentDigest>sha256:[a-f0-9]+)\"\\)"],
             "datasourceTemplate": "docker",
             "versioningTemplate": "docker"
         }
