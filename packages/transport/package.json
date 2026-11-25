@@ -54,14 +54,14 @@
     "devDependencies": {
         "@js-soft/docdb-access-loki": "1.4.6",
         "@js-soft/docdb-access-mongo": "1.4.6",
-        "@js-soft/node-logger": "1.2.23",
+        "@js-soft/node-logger": "1.2.24",
         "@js-soft/ts-serval": "2.0.17",
         "@types/json-stringify-safe": "5.0.3",
         "@types/lodash": "4.17.27",
         "@types/luxon": "3.7.6",
         "@types/qs": "6.15.1",
         "correlation-id": "5.2.0",
-        "testcontainers": "12.2.1",
+        "testcontainers": "12.2.2",
         "ts-mockito": "2.6.1"
     },
     "publishConfig": {
