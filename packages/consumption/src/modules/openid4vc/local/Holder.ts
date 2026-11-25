@@ -8,7 +8,6 @@ import { setGlobalConfig as setPresentationConfig } from "@openid4vc/utils";
 import { SDJWTException } from "@sd-jwt/core";
 import { DcqlQuery } from "dcql";
 import { base64url, errors } from "jose";
-import { parse } from "valibot";
 import { z } from "zod";
 import { AttributesController, OwnIdentityAttribute } from "../../attributes";
 import { CredentialFormats } from "./CredentialFormats";
@@ -18,6 +17,7 @@ import { OpenId4VcCrypto } from "./OpenId4VcCrypto";
 import { displayInformationSchema } from "./OpenId4VcSchemas";
 import { OpenId4VciCredentialResponseJSON } from "./OpenId4VciCredentialResponseJSON";
 import { OpenId4VciResolvedCredentialOffer } from "./OpenId4VciResolvedCredentialOffer";
+import { OpenId4VpDcqlQuery } from "./OpenId4VpDcqlQuery";
 import { OpenId4VpResolvedAuthorizationRequest } from "./OpenId4VpResolvedAuthorizationRequest";
 import { isVerifiableCredentialAttribute, OwnIdentityAttributeWithVerifiableCredential } from "./VerifiableCredentialAttribute";
 
@@ -203,19 +203,18 @@ export class Holder {
         );
     }
 
-    private query(request: OpenId4VpResolvedAuthorizationRequest): DcqlQuery.Output {
-        const payload = request.authorizationRequestPayload;
+    private query(payload: { response_mode?: string; [key: string]: unknown }): DcqlQuery.Output & OpenId4VpDcqlQuery {
         if (payload.presentation_definition || payload.presentation_definition_uri) throw new Error("Presentation Exchange is not supported");
         if (payload.transaction_data) throw new Error("Transaction data is not supported");
         if (!["direct_post", "direct_post.jwt"].includes(payload.response_mode ?? "")) throw new Error("Unsupported presentation response mode");
 
-        const query = parse(DcqlQuery.vModel, payload.dcql_query);
+        // dcql's parser validates unknown input at runtime even though its signature expects Input.
+        const query = DcqlQuery.parse(payload.dcql_query as DcqlQuery.Input);
         if (query.credentials.length !== 1 || query.credentials[0].multiple) throw new Error("Exactly one credential query is supported");
         if (!isSupportedFormat(query.credentials[0].format)) throw new Error("Unsupported presentation credential format");
 
-        DcqlQuery.validate(query);
-
-        return query;
+        // The supported formats above also satisfy the public authorization request type.
+        return query as DcqlQuery.Output & OpenId4VpDcqlQuery;
     }
 
     public async resolveAuthorizationRequest(request: string): Promise<OpenId4VpResolvedAuthorizationRequest> {
@@ -224,21 +223,14 @@ export class Holder {
 
         const resolved = await this.presentationClient.resolveOpenId4vpAuthorizationRequest({ authorizationRequestPayload: parsed.params, responseMode: { type: "direct_post" } });
         const payload = authorizationPayloadSchema.parse(resolved.authorizationRequestPayload);
-        if (payload.presentation_definition || payload.presentation_definition_uri) throw new Error("Presentation Exchange is not supported");
-        if (payload.transaction_data) throw new Error("Transaction data is not supported");
-
-        const result: OpenId4VpResolvedAuthorizationRequest = {
-            authorizationRequestPayload: { ...payload, dcql_query: parse(DcqlQuery.vModel, payload.dcql_query) },
+        return {
+            authorizationRequestPayload: { ...payload, dcql_query: this.query(payload) },
             version: resolved.version
         };
-
-        this.query(result);
-
-        return result;
     }
 
     public async matchingCredentials(request: OpenId4VpResolvedAuthorizationRequest): Promise<OwnIdentityAttributeWithVerifiableCredential[]> {
-        const query = this.query(request);
+        const query = this.query(request.authorizationRequestPayload);
         const attributes = await this.attributeController.getLocalAttributes({
             "@type": "OwnIdentityAttribute",
             "content.value.@type": "VerifiableCredential"
@@ -264,7 +256,7 @@ export class Holder {
         request: OpenId4VpResolvedAuthorizationRequest,
         credential: OwnIdentityAttribute
     ): Promise<{ status: number; body: OpenId4VcJsonValue }> {
-        const query = this.query(request);
+        const query = this.query(request.authorizationRequestPayload);
         if (!isVerifiableCredentialAttribute(credential)) throw new Error("The selected attribute does not contain a verifiable credential");
 
         const content = credential.content.value;

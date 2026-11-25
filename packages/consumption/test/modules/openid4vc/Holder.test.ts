@@ -10,10 +10,10 @@ import { CoseKey, SignatureAlgorithm } from "@owf/cose";
 import { DeviceKey, DeviceResponse, IssuerSigned, IssuerSignedBuilder, SessionTranscript } from "@owf/mdoc";
 import { SubjectAlternativeNameExtension, X509Certificate, X509CertificateGenerator } from "@peculiar/x509";
 import { SDJwtVcInstance } from "@sd-jwt/sd-jwt-vc";
+import { DcqlParseError } from "dcql";
 import { base64url, compactDecrypt, decodeJwt, decodeProtectedHeader, exportJWK, generateKeyPair, importJWK, JWTPayload, jwtVerify, SignJWT } from "jose";
 import { instance, mock } from "ts-mockito";
 import { deflateSync } from "node:zlib";
-import { ValiError } from "valibot";
 import { z } from "zod";
 import {
     AttributesController,
@@ -1123,7 +1123,7 @@ test("rejects malformed DCQL in a signed authorization request", async () => {
 
     await expect(
         fixture.holder.resolveAuthorizationRequest(`openid4vp://?client_id=x509_san_dns%3Averifier.example&request_uri=${encodeURIComponent(`${verifier}/request`)}`)
-    ).rejects.toThrow(ValiError);
+    ).rejects.toThrow(DcqlParseError);
 });
 
 test("rejects DCQL sets with unknown credential identifiers", async () => {
@@ -1133,7 +1133,9 @@ test("rejects DCQL sets with unknown credential identifiers", async () => {
 
     query.credential_sets = [{ options: [["unknown-credential"]] }];
 
-    await expect(fixture.holder.matchingCredentials(request)).rejects.toThrow("Credential set contains undefined credential id");
+    await expect(fixture.holder.matchingCredentials(request)).rejects.toMatchObject({
+        issues: [expect.objectContaining({ code: "unknown_credential_query_id", path: ["credential_sets", 0, "options", 0, 0] })]
+    });
 });
 
 test("rejects DCQL claim sets with unknown claim identifiers", async () => {
@@ -1141,9 +1143,25 @@ test("rejects DCQL claim sets with unknown claim identifiers", async () => {
     const query = request.authorizationRequestPayload.dcql_query;
     if (!query) throw new Error("Expected a DCQL query");
 
-    query.credentials[0].claim_sets = [["unknown-claim"]];
+    const credential = query.credentials[0];
+    credential.claims = [{ id: "name", path: ["name"] }];
+    credential.claim_sets = [["unknown-claim"]];
 
-    await expect(fixture.holder.matchingCredentials(request)).rejects.toThrow("Credential set contains undefined credential id");
+    await expect(fixture.holder.matchingCredentials(request)).rejects.toMatchObject({
+        issues: [expect.objectContaining({ code: "unknown_claim_id", path: ["credentials", 0, "claim_sets", 0, 0] })]
+    });
+});
+
+test("rejects DCQL credentials with duplicate claim identifiers", async () => {
+    const request = await fixture.request();
+    request.authorizationRequestPayload.dcql_query!.credentials[0].claims = [
+        { id: "name", path: ["name"] },
+        { id: "name", path: ["family_name"] }
+    ];
+
+    await expect(fixture.holder.matchingCredentials(request)).rejects.toMatchObject({
+        issues: [expect.objectContaining({ code: "duplicate_claim_id", path: ["credentials", 0, "claims", 1, "id"] })]
+    });
 });
 
 test("rejects malformed issuer JWKS instead of trusting its declared type", async () => {
