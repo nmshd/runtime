@@ -34,7 +34,7 @@
         "@typescript/native": "npm:typescript@7.0.2",
         "@vitest/coverage-v8": "5.1.1",
         "@vitest/eslint-plugin": "1.6.28",
-        "dependency-cruiser": "18.7.2",
+        "dependency-cruiser": "18.8.0",
         "enhanced-publish": "1.1.22",
         "eslint": "10.15.0",
         "npm-check-updates": "23.1.1",
