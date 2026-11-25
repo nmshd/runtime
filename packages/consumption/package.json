@@ -49,6 +49,7 @@
         "@openid4vc/openid4vp": "0.10.0",
         "@openid4vc/utils": "0.10.0",
         "@owf/cose": "^0.8.0",
+        "@owf/jose": "^0.8.0",
         "@owf/mdoc": "^0.10.0",
         "@peculiar/x509": "^3.0.0",
         "@sd-jwt/core": "^0.25.0",

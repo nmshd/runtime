@@ -2,7 +2,7 @@ import { ILogger } from "@js-soft/logging-abstractions";
 import { serialize, validate } from "@js-soft/ts-serval";
 import { CoreId } from "@nmshd/core-types";
 import { CoreSynchronizable, ICoreSynchronizable, SynchronizedCollection } from "@nmshd/transport";
-import { Jwk, zJwk } from "@openid4vc/oauth2";
+import { Jwk, zJwk } from "@owf/jose";
 import { base64url, calculateJwkThumbprint } from "jose";
 import { nameof } from "ts-simple-nameof";
 import { z } from "zod";

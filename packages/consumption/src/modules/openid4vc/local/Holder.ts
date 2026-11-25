@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/naming-convention -- OpenID4VC and DCQL use standardized field names. */
 import { IdentityAttribute, OpenId4VcJsonValue, TokenContentVerifiablePresentation, VerifiableCredential } from "@nmshd/content";
 import { AccountController } from "@nmshd/transport";
-import { JwtSigner, Oauth2ClientErrorResponseError, setGlobalConfig as setOauthConfig, zJwkSet } from "@openid4vc/oauth2";
+import { Oauth2ClientErrorResponseError, setGlobalConfig as setOauthConfig } from "@openid4vc/oauth2";
 import { Openid4vciClient, Openid4vciRetrieveCredentialsError, setGlobalConfig as setIssuanceConfig } from "@openid4vc/openid4vci";
 import { extractEncryptionJwkFromJwks, Openid4vpClient, zClientMetadata } from "@openid4vc/openid4vp";
 import { setGlobalConfig as setPresentationConfig } from "@openid4vc/utils";
-import { SDJWTException } from "@sd-jwt/core";
+import { JwsSigner, zJwkSet } from "@owf/jose";
+import { SdJwtError } from "@sd-jwt/core";
 import { DcqlQuery } from "dcql";
 import { base64url, errors } from "jose";
 import { z } from "zod";
@@ -124,7 +125,7 @@ export class Holder {
             const algorithm = this.cryptography.algorithm(publicJwk);
 
             const bindingMethods = configuration.cryptographic_binding_methods_supported;
-            let signer: JwtSigner;
+            let signer: JwsSigner;
             if (bindingMethods?.includes("did:key") || bindingMethods?.includes("did")) {
                 signer = { method: "did", alg: algorithm, didUrl: this.cryptography.didForKey(publicJwk, "key") };
             } else if (bindingMethods?.includes("did:jwk")) {
@@ -221,7 +222,7 @@ export class Holder {
         const parsed = this.presentationClient.parseOpenid4vpAuthorizationRequest({ authorizationRequest: request });
         if (parsed.type === "openid4vp_dc_api" || parsed.type === "openid4vp_iae") throw new Error("Unsupported presentation request type");
 
-        const resolved = await this.presentationClient.resolveOpenId4vpAuthorizationRequest({ authorizationRequestPayload: parsed.params, responseMode: { type: "direct_post" } });
+        const resolved = await this.presentationClient.resolveOpenid4vpAuthorizationRequest({ authorizationRequestPayload: parsed.params, responseMode: { type: "direct_post" } });
         const payload = authorizationPayloadSchema.parse(resolved.authorizationRequestPayload);
         return {
             authorizationRequestPayload: { ...payload, dcql_query: this.query(payload) },
@@ -352,7 +353,7 @@ export class Holder {
 
             return { isValid: true };
         } catch (cause) {
-            const code = cause instanceof SDJWTException || cause instanceof errors.JOSEError ? cause.code : undefined;
+            const code = cause instanceof SdJwtError || cause instanceof errors.JOSEError ? cause.code : undefined;
             let message = cause instanceof Error ? cause.message : "Invalid presentation";
 
             switch (code) {
@@ -387,8 +388,8 @@ export class Holder {
                     break;
             }
 
-            // SD-JWT 0.22 has no error codes for these key-binding failures.
-            if (cause instanceof SDJWTException && !code) {
+            // Some SD-JWT key-binding errors carry only a message.
+            if (cause instanceof SdJwtError && !code) {
                 switch (message) {
                     case "Verify Error: Invalid Key Binding audience":
                         message = "Verify Error: Invalid Audience";
