@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/naming-convention -- OpenID4VC and DCQL use standardized field names. */
 import { VerifiableCredential } from "@nmshd/content";
-import { Jwk, zJwk } from "@openid4vc/oauth2";
 import { zClientMetadata } from "@openid4vc/openid4vp";
 import { CoseKey } from "@owf/cose";
+import { Jwk, zJwk } from "@owf/jose";
 import { DeviceRequest, DocRequest, Holder as MdocHolder, IssuerSigned, ItemsRequest, SessionTranscript } from "@owf/mdoc";
-import { SDJwtVcInstance } from "@sd-jwt/sd-jwt-vc";
+import { SdJwtVcInstance } from "@sd-jwt/sd-jwt-vc";
 import { DcqlCredential, DcqlNotDisclosed, DcqlQuery } from "dcql";
 import { normalizeCredential, transformPresentationInput, validateCredentialPayload, validateJwtCredentialPayload, validateJwtPresentationPayload } from "did-jwt-vc";
 import { base64url, calculateJwkThumbprint, decodeJwt, decodeProtectedHeader } from "jose";
@@ -41,8 +41,8 @@ export class CredentialFormats {
         private readonly fetchInstance: typeof fetch
     ) {}
 
-    public sdJwt(holderKey?: Jwk): SDJwtVcInstance {
-        return new SDJwtVcInstance({
+    public sdJwt(holderKey?: Jwk): SdJwtVcInstance {
+        return new SdJwtVcInstance({
             hasher: (data, algorithm) => this.cryptography.hash(typeof data === "string" ? new TextEncoder().encode(data) : new Uint8Array(data), algorithm),
             verifier: async (data, signature) => {
                 // The SD-JWT library validates claims, including its configured clock skew.

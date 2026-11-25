@@ -5,11 +5,11 @@ import { ILogger } from "@js-soft/logging-abstractions";
 import { GivenName, IdentityAttribute, TokenContentVerifiablePresentation } from "@nmshd/content";
 import { CoreAddress, CoreDate, CoreId } from "@nmshd/core-types";
 import { AccountController, CoreSynchronizable, ICoreSynchronizable, Identity, SynchronizedCollection } from "@nmshd/transport";
-import { Jwk, zJwk } from "@openid4vc/oauth2";
 import { CoseKey, SignatureAlgorithm } from "@owf/cose";
+import { Jwk, zJwk } from "@owf/jose";
 import { DeviceKey, DeviceResponse, IssuerSigned, IssuerSignedBuilder, SessionTranscript } from "@owf/mdoc";
 import { SubjectAlternativeNameExtension, X509Certificate, X509CertificateGenerator } from "@peculiar/x509";
-import { SDJwtVcInstance } from "@sd-jwt/sd-jwt-vc";
+import { SdJwtVcInstance } from "@sd-jwt/sd-jwt-vc";
 import { DcqlParseError } from "dcql";
 import { base64url, compactDecrypt, decodeJwt, decodeProtectedHeader, exportJWK, generateKeyPair, importJWK, JWTPayload, jwtVerify, SignJWT } from "jose";
 import { instance, mock } from "ts-mockito";
@@ -214,7 +214,7 @@ class Fixture {
         if (url === `${verifier}/request`) {
             return new Response(
                 await new SignJWT(this.presentationRequest)
-                    .setProtectedHeader({ alg: this.issuerAlgorithm, typ: "oauth-authz-req+jwt", x5c: [base64url.encode(new Uint8Array(this.issuerCertificate.rawData))] })
+                    .setProtectedHeader({ alg: this.issuerAlgorithm, typ: "oauth-authz-req+jwt", x5c: [this.issuerCertificate.toString("base64")] })
                     .sign(await importJWK(this.issuerKey, this.issuerAlgorithm)),
                 { headers: { "content-type": "application/oauth-authz-req+jwt" } }
             );
@@ -256,7 +256,7 @@ class Fixture {
     public async issue(holderKey: Jwk, holderDid?: string): Promise<string> {
         if (this.format === "dc+sd-jwt") {
             let saltIndex = 0;
-            const sdJwt = new SDJwtVcInstance({
+            const sdJwt = new SdJwtVcInstance({
                 hasher: async (data, algorithm) => await this.crypto.hash(typeof data === "string" ? new TextEncoder().encode(data) : new Uint8Array(data), algorithm),
                 saltGenerator: (length) => (++saltIndex).toString().padStart(length, "s"),
                 signAlg: this.issuerAlgorithm,
@@ -480,7 +480,7 @@ describe.each<OpenId4VcCredentialFormat>(["dc+sd-jwt", "mso_mdoc", "jwt_vc_json"
 
             expect(verified.iss).toBe(issuer);
 
-            const claims = await new SDJwtVcInstance({
+            const claims = await new SdJwtVcInstance({
                 hasher: (data, algorithm) => fixture.crypto.hash(typeof data === "string" ? new TextEncoder().encode(data) : new Uint8Array(data), algorithm)
             }).getClaims(presentation);
 
@@ -1070,9 +1070,7 @@ test.each([
         signingAlgorithm: { name: "ECDSA", hash: "SHA-256" },
         keys: { publicKey: await importAsymmetricKey(fixture.issuerPublicKey, "ES256"), privateKey: await importAsymmetricKey(fixture.issuerKey, "ES256") }
     });
-    const jwt = await new SignJWT({ iss: issuer })
-        .setProtectedHeader({ alg: "ES256", x5c: [base64url.encode(new Uint8Array(certificate.rawData))] })
-        .sign(await importJWK(fixture.issuerKey, "ES256"));
+    const jwt = await new SignJWT({ iss: issuer }).setProtectedHeader({ alg: "ES256", x5c: [certificate.toString("base64")] }).sign(await importJWK(fixture.issuerKey, "ES256"));
 
     await expect(fixture.crypto.verifyIssuerJwt(jwt)).rejects.toThrow("Certificate is not valid at the current time");
 });
@@ -1115,6 +1113,17 @@ test("ignores and rejects an attribute that does not contain a verifiable creden
     expect(await fixture.holder.matchingCredentials(request)).toStrictEqual([credential]);
     await expect(fixture.holder.acceptAuthorizationRequest(request, otherAttribute)).rejects.toThrow("does not contain a verifiable credential");
     expect(fixture.requests.some(({ url }) => url === `${verifier}/response`)).toBe(false);
+});
+
+test("rejects a signed authorization request when the signing key does not match its certificate", async () => {
+    await fixture.request();
+    const { privateKey } = await generateKeyPair("ES256");
+    const request = await new SignJWT(fixture.presentationRequest)
+        .setProtectedHeader({ alg: "ES256", typ: "oauth-authz-req+jwt", x5c: [fixture.issuerCertificate.toString("base64")] })
+        .sign(privateKey);
+    fixture.extraResponses.set(`${verifier}/request`, new Response(request, { headers: { "content-type": "application/oauth-authz-req+jwt" } }));
+
+    await expect(fixture.request()).rejects.toThrow(/signature|could not be verified/i);
 });
 
 test("rejects malformed DCQL in a signed authorization request", async () => {
@@ -1351,7 +1360,7 @@ test("matches DCQL wildcard array paths", async () => {
 
     // Assert
     expect(result.status).toBe(200);
-    const verifier = new SDJwtVcInstance({
+    const verifier = new SdJwtVcInstance({
         hasher: (data, algorithm) => fixture.crypto.hash(typeof data === "string" ? new TextEncoder().encode(data) : new Uint8Array(data), algorithm)
     });
     expect((await verifier.getClaims(fixture.submitted.vp_token.credential[0])).names).toEqual(["Bob"]);

@@ -1,8 +1,9 @@
 import "reflect-metadata";
 import { CoreBuffer } from "@nmshd/crypto";
 import { p256 } from "@noble/curves/nist.js";
-import { CallbackContext, clientAuthenticationNone, Jwk, JwtSigner, zJwk, zJwkSet } from "@openid4vc/oauth2";
+import { CallbackContext, clientAuthenticationNone } from "@openid4vc/oauth2";
 import { CoseKey, SignatureAlgorithm } from "@owf/cose";
+import { Jwk, JwsSigner, zJwk, zJwkSet } from "@owf/jose";
 import { MdocContext } from "@owf/mdoc";
 import { SubjectAlternativeNameExtension, X509Certificate } from "@peculiar/x509";
 import {
@@ -260,7 +261,7 @@ export class OpenId4VcCrypto {
         return new Uint8Array(await this.requireWebCrypto().subtle.digest(normalized, new Uint8Array(data)));
     }
 
-    private async signerKey(signer: JwtSigner): Promise<Jwk> {
+    private async signerKey(signer: JwsSigner): Promise<Jwk> {
         if (signer.method === "jwk") {
             return this.publicKey(signer.publicJwk);
         }
@@ -274,20 +275,22 @@ export class OpenId4VcCrypto {
     public get callbacks(): CallbackContext {
         return {
             fetch: this.fetchInstance,
-            hash: (data, algorithm) => this.hash(data, algorithm),
+            hash: (data, algorithm) => this.hash(typeof data === "string" ? encoder.encode(data) : new Uint8Array(data), algorithm),
             generateRandom: (length) => this.requireWebCrypto().getRandomValues(new Uint8Array(length)),
             clientAuthentication: clientAuthenticationNone({ clientId: "wallet" }),
-            signJwt: async (signer, jwt) => {
+            signJws: async (signer, { signingInputBytes }) => {
                 const signerJwk = await this.signerKey(signer);
                 if (signer.alg !== this.algorithm(signerJwk)) throw new Error("Holder signature algorithm mismatch");
 
-                return { jwt: await this.signJwt(jwt.payload, signerJwk, jwt.header), signerJwk };
+                return { signature: base64url.encode(await this.signData(signingInputBytes, signerJwk)), signerJwk };
             },
-            verifyJwt: async (signer, jwt) => {
+            verifyJws: async (signer, { compact }) => {
+                if (!compact) return { verified: false };
+
                 try {
                     const signerJwk = await this.signerKey(signer);
 
-                    await jwtVerify(jwt.compact, await this.asymmetricKey(signerJwk, signer.alg), { algorithms: [signer.alg] });
+                    await jwtVerify(compact, await this.asymmetricKey(signerJwk, signer.alg), { algorithms: [signer.alg] });
 
                     return { verified: true, signerJwk };
                 } catch {

@@ -232,7 +232,8 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "required": [
                         "items"
                     ],
-                    "additionalProperties": false
+                    "additionalProperties": false,
+                    "description": "Construct a type with the properties of T except for those in type K."
                 },
                 "peer": {
                     "$ref": "#/definitions/AddressString"
@@ -551,7 +552,8 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "object",
                     "additionalProperties": {
                         "$ref": "#/definitions/ValueHintsJSON"
-                    }
+                    },
+                    "description": "Construct a type with a set of properties K of type T"
                 },
                 "@context": {
                     "type": "string"
@@ -623,7 +625,8 @@ export const CanCreateOutgoingRequestRequest: any = {
                     "type": "object",
                     "additionalProperties": {
                         "$ref": "#/definitions/ValueHintsJSON"
-                    }
+                    },
+                    "description": "Construct a type with a set of properties K of type T"
                 }
             },
             "required": [
@@ -4595,7 +4598,8 @@ export const CompleteOutgoingRequestRequest: any = {
                     "type": "object",
                     "additionalProperties": {
                         "$ref": "#/definitions/ValueHintsJSON"
-                    }
+                    },
+                    "description": "Construct a type with a set of properties K of type T"
                 },
                 "@context": {
                     "type": "string"
@@ -4667,7 +4671,8 @@ export const CompleteOutgoingRequestRequest: any = {
                     "type": "object",
                     "additionalProperties": {
                         "$ref": "#/definitions/ValueHintsJSON"
-                    }
+                    },
+                    "description": "Construct a type with a set of properties K of type T"
                 }
             },
             "required": [
@@ -6830,7 +6835,8 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "type": "object",
                     "additionalProperties": {
                         "$ref": "#/definitions/ValueHintsJSON"
-                    }
+                    },
+                    "description": "Construct a type with a set of properties K of type T"
                 },
                 "@context": {
                     "type": "string"
@@ -6902,7 +6908,8 @@ export const CreateAndCompleteOutgoingRequestFromRelationshipTemplateResponseReq
                     "type": "object",
                     "additionalProperties": {
                         "$ref": "#/definitions/ValueHintsJSON"
-                    }
+                    },
+                    "description": "Construct a type with a set of properties K of type T"
                 }
             },
             "required": [
@@ -7645,7 +7652,8 @@ export const CreateOutgoingRequestRequest: any = {
                     "required": [
                         "items"
                     ],
-                    "additionalProperties": false
+                    "additionalProperties": false,
+                    "description": "Construct a type with the properties of T except for those in type K."
                 },
                 "peer": {
                     "$ref": "#/definitions/AddressString"
@@ -7965,7 +7973,8 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "object",
                     "additionalProperties": {
                         "$ref": "#/definitions/ValueHintsJSON"
-                    }
+                    },
+                    "description": "Construct a type with a set of properties K of type T"
                 },
                 "@context": {
                     "type": "string"
@@ -8037,7 +8046,8 @@ export const CreateOutgoingRequestRequest: any = {
                     "type": "object",
                     "additionalProperties": {
                         "$ref": "#/definitions/ValueHintsJSON"
-                    }
+                    },
+                    "description": "Construct a type with a set of properties K of type T"
                 }
             },
             "required": [
@@ -11298,7 +11308,8 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "object",
                     "additionalProperties": {
                         "$ref": "#/definitions/ValueHintsJSON"
-                    }
+                    },
+                    "description": "Construct a type with a set of properties K of type T"
                 },
                 "@context": {
                     "type": "string"
@@ -11370,7 +11381,8 @@ export const ReceivedIncomingRequestRequest: any = {
                     "type": "object",
                     "additionalProperties": {
                         "$ref": "#/definitions/ValueHintsJSON"
-                    }
+                    },
+                    "description": "Construct a type with a set of properties K of type T"
                 }
             },
             "required": [
@@ -13844,7 +13856,8 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
                             "type": "string"
                         },
                         "metadata": {
-                            "type": "object"
+                            "type": "object",
+                            "description": "Construct a type with a set of properties K of type T"
                         },
                         "expiresAt": {
                             "$ref": "#/definitions/ISO8601DateTimeString"
@@ -13859,7 +13872,8 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
                             "type": "string"
                         },
                         "metadata": {
-                            "type": "object"
+                            "type": "object",
+                            "description": "Construct a type with a set of properties K of type T"
                         }
                     },
                     "additionalProperties": false
@@ -13987,7 +14001,8 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
                     "type": "object",
                     "additionalProperties": {
                         "$ref": "#/definitions/ValueHintsJSON"
-                    }
+                    },
+                    "description": "Construct a type with a set of properties K of type T"
                 },
                 "@context": {
                     "type": "string"
@@ -14059,7 +14074,8 @@ export const CreateAndShareRelationshipAttributeRequest: any = {
                     "type": "object",
                     "additionalProperties": {
                         "$ref": "#/definitions/ValueHintsJSON"
-                    }
+                    },
+                    "description": "Construct a type with a set of properties K of type T"
                 }
             },
             "required": [
@@ -14923,7 +14939,8 @@ export const ExecuteRelationshipAttributeQueryRequest: any = {
                     "type": "object",
                     "additionalProperties": {
                         "$ref": "#/definitions/ValueHintsJSON"
-                    }
+                    },
+                    "description": "Construct a type with a set of properties K of type T"
                 }
             },
             "required": [
@@ -16086,7 +16103,8 @@ export const ShareOwnIdentityAttributeRequest: any = {
                             "type": "string"
                         },
                         "metadata": {
-                            "type": "object"
+                            "type": "object",
+                            "description": "Construct a type with a set of properties K of type T"
                         },
                         "expiresAt": {
                             "$ref": "#/definitions/ISO8601DateTimeString"
@@ -16101,7 +16119,8 @@ export const ShareOwnIdentityAttributeRequest: any = {
                             "type": "string"
                         },
                         "metadata": {
-                            "type": "object"
+                            "type": "object",
+                            "description": "Construct a type with a set of properties K of type T"
                         }
                     },
                     "additionalProperties": false
@@ -17341,7 +17360,8 @@ export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
                     "type": "object",
                     "additionalProperties": {
                         "$ref": "#/definitions/ValueHintsJSON"
-                    }
+                    },
+                    "description": "Construct a type with a set of properties K of type T"
                 },
                 "@context": {
                     "type": "string"
@@ -17413,7 +17433,8 @@ export const SucceedRelationshipAttributeAndNotifyPeerRequest: any = {
                     "type": "object",
                     "additionalProperties": {
                         "$ref": "#/definitions/ValueHintsJSON"
-                    }
+                    },
+                    "description": "Construct a type with a set of properties K of type T"
                 }
             },
             "required": [
@@ -18239,7 +18260,8 @@ export const GetNotificationsRequest: any = {
                         }
                     }
                 ]
-            }
+            },
+            "description": "Construct a type with a set of properties K of type T"
         }
     }
 }
@@ -18448,7 +18470,8 @@ export const AcceptAuthorizationRequestRequest: any = {
                             }
                         },
                         "additionalProperties": false
-                    }
+                    },
+                    "description": "Construct a type with a set of properties K of type T"
                 }
             },
             "additionalProperties": {}
@@ -18589,7 +18612,8 @@ export const AcceptAuthorizationRequestRequest: any = {
                                     },
                                     {
                                         "type": "object",
-                                        "additionalProperties": {}
+                                        "additionalProperties": {},
+                                        "description": "Construct a type with a set of properties K of type T"
                                     }
                                 ]
                             }
@@ -19225,7 +19249,8 @@ export const RequestCredentialsRequest: any = {
                     "type": "object",
                     "additionalProperties": {
                         "$ref": "#/definitions/OpenId4VciCredentialConfiguration"
-                    }
+                    },
+                    "description": "Construct a type with a set of properties K of type T"
                 },
                 "nonce_endpoint": {
                     "type": "string"
@@ -19345,7 +19370,8 @@ export const RequestCredentialsRequest: any = {
                             "proof_signing_alg_values_supported"
                         ],
                         "additionalProperties": {}
-                    }
+                    },
+                    "description": "Construct a type with a set of properties K of type T"
                 },
                 "display": {
                     "type": "array",
@@ -20747,28 +20773,34 @@ export const UploadOwnFileRequest: any = {
                     "type": "object",
                     "properties": {
                         "BYTES_PER_ELEMENT": {
-                            "type": "number"
+                            "type": "number",
+                            "description": "The size in bytes of each element in the array."
                         },
                         "buffer": {
                             "type": "object",
                             "properties": {
                                 "byteLength": {
-                                    "type": "number"
+                                    "type": "number",
+                                    "description": "Read-only. The length of the ArrayBuffer (in bytes)."
                                 }
                             },
                             "required": [
                                 "byteLength"
                             ],
-                            "additionalProperties": false
+                            "additionalProperties": false,
+                            "description": "The ArrayBuffer instance referenced by the array."
                         },
                         "byteLength": {
-                            "type": "number"
+                            "type": "number",
+                            "description": "The length in bytes of the array."
                         },
                         "byteOffset": {
-                            "type": "number"
+                            "type": "number",
+                            "description": "The offset in bytes of the array."
                         },
                         "length": {
-                            "type": "number"
+                            "type": "number",
+                            "description": "The length of the array."
                         }
                     },
                     "required": [
@@ -20780,7 +20812,8 @@ export const UploadOwnFileRequest: any = {
                     ],
                     "additionalProperties": {
                         "type": "number"
-                    }
+                    },
+                    "description": "A typed array of 8-bit unsigned integer values. The contents are initialized to 0. If the requested number of bytes could not be allocated an exception is raised."
                 },
                 "filename": {
                     "type": "string"
