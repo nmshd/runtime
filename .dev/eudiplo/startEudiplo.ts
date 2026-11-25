@@ -10,6 +10,8 @@ export async function startEudiplo(): Promise<StartedTestContainer> {
             AUTH_CLIENT_SECRET: "test", // eslint-disable-line @typescript-eslint/naming-convention
             CONFIG_IMPORT_MODE: "upsert", // eslint-disable-line @typescript-eslint/naming-convention
             CONFIG_FOLDER: "/app/assets/config", // eslint-disable-line @typescript-eslint/naming-convention
+            // Interoperability fixtures use local issuers without an ETSI trust list or federation anchor.
+            SKIP_TRUST_AUTHORITY: "true", // eslint-disable-line @typescript-eslint/naming-convention
             PORT: "3000" // eslint-disable-line @typescript-eslint/naming-convention
         })
         .withExposedPorts({ container: 3000, host: 3000 })
