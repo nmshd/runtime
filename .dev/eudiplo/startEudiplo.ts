@@ -2,7 +2,7 @@ import { GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 import { resolve } from "node:path";
 
 export async function startEudiplo(): Promise<StartedTestContainer> {
-    return await new GenericContainer("ghcr.io/eudiplo/eudiplo:9.0.0@sha256:1be89640d66a7199fce3dedf220d326f0acf459eba19bc7d540f5b88fddcd4ac")
+    return await new GenericContainer("ghcr.io/eudiplo/eudiplo:10.1.0@sha256:917406fe2be9843a2dadfa3d835ec6da1b00b19fee65523f282ca97134065462")
         .withEnvironment({
             PUBLIC_URL: "http://localhost:3000", // eslint-disable-line @typescript-eslint/naming-convention
             MASTER_SECRET: "OgwrDcgVQQ2yZwcFt7kPxQm3nUF+X3etF6MdLTstZAY=", // eslint-disable-line @typescript-eslint/naming-convention
